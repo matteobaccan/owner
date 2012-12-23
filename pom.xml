@@ -33,7 +33,7 @@
             <id>luigi</id>
             <name>Luigi R. Viggiano</name>
             <email>luigi.viggiano@gmail.com</email>
-            <timezone>GMT+1</timezone>
+            <timezone>+1</timezone>
             <roles>
                 <role>dev</role>
             </roles>
