@@ -199,6 +199,6 @@ MORE INFORMATION
 ----------------
 
 Refer to the documentation on the [web site](http://lviggiano.github.com/owner) 
-or [github wiki](https://github.com/lviggiano/owner/wiki) for further details on how to use the Owner API.
+or [github wiki](https://github.com/lviggiano/owner/wiki) for further details on how to use the OWNER API.
 
 If you find some bug or have any request open an issue on [github issues](https://github.com/lviggiano/owner/issues).
