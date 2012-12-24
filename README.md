@@ -20,7 +20,7 @@ Since I liked the approach I decided to implement this API.
 USAGE
 -----
 
-The approach used by OWNER APIs, is to define a Java interface associated to a Property file.
+The approach used by OWNER APIs, is to define a Java interface associated to a Java properties file.
 
 Suppose your property file is ServerConfig.properties:
 
