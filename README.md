@@ -153,7 +153,7 @@ Then you can get the dependency:
     </dependencies>
 
 
-BINARIES
+DOWNLOADS
 --------
 
 You can download pre-built binaries from following links:
