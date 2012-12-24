@@ -131,6 +131,10 @@ will return <code>null</code>.</p>
 <p>If, in the example, we omit <code>@DefaultValue</code> for <code>maxThreads()</code> and we forget to define the property key in the properties 
 files, <code>null</code> will be used as default value.</p>
 
+<h2>JAVADOCS</h2>
+
+<p>API javadocs can be found <a href="http://lviggiano.github.com/owner/target/site/apidocs/index.html">here</a>.</p>
+
 <h2>BUILD</h2>
 
 <p>OWNER uses maven to build. At the moment the jars are not available on any repository, so you need to use git and maven to 
@@ -149,18 +153,35 @@ $ mvn install
 <li>owner-1.0-SNAPSHOT-javadoc.jar</li>
 <li>owner-1.0-SNAPSHOT-sources.jar</li>
 <li>owner-1.0-SNAPSHOT.jar</li>
+</ul><h2>BINARIES</h2>
+
+<p>You can download pre-built binaries from following links:</p>
+
+<h4>Archives</h4>
+
+<ul>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.bz2">owner-1.0-SNAPSHOT-bin.tar.bz2</a></li>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.gz">owner-1.0-SNAPSHOT-bin.tar.gz</a></li>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.zip">owner-1.0-SNAPSHOT-bin.zip</a></li>
+</ul><h4>Jars</h4>
+
+<ul>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT.jar">owner-1.0-SNAPSHOT.jar</a></li>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-javadoc.jar">owner-1.0-SNAPSHOT-javadoc.jar</a></li>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-sources.jar">owner-1.0-SNAPSHOT-sources.jar</a></li>
 </ul><h2>DEPENDENCIES</h2>
 
 <p>OWNER depends from <a href="http://commons.apache.org/lang/">commons-lang</a> to do some variable expansions.</p>
 
 <h2>TESTS</h2>
 
-<p>OWNER codebase is very compact, and it is fully covered by unit tests.</p>
+<p>OWNER codebase is very compact, and it is <a href="http://lviggiano.github.com/owner/target/site/cobertura/index.html">fully covered</a> by unit tests.</p>
 
 <p>To execute the tests, you need maven properly installed and configured, 
 then run the following command from the distribution root:</p>
 
-<p>$ mvn test</p>
+<pre><code>$ mvn test
+</code></pre>
 
 <h2>FAQ</h2>
 
