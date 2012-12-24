@@ -75,15 +75,15 @@ In the above example, OWNER will try to load the properties from several `@Sourc
  3. and, as last resort, it will try to load the properties from the classpath loding the resource identified by the path foo/bar/baz.properties
 
 In the `@Sources` annotation you can also specify system properties and/or environment variables with the syntax 
-`file:${user.home}/.myapp.config` (this gets resolved by 'user.home' System property) or `file:${HOME}/.myapp.config` 
+`file:${user.home}/.myapp.config` (this gets resolved by 'user.home' System property) or `file:${HOME}/.myapp.config`  
 (this gets resolved by the$HOME environment variable). The `~` used in the previous example is another example of 
-expansion, and it is equivalent to `${user.home}`
+variable expansion, and it is equivalent to `${user.home}`
 
 Did you notice that there is also the `@DefaultValue("42")` annotation specified in the example?
 This annotation gets automatically converted to `int`, since `maxThreads()` returns an `int`, and the value specified is 
 used as default, if `server.max.threads` key is not specified in the property file.
 
-The `@DefaultValue` is so confortable to use, and the basic type conversion between the `String` value and the method 
+The `@DefaultValue` is very confortable to use, and the basic type conversion between the `String` value and the method 
 return type are done automatically.
 
 #### Undefined properties 
@@ -115,8 +115,9 @@ Also you can pick the jar files from the target directory created by maven `mvn 
 DEPENDENCIES
 ------------
 
-OWNER depends from [commons-lang 2.6][2] to do some variable expansions.
+OWNER depends from [commons-lang][2] to do some variable expansions.
 
+[2]: http://commons.apache.org/lang/
 
 TESTS
 -----
@@ -155,5 +156,7 @@ See LICENSE file included for the details.
 MORE INFORMATION
 ----------------
 
-Refer to the documentation on the web site (http://lviggiano.github.com/owner)
-for further details on how to use the Owner API.
+Refer to the documentation on the [web site](http://lviggiano.github.com/owner) 
+or [github wiki](https://github.com/lviggiano/owner/wiki) for further details on how to use the Owner API.
+
+If you find some bug or have any request open an issue on [github issues](https://github.com/lviggiano/owner/issues).
