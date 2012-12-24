@@ -53,6 +53,27 @@
         <developerConnection>scm:git:git@github.com:lviggiano/owner.git</developerConnection>
     </scm>
 
+    <distributionManagement>
+
+        <snapshotRepository>
+            <id>local-snapshots</id>
+            <name>Local Snapshots</name>
+            <url>file://${project.build.directory}/repo/snapshots</url>
+        </snapshotRepository>
+
+        <repository>
+            <id>local-release</id>
+            <name>Local Release Repository</name>
+            <url>file://${project.build.directory}/repo/release</url>
+        </repository>
+
+        <site>
+            <id>github</id>
+            <url>file://${project.build.directory}/repo/site</url>
+        </site>
+
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
