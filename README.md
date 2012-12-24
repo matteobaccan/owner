@@ -22,7 +22,7 @@ USAGE
 
 The approach used by OWNER APIs, is to define a Java interface associated to a Java properties file.
 
-Suppose your property file is ServerConfig.properties:
+Suppose your properties file is ServerConfig.properties:
 
     port=80
     hostname=foobar.com
