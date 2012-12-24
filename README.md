@@ -45,7 +45,7 @@ Then, you can use it from inside your code:
         }
     }
 
-The mapping between the Java interface and the properties file can be automatically resolved by Owner API.
+The mapping between the Java interface and the properties file can be automatically resolved by OWNER API.
 By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
 com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
 contained in the properties file.
@@ -115,7 +115,7 @@ MAVEN
 
 If you are using maven, you can add the OWNER dependency in your project.
 
-First you need to add the owner repository:
+First you need to add the OWNER repository:
 
     <repositories>
         <repository>
