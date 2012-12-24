@@ -22,13 +22,13 @@ USAGE
 
 The approach used by OWNER APIs, is to define a Java interface associated to a Java properties file.
 
-Suppose your properties file is ServerConfig.properties:
+Suppose your properties file is defined as ServerConfig.properties:
 
     port=80
     hostname=foobar.com
     maxThreads=100
     
-To access this property you need to define a convenient Java interface as ServerConfig.java:
+To access this property you need to define a convenient Java interface in ServerConfig.java:
 
     public interface ServerConfig extends Config {
         int port();
@@ -36,7 +36,7 @@ To access this property you need to define a convenient Java interface as Server
         int maxThreads();
     }
     
-Then, you can use from inside your code:
+Then, you can use it from inside your code:
 
     public class MyApp {    
         public static void main(String[] args) {
@@ -45,11 +45,12 @@ Then, you can use from inside your code:
         }
     }
 
-The mapping between the Java interface and the Properties file can be automatically resolved by Owner API.
-By default Owne API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
-com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method to the property keys contained in the file.
+The mapping between the Java interface and the properties file can be automatically resolved by Owner API.
+By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
+com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
+contained in the properties file.
 
-But this default mapping can be tailored to your needs annotating the interface. 
+This default mapping can be tailored to your needs using some annotations on the interface. 
 
 Example:
 
@@ -120,7 +121,7 @@ OWNER depends from [commons-lang 2.6][2] to do some variable expansions.
 TESTS
 -----
 
-Owner is fully covered by unit tests.
+OWNER codebase is very compact, and it is fully covered by unit tests.
 
 To execute the tests, you need maven properly installed and configured, 
 then run the following command from the distribution root:
@@ -129,10 +130,20 @@ $ mvn test
 
 FAQ
 ---
-### What does "Owner" name mean?
+### What does "OWNER" name mean?
 
 Since this API is used to access *Properties* files, and we implement interfaces to deal with those, 
-somehow interfaces are owners for the properties.
+somehow interfaces are *owners* for the properties. So here comes the name OWNER.
+
+### Is OWNER a stable API?
+
+The codebase is very compact, and the test coverage is almost 100%. So there shouldn't be many bugs to deal with.
+You have the source, you can help improving the library and fix the bugs if you find some.
+
+Still, OWNER is very early, and APIs may change in the
+future to add/change some behaviors. 
+For example I would like to specify an annotation to define additional properties load policies. 
+But the goal is to keep the API backward compatible.
 
 LICENSE
 -------
