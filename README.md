@@ -140,17 +140,9 @@ BINARIES
 
 You can download pre-built binaries from following links:
 
-#### Archives
-
  * http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.bz2
  * http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.gz
  * http://lviggiano.github.com/owner/target/owner-1.0-bin.zip
-
-#### Jars
-
- * http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT.jar
- * http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-javadoc.jar
- * http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-sources.jar
 
 DEPENDENCIES
 ------------
