@@ -86,13 +86,30 @@ used as default, if `server.max.threads` key is not specified in the property fi
 The `@DefaultValue` is very confortable to use, and the basic type conversion between the `String` value and the method 
 return type are done automatically.
 
-#### Undefined properties 
+### UNDEFINED PROPERTIES
 
 If, in the example, ServerConfig interface cannot be mapped to any properties file, then all the methods in the interface 
-will return `null`.
+will return `null`, unless on the methods it is defined a `@DefaultValue` annotation, of course.
 
 If, in the example, we omit `@DefaultValue` for `maxThreads()` and we forget to define the property key in the properties 
 files, `null` will be used as default value.
+
+### PARAMETRIZED PROPERTIES
+
+Another neat feature, is the possibility to provide parameters on method interfaces, then the property value shall respect 
+the positional notation specified by the [`java.util.Formatter`][fmt] class.
+
+  [fmt]: http://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html#syntax
+
+Example: 
+
+    public interface SampleParamConfig extends Config {
+        @DefaultValue("Hello Mr. %s!")
+        String helloMr(String name);
+    }
+    
+    SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
+    System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
 
 JAVADOCS
 --------
