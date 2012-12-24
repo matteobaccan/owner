@@ -1,7 +1,7 @@
-Owner
+OWNER
 =====
 
-Owner, a simple API to ease Java(TM) property files usage.
+OWNER, a simple API to ease Java(TM) property files usage.
 
 INTRODUCTION
 ------------
@@ -19,7 +19,7 @@ to implement this API.
 USAGE
 -----
 
-The approach used by Owner APIs, is to define a Java interface associated to a Property file.
+The approach used by OWNER APIs, is to define a Java interface associated to a Property file.
 
 Suppose your property file is ServerConfig.properties:
 
@@ -52,7 +52,6 @@ But this default mapping can be tailored to your needs annotating the interface.
 
 Example:
 
-
     @Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
     public interface ServerConfig extends Config {
         
@@ -67,7 +66,7 @@ Example:
         int maxThreads();
     }
 
-In the above example, Owner will try to load the properties for several `@Sources`:
+In the above example, OWNER will try to load the properties from several `@Sources`:
 
  1. first, it will try to load from user's home directory ~/.myapp.config
  2. if the previous attempt fails, then it will try to load the properties from /etc/myapp.config
@@ -82,24 +81,28 @@ Did you notice that there is also the `@DefaultValue("42")` annotation specified
 This annotation gets automatically converted to `int`, since `maxThreads()` returns an `int`, and the value specified is 
 used as default, if `server.max.threads` key is not specified in the property file.
 
-The `@DefaultValue` is so confortable to use, and the basic type conversion between the `String` value and the method return type are done automatically.
+The `@DefaultValue` is so confortable to use, and the basic type conversion between the `String` value and the method 
+return type are done automatically.
 
-### What does "Owner" name mean?
+#### Undefined properties 
 
-Since this API is used to access *Properties* files, and we implement interfaces to deal with those, 
-somehow interfaces are owners for the properties.
+If, in the example, ServerConfig interface cannot be mapped to any properties file, then all the methods in the interface 
+will return `null`.
+
+If, in the example, we omit `@DefaultValue` for `maxThreads()` and we forget to define the property key in the properties 
+files, `null` will be used as default value.
 
 BUILD
 -----
 
-Owner uses maven. At the moment the Owner jar is not available on any repository, so you need to use git and maven to 
+OWNER uses maven to build. At the moment the jars are not available on any repository, so you need to use git and maven to 
 create the library jar.
 
     $ git clone git://github.com/lviggiano/owner.git
     $ cd owner
     $ mvn install
 
-This will install owner jars in your local maven repository.
+This will install OWNER jars in your local maven repository.
 
 Also you can pick the jar files from the target directory created by maven `mvn install' command:
 
@@ -107,9 +110,10 @@ Also you can pick the jar files from the target directory created by maven `mvn 
  * owner-1.0-SNAPSHOT-sources.jar
  * owner-1.0-SNAPSHOT.jar
 
------
+DEPENDENCIES
+------------
 
-Owner depends from [commons-lang 2.6][2] to do some variable expansions.
+OWNER depends from [commons-lang 2.6][2] to do some variable expansions.
 
 
 TESTS
@@ -122,6 +126,17 @@ then run the following command from the distribution root:
 
 $ mvn test
 
+FAQ
+---
+### What does "Owner" name mean?
+
+Since this API is used to access *Properties* files, and we implement interfaces to deal with those, 
+somehow interfaces are owners for the properties.
+
+LICENSE
+-------
+
+OWNER is released under the BSD license. See LICENSE file included for the details.
 
 MORE INFORMATION
 ----------------
