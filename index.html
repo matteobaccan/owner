@@ -1,44 +1,47 @@
 <!doctype html>
-<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
-<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>OWNER by lviggiano</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
-  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script type="text/javascript" src="javascripts/script.js"></script>
+  </head>
+  <body>
 
-  <title>Owner</title>
-  <meta name="description" content="owner">
+      <header>
+        <h1>OWNER</h1>
+        <p>Java™ properties files made super simple!</p>
+      </header>
 
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+      <div id="banner">
+        <span id="logo"></span>
 
-</head>
-
-<body>
-
-  <div class="wrapper">
-    <header>
-      <h1 class="title">Owner</h1>
-    </header>
-    <div id="container">
-      <p class="tagline">owner</p>
-      <div id="main" role="main">
-        <div class="download-bar">
-        <div class="inner">
-          <a href="https://github.com/lviggiano/owner/tarball/master" class="download-button tar"><span>Download</span></a>
-          <a href="https://github.com/lviggiano/owner/zipball/master" class="download-button zip"><span>Download</span></a>
-          <a href="https://github.com/lviggiano/owner" class="code">View Owner on GitHub</a>
+        <a href="https://github.com/lviggiano/owner" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/lviggiano/owner/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/lviggiano/owner/tarball/master" class="button">TAR</a></li>
+          </ul>
         </div>
-        <span class="blc"></span><span class="trc"></span>
-        </div>
-        <article class="markdown-body">
-          <h1>OWNER</h1>
+      </div><!-- end banner -->
 
-<p>OWNER, a simple API to ease Java(TM) property files usage.</p>
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>OWNER</h1>
+
+<p>OWNER, a simple API to ease Java™ property files usage.</p>
 
 <h2>INTRODUCTION</h2>
 
@@ -81,7 +84,7 @@ maxThreads=100
 }
 </code></pre>
 
-<p>The mapping between the Java interface and the properties file can be automatically resolved by Owner API.
+<p>The mapping between the Java interface and the properties file can be automatically resolved by OWNER API.
 By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
 com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
 contained in the properties file.</p>
@@ -137,38 +140,48 @@ files, <code>null</code> will be used as default value.</p>
 
 <h2>BUILD</h2>
 
-<p>OWNER uses maven to build. At the moment the jars are not available on any repository, so you need to use git and maven to 
-create the library jar.</p>
+<p>OWNER uses maven to build.</p>
 
 <pre><code>$ git clone git://github.com/lviggiano/owner.git
 $ cd owner
 $ mvn install
 </code></pre>
 
-<p>This will install OWNER jars in your local maven repository.</p>
+<p>This will install OWNER jars in your local maven repository. Or, you can pick the jar files from the target directory.</p>
 
-<p>Also you can pick the jar files from the target directory created by maven `mvn install' command:</p>
+<h2>MAVEN</h2>
 
-<ul>
-<li>owner-1.0-SNAPSHOT-javadoc.jar</li>
-<li>owner-1.0-SNAPSHOT-sources.jar</li>
-<li>owner-1.0-SNAPSHOT.jar</li>
-</ul><h2>BINARIES</h2>
+<p>If you are using maven, you can add the OWNER dependency in your project.</p>
+
+<p>First you need to add the OWNER repository:</p>
+
+<pre><code>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;owner-repo&lt;/id&gt;
+        &lt;url&gt;http://lviggiano.github.com/owner/target/repo/release&lt;/url&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;
+</code></pre>
+
+<p>Then you can get the dependency:</p>
+
+<pre><code>&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;owner&lt;/groupId&gt;
+        &lt;artifactId&gt;owner&lt;/artifactId&gt;
+        &lt;version&gt;1.0&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+
+<h2>BINARIES</h2>
 
 <p>You can download pre-built binaries from following links:</p>
 
-<h4>Archives</h4>
-
 <ul>
-<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.bz2">owner-1.0-SNAPSHOT-bin.tar.bz2</a></li>
-<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.gz">owner-1.0-SNAPSHOT-bin.tar.gz</a></li>
-<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.zip">owner-1.0-SNAPSHOT-bin.zip</a></li>
-</ul><h4>Jars</h4>
-
-<ul>
-<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT.jar">owner-1.0-SNAPSHOT.jar</a></li>
-<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-javadoc.jar">owner-1.0-SNAPSHOT-javadoc.jar</a></li>
-<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-sources.jar">owner-1.0-SNAPSHOT-sources.jar</a></li>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.bz2">http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.bz2</a></li>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.gz">http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.gz</a></li>
+<li><a href="http://lviggiano.github.com/owner/target/owner-1.0-bin.zip">http://lviggiano.github.com/owner/target/owner-1.0-bin.zip</a></li>
 </ul><h2>DEPENDENCIES</h2>
 
 <p>OWNER depends from <a href="http://commons.apache.org/lang/">commons-lang</a> to do some variable expansions.</p>
@@ -209,29 +222,26 @@ But the goal is to keep the API backward compatible.</p>
 <h2>MORE INFORMATION</h2>
 
 <p>Refer to the documentation on the <a href="http://lviggiano.github.com/owner">web site</a> 
-or <a href="https://github.com/lviggiano/owner/wiki">github wiki</a> for further details on how to use the Owner API.</p>
+or <a href="https://github.com/lviggiano/owner/wiki">github wiki</a> for further details on how to use the OWNER API.</p>
 
 <p>If you find some bug or have any request open an issue on <a href="https://github.com/lviggiano/owner/issues">github issues</a>.</p>
-        </article>
-      </div>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/lviggiano">lviggiano</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
     </div>
-    <footer>
-      <div class="owner">
-      <p><a href="https://github.com/lviggiano" class="avatar"><img src="https://secure.gravatar.com/avatar/e70dc4bc7989b5ccb9bce716ed504690?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png" width="48" height="48"/></a> <a href="https://github.com/lviggiano">lviggiano</a> maintains <a href="https://github.com/lviggiano/owner">Owner</a></p>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-462505-8");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
 
-
-      </div>
-      <div class="creds">
-        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br/>theme by <a href="http://twitter.com/jonrohan/">Jon Rohan</a></small>
-      </div>
-    </footer>
-  </div>
-  <div class="current-section">
-    <a href="#top">Scroll to top</a>
-    <a href="https://github.com/lviggiano/owner/tarball/master" class="tar">tar</a><a href="https://github.com/lviggiano/owner/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
-    <p class="name"></p>
-  </div>
-
-  
-</body>
+  </body>
 </html>
