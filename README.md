@@ -7,7 +7,7 @@ INTRODUCTION
 ------------
 
 The inspiring idea for this API comes from how GWT handles i18n and resource loading.
-You can read more about [GWT ClientBundle][1]
+You can read more about [GWT ClientBundle][]
 
 The problem in using GWT ClientBundle for loading property files is that it only works in client code (JavaScript), 
 not standard Java™ classes.
@@ -15,7 +15,7 @@ Also, GWT is a big library and it is designed for different purposes.
 
 Since I liked the approach I decided to implement this API.
 
-[1]: https://developers.google.com/web-toolkit/doc/latest/DevGuideClientBundle
+  [GWT ClientBundle]: https://developers.google.com/web-toolkit/doc/latest/DevGuideClientBundle
 
 USAGE
 -----
@@ -97,7 +97,9 @@ files, `null` will be used as default value.
 JAVADOCS
 --------
 
-API javadocs can be found [here](http://lviggiano.github.com/owner/target/site/apidocs/index.html).
+API javadocs can be found [here][javadocs].
+
+  [javadocs]: http://lviggiano.github.com/owner/target/site/apidocs/index.html
 
 BUILD
 -----
@@ -147,21 +149,21 @@ You can download pre-built binaries from following links:
 DEPENDENCIES
 ------------
 
-OWNER depends from [commons-lang][2] to do some variable expansions.
+OWNER depends from [commons-lang][] to do some variable expansions.
 
-[2]: http://commons.apache.org/lang/
+  [commons-lang]: http://commons.apache.org/lang/
 
 TESTS
 -----
 
-OWNER codebase is very compact, and it is [fully covered][coverage-report] by unit tests.
+OWNER codebase is very compact, and it is [fully covered][] by unit tests.
 
 To execute the tests, you need maven properly installed and configured, 
 then run the following command from the distribution root:
 
     $ mvn test
 
-[coverage-report]: http://lviggiano.github.com/owner/target/site/cobertura/index.html
+  [fully covered]: http://lviggiano.github.com/owner/target/site/cobertura/index.html
 
 FAQ
 ---
@@ -190,7 +192,11 @@ See LICENSE file included for the details.
 MORE INFORMATION
 ----------------
 
-Refer to the documentation on the [web site](http://lviggiano.github.com/owner) 
-or [github wiki](https://github.com/lviggiano/owner/wiki) for further details on how to use the OWNER API.
+Refer to the documentation on the [web site][]
+or [github wiki][] for further details on how to use the OWNER API.
 
-If you find some bug or have any request open an issue on [github issues](https://github.com/lviggiano/owner/issues).
+If you find some bug or have any request open an issue on [github issues][].
+
+  [web site]: http://lviggiano.github.com/owner
+  [github wiki]: https://github.com/lviggiano/owner/wiki
+  [github issues]: https://github.com/lviggiano/owner/issues
