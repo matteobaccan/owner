@@ -1,7 +1,7 @@
 OWNER
 =====
 
-OWNER, a simple API to ease Java(TM) property files usage.
+OWNER, a simple API to ease Java™ property files usage.
 
 INTRODUCTION
 ------------
@@ -10,7 +10,7 @@ The inspiring idea for this API comes from how GWT handles i18n and resource loa
 You can read more about [GWT ClientBundle][1]
 
 The problem in using GWT ClientBundle for loading property files is that it only works in client code (JavaScript), 
-not standard Java classes.
+not standard Java™ classes.
 Also, GWT is a big library and it is designed for different purposes. 
 
 Since I liked the approach I decided to implement this API.
@@ -20,7 +20,7 @@ Since I liked the approach I decided to implement this API.
 USAGE
 -----
 
-The approach used by OWNER APIs, is to define a Java interface associated to a Java properties file.
+The approach used by OWNER APIs, is to define a Java™ interface associated to a Java™ properties file.
 
 Suppose your properties file is defined as ServerConfig.properties:
 
@@ -28,7 +28,7 @@ Suppose your properties file is defined as ServerConfig.properties:
     hostname=foobar.com
     maxThreads=100
     
-To access this property you need to define a convenient Java interface in ServerConfig.java:
+To access this property you need to define a convenient Java™ interface in ServerConfig.java:
 
     public interface ServerConfig extends Config {
         int port();
@@ -45,7 +45,7 @@ Then, you can use it from inside your code:
         }
     }
 
-The mapping between the Java interface and the properties file can be automatically resolved by OWNER API.
+The mapping between the Java™ interface and the properties file can be automatically resolved by OWNER API.
 By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
 com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
 contained in the properties file.
