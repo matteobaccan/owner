@@ -9,10 +9,11 @@ INTRODUCTION
 The inspiring idea for this API comes from how GWT handles i18n and resource loading.
 You can read more about [GWT ClientBundle][1]
 
-The problem in using GWT ClientBundle for loading property files is that it only works in client code, 
-that later gets translated in JavaScript.
-GWT is a big library and it is designed for different purposes. But since I liked the approach I decided 
-to implement this API.
+The problem in using GWT ClientBundle for loading property files is that it only works in client code (JavaScript), 
+not standard Java classes.
+Also, GWT is a big library and it is designed for different purposes. 
+
+Since I liked the approach I decided to implement this API.
 
 [1]: https://developers.google.com/web-toolkit/doc/latest/DevGuideClientBundle
 
