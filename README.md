@@ -102,21 +102,38 @@ API javadocs can be found [here](http://lviggiano.github.com/owner/target/site/a
 BUILD
 -----
 
-OWNER uses maven to build. At the moment the jars are not available on any repository, so you need to use git and maven to 
-create the library jar.
+OWNER uses maven to build.
 
     $ git clone git://github.com/lviggiano/owner.git
     $ cd owner
     $ mvn install
 
-This will install OWNER jars in your local maven repository.
+This will install OWNER jars in your local maven repository. Or, you can pick the jar files from the target directory.
 
-Also you can pick the jar files from the target directory created by maven `mvn install' command:
+MAVEN
+-----
 
- * owner-1.0-SNAPSHOT-javadoc.jar
- * owner-1.0-SNAPSHOT-sources.jar
- * owner-1.0-SNAPSHOT.jar
- 
+If you are using maven, you can add the OWNER dependency in your project.
+
+First you need to add the owner repository:
+
+    <repositories>
+        <repository>
+            <id>owner-repo</id>
+            <url>http://lviggiano.github.com/owner/target/repo/release</url>
+        </repository>
+    </repositories>
+
+Then you can get the dependency:
+
+    <dependencies>
+        <dependency>
+            <groupId>owner</groupId>
+            <artifactId>owner</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
 
 BINARIES
 --------
@@ -125,15 +142,15 @@ You can download pre-built binaries from following links:
 
 #### Archives
 
- * [owner-1.0-SNAPSHOT-bin.tar.bz2](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.bz2)
- * [owner-1.0-SNAPSHOT-bin.tar.gz](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.gz)
- * [owner-1.0-SNAPSHOT-bin.zip](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.zip)
+ * http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.bz2
+ * http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.gz
+ * http://lviggiano.github.com/owner/target/owner-1.0-bin.zip
 
 #### Jars
 
- * [owner-1.0-SNAPSHOT.jar](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT.jar)
- * [owner-1.0-SNAPSHOT-javadoc.jar](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-javadoc.jar)
- * [owner-1.0-SNAPSHOT-sources.jar](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-sources.jar)
+ * http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT.jar
+ * http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-javadoc.jar
+ * http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-sources.jar
 
 DEPENDENCIES
 ------------
