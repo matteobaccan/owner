@@ -148,7 +148,9 @@ But the goal is to keep the API backward compatible.
 LICENSE
 -------
 
-OWNER is released under the BSD license. See LICENSE file included for the details.
+OWNER is released under the BSD license. 
+
+See LICENSE file included for the details.
 
 MORE INFORMATION
 ----------------
