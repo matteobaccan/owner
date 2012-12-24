@@ -49,14 +49,14 @@
 You can read more about <a href="https://developers.google.com/web-toolkit/doc/latest/DevGuideClientBundle">GWT ClientBundle</a></p>
 
 <p>The problem in using GWT ClientBundle for loading property files is that it only works in client code (JavaScript), 
-not standard Java classes.
+not standard Java™ classes.
 Also, GWT is a big library and it is designed for different purposes. </p>
 
 <p>Since I liked the approach I decided to implement this API.</p>
 
 <h2>USAGE</h2>
 
-<p>The approach used by OWNER APIs, is to define a Java interface associated to a Java properties file.</p>
+<p>The approach used by OWNER APIs, is to define a Java™ interface associated to a Java™ properties file.</p>
 
 <p>Suppose your properties file is defined as ServerConfig.properties:</p>
 
@@ -65,7 +65,7 @@ hostname=foobar.com
 maxThreads=100
 </code></pre>
 
-<p>To access this property you need to define a convenient Java interface in ServerConfig.java:</p>
+<p>To access this property you need to define a convenient Java™ interface in ServerConfig.java:</p>
 
 <pre><code>public interface ServerConfig extends Config {
     int port();
@@ -84,7 +84,7 @@ maxThreads=100
 }
 </code></pre>
 
-<p>The mapping between the Java interface and the properties file can be automatically resolved by OWNER API.
+<p>The mapping between the Java™ interface and the properties file can be automatically resolved by OWNER API.
 By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
 com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
 contained in the properties file.</p>
@@ -126,13 +126,29 @@ used as default, if <code>server.max.threads</code> key is not specified in the 
 <p>The <code>@DefaultValue</code> is very confortable to use, and the basic type conversion between the <code>String</code> value and the method 
 return type are done automatically.</p>
 
-<h4>Undefined properties</h4>
+<h3>UNDEFINED PROPERTIES</h3>
 
 <p>If, in the example, ServerConfig interface cannot be mapped to any properties file, then all the methods in the interface 
-will return <code>null</code>.</p>
+will return <code>null</code>, unless on the methods it is defined a <code>@DefaultValue</code> annotation, of course.</p>
 
 <p>If, in the example, we omit <code>@DefaultValue</code> for <code>maxThreads()</code> and we forget to define the property key in the properties 
 files, <code>null</code> will be used as default value.</p>
+
+<h3>PARAMETRIZED PROPERTIES</h3>
+
+<p>Another neat feature, is the possibility to provide parameters on method interfaces, then the property value shall respect 
+the positional notation specified by the <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html#syntax"><code>java.util.Formatter</code></a> class.</p>
+
+<p>Example: </p>
+
+<pre><code>public interface SampleParamConfig extends Config {
+    @DefaultValue("Hello Mr. %s!")
+    String helloMr(String name);
+}
+
+SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
+System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
+</code></pre>
 
 <h2>JAVADOCS</h2>
 
@@ -221,7 +237,7 @@ But the goal is to keep the API backward compatible.</p>
 
 <h2>MORE INFORMATION</h2>
 
-<p>Refer to the documentation on the <a href="http://lviggiano.github.com/owner">web site</a> 
+<p>Refer to the documentation on the <a href="http://lviggiano.github.com/owner">web site</a>
 or <a href="https://github.com/lviggiano/owner/wiki">github wiki</a> for further details on how to use the OWNER API.</p>
 
 <p>If you find some bug or have any request open an issue on <a href="https://github.com/lviggiano/owner/issues">github issues</a>.</p>
