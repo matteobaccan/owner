@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pmd version="4.3" timestamp="2012-12-24T12:31:09.612">
+<pmd version="4.3" timestamp="2012-12-24T17:14:41.334">
 <file name="/Users/luigi/var/src/owner/src/main/java/owner/ConfigFactory.java">
 <violation beginline="89" endline="91" begincolumn="15" endcolumn="13" rule="EmptyCatchBlock" ruleset="Basic Rules" package="owner" class="ConfigFactory" method="getResourceStreamBySourceAnnotation" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyCatchBlock" priority="3">
 Avoid empty catch blocks
