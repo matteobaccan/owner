@@ -94,6 +94,11 @@ will return `null`.
 If, in the example, we omit `@DefaultValue` for `maxThreads()` and we forget to define the property key in the properties 
 files, `null` will be used as default value.
 
+JAVADOCS
+--------
+
+API javadocs can be found [here](http://lviggiano.github.com/owner/target/site/apidocs/index.html).
+
 BUILD
 -----
 
@@ -111,6 +116,24 @@ Also you can pick the jar files from the target directory created by maven `mvn 
  * owner-1.0-SNAPSHOT-javadoc.jar
  * owner-1.0-SNAPSHOT-sources.jar
  * owner-1.0-SNAPSHOT.jar
+ 
+
+BINARIES
+--------
+
+You can download pre-built binaries from following links:
+
+#### Archives
+
+ * [owner-1.0-SNAPSHOT-bin.tar.bz2](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.bz2)
+ * [owner-1.0-SNAPSHOT-bin.tar.gz](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.tar.gz)
+ * [owner-1.0-SNAPSHOT-bin.zip](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-bin.zip)
+
+#### Jars
+
+ * [owner-1.0-SNAPSHOT.jar](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT.jar)
+ * [owner-1.0-SNAPSHOT-javadoc.jar](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-javadoc.jar)
+ * [owner-1.0-SNAPSHOT-sources.jar](http://lviggiano.github.com/owner/target/owner-1.0-SNAPSHOT-sources.jar)
 
 DEPENDENCIES
 ------------
@@ -122,12 +145,14 @@ OWNER depends from [commons-lang][2] to do some variable expansions.
 TESTS
 -----
 
-OWNER codebase is very compact, and it is fully covered by unit tests.
+OWNER codebase is very compact, and it is [fully covered][coverage-report] by unit tests.
 
 To execute the tests, you need maven properly installed and configured, 
 then run the following command from the distribution root:
 
-$ mvn test
+    $ mvn test
+
+[coverage-report]: http://lviggiano.github.com/owner/target/site/cobertura/index.html
 
 FAQ
 ---
