@@ -9,17 +9,18 @@
 <!DOCTYPE project [
 <!ENTITY trade "&#8482;">
 ]>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>owner</groupId>
     <artifactId>owner</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Owner</name>
     <url>http://lviggiano.github.com/owner/</url>
-    <description>A simple API to ease Java™ property files usage.</description>
+    <description>A simple API to ease Java&trade; property files usage.</description>
 
     <inceptionYear>2012</inceptionYear>
     <organization>
@@ -52,27 +53,6 @@
         <connection>scm:git:git://github.com/lviggiano/owner.git</connection>
         <developerConnection>scm:git:git@github.com:lviggiano/owner.git</developerConnection>
     </scm>
-
-    <distributionManagement>
-
-        <snapshotRepository>
-            <id>local-snapshots</id>
-            <name>Local Snapshots</name>
-            <url>file://${project.build.directory}/repo/snapshots</url>
-        </snapshotRepository>
-
-        <repository>
-            <id>local-release</id>
-            <name>Local Release Repository</name>
-            <url>file://${project.build.directory}/repo/release</url>
-        </repository>
-
-        <site>
-            <id>github</id>
-            <url>file://${project.build.directory}/repo/site</url>
-        </site>
-
-    </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
