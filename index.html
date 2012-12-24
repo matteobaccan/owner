@@ -36,32 +36,161 @@
         <span class="blc"></span><span class="trc"></span>
         </div>
         <article class="markdown-body">
-          <h3>Welcome to GitHub Pages.</h3>
+          <h1>OWNER</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>OWNER, a simple API to ease Java(TM) property files usage.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<h2>INTRODUCTION</h2>
+
+<p>The inspiring idea for this API comes from how GWT handles i18n and resource loading.
+You can read more about <a href="https://developers.google.com/web-toolkit/doc/latest/DevGuideClientBundle">GWT ClientBundle</a></p>
+
+<p>The problem in using GWT ClientBundle for loading property files is that it only works in client code (JavaScript), 
+not standard Java classes.
+Also, GWT is a big library and it is designed for different purposes. </p>
+
+<p>Since I liked the approach I decided to implement this API.</p>
+
+<h2>USAGE</h2>
+
+<p>The approach used by OWNER APIs, is to define a Java interface associated to a Java properties file.</p>
+
+<p>Suppose your properties file is defined as ServerConfig.properties:</p>
+
+<pre><code>port=80
+hostname=foobar.com
+maxThreads=100
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>To access this property you need to define a convenient Java interface in ServerConfig.java:</p>
 
-<h3>Designer Templates</h3>
+<pre><code>public interface ServerConfig extends Config {
+    int port();
+    String hostname();
+    int maxThreads();
+}
+</code></pre>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>Then, you can use it from inside your code:</p>
 
-<h3>Rather Drive Stick?</h3>
+<pre><code>public class MyApp {    
+    public static void main(String[] args) {
+        ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+        System.out.println("Server " + cfg.hostname() + ":" + cfg.port() + " will run " + cfg.maxThreads());
+    }
+}
+</code></pre>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>The mapping between the Java interface and the properties file can be automatically resolved by Owner API.
+By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
+com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
+contained in the properties file.</p>
 
-<h3>Authors and Contributors</h3>
+<p>This default mapping can be tailored to your needs using some annotations on the interface. </p>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>Example:</p>
 
-<h3>Support or Contact</h3>
+<pre><code>@Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
+public interface ServerConfig extends Config {
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+    @Key("server.http.port")
+    int port();
+
+    @Key("server.host.name")
+    String hostname();
+
+    @Key("server.max.threads");
+    @DefaultValue("42")
+    int maxThreads();
+}
+</code></pre>
+
+<p>In the above example, OWNER will try to load the properties from several <code>@Sources</code>:</p>
+
+<ol>
+<li>first, it will try to load from user's home directory ~/.myapp.config</li>
+<li>if the previous attempt fails, then it will try to load the properties from /etc/myapp.config</li>
+<li>and, as last resort, it will try to load the properties from the classpath loding the resource identified by the path foo/bar/baz.properties</li>
+</ol><p>In the <code>@Sources</code> annotation you can also specify system properties and/or environment variables with the syntax 
+<code>file:${user.home}/.myapp.config</code> (this gets resolved by 'user.home' System property) or <code>file:${HOME}/.myapp.config</code><br>
+(this gets resolved by the$HOME environment variable). The <code>~</code> used in the previous example is another example of 
+variable expansion, and it is equivalent to <code>${user.home}</code></p>
+
+<p>Did you notice that there is also the <code>@DefaultValue("42")</code> annotation specified in the example?
+This annotation gets automatically converted to <code>int</code>, since <code>maxThreads()</code> returns an <code>int</code>, and the value specified is 
+used as default, if <code>server.max.threads</code> key is not specified in the property file.</p>
+
+<p>The <code>@DefaultValue</code> is very confortable to use, and the basic type conversion between the <code>String</code> value and the method 
+return type are done automatically.</p>
+
+<h4>Undefined properties</h4>
+
+<p>If, in the example, ServerConfig interface cannot be mapped to any properties file, then all the methods in the interface 
+will return <code>null</code>.</p>
+
+<p>If, in the example, we omit <code>@DefaultValue</code> for <code>maxThreads()</code> and we forget to define the property key in the properties 
+files, <code>null</code> will be used as default value.</p>
+
+<h2>BUILD</h2>
+
+<p>OWNER uses maven to build. At the moment the jars are not available on any repository, so you need to use git and maven to 
+create the library jar.</p>
+
+<pre><code>$ git clone git://github.com/lviggiano/owner.git
+$ cd owner
+$ mvn install
+</code></pre>
+
+<p>This will install OWNER jars in your local maven repository.</p>
+
+<p>Also you can pick the jar files from the target directory created by maven `mvn install' command:</p>
+
+<ul>
+<li>owner-1.0-SNAPSHOT-javadoc.jar</li>
+<li>owner-1.0-SNAPSHOT-sources.jar</li>
+<li>owner-1.0-SNAPSHOT.jar</li>
+</ul><h2>DEPENDENCIES</h2>
+
+<p>OWNER depends from <a href="http://commons.apache.org/lang/">commons-lang</a> to do some variable expansions.</p>
+
+<h2>TESTS</h2>
+
+<p>OWNER codebase is very compact, and it is fully covered by unit tests.</p>
+
+<p>To execute the tests, you need maven properly installed and configured, 
+then run the following command from the distribution root:</p>
+
+<p>$ mvn test</p>
+
+<h2>FAQ</h2>
+
+<h3>What does "OWNER" name mean?</h3>
+
+<p>Since this API is used to access <em>Properties</em> files, and we implement interfaces to deal with those, 
+somehow interfaces are <em>owners</em> for the properties. So here comes the name OWNER.</p>
+
+<h3>Is OWNER a stable API?</h3>
+
+<p>The codebase is very compact, and the test coverage is almost 100%. So there shouldn't be many bugs to deal with.
+You have the source, you can help improving the library and fix the bugs if you find some.</p>
+
+<p>Still, OWNER is very early, and APIs may change in the
+future to add/change some behaviors. 
+For example I would like to specify an annotation to define additional properties load policies. 
+But the goal is to keep the API backward compatible.</p>
+
+<h2>LICENSE</h2>
+
+<p>OWNER is released under the BSD license. </p>
+
+<p>See LICENSE file included for the details.</p>
+
+<h2>MORE INFORMATION</h2>
+
+<p>Refer to the documentation on the <a href="http://lviggiano.github.com/owner">web site</a> 
+or <a href="https://github.com/lviggiano/owner/wiki">github wiki</a> for further details on how to use the Owner API.</p>
+
+<p>If you find some bug or have any request open an issue on <a href="https://github.com/lviggiano/owner/issues">github issues</a>.</p>
         </article>
       </div>
     </div>
