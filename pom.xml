@@ -32,6 +32,7 @@
         <license>
             <name>The BSD License</name>
             <url>file://${project.basedir}/LICENSE.txt</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
 
@@ -47,6 +48,11 @@
         </developer>
     </developers>
 
+    <scm>
+        <url>https://github.com/lviggiano/owner</url>
+        <connection>scm:git:git://github.com/lviggiano/owner.git</connection>
+        <developerConnection>scm:git:git@github.com:lviggiano/owner.git</developerConnection>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
