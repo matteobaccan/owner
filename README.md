@@ -6,8 +6,8 @@ OWNER, a simple API to ease Java™ property files usage.
 INTRODUCTION
 ------------
 
-The inspiring idea for this API comes from how GWT handles i18n and resource loading.
-You can read more about [GWT ClientBundle][]
+The inspiring idea for this API comes from how GWT handles internationalization.
+You can read more about [GWT internationalization][]
 
 The problem in using GWT ClientBundle for loading property files is that it only works in client code (JavaScript), 
 not standard Java™ classes.
@@ -15,7 +15,7 @@ Also, GWT is a big library and it is designed for different purposes.
 
 Since I liked the approach I decided to implement this API.
 
-  [GWT ClientBundle]: https://developers.google.com/web-toolkit/doc/latest/DevGuideClientBundle
+  [GWT internationalization]: https://developers.google.com/web-toolkit/doc/latest/DevGuideI18nConstants
 
 USAGE
 -----
