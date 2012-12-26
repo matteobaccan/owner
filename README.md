@@ -152,6 +152,8 @@ Then you can get the dependency:
         </dependency>
     </dependencies>
 
+In future, I may try to upload the jars in Maven Central Repository, so this won't be necessary.
+
 
 DOWNLOADS
 --------
@@ -168,6 +170,8 @@ DEPENDENCIES
 OWNER depends from [commons-lang][] to do some variable expansions.
 
   [commons-lang]: http://commons.apache.org/lang/
+
+From version 1.1 this dependency will be removed.
 
 TESTS
 -----
