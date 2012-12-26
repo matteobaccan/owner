@@ -16,9 +16,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -117,13 +117,13 @@ public class ConfigTest {
     @Test
     public void testDefautDoubleValue() {
         SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals(3.141592653589793, config.pi());
+        assertEquals(3.141592653589793D, config.pi(), 0.000000000000001D) ;
     }
 
     @Test
     public void testDefautFloatValue() {
         SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals(0.5f, config.half());
+        assertEquals(0.5f, config.half(), 0.01f);
     }
 
     @Test
