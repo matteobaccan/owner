@@ -12,7 +12,7 @@ package owner;
 import owner.Config.Sources;
 
 /**
- * Luigi R. Viggiano
+ * @author Luigi R. Viggiano
  */
 @Sources({"classpath:foo/bar/baz.properties",
           "file:~/.testfoobar.blahblah",
