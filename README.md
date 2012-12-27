@@ -6,12 +6,12 @@ OWNER, a simple API to ease Java™ property files usage.
 INTRODUCTION
 ------------
 
-The inspiring idea for this API comes from GWT i18n (see [here][gwt-i18n]).
+The goal of OWNER API is to minimize the code required to handle application configuration through Java™ properties files.
 
+The inspiring idea for this API comes from GWT i18n (see [here][gwt-i18n]).  
 The problem in using GWT i18n for loading property files is that it only works in client code (JavaScript), 
-not standard Java™ classes.
-Also, GWT is a big library and it is designed for different purposes. 
-
+not standard Java™ classes. 
+Also, GWT is a big library and it is designed for different purposes, than configuration. 
 Since I liked the approach I decided to implement something similar, and here we are.
 
   [gwt-i18n]: https://developers.google.com/web-toolkit/doc/latest/DevGuideI18nConstants
@@ -44,7 +44,7 @@ Then, you can use it from inside your code:
         }
     }
 
-The mapping between the Java™ interface and the properties file can be automatically resolved by OWNER API.
+The mapping between the Java™ interface and the properties file can be automatically resolved by OWNER API.  
 By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
 com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
 contained in the properties file.
@@ -157,8 +157,7 @@ In future, I may try to upload the jars in Maven Central Repository, so this won
 DEPENDENCIES
 ------------
 
-OWNER 1.0 has [commons-lang][] transitive dependency, to do some variable expansions.
-
+OWNER 1.0 has [commons-lang][] transitive dependency, to do some variable expansions.  
 OWNER 1.0.1 has no transitive dependencies.
 
   [commons-lang]: http://commons.apache.org/lang/
@@ -197,16 +196,14 @@ somehow interfaces are *owners* for the properties. So here comes the name OWNER
 The codebase is very compact, and the test coverage is almost 100%. So there shouldn't be many bugs to deal with.
 You have the source, you can help improving the library and fix the bugs if you find some.
 
-Still, OWNER is very early, and APIs may change in the
-future to add/change some behaviors. 
-For example I would like to specify an annotation to define additional properties load policies. 
+Still, OWNER is very early, and APIs may change in the future to add/change some behaviors.
+For example I would like to specify an annotation to define additional properties load policies.
 But the goal is to keep the API backward compatible.
 
 LICENSE
 -------
 
-OWNER is released under the BSD license. 
-
+OWNER is released under the BSD license.  
 See [LICENSE][] file included for the details.
 
   [LICENSE]: https://raw.github.com/lviggiano/owner/master/LICENSE
@@ -214,10 +211,10 @@ See [LICENSE][] file included for the details.
 MORE INFORMATION
 ----------------
 
-Refer to the documentation on the [web site][]
-or [github wiki][] for further details on how to use the OWNER API.
+Refer to the documentation on the [web site][] or [github wiki][] for further details on how to use the OWNER API.
 
-If you find some bug or have any request open an issue on [github issues][].
+If you find some bug or have any feature request open an issue on [github issues][], I'll try my best to keep up 
+with the developments.
 
   [web site]: http://lviggiano.github.com/owner
   [github wiki]: https://github.com/lviggiano/owner/wiki
