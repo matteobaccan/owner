@@ -148,7 +148,7 @@ Then you can get the dependency:
         <dependency>
             <groupId>owner</groupId>
             <artifactId>owner</artifactId>
-            <version>1.0</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 
@@ -160,18 +160,19 @@ DOWNLOADS
 
 You can download pre-built binaries from following links:
 
- * http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.bz2
- * http://lviggiano.github.com/owner/target/owner-1.0-bin.tar.gz
- * http://lviggiano.github.com/owner/target/owner-1.0-bin.zip
+ * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.tar.bz2
+ * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.tar.gz
+ * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.zip
 
 DEPENDENCIES
 ------------
 
-OWNER 1.0 depends from [commons-lang][] to do some variable expansions.
+OWNER 1.0 has [commons-lang][] transitive dependency; to do some variable expansions.
 
   [commons-lang]: http://commons.apache.org/lang/
 
-From version 1.0.1 this dependency will be removed.
+OWNER 1.0.1 has no transitive dependencies.
+
 
 TESTS
 -----
