@@ -208,7 +208,9 @@ LICENSE
 
 OWNER is released under the BSD license. 
 
-See LICENSE file included for the details.
+See [LICENSE][] file included for the details.
+
+  [LICENSE]: https://raw.github.com/lviggiano/owner/master/LICENSE
 
 MORE INFORMATION
 ----------------
