@@ -167,11 +167,11 @@ You can download pre-built binaries from following links:
 DEPENDENCIES
 ------------
 
-OWNER depends from [commons-lang][] to do some variable expansions.
+OWNER 1.0 depends from [commons-lang][] to do some variable expansions.
 
   [commons-lang]: http://commons.apache.org/lang/
 
-From version 1.1 this dependency will be removed.
+From version 1.0.1 this dependency will be removed.
 
 TESTS
 -----
