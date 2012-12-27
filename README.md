@@ -154,6 +154,14 @@ Then you can get the dependency:
 
 In future, I may try to upload the jars in Maven Central Repository, so this won't be necessary.
 
+DEPENDENCIES
+------------
+
+OWNER 1.0 has [commons-lang][] transitive dependency, to do some variable expansions.
+
+OWNER 1.0.1 has no transitive dependencies.
+
+  [commons-lang]: http://commons.apache.org/lang/
 
 DOWNLOADS
 --------
@@ -163,15 +171,6 @@ You can download pre-built binaries from following links:
  * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.tar.bz2
  * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.tar.gz
  * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.zip
-
-DEPENDENCIES
-------------
-
-OWNER 1.0 has [commons-lang][] transitive dependency; to do some variable expansions.
-
-  [commons-lang]: http://commons.apache.org/lang/
-
-OWNER 1.0.1 has no transitive dependencies.
 
 
 TESTS
