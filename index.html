@@ -47,13 +47,13 @@
 <h2>
 <a name="introduction" class="anchor" href="#introduction"><span class="mini-icon mini-icon-link"></span></a>INTRODUCTION</h2>
 
-<p>The inspiring idea for this API comes from GWT i18n (see <a href="https://developers.google.com/web-toolkit/doc/latest/DevGuideI18nConstants">here</a>).</p>
+<p>The goal of OWNER API is to minimize the code required to handle application configuration through Java™ properties files.</p>
 
-<p>The problem in using GWT i18n for loading property files is that it only works in client code (JavaScript), 
-not standard Java™ classes.
-Also, GWT is a big library and it is designed for different purposes. </p>
-
-<p>Since I liked the approach I decided to implement something similar, and here we are.</p>
+<p>The inspiring idea for this API comes from GWT i18n (see <a href="https://developers.google.com/web-toolkit/doc/latest/DevGuideI18nConstants">here</a>).<br>
+The problem in using GWT i18n for loading property files is that it only works in client code (JavaScript), 
+not standard Java™ classes. 
+Also, GWT is a big library and it is designed for different purposes, than configuration. 
+Since I liked the approach I decided to implement something similar, and here we are.</p>
 
 <h2>
 <a name="usage" class="anchor" href="#usage"><span class="mini-icon mini-icon-link"></span></a>USAGE</h2>
@@ -86,7 +86,7 @@ maxThreads=100
 }
 </code></pre>
 
-<p>The mapping between the Java™ interface and the properties file can be automatically resolved by OWNER API.
+<p>The mapping between the Java™ interface and the properties file can be automatically resolved by OWNER API.<br>
 By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
 com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
 contained in the properties file.</p>
@@ -202,9 +202,8 @@ $ mvn install
 <h2>
 <a name="dependencies" class="anchor" href="#dependencies"><span class="mini-icon mini-icon-link"></span></a>DEPENDENCIES</h2>
 
-<p>OWNER 1.0 has <a href="http://commons.apache.org/lang/">commons-lang</a> transitive dependency, to do some variable expansions.</p>
-
-<p>OWNER 1.0.1 has no transitive dependencies.</p>
+<p>OWNER 1.0 has <a href="http://commons.apache.org/lang/">commons-lang</a> transitive dependency, to do some variable expansions.<br>
+OWNER 1.0.1 has no transitive dependencies.</p>
 
 <h2>
 <a name="downloads" class="anchor" href="#downloads"><span class="mini-icon mini-icon-link"></span></a>DOWNLOADS</h2>
@@ -241,25 +240,23 @@ somehow interfaces are <em>owners</em> for the properties. So here comes the nam
 <p>The codebase is very compact, and the test coverage is almost 100%. So there shouldn't be many bugs to deal with.
 You have the source, you can help improving the library and fix the bugs if you find some.</p>
 
-<p>Still, OWNER is very early, and APIs may change in the
-future to add/change some behaviors. 
-For example I would like to specify an annotation to define additional properties load policies. 
+<p>Still, OWNER is very early, and APIs may change in the future to add/change some behaviors.
+For example I would like to specify an annotation to define additional properties load policies.
 But the goal is to keep the API backward compatible.</p>
 
 <h2>
 <a name="license" class="anchor" href="#license"><span class="mini-icon mini-icon-link"></span></a>LICENSE</h2>
 
-<p>OWNER is released under the BSD license. </p>
-
-<p>See <a href="https://raw.github.com/lviggiano/owner/master/LICENSE">LICENSE</a> file included for the details.</p>
+<p>OWNER is released under the BSD license.<br>
+See <a href="https://raw.github.com/lviggiano/owner/master/LICENSE">LICENSE</a> file included for the details.</p>
 
 <h2>
 <a name="more-information" class="anchor" href="#more-information"><span class="mini-icon mini-icon-link"></span></a>MORE INFORMATION</h2>
 
-<p>Refer to the documentation on the <a href="http://lviggiano.github.com/owner">web site</a>
-or <a href="https://github.com/lviggiano/owner/wiki">github wiki</a> for further details on how to use the OWNER API.</p>
+<p>Refer to the documentation on the <a href="http://lviggiano.github.com/owner">web site</a> or <a href="https://github.com/lviggiano/owner/wiki">github wiki</a> for further details on how to use the OWNER API.</p>
 
-<p>If you find some bug or have any request open an issue on <a href="https://github.com/lviggiano/owner/issues">github issues</a>.</p>      </section>
+<p>If you find some bug or have any feature request open an issue on <a href="https://github.com/lviggiano/owner/issues">github issues</a>, I'll try my best to keep up 
+with the developments.</p>      </section>
       <footer>
         <p>Project maintained by <a href="https://github.com/lviggiano">lviggiano</a></p>
         <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
