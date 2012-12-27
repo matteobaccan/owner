@@ -1,0 +1,8 @@
+#!/bin/sh
+PG_DIR=$(dirname $0)
+RAW_README_URL=https://raw.github.com/lviggiano/owner/master/README.md
+GITHUB_API_URL=https://api.github.com/markdown/raw
+
+cat $PG_DIR/header.inc
+curl -s $RAW_README_URL | curl -s --data-binary @- -H 'Content-Type: text/plain' https://api.github.com/markdown/raw 
+cat $PG_DIR/footer.inc
