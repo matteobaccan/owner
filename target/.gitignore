@@ -11,3 +11,4 @@ surefire/
 test-classes/
 unusedcode.xml
 maven-archiver/
+checkout/
