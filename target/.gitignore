@@ -1,0 +1,14 @@
+apidocs/
+basic.xml
+classes/
+cobertura/
+cpd.xml
+imports.xml
+javadoc-bundle-options/
+pmd.xml
+surefire-reports/
+surefire/
+test-classes/
+unusedcode.xml
+maven-archiver/
+checkout/
