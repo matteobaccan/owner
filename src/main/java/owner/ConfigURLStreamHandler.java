@@ -35,6 +35,7 @@ import java.net.URLStreamHandler;
 class ConfigURLStreamHandler extends URLStreamHandler {
     private final ClassLoader classLoader;
     private final SystemVariablesExpander expander;
+    public static final String CLASSPATH_PROTOCOL = "classpath";
 
     public ConfigURLStreamHandler(ClassLoader classLoader, SystemVariablesExpander expander) {
         this.classLoader = classLoader;
@@ -45,7 +46,7 @@ class ConfigURLStreamHandler extends URLStreamHandler {
     protected URLConnection openConnection(URL url) throws IOException {
         String protocol = url.getProtocol();
         String path = url.getPath();
-        if ("classpath".equals(protocol)) {
+        if (CLASSPATH_PROTOCOL.equals(protocol)) {
             URL resourceUrl = classLoader.getResource(expand(path));
             if (resourceUrl == null) return null;
             return resourceUrl.openConnection();

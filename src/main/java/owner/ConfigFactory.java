@@ -19,6 +19,7 @@ import java.net.URLConnection;
 import java.util.Properties;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
+import static owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 
 /**
  * Factory class to instantiate {@link Config} instances. By default a {link Config} sub-interface is associated to a
@@ -35,7 +36,7 @@ public class ConfigFactory {
     public static <T extends Config> T create(Class<? extends Config> clazz) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
         InvocationHandler handler = new PropertyInvocationHandler(loadPropertiesFor(clazz));
-        return (T) newProxyInstance(ConfigFactory.class.getClassLoader(), interfaces, handler);
+        return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }
 
     static Properties loadPropertiesFor(Class<? extends Config> clazz) {
@@ -70,7 +71,8 @@ public class ConfigFactory {
 
     private static InputStream getDefaultResourceStream(Class<? extends Config> clazz,
                                                         ConfigURLStreamHandler handler) throws IOException {
-        return getInputStream(new URL(null, "classpath:" + clazz.getName().replace('.', '/') + ".properties", handler));
+        String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
+        return getInputStream(new URL(null, spec, handler));
     }
 
 
