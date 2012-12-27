@@ -30,7 +30,7 @@
     <licenses>
         <license>
             <name>The BSD License</name>
-            <url>file://${project.basedir}/LICENSE</url>
+            <url>https://raw.github.com/lviggiano/owner/master/LICENSE</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
