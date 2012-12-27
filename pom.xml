@@ -48,7 +48,7 @@
     </developers>
 
     <scm>
-        <url>https://github.com/lviggiano/owner</url>
+        <url>https://github.com/lviggiano/owner/tree/master</url>
         <connection>scm:git:git://github.com/lviggiano/owner.git</connection>
         <developerConnection>scm:git:git@github.com:lviggiano/owner.git</developerConnection>
     </scm>
@@ -64,10 +64,6 @@
             <name>Local Release Repository</name>
             <url>file://${project.build.directory}/repo/release</url>
         </repository>
-        <!--<site>-->
-            <!--<id>maven-site</id>-->
-            <!--<url>file://${project.build.directory}/maven-site</url>-->
-        <!--</site>-->
     </distributionManagement>
 
     <properties>
@@ -178,6 +174,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jxr-plugin</artifactId>
                 <version>2.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-changelog-plugin</artifactId>
+                <version>2.2</version>
             </plugin>
         </plugins>
     </reporting>
