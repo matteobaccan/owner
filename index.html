@@ -26,7 +26,7 @@
 
         <a href="https://github.com/lviggiano/owner" class="button fork"><strong>View On GitHub</strong></a>
         <div class="downloads">
-          <span>Downloads:</span>
+          <span>Download Sources:</span>
           <ul>
             <li><a href="https://github.com/lviggiano/owner/zipball/master" class="button">ZIP</a></li>
             <li><a href="https://github.com/lviggiano/owner/tarball/master" class="button">TAR</a></li>
