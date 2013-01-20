@@ -184,8 +184,8 @@ There are several ways to contribute to OWNER API:
   4. If you want to help the development, you can pick a [bug or an enhancement][issues] then contribute
      your patches following github [collaboration process][collaborating] (see also #1).
 
-  [fork]: https://github.com/lviggiano/owner/fork
-  [change-req]: https://github.com/lviggiano/owner/issues
+  [fork]: https://help.github.com/articles/fork-a-repo
+  [issues]: https://github.com/lviggiano/owner/issues
   [collaborating]: https://help.github.com/categories/63/articles
 
 FAQ
