@@ -135,7 +135,7 @@ If you are using maven, you can add the OWNER dependency in your project:
 
     <dependencies>
         <dependency>
-            <groupId>owner</groupId>
+            <groupId>com.github.owner</groupId>
             <artifactId>owner</artifactId>
             <version>1.0.2</version>
         </dependency>
