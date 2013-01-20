@@ -131,24 +131,13 @@ This will install OWNER jars in your local maven repository. Or, you can pick th
 MAVEN
 -----
 
-If you are using maven, you can add the OWNER dependency in your project.
-
-First you need to add the OWNER repository:
-
-    <repositories>
-        <repository>
-            <id>owner-repo</id>
-            <url>http://lviggiano.github.com/owner/target/repo/release</url>
-        </repository>
-    </repositories>
-
-Then you can get the dependency:
+If you are using maven, you can add the OWNER dependency in your project:
 
     <dependencies>
         <dependency>
             <groupId>owner</groupId>
             <artifactId>owner</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </dependency>
     </dependencies>
 
@@ -158,7 +147,7 @@ DEPENDENCIES
 ------------
 
 OWNER 1.0 has [commons-lang][] transitive dependency, to do some variable expansions.  
-OWNER 1.0.1 has no transitive dependencies.
+OWNER 1.0.1 and subsequent versions, have no transitive dependencies.
 
   [commons-lang]: http://commons.apache.org/lang/
 
@@ -184,12 +173,28 @@ then run the following command from the distribution root:
 
   [fully covered]: http://lviggiano.github.com/owner/target/site/cobertura/index.html
 
+HOW TO CONTRIBUTE
+-----------------
+
+There are several ways to contribute to OWNER API:
+
+  1. If you have implemented some change, you can [fork the project on github][fork] then send me a pull request.
+  2. If you have some idea, you can [submit it as change request][issues] on github.
+  3. If you've found some defect, you can [submit the bug][issues] on github.
+  4. If you want to help the development, you can pick a [bug or an enhancement][issues] then contribute
+     your patches following github [collaboration process][collaborating] (see also #1).
+
+  [fork]: https://github.com/lviggiano/owner/fork
+  [change-req]: https://github.com/lviggiano/owner/issues
+  [collaborating]: https://help.github.com/categories/63/articles
+
 FAQ
 ---
 ### What does "OWNER" name mean?
 
 Since this API is used to access *Properties* files, and we implement interfaces to deal with those, 
 somehow interfaces are *owners* for the properties. So here comes the name OWNER.
+I tried to find a decent name for the project, but I didn't come out with anything better. Sorry.
 
 ### Is OWNER a stable API?
 
@@ -199,6 +204,28 @@ You have the source, you can help improving the library and fix the bugs if you 
 Still, OWNER is very early, and APIs may change in the future to add/change some behaviors.
 For example I would like to specify an annotation to define additional properties load policies.
 But the goal is to keep the API backward compatible.
+
+### What happens if some `key` is not bound to a default value, and the properties file has no value for that key?
+
+The returned value is `null`. This is consistent with the behavior of the [Properties][properties] class.
+If you think that this should be changed, please submit a [change request][issues] explaining your idea.
+A possible solution can be inventing a new annotation like `@Mandatory` on class level and/or method level for those
+methods that do not specify a `@DefaultValue`.
+I personally don't find this necessary, but once the change request is open we can see other people's comments.
+
+  [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
+
+CHANGELOG
+---------
+### 1.0.2
+Changed package name from `owner` to `com.github.owner`. This has been necessary in order to publish the artifact on
+Maven Central Repository.
+
+### 1.0.1
+Removed [commons-lang][] transitive dependency. Minor bug fixes.
+
+### 1.0
+Initial release.
 
 LICENSE
 -------
@@ -213,9 +240,8 @@ MORE INFORMATION
 
 Refer to the documentation on the [web site][] or [github wiki][] for further details on how to use the OWNER API.
 
-If you find some bug or have any feature request open an issue on [github issues][], I'll try my best to keep up 
+If you find some bug or have any feature request open an issue on [github issues][issues], I'll try my best to keep up
 with the developments.
 
   [web site]: http://lviggiano.github.com/owner
   [github wiki]: https://github.com/lviggiano/owner/wiki
-  [github issues]: https://github.com/lviggiano/owner/issues
