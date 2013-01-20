@@ -154,12 +154,9 @@ OWNER 1.0.1 and subsequent versions, have no transitive dependencies.
 DOWNLOADS
 --------
 
-You can download pre-built binaries from following links:
+You can download pre-built binaries from [here][downloads]
 
- * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.tar.bz2
- * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.tar.gz
- * http://lviggiano.github.com/owner/target/owner-1.0.1-bin.zip
-
+  [downloads]: https://github.com/lviggiano/owner/wiki/Downloads
 
 TESTS
 -----
