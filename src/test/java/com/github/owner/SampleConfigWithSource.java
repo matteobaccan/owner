@@ -6,10 +6,10 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package owner;
+package com.github.owner;
 
 
-import owner.Config.Sources;
+import com.github.owner.Config.Sources;
 
 /**
  * @author Luigi R. Viggiano
@@ -17,7 +17,7 @@ import owner.Config.Sources;
 @Sources({"classpath:foo/bar/baz.properties",
           "file:~/.testfoobar.blahblah",
           "file:/etc/testfoobar.blahblah",
-          "classpath:owner/FooBar.properties",
+          "classpath:com/github/owner/FooBar.properties",
           "file:~/blahblah.properties"})
 public interface SampleConfigWithSource extends Config {
     //  @Key("hello.world");

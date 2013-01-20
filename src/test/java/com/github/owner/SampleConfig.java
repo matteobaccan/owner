@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package owner;
+package com.github.owner;
 
 /**
  * @author Luigi R. Viggiano

@@ -6,9 +6,9 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package owner;
+package com.github.owner;
 
-import owner.Config.Sources;
+import com.github.owner.Config.Sources;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +19,7 @@ import java.net.URLConnection;
 import java.util.Properties;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
-import static owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
+import static com.github.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 
 /**
  * Factory class to instantiate {@link Config} instances. By default a {link Config} sub-interface is associated to a

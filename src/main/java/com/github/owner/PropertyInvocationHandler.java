@@ -6,11 +6,11 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package owner;
+package com.github.owner;
 
 
-import owner.Config.DefaultValue;
-import owner.Config.Key;
+import com.github.owner.Config.DefaultValue;
+import com.github.owner.Config.Key;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
