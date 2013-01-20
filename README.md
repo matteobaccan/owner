@@ -210,8 +210,11 @@ But the goal is to keep the API backward compatible.
 The returned value is `null`. This is consistent with the behavior of the [Properties][properties] class.
 If you think that this should be changed, please submit a [change request][issues] explaining your idea.
 A possible solution can be inventing a new annotation like `@Mandatory` on class level and/or method level for those
-methods that do not specify a `@DefaultValue`.
-I personally don't find this necessary, but once the change request is open we can see other people's comments.
+methods that do not specify a `@DefaultValue`, so that if the user forgets to specify a value for the mandatory
+property, a (subclass of) RuntimeException is thrown when the Config class is instantiated, to point out the
+misconfiguration.
+Thoughts? Ideas? Explain it on [github issues][issues].
+
 
   [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
 
