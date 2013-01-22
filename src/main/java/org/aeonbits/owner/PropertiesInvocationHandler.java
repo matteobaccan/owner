@@ -40,11 +40,12 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     static {
         try {
-            Class<Properties> pclass = Properties.class;
-            listPrintStream = pclass.getMethod("list", PrintStream.class);
-            listPrintWriter = pclass.getMethod("list", PrintWriter.class);
+            Class<Properties> propertiesClass = Properties.class;
+            listPrintStream = propertiesClass.getMethod("list", PrintStream.class);
+            listPrintWriter = propertiesClass.getMethod("list", PrintWriter.class);
         } catch (NoSuchMethodException e) {
-            // this shouldn't happen, btw we handle the case where the delegate method is not available...
+            // this shouldn't happen, btw we handle the case in which the delegate method is not available...
+            // so, it's fine.
         }
     }
 
@@ -77,6 +78,8 @@ class PropertiesInvocationHandler implements InvocationHandler {
     private Method proxyMethod(Method method) {
         if (matches(listPrintStream, method))
             return listPrintStream;
+        if (matches(listPrintWriter, method))
+            return listPrintWriter;
         return null;
     }
 

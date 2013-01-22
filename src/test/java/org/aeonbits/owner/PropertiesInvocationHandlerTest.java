@@ -8,17 +8,18 @@
 
 package org.aeonbits.owner;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Properties;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * @author Luigi R. Viggiano
@@ -30,13 +31,26 @@ public class PropertiesInvocationHandlerTest {
     @Mock
     private PrintStream printStream;
     @Mock
+    private PrintWriter printWriter;
+    @Mock
     private Object proxy;
+    private PropertiesInvocationHandler handler;
+
+    @Before
+    public void before() {
+        handler = new PropertiesInvocationHandler(properties);
+    }
 
     @Test
     public void testListPrintStream() throws Throwable {
-        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(properties);
-        handler.invoke(proxy, Config.class.getDeclaredMethod("list", PrintStream.class ), printStream);
+        handler.invoke(proxy, Config.class.getDeclaredMethod("list", PrintStream.class), printStream);
         verify(properties).list(eq(printStream));
-        verifyNoMoreInteractions(proxy);
     }
+
+    @Test
+    public void testListPrintWriter() throws Throwable {
+        handler.invoke(proxy, Config.class.getDeclaredMethod("list", PrintWriter.class), printWriter);
+        verify(properties).list(eq(printWriter));
+    }
+
 }
