@@ -16,7 +16,7 @@
     <packaging>jar</packaging>
 
     <name>OWNER</name>
-    <url>http://lviggiano.github.com/owner/</url>
+    <url>http://owner.aeonbits.org</url>
     <description>A simple API to ease Java(TM) property files usage.</description>
 
     <inceptionYear>2012</inceptionYear>
