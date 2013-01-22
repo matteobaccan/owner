@@ -6,10 +6,10 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package com.github.owner;
+package org.aeonbits.owner;
 
 
-import com.github.owner.Config.Sources;
+import org.aeonbits.owner.Config.Sources;
 
 /**
  * @author Luigi R. Viggiano
@@ -17,7 +17,7 @@ import com.github.owner.Config.Sources;
 @Sources({"classpath:foo/bar/baz.properties",
           "file:~/.testfoobar.blahblah",
           "file:/etc/testfoobar.blahblah",
-          "classpath:com/github/owner/FooBar.properties",
+          "classpath:org/aeonbits/owner/FooBar.properties",
           "file:~/blahblah.properties"})
 public interface SampleConfigWithSource extends Config {
     //  @Key("hello.world");

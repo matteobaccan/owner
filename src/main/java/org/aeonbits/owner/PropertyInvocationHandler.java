@@ -6,11 +6,11 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package com.github.owner;
+package org.aeonbits.owner;
 
 
-import com.github.owner.Config.DefaultValue;
-import com.github.owner.Config.Key;
+import org.aeonbits.owner.Config.DefaultValue;
+import org.aeonbits.owner.Config.Key;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;

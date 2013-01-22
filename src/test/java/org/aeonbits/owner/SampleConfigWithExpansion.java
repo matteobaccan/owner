@@ -6,14 +6,14 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package com.github.owner;
+package org.aeonbits.owner;
 
-import com.github.owner.Config.Sources;
+import org.aeonbits.owner.Config.Sources;
 
 /**
  * @author Luigi R. Viggiano
  */
-@Sources("classpath:foo/bar/thisDoesntExists.properties")
-public interface InvalidSourceConfig extends Config {
-    public String someProperty();
+@Sources({"file:${user.dir}/src/test/resources/test.properties"})
+public interface SampleConfigWithExpansion extends Config {
+    public String favoriteColor();
 }

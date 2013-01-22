@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package com.github.owner;
+package org.aeonbits.owner;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

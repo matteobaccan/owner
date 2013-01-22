@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package com.github.owner;
+package org.aeonbits.owner;
 
 import org.junit.Test;
 
@@ -49,7 +49,7 @@ public class ConfigTest {
 
         InputStream inputStream = ConfigFactory.getStreamFor(SampleConfig.class, spy);
         URL expected =
-                new URL(null, "classpath:com/github/owner/SampleConfig.properties", handler);
+                new URL(null, "classpath:org/aeonbits/owner/SampleConfig.properties", handler);
         verify(spy, times(1)).openConnection(eq(expected));
     }
 
@@ -79,7 +79,7 @@ public class ConfigTest {
         };
 
         InputStream stream = ConfigFactory.getStreamFor(SampleConfigWithSource.class, handler);
-        URL expected = new URL(null, "classpath:com/github/owner/FooBar.properties",
+        URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
                 handler);
         assertEquals(expected, lastURL[0]);
     }
