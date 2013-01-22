@@ -135,7 +135,7 @@ If you are using maven, you can add the OWNER dependency in your project:
 
     <dependencies>
         <dependency>
-            <groupId>owner</groupId>
+            <groupId>org.aeonbits.owner</groupId>
             <artifactId>owner</artifactId>
             <version>1.0.2</version>
         </dependency>
@@ -218,7 +218,7 @@ Thoughts? Ideas? Explain it on [github issues][issues].
 CHANGELOG
 ---------
 ### 1.0.2
-Changed package name from `owner` to `com.github.owner`. This has been necessary in order to publish the artifact on
+Changed package name from `owner` to `org.aeonbits.owner`. This has been necessary in order to publish the artifact on
 Maven Central Repository.
 
 ### 1.0.1
