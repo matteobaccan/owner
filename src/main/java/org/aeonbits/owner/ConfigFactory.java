@@ -35,7 +35,7 @@ public class ConfigFactory {
     @SuppressWarnings("unchecked")
     public static <T extends Config> T create(Class<? extends Config> clazz) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
-        InvocationHandler handler = new PropertyInvocationHandler(loadPropertiesFor(clazz));
+        InvocationHandler handler = new PropertiesInvocationHandler(loadPropertiesFor(clazz));
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }
 

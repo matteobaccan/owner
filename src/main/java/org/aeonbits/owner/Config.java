@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -56,4 +58,8 @@ public interface Config {
     public @interface Key {
         String value();
     }
+
+    public void list(PrintStream out);
+    public void list(PrintWriter out);
+
 }
