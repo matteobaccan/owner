@@ -10,12 +10,16 @@ package org.aeonbits.owner;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
+import static org.aeonbits.owner.ConfigFactory.loadPropertiesFor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -47,7 +51,7 @@ public class ConfigTest {
                 new SystemVariablesExpander());
         ConfigURLStreamHandler spy = spy(handler);
 
-        InputStream inputStream = ConfigFactory.getStreamFor(SampleConfig.class, spy);
+        ConfigFactory.getStreamFor(SampleConfig.class, spy);
         URL expected =
                 new URL(null, "classpath:org/aeonbits/owner/SampleConfig.properties", handler);
         verify(spy, times(1)).openConnection(eq(expected));
@@ -55,7 +59,7 @@ public class ConfigTest {
 
     @Test
     public void shouldReturnThePropertiesForTheClass() {
-        Properties props = ConfigFactory.loadPropertiesFor(SampleConfig.class);
+        Properties props = loadPropertiesFor(SampleConfig.class);
         assertNotNull(props);
         assertEquals("testValue", props.getProperty("testKey"));
     }
@@ -78,7 +82,7 @@ public class ConfigTest {
             }
         };
 
-        InputStream stream = ConfigFactory.getStreamFor(SampleConfigWithSource.class, handler);
+        ConfigFactory.getStreamFor(SampleConfigWithSource.class, handler);
         URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
                 handler);
         assertEquals(expected, lastURL[0]);
@@ -167,4 +171,29 @@ public class ConfigTest {
         SampleConfigWithExpansion config = ConfigFactory.create(SampleConfigWithExpansion.class);
         assertEquals("pink", config.favoriteColor());
     }
+
+    @Test
+    public void testListPrintStream() throws IOException {
+        ByteArrayOutputStream expected = new ByteArrayOutputStream();
+        loadPropertiesFor(SampleConfig.class).list(new PrintStream(expected, true));
+
+        SampleConfig config = ConfigFactory.create(SampleConfig.class);
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        config.list(new PrintStream(result, true));
+
+        assertEquals(expected.toString(), result.toString());
+    }
+
+    @Test
+    public void testListPrintWriter() throws IOException {
+        StringWriter expected = new StringWriter();
+        loadPropertiesFor(SampleConfig.class).list(new PrintWriter(expected, true));
+
+        SampleConfig config = ConfigFactory.create(SampleConfig.class);
+        StringWriter result = new StringWriter();
+        config.list(new PrintWriter(result, true));
+
+        assertEquals(expected.toString(), result.toString());
+    }
+
 }
