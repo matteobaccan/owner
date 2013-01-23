@@ -59,7 +59,26 @@ public interface Config {
         String value();
     }
 
+    /**
+     * Prints the property list out to the specified output stream.
+     * This method is useful for debugging.
+     *
+     * @param   out   an output stream.
+     * @throws  ClassCastException if any key in this property list
+     *          is not a string.
+     * @see     {@link java.util.Properties#list(java.io.PrintStream)}
+     */
     public void list(PrintStream out);
+
+    /**
+     * Prints this property list out to the specified output stream.
+     * This method is useful for debugging.
+     *
+     * @param   out   an output stream.
+     * @throws  ClassCastException if any key in this property list
+     *          is not a string.
+     * @see     {@link java.util.Properties#list(java.io.PrintWriter)}
+     */
     public void list(PrintWriter out);
 
 }
