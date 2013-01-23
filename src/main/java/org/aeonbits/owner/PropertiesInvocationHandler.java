@@ -25,27 +25,28 @@ import java.util.Properties;
 import static java.lang.String.format;
 
 /**
- * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps it
- * to a property value from a property file, or a {@link DefaultValue} specified in method annotation. The {@link Key}
- * annotation can be used to override default mapping between method names and property names.
+ * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
+ * it to a property value from a property file, or a {@link DefaultValue} specified in method annotation.
  * <p/>
- * Automatic conversion is handled between the property value and the return type expected by the method of the delegate.
+ * The {@link Key} annotation can be used to override default mapping between method names and property names.
+ * <p/>
+ * Automatic conversion is handled between the property value and the return type expected by the method of the
+ * delegate.
  *
  * @author Luigi R. Viggiano
  */
 class PropertiesInvocationHandler implements InvocationHandler {
     private final Properties properties;
-    private static Method listPrintStream;
-    private static Method listPrintWriter;
+    private static final Method listPrintStream = getMethod(Properties.class, "list", PrintStream.class);
+    private static final Method listPrintWriter = getMethod(Properties.class, "list", PrintWriter.class);
 
-    static {
+    private static Method getMethod(Class<?> aClass, String name, Class<?>... args) {
         try {
-            Class<Properties> propertiesClass = Properties.class;
-            listPrintStream = propertiesClass.getMethod("list", PrintStream.class);
-            listPrintWriter = propertiesClass.getMethod("list", PrintWriter.class);
+            return aClass.getMethod(name, args);
         } catch (NoSuchMethodException e) {
             // this shouldn't happen, btw we handle the case in which the delegate method is not available...
             // so, it's fine.
+            return null;
         }
     }
 
