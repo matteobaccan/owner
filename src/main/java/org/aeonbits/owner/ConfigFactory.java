@@ -34,6 +34,14 @@ import static org.aeonbits.owner.PropertiesMapper.defaults;
 public class ConfigFactory {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
 
+    /**
+     * Creates a {@link Config} instance from the specified interface
+     *
+     * @param clazz     the interface extending from {@link Config} that you want to instantiate.
+     * @param imports   additional variables to be used to resolve the properties.
+     * @param <T>       type of the interface.
+     * @return  an object implementing the given interface, which maps methods to property values.
+     */
     @SuppressWarnings("unchecked")
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = new Class<?>[]{clazz};

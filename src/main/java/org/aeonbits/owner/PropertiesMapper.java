@@ -15,7 +15,10 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 
 /**
- * @author luigi
+ * Maps methods to properties keys and defaultValues.
+ * Maps a class to default property values.
+ *
+ * @author Luigi R. Viggiano
  */
 class PropertiesMapper {
     static String key(Method method) {
