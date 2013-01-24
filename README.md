@@ -174,6 +174,69 @@ See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you wan
   [propedit]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditor.html
   [propeditsupport]:http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorSupport.html
 
+### VARIABLES EXPANSION
+
+Sometimes it may be useful to expand properties values from other properties.
+
+Example (ConfigWithExpansion.properties):
+
+    story=The ${animal} jumped over the ${target}
+    animal=quick ${color} fox
+    target=${target.attribute} dog
+    target.attribute=lazy
+    color=brown
+
+The property `story` will expand to *The quick brown fox jumped over the lazy dog*, you can map it with:
+
+    public interface ConfigWithExpansion  extends Config {
+        String story();
+    }
+
+This also works with the annotations, but you need to specify the properties on the methods:
+
+    public interface ConfigWithExpansion extends Config {
+
+        @DefaultValue("The ${animal} jumped over the ${target}")
+        String story();
+
+        @DefaultValue("quick ${color} fox")
+        String animal();
+
+        @DefaultValue("${target.attribute} dog")
+        String target();
+
+        @Key("target.attribute")
+        @DefaultValue("lazy")
+        String targetAttribute();
+
+        @DefaultValue("brown")
+        String color();
+    }
+
+Example of usage:
+
+    ConfigWithExpansion conf = ConfigFactory.create(ConfigWithExpansion.class);
+    String story = conf.story());
+
+Sometimes you may want to use system properties or environment variables, an idea could be to *import*
+`System.getProperties()` and `System.getenv()` on the Config creation time:
+
+    public interface SystemPropertiesExample extends Config {
+        @DefaultValue("something else")
+        String someOtherValue();
+
+        @DefaultValue("${user.home}")
+        String sysPropertyHome();
+
+        @DefaultValue("${HOME}")
+        String envHome();
+    }
+
+    SystemPropertiesExample conf =
+            ConfigFactory.create(SystemPropertiesExample.class, System.getProperties(), System.getenv());
+    String homeFromSystemProperty = conf.sysPropertyHome();
+    String homeFromSystemEnviroment = conf.envHome();
+
 JAVADOCS
 --------
 
