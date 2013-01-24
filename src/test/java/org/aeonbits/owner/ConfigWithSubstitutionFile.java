@@ -13,8 +13,4 @@ package org.aeonbits.owner;
  */
 public interface ConfigWithSubstitutionFile  extends Config {
     String story();
-    String animal();
-    String target();
-    @Key("target.attribute")
-    String targetAttribute();
 }
