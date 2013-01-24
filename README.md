@@ -282,8 +282,11 @@ Thoughts? Ideas? Explain it on [github issues][issues].
 CHANGELOG
 ---------
 ### 1.0.2
-Changed package name from `owner` to `org.aeonbits.owner`. This has been necessary in order to publish the artifact on
+
+* Changed package name from `owner` to `org.aeonbits.owner`. This has been necessary in order to publish the artifact on
 Maven Central Repository.
+* Custom & special return types lviggiano/owner#11
+* Properties variables expansion lviggiano/owner#12
 
 ### 1.0.1
 Removed [commons-lang][] transitive dependency. Minor bug fixes.

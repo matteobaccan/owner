@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
 import java.util.Properties;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
@@ -34,25 +35,27 @@ public class ConfigFactory {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
 
     @SuppressWarnings("unchecked")
-    public static <T extends Config> T create(Class<? extends T> clazz) {
+    public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
-        InvocationHandler handler = new PropertiesInvocationHandler(loadPropertiesFor(clazz));
+        InvocationHandler handler = new PropertiesInvocationHandler(loadPropertiesFor(clazz, imports));
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }
 
-    static Properties loadPropertiesFor(Class<? extends Config> clazz) {
+    static Properties loadPropertiesFor(Class<? extends Config> clazz, Map<?, ?>... imports) {
         ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
         try {
             InputStream stream = getStreamFor(clazz, handler);
             Properties defaults = defaults(clazz);
-            return load(stream, defaults);
+            return load(stream, defaults, imports);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Properties load(InputStream stream, Properties defaults) throws IOException {
+    private static Properties load(InputStream stream, Properties defaults, Map<?, ?>... imports) throws IOException {
         Properties props = new Properties(defaults);
+        addImports(props, imports);
+
         if (stream != null) {
             try {
                 props.load(stream);
@@ -63,7 +66,12 @@ public class ConfigFactory {
         return props;
     }
 
-    static InputStream getStreamFor(Class<? extends Config> clazz, ConfigURLStreamHandler handler) throws IOException {
+    private static void addImports(Properties props, Map<?, ?>... imports) {
+        for (Map<?, ?> importItem : imports)
+            props.putAll(importItem);
+    }
+
+    static InputStream getStreamFor(Class<?> clazz, ConfigURLStreamHandler handler) throws IOException {
         Sources sources = clazz.getAnnotation(Sources.class);
         if (sources == null)
             return getDefaultResourceStream(clazz, handler);
@@ -71,7 +79,7 @@ public class ConfigFactory {
             return getResourceStreamBySourceAnnotation(sources, handler);
     }
 
-    private static InputStream getDefaultResourceStream(Class<? extends Config> clazz,
+    private static InputStream getDefaultResourceStream(Class<?> clazz,
                                                         ConfigURLStreamHandler handler) throws IOException {
         String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
         return getInputStream(new URL(null, spec, handler));
