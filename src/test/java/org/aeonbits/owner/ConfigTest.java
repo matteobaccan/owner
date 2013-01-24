@@ -218,7 +218,15 @@ public class ConfigTest {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
         CustomType custom = config.customType();
         assertNotNull(custom);
-        assertEquals("hello!", custom.getText());
+        assertEquals("test", custom.getText());
+    }
+
+    @Test
+    public void testCustomTypeWithParameter() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        CustomType custom = config.salutation("Luigi");
+        assertNotNull(custom);
+        assertEquals("Hello Luigi!", custom.getText());
     }
 
 }

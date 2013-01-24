@@ -123,8 +123,11 @@ Example:
         @DefaultValue("http://owner.aeonbits.org")
         URL sampleURL();
 
-        @DefaultValue("hello!")
+        @DefaultValue("example")
         CustomType customType();
+
+        @DefaultValue("Hello %s!")
+        CustomType salutation(String name);
     }
 
 The user can define his own class types as `CustomType` in the previous example. The return type needs to be a public
@@ -148,7 +151,7 @@ If any error happens during the constructor call you'll receive a `java.lang.Uns
 
 Example:
 
-    java.lang.UnsupportedOperationException: Cannot convert 'hello!' to org.aeonbits.owner.CustomType
+    java.lang.UnsupportedOperationException: Cannot convert 'example' to org.aeonbits.owner.CustomType
         at org.aeonbits.owner.PropertiesInvocationHandler.convert(PropertiesInvocationHandler.java:108)
         at org.aeonbits.owner.PropertiesInvocationHandler.resolveProperty(PropertiesInvocationHandler.java:72)
         at org.aeonbits.owner.PropertiesInvocationHandler.invoke(PropertiesInvocationHandler.java:63)
@@ -160,7 +163,7 @@ Example:
         at org.aeonbits.owner.PropertiesInvocationHandler.convert(PropertiesInvocationHandler.java:105)
         ... 38 more
 
-The exception description states that OWNER failed to convert the text 'hello!' to `org.aeonbits.owner.CustomType` and
+The exception description states that OWNER failed to convert the text 'example' to `org.aeonbits.owner.CustomType` and
 the cause, in this case is because OWNER was unable to find the public constructor with a single `String` parameter.
 
 JAVADOCS

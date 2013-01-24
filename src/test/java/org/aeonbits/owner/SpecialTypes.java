@@ -21,6 +21,9 @@ public interface SpecialTypes extends Config {
     @DefaultValue("http://owner.aeonbits.org")
     URL sampleURL();
 
-    @DefaultValue("hello!")
+    @DefaultValue("test")
     CustomType customType();
+
+    @DefaultValue("Hello %s!")
+    CustomType salutation(String name);
 }

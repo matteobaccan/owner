@@ -11,7 +11,7 @@ package org.aeonbits.owner;
 public class CustomType {
     private final String text;
 
-    CustomType(String text) {
+    public CustomType(String text) {
         this.text = text;
     }
 
