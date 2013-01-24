@@ -15,12 +15,14 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 
 /**
- * Maps methods to properties keys and defaultValues.
- * Maps a class to default property values.
+ * Maps methods to properties keys and defaultValues. Maps a class to default property values.
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesMapper {
+abstract class PropertiesMapper {
+
+    private PropertiesMapper() {}   // avoid instantiation
+
     static String key(Method method) {
         Key key = method.getAnnotation(Key.class);
         return (key == null) ? method.getName() : key.value();

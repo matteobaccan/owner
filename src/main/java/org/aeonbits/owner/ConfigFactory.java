@@ -31,8 +31,11 @@ import static org.aeonbits.owner.PropertiesMapper.defaults;
  *
  * @author Luigi R. Viggiano
  */
-public class ConfigFactory {
+public abstract class ConfigFactory {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
+
+
+    private ConfigFactory() {}  // avoid instantiation
 
     /**
      * Creates a {@link Config} instance from the specified interface
