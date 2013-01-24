@@ -66,7 +66,7 @@ public interface Config {
      * @param   out   an output stream.
      * @throws  ClassCastException if any key in this property list
      *          is not a string.
-     * @see     {@link java.util.Properties#list(java.io.PrintStream)}
+     * @see     java.util.Properties#list(java.io.PrintStream)
      */
     public void list(PrintStream out);
 
@@ -77,7 +77,7 @@ public interface Config {
      * @param   out   an output stream.
      * @throws  ClassCastException if any key in this property list
      *          is not a string.
-     * @see     {@link java.util.Properties#list(java.io.PrintWriter)}
+     * @see     java.util.Properties#list(java.io.PrintWriter)
      */
     public void list(PrintWriter out);
 
