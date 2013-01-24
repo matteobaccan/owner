@@ -53,4 +53,16 @@ public class StrSubstitutorTest {
         assertEquals("The quick brown fox jumped over the lazy dog.", resolvedString);
     }
 
+    @Test
+    public void testMissingPropertyIsReplacedWithEmptyString() {
+        Properties values = new Properties() {{
+            setProperty("foo", "fooValue");
+            setProperty("baz", "bazValue");
+        }};
+        String template = "Test: ${foo} ${bar} ${baz} :Test";
+        String expected = "Test: fooValue  bazValue :Test";
+        String result = new StrSubstitutor(values).replace(template);
+        assertEquals(expected, result);
+    }
+
 }
