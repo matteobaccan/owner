@@ -35,9 +35,9 @@ import java.net.URLStreamHandler;
 class ConfigURLStreamHandler extends URLStreamHandler {
     private final ClassLoader classLoader;
     private final SystemVariablesExpander expander;
-    public static final String CLASSPATH_PROTOCOL = "classpath";
+    static final String CLASSPATH_PROTOCOL = "classpath";
 
-    public ConfigURLStreamHandler(ClassLoader classLoader, SystemVariablesExpander expander) {
+    ConfigURLStreamHandler(ClassLoader classLoader, SystemVariablesExpander expander) {
         this.classLoader = classLoader;
         this.expander = expander;
     }

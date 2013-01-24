@@ -11,7 +11,6 @@ package org.aeonbits.owner;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -196,37 +195,4 @@ public class ConfigTest {
 
         assertEquals(expected.toString(), result.toString());
     }
-
-    @Test
-    public void testFileReturnType() throws Throwable {
-        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
-        File f = config.sampleFile();
-        assertNotNull(f);
-        assertEquals("foobar.txt", f.getName());
-    }
-
-    @Test
-    public void testURLReturnType() throws Throwable {
-        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
-        URL u = config.sampleURL();
-        assertNotNull(u);
-        assertEquals("http://owner.aeonbits.org", u.toString());
-    }
-
-    @Test
-    public void testCustomType() throws Throwable {
-        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
-        CustomType custom = config.customType();
-        assertNotNull(custom);
-        assertEquals("test", custom.getText());
-    }
-
-    @Test
-    public void testCustomTypeWithParameter() throws Throwable {
-        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
-        CustomType custom = config.salutation("Luigi");
-        assertNotNull(custom);
-        assertEquals("Hello Luigi!", custom.getText());
-    }
-
 }

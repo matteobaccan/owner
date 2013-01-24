@@ -26,4 +26,7 @@ public interface SpecialTypes extends Config {
 
     @DefaultValue("Hello %s!")
     CustomType salutation(String name);
+
+    @DefaultValue("this should raise an exception")
+    InvalidCustomType invalid();
 }

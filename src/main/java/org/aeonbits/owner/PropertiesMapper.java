@@ -28,7 +28,7 @@ class PropertiesMapper {
         return defaultValue != null ? defaultValue.value() : null;
     }
 
-    public static Properties defaults(Class<? extends Config> clazz) {
+    static Properties defaults(Class<? extends Config> clazz) {
         Properties defaults = new Properties();
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {

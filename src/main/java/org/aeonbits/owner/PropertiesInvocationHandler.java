@@ -53,7 +53,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
         }
     }
 
-    public PropertiesInvocationHandler(Properties properties) {
+    PropertiesInvocationHandler(Properties properties) {
         this.properties = properties;
         this.substitutor = new StrSubstitutor(properties);
     }

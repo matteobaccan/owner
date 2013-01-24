@@ -1,0 +1,62 @@
+/*
+ * Copyright (c) 2013, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
+package org.aeonbits.owner;
+
+import org.junit.Test;
+
+import java.io.File;
+import java.net.URL;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+/**
+ * @author luigi
+ */
+public class CustomTypesTest {
+
+    @Test
+    public void testFileReturnType() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        File f = config.sampleFile();
+        assertNotNull(f);
+        assertEquals("foobar.txt", f.getName());
+    }
+
+    @Test
+    public void testURLReturnType() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        URL u = config.sampleURL();
+        assertNotNull(u);
+        assertEquals("http://owner.aeonbits.org", u.toString());
+    }
+
+    @Test
+    public void testCustomType() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        CustomType custom = config.customType();
+        assertNotNull(custom);
+        assertEquals("test", custom.getText());
+    }
+
+    @Test
+    public void testCustomTypeWithParameter() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        CustomType custom = config.salutation("Luigi");
+        assertNotNull(custom);
+        assertEquals("Hello Luigi!", custom.getText());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testInvalidCustomType() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        config.invalid();
+    }
+
+}

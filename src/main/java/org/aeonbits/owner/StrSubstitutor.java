@@ -8,10 +8,7 @@
 
 package org.aeonbits.owner;
 
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,17 +16,15 @@ import static java.util.regex.Pattern.compile;
 
 /**
  * Substitutes variables within a string by values.
- * <p>
- * This class takes a piece of text and substitutes all the variables within it.
- * The definition of a variable is <code>${variableName}</code>.
- * <p>
- * Typical usage of this class follows the following pattern: First an instance is created
- * and initialized with the valueMap that contains the values for the available variables.
- * If a prefix and/or suffix for variables should be used other than the default ones,
- * the appropriate settings can be performed. After that the <code>replace()</code>
- * method can be called passing in the source text for interpolation. In the returned
- * text all variable references (as long as their values are known) will be resolved.
- * The following example demonstrates this:
+ * <p/>
+ * This class takes a piece of text and substitutes all the variables within it. The definition of a variable is
+ * <code>${variableName}</code>.
+ * <p/>
+ * Typical usage of this class follows the following pattern: First an instance is created and initialized with the
+ * values that contains the values for the available variables. If a prefix and/or suffix for variables should be used
+ * other than the default ones, the appropriate settings can be performed. After that the <code>replace()</code> method
+ * can be called passing in the source text for interpolation. In the returned text all variable references (as long as
+ * their values are known) will be resolved. The following example demonstrates this:
  * <pre>
  * Map valuesMap = new HashMap();
  * valuesMap.put(&quot;animal&quot;, &quot;quick brown fox&quot;);
@@ -46,45 +41,39 @@ import static java.util.regex.Pattern.compile;
  * @author Luigi R. Viggiano
  */
 class StrSubstitutor {
-    private Properties valueMap;
+    private Properties values;
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
 
     /**
-     * Creates a new instance and initializes it. Uses defaults for variable
-     * prefix and suffix and the escaping character.
+     * Creates a new instance and initializes it. Uses defaults for variable prefix and suffix and the escaping
+     * character.
      *
-     * @param valueMap  the valueMap with the variables' values, may be null
+     * @param values the variables' values, may be null
      */
-    public StrSubstitutor(Properties valueMap) {
-        this.valueMap = valueMap;
+    StrSubstitutor(Properties values) {
+        this.values = values;
     }
 
     /**
-     * Replaces all the occurrences of variables with their matching values
-     * from the resolver using the given source string as a template.
+     * Replaces all the occurrences of variables with their matching values from the resolver using the given source
+     * string as a template.
      *
-     * @param source  the string to replace in, null returns null
+     * @param source the string to replace in, null returns null
      * @return the result of the replace operation
      */
-    public String replace(String source) {
-        if (source == null) return null;
+    String replace(String source) {
+        if (source == null)
+            return null;
         Matcher m = PATTERN.matcher(source);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
             String var = m.group(1);
-            String value = valueMap.getProperty(var);
+            String value = values.getProperty(var);
             String replacement = (value != null) ? replace(value) : "";
             m.appendReplacement(sb, replacement);
         }
         m.appendTail(sb);
         return sb.toString();
-    }
-
-
-    static void addAll(Map<String, String> variables, Properties properties) {
-        Set<Entry<Object, Object>> entries = properties.entrySet();
-        for (Entry<Object, Object> entry : entries)
-            variables.put((String) entry.getKey(), (String) entry.getValue());
     }
 
 }
