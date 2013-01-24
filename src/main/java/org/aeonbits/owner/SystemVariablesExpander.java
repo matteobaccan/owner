@@ -9,11 +9,7 @@
 package org.aeonbits.owner;
 
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * This class is used to expand variables in the format <tt>${variable}</tt>$, using values from {@link System#getenv()}
@@ -26,16 +22,12 @@ class SystemVariablesExpander {
     private final StrSubstitutor substitutor;
 
     SystemVariablesExpander() {
-        Map<String, String> variables = new LinkedHashMap<String, String>(System.getenv());
-        addAll(variables, System.getProperties());
+        Properties variables = new Properties();
+        variables.putAll(System.getenv());
+        variables.putAll(System.getProperties());
         substitutor = new StrSubstitutor(variables);
     }
 
-    private void addAll(Map<String, String> variables, Properties properties) {
-        Set<Entry<Object, Object>> entries = properties.entrySet();
-        for (Entry<Object, Object> entry : entries)
-            variables.put((String) entry.getKey(), (String) entry.getValue());
-    }
 
     String expand(String path) {
         if (path.indexOf('~') != -1)

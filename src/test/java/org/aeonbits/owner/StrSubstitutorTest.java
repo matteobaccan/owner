@@ -10,9 +10,7 @@ package org.aeonbits.owner;
 
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -24,33 +22,33 @@ public class StrSubstitutorTest {
 
     @Test
     public void shouldReturnNullWhenNullIsProvided() {
-        Map<String, String> map = Collections.emptyMap();
-        StrSubstitutor substitutor = new StrSubstitutor(map);
+        Properties props = new Properties();
+        StrSubstitutor substitutor = new StrSubstitutor(props);
         assertNull(substitutor.replace(null));
     }
 
     @Test
     public void shouldReplaceVariables() {
-        Map<String, String> valuesMap = new HashMap<String, String>();
-        valuesMap.put("animal", "quick brown fox");
-        valuesMap.put("target", "lazy dog");
+        Properties values = new Properties();
+        values.setProperty("animal", "quick brown fox");
+        values.setProperty("target", "lazy dog");
         String templateString = "The ${animal} jumped over the ${target}.";
-        StrSubstitutor sub = new StrSubstitutor(valuesMap);
+        StrSubstitutor sub = new StrSubstitutor(values);
         String resolvedString = sub.replace(templateString);
         assertEquals("The quick brown fox jumped over the lazy dog.", resolvedString);
     }
 
     @Test
     public void testRecoursiveResolution() {
-        Map<String, String> valuesMap = new HashMap<String, String>();
-        valuesMap.put("color", "brown");
-        valuesMap.put("animal", "quick ${color} fox");
-        valuesMap.put("target.attribute", "lazy");
-        valuesMap.put("target.animal", "dog");
-        valuesMap.put("target", "${target.attribute} ${target.animal}");
-        valuesMap.put("template", "The ${animal} jumped over the ${target}.");
+        Properties values = new Properties();
+        values.setProperty("color", "brown");
+        values.setProperty("animal", "quick ${color} fox");
+        values.setProperty("target.attribute", "lazy");
+        values.setProperty("target.animal", "dog");
+        values.setProperty("target", "${target.attribute} ${target.animal}");
+        values.setProperty("template", "The ${animal} jumped over the ${target}.");
         String templateString = "${template}";
-        StrSubstitutor sub = new StrSubstitutor(valuesMap);
+        StrSubstitutor sub = new StrSubstitutor(values);
         String resolvedString = sub.replace(templateString);
         assertEquals("The quick brown fox jumped over the lazy dog.", resolvedString);
     }

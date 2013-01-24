@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import static java.lang.String.format;
+import static org.aeonbits.owner.PropertiesMapper.key;
 
 /**
  * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
@@ -38,6 +39,7 @@ import static java.lang.String.format;
  */
 class PropertiesInvocationHandler implements InvocationHandler {
     private final Properties properties;
+    private final StrSubstitutor substitutor;
     private static final Method listPrintStream = getMethod(Properties.class, "list", PrintStream.class);
     private static final Method listPrintWriter = getMethod(Properties.class, "list", PrintWriter.class);
 
@@ -53,6 +55,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     public PropertiesInvocationHandler(Properties properties) {
         this.properties = properties;
+        this.substitutor = new StrSubstitutor(properties);
     }
 
     @Override
@@ -65,11 +68,10 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     private Object resolveProperty(Method method, Object... args) {
         String key = key(method);
-        String defaultValue = defaultValue(method);
-        String value = properties.getProperty(key, defaultValue);
+        String value = properties.getProperty(key);
         if (value == null)
             return null;
-        return convert(method.getReturnType(), format(value, args)); // TODO: variable expansion here would be nice
+        return convert(method.getReturnType(), substitutor.replace(format(value, args)));
     }
 
     private Object delegate(Object target, Method method, Object... args) throws InvocationTargetException,
@@ -90,11 +92,6 @@ class PropertiesInvocationHandler implements InvocationHandler {
                 && Arrays.equals(proxied.getParameterTypes(), proxy.getParameterTypes());
     }
 
-    private String key(Method method) {
-        Key key = method.getAnnotation(Key.class);
-        return (key == null) ? method.getName() : key.value();
-    }
-
     private Object convert(Class<?> targetType, String text) {
         PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
         if (editor != null) {
@@ -109,10 +106,5 @@ class PropertiesInvocationHandler implements InvocationHandler {
                         targetType.getCanonicalName()), ex);
             }
         }
-    }
-
-    private String defaultValue(Method method) {
-        DefaultValue defaultValue = method.getAnnotation(DefaultValue.class);
-        return defaultValue != null ? defaultValue.value() : null;
     }
 }

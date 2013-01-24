@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
+import static org.aeonbits.owner.PropertiesMapper.defaults;
 
 /**
  * Factory class to instantiate {@link Config} instances. By default a {link Config} sub-interface is associated to a
@@ -33,7 +34,7 @@ public class ConfigFactory {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
 
     @SuppressWarnings("unchecked")
-    public static <T extends Config> T create(Class<? extends Config> clazz) {
+    public static <T extends Config> T create(Class<? extends T> clazz) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
         InvocationHandler handler = new PropertiesInvocationHandler(loadPropertiesFor(clazz));
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
@@ -43,14 +44,15 @@ public class ConfigFactory {
         ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
         try {
             InputStream stream = getStreamFor(clazz, handler);
-            return load(stream);
+            Properties defaults = defaults(clazz);
+            return load(stream, defaults);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Properties load(InputStream stream) throws IOException {
-        Properties props = new Properties();
+    private static Properties load(InputStream stream, Properties defaults) throws IOException {
+        Properties props = new Properties(defaults);
         if (stream != null) {
             try {
                 props.load(stream);

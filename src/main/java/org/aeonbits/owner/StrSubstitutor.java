@@ -9,6 +9,9 @@
 package org.aeonbits.owner;
 
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +46,7 @@ import static java.util.regex.Pattern.compile;
  * @author Luigi R. Viggiano
  */
 class StrSubstitutor {
-    private Map<String, String> valueMap;
+    private Properties valueMap;
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
 
     /**
@@ -52,7 +55,7 @@ class StrSubstitutor {
      *
      * @param valueMap  the valueMap with the variables' values, may be null
      */
-    public StrSubstitutor(Map<String, String> valueMap) {
+    public StrSubstitutor(Properties valueMap) {
         this.valueMap = valueMap;
     }
 
@@ -69,10 +72,19 @@ class StrSubstitutor {
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
             String var = m.group(1);
-            String replacement = replace(valueMap.get(var));
+            String value = valueMap.getProperty(var);
+            String replacement = (value != null) ? replace(value) : "";
             m.appendReplacement(sb, replacement);
         }
         m.appendTail(sb);
         return sb.toString();
     }
+
+
+    static void addAll(Map<String, String> variables, Properties properties) {
+        Set<Entry<Object, Object>> entries = properties.entrySet();
+        for (Entry<Object, Object> entry : entries)
+            variables.put((String) entry.getKey(), (String) entry.getValue());
+    }
+
 }
