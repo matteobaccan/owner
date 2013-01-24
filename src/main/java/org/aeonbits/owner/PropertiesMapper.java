@@ -21,7 +21,9 @@ import java.util.Properties;
  */
 abstract class PropertiesMapper {
 
-    private PropertiesMapper() {}   // avoid instantiation
+    PropertiesMapper() {
+        throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
+    }
 
     static String key(Method method) {
         Key key = method.getAnnotation(Key.class);

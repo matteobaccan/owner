@@ -35,7 +35,9 @@ public abstract class ConfigFactory {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
 
 
-    private ConfigFactory() {}  // avoid instantiation
+    ConfigFactory() {
+        throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
+    }
 
     /**
      * Creates a {@link Config} instance from the specified interface
