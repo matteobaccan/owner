@@ -14,6 +14,8 @@ import org.aeonbits.owner.Config.Key;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import static org.aeonbits.owner.Util.prohibitInstantiation;
+
 /**
  * Maps methods to properties keys and defaultValues. Maps a class to default property values.
  *
@@ -22,7 +24,7 @@ import java.util.Properties;
 abstract class PropertiesMapper {
 
     PropertiesMapper() {
-        throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
+        prohibitInstantiation();
     }
 
     static String key(Method method) {

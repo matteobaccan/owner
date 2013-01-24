@@ -20,12 +20,18 @@ import java.util.Properties;
 
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
+import static org.aeonbits.owner.Util.prohibitInstantiation;
 
 /**
+ * Loads properties for a class.
  * @author Luigi R. Viggiano
  */
-public class PropertiesLoader {
+abstract class PropertiesLoader {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
+
+    PropertiesLoader() {
+        prohibitInstantiation();
+    }
 
     static Properties loadPropertiesFor(Class<? extends Config> clazz, Map<?, ?>... imports) {
         ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);

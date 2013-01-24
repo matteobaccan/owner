@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.PropertiesLoader.loadPropertiesFor;
+import static org.aeonbits.owner.Util.prohibitInstantiation;
 
 /**
  * Factory class to instantiate {@link Config} instances. By default a {link Config} sub-interface is associated to a
@@ -25,7 +26,7 @@ import static org.aeonbits.owner.PropertiesLoader.loadPropertiesFor;
 public abstract class ConfigFactory {
 
     ConfigFactory() {
-        throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
+        prohibitInstantiation();
     }
 
     /**
