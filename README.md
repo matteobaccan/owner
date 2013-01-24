@@ -166,6 +166,14 @@ Example:
 The exception description states that OWNER failed to convert the text 'example' to `org.aeonbits.owner.CustomType` and
 the cause, in this case is because OWNER was unable to find the public constructor with a single `String` parameter.
 
+You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your objects
+using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].
+See also [`PropertyEditorSupport`][propeditsupport]
+
+  [propeditmanager]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor(java.lang.Class, java.lang.Class)
+  [propedit]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditor.html
+  [propeditsupport]:http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorSupport.html
+
 JAVADOCS
 --------
 
