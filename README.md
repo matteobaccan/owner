@@ -110,6 +110,59 @@ Example:
     SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
     System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
 
+### CUSTOM & SPECIAL RETURN TYPES
+
+Since version 1.0.2 it is possible to have configuration interfaces to declare complex return types or even custom ones.
+
+Example:
+
+    public interface SpecialTypes extends Config {
+        @DefaultValue("foobar.txt")
+        File sampleFile();
+
+        @DefaultValue("http://owner.aeonbits.org")
+        URL sampleURL();
+
+        @DefaultValue("hello!")
+        CustomType customType();
+    }
+
+The user can define his own class types as `CustomType` in the previous example. The return type needs to be a public
+class declaring a public constructor with a single argument of type `java.lang.String'.
+
+Example:
+
+    public class CustomType {
+        private final String text;
+
+        public CustomType(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
+If any error happens during the constructor call you'll receive a `java.lang.UnsupportedOperationException`.
+
+Example:
+
+    java.lang.UnsupportedOperationException: Cannot convert 'hello!' to org.aeonbits.owner.CustomType
+        at org.aeonbits.owner.PropertiesInvocationHandler.convert(PropertiesInvocationHandler.java:108)
+        at org.aeonbits.owner.PropertiesInvocationHandler.resolveProperty(PropertiesInvocationHandler.java:72)
+        at org.aeonbits.owner.PropertiesInvocationHandler.invoke(PropertiesInvocationHandler.java:63)
+        at $Proxy4.customType(Unknown Source)
+        ... 31 more
+    Caused by: java.lang.NoSuchMethodException: org.aeonbits.owner.CustomType.<init>(java.lang.String)
+        at java.lang.Class.getConstructor0(Class.java:2721)
+        at java.lang.Class.getConstructor(Class.java:1674)
+        at org.aeonbits.owner.PropertiesInvocationHandler.convert(PropertiesInvocationHandler.java:105)
+        ... 38 more
+
+The exception description states that OWNER failed to convert the text 'hello!' to `org.aeonbits.owner.CustomType` and
+the cause, in this case is because OWNER was unable to find the public constructor with a single `String` parameter.
+
 JAVADOCS
 --------
 

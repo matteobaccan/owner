@@ -16,6 +16,7 @@ import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -96,8 +97,18 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     private Object convert(Class<?> targetType, String text) {
         PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
-        editor.setAsText(text);
-        return editor.getValue();
+        if (editor != null) {
+            editor.setAsText(text);
+            return editor.getValue();
+        } else {
+            try {
+                Constructor<?> constructor = targetType.getConstructor(String.class);
+                return constructor.newInstance(text);
+            } catch (ReflectiveOperationException ex) {
+                throw new UnsupportedOperationException(String.format("Cannot convert '%s' to %s", text,
+                        targetType.getCanonicalName()), ex);
+            }
+        }
     }
 
     private String defaultValue(Method method) {
