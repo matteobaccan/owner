@@ -98,7 +98,6 @@ public abstract class ConfigFactory {
         return getInputStream(new URL(null, spec, handler));
     }
 
-
     private static InputStream getResourceStreamBySourceAnnotation(Sources sources,
                                                                    ConfigURLStreamHandler handler) throws
             MalformedURLException {

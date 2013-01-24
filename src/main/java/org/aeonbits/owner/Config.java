@@ -24,6 +24,21 @@ import java.lang.annotation.Target;
 public interface Config {
 
     /**
+     * Specifies the policy for loading the properties files.
+     * By default the first available properties file specified by {@link Sources} will be loaded,
+     * see {@link LoadType#FIRST}.
+     * User can also specify that the load policy is {@link LoadType#MERGE} to have the properties files merged:
+     * properties are loaded in order from the first file to the last, if there are conflicts in properties names the
+     * earlier files loaded prevail.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @Documented
+    public @interface LoadPolicy {
+        LoadType value() default LoadType.FIRST;
+    }
+
+    /**
      * Specifies the source from which to load the properties file.
      * It has to be specified in a URL string format.
      * Allowed protocols are the ones allowed by {@link java.net.URL} plus
