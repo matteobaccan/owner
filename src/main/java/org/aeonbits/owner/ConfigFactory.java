@@ -34,7 +34,6 @@ import static org.aeonbits.owner.PropertiesMapper.defaults;
 public abstract class ConfigFactory {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
 
-
     ConfigFactory() {
         throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
     }
@@ -57,49 +56,32 @@ public abstract class ConfigFactory {
     static Properties loadPropertiesFor(Class<? extends Config> clazz, Map<?, ?>... imports) {
         ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
         try {
-            InputStream stream = getStreamFor(clazz, handler);
-            Properties defaults = defaults(clazz);
-            return load(stream, defaults, imports);
+            Properties props = defaults(clazz);
+            merge(props, imports);
+            Properties loadedFromFile = getPropertiesFor(clazz, handler);
+            merge(props, loadedFromFile);
+            return props;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Properties load(InputStream stream, Properties defaults, Map<?, ?>... imports) throws IOException {
-        Properties props = new Properties(defaults);
-        addImports(props, imports);
-
-        if (stream != null) {
-            try {
-                props.load(stream);
-            } finally {
-                stream.close();
-            }
-        }
-        return props;
-    }
-
-    private static void addImports(Properties props, Map<?, ?>... imports) {
-        for (Map<?, ?> importItem : imports)
-            props.putAll(importItem);
-    }
-
-    static InputStream getStreamFor(Class<?> clazz, ConfigURLStreamHandler handler) throws IOException {
+    static Properties getPropertiesFor(Class<?> clazz, ConfigURLStreamHandler handler) throws IOException {
         Sources sources = clazz.getAnnotation(Sources.class);
         if (sources == null)
-            return getDefaultResourceStream(clazz, handler);
+            return getDefaultProperties(clazz, handler);
         else
-            return getResourceStreamBySourceAnnotation(sources, handler);
+            return getPropertiesBySourceAnnotation(sources, handler);
     }
 
-    private static InputStream getDefaultResourceStream(Class<?> clazz,
-                                                        ConfigURLStreamHandler handler) throws IOException {
+    private static Properties getDefaultProperties(Class<?> clazz,
+                                                    ConfigURLStreamHandler handler) throws IOException {
         String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
-        return getInputStream(new URL(null, spec, handler));
+        return properties(getInputStream(new URL(null, spec, handler)));
     }
 
-    private static InputStream getResourceStreamBySourceAnnotation(Sources sources,
-                                                                   ConfigURLStreamHandler handler) throws
+    private static Properties getPropertiesBySourceAnnotation(Sources sources,
+                                                              ConfigURLStreamHandler handler) throws
             MalformedURLException {
 
         String[] values = sources.value();
@@ -109,12 +91,12 @@ public abstract class ConfigFactory {
             try {
                 InputStream stream = getInputStream(url);
                 if (stream != null)
-                    return stream;
+                    return properties(stream);
             } catch (IOException ex) {
                 // ignore: happens when a file specified in the sources is not found or cannot be read.
             }
         }
-        return null;
+        return new Properties();
     }
 
     private static InputStream getInputStream(URL url) throws IOException {
@@ -123,4 +105,26 @@ public abstract class ConfigFactory {
             return null;
         return conn.getInputStream();
     }
+
+    private static void merge(Properties results, Map<?, ?>... inputs) {
+        for (Map<?, ?> input : inputs)
+            results.putAll(input);
+    }
+
+    private static Properties properties(InputStream stream) throws IOException {
+        Properties props = new Properties();
+        load(props, stream);
+        return props;
+    }
+
+    private static void load(Properties props, InputStream stream) throws IOException {
+        if (stream != null) {
+            try {
+                props.load(stream);
+            } finally {
+                stream.close();
+            }
+        }
+    }
+
 }

@@ -51,7 +51,7 @@ public class ConfigTest {
                 new SystemVariablesExpander());
         ConfigURLStreamHandler spy = spy(handler);
 
-        ConfigFactory.getStreamFor(SampleConfig.class, spy);
+        ConfigFactory.getPropertiesFor(SampleConfig.class, spy);
         URL expected =
                 new URL(null, "classpath:org/aeonbits/owner/SampleConfig.properties", handler);
         verify(spy, times(1)).openConnection(eq(expected));
@@ -82,7 +82,7 @@ public class ConfigTest {
             }
         };
 
-        ConfigFactory.getStreamFor(SampleConfigWithSource.class, handler);
+        ConfigFactory.getPropertiesFor(SampleConfigWithSource.class, handler);
         URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
                 handler);
         assertEquals(expected, lastURL[0]);
