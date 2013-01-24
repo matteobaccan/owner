@@ -19,7 +19,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
-import static org.aeonbits.owner.ConfigFactory.loadPropertiesFor;
+import static org.aeonbits.owner.PropertiesLoader.getPropertiesFor;
+import static org.aeonbits.owner.PropertiesLoader.loadPropertiesFor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -51,7 +52,7 @@ public class ConfigTest {
                 new SystemVariablesExpander());
         ConfigURLStreamHandler spy = spy(handler);
 
-        ConfigFactory.getPropertiesFor(SampleConfig.class, spy);
+        getPropertiesFor(SampleConfig.class, spy);
         URL expected =
                 new URL(null, "classpath:org/aeonbits/owner/SampleConfig.properties", handler);
         verify(spy, times(1)).openConnection(eq(expected));
@@ -82,7 +83,7 @@ public class ConfigTest {
             }
         };
 
-        ConfigFactory.getPropertiesFor(SampleConfigWithSource.class, handler);
+        getPropertiesFor(SampleConfigWithSource.class, handler);
         URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
                 handler);
         assertEquals(expected, lastURL[0]);

@@ -8,9 +8,60 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.Sources;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Properties;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.reverse;
+import static org.aeonbits.owner.PropertiesLoader.getInputStream;
+import static org.aeonbits.owner.PropertiesLoader.properties;
+
 /**
  * @author Luigi R. Viggiano
  */
 public enum LoadType {
-    FIRST, MERGE
+    FIRST {
+        @Override
+        Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
+            String[] values = sources.value();
+            for (String source : values) {
+                URL url = new URL(null, source, handler);
+                try {
+                    InputStream stream = getInputStream(url);
+                    if (stream != null)
+                        return properties(stream);
+                } catch (IOException ex) {
+                    // ignore: happens when a file specified in the sources is not found or cannot be read.
+                }
+            }
+            return new Properties();
+        }
+    },
+
+    MERGE {
+        @Override
+        Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
+            String[] values = sources.value();
+            reverse(asList(values));
+            Properties result = new Properties();
+            for (String source : values) {
+                URL url = new URL(null, source, handler);
+                try {
+                    InputStream stream = getInputStream(url);
+                    if (stream != null)
+                        result.load(stream);
+                } catch (IOException ex) {
+                    // ignore: happens when a file specified in the sources is not found or cannot be read.
+                }
+            }
+            return result;
+        }
+    };
+
+    abstract Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException;
 }

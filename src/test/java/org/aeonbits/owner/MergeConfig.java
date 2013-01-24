@@ -16,10 +16,15 @@ import static org.aeonbits.owner.LoadType.MERGE;
 /**
  * @author luigi
  */
-@Sources({"classpath:org/aeonbits/owner/first.properties", "classpath:org/aeonbits/owner/second.properties"})
+@Sources({"classpath:org/aeonbits/owner/first.properties",
+          "classpath:foo/bar/thisDoesntExists.properties",
+          "classpath:org/aeonbits/owner/second.properties",
+          "file:${user.dir}/src/test/resources/foo/bar/thisDoesntExists.properties",
+          "file:${user.dir}/src/test/resources/org/aeonbits/owner/third.properties"})
 @LoadPolicy(MERGE)
 public interface MergeConfig extends Config {
     String foo();
     String bar();
     String baz();
+    String qux();
 }
