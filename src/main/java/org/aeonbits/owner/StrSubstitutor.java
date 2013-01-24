@@ -69,7 +69,7 @@ class StrSubstitutor {
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
             String var = m.group(1);
-            String replacement = valueMap.get(var);
+            String replacement = replace(valueMap.get(var));
             m.appendReplacement(sb, replacement);
         }
         m.appendTail(sb);

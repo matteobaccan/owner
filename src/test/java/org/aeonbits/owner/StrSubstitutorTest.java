@@ -39,4 +39,20 @@ public class StrSubstitutorTest {
         String resolvedString = sub.replace(templateString);
         assertEquals("The quick brown fox jumped over the lazy dog.", resolvedString);
     }
+
+    @Test
+    public void testRecoursiveResolution() {
+        Map<String, String> valuesMap = new HashMap<String, String>();
+        valuesMap.put("color", "brown");
+        valuesMap.put("animal", "quick ${color} fox");
+        valuesMap.put("target.attribute", "lazy");
+        valuesMap.put("target.animal", "dog");
+        valuesMap.put("target", "${target.attribute} ${target.animal}");
+        valuesMap.put("template", "The ${animal} jumped over the ${target}.");
+        String templateString = "${template}";
+        StrSubstitutor sub = new StrSubstitutor(valuesMap);
+        String resolvedString = sub.replace(templateString);
+        assertEquals("The quick brown fox jumped over the lazy dog.", resolvedString);
+    }
+
 }
