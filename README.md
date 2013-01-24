@@ -168,7 +168,7 @@ the cause, in this case is because OWNER was unable to find the public construct
 
 You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your objects
 using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].
-See also [`PropertyEditorSupport`][propeditsupport]
+See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you want to implement a `PropertyEditor`.
 
   [propeditmanager]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor
   [propedit]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditor.html
