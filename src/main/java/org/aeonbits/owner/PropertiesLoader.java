@@ -33,12 +33,12 @@ abstract class PropertiesLoader {
         prohibitInstantiation();
     }
 
-    static Properties loadPropertiesFor(Class<? extends Config> clazz, Map<?, ?>... imports) {
-        ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
+    static Properties load(Class<? extends Config> clazz, Map<?, ?>... imports) {
         try {
             Properties props = defaults(clazz);
             merge(props, imports);
-            Properties loadedFromFile = getPropertiesFor(clazz, handler);
+            ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
+            Properties loadedFromFile = doLoad(clazz, handler);
             merge(props, loadedFromFile);
             return props;
         } catch (IOException e) {
@@ -46,18 +46,18 @@ abstract class PropertiesLoader {
         }
     }
 
-    static Properties getPropertiesFor(Class<?> clazz, ConfigURLStreamHandler handler) throws IOException {
+    static Properties doLoad(Class<?> clazz, ConfigURLStreamHandler handler) throws IOException {
         Sources sources = clazz.getAnnotation(Sources.class);
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         LoadType loadType = (loadPolicy != null) ? loadPolicy.value() : LoadType.FIRST;
         if (sources == null)
-            return getDefaultProperties(clazz, handler);
+            return loadDefaultProperties(clazz, handler);
         else
             return loadType.load(sources, handler);
     }
 
-    private static Properties getDefaultProperties(Class<?> clazz,
-                                                   ConfigURLStreamHandler handler) throws IOException {
+    private static Properties loadDefaultProperties(Class<?> clazz,
+                                                    ConfigURLStreamHandler handler) throws IOException {
         String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
         return properties(getInputStream(new URL(null, spec, handler)));
     }
@@ -77,11 +77,6 @@ abstract class PropertiesLoader {
 
     static Properties properties(InputStream stream) throws IOException {
         Properties props = new Properties();
-        load(props, stream);
-        return props;
-    }
-
-    private static void load(Properties props, InputStream stream) throws IOException {
         if (stream != null) {
             try {
                 props.load(stream);
@@ -89,6 +84,6 @@ abstract class PropertiesLoader {
                 stream.close();
             }
         }
+        return props;
     }
-
 }
