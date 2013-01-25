@@ -12,11 +12,8 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.Key;
 
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,6 +21,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import static java.lang.String.format;
+import static org.aeonbits.owner.Converters.unsupported;
 import static org.aeonbits.owner.PropertiesMapper.key;
 
 /**
@@ -93,18 +91,11 @@ class PropertiesInvocationHandler implements InvocationHandler {
     }
 
     private Object convert(Class<?> targetType, String text) {
-        PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
-        if (editor != null) {
-            editor.setAsText(text);
-            return editor.getValue();
-        } else {
-            try {
-                Constructor<?> constructor = targetType.getConstructor(String.class);
-                return constructor.newInstance(text);
-            } catch (ReflectiveOperationException ex) {
-                throw new UnsupportedOperationException(String.format("Cannot convert '%s' to %s", text,
-                        targetType.getCanonicalName()), ex);
-            }
+        for (Converters converter : Converters.values()) {
+            Object converted = converter.convert(targetType, text);
+            if (converted != null)
+                return converted;
         }
+        return unsupported(targetType, text);
     }
 }

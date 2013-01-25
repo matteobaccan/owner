@@ -175,7 +175,14 @@ Example:
     SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
     System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
 
-### CUSTOM & SPECIAL RETURN TYPES
+### TYPE CONVERSION
+
+OWER API supports properties conversion for primitive types and enums. So when you define a properties like the
+followings they will be automatically converted from `String` to the primitive types and enum.
+
+        int maxThreads();
+        double pi();
+        TimeUnit timeUnit(); // java.util.concurrent.TimeUnit is an enum
 
 Since version 1.0.2 it is possible to have configuration interfaces to declare complex return types or even custom ones.
 
@@ -195,8 +202,19 @@ Example:
         CustomType salutation(String name);
     }
 
-The user can define his own class types as `CustomType` in the previous example. The return type needs to be a public
-class declaring a public constructor with a single argument of type `java.lang.String'.
+The user can define his own class types as `CustomType` in the previous example.
+
+OWNER API supports automatic conversion for:
+
+ * Primitive types: boolean, byte, short, integer, long, float, double
+ * Enums (notice that the conversion is case sensitive, so FOO != foo or Foo)
+ * java.lang.String, of course (no conversion is needed)
+ * java.net.URI
+ * java.io.File
+ * java.lang.Class (this can be useful, for instance, if you want to OWNER API to load the jdbc driver).
+ * Any instantiable class declaring a public constructor with a single argument of type `java.lang.String'.
+ * Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object'.
+ * Any class declaring a public method valueOf(String) that returns an instance of itself.
 
 Example:
 

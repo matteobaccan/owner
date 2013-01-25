@@ -33,4 +33,7 @@ public interface SpecialTypes extends Config {
     @DefaultValue("FOO")
     EnumType enumType();
 
+    @DefaultValue("java.sql.Driver")
+    Class jdbcDriver();
+
 }

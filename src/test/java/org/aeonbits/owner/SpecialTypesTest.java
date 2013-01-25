@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
+import java.sql.Driver;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -65,6 +66,14 @@ public class SpecialTypesTest {
         EnumType enumType = config.enumType();
         assertNotNull(enumType);
         assertEquals(EnumType.FOO, enumType);
+    }
+
+    @Test
+    public void testClassType() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        Class driver = config.jdbcDriver();
+        assertNotNull(driver);
+        assertEquals(Driver.class, driver);
     }
 
 }
