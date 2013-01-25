@@ -23,8 +23,12 @@ import static org.aeonbits.owner.LoadType.MERGE;
           "file:${user.dir}/src/test/resources/org/aeonbits/owner/third.properties"})
 @LoadPolicy(MERGE)
 public interface MergeConfig extends Config {
+    @DefaultValue("this should be ignored")
     String foo();
+    @DefaultValue("this should be ignored")
     String bar();
+    @DefaultValue("this should be ignored")
     String baz();
+    @DefaultValue("this should be ignored")
     String qux();
 }
