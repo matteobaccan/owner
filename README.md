@@ -304,7 +304,7 @@ Sometimes you may want to use system properties or environment variables, an ide
 
 ### DEBUGGING AID
 
-The your mapping interfaces you can optionally define two methods that may be convenient for the debugging:
+In your mapping interfaces you can optionally define two methods that may be convenient for the debugging:
 
     void list(PrintStream out);
     void list(PrintWriter out);
