@@ -321,15 +321,15 @@ An example of how to define those two methods:
         void list(PrintWriter out);
     }
 
-You can use them to print the resolved properties (and eventual overrides that may occur with the LoadType.MERGE
-explained before) to the console:
+You can use them to print the resolved properties (and eventual overrides that may occur with the `LoadType.MERGE` load
+policy explained before) to the console:
 
     ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
     cfg.list(System.out);
 
 Those two methods are *not* specified into `Config` interface to leave to the programmer the liberty to have them or not.
-If you want to have one of those methods in all your properties mapping interface you can define an adapter interface
-like:
+If you want to have those methods, or just one of them, in all your properties mapping interface you can define an
+adapter interface like the following:
 
     public interface MyConfig extends Config {
         void list(PrintStream out);
