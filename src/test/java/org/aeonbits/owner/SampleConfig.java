@@ -8,6 +8,9 @@
 
 package org.aeonbits.owner;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 /**
  * @author Luigi R. Viggiano
  */
@@ -26,4 +29,7 @@ public interface SampleConfig extends Config {
     @Key("salutation.text")
     @DefaultValue("Good Morning")
     String salutation();
+
+    public void list(PrintStream out);
+    public void list(PrintWriter out);
 }

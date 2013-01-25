@@ -8,8 +8,6 @@
 
 package org.aeonbits.owner;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -73,27 +71,5 @@ public interface Config {
     public @interface Key {
         String value();
     }
-
-    /**
-     * Prints the property list out to the specified output stream.
-     * This method is useful for debugging.
-     *
-     * @param   out   an output stream.
-     * @throws  ClassCastException if any key in this property list
-     *          is not a string.
-     * @see     java.util.Properties#list(java.io.PrintStream)
-     */
-    public void list(PrintStream out);
-
-    /**
-     * Prints this property list out to the specified output stream.
-     * This method is useful for debugging.
-     *
-     * @param   out   an output stream.
-     * @throws  ClassCastException if any key in this property list
-     *          is not a string.
-     * @see     java.util.Properties#list(java.io.PrintWriter)
-     */
-    public void list(PrintWriter out);
 
 }

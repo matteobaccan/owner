@@ -11,6 +11,9 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 import static org.aeonbits.owner.LoadType.MERGE;
 
 /**
@@ -31,4 +34,7 @@ public interface MergeConfig extends Config {
     String baz();
     @DefaultValue("this should be ignored")
     String qux();
+
+    void list(PrintStream out);
+    void list(PrintWriter out);
 }

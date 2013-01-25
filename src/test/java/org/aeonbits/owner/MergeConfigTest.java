@@ -23,5 +23,6 @@ public class MergeConfigTest {
         assertEquals("second", cfg.bar());
         assertEquals("first", cfg.foo());
         assertEquals("third", cfg.qux());
+        cfg.list(System.out);
     }
 }

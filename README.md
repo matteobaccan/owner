@@ -32,6 +32,7 @@ To access this property you need to define a convenient Java™ interface in Ser
     public interface ServerConfig extends Config {
         int port();
         String hostname();
+        @DefaultValue("42")
         int maxThreads();
     }
     
@@ -44,12 +45,43 @@ Then, you can use it from inside your code:
         }
     }
 
-The mapping between the Java™ interface and the properties file can be automatically resolved by OWNER API.  
-By default OWNER API tries to load the properties for the interface com.foo.bar.ServerConfig from the classpath as
-com.foo.bar.ServerConfig.properties; then it tries to assoaciate every method of the interface to the property keys 
-contained in the properties file.
+Did you notice that there is also the `@DefaultValue("42")` annotation specified in the example? It is used in case the
+`maxThread` key is missing from the properties file.
+This annotation gets automatically converted to `int`, since `maxThreads()` returns an `int`. See below to learn more
+about automatic type conversion.
 
-This default mapping can be tailored to your needs using some annotations on the interface. 
+With annotations, you can also customize the property keys:
+
+    # Example of property file 'ServerConfig.properties'
+    server.http.port=80
+    server.host.name=foobar.com
+    server.max.threads=100
+
+    /*
+     * Example of ServerConfig.java interface mapping the previous properties file
+     */
+    public interface ServerConfig extends Config {
+        @Key("server.http.port")
+        int port();
+
+        @Key("server.host.name")
+        String hostname();
+
+        @Key("server.max.threads");
+        @DefaultValue("42")
+        int maxThreads();
+    }
+
+The `@DefaultValue` is very confortable to use, and the basic type conversion between the `String` value and the method
+return type are done automatically.
+
+### PROPERTIES FILES LOADING LOGIC
+
+The mapping between the Java™ interface and the properties file is automatically resolved by OWNER API by matching the
+class name and the properties file name. So if your interface is com.foo.bar.ServerConfig.java, it will try to associate
+to com.foo.bar.ServerConfig.properties from the classpath.
+
+But if you want more, this logic can be tailored to your needs using some annotations.
 
 Example:
 
@@ -69,21 +101,54 @@ Example:
 
 In the above example, OWNER will try to load the properties from several `@Sources`:
 
- 1. first, it will try to load from user's home directory ~/.myapp.config
- 2. if the previous attempt fails, then it will try to load the properties from /etc/myapp.config
- 3. and, as last resort, it will try to load the properties from the classpath loding the resource identified by the path foo/bar/baz.properties
+ 1. first, it will try to load the properties file from user's home directory ~/.myapp.config, if this is found, this
+    file alone will be used.
+ 2. if the previous attempt fails, then it will try to load the properties file from /etc/myapp.config, and if this is
+    found, this one will be used.
+ 3. and, as last resort, it will try to load the properties from the classpath loading the resource identified by the
+    path foo/bar/baz.properties.
+ 4. if none of the previous URL resources is found, then the Java interface will not be associated to any file, and only
+    `@DefaultValue` will be used where specified, where not specified `null` will be returned.
 
-In the `@Sources` annotation you can also specify system properties and/or environment variables with the syntax 
-`file:${user.home}/.myapp.config` (this gets resolved by 'user.home' System property) or `file:${HOME}/.myapp.config`  
-(this gets resolved by the$HOME environment variable). The `~` used in the previous example is another example of 
-variable expansion, and it is equivalent to `${user.home}`
+So all properties will be loaded from only one file, the first that is found. If this property is not specified by the
+properties files, the `@DefaultValue` is used.
+*Only the first available properties file will be loaded, *others will be ignored*.
+For instance, if the file ~/.myapp.config is found, only that one will be considered; if that file doesn't defines the
+`maxThreads` property, the `@DefaultValue` will be returned; if `maxThreads` is specified inside `/etc/myapp.config` it
+will not be considered, since ~/.myapp.config prevailed, because it is specified before in the `@Sources` annotation.
+This load logic, is identified as "FIRST", since only the first file found will be considered, and it is the default
+logic adopted when the `@Source` annotation is specified with multiple URLs.
+You can also specify this load policy explicitly using `@LoadPolicy(LoadType.FIRST)` on the interface declaration.
 
-Did you notice that there is also the `@DefaultValue("42")` annotation specified in the example?
-This annotation gets automatically converted to `int`, since `maxThreads()` returns an `int`, and the value specified is 
-used as default, if `server.max.threads` key is not specified in the property file.
+But what if you want to have some *ovverriding* between properties? This is definitely possible: you can do it with
+the annotation `@LoadPolicy(LoadType.MERGE)`:
 
-The `@DefaultValue` is very confortable to use, and the basic type conversion between the `String` value and the method 
-return type are done automatically.
+    @LoadPolicy(LoadType.MERGE)
+    @Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
+    public interface ServerConfig extends Config {
+        ...
+    }
+
+In this case, *every property* will be loaded from all the specified URLs, and the first will prevail.
+So, following logic will apply:
+
+ 1. first, it will try to load the given property from ~/.myapp.config;
+    if the given property is found the associated value will be returned.
+ 2. then it will try to load the given property from /etc/myapp.config;
+    if the property is found the value associated will be returned.
+ 3. and as last resort it will try to load the given property from the classpath from the resource identified
+    by the path foo/bar/baz.properties; if the property is found, the associated value is returned.
+ 4. if the given property is not found of any of the above cases, it will be returned the value specified by the
+    `@DefaultValue` if specified, otherwise null will be returned.
+
+So basically we produce a merge between the properties files where the first property files overrides latter specified ones.
+So, in the previous example, when a property is not specified in `~/.myapp.confing` then it can be loaded from `/etc/mya.config`.
+
+The `@Sources` annotation accepts system properties and/or environment variables with the syntax
+`file:${user.home}/.myapp.config` (this gets resolved by 'user.home' System property) or `file:${HOME}/.myapp.config`
+(this gets resolved by the$HOME environment variable). The `~` used in the previous example is another example of
+variable expansion, and it is equivalent to `${user.home}`.
+
 
 ### UNDEFINED PROPERTIES
 
@@ -236,6 +301,42 @@ Sometimes you may want to use system properties or environment variables, an ide
             ConfigFactory.create(SystemPropertiesExample.class, System.getProperties(), System.getenv());
     String homeFromSystemProperty = conf.sysPropertyHome();
     String homeFromSystemEnviroment = conf.envHome();
+
+### DEBUGGING AID
+
+The your mapping interfaces you can optionally define two methods that may be convenient for the debugging:
+
+    void list(PrintStream out);
+    void list(PrintWriter out);
+
+Those two methods were available in Java [Properties][properties] to help the debugging process, so here we kept it.
+
+An example of how to define those two methods:
+
+    public interface SampleConfig extends Config {
+        @Key("server.http.port")
+        int httpPort();
+
+        void list(PrintStream out);
+        void list(PrintWriter out);
+    }
+
+You can use them to print the resolved properties (and eventual overrides that may occur with the LoadType.MERGE
+explained before) to the console:
+
+    ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+    cfg.list(System.out);
+
+Those two methods are *not* specified into `Config` interface to leave to the programmer the liberty to have them or not.
+If you want to have one of those methods in all your properties mapping interface you can define an adapter interface
+like:
+
+    public interface MyConfig extends Config {
+        void list(PrintStream out);
+        void list(PrintWriter out);
+    }
+
+and have your interface extending from `MyConfig` instead of `Config`.
 
 JAVADOCS
 --------
