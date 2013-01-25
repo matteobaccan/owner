@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author luigi
  */
-public class CustomTypesTest {
+public class SpecialTypesTest {
 
     @Test
     public void testFileReturnType() throws Throwable {
@@ -57,6 +57,14 @@ public class CustomTypesTest {
     public void testInvalidCustomType() throws Throwable {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
         config.invalid();
+    }
+
+    @Test
+    public void testEnumType() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        EnumType enumType = config.enumType();
+        assertNotNull(enumType);
+        assertEquals(EnumType.FOO, enumType);
     }
 
 }

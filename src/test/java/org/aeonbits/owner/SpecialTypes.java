@@ -29,4 +29,8 @@ public interface SpecialTypes extends Config {
 
     @DefaultValue("this should raise an exception")
     InvalidCustomType invalid();
+
+    @DefaultValue("FOO")
+    EnumType enumType();
+
 }
