@@ -149,6 +149,84 @@ The `@Sources` annotation accepts system properties and/or environment variables
 (this gets resolved by the$HOME environment variable). The `~` used in the previous example is another example of
 variable expansion, and it is equivalent to `${user.home}`.
 
+### IMPORTING PROPERTIES
+
+Additionally to the loading logic, you have another mechanism to load your properties into a configuration mapping
+interface. And this mechanism is to specify a [Properties][properties] object programmatically during
+`ConfigFactory.create()` invocation.
+
+Example:
+
+        public interface ImportConfig extends Config {
+
+            @DefaultValue("apple")
+            String foo();
+
+            @DefaultValue("pear")
+            String bar();
+
+            @DefaultValue("orange")
+            String baz();
+
+        }
+
+        // then...
+
+        Properties props = new Properties();
+        props.setProperty("foo", "pineapple");
+        props.setProperty("bar", "lime");
+
+        ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props); // props imported!
+
+        assertEquals("pineapple", cfg.foo());
+        assertEquals("lime", cfg.bar());
+        assertEquals("orange", cfg.baz());
+
+You can specify multiple properties to import, on the same line:
+
+        ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props1, props2, ...);
+
+If there are prop1 and prop2 define the two different values for the same key, the one specified first will prevail:
+
+        Properties p1 = new Properties();
+        p1.setProperty("foo", "pineapple");
+        p1.setProperty("bar", "lime");
+
+        Properties p2 = new Properties();
+        p2.setProperty("bar", "grapefruit");
+        p2.setProperty("baz", "blackberry");
+
+
+        ImportConfig cfg = ConfigFactory.create(ImportConfig.class, p1, p2); // props imported!
+
+        assertEquals("pineapple", cfg.foo());
+        assertEquals("lime", cfg.bar()); // p1 prevails, so this is lime and not grapefruit
+        assertEquals("blackberry", cfg.baz());
+
+This is pretty handy if you want to reference system properties or environment variables.
+Example:
+
+    interface SystemEnvProperties extends Config {
+        @Key("file.separator")
+        String fileSeparator();
+
+        @Key("java.home")
+        String javaHome();
+
+        @Key("HOME")
+        String home();
+
+        @Key("USER")
+        String user();
+
+        void list(PrintStream out);
+    }
+
+    SystemEnvProperties cfg = ConfigFactory.create(SystemEnvProperties.class, System.getProperties(), System.getenv());
+    assertEquals(File.separator, cfg.fileSeparator());
+    assertEquals(System.getProperty("java.home"), cfg.javaHome());
+    assertEquals(System.getenv().get("HOME"), cfg.home());
+    assertEquals(System.getenv().get("USER"), cfg.user());
 
 ### UNDEFINED PROPERTIES
 
@@ -297,17 +375,18 @@ Sometimes you may want to use system properties or environment variables, an ide
         @DefaultValue("something else")
         String someOtherValue();
 
-        @DefaultValue("${user.home}")
-        String sysPropertyHome();
+        @DefaultValue("Welcome: ${user.name}")
+        String welcomeString();
 
-        @DefaultValue("${HOME}")
-        String envHome();
+        @DefaultValue("${TMPDIR}/tempFile.tmp")
+        File tempFile();
     }
 
     SystemPropertiesExample conf =
             ConfigFactory.create(SystemPropertiesExample.class, System.getProperties(), System.getenv());
-    String homeFromSystemProperty = conf.sysPropertyHome();
-    String homeFromSystemEnviroment = conf.envHome();
+    String welcome = conf.welcomeString();
+    File temp = conf.tempFile();
+
 
 ### DEBUGGING AID
 

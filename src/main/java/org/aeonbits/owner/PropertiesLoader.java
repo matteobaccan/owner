@@ -21,6 +21,7 @@ import java.util.Properties;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.prohibitInstantiation;
+import static org.aeonbits.owner.Util.reverse;
 
 /**
  * Loads properties for a class.
@@ -36,7 +37,7 @@ abstract class PropertiesLoader {
     static Properties load(Class<? extends Config> clazz, Map<?, ?>... imports) {
         try {
             Properties props = defaults(clazz);
-            merge(props, imports);
+            merge(props, reverse(imports));
             ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
             Properties loadedFromFile = doLoad(clazz, handler);
             merge(props, loadedFromFile);

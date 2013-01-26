@@ -16,10 +16,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.reverse;
 import static org.aeonbits.owner.PropertiesLoader.getInputStream;
 import static org.aeonbits.owner.PropertiesLoader.properties;
+import static org.aeonbits.owner.Util.reverse;
 
 /**
  * @author Luigi R. Viggiano
@@ -46,8 +45,7 @@ public enum LoadType {
     MERGE {
         @Override
         Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
-            String[] values = sources.value();
-            reverse(asList(values));
+            String[] values = reverse(sources.value());
             Properties result = new Properties();
             for (String source : values) {
                 URL url = new URL(null, source, handler);
