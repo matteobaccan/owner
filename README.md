@@ -110,9 +110,9 @@ In the above example, OWNER will try to load the properties from several `@Sourc
  4. if none of the previous URL resources is found, then the Java interface will not be associated to any file, and only
     `@DefaultValue` will be used where specified, where not specified `null` will be returned.
 
-So all properties will be loaded from only one file, the first that is found. If this property is not specified by the
-properties files, the `@DefaultValue` is used.  
-*Only the first available properties file will be loaded, *others will be ignored*.  
+So all properties will be loaded from only one file: the first that is found.  
+If this property is not specified by the properties files, the `@DefaultValue` is used.  
+*Only the first available properties file will be loaded, others will be ignored*.  
 For instance, if the file ~/.myapp.config is found, only that one will be considered; if that file doesn't defines the
 `maxThreads` property, the `@DefaultValue` will be returned; if `maxThreads` is specified inside `/etc/myapp.config` it
 will not be considered, since ~/.myapp.config prevailed, because it is specified before in the `@Sources` annotation.  
