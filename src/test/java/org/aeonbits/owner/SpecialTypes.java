@@ -36,4 +36,6 @@ public interface SpecialTypes extends Config {
     @DefaultValue("java.sql.Driver")
     Class jdbcDriver();
 
+    @DefaultValue("foobar")
+    Reference reference();
 }

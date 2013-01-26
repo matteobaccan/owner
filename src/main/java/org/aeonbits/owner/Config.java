@@ -16,18 +16,27 @@ import java.lang.annotation.Target;
 
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
+ * <p/>
+ * Sub-interfaces may also implement list() methods as following to aid debugging:
+ * <p/>
+ * <pre>
+ *     void list(PrintStream out);
+ *     void list(PrintWriter out);
+ * </pre>
+ * <p/>
+ * These methods will print the list of properties, see {@link java.util.Properties#list(java.io.PrintStream)} and
+ * {@link java.util.Properties#list(java.io.PrintWriter)}.
  *
  * @author Luigi R. Viggiano
+ * @see java.util.Properties
  */
 public interface Config {
 
     /**
-     * Specifies the policy for loading the properties files.
-     * By default the first available properties file specified by {@link Sources} will be loaded,
-     * see {@link LoadType#FIRST}.
-     * User can also specify that the load policy is {@link LoadType#MERGE} to have the properties files merged:
-     * properties are loaded in order from the first file to the last, if there are conflicts in properties names the
-     * earlier files loaded prevail.
+     * Specifies the policy for loading the properties files. By default the first available properties file specified
+     * by {@link Sources} will be loaded, see {@link LoadType#FIRST}. User can also specify that the load policy is
+     * {@link LoadType#MERGE} to have the properties files merged: properties are loaded in order from the first file to
+     * the last, if there are conflicts in properties names the earlier files loaded prevail.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
@@ -37,10 +46,9 @@ public interface Config {
     }
 
     /**
-     * Specifies the source from which to load the properties file.
-     * It has to be specified in a URL string format.
-     * Allowed protocols are the ones allowed by {@link java.net.URL} plus
-     * <tt>classpath:path/to/resource.properties</tt>
+     * Specifies the source from which to load the properties file. It has to be specified in a URL string format.
+     * Allowed protocols are the ones allowed by {@link java.net.URL} plus <tt>classpath:path/to/resource
+     * .properties</tt>
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
@@ -50,9 +58,7 @@ public interface Config {
     }
 
     /**
-     * Default value to be used if no property is found.
-     * No quoting (other than normal Java string quoting)
-     * is done.
+     * Default value to be used if no property is found. No quoting (other than normal Java string quoting) is done.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -62,8 +68,8 @@ public interface Config {
     }
 
     /**
-     * The key used for lookup for the property.  If not present, the
-     * key will be generated based on the unqualified method name.
+     * The key used for lookup for the property.  If not present, the key will be generated based on the unqualified
+     * method name.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)

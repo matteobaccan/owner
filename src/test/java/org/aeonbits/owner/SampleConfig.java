@@ -30,6 +30,6 @@ public interface SampleConfig extends Config {
     @DefaultValue("Good Morning")
     String salutation();
 
-    public void list(PrintStream out);
-    public void list(PrintWriter out);
+    void list(PrintStream out);
+    void list(PrintWriter out);
 }

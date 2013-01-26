@@ -35,6 +35,10 @@ public interface MergeConfig extends Config {
     @DefaultValue("this should be ignored")
     String qux();
 
+    String quux(); // this should return null;
+    @DefaultValue("theDefaultValue")
+    String fubar();
+
     void list(PrintStream out);
     void list(PrintWriter out);
 }

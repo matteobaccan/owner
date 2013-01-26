@@ -11,6 +11,7 @@ package org.aeonbits.owner;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author luigi
@@ -23,6 +24,8 @@ public class MergeConfigTest {
         assertEquals("second", cfg.bar());
         assertEquals("first", cfg.foo());
         assertEquals("third", cfg.qux());
+        assertNull(cfg.quux());
+        assertEquals("theDefaultValue", cfg.fubar());
         cfg.list(System.out);
     }
 }
