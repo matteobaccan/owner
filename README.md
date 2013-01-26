@@ -206,7 +206,7 @@ Example:
         CustomType salutation(String name);
     }
 
-The user can define his own class types as `CustomType` in the previous example.
+You can define you own class types as in the above example `CustomType`.
 
 OWNER API supports automatic conversion for:
 
@@ -214,10 +214,10 @@ OWNER API supports automatic conversion for:
  2. Enums (notice that the conversion is case sensitive, so FOO != foo or Foo).
  3. java.lang.String, of course (no conversion is needed).
  4. java.net.URL, java.net.URI, java.io.File (they fall in case #6).
- 5. java.lang.Class (this can be useful, for instance, if you want to OWNER API to load the jdbc driver).
- 6. Any instantiable class declaring a public constructor with a single argument of type `java.lang.String'.
- 7. Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object'.
- 8. Any class declaring a public static method valueOf(String) that returns an instance of itself.
+ 5. java.lang.Class (this can be useful, for instance, if you want to load the jdbc driver, or similar cases).
+ 6. Any instantiable class declaring a public constructor with a single argument of type `java.lang.String`.
+ 7. Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object`.
+ 8. Any class declaring a public *static* method `valueOf(java.lang.String)` that returns an instance of itself.
  9. Any class for which you can register a [`PropertyEditor`][propedit] via
     [`PropertyEditorManager.registerEditor()`][propeditmanager].
 
@@ -235,24 +235,8 @@ Example:
         }
     }
 
-If any error happens during the constructor call you'll receive a `java.lang.UnsupportedOperationException`.
-
-Example:
-
-    java.lang.UnsupportedOperationException: Cannot convert 'example' to org.aeonbits.owner.CustomType
-        at org.aeonbits.owner.PropertiesInvocationHandler.convert(PropertiesInvocationHandler.java:108)
-        at org.aeonbits.owner.PropertiesInvocationHandler.resolveProperty(PropertiesInvocationHandler.java:72)
-        at org.aeonbits.owner.PropertiesInvocationHandler.invoke(PropertiesInvocationHandler.java:63)
-        at $Proxy4.customType(Unknown Source)
-        ... 31 more
-    Caused by: java.lang.NoSuchMethodException: org.aeonbits.owner.CustomType.<init>(java.lang.String)
-        at java.lang.Class.getConstructor0(Class.java:2721)
-        at java.lang.Class.getConstructor(Class.java:1674)
-        at org.aeonbits.owner.PropertiesInvocationHandler.convert(PropertiesInvocationHandler.java:105)
-        ... 38 more
-
-The exception description states that OWNER failed to convert the text 'example' to `org.aeonbits.owner.CustomType` and
-the cause, in this case is because OWNER was unable to find the public constructor with a single `String` parameter.
+If any error happens during the constructor call you'll receive a `java.lang.UnsupportedOperationException` with some
+meaningful description.
 
 You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your objects
 using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].
