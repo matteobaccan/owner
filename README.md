@@ -186,7 +186,7 @@ You can specify multiple properties to import, on the same line:
 
         ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props1, props2, ...);
 
-If there are prop1 and prop2 define the two different values for the same key, the one specified first will prevail:
+If there are prop1 and prop2 defining two different values for the same property key, the one specified first will prevail:
 
         Properties p1 = new Properties();
         p1.setProperty("foo", "pineapple");
