@@ -206,15 +206,16 @@ The user can define his own class types as `CustomType` in the previous example.
 
 OWNER API supports automatic conversion for:
 
- * Primitive types: boolean, byte, short, integer, long, float, double
- * Enums (notice that the conversion is case sensitive, so FOO != foo or Foo)
- * java.lang.String, of course (no conversion is needed)
- * java.net.URI
- * java.io.File
- * java.lang.Class (this can be useful, for instance, if you want to OWNER API to load the jdbc driver).
- * Any instantiable class declaring a public constructor with a single argument of type `java.lang.String'.
- * Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object'.
- * Any class declaring a public static method valueOf(String) that returns an instance of itself.
+ 1. Primitive types: boolean, byte, short, integer, long, float, double.
+ 2. Enums (notice that the conversion is case sensitive, so FOO != foo or Foo).
+ 3. java.lang.String, of course (no conversion is needed).
+ 4. java.net.URL, java.net.URI, java.io.File (they fall in case #6).
+ 5. java.lang.Class (this can be useful, for instance, if you want to OWNER API to load the jdbc driver).
+ 6. Any instantiable class declaring a public constructor with a single argument of type `java.lang.String'.
+ 7. Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object'.
+ 8. Any class declaring a public static method valueOf(String) that returns an instance of itself.
+ 9. Any class for which you can register a [`PropertyEditor`][propedit] via
+    [`PropertyEditorManager.registerEditor()`][propeditmanager].
 
 Example:
 
