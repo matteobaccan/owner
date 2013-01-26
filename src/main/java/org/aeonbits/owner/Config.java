@@ -8,14 +8,22 @@
 
 package org.aeonbits.owner;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Properties;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.aeonbits.owner.LoadType.FIRST;
+import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.PropertiesLoader.getInputStream;
+import static org.aeonbits.owner.PropertiesLoader.properties;
+import static org.aeonbits.owner.Util.reverse;
 
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
@@ -81,4 +89,57 @@ public interface Config {
         String value();
     }
 
+    /**
+     * Specifies the policy type to use to load the {@link org.aeonbits.owner.Config.Sources} files for properties.
+     *
+     * @author Luigi R. Viggiano
+     */
+    enum LoadType {
+
+        /**
+         * The first available {@link org.aeonbits.owner.Config.Sources} will be loaded.
+         */
+        FIRST {
+            @Override
+            Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
+                String[] values = sources.value();
+                for (String source : values) {
+                    URL url = new URL(null, source, handler);
+                    try {
+                        InputStream stream = getInputStream(url);
+                        if (stream != null)
+                            return properties(stream);
+                    } catch (IOException ex) {
+                        // ignore: happens when a file specified in the sources is not found or cannot be read.
+                    }
+                }
+                return new Properties();
+            }
+        },
+
+        /**
+         * All the {@link org.aeonbits.owner.Config.Sources} will be loaded and merged. If the same property key is specified from more than one
+         * source, the one specified first will prevail.
+         */
+        MERGE {
+            @Override
+            Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
+                String[] values = reverse(sources.value());
+                Properties result = new Properties();
+                for (String source : values) {
+                    URL url = new URL(null, source, handler);
+                    try {
+                        InputStream stream = getInputStream(url);
+                        if (stream != null)
+                            result.load(stream);
+                    } catch (IOException ex) {
+                        // ignore: happens when a file specified in the sources is not found or cannot be read.
+                    }
+                }
+                return result;
+            }
+        };
+
+        abstract Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException;
+    }
 }

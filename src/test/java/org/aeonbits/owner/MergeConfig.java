@@ -14,7 +14,7 @@ import org.aeonbits.owner.Config.Sources;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import static org.aeonbits.owner.LoadType.MERGE;
+import static org.aeonbits.owner.Config.LoadType.MERGE;
 
 /**
  * @author luigi

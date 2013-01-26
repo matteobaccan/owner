@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 
@@ -18,6 +19,8 @@ import java.net.URLConnection;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.aeonbits.owner.Config.LoadType;
+import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.prohibitInstantiation;
@@ -50,7 +53,7 @@ abstract class PropertiesLoader {
     static Properties doLoad(Class<?> clazz, ConfigURLStreamHandler handler) throws IOException {
         Sources sources = clazz.getAnnotation(Sources.class);
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
-        LoadType loadType = (loadPolicy != null) ? loadPolicy.value() : LoadType.FIRST;
+        LoadType loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
         if (sources == null)
             return loadDefaultProperties(clazz, handler);
         else
