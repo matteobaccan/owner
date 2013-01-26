@@ -55,6 +55,11 @@
         </mailingList>
     </mailingLists>
 
+    <issueManagement>
+        <system>GitHub Issue Tracking</system>
+        <url>https://github.com/lviggiano/owner/issues</url>
+    </issueManagement>
+
     <scm>
         <url>https://github.com/lviggiano/owner/tree/master</url>
         <connection>scm:git:git://github.com/lviggiano/owner.git</connection>
@@ -63,15 +68,20 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
+            <id>sonatype</id>
             <name>Sonatype Nexus Snapshots</name>
             <url>http://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus-staging</id>
+            <id>sonatype</id>
             <name>Nexus Release Repository</name>
             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+        <site>
+            <id>newinstance</id>
+            <name>NewInstance Maven Website</name>
+            <url>ftp://newinstance.it/www/owner</url>
+        </site>
     </distributionManagement>
 
     <properties>
