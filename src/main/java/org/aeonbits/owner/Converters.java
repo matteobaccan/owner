@@ -16,9 +16,11 @@ import java.lang.reflect.Method;
 import static java.lang.reflect.Modifier.isStatic;
 
 /**
- * @author luigi
+ * Converter class from {@link java.lang.String} to property types.
+ *
+ * @author Luigi R. Viggiano
  */
-public enum Converters {
+enum Converters {
     PROPERTY_EDITOR {
         @Override
         Object convert(Class<?> targetType, String text) {

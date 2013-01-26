@@ -21,9 +21,15 @@ import static org.aeonbits.owner.PropertiesLoader.properties;
 import static org.aeonbits.owner.Util.reverse;
 
 /**
+ * Specifies the policy type to use to load the {@link Sources} files for properties.
+ *
  * @author Luigi R. Viggiano
  */
 public enum LoadType {
+
+    /**
+     * The first available {@link Sources} will be loaded.
+     */
     FIRST {
         @Override
         Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
@@ -42,6 +48,10 @@ public enum LoadType {
         }
     },
 
+    /**
+     * All the {@link Sources} will be loaded and merged. If the same property key is specified from more than one
+     * source, the one specified first will prevail.
+     */
     MERGE {
         @Override
         Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {

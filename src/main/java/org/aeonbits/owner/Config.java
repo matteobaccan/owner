@@ -9,10 +9,13 @@
 package org.aeonbits.owner;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.aeonbits.owner.LoadType.FIRST;
 
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
@@ -38,11 +41,11 @@ public interface Config {
      * {@link LoadType#MERGE} to have the properties files merged: properties are loaded in order from the first file to
      * the last, if there are conflicts in properties names the earlier files loaded prevail.
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
+    @Retention(RUNTIME)
+    @Target(TYPE)
     @Documented
     public @interface LoadPolicy {
-        LoadType value() default LoadType.FIRST;
+        LoadType value() default FIRST;
     }
 
     /**
@@ -50,8 +53,8 @@ public interface Config {
      * Allowed protocols are the ones allowed by {@link java.net.URL} plus <tt>classpath:path/to/resource
      * .properties</tt>
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
+    @Retention(RUNTIME)
+    @Target(TYPE)
     @Documented
     public @interface Sources {
         String[] value();
@@ -60,8 +63,8 @@ public interface Config {
     /**
      * Default value to be used if no property is found. No quoting (other than normal Java string quoting) is done.
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
+    @Retention(RUNTIME)
+    @Target(METHOD)
     @Documented
     public @interface DefaultValue {
         String value();
@@ -71,8 +74,8 @@ public interface Config {
      * The key used for lookup for the property.  If not present, the key will be generated based on the unqualified
      * method name.
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
+    @Retention(RUNTIME)
+    @Target(METHOD)
     @Documented
     public @interface Key {
         String value();
