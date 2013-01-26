@@ -84,4 +84,12 @@ public class SpecialTypesTest {
         assertEquals(Driver.class, driver);
     }
 
+    @Test
+    public void testClassWithValueOfMethod() throws Throwable {
+        SpecialTypes cfg = ConfigFactory.create(SpecialTypes.class);
+        ValueOf valueOf = cfg.valueOf();
+        assertNotNull(valueOf);
+        assertEquals("valueOf", valueOf.toString());
+    }
+
 }

@@ -52,7 +52,7 @@ public enum Converters {
         }
     },
 
-    CLASS_CONVERTER {
+    CLASS {
         @Override
         Object convert(Class<?> targetType, String text) {
             try {
