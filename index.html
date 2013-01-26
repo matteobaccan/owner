@@ -369,13 +369,9 @@ public interface SpecialTypes extends Config {
 <li>java.lang.Class (this can be useful, for instance, if you want to load the jdbc driver, or similar cases).</li>
 <li>Any instantiable class declaring a public constructor with a single argument of type <code>java.lang.String</code>.</li>
 <li>Any instantiable class declaring a public constructor with a single argument of type <code>java.lang.Object</code>.</li>
-<li>Any class declaring a public <em>static</em> method <code>valueOf(java.lang.String)</code> that returns an instance of itself.
-
-<ol>
+<li>Any class declaring a public <em>static</em> method <code>valueOf(java.lang.String)</code> that returns an instance of itself.</li>
 <li>Any class for which you can register a <a href="http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditor.html"><code>PropertyEditor</code></a> via
-<a href="http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor"><code>PropertyEditorManager.registerEditor()</code></a>.</li>
-</ol>
-</li>
+ <a href="http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor"><code>PropertyEditorManager.registerEditor()</code></a>.</li>
 </ol><p>If OWNER API cannot find any way to map your business object, you'll receive a <code>java.lang.UnsupportedOperationException</code>
 with some meaningful description to identify the problem as quickly as possible.</p>
 
