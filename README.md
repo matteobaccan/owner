@@ -180,9 +180,13 @@ Example:
 OWER API supports properties conversion for primitive types and enums. So when you define a properties like the
 followings they will be automatically converted from `String` to the primitive types and enum.
 
-        int maxThreads();
+        int maxThreads();               // conversion happens from the value specified in the properties files.
+
+        @DefaultValue("3.1415")         // conversion happens also from @DefaultValue
         double pi();
-        TimeUnit timeUnit(); // java.util.concurrent.TimeUnit is an enum
+
+        @DefaultValue("NANOSECONDS");   // enum values are case sensitive!
+        TimeUnit timeUnit();            // java.util.concurrent.TimeUnit is an enum
 
 Since version 1.0.2 it is possible to have configuration interfaces to declare complex return types or even custom ones.
 
