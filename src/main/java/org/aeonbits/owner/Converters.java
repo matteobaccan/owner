@@ -28,11 +28,23 @@ public enum Converters {
         }
     },
 
-    STRING_CONSTRUCTOR {
+    CLASS_WITH_STRING_CONSTRUCTOR {
         @Override
         Object convert(Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
+                return constructor.newInstance(text);
+            } catch (ReflectiveOperationException ex) {
+                return null;
+            }
+        }
+    },
+
+    CLASS_WITH_OBJECT_CONSTRUCTOR {
+        @Override
+        Object convert(Class<?> targetType, String text) {
+            try {
+                Constructor<?> constructor = targetType.getConstructor(Object.class);
                 return constructor.newInstance(text);
             } catch (ReflectiveOperationException ex) {
                 return null;

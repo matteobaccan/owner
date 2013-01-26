@@ -39,11 +39,19 @@ public class SpecialTypesTest {
     }
 
     @Test
-    public void testCustomType() throws Throwable {
+    public void testClassWithStringConstructor() throws Throwable {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
         CustomType custom = config.customType();
         assertNotNull(custom);
         assertEquals("test", custom.getText());
+    }
+
+    @Test
+    public void testClassWithObjectConstructor() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        Reference reference = config.reference();
+        assertNotNull(reference);
+        assertEquals("foobar", reference.toString());
     }
 
     @Test
