@@ -426,7 +426,7 @@ JAVADOCS
 
 API javadocs can be found [here][javadocs].
 
-  [javadocs]: http://lviggiano.github.com/owner/target/site/apidocs/index.html
+  [javadocs]: http://owner.newinstance.it/maven-site/apidocs/index.html
 
 BUILD
 -----
@@ -454,7 +454,7 @@ If you are using maven, you can add the OWNER dependency in your project:
 
 The maven generated site, with all code reports and information can be found [here][maven-site].
 
- [maven-site]: http://lviggiano.github.com/owner/target/site/
+ [maven-site]: http://owner.newinstance.it/maven-site/
 
 DEPENDENCIES
 ------------
@@ -482,7 +482,7 @@ from the distribution root:
 
     $ mvn test
 
-  [fully covered]: http://lviggiano.github.com/owner/target/site/cobertura/index.html
+  [fully covered]: http://newinstance.it/owner/maven-site/cobertura/index.html
 
 HOW TO CONTRIBUTE
 -----------------

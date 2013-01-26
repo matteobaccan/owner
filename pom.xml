@@ -68,19 +68,19 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype</id>
+            <id>sonatype-nexus-snapshots</id>
             <name>Sonatype Nexus Snapshots</name>
-            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>http://oss.sonatype.org/content/repositories/snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype</id>
+            <id>sonatype-release-repository</id>
             <name>Nexus Release Repository</name>
             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <site>
-            <id>newinstance</id>
+            <id>newinstance-maven-website</id>
             <name>NewInstance Maven Website</name>
-            <url>ftp://newinstance.it/www/owner</url>
+            <url>ftp://newinstance.it:/public_html/owner/maven-site/</url>
         </site>
     </distributionManagement>
 
@@ -185,6 +185,13 @@
                 <version>3.2</version>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ftp</artifactId>
+                <version>2.3</version>
+            </extension>
+        </extensions>
     </build>
     <reporting>
         <plugins>
