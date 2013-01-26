@@ -10,9 +10,9 @@ The goal of OWNER API is to minimize the code required to handle application con
 
 The inspiring idea for this API comes from GWT i18n (see [here][gwt-i18n]).  
 The problem in using GWT i18n for loading property files is that it only works in client code (JavaScript), 
-not standard Java™ classes. 
-Also, GWT is a big library and it is designed for different purposes, than configuration. 
-Since I liked the approach I decided to implement something similar, and here we are.
+not standard Java™ classes.  
+Also, GWT is a big library and it is designed for different purposes, than configuration.   
+Since I liked the approach I decided to implement something similar, and here we are.  
 
   [gwt-i18n]: https://developers.google.com/web-toolkit/doc/latest/DevGuideI18nConstants
 
