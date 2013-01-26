@@ -314,7 +314,7 @@ But there is more. OWNER API supports automatic conversion for:
   7. Any instantiable class declaring a public constructor with a single argument of type `java.lang.String`.
   8. Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object`.
   9. Any class declaring a public *static* method `valueOf(java.lang.String)` that returns an instance of itself.
- 10. Any class for which you can register a [`PropertyEditor`][propedit] via
+  10. Any class for which you can register a [`PropertyEditor`][propedit] via
      [`PropertyEditorManager.registerEditor()`][propeditmanager].
 
 If OWNER API cannot find any way to map your business object, you'll receive a `java.lang.UnsupportedOperationException`
