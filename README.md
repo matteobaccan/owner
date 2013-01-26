@@ -46,9 +46,9 @@ Then, you can use it from inside your code:
     }
 
 Did you notice that there is also the `@DefaultValue("42")` annotation specified in the example? It is used in case the
-`maxThread` key is missing from the properties file.
+`maxThread` key is missing from the properties file.  
 This annotation gets automatically converted to `int`, since `maxThreads()` returns an `int`. See below to learn more
-about automatic type conversion.
+about automatic type conversion.  
 
 With annotations, you can also customize the property keys:
 
@@ -111,13 +111,13 @@ In the above example, OWNER will try to load the properties from several `@Sourc
     `@DefaultValue` will be used where specified, where not specified `null` will be returned.
 
 So all properties will be loaded from only one file, the first that is found. If this property is not specified by the
-properties files, the `@DefaultValue` is used.
-*Only the first available properties file will be loaded, *others will be ignored*.
+properties files, the `@DefaultValue` is used.  
+*Only the first available properties file will be loaded, *others will be ignored*.  
 For instance, if the file ~/.myapp.config is found, only that one will be considered; if that file doesn't defines the
 `maxThreads` property, the `@DefaultValue` will be returned; if `maxThreads` is specified inside `/etc/myapp.config` it
-will not be considered, since ~/.myapp.config prevailed, because it is specified before in the `@Sources` annotation.
+will not be considered, since ~/.myapp.config prevailed, because it is specified before in the `@Sources` annotation.  
 This load logic, is identified as "FIRST", since only the first file found will be considered, and it is the default
-logic adopted when the `@Source` annotation is specified with multiple URLs.
+logic adopted when the `@Source` annotation is specified with multiple URLs.  
 You can also specify this load policy explicitly using `@LoadPolicy(LoadType.FIRST)` on the interface declaration.
 
 But what if you want to have some *ovverriding* between properties? This is definitely possible: you can do it with
@@ -129,7 +129,7 @@ the annotation `@LoadPolicy(LoadType.MERGE)`:
         ...
     }
 
-In this case, *every property* will be loaded from all the specified URLs, and the first will prevail.
+In this case, *every property* will be loaded from all the specified URLs, and the first will prevail.  
 So, following logic will apply:
 
  1. first, it will try to load the given property from ~/.myapp.config;
@@ -141,7 +141,7 @@ So, following logic will apply:
  4. if the given property is not found of any of the above cases, it will be returned the value specified by the
     `@DefaultValue` if specified, otherwise null will be returned.
 
-So basically we produce a merge between the properties files where the first property files overrides latter specified ones.
+So basically we produce a merge between the properties files where the first property files overrides latter specified ones.  
 So, in the previous example, when a property is not specified in `~/.myapp.confing` then it can be loaded from `/etc/mya.config`.
 
 The `@Sources` annotation accepts system properties and/or environment variables with the syntax
@@ -317,7 +317,7 @@ If any error happens during the constructor call you'll receive a `java.lang.Uns
 meaningful description.
 
 You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your objects
-using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].
+using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].  
 See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you want to implement a `PropertyEditor`.
 
   [propeditmanager]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor
@@ -413,7 +413,7 @@ policy explained before) to the console:
     ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
     cfg.list(System.out);
 
-Those two methods are *not* specified into `Config` interface to leave to the programmer the liberty to have them or not.
+Those two methods are *not* specified into `Config` interface to leave to the programmer the liberty to have them or not.  
 If you want to have those methods, or just one of them, in all your properties mapping interface you can define an
 adapter interface like the following:
 
@@ -504,28 +504,27 @@ FAQ
 ### What does "OWNER" name mean?
 
 Since this API is used to access *Properties* files, and we implement interfaces to deal with those, 
-somehow interfaces are *owners* for the properties. So here comes the name OWNER.
-I tried to find a decent name for the project, but I didn't come out with anything better. Sorry.
+somehow interfaces are *owners* for the properties. So here comes the name OWNER.  
+I tried to find a decent name for the project, but I didn't come out with anything better. Sorry.  
 
 ### Is OWNER a stable API?
 
-The codebase is very compact, and the test coverage is almost 100%. So there shouldn't be many bugs to deal with.
-You have the source, you can help improving the library and fix the bugs if you find some.
+The codebase is very compact, and the test coverage is almost 100%. So there shouldn't be many bugs to deal with.  
+You have the source, you can help improving the library and fix the bugs if you find some.  
 
-Still, OWNER is very early, and APIs may change in the future to add/change some behaviors.
-For example I would like to specify an annotation to define additional properties load policies.
-But the goal is to keep the API backward compatible.
+Still, OWNER is very early, and APIs may change in the future to add/change some behaviors.  
+For example I would like to specify an annotation to define additional properties load policies.  
+But the goal is to keep the API backward compatible.  
 
 ### What happens if some `key` is not bound to a default value, and the properties file has no value for that key?
 
-The returned value is `null`. This is consistent with the behavior of the [Properties][properties] class.
-If you think that this should be changed, please submit a [change request][issues] explaining your idea.
+The returned value is `null`. This is consistent with the behavior of the [Properties][properties] class.  
+If you think that this should be changed, please submit a [change request][issues] explaining your idea.  
 A possible solution can be inventing a new annotation like `@Mandatory` on class level and/or method level for those
 methods that do not specify a `@DefaultValue`, so that if the user forgets to specify a value for the mandatory
 property, a (subclass of) RuntimeException is thrown when the Config class is instantiated, to point out the
-misconfiguration.
+misconfiguration.  
 Thoughts? Ideas? Explain it on [github issues][issues].
-
 
   [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
 
@@ -533,7 +532,7 @@ CHANGELOG
 ---------
 ### 1.0.2
 
-* Changed package name from `owner` to `org.aeonbits.owner`.
+* Changed package name from `owner` to `org.aeonbits.owner`.  
   This has been necessary in order to publish the artifact on Maven Central Repository.
 * Custom & special return types
 * Properties variables expansion
@@ -548,7 +547,7 @@ LICENSE
 -------
 
 OWNER is released under the BSD license.  
-See [LICENSE][] file included for the details.
+See [LICENSE][] file included for the details.  
 
   [LICENSE]: https://raw.github.com/lviggiano/owner/master/LICENSE
 
