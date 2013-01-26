@@ -532,16 +532,18 @@ CHANGELOG
 ---------
 ### 1.0.2
 
-* Changed package name from `owner` to `org.aeonbits.owner`.  
-  This has been necessary in order to publish the artifact on Maven Central Repository.
-* Custom & special return types
-* Properties variables expansion
+ * Changed package name from `owner` to `org.aeonbits.owner`.
+   This has been necessary in order to publish the artifact on Maven Central Repository.
+ * Custom & special return types
+ * Properties variables expansion
+ * Added possibility to specify [Properties][properties] to import with the method `ConfigFactory.create()`.
+ * Added list() methods to aide debugging. User can specify these methods in his properties mapping interfaces.
 
 ### 1.0.1
-Removed [commons-lang][] transitive dependency. Minor bug fixes.
+* Removed [commons-lang][] transitive dependency. Minor bug fixes.
 
 ### 1.0
-Initial release.
+ * Initial release.
 
 LICENSE
 -------
