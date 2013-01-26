@@ -48,11 +48,12 @@ public interface Config {
      * by {@link Sources} will be loaded, see {@link LoadType#FIRST}. User can also specify that the load policy is
      * {@link LoadType#MERGE} to have the properties files merged: properties are loaded in order from the first file to
      * the last, if there are conflicts in properties names the earlier files loaded prevail.
+     * @since 1.0.2
      */
     @Retention(RUNTIME)
     @Target(TYPE)
     @Documented
-    public @interface LoadPolicy {
+    @interface LoadPolicy {
         LoadType value() default FIRST;
     }
 
@@ -64,7 +65,7 @@ public interface Config {
     @Retention(RUNTIME)
     @Target(TYPE)
     @Documented
-    public @interface Sources {
+    @interface Sources {
         String[] value();
     }
 
@@ -74,7 +75,7 @@ public interface Config {
     @Retention(RUNTIME)
     @Target(METHOD)
     @Documented
-    public @interface DefaultValue {
+    @interface DefaultValue {
         String value();
     }
 
@@ -85,14 +86,13 @@ public interface Config {
     @Retention(RUNTIME)
     @Target(METHOD)
     @Documented
-    public @interface Key {
+    @interface Key {
         String value();
     }
 
     /**
      * Specifies the policy type to use to load the {@link org.aeonbits.owner.Config.Sources} files for properties.
-     *
-     * @author Luigi R. Viggiano
+     * @since 1.0.2
      */
     enum LoadType {
 
@@ -118,8 +118,8 @@ public interface Config {
         },
 
         /**
-         * All the {@link org.aeonbits.owner.Config.Sources} will be loaded and merged. If the same property key is specified from more than one
-         * source, the one specified first will prevail.
+         * All the {@link org.aeonbits.owner.Config.Sources} will be loaded and merged. If the same property key is
+         * specified from more than one source, the one specified first will prevail.
          */
         MERGE {
             @Override
