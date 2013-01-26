@@ -39,6 +39,9 @@ public interface SpecialTypes extends Config {
     @DefaultValue("foobar")
     Reference reference();
 
+    @DefaultValue("invalidValueOf")
+    InvalidValueOf invalidValueOf();
+
     @DefaultValue("valueOf")
     ValueOf valueOf();
 }

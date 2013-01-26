@@ -11,6 +11,9 @@ package org.aeonbits.owner;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+import static java.lang.reflect.Modifier.isStatic;
 
 /**
  * @author luigi
@@ -47,6 +50,20 @@ public enum Converters {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
                 return constructor.newInstance(text);
             } catch (ReflectiveOperationException ex) {
+                return null;
+            }
+        }
+    },
+
+    CLASS_WITH_VALUE_OF_METHOD {
+        @Override
+        Object convert(Class<?> targetType, String text) {
+            try {
+                Method method = targetType.getMethod("valueOf", String.class);
+                if (isStatic(method.getModifiers()))
+                    return method.invoke(null, text);
+                return null;
+            } catch (ReflectiveOperationException e) {
                 return null;
             }
         }

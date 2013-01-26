@@ -214,7 +214,7 @@ OWNER API supports automatic conversion for:
  * java.lang.Class (this can be useful, for instance, if you want to OWNER API to load the jdbc driver).
  * Any instantiable class declaring a public constructor with a single argument of type `java.lang.String'.
  * Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object'.
- * Any class declaring a public method valueOf(String) that returns an instance of itself.
+ * Any class declaring a public static method valueOf(String) that returns an instance of itself.
 
 Example:
 

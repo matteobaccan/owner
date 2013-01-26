@@ -11,20 +11,19 @@ package org.aeonbits.owner;
 /**
  * @author luigi
  */
-public class ValueOf {
-    private String text;
+public class InvalidValueOf {
+    private final String text;
 
-    private ValueOf() {
-    }
-
-    public static ValueOf valueOf(String text) {
-        ValueOf result = new ValueOf();
-        result.text = text;
-        return result;
+    private InvalidValueOf(String text) {
+        this.text = text;
     }
 
     @Override
     public String toString() {
-        return text;
+        return super.toString();
+    }
+
+    public InvalidValueOf valueOf(String text) {
+        return new InvalidValueOf(text);
     }
 }

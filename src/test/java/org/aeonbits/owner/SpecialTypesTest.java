@@ -84,6 +84,12 @@ public class SpecialTypesTest {
         assertEquals(Driver.class, driver);
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testClassWithInvalidValueOfMethod() throws Throwable {
+        SpecialTypes cfg = ConfigFactory.create(SpecialTypes.class);
+        cfg.invalidValueOf();
+    }
+
     @Test
     public void testClassWithValueOfMethod() throws Throwable {
         SpecialTypes cfg = ConfigFactory.create(SpecialTypes.class);
