@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright (c) 2012, Luigi R. Viggiano
-  ~ All rights reserved.
-  ~
-  ~ This software is distributable under the BSD license.
-  ~ See the terms of the BSD license in the documentation provided with this software.
-  -->
+<!-- ~ Copyright (c) 2012, Luigi R. Viggiano ~ All rights reserved. ~ ~ This 
+    software is distributable under the BSD license. ~ See the terms of the BSD 
+    license in the documentation provided with this software. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.aeonbits.owner</groupId>
@@ -44,6 +40,17 @@
             </roles>
         </developer>
     </developers>
+
+    <contributors>
+        <contributor>
+            <name>Riccardo Pasquini</name>
+            <email>riccardo.pasquini@gmail.com</email>
+            <timezone>+1</timezone>
+            <roles>
+                <role>dev</role>
+            </roles>
+        </contributor>
+    </contributors>
 
     <scm>
         <url>https://github.com/lviggiano/owner/tree/master</url>

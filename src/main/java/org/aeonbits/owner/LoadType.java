@@ -61,8 +61,9 @@ public enum LoadType {
                 URL url = new URL(null, source, handler);
                 try {
                     InputStream stream = getInputStream(url);
-                    if (stream != null)
-                        result.load(stream);
+                    if (stream != null) {
+                        result.putAll(properties(stream));
+                    }
                 } catch (IOException ex) {
                     // ignore: happens when a file specified in the sources is not found or cannot be read.
                 }
