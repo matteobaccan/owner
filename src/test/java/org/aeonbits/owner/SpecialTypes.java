@@ -18,6 +18,9 @@ public interface SpecialTypes extends Config {
     @DefaultValue("foobar.txt")
     File sampleFile();
 
+    @DefaultValue("~")
+    File home();
+
     @DefaultValue("http://owner.aeonbits.org")
     URL sampleURL();
 

@@ -10,10 +10,12 @@ package org.aeonbits.owner;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import static java.lang.reflect.Modifier.isStatic;
+import static org.aeonbits.owner.Util.expandUserHome;
 
 /**
  * Converter class from {@link java.lang.String} to property types.
@@ -29,6 +31,15 @@ enum Converters {
                 editor.setAsText(text);
                 return editor.getValue();
             }
+            return null;
+        }
+    },
+
+    FILE {
+        @Override
+        Object convert(Class<?> targetType, String text) {
+            if (targetType == File.class)
+                return new File(expandUserHome(text));
             return null;
         }
     },

@@ -98,4 +98,12 @@ public class SpecialTypesTest {
         assertEquals("valueOf", valueOf.toString());
     }
 
+    @Test
+    public void testHome() throws Throwable {
+        SpecialTypes cfg = ConfigFactory.create(SpecialTypes.class);
+        File home = cfg.home();
+        assertNotNull(home);
+        assertEquals(new File(System.getProperty("user.home")), home);
+    }
+
 }

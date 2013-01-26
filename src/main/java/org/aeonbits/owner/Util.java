@@ -32,4 +32,9 @@ class Util {
         return copy;
     }
 
+    static String expandUserHome(String text) {
+        if (text.indexOf('~') != -1)
+            return text.replace("~", System.getProperty("user.home"));
+        return text;
+    }
 }

@@ -11,6 +11,8 @@ package org.aeonbits.owner;
 
 import java.util.Properties;
 
+import static org.aeonbits.owner.Util.expandUserHome;
+
 /**
  * This class is used to expand variables in the format <tt>${variable}</tt>$, using values from {@link System#getenv()}
  * and {@link System#getProperties()} (in this order; first match is accepted).
@@ -30,8 +32,7 @@ class SystemVariablesExpander {
 
 
     String expand(String path) {
-        if (path.indexOf('~') != -1)
-            path = path.replace("~", "${user.home}");
+        path = expandUserHome(path);
         return substitutor.replace(path);
     }
 }
