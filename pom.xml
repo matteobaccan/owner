@@ -45,6 +45,16 @@
         </developer>
     </developers>
 
+    <mailingLists>
+        <mailingList>
+            <name>Users and Developers List</name>
+            <post>owner-api@googlegroups.com</post>
+            <subscribe>owner-api+subscribe@googlegroups.com</subscribe>
+            <unsubscribe>owner-api+unsubscribe@googlegroups.com</unsubscribe>
+            <archive>http://groups.google.com/group/owner-api</archive>
+        </mailingList>
+    </mailingLists>
+
     <scm>
         <url>https://github.com/lviggiano/owner/tree/master</url>
         <connection>scm:git:git://github.com/lviggiano/owner.git</connection>

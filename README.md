@@ -568,10 +568,12 @@ See [LICENSE][] file included for the details.
 MORE INFORMATION
 ----------------
 
-Refer to the documentation on the [web site][] or [github wiki][] for further details on how to use the OWNER API.
+Refer to the documentation on the [web site][] or [github wiki][] for further details on how to use the OWNER API.  
+You may also discuss and ask help on the [mailing-list][].
 
 If you find some bug or have any feature request open an issue on [github issues][issues], I'll try my best to keep up
 with the developments.
 
   [web site]: http://lviggiano.github.com/owner
   [github wiki]: https://github.com/lviggiano/owner/wiki
+  [mailing-list]: http://groups.google.com/group/owner-api
