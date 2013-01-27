@@ -8,17 +8,15 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Sources;
+import static org.aeonbits.owner.PropertiesLoader.properties;
+import static org.aeonbits.owner.Util.reverse;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
-import static org.aeonbits.owner.PropertiesLoader.getInputStream;
-import static org.aeonbits.owner.PropertiesLoader.properties;
-import static org.aeonbits.owner.Util.reverse;
+import org.aeonbits.owner.Config.Sources;
 
 /**
  * Specifies the policy type to use to load the {@link Sources} files for properties.
@@ -37,9 +35,9 @@ public enum LoadType {
             for (String source : values) {
                 URL url = new URL(null, source, handler);
                 try {
-                    InputStream stream = getInputStream(url);
-                    if (stream != null)
-                        return properties(stream);
+                    PropertiesFiller filler = PropertiesFiller.create(url);
+                    if (filler != null)
+                        return properties(filler);
                 } catch (IOException ex) {
                     // ignore: happens when a file specified in the sources is not found or cannot be read.
                 }
@@ -60,10 +58,9 @@ public enum LoadType {
             for (String source : values) {
                 URL url = new URL(null, source, handler);
                 try {
-                    InputStream stream = getInputStream(url);
-                    if (stream != null) {
-                        result.putAll(properties(stream));
-                    }
+                    PropertiesFiller filler = PropertiesFiller.create(url);
+                    if (filler != null)
+                        result.putAll(properties(filler));
                 } catch (IOException ex) {
                     // ignore: happens when a file specified in the sources is not found or cannot be read.
                 }

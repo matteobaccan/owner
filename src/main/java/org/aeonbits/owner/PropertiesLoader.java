@@ -13,6 +13,7 @@ import org.aeonbits.owner.Config.Sources;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
@@ -59,10 +60,16 @@ abstract class PropertiesLoader {
 
     private static Properties loadDefaultProperties(Class<?> clazz,
                                                     ConfigURLStreamHandler handler) throws IOException {
-        String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
-        return properties(getInputStream(new URL(null, spec, handler)));
+        String specPrefix = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/');
+        PropertiesFiller useInputStream = locateInputStreamByResourcePrefix(specPrefix, handler);
+        return properties(useInputStream);
     }
 
+    private static PropertiesFiller locateInputStreamByResourcePrefix(
+            String specPrefix, ConfigURLStreamHandler handler) throws MalformedURLException, IOException {
+        PropertiesFiller prioritizedFlatPropertiesFormat = PropertiesFiller.create(new URL(null, specPrefix + ".properties", handler));
+        return prioritizedFlatPropertiesFormat != null ? prioritizedFlatPropertiesFormat : PropertiesFiller.create(new URL(null, specPrefix + ".xml", handler));
+    }
 
     static InputStream getInputStream(URL url) throws IOException {
         URLConnection conn = url.openConnection();
@@ -76,13 +83,13 @@ abstract class PropertiesLoader {
             results.putAll(input);
     }
 
-    static Properties properties(InputStream stream) throws IOException {
+    static Properties properties(PropertiesFiller propertyFiller) throws IOException {
         Properties props = new Properties();
-        if (stream != null) {
+        if (propertyFiller != null) {
             try {
-                props.load(stream);
+                propertyFiller.load(props);
             } finally {
-                stream.close();
+                propertyFiller.close();
             }
         }
         return props;
