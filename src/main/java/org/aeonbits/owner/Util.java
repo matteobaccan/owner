@@ -27,7 +27,6 @@ class Util {
 
     static <T> T[] reverse(T[] array) {
         T[] copy = array.clone();
-        arraycopy(array, 0, copy, 0, array.length);
         Collections.reverse(Arrays.asList(copy));
         return copy;
     }
