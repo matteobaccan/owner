@@ -50,7 +50,7 @@ enum Converters {
             try {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
                 return constructor.newInstance(text);
-            } catch (ReflectiveOperationException ex) {
+            } catch (Exception e) {
                 return null;
             }
         }
@@ -62,7 +62,7 @@ enum Converters {
             try {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
                 return constructor.newInstance(text);
-            } catch (ReflectiveOperationException ex) {
+            } catch (Exception e) {
                 return null;
             }
         }
@@ -76,7 +76,7 @@ enum Converters {
                 if (isStatic(method.getModifiers()))
                     return method.invoke(null, text);
                 return null;
-            } catch (ReflectiveOperationException e) {
+            } catch (Exception e) {
                 return null;
             }
         }
