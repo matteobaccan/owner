@@ -544,7 +544,7 @@ CHANGELOG
 ---------
 ### 1.0.3
 
- * Fixed incompatibility with JRE 6.0 (project was compiled using JDK 7 and in some places I was catching
+ * Fixed incompatibility with JRE 6 (project was compiled using JDK 7 and in some places I was catching
    ReflectiveOperationException that has been introduced in JDK 7).
  * Minor code cleanup/optimization.
 
