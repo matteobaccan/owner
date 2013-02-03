@@ -1,4 +1,4 @@
-OWNER
+OWNER [![Build Status](https://aeonbits.ci.cloudbees.com/job/owner-api/badge/icon)](https://aeonbits.ci.cloudbees.com/job/owner-api/)
 =====
 
 OWNER, a simple API to ease Java property files usage.
