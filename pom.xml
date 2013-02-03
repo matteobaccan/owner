@@ -37,6 +37,8 @@
             <id>luigi</id>
             <name>Luigi R. Viggiano</name>
             <email>luigi.viggiano@gmail.com</email>
+            <organization>NewInstance Ltd.</organization>
+            <organizationUrl>http://en.newinstance.it</organizationUrl>
             <timezone>+1</timezone>
             <roles>
                 <role>dev</role>
@@ -58,6 +60,11 @@
         <system>GitHub Issue Tracking</system>
         <url>https://github.com/lviggiano/owner/issues</url>
     </issueManagement>
+
+    <ciManagement>
+        <system>jenkins</system>
+        <url>https://aeonbits.ci.cloudbees.com/job/owner-api/</url>
+    </ciManagement>
 
     <scm>
         <url>https://github.com/lviggiano/owner/tree/master</url>
