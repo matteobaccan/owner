@@ -1,4 +1,4 @@
-OWNER [![Build Status](https://aeonbits.ci.cloudbees.com/job/owner-api/badge/icon)](https://aeonbits.ci.cloudbees.com/job/owner-api/)
+OWNER
 =====
 
 OWNER, a simple API to ease Java property files usage.
@@ -439,7 +439,7 @@ OWNER uses maven to build.
 
 This will install OWNER jars in your local maven repository. Or, you can pick the jar files from the target directory.
 
-### Continuous Integration
+### Continuous Integration [![Build Status](https://aeonbits.ci.cloudbees.com/job/owner-api/badge/icon)](https://aeonbits.ci.cloudbees.com/job/owner-api/)
 
 You can access latest builds reports from [Jenkins on CloudBees](https://aeonbits.ci.cloudbees.com/job/owner-api/).
 
