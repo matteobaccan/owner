@@ -497,6 +497,11 @@ $ mvn install
 
 <p>This will install OWNER jars in your local maven repository. Or, you can pick the jar files from the target directory.</p>
 
+<h3>
+<a name="continuous-integration" class="anchor" href="#continuous-integration"><span class="mini-icon mini-icon-link"></span></a>Continuous Integration</h3>
+
+<p>You can access latest builds reports from <a href="https://aeonbits.ci.cloudbees.com/job/owner-api/">Jenkins on CloudBees</a>.</p>
+
 <h2>
 <a name="maven" class="anchor" href="#maven"><span class="mini-icon mini-icon-link"></span></a>MAVEN</h2>
 
@@ -591,6 +596,13 @@ verify all cases.</p>
 <a name="changelog" class="anchor" href="#changelog"><span class="mini-icon mini-icon-link"></span></a>CHANGELOG</h2>
 
 <h3>
+<a name="103" class="anchor" href="#103"><span class="mini-icon mini-icon-link"></span></a>1.0.3</h3>
+
+<ul>
+<li>Fixed incompatibility with JRE 6.0 (project was compiled using JDK 7 and in some places I was catching
+ReflectiveOperationException that has been introduced in JDK 7).</li>
+<li>Minor code cleanup/optimization.</li>
+</ul><h3>
 <a name="102" class="anchor" href="#102"><span class="mini-icon mini-icon-link"></span></a>1.0.2</h3>
 
 <ul>
