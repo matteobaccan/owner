@@ -366,7 +366,7 @@ This also works with the annotations, but you need to specify every properties o
     }
 
     ConfigWithExpansion conf = ConfigFactory.create(ConfigWithExpansion.class);
-    String story = conf.story());
+    String story = conf.story();
 
 Sometimes you may want expand System Properties or Environment Variables.
 This can be done using *imports* (see dedicated paragraph to learn more):
