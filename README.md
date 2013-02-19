@@ -544,6 +544,9 @@ verify all cases.
 
 CHANGELOG
 ---------
+### 1.0.4
+ * Fixed bug [#17 Substitution and format not working as expected when used together](https://github.com/lviggiano/owner/issues/17)
+
 ### 1.0.3
 
  * Fixed incompatibility with JRE 6 (project was compiled using JDK 7 and in some places I was catching
