@@ -22,6 +22,79 @@ import static org.junit.Assert.assertNotNull;
  */
 public class SpecialTypesTest {
 
+    public static class InvalidCustomType {
+    }
+
+    public static class InvalidValueOf {
+        private final String text;
+
+        private InvalidValueOf(String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return super.toString();
+        }
+
+        public InvalidValueOf valueOf(String text) {
+            return new InvalidValueOf(text);
+        }
+    }
+
+    public static class ValueOf {
+        private String text;
+
+        private ValueOf() {
+        }
+
+        public static ValueOf valueOf(String text) {
+            ValueOf result = new ValueOf();
+            result.text = text;
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
+    }
+
+    public static interface SpecialTypes extends Config {
+        @DefaultValue("foobar.txt")
+        File sampleFile();
+
+        @DefaultValue("~")
+        File home();
+
+        @DefaultValue("http://owner.aeonbits.org")
+        URL sampleURL();
+
+        @DefaultValue("test")
+        CustomType customType();
+
+        @DefaultValue("Hello %s!")
+        CustomType salutation(String name);
+
+        @DefaultValue("this should raise an exception")
+        InvalidCustomType invalid();
+
+        @DefaultValue("FOO")
+        EnumType enumType();
+
+        @DefaultValue("java.sql.Driver")
+        Class jdbcDriver();
+
+        @DefaultValue("foobar")
+        Reference reference();
+
+        @DefaultValue("invalidValueOf")
+        InvalidValueOf invalidValueOf();
+
+        @DefaultValue("valueOf")
+        ValueOf valueOf();
+    }
+
     @Test
     public void testFileReturnType() throws Throwable {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
@@ -38,12 +111,37 @@ public class SpecialTypesTest {
         assertEquals("http://owner.aeonbits.org", u.toString());
     }
 
+    public static class CustomType {
+        private final String text;
+
+        public CustomType(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
     @Test
     public void testClassWithStringConstructor() throws Throwable {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
         CustomType custom = config.customType();
         assertNotNull(custom);
         assertEquals("test", custom.getText());
+    }
+
+    public static class Reference {
+        private final Object object;
+
+        public Reference(Object object) {
+            this.object = object;
+        }
+
+        @Override
+        public String toString() {
+            return object.toString();
+        }
     }
 
     @Test
@@ -66,6 +164,15 @@ public class SpecialTypesTest {
     public void testInvalidCustomType() throws Throwable {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
         config.invalid();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testConvertersUnsupported() throws Throwable {
+        Converters.unsupported(InvalidCustomType.class, "foo");
+    }
+
+    public static enum EnumType {
+        FOO, BAR, BAZ
     }
 
     @Test
@@ -106,127 +213,5 @@ public class SpecialTypesTest {
         assertEquals(new File(System.getProperty("user.home")), home);
     }
 
-    /**
-     * @author luigi
-     */
-    public static interface SpecialTypes extends Config {
-        @DefaultValue("foobar.txt")
-        File sampleFile();
 
-        @DefaultValue("~")
-        File home();
-
-        @DefaultValue("http://owner.aeonbits.org")
-        URL sampleURL();
-
-        @DefaultValue("test")
-        CustomType customType();
-
-        @DefaultValue("Hello %s!")
-        CustomType salutation(String name);
-
-        @DefaultValue("this should raise an exception")
-        InvalidCustomType invalid();
-
-        @DefaultValue("FOO")
-        EnumType enumType();
-
-        @DefaultValue("java.sql.Driver")
-        Class jdbcDriver();
-
-        @DefaultValue("foobar")
-        Reference reference();
-
-        @DefaultValue("invalidValueOf")
-        InvalidValueOf invalidValueOf();
-
-        @DefaultValue("valueOf")
-        ValueOf valueOf();
-    }
-
-    /**
-     * @author luigi
-     */
-    public static class ValueOf {
-        private String text;
-
-        private ValueOf() {
-        }
-
-        public static ValueOf valueOf(String text) {
-            ValueOf result = new ValueOf();
-            result.text = text;
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return text;
-        }
-    }
-
-    /**
-     * @author luigi
-     */
-    public static class Reference {
-        private final Object object;
-
-        public Reference(Object object) {
-            this.object = object;
-        }
-
-        public Object getObject() {
-            return object;
-        }
-
-        @Override
-        public String toString() {
-            return object.toString();
-        }
-    }
-
-    /**
-     * @author luigi
-     */
-    public static class InvalidValueOf {
-        private final String text;
-
-        private InvalidValueOf(String text) {
-            this.text = text;
-        }
-
-        @Override
-        public String toString() {
-            return super.toString();
-        }
-
-        public InvalidValueOf valueOf(String text) {
-            return new InvalidValueOf(text);
-        }
-    }
-
-    /**
-     * @author luigi
-     */
-    public static enum EnumType {
-        FOO, BAR, BAZ
-    }
-
-    public static class CustomType {
-        private final String text;
-
-        public CustomType(String text) {
-            this.text = text;
-        }
-
-        public String getText() {
-            return text;
-        }
-    }
-
-    /**
-     * @author luigi
-     */
-    public static class InvalidCustomType {
-    }
 }

@@ -91,12 +91,19 @@ enum Converters {
                 return null;
             }
         }
+    },
+
+    UNSUPPORTED {
+        @Override
+        Object convert(Class<?> targetType, String text) {
+            throw new UnsupportedOperationException(String.format("Cannot convert '%s' to %s", text,
+                    targetType.getCanonicalName()));
+        }
     };
 
     abstract Object convert(Class<?> targetType, String text);
 
-    public static Object unsupported(Class<?> targetType, String text) {
-        throw new UnsupportedOperationException(String.format("Cannot convert '%s' to %s", text,
-                targetType.getCanonicalName()));
+    static Object unsupported(Class<?> targetType, String text) {
+        return UNSUPPORTED.convert(targetType, text);
     }
 }
