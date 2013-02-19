@@ -28,6 +28,7 @@ import static org.aeonbits.owner.Util.reverse;
 
 /**
  * Loads properties for a class.
+ *
  * @author Luigi R. Viggiano
  */
 abstract class PropertiesLoader {
@@ -63,9 +64,13 @@ abstract class PropertiesLoader {
     private static Properties loadDefaultProperties(Class<?> clazz,
                                                     ConfigURLStreamHandler handler) throws IOException {
         String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
-        return properties(getInputStream(new URL(null, spec, handler)));
+        InputStream inputStream = getInputStream(new URL(null, spec, handler));
+        try {
+            return properties(inputStream);
+        } finally {
+            close(inputStream);
+        }
     }
-
 
     static InputStream getInputStream(URL url) throws IOException {
         URLConnection conn = url.openConnection();
@@ -81,13 +86,14 @@ abstract class PropertiesLoader {
 
     static Properties properties(InputStream stream) throws IOException {
         Properties props = new Properties();
-        if (stream != null) {
-            try {
-                props.load(stream);
-            } finally {
-                stream.close();
-            }
-        }
+        if (stream != null)
+            props.load(stream);
         return props;
     }
+
+    static void close(InputStream inputStream) throws IOException {
+        if (inputStream != null)
+            inputStream.close();
+    }
+
 }

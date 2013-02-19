@@ -30,4 +30,9 @@ public class UtilTest {
         assertTrue(Arrays.equals(new Integer[]{1, 2, 3, 4, 5}, i));
         assertTrue(Arrays.equals(new Integer[]{5, 4, 3, 2, 1}, result));
     }
+
+    @Test
+    public void testIgnore() {
+        Util.ignore();
+    }
 }

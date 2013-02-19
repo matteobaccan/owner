@@ -34,4 +34,9 @@ class Util {
             return text.replace("~", System.getProperty("user.home"));
         return text;
     }
+
+    static void ignore() {
+        // the ignore method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
+        // complaining about empty catch methods.
+    }
 }

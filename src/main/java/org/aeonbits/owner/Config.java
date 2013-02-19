@@ -21,8 +21,10 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.PropertiesLoader.close;
 import static org.aeonbits.owner.PropertiesLoader.getInputStream;
 import static org.aeonbits.owner.PropertiesLoader.properties;
+import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 
 /**
@@ -108,9 +110,13 @@ public interface Config {
                     try {
                         InputStream stream = getInputStream(url);
                         if (stream != null)
-                            return properties(stream);
+                            try {
+                                return properties(stream);
+                            } finally {
+                                close(stream);
+                            }
                     } catch (IOException ex) {
-                        // ignore: happens when a file specified in the sources is not found or cannot be read.
+                        ignore(); // happens when a file specified in the sources is not found or cannot be read.
                     }
                 }
                 return new Properties();
@@ -131,9 +137,13 @@ public interface Config {
                     try {
                         InputStream stream = getInputStream(url);
                         if (stream != null)
-                            result.load(stream);
+                            try {
+                               result.load(stream);
+                            } finally {
+                                close(stream);
+                            }
                     } catch (IOException ex) {
-                        // ignore: happens when a file specified in the sources is not found or cannot be read.
+                        ignore(); // happens when a file specified in the sources is not found or cannot be read.
                     }
                 }
                 return result;
