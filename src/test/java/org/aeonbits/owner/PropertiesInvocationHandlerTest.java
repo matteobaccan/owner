@@ -43,14 +43,19 @@ public class PropertiesInvocationHandlerTest {
 
     @Test
     public void testListPrintStream() throws Throwable {
-        handler.invoke(proxy, SampleConfig.class.getDeclaredMethod("list", PrintStream.class), printStream);
+        handler.invoke(proxy, MyConfig.class.getDeclaredMethod("list", PrintStream.class), printStream);
         verify(properties).list(eq(printStream));
     }
 
     @Test
     public void testListPrintWriter() throws Throwable {
-        handler.invoke(proxy, SampleConfig.class.getDeclaredMethod("list", PrintWriter.class), printWriter);
+        handler.invoke(proxy, MyConfig.class.getDeclaredMethod("list", PrintWriter.class), printWriter);
         verify(properties).list(eq(printWriter));
+    }
+
+    public interface MyConfig extends Config {
+        void list(PrintStream out);
+        void list(PrintWriter out);
     }
 
 }

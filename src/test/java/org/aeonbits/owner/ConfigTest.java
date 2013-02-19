@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.Sources;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -54,7 +55,7 @@ public class ConfigTest {
 
         doLoad(SampleConfig.class, spy);
         URL expected =
-                new URL(null, "classpath:org/aeonbits/owner/SampleConfig.properties", handler);
+                new URL(null, "classpath:org/aeonbits/owner/ConfigTest$SampleConfig.properties", handler);
         verify(spy, times(1)).openConnection(eq(expected));
     }
 
@@ -195,5 +196,84 @@ public class ConfigTest {
         config.list(new PrintWriter(result, true));
 
         assertEquals(expected.toString(), result.toString());
+    }
+
+    /**
+     * @author Luigi R. Viggiano
+     */
+    public static interface UnassociatedConfig extends Config {
+        String someProperty();
+    }
+
+    /**
+     * @author Luigi R. Viggiano
+     */
+    @Sources({"classpath:foo/bar/baz.properties",
+              "file:~/.testfoobar.blahblah",
+              "file:/etc/testfoobar.blahblah",
+              "classpath:org/aeonbits/owner/FooBar.properties",
+              "file:~/blahblah.properties"})
+    public static interface SampleConfigWithSource extends Config {
+        //  @Key("hello.world");
+        //  @DefaultValue("Hello World");
+        String helloWorld();
+
+        @DefaultValue("Hello Mr. %s!")
+        String helloMr(String name);
+
+        @DefaultValue("42")
+        int answerToLifeUniverseAndEverything();
+
+        @DefaultValue("3.141592653589793")
+        double pi();
+
+        @DefaultValue("0.5")
+        float half();
+
+        @DefaultValue("false")
+        boolean worldIsFlat();
+
+        @DefaultValue("7")
+        Integer daysInWeek();
+    }
+
+    /**
+     * @author Luigi R. Viggiano
+     */
+    @Sources({"file:${user.dir}/src/test/resources/test.properties"})
+    public static interface SampleConfigWithExpansion extends Config {
+        public String favoriteColor();
+    }
+
+    /**
+     * @author Luigi R. Viggiano
+     */
+    @Sources("classpath:foo/bar/thisDoesntExists.properties")
+    public static interface InvalidSourceConfig extends Config {
+        public String someProperty();
+    }
+
+    /**
+     * @author Luigi R. Viggiano
+     */
+    public static interface SampleConfig extends Config {
+        String testKey();
+
+        String hello(String param);
+
+        @DefaultValue("Bohemian Rapsody - Queen")
+        String favoriteSong();
+
+        String unspecifiedProperty();
+
+        @Key("server.http.port")
+        int httpPort();
+
+        @Key("salutation.text")
+        @DefaultValue("Good Morning")
+        String salutation();
+
+        void list(PrintStream out);
+        void list(PrintWriter out);
     }
 }

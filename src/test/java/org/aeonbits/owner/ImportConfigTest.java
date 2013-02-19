@@ -46,4 +46,20 @@ public class ImportConfigTest {
         assertEquals("lime", cfg.bar()); // p1 prevails, so this is lime and not grapefruit
         assertEquals("blackberry", cfg.baz());
     }
+
+    /**
+     * @author luigi
+     */
+    public static interface ImportConfig extends Config {
+
+        @DefaultValue("apple")
+        String foo();
+
+        @DefaultValue("pear")
+        String bar();
+
+        @DefaultValue("orange")
+        String baz();
+
+    }
 }

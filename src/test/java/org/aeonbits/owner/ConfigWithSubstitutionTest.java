@@ -36,4 +36,44 @@ public class ConfigWithSubstitutionTest {
         assertEquals("Please grandma, tell me the story of 'The quick brown fox jumped over the lazy dog'", conf.tellmeTheStory());
     }
 
+    /**
+     * @author luigi
+     */
+    public static interface ConfigWithSubstitutionFile  extends Config {
+        String story();
+    }
+
+    /**
+     * @author luigi
+     */
+    public static interface ConfigWithSubtstitutionAnnotationsSubInterface extends ConfigWithSubstitutionAnnotations {
+
+        @DefaultValue("grandma")
+        public String teller();
+
+        @DefaultValue("Please ${teller}, tell me the story of '${story}'")
+        public String tellmeTheStory();
+    }
+
+    /**
+     * @author luigi
+     */
+    public static interface ConfigWithSubstitutionAnnotations extends Config {
+
+        @DefaultValue("The ${animal} jumped over the ${target}")
+        String story();
+
+        @DefaultValue("quick ${color} fox")
+        String animal();
+
+        @DefaultValue("${target.attribute} dog")
+        String target();
+
+        @Key("target.attribute")
+        @DefaultValue("lazy")
+        String targetAttribute();
+
+        @DefaultValue("brown")
+        String color();
+    }
 }

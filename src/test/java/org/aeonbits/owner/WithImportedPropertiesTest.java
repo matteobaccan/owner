@@ -56,4 +56,16 @@ public class WithImportedPropertiesTest {
         assertEquals("testing replacement from propsFromTest properties file.", conf.someValue());
     }
 
+    /**
+     * @author luigi
+     */
+    public static interface WithImportedProperties extends Config {
+        String someValue();
+
+        @DefaultValue("${user.home}")
+        String userHome();
+
+        @DefaultValue("${HOME}")
+        String envHome();
+    }
 }
