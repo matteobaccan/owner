@@ -69,7 +69,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
         String value = properties.getProperty(key);
         if (value == null)
             return null;
-        return convert(method.getReturnType(), substitutor.replace(format(value, args)));
+        return convert(method.getReturnType(), format(substitutor.replace(value), args));
     }
 
     private Object delegate(Object target, Method method, Object... args) throws InvocationTargetException,

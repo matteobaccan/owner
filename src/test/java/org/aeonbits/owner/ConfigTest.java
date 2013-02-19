@@ -35,6 +35,30 @@ import static org.mockito.Mockito.verify;
  */
 public class ConfigTest {
 
+    /**
+     * @author Luigi R. Viggiano
+     */
+    public static interface SampleConfig extends Config {
+        String testKey();
+
+        String hello(String param);
+
+        @DefaultValue("Bohemian Rapsody - Queen")
+        String favoriteSong();
+
+        String unspecifiedProperty();
+
+        @Key("server.http.port")
+        int httpPort();
+
+        @Key("salutation.text")
+        @DefaultValue("Good Morning")
+        String salutation();
+
+        void list(PrintStream out);
+        void list(PrintWriter out);
+    }
+
     @Test
     public void shouldNotReturnNull() {
         SampleConfig config = ConfigFactory.create(SampleConfig.class);
@@ -72,6 +96,38 @@ public class ConfigTest {
         assertEquals("Hello Luigi.", config.hello("Luigi"));
     }
 
+    /**
+     * @author Luigi R. Viggiano
+     */
+    @Sources({"classpath:foo/bar/baz.properties",
+            "file:~/.testfoobar.blahblah",
+            "file:/etc/testfoobar.blahblah",
+            "classpath:org/aeonbits/owner/FooBar.properties",
+            "file:~/blahblah.properties"})
+    public static interface SampleConfigWithSource extends Config {
+        //  @Key("hello.world");
+        //  @DefaultValue("Hello World");
+        String helloWorld();
+
+        @DefaultValue("Hello Mr. %s!")
+        String helloMr(String name);
+
+        @DefaultValue("42")
+        int answerToLifeUniverseAndEverything();
+
+        @DefaultValue("3.141592653589793")
+        double pi();
+
+        @DefaultValue("0.5")
+        float half();
+
+        @DefaultValue("false")
+        boolean worldIsFlat();
+
+        @DefaultValue("7")
+        Integer daysInWeek();
+    }
+
     @Test
     public void shouldLoadURLFromSpecifiedSource() throws IOException {
         final URL[] lastURL = { null };
@@ -96,10 +152,25 @@ public class ConfigTest {
         assertEquals("Hello World!", sample.helloWorld());
     }
 
+    /**
+     * @author Luigi R. Viggiano
+     */
+    @Sources("classpath:foo/bar/thisDoesntExists.properties")
+    public static interface InvalidSourceConfig extends Config {
+        public String someProperty();
+    }
+
     @Test
     public void shouldReturnNullProperty() {
         InvalidSourceConfig config = ConfigFactory.create(InvalidSourceConfig.class);
         assertNull(config.someProperty());
+    }
+
+    /**
+     * @author Luigi R. Viggiano
+     */
+    public static interface UnassociatedConfig extends Config {
+        String someProperty();
     }
 
     @Test
@@ -168,6 +239,14 @@ public class ConfigTest {
         assertEquals("Good Afternoon", config.salutation());
     }
 
+    /**
+     * @author Luigi R. Viggiano
+     */
+    @Sources({"file:${user.dir}/src/test/resources/test.properties"})
+    public static interface SampleConfigWithExpansion extends Config {
+        public String favoriteColor();
+    }
+
     @Test
     public void testPropertyWithExpansion() {
         SampleConfigWithExpansion config = ConfigFactory.create(SampleConfigWithExpansion.class);
@@ -198,82 +277,20 @@ public class ConfigTest {
         assertEquals(expected.toString(), result.toString());
     }
 
-    /**
-     * @author Luigi R. Viggiano
-     */
-    public static interface UnassociatedConfig extends Config {
-        String someProperty();
+    public static interface SubstituteAndFormat extends Config {
+        @DefaultValue("Hello ${mister}")
+        String salutation(String name);
+
+        @DefaultValue("Mr. %s")
+        String mister(String name);
     }
 
-    /**
-     * @author Luigi R. Viggiano
-     */
-    @Sources({"classpath:foo/bar/baz.properties",
-              "file:~/.testfoobar.blahblah",
-              "file:/etc/testfoobar.blahblah",
-              "classpath:org/aeonbits/owner/FooBar.properties",
-              "file:~/blahblah.properties"})
-    public static interface SampleConfigWithSource extends Config {
-        //  @Key("hello.world");
-        //  @DefaultValue("Hello World");
-        String helloWorld();
-
-        @DefaultValue("Hello Mr. %s!")
-        String helloMr(String name);
-
-        @DefaultValue("42")
-        int answerToLifeUniverseAndEverything();
-
-        @DefaultValue("3.141592653589793")
-        double pi();
-
-        @DefaultValue("0.5")
-        float half();
-
-        @DefaultValue("false")
-        boolean worldIsFlat();
-
-        @DefaultValue("7")
-        Integer daysInWeek();
+    @Test
+    public void testSubstitutionAndFormat() {
+        SubstituteAndFormat cfg = ConfigFactory.create(SubstituteAndFormat.class);
+        assertEquals("Hello Mr. Luigi", cfg.salutation("Luigi"));
+        assertEquals("Mr. Luigi", cfg.mister("Luigi"));
     }
 
-    /**
-     * @author Luigi R. Viggiano
-     */
-    @Sources({"file:${user.dir}/src/test/resources/test.properties"})
-    public static interface SampleConfigWithExpansion extends Config {
-        public String favoriteColor();
-    }
 
-    /**
-     * @author Luigi R. Viggiano
-     */
-    @Sources("classpath:foo/bar/thisDoesntExists.properties")
-    public static interface InvalidSourceConfig extends Config {
-        public String someProperty();
-    }
-
-    /**
-     * @author Luigi R. Viggiano
-     */
-    public static interface SampleConfig extends Config {
-        String testKey();
-
-        String hello(String param);
-
-        @DefaultValue("Bohemian Rapsody - Queen")
-        String favoriteSong();
-
-        String unspecifiedProperty();
-
-        @Key("server.http.port")
-        int httpPort();
-
-        @Key("salutation.text")
-        @DefaultValue("Good Morning")
-        String salutation();
-
-        void list(PrintStream out);
-        void list(PrintWriter out);
-    }
 }
