@@ -11,8 +11,6 @@ package org.aeonbits.owner;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static java.lang.System.arraycopy;
-
 /**
  * @author Luigi R. Viggiano
  */
