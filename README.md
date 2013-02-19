@@ -545,7 +545,10 @@ verify all cases.
 CHANGELOG
 ---------
 ### 1.0.4
- * Fixed bug [#17 Substitution and format not working as expected when used together](https://github.com/lviggiano/owner/issues/17)
+
+ * Fixed bug [#17][bug-17] Substitution and format not working as expected when used together
+ 
+  [bug-17]: https://github.com/lviggiano/owner/issues/17
 
 ### 1.0.3
 
