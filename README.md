@@ -454,7 +454,7 @@ If you are using maven, you can add the OWNER dependency in your project:
         <dependency>
             <groupId>org.aeonbits.owner</groupId>
             <artifactId>owner</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
         </dependency>
     </dependencies>
 
