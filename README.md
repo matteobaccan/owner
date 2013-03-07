@@ -592,7 +592,7 @@ verify all cases.
 
 CHANGELOG
 ---------
-### 1.0.4
+### 1.0.4 (under development)
 
  * Fixed bug [#17][bug-17] Substitution and format not working as expected when used together
  
