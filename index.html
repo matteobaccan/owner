@@ -62,35 +62,35 @@ Since I liked the approach I decided to implement something similar, and here we
 
 <p>The approach used by OWNER APIs, is to define a Java interface associated to a properties file.</p>
 
-<p>Suppose your properties file is defined as ServerConfig.properties:</p>
+<p>Suppose your properties file is defined as <code>ServerConfig.properties</code>:</p>
 
-<pre><code>port=80
-hostname=foobar.com
-maxThreads=100
-</code></pre>
+<div class="highlight"><pre><span class="na">port</span><span class="o">=</span><span class="s">80</span>
+<span class="na">hostname</span><span class="o">=</span><span class="s">foobar.com</span>
+<span class="na">maxThreads</span><span class="o">=</span><span class="s">100</span>
+</pre></div>
 
-<p>To access this property you need to define a convenient Java interface in ServerConfig.java:</p>
+<p>To access this property you need to define a convenient Java interface in <code>ServerConfig.java</code>:</p>
 
-<pre><code>public interface ServerConfig extends Config {
-    int port();
-    String hostname();
-    @DefaultValue("42")
-    int maxThreads();
-}
-</code></pre>
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ServerConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="nf">port</span><span class="o">();</span>
+    <span class="n">String</span> <span class="nf">hostname</span><span class="o">();</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"42"</span><span class="o">)</span>
+    <span class="kt">int</span> <span class="nf">maxThreads</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>We'll call this interface the <em>Properties Mapping Interface</em> or just <em>Mapping Interface</em> since its goal is to map
 Properties into a an easy to use piece of code.</p>
 
 <p>Then, you can use it from inside your code:</p>
 
-<pre><code>public class MyApp {    
-    public static void main(String[] args) {
-        ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
-        System.out.println("Server " + cfg.hostname() + ":" + cfg.port() + " will run " + cfg.maxThreads());
-    }
-}
-</code></pre>
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyApp</span> <span class="o">{</span>    
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">ServerConfig</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ServerConfig</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Server "</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="na">hostname</span><span class="o">()</span> <span class="o">+</span> <span class="s">":"</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="na">port</span><span class="o">()</span> <span class="o">+</span> <span class="s">" will run "</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="na">maxThreads</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>Did you notice that there is also the <code>@DefaultValue("42")</code> annotation specified in the example? It is used in case the
 <code>maxThread</code> key is missing from the properties file.<br>
@@ -99,26 +99,27 @@ about automatic type conversion.  </p>
 
 <p>With annotations, you can also customize the property keys:</p>
 
-<pre><code># Example of property file 'ServerConfig.properties'
-server.http.port=80
-server.host.name=foobar.com
-server.max.threads=100
+<div class="highlight"><pre><span class="c"># Example of property file 'ServerConfig.properties'</span>
+<span class="na">server.http.port</span><span class="o">=</span><span class="s">80</span>
+<span class="na">server.host.name</span><span class="o">=</span><span class="s">foobar.com</span>
+<span class="na">server.max.threads</span><span class="o">=</span><span class="s">100</span>
+</pre></div>
 
-/*
- * Example of ServerConfig.java interface mapping the previous properties file
- */
-public interface ServerConfig extends Config {
-    @Key("server.http.port")
-    int port();
+<div class="highlight"><pre><span class="cm">/*</span>
+<span class="cm"> * Example of ServerConfig.java interface mapping the previous properties file</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ServerConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"server.http.port"</span><span class="o">)</span>
+    <span class="kt">int</span> <span class="nf">port</span><span class="o">();</span>
 
-    @Key("server.host.name")
-    String hostname();
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"server.host.name"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">hostname</span><span class="o">();</span>
 
-    @Key("server.max.threads");
-    @DefaultValue("42")
-    int maxThreads();
-}
-</code></pre>
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"server.max.threads"</span><span class="o">);</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"42"</span><span class="o">)</span>
+    <span class="kt">int</span> <span class="nf">maxThreads</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>The <code>@DefaultValue</code> and <code>@Key</code> annotations are the basics to start using this API.</p>
 
@@ -135,20 +136,20 @@ For instance, if your <em>mapping interface</em> is com.foo.bar.ServerConfig, OW
 
 <p>But this logic can be tailored to your needs using some additional annotations:</p>
 
-<pre><code>@Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
-public interface ServerConfig extends Config {
+<div class="highlight"><pre><span class="nd">@Sources</span><span class="o">({</span> <span class="s">"file:~/.myapp.config"</span><span class="o">,</span> <span class="s">"file:/etc/myapp.config"</span><span class="o">,</span> <span class="s">"classpath:foo/bar/baz.properties"</span> <span class="o">})</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ServerConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
 
-    @Key("server.http.port")
-    int port();
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"server.http.port"</span><span class="o">)</span>
+    <span class="kt">int</span> <span class="nf">port</span><span class="o">();</span>
 
-    @Key("server.host.name")
-    String hostname();
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"server.host.name"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">hostname</span><span class="o">();</span>
 
-    @Key("server.max.threads");
-    @DefaultValue("42")
-    int maxThreads();
-}
-</code></pre>
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"server.max.threads"</span><span class="o">);</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"42"</span><span class="o">)</span>
+    <span class="kt">int</span> <span class="nf">maxThreads</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>In the above example, OWNER will try to load the properties from several <code>@Sources</code>:</p>
 
@@ -172,12 +173,12 @@ You can also specify this load policy explicitly using <code>@LoadPolicy(LoadTyp
 <p>But what if you want to have some <em>overriding</em> between properties? This is definitely possible: you can do it with
 the annotation <code>@LoadPolicy(LoadType.MERGE)</code>:</p>
 
-<pre><code>@LoadPolicy(LoadType.MERGE)
-@Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
-public interface ServerConfig extends Config {
-    ...
-}
-</code></pre>
+<div class="highlight"><pre><span class="nd">@LoadPolicy</span><span class="o">(</span><span class="n">LoadType</span><span class="o">.</span><span class="na">MERGE</span><span class="o">)</span>
+<span class="nd">@Sources</span><span class="o">({</span> <span class="s">"file:~/.myapp.config"</span><span class="o">,</span> <span class="s">"file:/etc/myapp.config"</span><span class="o">,</span> <span class="s">"classpath:foo/bar/baz.properties"</span> <span class="o">})</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ServerConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>In this case, for <em>every property</em> all the specified URLs will be queries, and the first resource defining the property
 will prevail.
@@ -206,80 +207,80 @@ variable expansion, and it is equivalent to <code>${user.home}</code>.</p>
 And this mechanism is to specify a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html">Properties</a> object programmatically when calling
 <code>ConfigFactory.create()</code>:</p>
 
-<pre><code>    public interface ImportConfig extends Config {
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ImportConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
 
-        @DefaultValue("apple")
-        String foo();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"apple"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">foo</span><span class="o">();</span>
 
-        @DefaultValue("pear")
-        String bar();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"pear"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">bar</span><span class="o">();</span>
 
-        @DefaultValue("orange")
-        String baz();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"orange"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">baz</span><span class="o">();</span>
 
-    }
+<span class="o">}</span>
 
-    // then...
+<span class="c1">// then...</span>
 
-    Properties props = new Properties();
-    props.setProperty("foo", "pineapple");
-    props.setProperty("bar", "lime");
+<span class="n">Properties</span> <span class="n">props</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="o">();</span>
+<span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"foo"</span><span class="o">,</span> <span class="s">"pineapple"</span><span class="o">);</span>
+<span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"bar"</span><span class="o">,</span> <span class="s">"lime"</span><span class="o">);</span>
 
-    ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props); // props imported!
+<span class="n">ImportConfig</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ImportConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">props</span><span class="o">);</span> <span class="c1">// props imported!</span>
 
-    assertEquals("pineapple", cfg.foo());
-    assertEquals("lime", cfg.bar());
-    assertEquals("orange", cfg.baz());
-</code></pre>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">"pineapple"</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">foo</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">"lime"</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">bar</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">"orange"</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">baz</span><span class="o">());</span>
+</pre></div>
 
 <p>You can specify multiple properties to import on the same line:</p>
 
-<pre><code>    ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props1, props2, ...);
-</code></pre>
+<div class="highlight"><pre><span class="n">ImportConfig</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ImportConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">props1</span><span class="o">,</span> <span class="n">props2</span><span class="o">,</span> <span class="o">...);</span>
+</pre></div>
 
 <p>If there are prop1 and prop2 defining two different values for the same property key, the one specified first will
 prevail:</p>
 
-<pre><code>    Properties p1 = new Properties();
-    p1.setProperty("foo", "pineapple");
-    p1.setProperty("bar", "lime");
+<div class="highlight"><pre><span class="n">Properties</span> <span class="n">p1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="o">();</span>
+<span class="n">p1</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"foo"</span><span class="o">,</span> <span class="s">"pineapple"</span><span class="o">);</span>
+<span class="n">p1</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"bar"</span><span class="o">,</span> <span class="s">"lime"</span><span class="o">);</span>
 
-    Properties p2 = new Properties();
-    p2.setProperty("bar", "grapefruit");
-    p2.setProperty("baz", "blackberry");
+<span class="n">Properties</span> <span class="n">p2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="o">();</span>
+<span class="n">p2</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"bar"</span><span class="o">,</span> <span class="s">"grapefruit"</span><span class="o">);</span>
+<span class="n">p2</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"baz"</span><span class="o">,</span> <span class="s">"blackberry"</span><span class="o">);</span>
 
 
-    ImportConfig cfg = ConfigFactory.create(ImportConfig.class, p1, p2); // props imported!
+<span class="n">ImportConfig</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ImportConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">p1</span><span class="o">,</span> <span class="n">p2</span><span class="o">);</span> <span class="c1">// props imported!</span>
 
-    assertEquals("pineapple", cfg.foo());
-    assertEquals("lime", cfg.bar()); // p1 prevails, so this is lime and not grapefruit
-    assertEquals("blackberry", cfg.baz());
-</code></pre>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">"pineapple"</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">foo</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">"lime"</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">bar</span><span class="o">());</span> <span class="c1">// p1 prevails, so this is lime and not grapefruit</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">"blackberry"</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">baz</span><span class="o">());</span>
+</pre></div>
 
 <p>This is pretty handy if you want to reference system properties or environment variables:</p>
 
-<pre><code>interface SystemEnvProperties extends Config {
-    @Key("file.separator")
-    String fileSeparator();
+<div class="highlight"><pre><span class="kd">interface</span> <span class="nc">SystemEnvProperties</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"file.separator"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">fileSeparator</span><span class="o">();</span>
 
-    @Key("java.home")
-    String javaHome();
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"java.home"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">javaHome</span><span class="o">();</span>
 
-    @Key("HOME")
-    String home();
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"HOME"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">home</span><span class="o">();</span>
 
-    @Key("USER")
-    String user();
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"USER"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">user</span><span class="o">();</span>
 
-    void list(PrintStream out);
-}
+    <span class="kt">void</span> <span class="nf">list</span><span class="o">(</span><span class="n">PrintStream</span> <span class="n">out</span><span class="o">);</span>
+<span class="o">}</span>
 
-SystemEnvProperties cfg = ConfigFactory.create(SystemEnvProperties.class, System.getProperties(), System.getenv());
-assertEquals(File.separator, cfg.fileSeparator());
-assertEquals(System.getProperty("java.home"), cfg.javaHome());
-assertEquals(System.getenv().get("HOME"), cfg.home());
-assertEquals(System.getenv().get("USER"), cfg.user());
-</code></pre>
+<span class="n">SystemEnvProperties</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">SystemEnvProperties</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">System</span><span class="o">.</span><span class="na">getProperties</span><span class="o">(),</span> <span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="n">File</span><span class="o">.</span><span class="na">separator</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">fileSeparator</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"java.home"</span><span class="o">),</span> <span class="n">cfg</span><span class="o">.</span><span class="na">javaHome</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="s">"HOME"</span><span class="o">),</span> <span class="n">cfg</span><span class="o">.</span><span class="na">home</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="s">"USER"</span><span class="o">),</span> <span class="n">cfg</span><span class="o">.</span><span class="na">user</span><span class="o">());</span>
+</pre></div>
 
 <h3>
 <a name="undefined-properties" class="anchor" href="#undefined-properties"><span class="mini-icon mini-icon-link"></span></a>UNDEFINED PROPERTIES</h3>
@@ -300,14 +301,14 @@ defaults.</p>
 <p>Another neat feature, is the possibility to provide parameters on method interfaces. The property values shall respect
 the positional notation specified by the <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html#syntax"><code>java.util.Formatter</code></a> class:</p>
 
-<pre><code>public interface SampleParamConfig extends Config {
-    @DefaultValue("Hello Mr. %s!")
-    String helloMr(String name);
-}
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">SampleParamConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Hello Mr. %s!"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">helloMr</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">);</span>
+<span class="o">}</span>
 
-SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
-System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
-</code></pre>
+<span class="n">SampleParamConfig</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">SampleParamConfig</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">cfg</span><span class="o">.</span><span class="na">helloMr</span><span class="o">(</span><span class="s">"Luigi"</span><span class="o">));</span> <span class="c1">// will println 'Hello Mr. Luigi!'</span>
+</pre></div>
 
 <h3>
 <a name="type-conversion" class="anchor" href="#type-conversion"><span class="mini-icon mini-icon-link"></span></a>TYPE CONVERSION</h3>
@@ -316,14 +317,14 @@ System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
 When you define the <em>mapping interface</em> you can use a wide set of return types, and they will be automatically
 converted from <code>String</code> to the primitive types and enums:</p>
 
-<pre><code>    int maxThreads();               // conversion happens from the value specified in the properties files.
+<div class="highlight"><pre><span class="kt">int</span> <span class="nf">maxThreads</span><span class="o">();</span>               <span class="c1">// conversion happens from the value specified in the properties files.</span>
 
-    @DefaultValue("3.1415")         // conversion happens also from @DefaultValue
-    double pi();
+<span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"3.1415"</span><span class="o">)</span>         <span class="c1">// conversion happens also from @DefaultValue</span>
+<span class="kt">double</span> <span class="nf">pi</span><span class="o">();</span>
 
-    @DefaultValue("NANOSECONDS");   // enum values are case sensitive!
-    TimeUnit timeUnit();            // java.util.concurrent.TimeUnit is an enum
-</code></pre>
+<span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"NANOSECONDS"</span><span class="o">);</span>   <span class="c1">// enum values are case sensitive!</span>
+<span class="n">TimeUnit</span> <span class="nf">timeUnit</span><span class="o">();</span>            <span class="c1">// java.util.concurrent.TimeUnit is an enum</span>
+</pre></div>
 
 <p>Since version 1.0.2 it is possible to have configuration interfaces to declare business objects as return types, many are
 compatible and you can also define your own objects:</p>
@@ -331,32 +332,32 @@ compatible and you can also define your own objects:</p>
 <p>The easiest way is to define your business object with a public constructor taking a single parameter of type
 <code>java.lang.String</code>:</p>
 
-<pre><code>public class CustomType {
-    private final String text;
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomType</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">text</span><span class="o">;</span>
 
-    public CustomType(String text) {
-        this.text = text;
-    }
+    <span class="kd">public</span> <span class="nf">CustomType</span><span class="o">(</span><span class="n">String</span> <span class="n">text</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">;</span>
+    <span class="o">}</span>
 
-    public String getText() {
-        return text;
-    }
-}
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getText</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
 
-public interface SpecialTypes extends Config {
-    @DefaultValue("foobar.txt")
-    File sampleFile();
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">SpecialTypes</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"foobar.txt"</span><span class="o">)</span>
+    <span class="n">File</span> <span class="nf">sampleFile</span><span class="o">();</span>
 
-    @DefaultValue("http://owner.aeonbits.org")
-    URL sampleURL();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"http://owner.aeonbits.org"</span><span class="o">)</span>
+    <span class="n">URL</span> <span class="nf">sampleURL</span><span class="o">();</span>
 
-    @DefaultValue("example")
-    CustomType customType();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"example"</span><span class="o">)</span>
+    <span class="n">CustomType</span> <span class="nf">customType</span><span class="o">();</span>
 
-    @DefaultValue("Hello %s!")
-    CustomType salutation(String name);
-}
-</code></pre>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Hello %s!"</span><span class="o">)</span>
+    <span class="n">CustomType</span> <span class="nf">salutation</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">);</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>OWNER API will take the value "example" and pass it to the CustomType constructor then return it.</p>
 
@@ -386,60 +387,61 @@ See also <a href="http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEd
 
 <p>Sometimes it may be useful to expand properties values from other properties:</p>
 
-<pre><code>story=The ${animal} jumped over the ${target}
-animal=quick ${color} fox
-target=${target.attribute} dog
-target.attribute=lazy
-color=brown
+<div class="highlight"><pre><span class="na">story</span><span class="o">=</span><span class="s">The ${animal} jumped over the ${target}</span>
+<span class="na">animal</span><span class="o">=</span><span class="s">quick ${color} fox</span>
+<span class="na">target</span><span class="o">=</span><span class="s">${target.attribute} dog</span>
+<span class="na">target.attribute</span><span class="o">=</span><span class="s">lazy</span>
+<span class="na">color</span><span class="o">=</span><span class="s">brown</span>
+</pre></div>
 
-public interface ConfigWithExpansion  extends Config {
-    String story();
-}
-</code></pre>
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ConfigWithExpansion</span>  <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="nf">story</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>The property <code>story</code> will expand to <em>The quick brown fox jumped over the lazy dog</em>.</p>
 
 <p>This also works with the annotations, but you need to specify every properties on the methods:</p>
 
-<pre><code>public interface ConfigWithExpansion extends Config {
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ConfigWithExpansion</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
 
-    @DefaultValue("The ${animal} jumped over the ${target}")
-    String story();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"The ${animal} jumped over the ${target}"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">story</span><span class="o">();</span>
 
-    @DefaultValue("quick ${color} fox")
-    String animal();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"quick ${color} fox"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">animal</span><span class="o">();</span>
 
-    @DefaultValue("${target.attribute} dog")
-    String target();
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"${target.attribute} dog"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">target</span><span class="o">();</span>
 
-    @Key("target.attribute")
-    @DefaultValue("lazy")
-    String targetAttribute();
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"target.attribute"</span><span class="o">)</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"lazy"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">targetAttribute</span><span class="o">();</span>
 
-    @DefaultValue("brown")
-    String color();
-}
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"brown"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">color</span><span class="o">();</span>
+<span class="o">}</span>
 
-ConfigWithExpansion conf = ConfigFactory.create(ConfigWithExpansion.class);
-String story = conf.story();
-</code></pre>
+<span class="n">ConfigWithExpansion</span> <span class="n">conf</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ConfigWithExpansion</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">String</span> <span class="n">story</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">story</span><span class="o">();</span>
+</pre></div>
 
 <p>Sometimes you may want expand System Properties or Environment Variables.
 This can be done using <em>imports</em> (see dedicated paragraph to learn more):</p>
 
-<pre><code>public interface SystemPropertiesExample extends Config {
-    @DefaultValue("Welcome: ${user.name}")
-    String welcomeString();
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">SystemPropertiesExample</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Welcome: ${user.name}"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">welcomeString</span><span class="o">();</span>
 
-    @DefaultValue("${TMPDIR}/tempFile.tmp")
-    File tempFile();
-}
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"${TMPDIR}/tempFile.tmp"</span><span class="o">)</span>
+    <span class="n">File</span> <span class="nf">tempFile</span><span class="o">();</span>
+<span class="o">}</span>
 
-SystemPropertiesExample conf =
-        ConfigFactory.create(SystemPropertiesExample.class, System.getProperties(), System.getenv());
-String welcome = conf.welcomeString();
-File temp = conf.tempFile();
-</code></pre>
+<span class="n">SystemPropertiesExample</span> <span class="n">conf</span> <span class="o">=</span>
+        <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">SystemPropertiesExample</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">System</span><span class="o">.</span><span class="na">getProperties</span><span class="o">(),</span> <span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">());</span>
+<span class="n">String</span> <span class="n">welcome</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">welcomeString</span><span class="o">();</span>
+<span class="n">File</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">tempFile</span><span class="o">();</span>
+</pre></div>
 
 <h3>
 <a name="debugging-aid" class="anchor" href="#debugging-aid"><span class="mini-icon mini-icon-link"></span></a>DEBUGGING AID</h3>
@@ -447,25 +449,25 @@ File temp = conf.tempFile();
 <p>In your <em>mapping interfaces</em> you can optionally define one of the following methods that may be convenient for
 debugging:</p>
 
-<pre><code>void list(PrintStream out);
-void list(PrintWriter out);
-</code></pre>
+<div class="highlight"><pre><span class="kt">void</span> <span class="nf">list</span><span class="o">(</span><span class="n">PrintStream</span> <span class="n">out</span><span class="o">);</span>
+<span class="kt">void</span> <span class="nf">list</span><span class="o">(</span><span class="n">PrintWriter</span> <span class="n">out</span><span class="o">);</span>
+</pre></div>
 
 <p>Those two methods were available in Java <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html">Properties</a> to help the debugging process, so here we kept it.</p>
 
 <p>You can use them to print the resolved properties (and eventual overrides that may occur when using the
 <code>LoadType.MERGE</code>):</p>
 
-<pre><code>public interface SampleConfig extends Config {
-    @Key("server.http.port")
-    int httpPort();
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">SampleConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">"server.http.port"</span><span class="o">)</span>
+    <span class="kt">int</span> <span class="nf">httpPort</span><span class="o">();</span>
 
-    void list(PrintStream out);
-}
+    <span class="kt">void</span> <span class="nf">list</span><span class="o">(</span><span class="n">PrintStream</span> <span class="n">out</span><span class="o">);</span>
+<span class="o">}</span>
 
-ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
-cfg.list(System.out);
-</code></pre>
+<span class="n">ServerConfig</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ServerConfig</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">cfg</span><span class="o">.</span><span class="na">list</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">);</span>
+</pre></div>
 
 <p>These two methods are <em>not</em> specified into <code>Config</code> interface, so you don't have them available in your <em>mapping
 interfaces</em> by default. This is done by purpose, to leave to the programmer the liberty to have this feature or not,
@@ -474,11 +476,11 @@ keeping your mapping interface hiding its internal details.</p>
 <p>If you want to have those methods - or just one of them - in all of your <em>mapping interfaces</em> you can define an
 intermediate adapter interface like the following:</p>
 
-<pre><code>public interface MyConfig extends Config {
-    void list(PrintStream out);
-    void list(PrintWriter out);
-}
-</code></pre>
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="kt">void</span> <span class="nf">list</span><span class="o">(</span><span class="n">PrintStream</span> <span class="n">out</span><span class="o">);</span>
+    <span class="kt">void</span> <span class="nf">list</span><span class="o">(</span><span class="n">PrintWriter</span> <span class="n">out</span><span class="o">);</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>then, you'll extend your mapping interfaces from <code>MyConfig</code> instead than using <code>Config</code> directly.</p>
 
@@ -509,14 +511,14 @@ $ mvn install
 
 <p>If you are using maven, you can add the OWNER dependency in your project:</p>
 
-<pre><code>&lt;dependencies&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.aeonbits.owner&lt;/groupId&gt;
-        &lt;artifactId&gt;owner&lt;/artifactId&gt;
-        &lt;version&gt;1.0.3&lt;/version&gt;
-    &lt;/dependency&gt;
-&lt;/dependencies&gt;
-</code></pre>
+<div class="highlight"><pre><span class="nt">&lt;dependencies&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.aeonbits.owner<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>owner<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.0.3<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;/dependencies&gt;</span>
+</pre></div>
 
 <p>The maven generated site, with all code reports and information can be found <a href="http://owner.newinstance.it/maven-site/">here</a>.</p>
 
@@ -598,7 +600,7 @@ verify all cases.</p>
 <a name="changelog" class="anchor" href="#changelog"><span class="mini-icon mini-icon-link"></span></a>CHANGELOG</h2>
 
 <h3>
-<a name="104" class="anchor" href="#104"><span class="mini-icon mini-icon-link"></span></a>1.0.4</h3>
+<a name="104-under-development" class="anchor" href="#104-under-development"><span class="mini-icon mini-icon-link"></span></a>1.0.4 (under development)</h3>
 
 <ul>
 <li>Fixed bug <a href="https://github.com/lviggiano/owner/issues/17">#17</a> Substitution and format not working as expected when used together</li>
