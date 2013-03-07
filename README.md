@@ -23,32 +23,38 @@ USAGE
 
 The approach used by OWNER APIs, is to define a Java interface associated to a properties file.
 
-Suppose your properties file is defined as ServerConfig.properties:
+Suppose your properties file is defined as `ServerConfig.properties`:
 
-    port=80
-    hostname=foobar.com
-    maxThreads=100
+```properties
+port=80
+hostname=foobar.com
+maxThreads=100
+```
     
-To access this property you need to define a convenient Java interface in ServerConfig.java:
+To access this property you need to define a convenient Java interface in `ServerConfig.java`:
 
-    public interface ServerConfig extends Config {
-        int port();
-        String hostname();
-        @DefaultValue("42")
-        int maxThreads();
-    }
+```java
+public interface ServerConfig extends Config {
+    int port();
+    String hostname();
+    @DefaultValue("42")
+    int maxThreads();
+}
+```
 
 We'll call this interface the *Properties Mapping Interface* or just *Mapping Interface* since its goal is to map
 Properties into a an easy to use piece of code.
     
 Then, you can use it from inside your code:
 
-    public class MyApp {    
-        public static void main(String[] args) {
-            ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
-            System.out.println("Server " + cfg.hostname() + ":" + cfg.port() + " will run " + cfg.maxThreads());
-        }
+```java
+public class MyApp {    
+    public static void main(String[] args) {
+        ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+        System.out.println("Server " + cfg.hostname() + ":" + cfg.port() + " will run " + cfg.maxThreads());
     }
+}
+```
 
 Did you notice that there is also the `@DefaultValue("42")` annotation specified in the example? It is used in case the
 `maxThread` key is missing from the properties file.  
@@ -57,25 +63,29 @@ about automatic type conversion.
 
 With annotations, you can also customize the property keys:
 
-    # Example of property file 'ServerConfig.properties'
-    server.http.port=80
-    server.host.name=foobar.com
-    server.max.threads=100
+```properties
+# Example of property file 'ServerConfig.properties'
+server.http.port=80
+server.host.name=foobar.com
+server.max.threads=100
+```
 
-    /*
-     * Example of ServerConfig.java interface mapping the previous properties file
-     */
-    public interface ServerConfig extends Config {
-        @Key("server.http.port")
-        int port();
+```java
+/*
+ * Example of ServerConfig.java interface mapping the previous properties file
+ */
+public interface ServerConfig extends Config {
+    @Key("server.http.port")
+    int port();
 
-        @Key("server.host.name")
-        String hostname();
+    @Key("server.host.name")
+    String hostname();
 
-        @Key("server.max.threads");
-        @DefaultValue("42")
-        int maxThreads();
-    }
+    @Key("server.max.threads");
+    @DefaultValue("42")
+    int maxThreads();
+}
+```
 
 The `@DefaultValue` and `@Key` annotations are the basics to start using this API.
 
@@ -91,19 +101,21 @@ For instance, if your *mapping interface* is com.foo.bar.ServerConfig, OWNER API
 
 But this logic can be tailored to your needs using some additional annotations:
 
-    @Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
-    public interface ServerConfig extends Config {
-        
-        @Key("server.http.port")
-        int port();
-        
-        @Key("server.host.name")
-        String hostname();
-        
-        @Key("server.max.threads");
-        @DefaultValue("42")
-        int maxThreads();
-    }
+```java
+@Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
+public interface ServerConfig extends Config {
+    
+    @Key("server.http.port")
+    int port();
+    
+    @Key("server.host.name")
+    String hostname();
+    
+    @Key("server.max.threads");
+    @DefaultValue("42")
+    int maxThreads();
+}
+```
 
 In the above example, OWNER will try to load the properties from several `@Sources`:
 
@@ -127,11 +139,13 @@ You can also specify this load policy explicitly using `@LoadPolicy(LoadType.FIR
 But what if you want to have some *overriding* between properties? This is definitely possible: you can do it with
 the annotation `@LoadPolicy(LoadType.MERGE)`:
 
-    @LoadPolicy(LoadType.MERGE)
-    @Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
-    public interface ServerConfig extends Config {
-        ...
-    }
+```java
+@LoadPolicy(LoadType.MERGE)
+@Sources({ "file:~/.myapp.config", "file:/etc/myapp.config", "classpath:foo/bar/baz.properties" })
+public interface ServerConfig extends Config {
+    ...
+}
+```
 
 In this case, for *every property* all the specified URLs will be queries, and the first resource defining the property
 will prevail.
@@ -159,76 +173,84 @@ You can use another mechanism to load your properties into a *mapping interface*
 And this mechanism is to specify a [Properties][properties] object programmatically when calling
 `ConfigFactory.create()`:
 
-        public interface ImportConfig extends Config {
+```java
+public interface ImportConfig extends Config {
 
-            @DefaultValue("apple")
-            String foo();
+    @DefaultValue("apple")
+    String foo();
 
-            @DefaultValue("pear")
-            String bar();
+    @DefaultValue("pear")
+    String bar();
 
-            @DefaultValue("orange")
-            String baz();
+    @DefaultValue("orange")
+    String baz();
 
-        }
+}
 
-        // then...
+// then...
 
-        Properties props = new Properties();
-        props.setProperty("foo", "pineapple");
-        props.setProperty("bar", "lime");
+Properties props = new Properties();
+props.setProperty("foo", "pineapple");
+props.setProperty("bar", "lime");
 
-        ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props); // props imported!
+ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props); // props imported!
 
-        assertEquals("pineapple", cfg.foo());
-        assertEquals("lime", cfg.bar());
-        assertEquals("orange", cfg.baz());
+assertEquals("pineapple", cfg.foo());
+assertEquals("lime", cfg.bar());
+assertEquals("orange", cfg.baz());
+```
 
 You can specify multiple properties to import on the same line:
 
-        ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props1, props2, ...);
+```java
+ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props1, props2, ...);
+```
 
 If there are prop1 and prop2 defining two different values for the same property key, the one specified first will
 prevail:
 
-        Properties p1 = new Properties();
-        p1.setProperty("foo", "pineapple");
-        p1.setProperty("bar", "lime");
+```java
+Properties p1 = new Properties();
+p1.setProperty("foo", "pineapple");
+p1.setProperty("bar", "lime");
 
-        Properties p2 = new Properties();
-        p2.setProperty("bar", "grapefruit");
-        p2.setProperty("baz", "blackberry");
+Properties p2 = new Properties();
+p2.setProperty("bar", "grapefruit");
+p2.setProperty("baz", "blackberry");
 
 
-        ImportConfig cfg = ConfigFactory.create(ImportConfig.class, p1, p2); // props imported!
+ImportConfig cfg = ConfigFactory.create(ImportConfig.class, p1, p2); // props imported!
 
-        assertEquals("pineapple", cfg.foo());
-        assertEquals("lime", cfg.bar()); // p1 prevails, so this is lime and not grapefruit
-        assertEquals("blackberry", cfg.baz());
+assertEquals("pineapple", cfg.foo());
+assertEquals("lime", cfg.bar()); // p1 prevails, so this is lime and not grapefruit
+assertEquals("blackberry", cfg.baz());
+```
 
 This is pretty handy if you want to reference system properties or environment variables:
 
-    interface SystemEnvProperties extends Config {
-        @Key("file.separator")
-        String fileSeparator();
+```java
+interface SystemEnvProperties extends Config {
+    @Key("file.separator")
+    String fileSeparator();
 
-        @Key("java.home")
-        String javaHome();
+    @Key("java.home")
+    String javaHome();
 
-        @Key("HOME")
-        String home();
+    @Key("HOME")
+    String home();
 
-        @Key("USER")
-        String user();
+    @Key("USER")
+    String user();
 
-        void list(PrintStream out);
-    }
+    void list(PrintStream out);
+}
 
-    SystemEnvProperties cfg = ConfigFactory.create(SystemEnvProperties.class, System.getProperties(), System.getenv());
-    assertEquals(File.separator, cfg.fileSeparator());
-    assertEquals(System.getProperty("java.home"), cfg.javaHome());
-    assertEquals(System.getenv().get("HOME"), cfg.home());
-    assertEquals(System.getenv().get("USER"), cfg.user());
+SystemEnvProperties cfg = ConfigFactory.create(SystemEnvProperties.class, System.getProperties(), System.getenv());
+assertEquals(File.separator, cfg.fileSeparator());
+assertEquals(System.getProperty("java.home"), cfg.javaHome());
+assertEquals(System.getenv().get("HOME"), cfg.home());
+assertEquals(System.getenv().get("USER"), cfg.user());
+```
 
 ### UNDEFINED PROPERTIES
 
@@ -249,13 +271,15 @@ the positional notation specified by the [`java.util.Formatter`][fmt] class:
 
   [fmt]: http://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html#syntax
 
-    public interface SampleParamConfig extends Config {
-        @DefaultValue("Hello Mr. %s!")
-        String helloMr(String name);
-    }
-    
-    SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
-    System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
+```java
+public interface SampleParamConfig extends Config {
+    @DefaultValue("Hello Mr. %s!")
+    String helloMr(String name);
+}
+
+SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
+System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
+```
 
 ### TYPE CONVERSION
 
@@ -263,13 +287,15 @@ OWER API supports properties conversion for primitive types and enums.
 When you define the *mapping interface* you can use a wide set of return types, and they will be automatically
 converted from `String` to the primitive types and enums:
 
-        int maxThreads();               // conversion happens from the value specified in the properties files.
+```java
+int maxThreads();               // conversion happens from the value specified in the properties files.
 
-        @DefaultValue("3.1415")         // conversion happens also from @DefaultValue
-        double pi();
+@DefaultValue("3.1415")         // conversion happens also from @DefaultValue
+double pi();
 
-        @DefaultValue("NANOSECONDS");   // enum values are case sensitive!
-        TimeUnit timeUnit();            // java.util.concurrent.TimeUnit is an enum
+@DefaultValue("NANOSECONDS");   // enum values are case sensitive!
+TimeUnit timeUnit();            // java.util.concurrent.TimeUnit is an enum
+```
 
 Since version 1.0.2 it is possible to have configuration interfaces to declare business objects as return types, many are
 compatible and you can also define your own objects:
@@ -277,31 +303,33 @@ compatible and you can also define your own objects:
 The easiest way is to define your business object with a public constructor taking a single parameter of type
 `java.lang.String`:
 
-    public class CustomType {
-        private final String text;
+```java
+public class CustomType {
+    private final String text;
 
-        public CustomType(String text) {
-            this.text = text;
-        }
-
-        public String getText() {
-            return text;
-        }
+    public CustomType(String text) {
+        this.text = text;
     }
 
-    public interface SpecialTypes extends Config {
-        @DefaultValue("foobar.txt")
-        File sampleFile();
-
-        @DefaultValue("http://owner.aeonbits.org")
-        URL sampleURL();
-
-        @DefaultValue("example")
-        CustomType customType();
-
-        @DefaultValue("Hello %s!")
-        CustomType salutation(String name);
+    public String getText() {
+        return text;
     }
+}
+
+public interface SpecialTypes extends Config {
+    @DefaultValue("foobar.txt")
+    File sampleFile();
+
+    @DefaultValue("http://owner.aeonbits.org")
+    URL sampleURL();
+
+    @DefaultValue("example")
+    CustomType customType();
+
+    @DefaultValue("Hello %s!")
+    CustomType salutation(String name);
+}
+```
 
 OWNER API will take the value "example" and pass it to the CustomType constructor then return it.
 
@@ -334,80 +362,92 @@ See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you wan
 
 Sometimes it may be useful to expand properties values from other properties:
 
-    story=The ${animal} jumped over the ${target}
-    animal=quick ${color} fox
-    target=${target.attribute} dog
-    target.attribute=lazy
-    color=brown
+```properties
+story=The ${animal} jumped over the ${target}
+animal=quick ${color} fox
+target=${target.attribute} dog
+target.attribute=lazy
+color=brown
+```
 
-    public interface ConfigWithExpansion  extends Config {
-        String story();
-    }
+```java
+public interface ConfigWithExpansion  extends Config {
+    String story();
+}
+```
 
 The property `story` will expand to *The quick brown fox jumped over the lazy dog*.
 
 This also works with the annotations, but you need to specify every properties on the methods:
 
-    public interface ConfigWithExpansion extends Config {
+```java
+public interface ConfigWithExpansion extends Config {
 
-        @DefaultValue("The ${animal} jumped over the ${target}")
-        String story();
+    @DefaultValue("The ${animal} jumped over the ${target}")
+    String story();
 
-        @DefaultValue("quick ${color} fox")
-        String animal();
+    @DefaultValue("quick ${color} fox")
+    String animal();
 
-        @DefaultValue("${target.attribute} dog")
-        String target();
+    @DefaultValue("${target.attribute} dog")
+    String target();
 
-        @Key("target.attribute")
-        @DefaultValue("lazy")
-        String targetAttribute();
+    @Key("target.attribute")
+    @DefaultValue("lazy")
+    String targetAttribute();
 
-        @DefaultValue("brown")
-        String color();
-    }
+    @DefaultValue("brown")
+    String color();
+}
 
-    ConfigWithExpansion conf = ConfigFactory.create(ConfigWithExpansion.class);
-    String story = conf.story();
+ConfigWithExpansion conf = ConfigFactory.create(ConfigWithExpansion.class);
+String story = conf.story();
+```
 
 Sometimes you may want expand System Properties or Environment Variables.
 This can be done using *imports* (see dedicated paragraph to learn more):
 
-    public interface SystemPropertiesExample extends Config {
-        @DefaultValue("Welcome: ${user.name}")
-        String welcomeString();
+```java
+public interface SystemPropertiesExample extends Config {
+    @DefaultValue("Welcome: ${user.name}")
+    String welcomeString();
 
-        @DefaultValue("${TMPDIR}/tempFile.tmp")
-        File tempFile();
-    }
+    @DefaultValue("${TMPDIR}/tempFile.tmp")
+    File tempFile();
+}
 
-    SystemPropertiesExample conf =
-            ConfigFactory.create(SystemPropertiesExample.class, System.getProperties(), System.getenv());
-    String welcome = conf.welcomeString();
-    File temp = conf.tempFile();
+SystemPropertiesExample conf =
+        ConfigFactory.create(SystemPropertiesExample.class, System.getProperties(), System.getenv());
+String welcome = conf.welcomeString();
+File temp = conf.tempFile();
+```
 
 ### DEBUGGING AID
 
 In your *mapping interfaces* you can optionally define one of the following methods that may be convenient for
 debugging:
 
-    void list(PrintStream out);
-    void list(PrintWriter out);
+```java
+void list(PrintStream out);
+void list(PrintWriter out);
+```
 
 Those two methods were available in Java [Properties][properties] to help the debugging process, so here we kept it.
 
 You can use them to print the resolved properties (and eventual overrides that may occur when using the
 `LoadType.MERGE`):
 
-    public interface SampleConfig extends Config {
-        @Key("server.http.port")
-        int httpPort();
+```java
+public interface SampleConfig extends Config {
+    @Key("server.http.port")
+    int httpPort();
 
-        void list(PrintStream out);
-    }
+    void list(PrintStream out);
+}
 
-    ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
-    cfg.list(System.out);
+ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+cfg.list(System.out);
+```
 
 These two methods are *not* specified into `Config` interface, so you don't have them available in your *mapping
 interfaces* by default. This is done by purpose, to leave to the programmer the liberty to have this feature or not,
@@ -416,10 +456,12 @@ keeping your mapping interface hiding its internal details.
 If you want to have those methods - or just one of them - in all of your *mapping interfaces* you can define an
 intermediate adapter interface like the following:
 
-    public interface MyConfig extends Config {
-        void list(PrintStream out);
-        void list(PrintWriter out);
-    }
+```java
+public interface MyConfig extends Config {
+    void list(PrintStream out);
+    void list(PrintWriter out);
+}
+```
 
 then, you'll extend your mapping interfaces from `MyConfig` instead than using `Config` directly.
 
@@ -435,9 +477,11 @@ BUILD
 
 OWNER uses maven to build.
 
-    $ git clone git://github.com/lviggiano/owner.git
-    $ cd owner
-    $ mvn install
+```
+$ git clone git://github.com/lviggiano/owner.git
+$ cd owner
+$ mvn install
+```
 
 This will install OWNER jars in your local maven repository. Or, you can pick the jar files from the target directory.
 
@@ -450,13 +494,15 @@ MAVEN
 
 If you are using maven, you can add the OWNER dependency in your project:
 
-    <dependencies>
-        <dependency>
-            <groupId>org.aeonbits.owner</groupId>
-            <artifactId>owner</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-    </dependencies>
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.aeonbits.owner</groupId>
+        <artifactId>owner</artifactId>
+        <version>1.0.3</version>
+    </dependency>
+</dependencies>
+```
 
 The maven generated site, with all code reports and information can be found [here][maven-site].
 
@@ -486,7 +532,9 @@ OWNER codebase is very compact. It has been developed using test driven developm
 To execute the tests, you need maven properly installed and configured in your system, then run the following command
 from the distribution root:
 
-    $ mvn test
+```
+$ mvn test
+```
 
   [fully covered]: http://newinstance.it/owner/maven-site/cobertura/index.html
 
