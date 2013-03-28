@@ -8,8 +8,14 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.DisableFeature;
+import org.aeonbits.owner.Config.DisableableFeature;
+
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author Luigi R. Viggiano
@@ -38,5 +44,17 @@ class Util {
     static void ignore() {
         // the ignore method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
         // complaining about empty catch methods.
+    }
+
+    static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
+        Class<DisableFeature> annotation = DisableFeature.class;
+        if (isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
+                isFeatureDisabled(feature, method.getAnnotation(annotation)))
+            return true;
+        return false;
+    }
+
+    private static boolean isFeatureDisabled(DisableableFeature feature, DisableFeature annotation) {
+        return annotation != null && asList(annotation.value()).contains(feature);
     }
 }

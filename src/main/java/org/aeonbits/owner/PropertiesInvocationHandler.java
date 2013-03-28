@@ -21,8 +21,10 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import static java.lang.String.format;
+import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.unsupported;
 import static org.aeonbits.owner.PropertiesMapper.key;
+import static org.aeonbits.owner.Util.isFeatureDisabled;
 
 /**
  * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
@@ -69,7 +71,13 @@ class PropertiesInvocationHandler implements InvocationHandler {
         String value = properties.getProperty(key);
         if (value == null)
             return null;
-        return convert(method.getReturnType(), format(substitutor.replace(value), args));
+        return convert(method.getReturnType(), format(expandVariables(method, value), args));
+    }
+
+    private String expandVariables(Method method, String value) {
+        if (isFeatureDisabled(method, VARIABLE_EXPANSION))
+            return value;
+        return substitutor.replace(value);
     }
 
     private Object delegate(Object target, Method method, Object... args) throws InvocationTargetException,

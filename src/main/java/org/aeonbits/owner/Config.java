@@ -11,6 +11,7 @@ package org.aeonbits.owner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.MalformedURLException;
@@ -138,7 +139,7 @@ public interface Config {
                         InputStream stream = getInputStream(url);
                         if (stream != null)
                             try {
-                               result.load(stream);
+                                result.load(stream);
                             } finally {
                                 close(stream);
                             }
@@ -151,5 +152,28 @@ public interface Config {
         };
 
         abstract Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException;
+    }
+
+    /**
+     * Specifies to disable some of the features supported by the API.
+     * This may be useful in case the user prefers to implement by his own, or just has troubles with something that
+     * is unwanted.
+     * Features that can be disabled are specified in the enum {@link DisableableFeature}.
+     * @since 1.0.4
+     */
+    @Retention(RUNTIME)
+    @Target({ElementType.METHOD, ElementType.TYPE})
+    @Documented
+    @interface DisableFeature {
+        DisableableFeature[] value();
+    }
+
+    /**
+     * This enum contains the features that can be disabled using the annotation {@link DisableFeature}.
+     * @since 1.0.4
+     */
+    enum DisableableFeature {
+        VARIABLE_EXPANSION,
+        PARAMETER_FORMATTING
     }
 }

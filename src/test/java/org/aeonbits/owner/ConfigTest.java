@@ -292,5 +292,4 @@ public class ConfigTest {
         assertEquals("Mr. Luigi", cfg.mister("Luigi"));
     }
 
-
 }
