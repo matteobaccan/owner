@@ -15,7 +15,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class WithImportedPropertiesTest {
 

@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class SpecialTypesTest {
 

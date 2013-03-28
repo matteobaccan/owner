@@ -15,7 +15,7 @@ import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class UtilTest {
     @Test(expected = UnsupportedOperationException.class)

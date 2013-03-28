@@ -8,14 +8,12 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.DisableFeature;
 import org.junit.Test;
 
-import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class ConfigWithSubstitutionTest {
 
@@ -79,33 +77,4 @@ public class ConfigWithSubstitutionTest {
         String color();
     }
 
-    public static interface ConfigWithSubstitutionDisabledOnMethod extends Config {
-        @DefaultValue("Earth")
-        String world();
-
-        @DisableFeature(VARIABLE_EXPANSION)
-        @DefaultValue("Hello ${world}.")
-        String sayHelloDisabled();
-    }
-
-    @Test
-    public void shouldNotExpandWorldWhenDisabledOnMethodLevel() {
-        ConfigWithSubstitutionDisabledOnMethod cfg = ConfigFactory.create(ConfigWithSubstitutionDisabledOnMethod.class);
-        assertEquals("Hello ${world}.", cfg.sayHelloDisabled());
-    }
-
-    @DisableFeature(VARIABLE_EXPANSION)
-    public static interface ConfigWithSubstitutionDisabledOnClass extends Config {
-        @DefaultValue("Earth")
-        String world();
-
-        @DefaultValue("Hello ${world}.")
-        String sayHelloDisabled();
-    }
-
-    @Test
-    public void shouldNotExpandWorldWhenDisabledOnClassLevel() {
-        ConfigWithSubstitutionDisabledOnClass cfg = ConfigFactory.create(ConfigWithSubstitutionDisabledOnClass.class);
-        assertEquals("Hello ${world}.", cfg.sayHelloDisabled());
-    }
 }

@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests properties resolution.
  *
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class PropertyNotSetTest {
 

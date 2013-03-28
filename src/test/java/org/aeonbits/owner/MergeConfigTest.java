@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class MergeConfigTest {
     @Test

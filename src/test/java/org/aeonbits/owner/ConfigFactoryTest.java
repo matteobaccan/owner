@@ -11,7 +11,7 @@ package org.aeonbits.owner;
 import org.junit.Test;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class ConfigFactoryTest {
     @Test(expected = UnsupportedOperationException.class)

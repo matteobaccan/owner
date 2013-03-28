@@ -16,7 +16,7 @@ import java.io.PrintStream;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class SystemPropertiesAndEnvTest {
     interface SystemEnvProperties extends Config {
