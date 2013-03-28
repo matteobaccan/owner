@@ -25,12 +25,16 @@ public class DisableFeatureTest {
         @DisableFeature(VARIABLE_EXPANSION)
         @DefaultValue("Hello ${world}.")
         String sayHelloDisabled();
+
+        @DefaultValue("Hello ${world}.")
+        String sayHelloEnabled();
     }
 
     @Test
     public void shouldNotExpandWorldWhenDisabledOnMethodLevel() {
         ConfigWithSubstitutionDisabledOnMethod cfg = ConfigFactory.create(ConfigWithSubstitutionDisabledOnMethod.class);
         assertEquals("Hello ${world}.", cfg.sayHelloDisabled());
+        assertEquals("Hello Earth.", cfg.sayHelloEnabled());
     }
 
     @DisableFeature(VARIABLE_EXPANSION)
@@ -40,12 +44,16 @@ public class DisableFeatureTest {
 
         @DefaultValue("Hello ${world}.")
         String sayHelloDisabled();
+
+        @DefaultValue("Hello ${world}.")
+        String sayHelloEnabled();
     }
 
     @Test
     public void shouldNotExpandWorldWhenDisabledOnClassLevel() {
         ConfigWithSubstitutionDisabledOnClass cfg = ConfigFactory.create(ConfigWithSubstitutionDisabledOnClass.class);
         assertEquals("Hello ${world}.", cfg.sayHelloDisabled());
+        assertEquals("Hello ${world}.", cfg.sayHelloEnabled());
     }
 
 }
