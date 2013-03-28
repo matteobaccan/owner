@@ -19,7 +19,7 @@ import static java.util.Arrays.asList;
 /**
  * @author Luigi R. Viggiano
  */
-class Util {
+abstract class Util {
     Util() {
         prohibitInstantiation();
     }
