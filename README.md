@@ -653,9 +653,12 @@ CHANGELOG
 ---------
 ### 1.0.4 (under development)
 
- * Fixed bug [#17][bug-17] Substitution and format not working as expected when used together
+ * Implemented @DisableFeature annotation to provide the possibility to disable variable expansion and parametrized
+   formatting. See Issue [#20][issue-20].
+ * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together
  
-  [bug-17]: https://github.com/lviggiano/owner/issues/17
+  [issue-17]: https://github.com/lviggiano/owner/issues/17
+  [issue-20]: https://github.com/lviggiano/owner/issues/20
 
 ### 1.0.3
 
