@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Properties;
 
-import static java.lang.String.format;
+import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.unsupported;
 import static org.aeonbits.owner.PropertiesMapper.key;
@@ -71,7 +71,13 @@ class PropertiesInvocationHandler implements InvocationHandler {
         String value = properties.getProperty(key);
         if (value == null)
             return null;
-        return convert(method.getReturnType(), format(expandVariables(method, value), args));
+        return convert(method.getReturnType(), format(method, expandVariables(method, value), args));
+    }
+
+    private String format(Method method, String format, Object... args) {
+        if (isFeatureDisabled(method, PARAMETER_FORMATTING))
+            return format;
+        return String.format(format, args);
     }
 
     private String expandVariables(Method method, String value) {
