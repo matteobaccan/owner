@@ -310,6 +310,21 @@ the positional notation specified by the <a href="http://docs.oracle.com/javase/
 <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">cfg</span><span class="o">.</span><span class="na">helloMr</span><span class="o">(</span><span class="s">"Luigi"</span><span class="o">));</span> <span class="c1">// will println 'Hello Mr. Luigi!'</span>
 </pre></div>
 
+<h4>
+<a name="disabling-parametrized-properties-formatting" class="anchor" href="#disabling-parametrized-properties-formatting"><span class="mini-icon mini-icon-link"></span></a>DISABLING PARAMETRIZED PROPERTIES FORMATTING</h4>
+
+<p>The parametrized properties feature can be disabled if the user doesn't find it convenient for some reason.
+This can be done using the <code>@DisableFeature</code> annotation:</p>
+
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Sample</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DisableFeature</span><span class="o">(</span><span class="n">PARAMETER_FORMATTING</span><span class="o">)</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Hello %s."</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">hello</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">);</span> <span class="c1">// will return the string "Hello %s." ignoring the parameter.</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>The <code>@DisabledFeature</code> annotation can be applied on method level and/or on class level.</p>
+
 <h3>
 <a name="type-conversion" class="anchor" href="#type-conversion"><span class="mini-icon mini-icon-link"></span></a>TYPE CONVERSION</h3>
 
@@ -441,6 +456,47 @@ This can be done using <em>imports</em> (see dedicated paragraph to learn more):
         <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">SystemPropertiesExample</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">System</span><span class="o">.</span><span class="na">getProperties</span><span class="o">(),</span> <span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">());</span>
 <span class="n">String</span> <span class="n">welcome</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">welcomeString</span><span class="o">();</span>
 <span class="n">File</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">tempFile</span><span class="o">();</span>
+</pre></div>
+
+<h4>
+<a name="disabling-variables-expansion" class="anchor" href="#disabling-variables-expansion"><span class="mini-icon mini-icon-link"></span></a>DISABLING VARIABLES EXPANSION</h4>
+
+<p>The variables expansion feature can be disabled if the user doesn't find it convenient for some reason.
+This can be done using the <code>@DisableFeature</code> annotation:</p>
+
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Sample</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Earth"</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">world</span><span class="o">();</span>
+
+    <span class="nd">@DisableFeature</span><span class="o">(</span><span class="n">VARIABLE_EXPANSION</span><span class="o">)</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Hello ${world}."</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">sayHello</span><span class="o">();</span> <span class="c1">// will return the string "Hello ${world}."</span>
+<span class="o">}</span>
+
+</pre></div>
+
+<p>The <code>@DisabledFeature</code> annotation can be applied on method level and/or on class level.</p>
+
+<h3>
+<a name="disabling-unwanted-features" class="anchor" href="#disabling-unwanted-features"><span class="mini-icon mini-icon-link"></span></a>DISABLING UNWANTED FEATURES</h3>
+
+<p>It is possible to disable some of the features implemented in the API, if for some reasons they are inconvenient for the
+programmer. This can be done using the <a href="http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.DisableFeature.html"><code>@DisabledFeature</code></a> annotation, as explained in other paragraphs in this
+tutorial.</p>
+
+<p>The <code>@DisabledFeature</code> can also be combined with multiple <a href="http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.DisableableFeature.html"><code>DisableableFeature</code></a> and it can be used on method level
+or on class level:</p>
+
+<div class="highlight"><pre><span class="nd">@DisableFeature</span><span class="o">({</span><span class="n">VARIABLE_EXPANSION</span><span class="o">,</span> <span class="n">PARAMETER_FORMATTING</span><span class="o">})</span> <span class="c1">// on class level...</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">interface</span> <span class="nc">SampleConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Earth"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">planet</span><span class="o">();</span>
+
+    <span class="nd">@DisableFeature</span><span class="o">({</span><span class="n">VARIABLE_EXPANSION</span><span class="o">,</span> <span class="n">PARAMETER_FORMATTING</span><span class="o">})</span> <span class="c1">// on method level...</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">"Hello %s, welcome on ${planet}!"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">hello</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">);</span> <span class="c1">// will return the string "Hello %s, welcome on ${planet}!" ignoring the parameter.</span>
+<span class="o">}</span>
+
 </pre></div>
 
 <h3>
@@ -603,6 +659,8 @@ verify all cases.</p>
 <a name="104-under-development" class="anchor" href="#104-under-development"><span class="mini-icon mini-icon-link"></span></a>1.0.4 (under development)</h3>
 
 <ul>
+<li>Implemented <code>@DisableFeature</code> annotation to provide the possibility to disable variable expansion and parametrized
+formatting. See Issue <a href="https://github.com/lviggiano/owner/issues/20">#20</a>.</li>
 <li>Fixed bug <a href="https://github.com/lviggiano/owner/issues/17">#17</a> Substitution and format not working as expected when used together</li>
 </ul><h3>
 <a name="103" class="anchor" href="#103"><span class="mini-icon mini-icon-link"></span></a>1.0.3</h3>
