@@ -11,7 +11,6 @@ package org.aeonbits.owner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.MalformedURLException;
@@ -162,7 +161,7 @@ public interface Config {
      * @since 1.0.4
      */
     @Retention(RUNTIME)
-    @Target({ElementType.METHOD, ElementType.TYPE})
+    @Target({METHOD, TYPE})
     @Documented
     @interface DisableFeature {
         DisableableFeature[] value();

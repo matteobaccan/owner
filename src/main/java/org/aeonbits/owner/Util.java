@@ -12,7 +12,6 @@ import org.aeonbits.owner.Config.DisableFeature;
 import org.aeonbits.owner.Config.DisableableFeature;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 
 import static java.util.Arrays.asList;
@@ -31,7 +30,7 @@ class Util {
 
     static <T> T[] reverse(T[] array) {
         T[] copy = array.clone();
-        Collections.reverse(Arrays.asList(copy));
+        Collections.reverse(asList(copy));
         return copy;
     }
 
