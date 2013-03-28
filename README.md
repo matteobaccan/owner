@@ -281,6 +281,21 @@ SampleParamConfig cfg = ConfigFactory.create(SampleParamConfig.class);
 System.out.println(cfg.helloMr("Luigi")); // will println 'Hello Mr. Luigi!'
 ```
 
+#### DISABLING PARAMETRIZED PROPERTIES FORMATTING
+
+The parametrized properties feature can be disabled if the user doesn't find it convenient for some reason.
+This can be done using the `@DisableFeature` annotation:
+
+```java
+public interface Sample extends Config {
+    @DisableFeature(PARAMETER_FORMATTING)
+    @DefaultValue("Hello %s.")
+    public String hello(String name); // will return the string "Hello %s." ignoring the parameter.
+}
+```
+
+The `@DisabledFeature` annotation can be applied on method level and/or on class level.
+
 ### TYPE CONVERSION
 
 OWER API supports properties conversion for primitive types and enums.
@@ -421,6 +436,50 @@ SystemPropertiesExample conf =
 String welcome = conf.welcomeString();
 File temp = conf.tempFile();
 ```
+
+#### DISABLING VARIABLES EXPANSION
+
+The variables expansion feature can be disabled if the user doesn't find it convenient for some reason.
+This can be done using the `@DisableFeature` annotation:
+
+```java
+public interface Sample extends Config {
+    @DefaultValue("Earth")
+    String world();
+
+    @DisableFeature(VARIABLE_EXPANSION)
+    @DefaultValue("Hello ${world}.")
+    String sayHello(); // will return the string "Hello ${world}."
+}
+
+```
+
+The `@DisabledFeature` annotation can be applied on method level and/or on class level.
+
+### DISABLING UNWANTED FEATURES
+It is possible to disable some of the features implemented in the API, if for some reasons they are inconvenient for the
+programmer. This can be done using the [`@DisabledFeature`][df] annotation, as explained in other paragraphs in this
+tutorial.
+
+The `@DisabledFeature` can also be combined with multiple [`DisableableFeature`][dfe] and it can be used on method level
+or on class level:
+
+```java
+@DisableFeature({VARIABLE_EXPANSION, PARAMETER_FORMATTING}) // on class level...
+public static interface SampleConfig extends Config {
+    @DefaultValue("Earth")
+    public String planet();
+
+    @DisableFeature({VARIABLE_EXPANSION, PARAMETER_FORMATTING}) // on method level...
+    @DefaultValue("Hello %s, welcome on ${planet}!")
+    public String hello(String name); // will return the string "Hello %s, welcome on ${planet}!" ignoring the parameter.
+}
+
+```
+
+  [dfe]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.DisableableFeature.html
+  [df]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.DisableFeature.html
+
 
 ### DEBUGGING AID
 
