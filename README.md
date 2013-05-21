@@ -361,6 +361,7 @@ But there is more. OWNER API supports automatic conversion for:
   9. Any class declaring a public *static* method `valueOf(java.lang.String)` that returns an instance of itself.
   10. Any class for which you can register a [`PropertyEditor`][propedit] via
      [`PropertyEditorManager.registerEditor()`][propeditmanager].
+  11. Any array having above types as elements.
 
 If OWNER API cannot find any way to map your business object, you'll receive a `java.lang.UnsupportedOperationException`
 with some meaningful description to identify the problem as quickly as possible.
