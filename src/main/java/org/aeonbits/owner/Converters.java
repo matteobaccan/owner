@@ -97,24 +97,22 @@ enum Converters {
     ARRAY {
         @Override
         Object convert(Class<?> targetType, String text) {
-            if (!targetType.isArray()) {
+            if (!targetType.isArray())
                 return null;
-            }
 
             Class<?> type = targetType.getComponentType();
 
-            if (text.trim().isEmpty()) {
+            if (text.trim().isEmpty())
                 return Array.newInstance(type, 0);
-            }
 
-            final String separator = ","; // TODO: allow the user to specify his own, via annotation
+            String separator = ","; // TODO: allow the user to specify his own, via annotation
             String[] chunks = text.split(separator, -1);
 
             Converters converter = findAppropriateConverter(type, chunks[0]);
             Object result = Array.newInstance(type, chunks.length);
 
             for (int i = 0; i < chunks.length; i++) {
-                final String chunk = chunks[i].trim();
+                String chunk = chunks[i].trim();
                 Object value = converter.convert(type, chunk);
                 Array.set(result, i, value);
             }
@@ -123,13 +121,10 @@ enum Converters {
         }
 
         private Converters findAppropriateConverter(Class<?> targetType, String text) {
-            for (Converters converter : values()) {
-                if (converter.convert(targetType, text) != null) {
+            for (Converters converter : values())
+                if (converter.convert(targetType, text) != null)
                     return converter;
-                }
-            }
-
-            return UNSUPPORTED;
+            return UNSUPPORTED; // this is unreachable code, but the compiler needs it.
         }
 
     },
