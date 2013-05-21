@@ -242,6 +242,20 @@ public class ConfigTest {
         assertEquals("Good Afternoon", config.salutation());
     }
 
+    @Sources({"file:${user.dir}/src/test/resources/unsupported.properties"})
+    public interface UnsupportedConfig extends Config {
+        public static class UnsupportedType {
+        }
+
+        public UnsupportedType unsupportedTypeProperty();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testUnsupportedClassConverting() throws Exception {
+        UnsupportedConfig cfg = ConfigFactory.create(UnsupportedConfig.class);
+        cfg.unsupportedTypeProperty();
+    }
+
     /**
      * @author Luigi R. Viggiano
      */
