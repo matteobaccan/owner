@@ -11,6 +11,7 @@ package org.aeonbits.owner;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -91,6 +92,50 @@ enum Converters {
                 return null;
             }
         }
+    },
+
+    ARRAY {
+        @Override
+        Object convert(Class<?> targetType, String text) {
+            if (!targetType.isArray()) {
+                return null;
+            }
+
+            Class<?> type = targetType.getComponentType();
+
+            if (text.trim().isEmpty()) {
+                return Array.newInstance(type, 0);
+            }
+
+            final String separator = ",";
+            String[] chunks = text.split(separator);
+
+            Converters converter = findAppropriateConverter(type, chunks[0]);
+            Object[] result = (Object[]) Array.newInstance(type, chunks.length);
+
+            try {
+                for (int i = 0; i < chunks.length; i++) {
+                    final String chunk = chunks[i].trim();
+                    result[i] = converter.convert(type, chunk);
+                }
+            } catch (Exception e) {
+                throw new UnsupportedOperationException(String.format("Cannot convert '%s' to %s", text,
+                        targetType.getCanonicalName()));
+            }
+
+            return result;
+        }
+
+        private Converters findAppropriateConverter(Class<?> targetType, String text) {
+            for (Converters converter : values()) {
+                if (converter.convert(targetType, text) != null) {
+                    return converter;
+                }
+            }
+
+            return UNSUPPORTED;
+        }
+
     },
 
     UNSUPPORTED {
