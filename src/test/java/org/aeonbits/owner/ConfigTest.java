@@ -329,13 +329,13 @@ public class ConfigTest {
     }
 
     @Sources({"classpath:array/integers.properties"})
-    public static interface ReadIntArray extends Config {
+    public static interface ReadIntegerArray extends Config {
         public Integer[] integers();
     }
 
     @Test
-    public void itShouldReturnIntArray() throws Exception {
-        ReadIntArray cfg = ConfigFactory.create(ReadIntArray.class);
+    public void itShouldReturnIntegerArray() throws Exception {
+        ReadIntegerArray cfg = ConfigFactory.create(ReadIntegerArray.class);
         assertThat(cfg.integers(), is(new Integer[]{1, 2, 3}));
     }
 
@@ -345,9 +345,31 @@ public class ConfigTest {
     }
 
     @Test
-    public void itShouldReturnEmptyIntArray() throws Exception {
+    public void itShouldReturnEmptyIntegerArray() throws Exception {
         ReadEmptyIntegerArray cfg = ConfigFactory.create(ReadEmptyIntegerArray.class);
         assertThat(cfg.emptyIntegers(), is(new Integer[]{}));
+    }
+
+    @Sources({"classpath:array/integers.properties"})
+    public static interface ReadIntArray extends Config {
+        public int[] integers();
+    }
+
+    @Test
+    public void itShouldReturnIntArray() throws Exception {
+        ReadIntArray cfg = ConfigFactory.create(ReadIntArray.class);
+        assertThat(cfg.integers(), is(new int[]{1, 2, 3}));
+    }
+
+    @Sources({"classpath:array/integers.properties"})
+    public static interface ReadEmptyIntArray extends Config {
+        public int[] emptyIntegers();
+    }
+
+    @Test
+    public void itShouldReturnEmptyIntArray() throws Exception {
+        ReadEmptyIntArray cfg = ConfigFactory.create(ReadEmptyIntArray.class);
+        assertThat(cfg.emptyIntegers(), is(new int[]{}));
     }
 
 }

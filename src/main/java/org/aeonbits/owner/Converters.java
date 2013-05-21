@@ -111,11 +111,12 @@ enum Converters {
             String[] chunks = text.split(separator, -1);
 
             Converters converter = findAppropriateConverter(type, chunks[0]);
-            Object[] result = (Object[]) Array.newInstance(type, chunks.length);
+            Object result = Array.newInstance(type, chunks.length);
 
             for (int i = 0; i < chunks.length; i++) {
                 final String chunk = chunks[i].trim();
-                result[i] = converter.convert(type, chunk);
+                Object value = converter.convert(type, chunk);
+                Array.set(result, i, value);
             }
 
             return result;
