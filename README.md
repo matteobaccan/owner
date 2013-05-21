@@ -653,13 +653,14 @@ CHANGELOG
 ---------
 ### 1.0.4 (under development)
 
- * Added basic array support. Thanks @ffbit.
+ * Added basic array support. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
    formatting. See Issue [#20][issue-20].
  * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together
  
   [issue-17]: https://github.com/lviggiano/owner/issues/17
   [issue-20]: https://github.com/lviggiano/owner/issues/20
+  [ffbit]: https://github.com/ffbit
 
 ### 1.0.3
 
