@@ -107,20 +107,15 @@ enum Converters {
                 return Array.newInstance(type, 0);
             }
 
-            final String separator = ",";
-            String[] chunks = text.split(separator);
+            final String separator = ","; // TODO: allow the user to specify his own, via annotation
+            String[] chunks = text.split(separator, -1);
 
             Converters converter = findAppropriateConverter(type, chunks[0]);
             Object[] result = (Object[]) Array.newInstance(type, chunks.length);
 
-            try {
-                for (int i = 0; i < chunks.length; i++) {
-                    final String chunk = chunks[i].trim();
-                    result[i] = converter.convert(type, chunk);
-                }
-            } catch (Exception e) {
-                throw new UnsupportedOperationException(String.format("Cannot convert '%s' to %s", text,
-                        targetType.getCanonicalName()));
+            for (int i = 0; i < chunks.length; i++) {
+                final String chunk = chunks[i].trim();
+                result[i] = converter.convert(type, chunk);
             }
 
             return result;
