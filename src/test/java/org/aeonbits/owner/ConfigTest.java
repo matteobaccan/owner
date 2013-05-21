@@ -57,7 +57,6 @@ public class ConfigTest {
         String salutation();
 
         public static class UnsupportedType {}
-//        public UnsupportedType unsupportedTypeProperty();
 
         void list(PrintStream out);
         void list(PrintWriter out);
@@ -242,13 +241,6 @@ public class ConfigTest {
         SampleConfig config = ConfigFactory.create(SampleConfig.class);
         assertEquals("Good Afternoon", config.salutation());
     }
-
-
-//    @Test(expected = UnsupportedOperationException.class)
-//    public void testUnsupportedClassConverting() throws Exception {
-//        SampleConfig cfg = ConfigFactory.create(SampleConfig.class);
-//        cfg.unsupportedTypeProperty();
-//    }
 
     /**
      * @author Luigi R. Viggiano
