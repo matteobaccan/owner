@@ -22,9 +22,12 @@ import java.util.Properties;
 
 import static org.aeonbits.owner.PropertiesLoader.doLoad;
 import static org.aeonbits.owner.PropertiesLoader.load;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -290,6 +293,61 @@ public class ConfigTest {
         SubstituteAndFormat cfg = ConfigFactory.create(SubstituteAndFormat.class);
         assertEquals("Hello Mr. Luigi", cfg.salutation("Luigi"));
         assertEquals("Mr. Luigi", cfg.mister("Luigi"));
+    }
+
+    @Sources({"classpath:array/strings.properties"})
+    public static interface ReadStringArray extends Config {
+        public String[] fruit();
+    }
+
+    @Test
+    public void itShouldReadStringArray() throws Exception {
+        ReadStringArray cfg = ConfigFactory.create(ReadStringArray.class);
+        assertThat(cfg.fruit(), is(new String[]{"apple", "pear", "orange"}));
+    }
+
+    @Sources({"classpath:array/strings.properties"})
+    public static interface ReadMissedStringArray extends Config {
+        public String[] missedProperty();
+    }
+
+    @Test
+    public void itShouldReturnNullForMissedStringArray() throws Exception {
+        ReadMissedStringArray cfg = ConfigFactory.create(ReadMissedStringArray.class);
+        assertThat(cfg.missedProperty(), is(nullValue()));
+    }
+
+    @Sources({"classpath:array/strings.properties"})
+    public static interface ReadEmptyStringArray extends Config {
+        public String[] emptyProperty();
+    }
+
+    @Test
+    public void itShouldReturnEmptyStringArray() throws Exception {
+        ReadEmptyStringArray cfg = ConfigFactory.create(ReadEmptyStringArray.class);
+        assertThat(cfg.emptyProperty(), is(new String[]{}));
+    }
+
+    @Sources({"classpath:array/integers.properties"})
+    public static interface ReadIntArray extends Config {
+        public Integer[] integers();
+    }
+
+    @Test
+    public void itShouldReturnIntArray() throws Exception {
+        ReadIntArray cfg = ConfigFactory.create(ReadIntArray.class);
+        assertThat(cfg.integers(), is(new Integer[]{1, 2, 3}));
+    }
+
+    @Sources({"classpath:array/integers.properties"})
+    public static interface ReadEmptyIntegerArray extends Config {
+        public Integer[] emptyIntegers();
+    }
+
+    @Test
+    public void itShouldReturnEmptyIntArray() throws Exception {
+        ReadEmptyIntegerArray cfg = ConfigFactory.create(ReadEmptyIntegerArray.class);
+        assertThat(cfg.emptyIntegers(), is(new Integer[]{}));
     }
 
 }
