@@ -149,9 +149,17 @@ public class ArraySupportTest {
         public int[] nonInstantiableTokenizer(); // throws an exception since the Tokenizer class is declared as private
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testConflictingAnnotationsOnMethodLevel() throws Exception {
-        cfgInvalidAnnotationConfig.conflictingAnnotationsOnMethodLevel();
+        try {
+            cfgInvalidAnnotationConfig.conflictingAnnotationsOnMethodLevel();
+            fail("UnsupportedOperationException expected");
+        } catch (UnsupportedOperationException ex) {
+            assertThat(ex.getMessage(),
+                    equalTo("You cannot specify @Separator and @TokenizerClass both together on method level for " +
+                            "'public abstract int[] org.aeonbits.owner.ArraySupportTest$InvalidAnnotationConfig" +
+                            ".conflictingAnnotationsOnMethodLevel()'"));
+        }
     }
 
     @Test
@@ -183,7 +191,7 @@ public class ArraySupportTest {
             fail("UnsupportedOperationException expected");
         } catch (UnsupportedOperationException ex) {
             assertThat(ex.getMessage(),
-                    equalTo("You cannot specify both @Separator and @TokenizerClass together on class " +
+                    equalTo("You cannot specify @Separator and @TokenizerClass both together on class level for " +
                             "'org.aeonbits.owner.ArraySupportTest.ConflictingAnnotationsOnClassLevel'"));
         }
     }
