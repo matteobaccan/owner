@@ -144,7 +144,7 @@ enum Converters {
         throw unsupported(targetType, text); // this line is unreachable, but compiler needs it.
     }
 
-    static final UnsupportedOperationException unsupported(Class<?> targetType, String text) {
+    private static UnsupportedOperationException unsupported(Class<?> targetType, String text) {
         return new UnsupportedOperationException(
                 format("Cannot convert '%s' to %s", text, targetType.getCanonicalName()));
     }
