@@ -8,6 +8,10 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.Separator;
+import org.aeonbits.owner.Config.Tokenizer;
+import org.aeonbits.owner.Config.TokenizerClass;
+
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.File;
@@ -106,14 +110,14 @@ enum Converters {
             if (text.trim().isEmpty())
                 return Array.newInstance(type, 0);
 
-            String separator = ","; // TODO: allow the user to specify his own, via annotation
-            String[] chunks = text.split(separator, -1);
+            Tokenizer tokenizer = getTokenizer(targetMethod);
+            String[] chunks = tokenizer.tokens(text);
 
             Converters converter = doConvert(targetMethod, type, chunks[0]).getConverter();
             Object result = Array.newInstance(type, chunks.length);
 
             for (int i = 0; i < chunks.length; i++) {
-                String chunk = chunks[i].trim();
+                String chunk = chunks[i];
                 Object value = converter.tryConvert(targetMethod, type, chunk);
                 Array.set(result, i, value);
             }
@@ -125,9 +129,43 @@ enum Converters {
     UNSUPPORTED {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            throw unsupported(targetType, text);
+            throw unsupportedConversion(targetType, text);
         }
     };
+
+    private static Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
+
+    private static Tokenizer getTokenizer(Method targetMethod) {
+        Separator separatorAnnotationOnMethod = targetMethod.getAnnotation(Separator.class);
+        TokenizerClass tokenizerClassOnMethod = targetMethod.getAnnotation(TokenizerClass.class);
+
+        if (separatorAnnotationOnMethod != null && tokenizerClassOnMethod != null)
+            throw unsupported(
+                    "You cannot specify both @Separator and @TokenizerClass together on method '%s'", targetMethod);
+
+        if (separatorAnnotationOnMethod != null)
+            return new SplitAndTrimTokenizer(separatorAnnotationOnMethod.value());
+
+        if (tokenizerClassOnMethod != null) {
+            Class<? extends Tokenizer> tokenizerClass = tokenizerClassOnMethod.value();
+            try {
+                return tokenizerClass.newInstance();
+            } catch (Exception e) {
+                throw unsupported(e,
+                        "Tokenizer class '%s' cannot be instantiated; see the cause below in the stack trace",
+                        tokenizerClass.getCanonicalName());
+            }
+        }
+        return defaultTokenizer;
+    }
+
+    private static UnsupportedOperationException unsupported(Throwable cause, String msg, Object... args) {
+        return new UnsupportedOperationException(format(msg, args), cause);
+    }
+
+    private static UnsupportedOperationException unsupported(String msg, Object... args) {
+        return new UnsupportedOperationException(format(msg, args));
+    }
 
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
@@ -141,12 +179,11 @@ enum Converters {
             if (convertedValue != null)
                 return new ConversionResult(converter, convertedValue);
         }
-        throw unsupported(targetType, text); // this line is unreachable, but compiler needs it.
+        throw unsupportedConversion(targetType, text); // this line is unreachable, but compiler needs it.
     }
 
-    private static UnsupportedOperationException unsupported(Class<?> targetType, String text) {
-        return new UnsupportedOperationException(
-                format("Cannot convert '%s' to %s", text, targetType.getCanonicalName()));
+    private static UnsupportedOperationException unsupportedConversion(Class<?> targetType, String text) {
+        return unsupported("Cannot convert '%s' to %s", text, targetType.getCanonicalName());
     }
 
     private static class ConversionResult {

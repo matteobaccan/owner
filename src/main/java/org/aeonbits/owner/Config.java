@@ -175,4 +175,41 @@ public interface Config {
         VARIABLE_EXPANSION,
         PARAMETER_FORMATTING
     }
+
+    /**
+     * Specifies simple <tt>{@link java.lang.String}</tt> as separator to tokenize properties values into
+     * single element for vectors and collections.
+     * The value specified is used as per {@link java.lang.String#split(String, int)} with int=-1
+     * @since 1.0.4
+     */
+    @Retention(RUNTIME)
+    @Target({METHOD, TYPE})
+    @Documented
+    @interface Separator {
+        /**
+         * @return the value specified is used as per {@link java.lang.String#split(String, int)} with int=-1
+         */
+        String value();
+    }
+
+    /**
+     * Specifies simple <tt>{@link Tokenizer}</tt> class to allow the user to specify a custom logic to split
+     * the property value into tokens to be used as single elements for vectors and collections.
+     * @since 1.0.4
+     */
+    @Retention(RUNTIME)
+    @Target({METHOD, TYPE})
+    @Documented
+    @interface TokenizerClass {
+        Class<? extends Tokenizer> value();
+    }
+
+    /**
+     * Tokenizer interface that specifies how to split a single value into tokens to be used as elements
+     * for arrays and collections.
+     * @since 1.0.4
+     */
+    interface Tokenizer {
+        String[] tokens(String values);
+    }
 }
