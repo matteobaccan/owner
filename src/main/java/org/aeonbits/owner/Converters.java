@@ -15,6 +15,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Util.expandUserHome;
 
@@ -26,7 +27,7 @@ import static org.aeonbits.owner.Util.expandUserHome;
 enum Converters {
     PROPERTY_EDITOR {
         @Override
-        Object convert(Class<?> targetType, String text) {
+        Object tryConvert(Class<?> targetType, String text) {
             PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
             if (editor != null) {
                 editor.setAsText(text);
@@ -38,7 +39,7 @@ enum Converters {
 
     FILE {
         @Override
-        Object convert(Class<?> targetType, String text) {
+        Object tryConvert(Class<?> targetType, String text) {
             if (targetType == File.class)
                 return new File(expandUserHome(text));
             return null;
@@ -47,7 +48,7 @@ enum Converters {
 
     CLASS_WITH_STRING_CONSTRUCTOR {
         @Override
-        Object convert(Class<?> targetType, String text) {
+        Object tryConvert(Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
                 return constructor.newInstance(text);
@@ -59,7 +60,7 @@ enum Converters {
 
     CLASS_WITH_OBJECT_CONSTRUCTOR {
         @Override
-        Object convert(Class<?> targetType, String text) {
+        Object tryConvert(Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
                 return constructor.newInstance(text);
@@ -71,7 +72,7 @@ enum Converters {
 
     CLASS_WITH_VALUE_OF_METHOD {
         @Override
-        Object convert(Class<?> targetType, String text) {
+        Object tryConvert(Class<?> targetType, String text) {
             try {
                 Method method = targetType.getMethod("valueOf", String.class);
                 if (isStatic(method.getModifiers()))
@@ -85,7 +86,7 @@ enum Converters {
 
     CLASS {
         @Override
-        Object convert(Class<?> targetType, String text) {
+        Object tryConvert(Class<?> targetType, String text) {
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException e) {
@@ -96,7 +97,7 @@ enum Converters {
 
     ARRAY {
         @Override
-        Object convert(Class<?> targetType, String text) {
+        Object tryConvert(Class<?> targetType, String text) {
             if (!targetType.isArray())
                 return null;
 
@@ -108,38 +109,61 @@ enum Converters {
             String separator = ","; // TODO: allow the user to specify his own, via annotation
             String[] chunks = text.split(separator, -1);
 
-            Converters converter = findAppropriateConverter(type, chunks[0]);
+            Converters converter = doConvert(type, chunks[0]).getConverter();
             Object result = Array.newInstance(type, chunks.length);
 
             for (int i = 0; i < chunks.length; i++) {
                 String chunk = chunks[i].trim();
-                Object value = converter.convert(type, chunk);
+                Object value = converter.tryConvert(type, chunk);
                 Array.set(result, i, value);
             }
 
             return result;
         }
-
-        private Converters findAppropriateConverter(Class<?> targetType, String text) {
-            for (Converters converter : values())
-                if (converter.convert(targetType, text) != null)
-                    return converter;
-            return UNSUPPORTED; // this is unreachable code, but the compiler needs it.
-        }
-
     },
 
     UNSUPPORTED {
         @Override
-        Object convert(Class<?> targetType, String text) {
-            throw new UnsupportedOperationException(String.format("Cannot convert '%s' to %s", text,
-                    targetType.getCanonicalName()));
+        Object tryConvert(Class<?> targetType, String text) {
+            throw unsupported(targetType, text);
         }
     };
 
-    abstract Object convert(Class<?> targetType, String text);
+    abstract Object tryConvert(Class<?> targetType, String text);
 
-    static Object unsupported(Class<?> targetType, String text) {
-        return UNSUPPORTED.convert(targetType, text);
+    static Object convert(Class<?> targetType, String text) {
+        return doConvert(targetType, text).getConvertedValue();
+    }
+
+    private static ConversionResult doConvert(Class<?> targetType, String text) {
+        for (Converters converter : values()) {
+            Object convertedValue = converter.tryConvert(targetType, text);
+            if (convertedValue != null)
+                return new ConversionResult(converter, convertedValue);
+        }
+        throw unsupported(targetType, text); // this line is unreachable, but compiler needs it.
+    }
+
+    static final UnsupportedOperationException unsupported(Class<?> targetType, String text) {
+        return new UnsupportedOperationException(
+                format("Cannot convert '%s' to %s", text, targetType.getCanonicalName()));
+    }
+
+    private static class ConversionResult {
+        private final Converters converter;
+        private final Object convertedValue;
+
+        public ConversionResult(Converters converter, Object convertedValue) {
+            this.converter = converter;
+            this.convertedValue = convertedValue;
+        }
+
+        public Converters getConverter() {
+            return converter;
+        }
+
+        public Object getConvertedValue() {
+            return convertedValue;
+        }
     }
 }

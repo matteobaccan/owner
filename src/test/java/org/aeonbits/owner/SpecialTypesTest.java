@@ -168,7 +168,7 @@ public class SpecialTypesTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testConvertersUnsupported() throws Throwable {
-        Converters.unsupported(InvalidCustomType.class, "foo");
+        throw Converters.unsupported(InvalidCustomType.class, "foo");
     }
 
     public static enum EnumType {

@@ -22,7 +22,7 @@ import java.util.Properties;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
-import static org.aeonbits.owner.Converters.unsupported;
+import static org.aeonbits.owner.Converters.convert;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.Util.isFeatureDisabled;
 
@@ -104,12 +104,4 @@ class PropertiesInvocationHandler implements InvocationHandler {
                 && Arrays.equals(proxied.getParameterTypes(), proxy.getParameterTypes());
     }
 
-    private Object convert(Class<?> targetType, String text) {
-        for (Converters converter : Converters.values()) {
-            Object converted = converter.convert(targetType, text);
-            if (converted != null)
-                return converted;
-        }
-        return unsupported(targetType, text);
-    }
 }
