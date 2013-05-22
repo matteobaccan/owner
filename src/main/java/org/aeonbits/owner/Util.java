@@ -14,6 +14,7 @@ import org.aeonbits.owner.Config.DisableableFeature;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 /**
@@ -56,4 +57,13 @@ abstract class Util {
     private static boolean isFeatureDisabled(DisableableFeature feature, DisableFeature annotation) {
         return annotation != null && asList(annotation.value()).contains(feature);
     }
+
+    static UnsupportedOperationException unsupported(Throwable cause, String msg, Object... args) {
+        return new UnsupportedOperationException(format(msg, args), cause);
+    }
+
+    static UnsupportedOperationException unsupported(String msg, Object... args) {
+        return new UnsupportedOperationException(format(msg, args));
+    }
+
 }

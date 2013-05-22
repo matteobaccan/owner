@@ -19,9 +19,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Util.expandUserHome;
+import static org.aeonbits.owner.Util.unsupported;
 
 /**
  * Converter class from {@link java.lang.String} to property types.
@@ -133,39 +133,50 @@ enum Converters {
         }
     };
 
+    // TODO: remark for Luigi, refactor the code below into a new class.
     private static Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
-
     private static Tokenizer getTokenizer(Method targetMethod) {
-        Separator separatorAnnotationOnMethod = targetMethod.getAnnotation(Separator.class);
-        TokenizerClass tokenizerClassOnMethod = targetMethod.getAnnotation(TokenizerClass.class);
+        Class<?> declaringClass = targetMethod.getDeclaringClass();
+        Separator separatorAnnotationOnClassLevel = declaringClass.getAnnotation(Separator.class);
+        TokenizerClass tokenizerClassAnnotationOnClassLevel = declaringClass.getAnnotation(TokenizerClass.class);
 
-        if (separatorAnnotationOnMethod != null && tokenizerClassOnMethod != null)
+        Separator separatorAnnotationOnMethodLevel = targetMethod.getAnnotation(Separator.class);
+        TokenizerClass tokenizerClassAnnotationOnMethodLevel = targetMethod.getAnnotation(TokenizerClass.class);
+
+        if (separatorAnnotationOnClassLevel != null && tokenizerClassAnnotationOnClassLevel != null)
+            throw unsupported(
+                    "You cannot specify both @Separator and @TokenizerClass together on class '%s'",
+                    declaringClass.getCanonicalName());
+
+        if (separatorAnnotationOnMethodLevel != null && tokenizerClassAnnotationOnMethodLevel != null)
             throw unsupported(
                     "You cannot specify both @Separator and @TokenizerClass together on method '%s'", targetMethod);
 
-        if (separatorAnnotationOnMethod != null)
-            return new SplitAndTrimTokenizer(separatorAnnotationOnMethod.value());
+        if (separatorAnnotationOnMethodLevel != null)
+            return new SplitAndTrimTokenizer(separatorAnnotationOnMethodLevel.value());
 
-        if (tokenizerClassOnMethod != null) {
-            Class<? extends Tokenizer> tokenizerClass = tokenizerClassOnMethod.value();
-            try {
-                return tokenizerClass.newInstance();
-            } catch (Exception e) {
-                throw unsupported(e,
-                        "Tokenizer class '%s' cannot be instantiated; see the cause below in the stack trace",
-                        tokenizerClass.getCanonicalName());
-            }
-        }
+        if (tokenizerClassAnnotationOnMethodLevel != null)
+            return createTokenizer(tokenizerClassAnnotationOnMethodLevel.value());
+
+        if (separatorAnnotationOnClassLevel != null)
+            return new SplitAndTrimTokenizer(separatorAnnotationOnClassLevel.value());
+
+        if (tokenizerClassAnnotationOnClassLevel != null)
+            return createTokenizer(tokenizerClassAnnotationOnClassLevel.value());
+
         return defaultTokenizer;
     }
 
-    private static UnsupportedOperationException unsupported(Throwable cause, String msg, Object... args) {
-        return new UnsupportedOperationException(format(msg, args), cause);
+    private static Tokenizer createTokenizer(Class<? extends Tokenizer> tokenizerClass) {
+        try {
+            return tokenizerClass.newInstance();
+        } catch (Exception e) {
+            throw unsupported(e,
+                    "Tokenizer class '%s' cannot be instantiated; see the cause below in the stack trace",
+                    tokenizerClass.getCanonicalName());
+        }
     }
-
-    private static UnsupportedOperationException unsupported(String msg, Object... args) {
-        return new UnsupportedOperationException(format(msg, args));
-    }
+    //end TODO (remark for luigi): the above code must go out from here.
 
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 

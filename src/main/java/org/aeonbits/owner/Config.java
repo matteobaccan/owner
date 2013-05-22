@@ -50,6 +50,7 @@ public interface Config {
      * by {@link Sources} will be loaded, see {@link LoadType#FIRST}. User can also specify that the load policy is
      * {@link LoadType#MERGE} to have the properties files merged: properties are loaded in order from the first file to
      * the last, if there are conflicts in properties names the earlier files loaded prevail.
+     *
      * @since 1.0.2
      */
     @Retention(RUNTIME)
@@ -61,8 +62,10 @@ public interface Config {
 
     /**
      * Specifies the source from which to load the properties file. It has to be specified in a URL string format.
-     * Allowed protocols are the ones allowed by {@link java.net.URL} plus <tt>classpath:path/to/resource
-     * .properties</tt>
+     * Allowed protocols are the ones allowed by {@link java.net.URL} plus
+     * <tt>classpath:path/to/resource.properties</tt>
+     *
+     * @since 1.0.2
      */
     @Retention(RUNTIME)
     @Target(TYPE)
@@ -94,6 +97,7 @@ public interface Config {
 
     /**
      * Specifies the policy type to use to load the {@link org.aeonbits.owner.Config.Sources} files for properties.
+     *
      * @since 1.0.2
      */
     enum LoadType {
@@ -158,6 +162,7 @@ public interface Config {
      * This may be useful in case the user prefers to implement by his own, or just has troubles with something that
      * is unwanted.
      * Features that can be disabled are specified in the enum {@link DisableableFeature}.
+     *
      * @since 1.0.4
      */
     @Retention(RUNTIME)
@@ -169,6 +174,7 @@ public interface Config {
 
     /**
      * This enum contains the features that can be disabled using the annotation {@link DisableFeature}.
+     *
      * @since 1.0.4
      */
     enum DisableableFeature {
@@ -180,6 +186,20 @@ public interface Config {
      * Specifies simple <tt>{@link java.lang.String}</tt> as separator to tokenize properties values into
      * single element for vectors and collections.
      * The value specified is used as per {@link java.lang.String#split(String, int)} with int=-1
+     *
+     * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
+     * together on the same level:
+     * <ul>
+     *     <li>
+     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same method
+     *     </li>
+     *     <li>
+     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same class
+     *     </li>
+     * </ul>
+     * in the two above cases an {@link UnsupportedOperationException} will be thrown when the corresponding conversion
+     * is executed.
+     *
      * @since 1.0.4
      */
     @Retention(RUNTIME)
@@ -195,6 +215,20 @@ public interface Config {
     /**
      * Specifies simple <tt>{@link Tokenizer}</tt> class to allow the user to specify a custom logic to split
      * the property value into tokens to be used as single elements for vectors and collections.
+     *
+     * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
+     * together on the same level:
+     * <ul>
+     *     <li>
+     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same method
+     *     </li>
+     *     <li>
+     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same class
+     *     </li>
+     * </ul>
+     * in the two above cases an {@link UnsupportedOperationException} will be thrown when the corresponding conversion
+     * is executed.
+     *
      * @since 1.0.4
      */
     @Retention(RUNTIME)
@@ -207,6 +241,7 @@ public interface Config {
     /**
      * Tokenizer interface that specifies how to split a single value into tokens to be used as elements
      * for arrays and collections.
+     *
      * @since 1.0.4
      */
     interface Tokenizer {
