@@ -191,10 +191,10 @@ public interface Config {
      * together on the same level:
      * <ul>
      *     <li>
-     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same method
+     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same method
      *     </li>
      *     <li>
-     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same class
+     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same class
      *     </li>
      * </ul>
      * in the two above cases an {@link UnsupportedOperationException} will be thrown when the corresponding conversion
@@ -220,10 +220,10 @@ public interface Config {
      * together on the same level:
      * <ul>
      *     <li>
-     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same method
+     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same method
      *     </li>
      *     <li>
-     *     You cannot specify both {@link TokenizerClass} and {@link Separator} together on the same class
+     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same class
      *     </li>
      * </ul>
      * in the two above cases an {@link UnsupportedOperationException} will be thrown when the corresponding conversion

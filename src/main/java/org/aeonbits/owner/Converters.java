@@ -145,12 +145,13 @@ enum Converters {
 
         if (separatorAnnotationOnClassLevel != null && tokenizerClassAnnotationOnClassLevel != null)
             throw unsupported(
-                    "You cannot specify both @Separator and @TokenizerClass together on class '%s'",
+                    "You cannot specify @Separator and @TokenizerClass both together on class level for '%s'",
                     declaringClass.getCanonicalName());
 
         if (separatorAnnotationOnMethodLevel != null && tokenizerClassAnnotationOnMethodLevel != null)
             throw unsupported(
-                    "You cannot specify both @Separator and @TokenizerClass together on method '%s'", targetMethod);
+                    "You cannot specify @Separator and @TokenizerClass both together on method level for '%s'",
+                    targetMethod);
 
         if (separatorAnnotationOnMethodLevel != null)
             return new SplitAndTrimTokenizer(separatorAnnotationOnMethodLevel.value());
