@@ -27,7 +27,7 @@ import static org.aeonbits.owner.Util.expandUserHome;
 enum Converters {
     PROPERTY_EDITOR {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
             if (editor != null) {
                 editor.setAsText(text);
@@ -39,7 +39,7 @@ enum Converters {
 
     FILE {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (targetType == File.class)
                 return new File(expandUserHome(text));
             return null;
@@ -48,7 +48,7 @@ enum Converters {
 
     CLASS_WITH_STRING_CONSTRUCTOR {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
                 return constructor.newInstance(text);
@@ -60,7 +60,7 @@ enum Converters {
 
     CLASS_WITH_OBJECT_CONSTRUCTOR {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
                 return constructor.newInstance(text);
@@ -72,7 +72,7 @@ enum Converters {
 
     CLASS_WITH_VALUE_OF_METHOD {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 Method method = targetType.getMethod("valueOf", String.class);
                 if (isStatic(method.getModifiers()))
@@ -86,7 +86,7 @@ enum Converters {
 
     CLASS {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException e) {
@@ -97,7 +97,7 @@ enum Converters {
 
     ARRAY {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (!targetType.isArray())
                 return null;
 
@@ -109,12 +109,12 @@ enum Converters {
             String separator = ","; // TODO: allow the user to specify his own, via annotation
             String[] chunks = text.split(separator, -1);
 
-            Converters converter = doConvert(type, chunks[0]).getConverter();
+            Converters converter = doConvert(targetMethod, type, chunks[0]).getConverter();
             Object result = Array.newInstance(type, chunks.length);
 
             for (int i = 0; i < chunks.length; i++) {
                 String chunk = chunks[i].trim();
-                Object value = converter.tryConvert(type, chunk);
+                Object value = converter.tryConvert(targetMethod, type, chunk);
                 Array.set(result, i, value);
             }
 
@@ -124,20 +124,20 @@ enum Converters {
 
     UNSUPPORTED {
         @Override
-        Object tryConvert(Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             throw unsupported(targetType, text);
         }
     };
 
-    abstract Object tryConvert(Class<?> targetType, String text);
+    abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
-    static Object convert(Class<?> targetType, String text) {
-        return doConvert(targetType, text).getConvertedValue();
+    static Object convert(Method targetMethod, Class<?> targetType, String text) {
+        return doConvert(targetMethod, targetType, text).getConvertedValue();
     }
 
-    private static ConversionResult doConvert(Class<?> targetType, String text) {
+    private static ConversionResult doConvert(Method targetMethod, Class<?> targetType, String text) {
         for (Converters converter : values()) {
-            Object convertedValue = converter.tryConvert(targetType, text);
+            Object convertedValue = converter.tryConvert(targetMethod, targetType, text);
             if (convertedValue != null)
                 return new ConversionResult(converter, convertedValue);
         }

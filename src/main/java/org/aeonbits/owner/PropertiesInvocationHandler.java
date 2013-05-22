@@ -71,7 +71,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
         String value = properties.getProperty(key);
         if (value == null)
             return null;
-        return convert(method.getReturnType(), format(method, expandVariables(method, value), args));
+        return convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
     }
 
     private String format(Method method, String format, Object... args) {
