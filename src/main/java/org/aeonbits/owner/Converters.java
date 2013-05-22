@@ -14,6 +14,10 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
@@ -120,6 +124,55 @@ enum Converters {
 
             return result;
         }
+    },
+
+    COLLECTION {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (!targetType.isAssignableFrom(Collection.class)) {
+                return null;
+            }
+
+            ParameterizedType parameterizedType = (ParameterizedType) targetMethod.getGenericReturnType();
+            Class<?> type = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+
+            Object stub = Array.newInstance(type, 0);
+
+            Object[] array = (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text);
+            Collection<Object> list = Arrays.asList(array);
+
+            Collection<Object> result = instantiateCollection(targetType);
+            result.addAll(list);
+
+            return result;
+        }
+
+        private <T> Collection<T> instantiateCollection(Class<? extends T> targetType) {
+            if (targetType.isInterface()) {
+                return instantiateCollectionFromInterface(targetType);
+            }
+
+            return instantiateCollectionFromClass(targetType);
+        }
+
+        private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
+            try {
+                return (Collection<T>) targetType.newInstance();
+            } catch (InstantiationException e) {
+                throw new RuntimeException("Could not instantiate collection type:" + targetType.getCanonicalName());
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("IllegalAccessException trying to instantiate collection type:" + targetType.getCanonicalName());
+            }
+        }
+
+        private <T> Collection<T> instantiateCollectionFromInterface(Class<? extends T> targetType) {
+            if (targetType.isAssignableFrom(Collection.class)) {
+                return new HashSet<T>();
+            }
+
+            return null;
+        }
+
     },
 
     UNSUPPORTED {
