@@ -12,6 +12,9 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
+import static org.aeonbits.owner.Util.ignore;
+import static org.aeonbits.owner.Util.unreachable;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -33,6 +36,15 @@ public class UtilTest {
 
     @Test
     public void testIgnore() {
-        Util.ignore();
+        ignore();
+    }
+
+    @Test
+    public void testUnreachable() {
+        try {
+            unreachable();
+        } catch(AssertionError err) {
+            assertEquals("this code should never be reached", err.getMessage());
+        }
     }
 }

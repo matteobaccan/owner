@@ -66,4 +66,7 @@ abstract class Util {
         return new UnsupportedOperationException(format(msg, args));
     }
 
+    public static <T> T unreachable() {
+        throw new AssertionError("this code should never be reached");
+    }
 }

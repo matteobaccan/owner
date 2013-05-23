@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Util.expandUserHome;
+import static org.aeonbits.owner.Util.unreachable;
 import static org.aeonbits.owner.Util.unsupported;
 
 /**
@@ -191,7 +192,7 @@ enum Converters {
             if (convertedValue != null)
                 return new ConversionResult(converter, convertedValue);
         }
-        throw unsupportedConversion(targetType, text); // this line is unreachable, but compiler needs it.
+        return unreachable(); // this line is unreachable, but compiler needs it.
     }
 
     private static UnsupportedOperationException unsupportedConversion(Class<?> targetType, String text) {
