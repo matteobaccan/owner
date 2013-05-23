@@ -18,7 +18,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -182,8 +182,8 @@ enum Converters {
             else if (SortedSet.class.isAssignableFrom(targetType))
                 return new TreeSet<T>();
             else if (Set.class.isAssignableFrom(targetType))
-                return new HashSet<T>();
-            return new HashSet<T>();
+                return new LinkedHashSet<T>();
+            return new ArrayList<T>();
         }
 
     },

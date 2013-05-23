@@ -1,10 +1,10 @@
 package org.aeonbits.owner;
 
-import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -100,7 +100,7 @@ public class CollectionSupportTest {
 
     @Test
     public void itShouldWorkWithRawCollectionAsWithCollectionOfStrings() throws Exception {
-        assertEquals(Sets.newHashSet("1", "2", "3"), cfg.rawCollection());
+        assertEquals(Arrays.asList("1", "2", "3"), cfg.rawCollection());
     }
 
 }
