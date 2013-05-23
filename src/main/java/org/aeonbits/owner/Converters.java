@@ -16,6 +16,15 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Util.expandUserHome;
@@ -123,6 +132,63 @@ enum Converters {
 
             return result;
         }
+    },
+
+    COLLECTION {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (!Collection.class.isAssignableFrom(targetType))
+                return null;
+
+            Object[] array = convertToArray(targetMethod, text);
+            Collection<Object> collection = Arrays.asList(array);
+            Collection<Object> result = instantiateCollection(targetType);
+            result.addAll(collection);
+            return result;
+        }
+
+        private Object[] convertToArray(Method targetMethod, String text) {
+            Class<?> type = getGenericType(targetMethod);
+            Object stub = Array.newInstance(type, 0);
+            return (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text);
+        }
+
+        private Class<?> getGenericType(Method targetMethod) {
+            if (targetMethod.getGenericReturnType() instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) targetMethod.getGenericReturnType();
+                return (Class<?>) parameterizedType.getActualTypeArguments()[0];
+            }
+            // Default generic type for raw collections.
+            return String.class;
+        }
+
+        private <T> Collection<T> instantiateCollection(Class<? extends T> targetType) {
+            if (targetType.isInterface())
+                return instantiateCollectionFromInterface(targetType);
+            return instantiateCollectionFromClass(targetType);
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
+            try {
+                return (Collection<T>) targetType.newInstance();
+            } catch (InstantiationException e) {
+                throw new UnsupportedOperationException("Could not instantiate collection type:" + targetType.getCanonicalName());
+            } catch (IllegalAccessException e) {
+                throw new UnsupportedOperationException("IllegalAccessException trying to instantiate collection type:" + targetType.getCanonicalName());
+            }
+        }
+
+        private <T> Collection<T> instantiateCollectionFromInterface(Class<? extends T> targetType) {
+            if (List.class.isAssignableFrom(targetType))
+                return new ArrayList<T>();
+            else if (SortedSet.class.isAssignableFrom(targetType))
+                return new TreeSet<T>();
+            else if (Set.class.isAssignableFrom(targetType))
+                return new LinkedHashSet<T>();
+            return new ArrayList<T>();
+        }
+
     },
 
     UNSUPPORTED {
