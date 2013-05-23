@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner.arrays;
 
-import org.aeonbits.owner.ArraySupportTest.CustomCommaTokenizer;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Tokenizer;
 import org.aeonbits.owner.ConfigFactory;
@@ -47,5 +46,4 @@ public class InvalidAnnotationTest {
             assertTrue(ex.getCause() instanceof IllegalAccessException); // since NonInstantiableTokenizer is private.
         }
     }
-
 }

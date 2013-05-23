@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner.arrays;
 
-import org.aeonbits.owner.ArraySupportTest.CustomCommaTokenizer;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Separator;
 import org.aeonbits.owner.Config.TokenizerClass;
@@ -24,7 +23,6 @@ import static org.junit.Assert.fail;
  * @author luigi
  */
 public class ConflictingAnnotationsOnClassLevelTest {
-
     private ConflictingAnnotationsOnClassLevel cfgConflictingAnnotationsOnClassLevel;
 
     @Before
@@ -52,5 +50,4 @@ public class ConflictingAnnotationsOnClassLevelTest {
                             ".ConflictingAnnotationsOnClassLevel'"));
         }
     }
-
 }

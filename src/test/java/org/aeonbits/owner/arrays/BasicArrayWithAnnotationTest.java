@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner.arrays;
 
-import org.aeonbits.owner.ArraySupportTest.CustomDashTokenizer;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Before;
@@ -38,7 +37,6 @@ public class BasicArrayWithAnnotationTest {
         public String[] withSeparatorClass();
     }
 
-
     @Test
     public void testSeparatorAnnotation() throws Exception {
         assertThat(cfgBasicArrayWithAnnotationConfig.fibonacci(), is(new int[]{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}));
@@ -48,6 +46,4 @@ public class BasicArrayWithAnnotationTest {
     public void testTokenizerClass() throws Exception {
         assertThat(cfgBasicArrayWithAnnotationConfig.withSeparatorClass(), is(new String[]{"foo", "bar", "baz"}));
     }
-
-
 }

@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner.arrays;
 
-import org.aeonbits.owner.ArraySupportTest.CustomDashTokenizer;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Before;
@@ -35,7 +34,7 @@ public class ConflictingAnnotationsOnMethodLevelTest {
         @TokenizerClass(CustomDashTokenizer.class)
         @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
         public int[] conflictingAnnotationsOnMethodLevel(); // should throw an exception when invoked: cannot use
-        // both @Separator and @Tokenizer on method level
+                                                            // both @Separator and @Tokenizer on method level
     }
 
     @Test
@@ -51,5 +50,4 @@ public class ConflictingAnnotationsOnMethodLevelTest {
                             ".conflictingAnnotationsOnMethodLevel()'"));
         }
     }
-
 }

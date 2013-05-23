@@ -8,9 +8,6 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Separator;
-import org.aeonbits.owner.Config.Tokenizer;
-import org.aeonbits.owner.Config.TokenizerClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,23 +16,16 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- * TODO: remark for Luigi, refactor this: split this class... I put the comments to identify where to split
- *
  * @author Luigi R. Viggiano
  * @author Dmytro Chyzhykov
  */
 public class ArraySupportTest {
 
     private ArrayConfig cfg;
-    private ArrayConfigWithSeparatorAnnotationOnClassLevel cfgSeparatorAnnotationOnClassLevel;
-    private ArrayConfigWithTokenizerAnnotationOnClassLevel cfgArrayConfigWithTokenizerAnnotationOnClassLevel;
 
     @Before
     public void before() {
         cfg = ConfigFactory.create(ArrayConfig.class);
-        cfgSeparatorAnnotationOnClassLevel = ConfigFactory.create(ArrayConfigWithSeparatorAnnotationOnClassLevel.class);
-        cfgArrayConfigWithTokenizerAnnotationOnClassLevel = ConfigFactory
-                .create(ArrayConfigWithTokenizerAnnotationOnClassLevel.class);
     }
 
     public static interface ArrayConfig extends Config {
@@ -94,95 +84,4 @@ public class ArraySupportTest {
     public void testUnsupportedArrayType() throws Exception {
         cfg.unsupported();
     }
-
-    /*------------------------------------------------------------------------------------------------------------------
-     * ArrayConfigWithSeparatorAnnotationOnClassLevel
-     *----------------------------------------------------------------------------------------------------------------*/
-
-    @Separator(";")
-    public static interface ArrayConfigWithSeparatorAnnotationOnClassLevel extends Config {
-
-        @Separator(",")                   //should override the class-level @Separator
-        @DefaultValue("1, 2, 3, 4")
-        public int[] commaSeparated();
-
-        @DefaultValue("1; 2; 3; 4")
-        public int[] semicolonSeparated();  //should take the class level @Separator
-
-
-        @TokenizerClass(CustomDashTokenizer.class) //should take the class level @Separator
-        @DefaultValue("1-2-3-4")
-        public int[] dashSeparated();
-    }
-
-    @Test
-    public void testSeparatorAnnotationOnMethodOverridingSeparatorAnnotationOnClassLevel() {
-        assertThat(cfgSeparatorAnnotationOnClassLevel.commaSeparated(), is(new int[]{1, 2, 3, 4}));
-    }
-
-    @Test
-    public void testSeparatorAnnotationOnClassLevelAndNoOverridingOnMethodLevel() {
-        assertThat(cfgSeparatorAnnotationOnClassLevel.semicolonSeparated(), is(new int[]{1, 2, 3, 4}));
-    }
-
-    @Test
-    public void testTokenClassAnnotationOnMethodLevelOverridingSeparatorOnClassLevel() {
-        assertThat(cfgSeparatorAnnotationOnClassLevel.dashSeparated(), is(new int[]{1, 2, 3, 4}));
-    }
-
-
-    /*------------------------------------------------------------------------------------------------------------------
-     * ArrayConfigWithTokenizerAnnotationOnClassLevel
-     *----------------------------------------------------------------------------------------------------------------*/
-
-    @TokenizerClass(CustomDashTokenizer.class)
-    public static interface ArrayConfigWithTokenizerAnnotationOnClassLevel extends Config {
-
-        @TokenizerClass(CustomCommaTokenizer.class) //should override the class-level @TokenizerClass
-        @DefaultValue("1,2,3,4")
-        public int[] commaSeparated();
-
-        @Separator(";")  // overrides class level @TokenizerClass
-        @DefaultValue("1; 2; 3; 4")
-        public int[] semicolonSeparated();
-
-        @DefaultValue("1-2-3-4")
-        public int[] dashSeparated(); // class level @TokenizerClass applies
-    }
-
-    @Test
-    public void testTokenizerClassAnnotationOnMethodLevelOverridingTokenizerClassAnnotationOnClassLevel() {
-        assertThat(cfgArrayConfigWithTokenizerAnnotationOnClassLevel.commaSeparated(), is(new int[]{1, 2, 3, 4}));
-    }
-
-    @Test
-    public void testSeparatorAnnotationOnMethodLevelOverridingTokenizerClassAnnotationOnClassLevel() {
-        assertThat(cfgArrayConfigWithTokenizerAnnotationOnClassLevel.semicolonSeparated(), is(new int[]{1, 2, 3, 4}));
-    }
-
-    @Test
-    public void testTokenizerClassAnnotationOnClassLevelAndNoOverridingOnMethodLevel() {
-        assertThat(cfgArrayConfigWithTokenizerAnnotationOnClassLevel.dashSeparated(), is(new int[]{1, 2, 3, 4}));
-    }
-
-
-    /*------------------------------------------------------------------------------------------------------------------
-     * Custom Tokenizers, used by above tests
-     *----------------------------------------------------------------------------------------------------------------*/
-
-    public static class CustomDashTokenizer implements Tokenizer {
-        @Override
-        public String[] tokens(String values) {
-            return values.split("-", -1);
-        }
-    }
-
-    public static class CustomCommaTokenizer implements Tokenizer {
-        @Override
-        public String[] tokens(String values) {
-            return values.split(",", -1);
-        }
-    }
-
-
 }
