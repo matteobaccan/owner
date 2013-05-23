@@ -3,19 +3,35 @@ package org.aeonbits.owner;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 
-import static org.hamcrest.CoreMatchers.both;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 
 public class CollectionSupportTest {
     private CollectionConfig cfg;
 
     public interface CollectionConfig extends Config {
-        @DefaultValue("pink,black")
+        String COLORS = "pink,black";
+        String INTEGERS = "1, 2, 3";
+
+        @DefaultValue(COLORS)
         Collection<String> colors();
+
+        @DefaultValue(COLORS)
+        Set<String> colorSet();
+
+        @DefaultValue(INTEGERS)
+        SortedSet<Integer> integerSortedSet();
+
+        @DefaultValue(INTEGERS)
+        List<Integer> integerList();
     }
 
     @Before
@@ -24,8 +40,25 @@ public class CollectionSupportTest {
     }
 
     @Test
-    public void itShouldReadCollection() throws Exception {
-        assertThat(cfg.colors(), contains("pink", "black"));
+    public void itShouldReadCollectionOfStrings() throws Exception {
+        assertThat(cfg.colors().size(), is(2));
+        assertThat(cfg.colors(), containsInAnyOrder("pink", "black"));
+    }
+
+    @Test
+    public void itShouldReadSetOfStrings() throws Exception {
+        assertThat(cfg.colorSet().size(), is(2));
+        assertThat(cfg.colorSet(), containsInAnyOrder("pink", "black"));
+    }
+
+    @Test
+    public void itShouldReadSortedSetOfIntegers() throws Exception {
+        assertThat(cfg.integerSortedSet(), contains(1, 2, 3));
+    }
+
+    @Test
+    public void itShouldReadListOfIntegers() throws Exception {
+        assertThat(cfg.integerList(), contains(1, 2, 3));
     }
 
 }

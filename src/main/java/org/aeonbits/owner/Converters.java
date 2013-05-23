@@ -15,9 +15,14 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
@@ -129,7 +134,7 @@ enum Converters {
     COLLECTION {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!targetType.isAssignableFrom(Collection.class)) {
+            if (!Collection.class.isAssignableFrom(targetType)) {
                 return null;
             }
 
@@ -166,7 +171,13 @@ enum Converters {
         }
 
         private <T> Collection<T> instantiateCollectionFromInterface(Class<? extends T> targetType) {
-            if (targetType.isAssignableFrom(Collection.class)) {
+            if (List.class.isAssignableFrom(targetType)) {
+                return new ArrayList<T>();
+            } else if (SortedSet.class.isAssignableFrom(targetType)) {
+                return new TreeSet<T>();
+            } else if (Set.class.isAssignableFrom(targetType)) {
+                return new HashSet<T>();
+            } else if (Collection.class.isAssignableFrom(targetType)) {
                 return new HashSet<T>();
             }
 
