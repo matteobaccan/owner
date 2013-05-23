@@ -134,38 +134,39 @@ enum Converters {
     COLLECTION {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!Collection.class.isAssignableFrom(targetType)) {
+            if (!Collection.class.isAssignableFrom(targetType))
                 return null;
-            }
 
-            Class<?> type = String.class;
-
-            if (targetMethod.getGenericReturnType() instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) targetMethod.getGenericReturnType();
-                type = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-            }
-
-            Object stub = Array.newInstance(type, 0);
-
-            Object[] array = (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text);
-            Collection<Object> list = Arrays.asList(array);
-
+            Object[] array = convertToArray(targetMethod, text);
+            Collection<Object> collection = Arrays.asList(array);
             Collection<Object> result = instantiateCollection(targetType);
-            result.addAll(list);
-
+            result.addAll(collection);
             return result;
         }
 
-        private <T> Collection<T> instantiateCollection(Class<? extends T> targetType) {
-            if (targetType.isInterface()) {
-                return instantiateCollectionFromInterface(targetType);
-            }
+        private Object[] convertToArray(Method targetMethod, String text) {
+            Class<?> type = getGenericType(targetMethod);
+            Object stub = Array.newInstance(type, 0);
+            return (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text);
+        }
 
+        private Class<?> getGenericType(Method targetMethod) {
+            if (targetMethod.getGenericReturnType() instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) targetMethod.getGenericReturnType();
+                return (Class<?>) parameterizedType.getActualTypeArguments()[0];
+            }
+            // Default generic type for raw collections.
+            return String.class;
+        }
+
+        private <T> Collection<T> instantiateCollection(Class<? extends T> targetType) {
+            if (targetType.isInterface())
+                return instantiateCollectionFromInterface(targetType);
             return instantiateCollectionFromClass(targetType);
         }
 
         @SuppressWarnings("unchecked")
-		private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
+        private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
             try {
                 return (Collection<T>) targetType.newInstance();
             } catch (InstantiationException e) {
@@ -176,14 +177,12 @@ enum Converters {
         }
 
         private <T> Collection<T> instantiateCollectionFromInterface(Class<? extends T> targetType) {
-            if (List.class.isAssignableFrom(targetType)) {
+            if (List.class.isAssignableFrom(targetType))
                 return new ArrayList<T>();
-            } else if (SortedSet.class.isAssignableFrom(targetType)) {
+            else if (SortedSet.class.isAssignableFrom(targetType))
                 return new TreeSet<T>();
-            } else if (Set.class.isAssignableFrom(targetType)) {
+            else if (Set.class.isAssignableFrom(targetType))
                 return new HashSet<T>();
-            }
-
             return new HashSet<T>();
         }
 
