@@ -159,9 +159,9 @@ enum Converters {
             try {
                 return (Collection<T>) targetType.newInstance();
             } catch (InstantiationException e) {
-                throw new RuntimeException("Could not instantiate collection type:" + targetType.getCanonicalName());
+                throw new UnsupportedOperationException("Could not instantiate collection type:" + targetType.getCanonicalName());
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("IllegalAccessException trying to instantiate collection type:" + targetType.getCanonicalName());
+                throw new UnsupportedOperationException("IllegalAccessException trying to instantiate collection type:" + targetType.getCanonicalName());
             }
         }
 

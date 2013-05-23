@@ -14,6 +14,7 @@ public class CollectionSupportTest {
     private CollectionConfig cfg;
 
     public interface CollectionConfig extends Config {
+        @DefaultValue("pink,black")
         Collection<String> colors();
     }
 
