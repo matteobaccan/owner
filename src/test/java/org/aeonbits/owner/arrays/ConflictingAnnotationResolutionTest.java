@@ -37,7 +37,7 @@ public class ConflictingAnnotationResolutionTest {
 
         // but since @TokenizerClass on method level takes precedence, the conflict is resolved.
         @TokenizerClass(CustomDashTokenizer.class)
-        @DefaultValue("1;2;3;4")
+        @DefaultValue("1-2-3-4")
         public int[] semicolonSeparated();
     }
 
@@ -49,6 +49,11 @@ public class ConflictingAnnotationResolutionTest {
     @Test
     public void testSeparatorAnnotationOnMethodLevelResolveTheConflictOnClassLevel() {
         assertThat(cfg.commaSeparated(), is(new int[]{1, 2, 3, 4}));
+    }
+
+    @Test
+    public void testTokenizerClassAnnotationOnMethodLevelResolveTheConflictOnClassLevel() {
+        assertThat(cfg.semicolonSeparated(), is(new int[]{1, 2, 3, 4}));
     }
 
 }

@@ -8,9 +8,7 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Separator;
 import org.aeonbits.owner.Config.Tokenizer;
-import org.aeonbits.owner.Config.TokenizerClass;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
@@ -111,7 +109,7 @@ enum Converters {
             if (text.trim().isEmpty())
                 return Array.newInstance(type, 0);
 
-            Tokenizer tokenizer = getTokenizer(targetMethod);
+            Tokenizer tokenizer = TokenizerResolver.resolveTokenizer(targetMethod);
             String[] chunks = tokenizer.tokens(text);
 
             Converters converter = doConvert(targetMethod, type, chunks[0]).getConverter();
@@ -133,68 +131,6 @@ enum Converters {
             throw unsupportedConversion(targetType, text);
         }
     };
-
-    // TODO: remark for Luigi, refactor the code below into a new class.
-    private static Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
-
-    private static Tokenizer getTokenizer(Method targetMethod) {
-        Tokenizer methodLevelTokenizer = resolveTokenizerOnMethodLevel(targetMethod);
-        if (methodLevelTokenizer != null)
-            return methodLevelTokenizer;
-
-        Tokenizer classLevelTokenizer = resolveTokenizerOnClassLevel(targetMethod.getDeclaringClass());
-        if (classLevelTokenizer != null)
-            return classLevelTokenizer;
-
-        return defaultTokenizer;
-    }
-
-    private static Tokenizer resolveTokenizerOnClassLevel(Class<?> declaringClass) {
-        Separator separatorAnnotationOnClassLevel = declaringClass.getAnnotation(Separator.class);
-        TokenizerClass tokenizerClassAnnotationOnClassLevel = declaringClass.getAnnotation(TokenizerClass.class);
-
-        if (separatorAnnotationOnClassLevel != null && tokenizerClassAnnotationOnClassLevel != null)
-            throw unsupported(
-                    "You cannot specify @Separator and @TokenizerClass both together on class level for '%s'",
-                    declaringClass.getCanonicalName());
-
-        if (separatorAnnotationOnClassLevel != null)
-            return new SplitAndTrimTokenizer(separatorAnnotationOnClassLevel.value());
-
-        if (tokenizerClassAnnotationOnClassLevel != null)
-            return createTokenizer(tokenizerClassAnnotationOnClassLevel.value());
-
-        return null;
-    }
-
-    private static Tokenizer resolveTokenizerOnMethodLevel(Method targetMethod) {
-        Separator separatorAnnotationOnMethodLevel = targetMethod.getAnnotation(Separator.class);
-        TokenizerClass tokenizerClassAnnotationOnMethodLevel = targetMethod.getAnnotation(TokenizerClass.class);
-
-        if (separatorAnnotationOnMethodLevel != null && tokenizerClassAnnotationOnMethodLevel != null)
-            throw unsupported(
-                    "You cannot specify @Separator and @TokenizerClass both together on method level for '%s'",
-                    targetMethod);
-
-        if (separatorAnnotationOnMethodLevel != null)
-            return new SplitAndTrimTokenizer(separatorAnnotationOnMethodLevel.value());
-
-        if (tokenizerClassAnnotationOnMethodLevel != null)
-            return createTokenizer(tokenizerClassAnnotationOnMethodLevel.value());
-
-        return null;
-    }
-
-    private static Tokenizer createTokenizer(Class<? extends Tokenizer> tokenizerClass) {
-        try {
-            return tokenizerClass.newInstance();
-        } catch (Exception e) {
-            throw unsupported(e,
-                    "Tokenizer class '%s' cannot be instantiated; see the cause below in the stack trace",
-                    tokenizerClass.getCanonicalName());
-        }
-    }
-    //end TODO (remark for luigi): the above code must go out from here.
 
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
