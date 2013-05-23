@@ -3,6 +3,7 @@ package org.aeonbits.owner;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -39,6 +40,15 @@ public class CollectionSupportTest {
 
         @DefaultValue(INTEGERS)
         LinkedList<Integer> integerLinkedList();
+
+        @DefaultValue(INTEGERS)
+        CollectionWithoutDefaultConstructor<Integer> badCollection();
+    }
+
+    static class CollectionWithoutDefaultConstructor<E> extends ArrayList<E> {
+        public CollectionWithoutDefaultConstructor(int size) {
+            super(size);
+        }
     }
 
     @Before
@@ -76,6 +86,11 @@ public class CollectionSupportTest {
     public void itShouldReadConcreteListImplementation() throws Exception {
         assertThat(cfg.integerLinkedList(), instanceOf(LinkedList.class));
         assertThat(cfg.integerLinkedList(), contains(1, 2, 3));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void itShouldThrowExceptionWithCollectionWithoutDefaultConstructor() throws Exception {
+        cfg.badCollection();
     }
 
 }

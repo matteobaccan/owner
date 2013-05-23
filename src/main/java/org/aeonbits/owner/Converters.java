@@ -160,7 +160,8 @@ enum Converters {
             return instantiateCollectionFromClass(targetType);
         }
 
-        private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
+        @SuppressWarnings("unchecked")
+		private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
             try {
                 return (Collection<T>) targetType.newInstance();
             } catch (InstantiationException e) {
@@ -177,11 +178,9 @@ enum Converters {
                 return new TreeSet<T>();
             } else if (Set.class.isAssignableFrom(targetType)) {
                 return new HashSet<T>();
-            } else if (Collection.class.isAssignableFrom(targetType)) {
-                return new HashSet<T>();
             }
 
-            return null;
+            return new HashSet<T>();
         }
 
     },
