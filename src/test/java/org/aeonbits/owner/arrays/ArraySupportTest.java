@@ -30,21 +30,34 @@ public class ArraySupportTest {
         cfg = ConfigFactory.create(ArrayConfig.class);
     }
 
+    /**
+     emptyProperty=
+     unsupported=dummy value: this is unsupported
+     */
     public static interface ArrayConfig extends Config {
+        @DefaultValue("apple, pear, orange")
         public String[] fruit();
+
+        @DefaultValue("")
         public String[] emptyProperty();
         public String[] missedProperty();
+
+        @DefaultValue("1, 2, 3")
         public Integer[] integers();
+
+        @DefaultValue("${emptyProperty}")
         public Integer[] emptyIntegers();
 
-        @Key("integers")
+        @DefaultValue("${integers}")
         public int[] primitiveIntArray();
 
-        @Key("emptyIntegers")
+        @DefaultValue("${emptyIntegers}")
         public int[] primitiveEmptyIntegers();
 
-        public static class UnsupportedType {}
+        @DefaultValue("dummy value: this is unsupported")
         public UnsupportedType[] unsupported();
+
+        public static class UnsupportedType {}
     }
 
     @Test
