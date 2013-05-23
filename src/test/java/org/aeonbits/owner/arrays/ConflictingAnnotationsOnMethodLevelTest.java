@@ -21,12 +21,11 @@ import static org.junit.Assert.fail;
  * @author Luigi R. Viggiano
  */
 public class ConflictingAnnotationsOnMethodLevelTest {
-    private ConflictingAnnotationsOnMethodLevelConfig cfgConflictingAnnotationsOnMethodLevelConfig;
+    private ConflictingAnnotationsOnMethodLevelConfig cfg;
 
     @Before
     public void before() {
-        cfgConflictingAnnotationsOnMethodLevelConfig =
-                ConfigFactory.create(ConflictingAnnotationsOnMethodLevelConfig.class);
+        cfg = ConfigFactory.create(ConflictingAnnotationsOnMethodLevelConfig.class);
     }
 
     public static interface ConflictingAnnotationsOnMethodLevelConfig extends Config {
@@ -40,7 +39,7 @@ public class ConflictingAnnotationsOnMethodLevelTest {
     @Test
     public void testConflictingAnnotationsOnMethodLevel() throws Exception {
         try {
-            cfgConflictingAnnotationsOnMethodLevelConfig.conflictingAnnotationsOnMethodLevel();
+            cfg.conflictingAnnotationsOnMethodLevel();
             fail("UnsupportedOperationException expected");
         } catch (UnsupportedOperationException ex) {
             assertThat(ex.getMessage(),

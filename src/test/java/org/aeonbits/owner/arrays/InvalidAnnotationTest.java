@@ -21,10 +21,11 @@ import static org.junit.Assert.fail;
  * @author Luigi R. Viggiano
  */
 public class InvalidAnnotationTest {
-    private InvalidAnnotationConfig cfgInvalidAnnotationConfig;
+    private InvalidAnnotationConfig cfg;
+    
     @Before
     public void before() {
-        cfgInvalidAnnotationConfig = ConfigFactory.create(InvalidAnnotationConfig.class);
+        cfg = ConfigFactory.create(InvalidAnnotationConfig.class);
     }
 
     public static interface InvalidAnnotationConfig extends Config {
@@ -40,7 +41,7 @@ public class InvalidAnnotationTest {
     @Test
     public void testNonInstantiableTokenizer() throws Exception {
         try {
-            cfgInvalidAnnotationConfig.nonInstantiableTokenizer();
+            cfg.nonInstantiableTokenizer();
             fail("UnsupportedOperationException expected");
         } catch (UnsupportedOperationException ex) {
             assertTrue(ex.getCause() instanceof IllegalAccessException); // since NonInstantiableTokenizer is private.

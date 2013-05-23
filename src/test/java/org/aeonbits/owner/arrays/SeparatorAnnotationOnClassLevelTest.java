@@ -21,11 +21,11 @@ import static org.junit.Assert.assertThat;
  * @author Luigi R. Viggiano
  */
 public class SeparatorAnnotationOnClassLevelTest {
-    private ArrayConfigWithSeparatorAnnotationOnClassLevel cfgSeparatorAnnotationOnClassLevel;
+    private ArrayConfigWithSeparatorAnnotationOnClassLevel cfg;
 
     @Before
     public void before() {
-        cfgSeparatorAnnotationOnClassLevel = ConfigFactory.create(ArrayConfigWithSeparatorAnnotationOnClassLevel.class);
+        cfg = ConfigFactory.create(ArrayConfigWithSeparatorAnnotationOnClassLevel.class);
     }
 
     @Separator(";")
@@ -45,16 +45,16 @@ public class SeparatorAnnotationOnClassLevelTest {
 
     @Test
     public void testSeparatorAnnotationOnMethodOverridingSeparatorAnnotationOnClassLevel() {
-        assertThat(cfgSeparatorAnnotationOnClassLevel.commaSeparated(), is(new int[]{1, 2, 3, 4}));
+        assertThat(cfg.commaSeparated(), is(new int[]{1, 2, 3, 4}));
     }
 
     @Test
     public void testSeparatorAnnotationOnClassLevelAndNoOverridingOnMethodLevel() {
-        assertThat(cfgSeparatorAnnotationOnClassLevel.semicolonSeparated(), is(new int[]{1, 2, 3, 4}));
+        assertThat(cfg.semicolonSeparated(), is(new int[]{1, 2, 3, 4}));
     }
 
     @Test
     public void testTokenClassAnnotationOnMethodLevelOverridingSeparatorOnClassLevel() {
-        assertThat(cfgSeparatorAnnotationOnClassLevel.dashSeparated(), is(new int[]{1, 2, 3, 4}));
+        assertThat(cfg.dashSeparated(), is(new int[]{1, 2, 3, 4}));
     }
 }

@@ -23,11 +23,11 @@ import static org.junit.Assert.fail;
  * @author luigi
  */
 public class ConflictingAnnotationsOnClassLevelTest {
-    private ConflictingAnnotationsOnClassLevel cfgConflictingAnnotationsOnClassLevel;
+    private ConflictingAnnotationsOnClassLevel cfg;
 
     @Before
     public void before() {
-        cfgConflictingAnnotationsOnClassLevel = ConfigFactory.create(ConflictingAnnotationsOnClassLevel.class);
+        cfg = ConfigFactory.create(ConflictingAnnotationsOnClassLevel.class);
     }
 
     @TokenizerClass(CustomCommaTokenizer.class) // should throw an exception when the first array conversion is invoked:
@@ -41,7 +41,7 @@ public class ConflictingAnnotationsOnClassLevelTest {
     @Test
     public void testConflictingAnnotationsOnClassLevel() throws Throwable {
         try {
-            cfgConflictingAnnotationsOnClassLevel.commaSeparated();
+            cfg.commaSeparated();
             fail("UnsupportedOperationException expected");
         } catch (UnsupportedOperationException ex) {
             assertThat(ex.getMessage(),

@@ -20,11 +20,11 @@ import static org.junit.Assert.assertThat;
  * @author Luigi R. Viggiano
  */
 public class BasicArrayWithAnnotationTest {
-    private BasicArrayWithAnnotationConfig cfgBasicArrayWithAnnotationConfig;
+    private BasicArrayWithAnnotationConfig cfg;
 
     @Before
     public void before() {
-        cfgBasicArrayWithAnnotationConfig = ConfigFactory.create(BasicArrayWithAnnotationConfig.class);
+        cfg = ConfigFactory.create(BasicArrayWithAnnotationConfig.class);
     }
 
     public static interface BasicArrayWithAnnotationConfig extends Config {
@@ -39,11 +39,11 @@ public class BasicArrayWithAnnotationTest {
 
     @Test
     public void testSeparatorAnnotation() throws Exception {
-        assertThat(cfgBasicArrayWithAnnotationConfig.fibonacci(), is(new int[]{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}));
+        assertThat(cfg.fibonacci(), is(new int[]{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}));
     }
 
     @Test
     public void testTokenizerClass() throws Exception {
-        assertThat(cfgBasicArrayWithAnnotationConfig.withSeparatorClass(), is(new String[]{"foo", "bar", "baz"}));
+        assertThat(cfg.withSeparatorClass(), is(new String[]{"foo", "bar", "baz"}));
     }
 }

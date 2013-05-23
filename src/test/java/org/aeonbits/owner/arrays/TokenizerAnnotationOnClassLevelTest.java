@@ -22,12 +22,11 @@ import static org.junit.Assert.assertThat;
  */
 public class TokenizerAnnotationOnClassLevelTest {
 
-    private ArrayConfigWithTokenizerAnnotationOnClassLevel cfgArrayConfigWithTokenizerAnnotationOnClassLevel;
+    private ArrayConfigWithTokenizerAnnotationOnClassLevel cfg;
 
     @Before
     public void before() {
-        cfgArrayConfigWithTokenizerAnnotationOnClassLevel = ConfigFactory.create
-                (ArrayConfigWithTokenizerAnnotationOnClassLevel.class);
+        cfg = ConfigFactory.create(ArrayConfigWithTokenizerAnnotationOnClassLevel.class);
     }
 
     @TokenizerClass(CustomDashTokenizer.class)
@@ -47,17 +46,17 @@ public class TokenizerAnnotationOnClassLevelTest {
 
     @Test
     public void testTokenizerClassAnnotationOnMethodLevelOverridingTokenizerClassAnnotationOnClassLevel() {
-        assertThat(cfgArrayConfigWithTokenizerAnnotationOnClassLevel.commaSeparated(), is(new int[]{1, 2, 3, 4}));
+        assertThat(cfg.commaSeparated(), is(new int[]{1, 2, 3, 4}));
     }
 
     @Test
     public void testSeparatorAnnotationOnMethodLevelOverridingTokenizerClassAnnotationOnClassLevel() {
-        assertThat(cfgArrayConfigWithTokenizerAnnotationOnClassLevel.semicolonSeparated(), is(new int[]{1, 2, 3, 4}));
+        assertThat(cfg.semicolonSeparated(), is(new int[]{1, 2, 3, 4}));
     }
 
     @Test
     public void testTokenizerClassAnnotationOnClassLevelAndNoOverridingOnMethodLevel() {
-        assertThat(cfgArrayConfigWithTokenizerAnnotationOnClassLevel.dashSeparated(), is(new int[]{1, 2, 3, 4}));
+        assertThat(cfg.dashSeparated(), is(new int[]{1, 2, 3, 4}));
     }
 
 }
