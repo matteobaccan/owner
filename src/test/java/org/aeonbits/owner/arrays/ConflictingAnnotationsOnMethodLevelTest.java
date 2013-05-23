@@ -29,11 +29,11 @@ public class ConflictingAnnotationsOnMethodLevelTest {
     }
 
     public static interface ConflictingAnnotationsOnMethodLevelConfig extends Config {
+        // should throw an exception when invoked: cannot use both @Separator and @Tokenizer on method level
         @Separator(";")
         @TokenizerClass(CustomDashTokenizer.class)
         @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
-        public int[] conflictingAnnotationsOnMethodLevel(); // should throw an exception when invoked: cannot use
-                                                            // both @Separator and @Tokenizer on method level
+        public int[] conflictingAnnotationsOnMethodLevel();
     }
 
     @Test

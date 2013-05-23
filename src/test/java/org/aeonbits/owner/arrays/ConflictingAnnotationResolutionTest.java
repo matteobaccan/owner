@@ -21,18 +21,24 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Luigi R. Viggiano
  */
-public class ConflictingAnnotationOnClassLevelResolvedOnMethodLevel {
+public class ConflictingAnnotationResolutionTest {
 
     private ConflictingAnnotationsResolved cfg;
 
     // as we know specifying both @TokenizerClass and Separator on the same level (class level) generates a conflict
     @TokenizerClass(CustomCommaTokenizer.class)
-    @Separator(";")
+    @Separator("!")
     public static interface ConflictingAnnotationsResolved extends Config {
 
-        @Separator(",") // but since @Separator on method level takes precedence, the conflict is resolved.
+        // but since @Separator on method level takes precedence, the conflict is resolved.
+        @Separator(",")
         @DefaultValue("1, 2, 3, 4")
         public int[] commaSeparated();
+
+        // but since @TokenizerClass on method level takes precedence, the conflict is resolved.
+        @TokenizerClass(CustomDashTokenizer.class)
+        @DefaultValue("1;2;3;4")
+        public int[] semicolonSeparated();
     }
 
     @Before

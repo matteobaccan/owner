@@ -30,9 +30,10 @@ public class ConflictingAnnotationsOnClassLevelTest {
         cfg = ConfigFactory.create(ConflictingAnnotationsOnClassLevel.class);
     }
 
-    @TokenizerClass(CustomCommaTokenizer.class) // should throw an exception when the first array conversion is invoked:
-    @Separator(",")                             // @Tokenizer and @Separator annotations cannot be used together on
-    // class level.
+    // should throw an exception when the first array conversion is invoked: @Tokenizer and @Separator annotations
+    // cannot be used together on class level.
+    @TokenizerClass(CustomCommaTokenizer.class)
+    @Separator(",")
     public static interface ConflictingAnnotationsOnClassLevel extends Config {
         @DefaultValue("1, 2, 3, 4")
         public int[] commaSeparated();

@@ -22,16 +22,17 @@ import static org.junit.Assert.fail;
  */
 public class InvalidAnnotationTest {
     private InvalidAnnotationConfig cfg;
-    
+
     @Before
     public void before() {
         cfg = ConfigFactory.create(InvalidAnnotationConfig.class);
     }
 
     public static interface InvalidAnnotationConfig extends Config {
+        // it throws an exception since the Tokenizer class is declared as private
         @TokenizerClass(NonInstantiableTokenizer.class)
         @DefaultValue("1,2,3")
-        public int[] nonInstantiableTokenizer(); // throws an exception since the Tokenizer class is declared as private
+        public int[] nonInstantiableTokenizer();
     }
 
     // it's private, it cannot be instantiated by the OWNER library
@@ -44,7 +45,8 @@ public class InvalidAnnotationTest {
             cfg.nonInstantiableTokenizer();
             fail("UnsupportedOperationException expected");
         } catch (UnsupportedOperationException ex) {
-            assertTrue(ex.getCause() instanceof IllegalAccessException); // since NonInstantiableTokenizer is private.
+            // since NonInstantiableTokenizer is private and IllegalAccessException is expected.
+            assertTrue(ex.getCause() instanceof IllegalAccessException);
         }
     }
 }
