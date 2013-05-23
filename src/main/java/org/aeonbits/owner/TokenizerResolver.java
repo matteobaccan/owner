@@ -14,14 +14,18 @@ import org.aeonbits.owner.Config.TokenizerClass;
 
 import java.lang.reflect.Method;
 
+import static org.aeonbits.owner.Util.prohibitInstantiation;
 import static org.aeonbits.owner.Util.unsupported;
 
 /**
  * @author Luigi R. Viggiano
  */
-class TokenizerResolver {
+abstract class TokenizerResolver {
 
-    // TODO: remark for Luigi, refactor the code below into a new class.
+    TokenizerResolver() {
+        prohibitInstantiation();
+    }
+
     private static Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
 
     static Tokenizer resolveTokenizer(Method targetMethod) {
