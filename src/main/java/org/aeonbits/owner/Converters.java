@@ -138,8 +138,12 @@ enum Converters {
                 return null;
             }
 
-            ParameterizedType parameterizedType = (ParameterizedType) targetMethod.getGenericReturnType();
-            Class<?> type = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+            Class<?> type = String.class;
+
+            if (targetMethod.getGenericReturnType() instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) targetMethod.getGenericReturnType();
+                type = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+            }
 
             Object stub = Array.newInstance(type, 0);
 

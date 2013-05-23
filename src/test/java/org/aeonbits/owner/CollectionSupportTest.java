@@ -1,5 +1,6 @@
 package org.aeonbits.owner;
 
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import java.util.SortedSet;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class CollectionSupportTest {
@@ -40,6 +42,9 @@ public class CollectionSupportTest {
 
         @DefaultValue(INTEGERS)
         LinkedList<Integer> integerLinkedList();
+
+        @DefaultValue(INTEGERS)
+        Collection rawCollection();
 
         @DefaultValue(INTEGERS)
         CollectionWithoutDefaultConstructor<Integer> badCollection();
@@ -93,4 +98,10 @@ public class CollectionSupportTest {
         cfg.badCollection();
     }
 
+    @Test
+    public void itShouldWorkWithRawCollectionAsWithCollectionOfStrings() throws Exception {
+        assertEquals(Sets.newHashSet("1", "2", "3"), cfg.rawCollection());
+    }
+
 }
+
