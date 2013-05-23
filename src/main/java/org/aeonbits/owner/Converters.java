@@ -172,10 +172,8 @@ enum Converters {
         private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
             try {
                 return (Collection<T>) targetType.newInstance();
-            } catch (InstantiationException e) {
-                throw new UnsupportedOperationException("Could not instantiate collection type:" + targetType.getCanonicalName());
-            } catch (IllegalAccessException e) {
-                throw new UnsupportedOperationException("IllegalAccessException trying to instantiate collection type:" + targetType.getCanonicalName());
+            } catch (Exception e) {
+                throw unsupported(e, "Cannot instantiate collection of type '%s'", targetType.getCanonicalName());
             }
         }
 
