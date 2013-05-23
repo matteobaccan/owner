@@ -14,12 +14,9 @@ import org.aeonbits.owner.Config.TokenizerClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * TODO: remark for Luigi, refactor this: split this class... I put the comments to identify where to split
@@ -31,25 +28,15 @@ public class ArraySupportTest {
 
     private ArrayConfig cfg;
     private ArrayConfigWithSeparatorAnnotationOnClassLevel cfgSeparatorAnnotationOnClassLevel;
-    private ConflictingAnnotationsOnClassLevel cfgConflictingAnnotationsOnClassLevel;
-    private BasicArrayWithAnnotationConfig cfgBasicArrayWithAnnotationConfig;
     private ArrayConfigWithTokenizerAnnotationOnClassLevel cfgArrayConfigWithTokenizerAnnotationOnClassLevel;
-    private InvalidAnnotationConfig cfgInvalidAnnotationConfig;
 
     @Before
     public void before() {
         cfg = ConfigFactory.create(ArrayConfig.class);
-        cfgBasicArrayWithAnnotationConfig = ConfigFactory.create(BasicArrayWithAnnotationConfig.class);
-        cfgInvalidAnnotationConfig = ConfigFactory.create(InvalidAnnotationConfig.class);
         cfgSeparatorAnnotationOnClassLevel = ConfigFactory.create(ArrayConfigWithSeparatorAnnotationOnClassLevel.class);
-        cfgConflictingAnnotationsOnClassLevel = ConfigFactory.create(ConflictingAnnotationsOnClassLevel.class);
         cfgArrayConfigWithTokenizerAnnotationOnClassLevel = ConfigFactory
                 .create(ArrayConfigWithTokenizerAnnotationOnClassLevel.class);
     }
-
-    /*------------------------------------------------------------------------------------------------------------------
-     * BasicArrayWithAnnotationConfig
-     *----------------------------------------------------------------------------------------------------------------*/
 
     public static interface ArrayConfig extends Config {
         public String[] fruit();
@@ -106,94 +93,6 @@ public class ArraySupportTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testUnsupportedArrayType() throws Exception {
         cfg.unsupported();
-    }
-
-    /*------------------------------------------------------------------------------------------------------------------
-     * BasicArrayWithAnnotationConfig
-     *----------------------------------------------------------------------------------------------------------------*/
-
-    public static interface BasicArrayWithAnnotationConfig extends Config  {
-        @Separator(";")
-        @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
-        public int[] fibonacci();
-
-        @TokenizerClass(CustomDashTokenizer.class)
-        @DefaultValue("foo-bar-baz")
-        public String[] withSeparatorClass();
-    }
-
-
-    @Test
-    public void testSeparatorAnnotation() throws Exception {
-        assertThat(cfgBasicArrayWithAnnotationConfig.fibonacci(), is(new int[]{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}));
-    }
-
-    @Test
-    public void testTokenizerClass() throws Exception {
-        assertThat(cfgBasicArrayWithAnnotationConfig.withSeparatorClass(), is(new String[]{"foo", "bar", "baz"}));
-    }
-
-    /*------------------------------------------------------------------------------------------------------------------
-     * InvalidAnnotationConfig
-     *----------------------------------------------------------------------------------------------------------------*/
-
-    public static interface InvalidAnnotationConfig extends Config {
-        @Separator(";")
-        @TokenizerClass(CustomDashTokenizer.class)
-        @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
-        public int[] conflictingAnnotationsOnMethodLevel(); // should throw an exception when invoked: cannot use
-                                                            // both @Separator and @Tokenizer on method level
-
-        @TokenizerClass(NonInstantiableTokenizer.class)
-        @DefaultValue("1,2,3")
-        public int[] nonInstantiableTokenizer(); // throws an exception since the Tokenizer class is declared as private
-    }
-
-    @Test
-    public void testConflictingAnnotationsOnMethodLevel() throws Exception {
-        try {
-            cfgInvalidAnnotationConfig.conflictingAnnotationsOnMethodLevel();
-            fail("UnsupportedOperationException expected");
-        } catch (UnsupportedOperationException ex) {
-            assertThat(ex.getMessage(),
-                    equalTo("You cannot specify @Separator and @TokenizerClass both together on method level for " +
-                            "'public abstract int[] org.aeonbits.owner.ArraySupportTest$InvalidAnnotationConfig" +
-                            ".conflictingAnnotationsOnMethodLevel()'"));
-        }
-    }
-
-    @Test
-    public void testNonInstantiableTokenizer() throws Exception {
-        try {
-            cfgInvalidAnnotationConfig.nonInstantiableTokenizer();
-            fail("UnsupportedOperationException expected");
-        } catch (UnsupportedOperationException ex) {
-            assertTrue(ex.getCause() instanceof IllegalAccessException); // since NonInstantiableTokenizer is private.
-        }
-    }
-
-    /*------------------------------------------------------------------------------------------------------------------
-     * ConflictingAnnotationsOnClassLevel
-     *----------------------------------------------------------------------------------------------------------------*/
-
-    @TokenizerClass(CustomCommaTokenizer.class) // should throw an exception when the first array conversion is invoked:
-    @Separator(",")                             // @Tokenizer and @Separator annotations cannot be used together on
-    // class level.
-    public static interface ConflictingAnnotationsOnClassLevel extends Config {
-        @DefaultValue("1, 2, 3, 4")
-        public int[] commaSeparated();
-    }
-
-    @Test
-    public void testConflictingAnnotationsOnClassLevel() throws Throwable {
-        try {
-            cfgConflictingAnnotationsOnClassLevel.commaSeparated();
-            fail("UnsupportedOperationException expected");
-        } catch (UnsupportedOperationException ex) {
-            assertThat(ex.getMessage(),
-                    equalTo("You cannot specify @Separator and @TokenizerClass both together on class level for " +
-                            "'org.aeonbits.owner.ArraySupportTest.ConflictingAnnotationsOnClassLevel'"));
-        }
     }
 
     /*------------------------------------------------------------------------------------------------------------------
@@ -285,8 +184,5 @@ public class ArraySupportTest {
         }
     }
 
-    // it's private, it cannot be instantiated by the OWNER library
-    private static class NonInstantiableTokenizer extends CustomCommaTokenizer implements Tokenizer {
-    }
 
 }
