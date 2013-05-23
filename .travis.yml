@@ -6,5 +6,5 @@ jdk:
   - openjdk7
   - openjdk6
   - openjdk5
-before_script: mvn install -Dmaven.compiler.target=1.5 -Dmaven.compiler.source=1.5 -DskipTests=true -B
+install: mvn install -Dmaven.compiler.target=1.5 -Dmaven.compiler.source=1.5 -DskipTests=true -B
 script: mvn test -Dmaven.compiler.target=1.5 -Dmaven.compiler.source=1.5 -B
