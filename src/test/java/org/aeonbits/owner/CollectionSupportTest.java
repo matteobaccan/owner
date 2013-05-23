@@ -3,13 +3,14 @@ package org.aeonbits.owner;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -32,6 +33,12 @@ public class CollectionSupportTest {
 
         @DefaultValue(INTEGERS)
         List<Integer> integerList();
+
+        @DefaultValue(COLORS)
+        LinkedHashSet<String> colorLinkedHashSet();
+
+        @DefaultValue(INTEGERS)
+        LinkedList<Integer> integerLinkedList();
     }
 
     @Before
@@ -41,13 +48,11 @@ public class CollectionSupportTest {
 
     @Test
     public void itShouldReadCollectionOfStrings() throws Exception {
-        assertThat(cfg.colors().size(), is(2));
         assertThat(cfg.colors(), containsInAnyOrder("pink", "black"));
     }
 
     @Test
     public void itShouldReadSetOfStrings() throws Exception {
-        assertThat(cfg.colorSet().size(), is(2));
         assertThat(cfg.colorSet(), containsInAnyOrder("pink", "black"));
     }
 
@@ -59,6 +64,18 @@ public class CollectionSupportTest {
     @Test
     public void itShouldReadListOfIntegers() throws Exception {
         assertThat(cfg.integerList(), contains(1, 2, 3));
+    }
+
+    @Test
+    public void itShouldReadConcreteSetImplementation() throws Exception {
+        assertThat(cfg.colorLinkedHashSet(), instanceOf(LinkedHashSet.class));
+        assertThat(cfg.colorLinkedHashSet(), contains("pink", "black"));
+    }
+
+    @Test
+    public void itShouldReadConcreteListImplementation() throws Exception {
+        assertThat(cfg.integerLinkedList(), instanceOf(LinkedList.class));
+        assertThat(cfg.integerLinkedList(), contains(1, 2, 3));
     }
 
 }
