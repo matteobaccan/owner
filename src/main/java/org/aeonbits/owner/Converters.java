@@ -99,6 +99,8 @@ enum Converters {
     CLASS {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (!Class.class.isAssignableFrom(targetType))
+                return null;
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException e) {
