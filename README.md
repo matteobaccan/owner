@@ -812,7 +812,7 @@ CHANGELOG
 ---------
 ### 1.0.4 (under development)
 
- * Fist class Array and Collections support in type conversion. Thanks [ffbit][].
+ * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
    formatting. See Issue [#20][issue-20].
  * Website code snippets now have syntax highlighting. Thanks [ming13][].
