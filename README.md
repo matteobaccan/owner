@@ -436,7 +436,7 @@ Annotations specified on method level override the setting specified on the clas
 
 ```java
 @Separator(";")
-public static interface ArrayConfigWithSeparatorAnnotationOnClassLevel extends Config {
+public interface ArrayConfigWithSeparatorAnnotationOnClassLevel extends Config {
 
     @DefaultValue("1; 2; 3; 4")
     public int[] semicolonSeparated();  // takes the class level @Separator
@@ -458,25 +458,25 @@ So in following cases you'll get a [`UnsupportedOperationException`][unsupported
 
 ```java
 
-    // @Separator and @TokenizerClass cannot be used together on class level.
-    @TokenizerClass(CustomCommaTokenizer.class)
-    @Separator(",")
-    public static interface Wrong extends Config {
+// @Separator and @TokenizerClass cannot be used together on class level.
+@TokenizerClass(CustomCommaTokenizer.class)
+@Separator(",")
+public interface Wrong extends Config {
 
-        @DefaultValue("1, 2, 3, 4")
-        public int[] commaSeparated(); // will throw UnsupportedOperationException!
+    @DefaultValue("1, 2, 3, 4")
+    public int[] commaSeparated(); // will throw UnsupportedOperationException!
 
-    }
+}
 
-    public static interface AlsoWrong extends Config {
+public interface AlsoWrong extends Config {
 
-        // @Separator and @TokenizerClass cannot be used together on method level.
-        @Separator(";")
-        @TokenizerClass(CustomDashTokenizer.class)
-        @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
-        public int[] conflictingAnnotationsOnMethodLevel(); // will throw UnsupportedOperationException!
+    // @Separator and @TokenizerClass cannot be used together on method level.
+    @Separator(";")
+    @TokenizerClass(CustomDashTokenizer.class)
+    @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
+    public int[] conflictingAnnotationsOnMethodLevel(); // will throw UnsupportedOperationException!
 
-    }
+}
 ```
 
   [unsupported-ex]: http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html
@@ -486,16 +486,16 @@ OWNER is able to resolve things correctly on method level:
 
 ```java
 
-    // @Separator and @TokenizerClass cannot be used together on class level.
-    @Separator(";")
-    @TokenizerClass(CustomDashTokenizer.class)
-    public static interface WrongButItWorks extends Config {
+// @Separator and @TokenizerClass cannot be used together on class level.
+@Separator(";")
+@TokenizerClass(CustomDashTokenizer.class)
+public interface WrongButItWorks extends Config {
 
-        @Separator(";") // but this overrides the wrong class level annotations, so it will work!
-        @DefaultValue("1, 2, 3, 4")
-        public int[] commaSeparated();
+    @Separator(";") // but this overrides the wrong class level annotations, so it will work!
+    @DefaultValue("1, 2, 3, 4")
+    public int[] commaSeparated();
 
-    }
+}
 ```
 
 It is not recommended to have above wrong annotations setup: it is considered a bug in the code, and even if this setup
@@ -622,7 +622,7 @@ or on class level:
 
 ```java
 @DisableFeature({VARIABLE_EXPANSION, PARAMETER_FORMATTING}) // on class level...
-public static interface SampleConfig extends Config {
+public interface SampleConfig extends Config {
     @DefaultValue("Earth")
     public String planet();
 
