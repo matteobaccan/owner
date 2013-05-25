@@ -393,12 +393,14 @@ Collections Framework interfaces, as long as your implementation class defines a
   [Stack]: http://docs.oracle.com/javase/7/docs/api/java/util/Stack.html
   [LinkedList]: http://docs.oracle.com/javase/7/docs/api/java/util/LinkedList.html
 
-The Map interface and sub-interfaces are not supported.
+The [`Map`][Map] interface and sub-interfaces are not supported.
+
+  [Map]: http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
 
 By default OWNER uses the comma `","` character to tokenize values for the arrays and collections, but you can specify
 different characters (and regexp) with the [`@Separator`][separator] annotation or, if your property format has a more
 complex tokenization logic, you can define your own tokenizer class via the [`@TokenizerClass`][tokenizerclass]
-annotation plus [`Tokenizer`][] interface.
+annotation plus [`Tokenizer`][tokenizer] interface.
 
   [separator]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.Separator.html
   [tokenizerclass]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.TokenizerClass.html
