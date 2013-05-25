@@ -63,8 +63,6 @@ enum Converters {
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
-                if (constructor == null)
-                    return null;
                 return constructor.newInstance(text);
             } catch (Exception e) {
                 return null;
@@ -77,8 +75,6 @@ enum Converters {
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
-                if (constructor == null)
-                    return null;
                 return constructor.newInstance(text);
             } catch (Exception e) {
                 return null;

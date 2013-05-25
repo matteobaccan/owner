@@ -97,6 +97,9 @@ public class SpecialTypesTest {
 
         @DefaultValue("valueOf")
         ValueOf valueOf();
+
+        @DefaultValue("obj")
+        Object object();
     }
 
     @Test
@@ -219,5 +222,10 @@ public class SpecialTypesTest {
         assertEquals(new File(System.getProperty("user.home")), home);
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testObject() throws Throwable {
+        SpecialTypes cfg = ConfigFactory.create(SpecialTypes.class);
+        cfg.object();
+    }
 
 }
