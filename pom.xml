@@ -44,6 +44,16 @@
                 <role>dev</role>
             </roles>
         </developer>
+        <developer>
+            <id>ffbit</id>
+            <name>Dmytro Chyzhykov</name>
+            <email>dmytro.chyzhykov@gmail.com</email>
+            <url>http://ffbit.com/</url>
+            <timezone>+3</timezone>
+            <roles>
+                <role>dev</role>
+            </roles>
+        </developer>
     </developers>
 
     <mailingLists>
