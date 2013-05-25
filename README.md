@@ -445,7 +445,6 @@ public static interface ArrayConfigWithSeparatorAnnotationOnClassLevel extends C
     @DefaultValue("1, 2, 3, 4")
     public int[] commaSeparated();
 
-
     @TokenizerClass(CustomDashTokenizer.class) // overrides the class level @Separator(";")
     @DefaultValue("1-2-3-4")
     public int[] dashSeparated();
@@ -453,8 +452,9 @@ public static interface ArrayConfigWithSeparatorAnnotationOnClassLevel extends C
 ```
 
 Notice that it is invalid to specify together on the same level both [`@Separator`][separator] and
-[`@TokenizerClass`][tokenizerclass] annotations, so in following cases you'll get a
-`java.lang.UnsupportedOperationException`:
+[`@TokenizerClass`][tokenizerclass] annotations: you cannot specify two different to do the same thing!
+
+So in following cases you'll get a `java.lang.UnsupportedOperationException`:
 
 ```java
 
@@ -464,7 +464,7 @@ Notice that it is invalid to specify together on the same level both [`@Separato
     public static interface Wrong extends Config {
 
         @DefaultValue("1, 2, 3, 4")
-        public int[] commaSeparated();
+        public int[] commaSeparated(); // will throw UnsupportedOperationException!
 
     }
 
@@ -474,7 +474,7 @@ Notice that it is invalid to specify together on the same level both [`@Separato
         @Separator(";")
         @TokenizerClass(CustomDashTokenizer.class)
         @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
-        public int[] conflictingAnnotationsOnMethodLevel();
+        public int[] conflictingAnnotationsOnMethodLevel(); // will throw UnsupportedOperationException!
 
     }
 ```
