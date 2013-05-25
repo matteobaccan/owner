@@ -16,6 +16,7 @@ import java.sql.Driver;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Luigi R. Viggiano
@@ -84,6 +85,9 @@ public class SpecialTypesTest {
 
         @DefaultValue("java.sql.Driver")
         Class jdbcDriver();
+
+        @DefaultValue("foo.bar.UnexistentClass")
+        Class nonExistentClass();
 
         @DefaultValue("foobar")
         Reference reference();
@@ -184,6 +188,13 @@ public class SpecialTypesTest {
         Class driver = config.jdbcDriver();
         assertNotNull(driver);
         assertEquals(Driver.class, driver);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testClassTypeWhenClassIsNotFound() throws Throwable {
+        SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
+        Class nonExistent = config.nonExistentClass();
+        assertNull(nonExistent);
     }
 
     @Test(expected = UnsupportedOperationException.class)

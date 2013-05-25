@@ -63,6 +63,8 @@ enum Converters {
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
+                if (constructor == null)
+                    return null;
                 return constructor.newInstance(text);
             } catch (Exception e) {
                 return null;
@@ -75,6 +77,8 @@ enum Converters {
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
+                if (constructor == null)
+                    return null;
                 return constructor.newInstance(text);
             } catch (Exception e) {
                 return null;
@@ -103,8 +107,8 @@ enum Converters {
                 return null;
             try {
                 return Class.forName(text);
-            } catch (ClassNotFoundException e) {
-                return null;
+            } catch (ClassNotFoundException ex) {
+                throw unsupported(ex, "Cannot convert '%s' to %s", text, targetType.getCanonicalName());
             }
         }
     },
