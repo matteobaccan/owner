@@ -183,9 +183,10 @@ public interface Config {
     }
 
     /**
-     * Specifies simple <tt>{@link java.lang.String}</tt> as separator to tokenize properties values into
-     * single element for vectors and collections.
-     * The value specified is used as per {@link java.lang.String#split(String, int)} with int=-1
+     * Specifies simple <tt>{@link String}</tt> as separator to tokenize properties values specified as a
+     * single string value, into elements for vectors and collections.
+     * The value specified is used as per {@link String#split(String, int)} with int=-1, every element is also
+     * trimmed out from spaces using {@link String#trim()}.
      *
      * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
      * together on the same level:

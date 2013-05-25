@@ -381,9 +381,9 @@ public class MyConfig extends Config {
 ```
 
 You can use array of objects or primitive Java types, as well as Java collections, as specified by interfaces
-[`Collection`][], [`List`][], [`Set`][], [`SortedSet`][] or concrete implementations like [`Vector`][], [`Stack`][],
-[`LinkedList`][] etc. or your own concrete implementation of the Java Collections Framework interfaces, as long as
-your implementation class defines a default no-arg constructor.
+[`Collection`][Collection], [`List`][List], [`Set`][Set], [`SortedSet`][SortedSet] or concrete implementations like
+[`Vector`][Vector], [`Stack`][Stack], [`LinkedList`][LinkedList] etc. or your own concrete implementation of the Java
+Collections Framework interfaces, as long as your implementation class defines a default no-arg constructor.
 
   [Collection]: http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html
   [List]: http://docs.oracle.com/javase/7/docs/api/java/util/List.html
