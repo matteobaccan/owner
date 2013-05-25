@@ -515,10 +515,10 @@ But there is more. OWNER API supports automatic conversion for:
   10. Any class for which you can register a [`PropertyEditor`][propedit] via
       [`PropertyEditorManager.registerEditor()`][propeditmanager].
   11. Any array having above types as elements.
-  12. Java Collections of all above types: Set, List, SortedSet or concrete implementations like LinkedHashSet or user
-      defined collections having a default no-arg constructor.
+  12. Any Java Collections of all above types: Set, List, SortedSet or concrete implementations like LinkedHashSet or user
+      defined collections having a default no-arg constructor. [`Map`][Map] and sub-interfaces are not supported.
 
-If OWNER API cannot find any way to map your business object, you'll receive a `java.lang.UnsupportedOperationException`
+If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsup-ex]
 with some meaningful description to identify the problem as quickly as possible.
 
 You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your business objects
