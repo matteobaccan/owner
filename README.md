@@ -454,7 +454,7 @@ public static interface ArrayConfigWithSeparatorAnnotationOnClassLevel extends C
 Notice that it is invalid to specify together on the same level both [`@Separator`][separator] and
 [`@TokenizerClass`][tokenizerclass] annotations: you cannot specify two different to do the same thing!
 
-So in following cases you'll get a `java.lang.UnsupportedOperationException`:
+So in following cases you'll get a [`UnsupportedOperationException`][unsupported-ex]:
 
 ```java
 
@@ -478,6 +478,8 @@ So in following cases you'll get a `java.lang.UnsupportedOperationException`:
 
     }
 ```
+
+  [unsupported-ex]: http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html
 
 But even though the following example contains a conflict on class level (and should be considered a bug),
 OWNER is able to resolve things correctly on method level:
