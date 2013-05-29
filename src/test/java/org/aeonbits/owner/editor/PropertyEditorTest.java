@@ -10,6 +10,7 @@ package org.aeonbits.owner.editor;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.beans.PropertyEditorManager;
@@ -22,6 +23,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class PropertyEditorTest {
 
+    private MyAppConfig cfg;
+
     public interface MyAppConfig extends Config {
         @DefaultValue("admin")
         User user();
@@ -32,19 +35,18 @@ public class PropertyEditorTest {
 
     @Test
     public void testPropertyEditor() {
-        PropertyEditorManager.registerEditor(User.class, UserPropertyEditor.class);
-
-        MyAppConfig cfg = ConfigFactory.create(MyAppConfig.class);
-
         assertEquals("admin", cfg.user().getUsername());
+    }
+
+    @Before
+    public void setUp() {
+        PropertyEditorManager.registerEditor(User.class, UserPropertyEditor.class);
+        cfg = ConfigFactory.create(MyAppConfig.class);
     }
 
 
     @Test
     public void testPropertyEditorWithList() {
-        PropertyEditorManager.registerEditor(User.class, UserPropertyEditor.class);
-
-        MyAppConfig cfg = ConfigFactory.create(MyAppConfig.class);
         List<User> users = cfg.users();
         assertEquals("admin", users.get(0).getUsername());
         assertEquals("root", users.get(1).getUsername());
