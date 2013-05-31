@@ -38,7 +38,13 @@ public class PropertiesInvocationHandlerTest {
 
     @Before
     public void before() {
-        handler = new PropertiesInvocationHandler(properties);
+        PropertiesLoader loader = new PropertiesLoader(null) {
+            @Override
+            Properties load() {
+                return properties;
+            }
+        };
+        handler = new PropertiesInvocationHandler(loader);
     }
 
     @Test

@@ -26,11 +26,6 @@ public class UnsupportedInstantiationTest {
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testPropertiesLoaderInstantiation() {
-        new PropertiesLoader(){};
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
     public void testConfigFactoryInstantiation() {
         new ConfigFactory(){};
     }

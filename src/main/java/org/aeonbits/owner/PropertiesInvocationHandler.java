@@ -40,6 +40,7 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
 class PropertiesInvocationHandler implements InvocationHandler {
     private final Properties properties;
     private final StrSubstitutor substitutor;
+    private final PropertiesLoader propertiesLoader;
     private static final Method listPrintStream = getMethod(Properties.class, "list", PrintStream.class);
     private static final Method listPrintWriter = getMethod(Properties.class, "list", PrintWriter.class);
 
@@ -53,8 +54,9 @@ class PropertiesInvocationHandler implements InvocationHandler {
         }
     }
 
-    PropertiesInvocationHandler(Properties properties) {
-        this.properties = properties;
+    PropertiesInvocationHandler(PropertiesLoader loader) {
+        this.propertiesLoader = loader;
+        this.properties = loader.load();
         this.substitutor = new StrSubstitutor(properties);
     }
 

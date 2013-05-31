@@ -23,7 +23,6 @@ import static org.aeonbits.owner.Config.LoadType;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
-import static org.aeonbits.owner.Util.prohibitInstantiation;
 import static org.aeonbits.owner.Util.reverse;
 
 /**
@@ -31,19 +30,22 @@ import static org.aeonbits.owner.Util.reverse;
  *
  * @author Luigi R. Viggiano
  */
-abstract class PropertiesLoader {
+class PropertiesLoader {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
+    private final Class<? extends Config> clazz;
+    private final Map<?, ?>[] imports;
 
-    PropertiesLoader() {
-        prohibitInstantiation();
+    PropertiesLoader(Class<? extends Config> clazz, Map<?, ?>... imports) {
+        this.clazz = clazz;
+        this.imports = imports;
     }
 
-    static Properties load(Class<? extends Config> clazz, Map<?, ?>... imports) {
+    Properties load() {
         try {
             Properties props = defaults(clazz);
             merge(props, reverse(imports));
             ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
-            Properties loadedFromFile = doLoad(clazz, handler);
+            Properties loadedFromFile = doLoad(handler);
             merge(props, loadedFromFile);
             return props;
         } catch (IOException e) {
@@ -51,18 +53,17 @@ abstract class PropertiesLoader {
         }
     }
 
-    static Properties doLoad(Class<?> clazz, ConfigURLStreamHandler handler) throws IOException {
+    Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
         Sources sources = clazz.getAnnotation(Sources.class);
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         LoadType loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
         if (sources == null)
-            return loadDefaultProperties(clazz, handler);
+            return loadDefaultProperties(handler);
         else
             return loadType.load(sources, handler);
     }
 
-    private static Properties loadDefaultProperties(Class<?> clazz,
-                                                    ConfigURLStreamHandler handler) throws IOException {
+    private Properties loadDefaultProperties(ConfigURLStreamHandler handler) throws IOException {
         String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
         InputStream inputStream = getInputStream(new URL(null, spec, handler));
         try {
