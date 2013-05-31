@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class PropertyNotSetTest {
 
-
     public interface MyConfig extends Config {
         @DefaultValue("Hello ${world}.")
         String foo();
