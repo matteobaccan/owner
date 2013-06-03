@@ -29,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
+ * TODO: maybe splitting this class in several simpler ones would help.
  * @author Luigi R. Viggiano
  */
 public class ConfigTest {
