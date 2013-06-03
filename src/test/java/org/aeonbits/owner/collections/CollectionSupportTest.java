@@ -1,5 +1,7 @@
-package org.aeonbits.owner;
+package org.aeonbits.owner.collections;
 
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.ConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -9,7 +9,10 @@
 package org.aeonbits.owner;
 
 /**
- * @author luigi
+ * Allows the a Config object to implement the reload of the properties.
+ *
+ * @author Luigi
+ * @since 1.0.4
  */
 public interface Reloadable {
     public void reload();

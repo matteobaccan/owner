@@ -30,15 +30,7 @@ import static org.aeonbits.owner.Util.reverse;
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p/>
- * Sub-interfaces may also implement list() methods as following to aid debugging:
- * <p/>
- * <pre>
- *     void list(PrintStream out);
- *     void list(PrintWriter out);
- * </pre>
- * <p/>
- * These methods will print the list of properties, see {@link java.util.Properties#list(java.io.PrintStream)} and
- * {@link java.util.Properties#list(java.io.PrintWriter)}.
+ * Sub-interfaces may also extend {@link Listable} to allow some debugging facility.
  *
  * @author Luigi R. Viggiano
  * @see java.util.Properties

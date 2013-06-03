@@ -36,7 +36,7 @@ public class ConfigTest {
     /**
      * @author Luigi R. Viggiano
      */
-    public static interface SampleConfig extends Config {
+    public static interface SampleConfig extends Config, Listable {
 
         String testKey();
 
