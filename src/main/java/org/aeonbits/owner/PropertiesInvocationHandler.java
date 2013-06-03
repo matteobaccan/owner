@@ -15,7 +15,6 @@ import org.aeonbits.owner.Config.Key;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Properties;
@@ -35,23 +34,59 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
  * Automatic conversion is handled between the property value and the return type expected by the method of the
  * delegate.
  *
+ * TODO: synchronize access to properties object (also when RELOAD.invoke is called)
+ *
  * @author Luigi R. Viggiano
  */
 class PropertiesInvocationHandler implements InvocationHandler {
     private final Properties properties;
     private final StrSubstitutor substitutor;
     private final PropertiesLoader propertiesLoader;
-    private static final Method listPrintStream = getMethod(Properties.class, "list", PrintStream.class);
-    private static final Method listPrintWriter = getMethod(Properties.class, "list", PrintWriter.class);
 
-    private static Method getMethod(Class<?> aClass, String name, Class<?>... args) {
-        try {
-            return aClass.getMethod(name, args);
-        } catch (NoSuchMethodException e) {
-            // this shouldn't happen, btw we handle the case in which the delegate method is not available...
-            // so, it's fine.
-            return null;
+    private enum DelegatedMethods {
+        LIST_PRINT_STREAM(getMethod(Properties.class, "list", PrintStream.class)) {
+            @Override
+            public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
+                return proxiedMethod.invoke(handler.properties, args);
+            }
+        },
+
+        LIST_PRINT_WRITER(getMethod(Properties.class, "list", PrintWriter.class)) {
+            @Override
+            public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
+                return proxiedMethod.invoke(handler.properties, args);
+            }
+        },
+
+        RELOAD(getMethod(Reloadable.class, "reload")) {
+            @Override
+            public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
+                return proxiedMethod.invoke(handler.propertiesLoader, args);
+            }
+        };
+
+        final Method proxiedMethod;
+
+        DelegatedMethods(Method proxiedMethod) {
+            this.proxiedMethod = proxiedMethod;
         }
+
+        private boolean matches(Method proxy) {
+            return proxiedMethod != null && proxiedMethod.getName().equals(proxy.getName())
+                    && Arrays.equals(proxiedMethod.getParameterTypes(), proxy.getParameterTypes());
+        }
+
+        private static Method getMethod(Class<?> aClass, String name, Class<?>... args) {
+            try {
+                return aClass.getMethod(name, args);
+            } catch (NoSuchMethodException e) {
+                // this shouldn't happen, btw we handle the case in which the delegate method is not available...
+                // so, it's fine.
+                return null;
+            }
+        }
+
+        public abstract Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable;
     }
 
     PropertiesInvocationHandler(PropertiesLoader loader) {
@@ -63,8 +98,9 @@ class PropertiesInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object... args) throws Throwable {
         Method proxyMethod;
-        if (null != (proxyMethod = proxyMethod(method)))
-            return delegate(properties, proxyMethod, args);
+        for (DelegatedMethods delegated : DelegatedMethods.values())
+            if (delegated.matches(method))
+                return delegated.invoke(this, args);
         return resolveProperty(method, args);
     }
 
@@ -86,24 +122,6 @@ class PropertiesInvocationHandler implements InvocationHandler {
         if (isFeatureDisabled(method, VARIABLE_EXPANSION))
             return value;
         return substitutor.replace(value);
-    }
-
-    private Object delegate(Object target, Method method, Object... args) throws InvocationTargetException,
-            IllegalAccessException {
-        return method.invoke(target, args);
-    }
-
-    private Method proxyMethod(Method method) {
-        if (matches(listPrintStream, method))
-            return listPrintStream;
-        if (matches(listPrintWriter, method))
-            return listPrintWriter;
-        return null;
-    }
-
-    private boolean matches(Method proxied, Method proxy) {
-        return proxied != null && proxied.getName().equals(proxy.getName())
-                && Arrays.equals(proxied.getParameterTypes(), proxy.getParameterTypes());
     }
 
 }

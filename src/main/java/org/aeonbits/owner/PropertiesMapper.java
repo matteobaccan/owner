@@ -37,15 +37,13 @@ abstract class PropertiesMapper {
         return defaultValue != null ? defaultValue.value() : null;
     }
 
-    static Properties defaults(Class<? extends Config> clazz) {
-        Properties defaults = new Properties();
+    static void defaults(Properties properties, Class<? extends Config> clazz) {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
             String key = key(method);
             String value = defaultValue(method);
             if (value != null)
-                defaults.put(key, value);
+                properties.put(key, value);
         }
-        return defaults;
     }
 }

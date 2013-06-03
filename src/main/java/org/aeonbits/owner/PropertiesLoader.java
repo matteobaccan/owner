@@ -30,10 +30,11 @@ import static org.aeonbits.owner.Util.reverse;
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesLoader {
+class PropertiesLoader implements Reloadable {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
+    private final Properties properties = new Properties();
 
     PropertiesLoader(Class<? extends Config> clazz, Map<?, ?>... imports) {
         this.clazz = clazz;
@@ -42,15 +43,20 @@ class PropertiesLoader {
 
     Properties load() {
         try {
-            Properties props = defaults(clazz);
-            merge(props, reverse(imports));
+            defaults(properties, clazz);
+            merge(properties, reverse(imports));
             ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
             Properties loadedFromFile = doLoad(handler);
-            merge(props, loadedFromFile);
-            return props;
+            merge(properties, loadedFromFile);
+            return properties;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void reload() {
+        properties.clear();
+        load();
     }
 
     Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
