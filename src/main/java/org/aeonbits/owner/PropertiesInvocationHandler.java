@@ -34,34 +34,31 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
  * Automatic conversion is handled between the property value and the return type expected by the method of the
  * delegate.
  *
- * TODO: synchronize access to properties object (also when RELOAD.invoke is called)
- *
  * @author Luigi R. Viggiano
  */
 class PropertiesInvocationHandler implements InvocationHandler {
-    private final Properties properties;
     private final StrSubstitutor substitutor;
-    private final PropertiesLoader propertiesLoader;
+    private final PropertiesManager propertiesManager;
 
     private enum DelegatedMethods {
         LIST_PRINT_STREAM(getMethod(Properties.class, "list", PrintStream.class)) {
             @Override
             public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
-                return proxiedMethod.invoke(handler.properties, args);
+                return proxiedMethod.invoke(handler.propertiesManager.properties(), args);
             }
         },
 
         LIST_PRINT_WRITER(getMethod(Properties.class, "list", PrintWriter.class)) {
             @Override
             public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
-                return proxiedMethod.invoke(handler.properties, args);
+                return proxiedMethod.invoke(handler.propertiesManager.properties(), args);
             }
         },
 
         RELOAD(getMethod(Reloadable.class, "reload")) {
             @Override
             public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
-                return proxiedMethod.invoke(handler.propertiesLoader, args);
+                return proxiedMethod.invoke(handler.propertiesManager, args);
             }
         };
 
@@ -89,15 +86,13 @@ class PropertiesInvocationHandler implements InvocationHandler {
         public abstract Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable;
     }
 
-    PropertiesInvocationHandler(PropertiesLoader loader) {
-        this.propertiesLoader = loader;
-        this.properties = loader.load();
-        this.substitutor = new StrSubstitutor(properties);
+    PropertiesInvocationHandler(PropertiesManager manager) {
+        this.propertiesManager = manager;
+        this.substitutor = new StrSubstitutor(manager.load());
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object... args) throws Throwable {
-        Method proxyMethod;
         for (DelegatedMethods delegated : DelegatedMethods.values())
             if (delegated.matches(method))
                 return delegated.invoke(this, args);
@@ -106,7 +101,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     private Object resolveProperty(Method method, Object... args) {
         String key = key(method);
-        String value = properties.getProperty(key);
+        String value = propertiesManager.getProperty(key);
         if (value == null)
             return null;
         return convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));

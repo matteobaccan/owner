@@ -21,16 +21,17 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.PropertiesLoader.close;
-import static org.aeonbits.owner.PropertiesLoader.getInputStream;
-import static org.aeonbits.owner.PropertiesLoader.properties;
+import static org.aeonbits.owner.PropertiesManager.close;
+import static org.aeonbits.owner.PropertiesManager.getInputStream;
+import static org.aeonbits.owner.PropertiesManager.properties;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p/>
- * Sub-interfaces may also extend {@link Listable} to allow some debugging facility.
+ * Sub-interfaces may also extend {@link Listable} to allow some debugging facility, or {@link Reloadable} to allow the
+ * user to programmatically reload properties.
  *
  * @author Luigi R. Viggiano
  * @see java.util.Properties

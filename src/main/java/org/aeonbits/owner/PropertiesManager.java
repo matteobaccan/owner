@@ -18,6 +18,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import static org.aeonbits.owner.Config.LoadType;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
@@ -26,23 +29,39 @@ import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.reverse;
 
 /**
- * Loads properties for a class.
+ * Loads properties and manages access to properties handling concurrency.
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesLoader implements Reloadable {
+class PropertiesManager implements Reloadable {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
     private final Properties properties = new Properties();
 
-    PropertiesLoader(Class<? extends Config> clazz, Map<?, ?>... imports) {
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReadLock readLock = lock.readLock();
+    private final WriteLock writeLock = lock.writeLock();
+
+
+    PropertiesManager(Class<? extends Config> clazz, Map<?, ?>... imports) {
         this.clazz = clazz;
         this.imports = imports;
     }
 
     Properties load() {
+        return load(false);
+    }
+
+    public void reload() {
+        load(true);
+    }
+
+    private Properties load(boolean clear) {
+        writeLock.lock();
         try {
+            if (clear)
+                properties.clear();
             defaults(properties, clazz);
             merge(properties, reverse(imports));
             ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
@@ -51,12 +70,9 @@ class PropertiesLoader implements Reloadable {
             return properties;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            writeLock.unlock();
         }
-    }
-
-    public void reload() {
-        properties.clear();
-        load();
     }
 
     Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
@@ -103,4 +119,21 @@ class PropertiesLoader implements Reloadable {
             inputStream.close();
     }
 
+    Properties properties() {
+        readLock.lock();
+        try {
+            return properties;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public String getProperty(String key) {
+        readLock.lock();
+        try {
+            return properties.getProperty(key);
+        }finally {
+            readLock.unlock();
+        }
+    }
 }

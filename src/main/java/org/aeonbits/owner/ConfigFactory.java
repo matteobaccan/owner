@@ -39,8 +39,8 @@ public abstract class ConfigFactory {
     @SuppressWarnings("unchecked")
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
-        PropertiesLoader loader = new PropertiesLoader(clazz, imports);
-        InvocationHandler handler = new PropertiesInvocationHandler(loader);
+        PropertiesManager manager = new PropertiesManager(clazz, imports);
+        InvocationHandler handler = new PropertiesInvocationHandler(manager);
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }
 }

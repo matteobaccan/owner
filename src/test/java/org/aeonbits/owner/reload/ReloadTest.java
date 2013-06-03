@@ -12,10 +12,14 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -26,34 +30,56 @@ import static org.junit.Assert.assertEquals;
  */
 public class ReloadTest {
     private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
+    private static File target;
+    private ReloadableConfig reloadableConfig;
+
+    @BeforeClass
+    public static void beforeClass() throws MalformedURLException {
+        target = new File(new URL(spec).getFile());
+    }
+
+    @Before
+    public void before() throws Throwable {
+        synchronized (target) {
+            save(new Properties() {{
+                setProperty("someValue", "10");
+            }});
+
+            reloadableConfig = ConfigFactory.create(ReloadableConfig.class);
+        }
+    }
 
     @Sources(spec)
     public interface ReloadableConfig extends Config, Reloadable {
-        int someValue();
+        Integer someValue();
     }
 
     @Test
     public void testReload() throws Throwable {
-        save(new Properties() {{
-            setProperty("someValue", "10");
-        }});
+        assertEquals(Integer.valueOf(10), reloadableConfig.someValue());
 
-        ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class);
-        assertEquals(10, cfg.someValue());
+        synchronized (target) {
+            save(new Properties() {{
+                setProperty("someValue", "20");
+            }});
 
-        save(new Properties() {{
-            setProperty("someValue", "20");
-        }});
-
-        cfg.reload();
-        assertEquals(20, cfg.someValue());
+            reloadableConfig.reload();
+        }
+        assertEquals(Integer.valueOf(20), reloadableConfig.someValue());
     }
 
     private void save(Properties p) throws Throwable {
-        File target = new File(new URL(spec).getFile());
-        target.getParentFile().mkdirs();
-        p.store(new FileWriter(target), "foobar");
+        synchronized (target) {
+            target.getParentFile().mkdirs();
+            p.store(new FileWriter(target), "foobar");
+        }
     }
 
+    @After
+    public void after() throws Throwable {
+        synchronized (target) {
+            target.delete();
+        }
+    }
 
 }
