@@ -38,30 +38,30 @@ public class ReloadTest {
 
     @Sources(spec)
     public interface ReloadableConfig extends Config, Reloadable {
-        Integer someValue();
+        Integer minimumAge();
     }
 
     @Test
     public void testReload() throws Throwable {
         save(new Properties() {{
-            setProperty("someValue", "10");
+            setProperty("minimumAge", "18");
         }});
 
         ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class);
 
-        assertEquals(Integer.valueOf(10), cfg.someValue());
+        assertEquals(Integer.valueOf(18), cfg.minimumAge());
 
         save(new Properties() {{
-            setProperty("someValue", "20");
+            setProperty("minimumAge", "21");
         }});
 
         cfg.reload();
-        assertEquals(Integer.valueOf(20), cfg.someValue());
+        assertEquals(Integer.valueOf(21), cfg.minimumAge());
     }
 
     private void save(Properties p) throws Throwable {
         target.getParentFile().mkdirs();
-        p.store(new FileWriter(target), "foobar");
+        p.store(new FileWriter(target), "reloadable config example");
     }
 
     @After
