@@ -40,13 +40,11 @@ public class ReloadTest {
 
     @Before
     public void before() throws Throwable {
-        synchronized (target) {
-            save(new Properties() {{
-                setProperty("someValue", "10");
-            }});
+        save(new Properties() {{
+            setProperty("someValue", "10");
+        }});
 
-            reloadableConfig = ConfigFactory.create(ReloadableConfig.class);
-        }
+        reloadableConfig = ConfigFactory.create(ReloadableConfig.class);
     }
 
     @Sources(spec)
@@ -58,28 +56,22 @@ public class ReloadTest {
     public void testReload() throws Throwable {
         assertEquals(Integer.valueOf(10), reloadableConfig.someValue());
 
-        synchronized (target) {
-            save(new Properties() {{
-                setProperty("someValue", "20");
-            }});
+        save(new Properties() {{
+            setProperty("someValue", "20");
+        }});
 
-            reloadableConfig.reload();
-        }
+        reloadableConfig.reload();
         assertEquals(Integer.valueOf(20), reloadableConfig.someValue());
     }
 
     private void save(Properties p) throws Throwable {
-        synchronized (target) {
-            target.getParentFile().mkdirs();
-            p.store(new FileWriter(target), "foobar");
-        }
+        target.getParentFile().mkdirs();
+        p.store(new FileWriter(target), "foobar");
     }
 
     @After
     public void after() throws Throwable {
-        synchronized (target) {
-            target.delete();
-        }
+        target.delete();
     }
 
 }
