@@ -13,7 +13,6 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,20 +30,10 @@ import static org.junit.Assert.assertEquals;
 public class ReloadTest {
     private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
     private static File target;
-    private ReloadableConfig reloadableConfig;
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
         target = new File(new URL(spec).getFile());
-    }
-
-    @Before
-    public void before() throws Throwable {
-        save(new Properties() {{
-            setProperty("someValue", "10");
-        }});
-
-        reloadableConfig = ConfigFactory.create(ReloadableConfig.class);
     }
 
     @Sources(spec)
@@ -54,14 +43,20 @@ public class ReloadTest {
 
     @Test
     public void testReload() throws Throwable {
-        assertEquals(Integer.valueOf(10), reloadableConfig.someValue());
+        save(new Properties() {{
+            setProperty("someValue", "10");
+        }});
+
+        ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class);
+
+        assertEquals(Integer.valueOf(10), cfg.someValue());
 
         save(new Properties() {{
             setProperty("someValue", "20");
         }});
 
-        reloadableConfig.reload();
-        assertEquals(Integer.valueOf(20), reloadableConfig.someValue());
+        cfg.reload();
+        assertEquals(Integer.valueOf(20), cfg.someValue());
     }
 
     private void save(Properties p) throws Throwable {

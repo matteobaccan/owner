@@ -27,6 +27,7 @@ import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.reverse;
+import static org.aeonbits.owner.Util.unsupported;
 
 /**
  * Loads properties and manages access to properties handling concurrency.
@@ -69,7 +70,7 @@ class PropertiesManager implements Reloadable {
             merge(properties, loadedFromFile);
             return properties;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw unsupported(e, "Properties load failed");
         } finally {
             writeLock.unlock();
         }

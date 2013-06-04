@@ -112,6 +112,10 @@ public interface Config {
                             } finally {
                                 close(stream);
                             }
+                    } catch (final MalformedURLException ex) {
+                        throw new MalformedURLException(ex.getMessage() + " for URL " + url.toString()) {{
+                            initCause(ex);
+                        }};
                     } catch (IOException ex) {
                         ignore(); // happens when a file specified in the sources is not found or cannot be read.
                     }

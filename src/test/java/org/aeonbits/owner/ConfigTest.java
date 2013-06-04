@@ -299,4 +299,15 @@ public class ConfigTest {
         assertEquals("Mr. Luigi", cfg.mister("Luigi"));
     }
 
+
+    @Sources("httpz://foo.bar.baz")
+    interface InvalidURLConfig extends Config {
+
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testWhenURLIsInvalid() {
+        InvalidURLConfig cfg = ConfigFactory.create(InvalidURLConfig.class);
+    }
+
 }
