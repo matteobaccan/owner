@@ -255,6 +255,11 @@ assertEquals(System.getenv().get("HOME"), cfg.home());
 assertEquals(System.getenv().get("USER"), cfg.user());
 ```
 
+#### Importing properties and other loading logic
+Notice that the "importing properties" feature is just additional to the properties loading mechanism explained in the
+paragraph "PROPERTIES FILES LOADING LOGIC". Properties imported have lower priority regarding the properties loaded from
+the `@Sources` attribute.
+
 ### UNDEFINED PROPERTIES
 
 If, in the example, ServerConfig interface cannot be mapped to any properties file, then all the methods in the
