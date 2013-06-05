@@ -70,6 +70,7 @@ public class UtilTest {
         public Object clone() throws CloneNotSupportedException;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends MyCloneable> T[] newArray(int size, T cloneable) throws CloneNotSupportedException {
         Object array = Array.newInstance(cloneable.getClass(), size);
         Array.set(array, 0, cloneable);

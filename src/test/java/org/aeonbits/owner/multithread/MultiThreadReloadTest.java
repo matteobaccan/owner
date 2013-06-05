@@ -12,7 +12,6 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.UtilTest.MyCloneable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,11 +21,9 @@ import java.io.File;
 import java.lang.Thread.State;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import static org.aeonbits.owner.UtilTest.debug;
 import static org.aeonbits.owner.UtilTest.newArray;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertNotNull;
@@ -38,7 +35,6 @@ import static org.junit.Assert.assertTrue;
 public class MultiThreadReloadTest {
     private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
     private static File target;
-    private int uniqueThreadId = 0;
     private ReloadableConfig reloadableConfig;
 
     @BeforeClass
@@ -108,7 +104,8 @@ public class MultiThreadReloadTest {
                     System.err.printf("There are %d exception collected by %s#%d\n", errorCount,
                             thread.getClass().getName(), i);
 
-                for (Throwable error : thread.errors) {
+                List<Throwable> errors = thread.errors;
+                for (Throwable error : errors) {
                     System.err.printf("%s#%d thrown an exception: %s\n", thread.getClass().getName(), i,
                             error.getMessage());
                     error.printStackTrace(System.err);
@@ -117,54 +114,7 @@ public class MultiThreadReloadTest {
             }
     }
 
-    abstract class ThreadBase extends Thread implements MyCloneable {
-        final int uniqueThreadId = ++MultiThreadReloadTest.this.uniqueThreadId;
-        final ReloadableConfig cfg;
-        final Object lock;
-        final int loops;
-        final List<Throwable> errors;
-
-        ThreadBase(ReloadableConfig cfg, Object lock, int loops) {
-            this.cfg = cfg;
-            this.lock = lock;
-            this.loops = loops;
-            this.errors = new ArrayList<Throwable>();
-        }
-
-        @Override
-        public Object clone() throws CloneNotSupportedException {
-            return super.clone();
-        }
-
-        @Override
-        public void run() {
-            synchronized (lock) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-            }
-            for (int i = 0; i < loops; i++) {
-                debug("%s[%d] started loop #%d.\n", getClass().getName(), uniqueThreadId, i);
-                try {
-                    execute();
-                } catch (Throwable throwable) {
-                    debug("%s[%d] thrown an error in loop #%d.\n", getClass().getName(), uniqueThreadId, i);
-                    errors.add(throwable);
-                }
-                yield();
-                debug("%s[%d] completed loop #%d.\n", getClass().getName(), uniqueThreadId, i);
-            }
-        }
-
-        abstract void execute() throws Throwable;
-    }
-
-
-
-    private class ReaderThread extends ThreadBase {
+    private class ReaderThread extends ThreadBase<ReloadableConfig> {
         ReaderThread(ReloadableConfig cfg, Object lock, int loops) {
             super(cfg, lock, loops);
         }
@@ -183,7 +133,7 @@ public class MultiThreadReloadTest {
         }
     }
 
-    private class WriterThread extends ThreadBase {
+    private class WriterThread extends ThreadBase<ReloadableConfig> {
         public WriterThread(ReloadableConfig cfg, Object lock, int loops) {
             super(cfg, lock, loops);
         }

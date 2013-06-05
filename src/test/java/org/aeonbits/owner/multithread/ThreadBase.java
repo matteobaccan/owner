@@ -8,15 +8,15 @@ import java.util.List;
 
 import static org.aeonbits.owner.UtilTest.debug;
 
-abstract class ThreadBase extends Thread implements MyCloneable {
+abstract class ThreadBase<T extends Config> extends Thread implements MyCloneable {
     private static long counter = 0;
     final long uniqueThreadId = ++counter;
-    final Config cfg;
+    final T cfg;
     final Object lock;
     final int loops;
     final List<Throwable> errors;
 
-    ThreadBase(Config cfg, Object lock, int loops) {
+    ThreadBase(T cfg, Object lock, int loops) {
         this.cfg = cfg;
         this.lock = lock;
         this.loops = loops;
