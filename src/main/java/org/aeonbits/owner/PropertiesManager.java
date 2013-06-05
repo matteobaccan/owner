@@ -14,6 +14,8 @@ import org.aeonbits.owner.Config.Sources;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
@@ -34,19 +36,18 @@ import static org.aeonbits.owner.Util.unsupported;
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesManager implements Reloadable {
+class PropertiesManager implements Reloadable, Listable {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
-    private final Properties properties = new Properties();
-
+    private final Properties properties;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final ReadLock readLock = lock.readLock();
     private final WriteLock writeLock = lock.writeLock();
 
-
-    PropertiesManager(Class<? extends Config> clazz, Map<?, ?>... imports) {
+    PropertiesManager(Class<? extends Config> clazz, Properties properties, Map<?, ?>... imports) {
         this.clazz = clazz;
+        this.properties = properties;
         this.imports = imports;
     }
 
@@ -120,20 +121,31 @@ class PropertiesManager implements Reloadable {
             inputStream.close();
     }
 
-    Properties properties() {
-        readLock.lock();
-        try {
-            return properties;
-        } finally {
-            readLock.unlock();
-        }
-    }
-
     public String getProperty(String key) {
         readLock.lock();
         try {
             return properties.getProperty(key);
         }finally {
+            readLock.unlock();
+        }
+    }
+
+    @Override
+    public void list(PrintStream out) {
+        readLock.lock();
+        try {
+            properties.list(out);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Override
+    public void list(PrintWriter out) {
+        readLock.lock();
+        try {
+            properties.list(out);
+        } finally {
             readLock.unlock();
         }
     }

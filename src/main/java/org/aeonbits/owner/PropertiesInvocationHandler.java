@@ -43,22 +43,25 @@ class PropertiesInvocationHandler implements InvocationHandler {
     private enum DelegatedMethods {
         LIST_PRINT_STREAM(getMethod(Properties.class, "list", PrintStream.class)) {
             @Override
-            public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
-                return proxiedMethod.invoke(handler.propertiesManager.properties(), args);
+            public Object invoke(PropertiesManager propsMgr, Object... args) {
+                propsMgr.list((PrintStream)args[0]);
+                return null;
             }
         },
 
         LIST_PRINT_WRITER(getMethod(Properties.class, "list", PrintWriter.class)) {
             @Override
-            public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
-                return proxiedMethod.invoke(handler.propertiesManager.properties(), args);
+            public Object invoke(PropertiesManager propsMgr, Object... args) {
+                propsMgr.list((PrintWriter)args[0]);
+                return null;
             }
         },
 
         RELOAD(getMethod(Reloadable.class, "reload")) {
             @Override
-            public Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable {
-                return proxiedMethod.invoke(handler.propertiesManager, args);
+            public Object invoke(PropertiesManager propsMgr, Object... args) {
+                propsMgr.reload();
+                return null;
             }
         };
 
@@ -83,7 +86,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
             }
         }
 
-        public abstract Object invoke(PropertiesInvocationHandler handler, Object... args) throws Throwable;
+        public abstract Object invoke(PropertiesManager propertiesManager, Object[] args);
     }
 
     PropertiesInvocationHandler(PropertiesManager manager) {
@@ -95,7 +98,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object... args) throws Throwable {
         for (DelegatedMethods delegated : DelegatedMethods.values())
             if (delegated.matches(method))
-                return delegated.invoke(this, args);
+                return delegated.invoke(propertiesManager, args);
         return resolveProperty(method, args);
     }
 

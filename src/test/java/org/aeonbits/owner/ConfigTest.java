@@ -79,7 +79,7 @@ public class ConfigTest {
                 new SystemVariablesExpander());
         ConfigURLStreamHandler spy = spy(handler);
 
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class);
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
 
         manager.doLoad(spy);
         URL expected =
@@ -89,7 +89,7 @@ public class ConfigTest {
 
     @Test
     public void shouldReturnThePropertiesForTheClass() {
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class);
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
         Properties props = manager.load();
         assertNotNull(props);
         assertEquals("testValue", props.getProperty("testKey"));
@@ -97,7 +97,7 @@ public class ConfigTest {
 
     @Test
     public void shouldDoReplacements() {
-        SampleConfig config = ConfigFactory.create(SampleConfig.class);
+        SampleConfig config = ConfigFactory.create(SampleConfig.class, new Properties());
         assertEquals("Hello Luigi.", config.hello("Luigi"));
     }
 
@@ -144,7 +144,7 @@ public class ConfigTest {
                 return super.openConnection(url);
             }
         };
-        PropertiesManager manager = new PropertiesManager(SampleConfigWithSource.class);
+        PropertiesManager manager = new PropertiesManager(SampleConfigWithSource.class, new Properties());
         manager.doLoad(handler);
         URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
                 handler);
@@ -261,7 +261,7 @@ public class ConfigTest {
     @Test
     public void testListPrintStream() throws IOException {
         ByteArrayOutputStream expected = new ByteArrayOutputStream();
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class);
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
         manager.load().list(new PrintStream(expected, true));
 
         SampleConfig config = ConfigFactory.create(SampleConfig.class);
@@ -274,7 +274,7 @@ public class ConfigTest {
     @Test
     public void testListPrintWriter() throws IOException {
         StringWriter expected = new StringWriter();
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class);
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
         manager.load().list(new PrintWriter(expected, true));
 
         SampleConfig config = ConfigFactory.create(SampleConfig.class);

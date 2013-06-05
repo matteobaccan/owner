@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.PrintStream;
@@ -26,8 +27,8 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PropertiesInvocationHandlerTest {
-    @Mock
-    private Properties properties;
+    @Spy
+    private Properties properties = new Properties();
     @Mock
     private PrintStream printStream;
     @Mock
@@ -36,17 +37,11 @@ public class PropertiesInvocationHandlerTest {
     private Object proxy;
     private PropertiesInvocationHandler handler;
 
+    interface Dummy extends Config {}
+
     @Before
     public void before() {
-        PropertiesManager loader = new PropertiesManager(null) {
-            @Override
-            Properties load() {
-                return properties();
-            }
-            Properties properties() {
-                return properties;
-            }
-        };
+        PropertiesManager loader = new PropertiesManager(Dummy.class, properties);
         handler = new PropertiesInvocationHandler(loader);
     }
 

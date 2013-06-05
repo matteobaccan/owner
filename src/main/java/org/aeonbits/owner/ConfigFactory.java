@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 
 import java.lang.reflect.InvocationHandler;
 import java.util.Map;
+import java.util.Properties;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.Util.prohibitInstantiation;
@@ -39,7 +40,7 @@ public abstract class ConfigFactory {
     @SuppressWarnings("unchecked")
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
-        PropertiesManager manager = new PropertiesManager(clazz, imports);
+        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), imports);
         InvocationHandler handler = new PropertiesInvocationHandler(manager);
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }
