@@ -8,8 +8,14 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.Sources;
+import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -18,6 +24,27 @@ import static org.junit.Assert.assertEquals;
  * @author Luigi R. Viggiano
  */
 public class ImportConfigTest {
+    private static final String spec = "file:target/test-resources/ImportConfig.properties";
+    private static File target;
+
+    @BeforeClass
+    public static void beforeClass() throws MalformedURLException {
+        target = new File(new URL(spec).getFile());
+    }
+
+    @Sources(spec)
+    public static interface ImportConfig extends Config {
+
+        @DefaultValue("apple")
+        String foo();
+
+        @DefaultValue("pear")
+        String bar();
+
+        @DefaultValue("orange")
+        String baz();
+
+    }
 
     @Test
     public void testImport() {
@@ -47,19 +74,9 @@ public class ImportConfigTest {
         assertEquals("blackberry", cfg.baz());
     }
 
-    /**
-     * @author luigi
-     */
-    public static interface ImportConfig extends Config {
-
-        @DefaultValue("apple")
-        String foo();
-
-        @DefaultValue("pear")
-        String bar();
-
-        @DefaultValue("orange")
-        String baz();
-
+    @After
+    public void after() throws Throwable {
+        target.delete();
     }
+
 }

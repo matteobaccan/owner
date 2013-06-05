@@ -13,15 +13,16 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -36,6 +37,13 @@ public class ReloadTest {
         target = new File(new URL(spec).getFile());
     }
 
+    @Before
+    public void before() throws Throwable {
+        save(target, new Properties() {{
+            setProperty("minimumAge", "18");
+        }});
+    }
+
     @Sources(spec)
     public interface ReloadableConfig extends Config, Reloadable {
         Integer minimumAge();
@@ -43,20 +51,21 @@ public class ReloadTest {
 
     @Test
     public void testReload() throws Throwable {
-        save(new Properties() {{
-            setProperty("minimumAge", "18");
-        }});
 
         ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class);
 
         assertEquals(Integer.valueOf(18), cfg.minimumAge());
 
-        save(new Properties() {{
+        save(target, new Properties() {{
             setProperty("minimumAge", "21");
         }});
 
         cfg.reload();
         assertEquals(Integer.valueOf(21), cfg.minimumAge());
+    }
+
+    public interface ReloadImportConfig extends Config, Reloadable {
+        Integer minimumAge();
     }
 
     @Test
@@ -65,7 +74,7 @@ public class ReloadTest {
            setProperty("minimumAge", "18");
         }};
 
-        ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class, props);
+        ReloadImportConfig cfg = ConfigFactory.create(ReloadImportConfig.class, props);
         assertEquals(Integer.valueOf(18), cfg.minimumAge());
 
         props.setProperty("minimumAge", "21"); // changing props doesn't reflect to cfg immediately
@@ -73,11 +82,6 @@ public class ReloadTest {
 
         cfg.reload(); // the config gets reloaded, so the change in props gets reflected
         assertEquals(Integer.valueOf(21), cfg.minimumAge());
-    }
-
-    private void save(Properties p) throws Throwable {
-        target.getParentFile().mkdirs();
-        p.store(new FileWriter(target), "reloadable config example");
     }
 
     @After

@@ -10,7 +10,11 @@ package org.aeonbits.owner;
 
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Properties;
 
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachable;
@@ -47,4 +51,10 @@ public class UtilTest {
             assertEquals("this code should never be reached", err.getMessage());
         }
     }
+
+    public static void save(File target, Properties p) throws IOException {
+        target.getParentFile().mkdirs();
+        p.store(new FileWriter(target), "saved for test");
+    }
+
 }

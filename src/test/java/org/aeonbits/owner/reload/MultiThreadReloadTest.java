@@ -18,7 +18,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.lang.Thread.State;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -48,7 +48,7 @@ public class MultiThreadReloadTest {
     @Before
     public void before() throws Throwable {
         synchronized (target) {
-            save(new Properties() {{
+            save(target, new Properties() {{
                 setProperty("someValue", "10");
             }});
 
@@ -59,13 +59,6 @@ public class MultiThreadReloadTest {
     @Sources(spec)
     public interface ReloadableConfig extends Config, Reloadable {
         Integer someValue();
-    }
-
-    private void save(Properties p) throws Throwable {
-        synchronized (target) {
-            target.getParentFile().mkdirs();
-            p.store(new FileWriter(target), "foobar");
-        }
     }
 
     @Test
@@ -214,7 +207,7 @@ public class MultiThreadReloadTest {
         @Override
         void execute() throws Throwable {
             synchronized (target) {
-                save(new Properties() {{
+                save(target, new Properties() {{
                     setProperty("someValue", "20");
                 }});
 
@@ -223,7 +216,7 @@ public class MultiThreadReloadTest {
             yield();
 
             synchronized (target) {
-                save(new Properties() {{
+                save(target, new Properties() {{
                     setProperty("someValue", "10");
                 }});
 
