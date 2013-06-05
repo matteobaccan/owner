@@ -6,12 +6,13 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.reload;
+package org.aeonbits.owner.multithread;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
+import org.aeonbits.owner.UtilTest.MyCloneable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -19,13 +20,14 @@ import org.junit.Test;
 
 import java.io.File;
 import java.lang.Thread.State;
-import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.debug;
+import static org.aeonbits.owner.UtilTest.newArray;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -37,7 +39,6 @@ public class MultiThreadReloadTest {
     private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
     private static File target;
     private int uniqueThreadId = 0;
-    private boolean debug = false;
     private ReloadableConfig reloadableConfig;
 
     @BeforeClass
@@ -96,19 +97,6 @@ public class MultiThreadReloadTest {
             }
     }
 
-    interface MyCloneable extends Cloneable {
-        // for some stupid reason java.lang.Cloneable doesn't define this method...
-        public Object clone() throws CloneNotSupportedException;
-    }
-
-    public <T extends MyCloneable> T[] newArray(int size, T cloneable) throws CloneNotSupportedException {
-        Object array = Array.newInstance(cloneable.getClass(), size);
-        Array.set(array, 0, cloneable);
-        for (int i = 1; i < size; i++)
-            Array.set(array, i, cloneable.clone());
-        return (T[]) array;
-    }
-
     private void throwErrorIfAny(ThreadBase[]... args) throws Throwable {
         for (ThreadBase[] threads : args)
             for (int i = 0; i < threads.length; i++) {
@@ -129,7 +117,7 @@ public class MultiThreadReloadTest {
             }
     }
 
-    private abstract class ThreadBase extends Thread implements MyCloneable {
+    abstract class ThreadBase extends Thread implements MyCloneable {
         final int uniqueThreadId = ++MultiThreadReloadTest.this.uniqueThreadId;
         final ReloadableConfig cfg;
         final Object lock;
@@ -174,10 +162,6 @@ public class MultiThreadReloadTest {
         abstract void execute() throws Throwable;
     }
 
-    void debug(String format, Object... args) {
-        if (debug)
-            System.out.printf(format, args);
-    }
 
 
     private class ReaderThread extends ThreadBase {
