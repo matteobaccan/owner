@@ -37,7 +37,7 @@
  * Owner has a lot of features and its behavior is fully customizable to your needs.
  * </p>
  * <p>
- * Have a look at the full documentation from the <a href="http://owner.aeonbits.org/">OWNER website</a>.
+ * Have a look at the full documentation from the <a href="http://owner.aeonbits.org/" target="_top">OWNER website</a>.
  * </p>
  */
 package org.aeonbits.owner;
