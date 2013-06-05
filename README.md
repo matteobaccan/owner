@@ -870,6 +870,7 @@ CHANGELOG
 
  * Added `Listable` interface for the `list()` methods used to aid debugging.
  * Added the `reload()` method that can be exposed implementing the interface `Reloadable`.
+ * Added [Travis CI][travis-ci] to the project to track changes and run tests on different JDK versions.
  * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
    formatting. See Issue [#20][issue-20].
@@ -880,6 +881,7 @@ CHANGELOG
   [issue-20]: https://github.com/lviggiano/owner/issues/20
   [ffbit]: https://github.com/ffbit
   [ming13]: https://github.com/ming13
+  [travis-ci]: https://travis-ci.org/lviggiano/owner
 
 ### 1.0.3
 
