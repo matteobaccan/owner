@@ -302,10 +302,14 @@ Example:
     }
 ```
 
-As you can see in above example, the property "foo" is defined by default to be 'apple' but it is redefined both in
-the imported properties `props` as 'pineapple' and in the file "file:target/test-resources/ImportConfig.properties"
-as 'strawberries'. The behavior assumed by OWNER is that the one specified by the `@Sources` wins, so the value will be
-'strawberries'.
+As you can see in above example, the property `foo` is defined with a `@DefaultValue` as 'apple' but it is redefined
+both in the imported properties `props` as 'pineapple' and in the file identified by `@Sources`
+(file:target/test-resources/ImportConfig.properties) as 'strawberries'.
+The behavior assumed by the OWNER API is that the one specified by the `@Sources` wins, so the value, in this particular
+case will be 'strawberries'.
+
+There is no specific reason why we gave `@Sources` higher priority over the imported properties, it is an arbitrary
+decision based on the fact that something defined in a file by a DevOp or a User should be considered more influential.
 
 ### UNDEFINED PROPERTIES
 
