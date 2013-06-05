@@ -9,15 +9,14 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Sources;
-import org.junit.After;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -25,12 +24,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class ImportConfigTest {
     private static final String spec = "file:target/test-resources/ImportConfig.properties";
-    private static File target;
-
-    @BeforeClass
-    public static void beforeClass() throws MalformedURLException {
-        target = new File(new URL(spec).getFile());
-    }
 
     @Sources(spec)
     public static interface ImportConfig extends Config {
@@ -74,9 +67,26 @@ public class ImportConfigTest {
         assertEquals("blackberry", cfg.baz());
     }
 
-    @After
-    public void after() throws Throwable {
-        target.delete();
+    @Test
+    public void testThatImportedPropertiesHaveLowerPriorityThanPropertiesLoadedBySources() throws IOException {
+        File target = new File(new URL(spec).getFile());
+
+        save(target, new Properties() {{
+            setProperty("foo", "strawberries");
+        }});
+
+        try {
+            Properties props = new Properties();
+            props.setProperty("foo", "pineapple");
+            props.setProperty("bar", "lime");
+            ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props); // props imported!
+            assertEquals("strawberries", cfg.foo());
+            assertEquals("lime", cfg.bar());
+            assertEquals("orange", cfg.baz());
+        } finally {
+            target.delete();
+        }
     }
+
 
 }

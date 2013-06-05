@@ -255,10 +255,57 @@ assertEquals(System.getenv().get("HOME"), cfg.home());
 assertEquals(System.getenv().get("USER"), cfg.user());
 ```
 
-#### Importing properties and other loading logic
+#### Importing properties and other loading logics
+
 Notice that the "importing properties" feature is just additional to the properties loading mechanism explained in the
-paragraph "PROPERTIES FILES LOADING LOGIC". Properties imported have lower priority regarding the properties loaded from
-the `@Sources` attribute.
+paragraph [PROPERTIES FILES LOADING LOGIC](#properties-files-loading-logic).
+Properties imported have lower priority regarding the properties loaded from the `@Sources` attribute.
+
+Example:
+
+```java
+    private static final String spec = "file:target/test-resources/ImportConfig.properties";
+
+    @Sources(spec)
+    public static interface ImportConfig extends Config {
+
+        @DefaultValue("apple")
+        String foo();
+
+        @DefaultValue("pear")
+        String bar();
+
+        @DefaultValue("orange")
+        String baz();
+
+    }
+
+    @Test
+    public void testThatImportedPropertiesHaveLowerPriorityThanPropertiesLoadedBySources() throws IOException {
+        File target = new File(new URL(spec).getFile());
+
+        save(target, new Properties() {{
+            setProperty("foo", "strawberries");
+        }});
+
+        try {
+            Properties props = new Properties();
+            props.setProperty("foo", "pineapple");
+            props.setProperty("bar", "lime");
+            ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props); // props imported!
+            assertEquals("strawberries", cfg.foo());
+            assertEquals("lime", cfg.bar());
+            assertEquals("orange", cfg.baz());
+        } finally {
+            target.delete();
+        }
+    }
+```
+
+As you can see in above example, the property "foo" is defined by default to be 'apple' but it is redefined both in
+the imported properties `props` as 'pineapple' and in the file "file:target/test-resources/ImportConfig.properties"
+as 'strawberries'. The behavior assumed by OWNER is that the one specified by the `@Sources` wins, so the value will be
+'strawberries'.
 
 ### UNDEFINED PROPERTIES
 
@@ -817,6 +864,8 @@ CHANGELOG
 ---------
 ### 1.0.4 (under development)
 
+ * Added `Listable` interface for the `list()` methods used to aid debugging.
+ * Added the `reload()` method that can be exposed implementing the interface `Reloadable`.
  * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
    formatting. See Issue [#20][issue-20].
