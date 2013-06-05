@@ -9,10 +9,7 @@
 package org.aeonbits.owner;
 
 /**
- * <p>Allows the Config object to implement reloading the properties.</p>
- *
- * <p>Example:</p>
- *
+ * <p>Allows the Config object to implement reloading the properties.</p> <p/> <p>Example:</p> <p/>
  * <pre>
  *     public interface MyConfig extends Config, Reloadable {
  *         int someProperties();
@@ -32,9 +29,9 @@ package org.aeonbits.owner;
  *         if (before != after) { ... }
  *     }
  * </pre>
- *
- * <p>The reload method will reload the properties using the same sources used when it was instantiated the first time.
- * This can be useful to programmatically reload the configuration after the configuration files were changed.</p>
+ * <p/> <p>The reload method will reload the properties using the same sources used when it was instantiated the first
+ * time. This can be useful to programmatically reload the configuration after the configuration files were
+ * changed.</p>
  *
  * @author Luigi R. Viggiano
  * @since 1.0.4
@@ -46,5 +43,5 @@ public interface Reloadable {
      *
      * @since 1.0.4
      */
-    public void reload();
+    void reload();
 }

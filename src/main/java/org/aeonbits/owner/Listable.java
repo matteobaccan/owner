@@ -12,10 +12,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * <p>Allows Config Object to implement the list() methods to aid debugging.</p>
- *
- * <p>Example:</p>
- *
+ * <p>Allows Config Object to implement the list() methods to aid debugging.</p> <p/> <p>Example:</p> <p/>
  * <pre>
  *     public interface MyConfig extends Config, Listable {
  *         int someProperties();
@@ -26,9 +23,9 @@ import java.io.PrintWriter;
  *         cfg.list(System.out);
  *     }
  * </pre>
- *
- * <p>These methods will print the list of properties, see {@link java.util.Properties#list(java.io.PrintStream)} and
- * {@link java.util.Properties#list(java.io.PrintWriter)}.</p>
+ * <p/>
+ * <p>These methods will print the list of properties, see {@link java.util.Properties#list(java.io.PrintStream)}
+ * and {@link java.util.Properties#list(java.io.PrintWriter)}.</p>
  *
  * @author Luigi R. Viggiano
  * @since 1.0.4
@@ -36,26 +33,22 @@ import java.io.PrintWriter;
 public interface Listable {
 
     /**
-     * Prints this property list out to the specified output stream.
-     * This method is useful for debugging.
+     * Prints this property list out to the specified output stream. This method is useful for debugging.
      *
-     * @param   out   an output stream.
-     * @throws  ClassCastException if any key in this property list
-     *          is not a string.
-     * @see     java.util.Properties#list(java.io.PrintStream)
+     * @param out an output stream.
+     * @throws ClassCastException if any key in this property list is not a string.
+     * @see java.util.Properties#list(java.io.PrintStream)
      * @since 1.0.4
      */
-    public void list(PrintStream out);
+    void list(PrintStream out);
 
     /**
-     * Prints this property list out to the specified output stream.
-     * This method is useful for debugging.
+     * Prints this property list out to the specified output stream. This method is useful for debugging.
      *
-     * @param   out   an output stream.
-     * @throws  ClassCastException if any key in this property list
-     *          is not a string.
-     * @see     java.util.Properties#list(java.io.PrintWriter)
+     * @param out an output stream.
+     * @throws ClassCastException if any key in this property list is not a string.
+     * @see java.util.Properties#list(java.io.PrintWriter)
      * @since 1.0.4
      */
-    public void list(PrintWriter out);
+    void list(PrintWriter out);
 }
