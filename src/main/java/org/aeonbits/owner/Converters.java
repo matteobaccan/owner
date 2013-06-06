@@ -42,11 +42,9 @@ enum Converters {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
-            if (editor != null) {
-                editor.setAsText(text);
-                return editor.getValue();
-            }
-            return null;
+            if (editor == null) return null;
+            editor.setAsText(text);
+            return editor.getValue();
         }
     },
 
@@ -73,8 +71,7 @@ enum Converters {
     ARRAY {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!targetType.isArray())
-                return null;
+            if (!targetType.isArray()) return null;
 
             Class<?> type = targetType.getComponentType();
 
@@ -100,8 +97,7 @@ enum Converters {
     COLLECTION {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!Collection.class.isAssignableFrom(targetType))
-                return null;
+            if (!Collection.class.isAssignableFrom(targetType)) return null;
 
             Object[] array = convertToArray(targetMethod, text);
             Collection<Object> collection = Arrays.asList(array);
@@ -164,18 +160,6 @@ enum Converters {
         }
     },
 
-    CLASS_WITH_OBJECT_CONSTRUCTOR {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            try {
-                Constructor<?> constructor = targetType.getConstructor(Object.class);
-                return constructor.newInstance(text);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    },
-
     CLASS_WITH_VALUE_OF_METHOD {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
@@ -184,6 +168,18 @@ enum Converters {
                 if (isStatic(method.getModifiers()))
                     return method.invoke(null, text);
                 return null;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    },
+
+    CLASS_WITH_OBJECT_CONSTRUCTOR {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            try {
+                Constructor<?> constructor = targetType.getConstructor(Object.class);
+                return constructor.newInstance(text);
             } catch (Exception e) {
                 return null;
             }
