@@ -16,7 +16,7 @@ import java.util.Arrays;
 enum DelegatedMethods {
     LIST_PRINT_STREAM(getMethod(Listable.class, "list", PrintStream.class)) {
         @Override
-        public Object invoke(PropertiesManager propsMgr, Object... args) {
+        public Object delegate(PropertiesManager propsMgr, Object... args) {
             propsMgr.list((PrintStream) args[0]);
             return null;
         }
@@ -24,7 +24,7 @@ enum DelegatedMethods {
 
     LIST_PRINT_WRITER(getMethod(Listable.class, "list", PrintWriter.class)) {
         @Override
-        public Object invoke(PropertiesManager propsMgr, Object... args) {
+        public Object delegate(PropertiesManager propsMgr, Object... args) {
             propsMgr.list((PrintWriter) args[0]);
             return null;
         }
@@ -32,7 +32,7 @@ enum DelegatedMethods {
 
     RELOAD(getMethod(Reloadable.class, "reload")) {
         @Override
-        public Object invoke(PropertiesManager propsMgr, Object... args) {
+        public Object delegate(PropertiesManager propsMgr, Object... args) {
             propsMgr.reload();
             return null;
         }
@@ -40,14 +40,14 @@ enum DelegatedMethods {
 
     SET_PROPERTY(getMethod(Modifiable.class, "setProperty", String.class, String.class)) {
         @Override
-        public Object invoke(PropertiesManager propsMgr, Object[] args) {
+        public Object delegate(PropertiesManager propsMgr, Object[] args) {
             return propsMgr.setProperty((String) args[0], (String) args[1]);
         }
     },
 
     REMOVE_PROPERTY(getMethod(Modifiable.class, "removeProperty", String.class)) {
         @Override
-        public Object invoke(PropertiesManager propsMgr, Object[] args) {
+        public Object delegate(PropertiesManager propsMgr, Object[] args) {
             return propsMgr.removeProperty((String) args[0]);
         }
     };
@@ -73,5 +73,9 @@ enum DelegatedMethods {
         }
     }
 
-    abstract Object invoke(PropertiesManager propsMgr, Object[] args);
+    abstract Object delegate(PropertiesManager propsMgr, Object[] args);
+
+    static DelegatedMethods[] delegableMethods() {
+        return values();
+    }
 }

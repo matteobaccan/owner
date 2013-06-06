@@ -12,15 +12,13 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.Key;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.convert;
+import static org.aeonbits.owner.DelegatedMethods.delegableMethods;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.Util.isFeatureDisabled;
 
@@ -47,11 +45,11 @@ class PropertiesInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object... args) throws Throwable {
-        for (DelegatedMethods delegated : DelegatedMethods.values())
-            if (delegated.matches(method))
-                return delegated.invoke(propertiesManager, args);
-        return resolveProperty(method, args);
+    public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {
+        for (DelegatedMethods delegableMethod : delegableMethods())
+            if (delegableMethod.matches(invokedMethod))
+                return delegableMethod.delegate(propertiesManager, args);
+        return resolveProperty(invokedMethod, args);
     }
 
     private Object resolveProperty(Method method, Object... args) {
