@@ -37,6 +37,7 @@ import static org.aeonbits.owner.Util.unsupported;
  * @author Luigi R. Viggiano
  */
 enum Converters {
+
     PROPERTY_EDITOR {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
@@ -52,55 +53,15 @@ enum Converters {
     FILE {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (targetType == File.class)
-                return new File(expandUserHome(text));
-            return null;
-        }
-    },
-
-    CLASS_WITH_STRING_CONSTRUCTOR {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            try {
-                Constructor<?> constructor = targetType.getConstructor(String.class);
-                return constructor.newInstance(text);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    },
-
-    CLASS_WITH_OBJECT_CONSTRUCTOR {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            try {
-                Constructor<?> constructor = targetType.getConstructor(Object.class);
-                return constructor.newInstance(text);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    },
-
-    CLASS_WITH_VALUE_OF_METHOD {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            try {
-                Method method = targetType.getMethod("valueOf", String.class);
-                if (isStatic(method.getModifiers()))
-                    return method.invoke(null, text);
-                return null;
-            } catch (Exception e) {
-                return null;
-            }
+            if (targetType != File.class) return null;
+            return new File(expandUserHome(text));
         }
     },
 
     CLASS {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!Class.class.isAssignableFrom(targetType))
-                return null;
+            if (targetType != Class.class) return null;
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException ex) {
@@ -189,6 +150,44 @@ enum Converters {
             return new ArrayList<T>();
         }
 
+    },
+
+    CLASS_WITH_STRING_CONSTRUCTOR {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            try {
+                Constructor<?> constructor = targetType.getConstructor(String.class);
+                return constructor.newInstance(text);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    },
+
+    CLASS_WITH_OBJECT_CONSTRUCTOR {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            try {
+                Constructor<?> constructor = targetType.getConstructor(Object.class);
+                return constructor.newInstance(text);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    },
+
+    CLASS_WITH_VALUE_OF_METHOD {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            try {
+                Method method = targetType.getMethod("valueOf", String.class);
+                if (isStatic(method.getModifiers()))
+                    return method.invoke(null, text);
+                return null;
+            } catch (Exception e) {
+                return null;
+            }
+        }
     },
 
     UNSUPPORTED {
