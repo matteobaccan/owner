@@ -32,7 +32,7 @@ abstract class MultiThreadTestBase {
             }
     }
 
-    protected void throwErrorIfAny(ThreadBase[]... args) throws Throwable {
+    protected void assertNoErrors(ThreadBase[]... args) throws Throwable {
         for (ThreadBase[] threads : args)
             for (int i = 0; i < threads.length; i++) {
                 ThreadBase thread = threads[i];

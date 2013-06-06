@@ -71,7 +71,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase {
 
         join(readers, writers);
 
-        throwErrorIfAny(readers, writers);
+        assertNoErrors(readers, writers);
     }
 
     private class ReaderThread extends ThreadBase<ReloadableConfig> {
