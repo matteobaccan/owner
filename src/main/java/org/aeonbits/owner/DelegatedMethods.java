@@ -52,15 +52,15 @@ enum DelegatedMethods {
         }
     };
 
-    private final Method proxiedMethod;
+    private final Method delegableMethod;
 
-    DelegatedMethods(Method proxiedMethod) {
-        this.proxiedMethod = proxiedMethod;
+    DelegatedMethods(Method delegableMethod) {
+        this.delegableMethod = delegableMethod;
     }
 
-    boolean matches(Method proxy) {
-        return proxiedMethod != null && proxiedMethod.getName().equals(proxy.getName())
-                && Arrays.equals(proxiedMethod.getParameterTypes(), proxy.getParameterTypes());
+    boolean matches(Method invokedMethod) {
+        return delegableMethod.getName().equals(invokedMethod.getName())
+                && Arrays.equals(delegableMethod.getParameterTypes(), invokedMethod.getParameterTypes());
     }
 
     private static Method getMethod(Class<?> aClass, String name, Class<?>... args) {
