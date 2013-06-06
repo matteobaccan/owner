@@ -6,12 +6,9 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.reload;
+package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
-import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.Reloadable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

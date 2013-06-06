@@ -18,10 +18,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.lang.Thread.State;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.newArray;
@@ -32,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Luigi R. Viggiano
  */
-public class MultiThreadReloadTest {
+public class MultiThreadReloadTest extends MultiThreadTestBase {
     private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
     private static File target;
     private ReloadableConfig reloadableConfig;
@@ -74,44 +72,6 @@ public class MultiThreadReloadTest {
         join(readers, writers);
 
         throwErrorIfAny(readers, writers);
-    }
-
-    private void join(ThreadBase[]... args) throws InterruptedException {
-        for (ThreadBase[] threads : args)
-            for (Thread thread : threads)
-                thread.join();
-    }
-
-    private void start(ThreadBase[]... args) throws InterruptedException {
-        for (ThreadBase[] threads : args)
-            for (Thread thread : threads) {
-                thread.start();
-                while (thread.getState() != State.WAITING)
-                    // waits for all threads to be started and ready to rush
-                    // when lock.notifyAll() is issued
-                    thread.join(1);
-            }
-    }
-
-    private void throwErrorIfAny(ThreadBase[]... args) throws Throwable {
-        for (ThreadBase[] threads : args)
-            for (int i = 0; i < threads.length; i++) {
-                ThreadBase thread = threads[i];
-
-                int errorCount = thread.errors.size();
-
-                if (errorCount > 0)
-                    System.err.printf("There are %d exception collected by %s#%d\n", errorCount,
-                            thread.getClass().getName(), i);
-
-                List<Throwable> errors = thread.errors;
-                for (Throwable error : errors) {
-                    System.err.printf("%s#%d thrown an exception: %s\n", thread.getClass().getName(), i,
-                            error.getMessage());
-                    error.printStackTrace(System.err);
-                    throw error;
-                }
-            }
     }
 
     private class ReaderThread extends ThreadBase<ReloadableConfig> {
