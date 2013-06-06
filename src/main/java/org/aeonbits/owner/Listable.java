@@ -12,10 +12,11 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * <p>Allows Config Object to implement the list() methods to aid debugging.</p> <p/> <p>Example:</p> <p/>
+ * <p>Allows a <tt>Config</tt> object to implement the list() methods to aid debugging.</p>
+ * <p>Example:</p>
  * <pre>
  *     public interface MyConfig extends Config, Listable {
- *         int someProperties();
+ *         int someProperty();
  *     }
  *
  *     public void doSomething() {
@@ -23,7 +24,6 @@ import java.io.PrintWriter;
  *         cfg.list(System.out);
  *     }
  * </pre>
- * <p/>
  * <p>These methods will print the list of properties, see {@link java.util.Properties#list(java.io.PrintStream)}
  * and {@link java.util.Properties#list(java.io.PrintWriter)}.</p>
  *
