@@ -19,6 +19,7 @@ import static java.util.Arrays.asList;
 
 /**
  * This class contains utility methods used all over the library.
+ *
  * @author Luigi R. Viggiano
  */
 abstract class Util {
@@ -50,8 +51,8 @@ abstract class Util {
 
     static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
         Class<DisableFeature> annotation = DisableFeature.class;
-        return (isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
-                isFeatureDisabled(feature, method.getAnnotation(annotation)));
+        return isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
+                isFeatureDisabled(feature, method.getAnnotation(annotation));
     }
 
     private static boolean isFeatureDisabled(DisableableFeature feature, DisableFeature annotation) {
