@@ -17,7 +17,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Properties;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
@@ -41,7 +40,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
     private final PropertiesManager propertiesManager;
 
     private enum DelegatedMethods {
-        LIST_PRINT_STREAM(getMethod(Properties.class, "list", PrintStream.class)) {
+        LIST_PRINT_STREAM(getMethod(Listable.class, "list", PrintStream.class)) {
             @Override
             public Object invoke(PropertiesManager propsMgr, Object... args) {
                 propsMgr.list((PrintStream)args[0]);
@@ -49,7 +48,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
             }
         },
 
-        LIST_PRINT_WRITER(getMethod(Properties.class, "list", PrintWriter.class)) {
+        LIST_PRINT_WRITER(getMethod(Listable.class, "list", PrintWriter.class)) {
             @Override
             public Object invoke(PropertiesManager propsMgr, Object... args) {
                 propsMgr.list((PrintWriter)args[0]);
@@ -63,7 +62,23 @@ class PropertiesInvocationHandler implements InvocationHandler {
                 propsMgr.reload();
                 return null;
             }
-        };
+        },
+
+        SET_PROPERTY(getMethod(Modifiable.class, "setProperty", String.class, String.class)) {
+            @Override
+            public Object invoke(PropertiesManager propsMgr, Object[] args) {
+                return propsMgr.setProperty((String)args[0], (String)args[1]);
+            }
+        },
+
+        REMOVE_PROPERTY(getMethod(Modifiable.class, "removeProperty", String.class)) {
+            @Override
+            public Object invoke(PropertiesManager propsMgr, Object[] args) {
+                return propsMgr.removeProperty((String)args[0]);
+            }
+        }
+
+        ;
 
         final Method proxiedMethod;
 
@@ -86,7 +101,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
             }
         }
 
-        public abstract Object invoke(PropertiesManager propertiesManager, Object[] args);
+        public abstract Object invoke(PropertiesManager propsMgr, Object[] args);
     }
 
     PropertiesInvocationHandler(PropertiesManager manager) {

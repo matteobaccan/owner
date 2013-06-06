@@ -28,6 +28,7 @@ import static org.aeonbits.owner.Config.LoadType;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
+import static org.aeonbits.owner.Util.asString;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
 
@@ -125,7 +126,7 @@ class PropertiesManager implements Reloadable, Listable {
         readLock.lock();
         try {
             return properties.getProperty(key);
-        }finally {
+        } finally {
             readLock.unlock();
         }
     }
@@ -147,6 +148,26 @@ class PropertiesManager implements Reloadable, Listable {
             properties.list(out);
         } finally {
             readLock.unlock();
+        }
+    }
+
+    public String setProperty(String key, String value) {
+        writeLock.lock();
+        try {
+            if (value == null) return removeProperty(key);
+            return asString(properties.setProperty(key, value));
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+
+    public String removeProperty(String key) {
+        writeLock.lock();
+        try {
+            return asString(properties.remove(key));
+        } finally {
+            writeLock.unlock();
         }
     }
 }

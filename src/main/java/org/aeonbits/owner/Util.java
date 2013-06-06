@@ -18,6 +18,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 /**
+ * This class contains utility methods used all over the library.
  * @author Luigi R. Viggiano
  */
 abstract class Util {
@@ -29,6 +30,7 @@ abstract class Util {
         throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
     }
 
+    @SuppressWarnings("unchecked")
     static <T> T[] reverse(T[] array) {
         T[] copy = array.clone();
         Collections.reverse(asList(copy));
@@ -48,10 +50,8 @@ abstract class Util {
 
     static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
         Class<DisableFeature> annotation = DisableFeature.class;
-        if (isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
-                isFeatureDisabled(feature, method.getAnnotation(annotation)))
-            return true;
-        return false;
+        return (isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
+                isFeatureDisabled(feature, method.getAnnotation(annotation)));
     }
 
     private static boolean isFeatureDisabled(DisableableFeature feature, DisableFeature annotation) {
@@ -66,7 +66,13 @@ abstract class Util {
         return new UnsupportedOperationException(format(msg, args));
     }
 
-    public static <T> T unreachable() {
+    static <T> T unreachable() {
         throw new AssertionError("this code should never be reached");
     }
+
+    static String asString(Object result) {
+        if (result == null) return null;
+        return String.valueOf(result);
+    }
+
 }
