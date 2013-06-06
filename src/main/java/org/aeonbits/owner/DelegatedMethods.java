@@ -67,9 +67,8 @@ enum DelegatedMethods {
         try {
             return aClass.getMethod(name, args);
         } catch (NoSuchMethodException e) {
-            // this shouldn't happen, btw we handle the case in which the delegate method is not available...
-            // so, it's fine.
-            return null;
+            // this can't happen.
+            throw new RuntimeException(e);
         }
     }
 
