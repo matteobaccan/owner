@@ -47,6 +47,11 @@ public class ConfigTest {
         @Key("salutation.text")
         @DefaultValue("Good Morning")
         String salutation();
+
+        @DefaultValue("foo")
+        void voidMethodWithValue();
+
+        void voidMethodWithoutValue();
     }
 
     @Test
@@ -87,6 +92,18 @@ public class ConfigTest {
     public void shouldDoReplacements() {
         SampleConfig config = ConfigFactory.create(SampleConfig.class, new Properties());
         assertEquals("Hello Luigi.", config.hello("Luigi"));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testVoidMethodWithValue() {
+        SampleConfig cfg = ConfigFactory.create(SampleConfig.class);
+        cfg.voidMethodWithValue();
+    }
+
+    @Test
+    public void testVoidMethodWithoutValue() {
+        SampleConfig cfg = ConfigFactory.create(SampleConfig.class);
+        cfg.voidMethodWithoutValue();
     }
 
     @Sources({"classpath:foo/bar/baz.properties",
