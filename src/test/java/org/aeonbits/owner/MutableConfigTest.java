@@ -16,9 +16,9 @@ import static org.junit.Assert.assertNull;
 /**
  * @author Luigi R. Viggiano
  */
-public class ModifiableConfigTest {
+public class MutableConfigTest {
 
-    interface ModifiableConfig extends Config, Modifiable {
+    interface MutableConfig extends Config, Mutable {
         @DefaultValue("18")
         public Integer minAge();
         public Integer maxAge();
@@ -26,7 +26,7 @@ public class ModifiableConfigTest {
 
     @Test
     public void testSetProperty() {
-        ModifiableConfig cfg = ConfigFactory.create(ModifiableConfig.class);
+        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         String oldValue = cfg.setProperty("minAge", "21");
         assertEquals("18", oldValue);
@@ -35,7 +35,7 @@ public class ModifiableConfigTest {
 
     @Test
     public void testSetPropertyThatWasNull() {
-        ModifiableConfig cfg = ConfigFactory.create(ModifiableConfig.class);
+        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertNull(cfg.maxAge());
         String oldValue = cfg.setProperty("maxAge", "999");
         assertNull(oldValue);
@@ -44,7 +44,7 @@ public class ModifiableConfigTest {
 
     @Test
     public void testSetPropertyWithNull() {
-        ModifiableConfig cfg = ConfigFactory.create(ModifiableConfig.class);
+        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         String oldValue = cfg.setProperty("minAge", null);
         assertEquals("18", oldValue);
@@ -53,7 +53,7 @@ public class ModifiableConfigTest {
 
     @Test
     public void testRemoveProperty() {
-        ModifiableConfig cfg = ConfigFactory.create(ModifiableConfig.class);
+        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         String oldValue = cfg.removeProperty("minAge");
         assertEquals("18", oldValue);
@@ -62,7 +62,7 @@ public class ModifiableConfigTest {
 
     @Test
     public void testClear() {
-        ModifiableConfig cfg = ConfigFactory.create(ModifiableConfig.class);
+        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         cfg.clear();
         assertNull(cfg.minAge());
