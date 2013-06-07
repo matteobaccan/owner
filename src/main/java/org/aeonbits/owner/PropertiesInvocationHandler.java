@@ -37,8 +37,6 @@ class PropertiesInvocationHandler implements InvocationHandler {
     private final StrSubstitutor substitutor;
     private final PropertiesManager propertiesManager;
 
-
-
     PropertiesInvocationHandler(PropertiesManager manager) {
         this.propertiesManager = manager;
         this.substitutor = new StrSubstitutor(manager.load());
