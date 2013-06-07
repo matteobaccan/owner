@@ -11,7 +11,7 @@ package org.aeonbits.owner.multithread;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.Mutable;
+import org.aeonbits.owner.Reloadable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,7 +52,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase {
     }
 
     @Sources(spec)
-    public interface ReloadableConfig extends Config, Mutable {
+    public interface ReloadableConfig extends Config, Reloadable {
         Integer someValue();
     }
 

@@ -42,7 +42,7 @@ public class ReloadTest {
     }
 
     @Sources(spec)
-    public interface ReloadableConfig extends Config, Mutable {
+    public interface ReloadableConfig extends Config, Reloadable {
         Integer minimumAge();
     }
 
@@ -61,7 +61,7 @@ public class ReloadTest {
         assertEquals(Integer.valueOf(21), cfg.minimumAge());
     }
 
-    public interface ReloadImportConfig extends Config, Mutable {
+    public interface ReloadImportConfig extends Config, Reloadable {
         Integer minimumAge();
     }
 
