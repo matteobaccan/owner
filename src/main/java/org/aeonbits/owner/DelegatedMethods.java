@@ -38,21 +38,21 @@ enum DelegatedMethods {
         }
     },
 
-    SET_PROPERTY(getMethod(Modifiable.class, "setProperty", String.class, String.class)) {
+    SET_PROPERTY(getMethod(Mutable.class, "setProperty", String.class, String.class)) {
         @Override
         public Object delegate(PropertiesManager propsMgr, Object[] args) {
             return propsMgr.setProperty((String) args[0], (String) args[1]);
         }
     },
 
-    REMOVE_PROPERTY(getMethod(Modifiable.class, "removeProperty", String.class)) {
+    REMOVE_PROPERTY(getMethod(Mutable.class, "removeProperty", String.class)) {
         @Override
         public Object delegate(PropertiesManager propsMgr, Object[] args) {
             return propsMgr.removeProperty((String) args[0]);
         }
     },
 
-    CLEAR(getMethod(Modifiable.class, "clear")) {
+    CLEAR(getMethod(Mutable.class, "clear")) {
         @Override
         Object delegate(PropertiesManager propsMgr, Object[] args) {
             propsMgr.clear();

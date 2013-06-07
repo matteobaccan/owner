@@ -12,7 +12,7 @@ package org.aeonbits.owner;
  * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p>
  * <p>Example:</p>
  * <pre>
- *     public interface MyConfig extends Config, Modifiable {
+ *     public interface MyConfig extends Config, Mutable {
  *         @DefaultValue("10")
  *         int someProperty();
  *     }
@@ -30,7 +30,7 @@ package org.aeonbits.owner;
  * @author  Luigi R. Viggiano
  * @since   1.0.4
  */
-public interface Modifiable {
+public interface Mutable {
 
     /**
      * <p>Sets a given property to the specified value.</p>
