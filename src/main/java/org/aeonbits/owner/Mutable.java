@@ -13,17 +13,17 @@ package org.aeonbits.owner;
  * <p>Example:</p>
  * <pre>
  *     public interface MyConfig extends Config, Mutable {
- *         @DefaultValue("10")
- *         int someProperty();
+ *         &#64;DefaultValue("18")
+ *         int minAge();
  *     }
  *
  *     public void example() {
  *         MyConfig cfg = ConfigFactory.create(MyConfig.class);
- *         int before = cfg.someProperty();                 // before is 10
- *         int old = cfg.setProperty("someProperty", "20"); // old is 10
- *         int after = cfg.someProperty();                  // after is 20
- *         int old2 = cfg.removeProperty("someProperty");   // old2 is 20
- *         int end = cfg.someProperty();                    // end is null
+ *         int before = cfg.minAge();                 // before = 18
+ *         int old = cfg.setProperty("minAge", "21"); // old = 18
+ *         int after = cfg.minAge();                  // after = 21
+ *         int old2 = cfg.removeProperty("minAge");   // old2 = 21
+ *         int end = cfg.minAge();                    // end = null
  *     }
  * </pre>
  *
