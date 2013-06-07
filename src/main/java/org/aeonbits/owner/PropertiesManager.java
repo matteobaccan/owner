@@ -37,7 +37,7 @@ import static org.aeonbits.owner.Util.unsupported;
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesManager implements Reloadable, Listable {
+class PropertiesManager implements Reloadable, Listable, Modifiable {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
@@ -53,18 +53,8 @@ class PropertiesManager implements Reloadable, Listable {
     }
 
     Properties load() {
-        return load(false);
-    }
-
-    public void reload() {
-        load(true);
-    }
-
-    private Properties load(boolean clear) {
         writeLock.lock();
         try {
-            if (clear)
-                properties.clear();
             defaults(properties, clazz);
             merge(properties, reverse(imports));
             ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
@@ -73,6 +63,16 @@ class PropertiesManager implements Reloadable, Listable {
             return properties;
         } catch (IOException e) {
             throw unsupported(e, "Properties load failed");
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public void reload() {
+        writeLock.lock();
+        try {
+            clear();
+            load();
         } finally {
             writeLock.unlock();
         }
@@ -161,11 +161,19 @@ class PropertiesManager implements Reloadable, Listable {
         }
     }
 
-
     public String removeProperty(String key) {
         writeLock.lock();
         try {
             return asString(properties.remove(key));
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public void clear() {
+        writeLock.lock();
+        try {
+            properties.clear();
         } finally {
             writeLock.unlock();
         }

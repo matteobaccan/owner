@@ -60,4 +60,12 @@ public class ModifiableConfigTest {
         assertNull(cfg.minAge());
     }
 
+    @Test
+    public void testClear() {
+        ModifiableConfig cfg = ConfigFactory.create(ModifiableConfig.class);
+        assertEquals(Integer.valueOf(18), cfg.minAge());
+        cfg.clear();
+        assertNull(cfg.minAge());
+    }
+
 }

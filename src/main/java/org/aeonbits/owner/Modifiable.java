@@ -56,4 +56,11 @@ public interface Modifiable {
      * @since 1.0.4
      */
     String removeProperty(String key);
+
+    /**
+     * Clears all properties.
+     *
+     * @since 1.0.4
+     */
+    void clear();
 }

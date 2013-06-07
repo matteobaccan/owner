@@ -65,9 +65,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase {
 
         start(readers, writers);
 
-        synchronized (lock) {
-            lock.notifyAll();
-        }
+        notifyAll(lock);
 
         join(readers, writers);
 

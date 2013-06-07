@@ -52,4 +52,10 @@ abstract class MultiThreadTestBase {
                 }
             }
     }
+
+    void notifyAll(Object lock) {
+        synchronized (lock) {
+            lock.notifyAll();
+        }
+    }
 }

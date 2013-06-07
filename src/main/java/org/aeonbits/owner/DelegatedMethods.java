@@ -50,6 +50,14 @@ enum DelegatedMethods {
         public Object delegate(PropertiesManager propsMgr, Object[] args) {
             return propsMgr.removeProperty((String) args[0]);
         }
+    },
+
+    CLEAR(getMethod(Modifiable.class, "clear")) {
+        @Override
+        Object delegate(PropertiesManager propsMgr, Object[] args) {
+            propsMgr.clear();
+            return null;
+        }
     };
 
     private final Method delegableMethod;
