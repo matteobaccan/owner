@@ -89,9 +89,6 @@ public class ConfigTest {
         assertEquals("Hello Luigi.", config.hello("Luigi"));
     }
 
-    /**
-     * @author Luigi R. Viggiano
-     */
     @Sources({"classpath:foo/bar/baz.properties",
             "file:~/.testfoobar.blahblah",
             "file:/etc/testfoobar.blahblah",
@@ -145,9 +142,6 @@ public class ConfigTest {
         assertEquals("Hello World!", sample.helloWorld());
     }
 
-    /**
-     * @author Luigi R. Viggiano
-     */
     @Sources("classpath:foo/bar/thisDoesntExists.properties")
     public static interface InvalidSourceConfig extends Config {
         public String someProperty();

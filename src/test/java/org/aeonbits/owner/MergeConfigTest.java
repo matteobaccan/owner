@@ -12,9 +12,6 @@ import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.junit.Test;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
 import static org.aeonbits.owner.Config.LoadType.MERGE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -56,8 +53,5 @@ public class MergeConfigTest {
         String quux(); // this should return null;
         @DefaultValue("theDefaultValue")
         String fubar();
-
-        void list(PrintStream out);
-        void list(PrintWriter out);
     }
 }
