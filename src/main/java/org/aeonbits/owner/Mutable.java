@@ -10,7 +10,9 @@ package org.aeonbits.owner;
 
 /**
  * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p>
+ *
  * <p>Example:</p>
+ *
  * <pre>
  *     public interface MyConfig extends Config, Mutable {
  *         &#64;DefaultValue("18")

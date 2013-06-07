@@ -11,11 +11,7 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.Sources;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
@@ -34,10 +30,7 @@ import static org.mockito.Mockito.verify;
  */
 public class ConfigTest {
 
-    /**
-     * @author Luigi R. Viggiano
-     */
-    public static interface SampleConfig extends Config, Accessible {
+    public static interface SampleConfig extends Config {
 
         String testKey();
 
@@ -54,11 +47,6 @@ public class ConfigTest {
         @Key("salutation.text")
         @DefaultValue("Good Morning")
         String salutation();
-
-        public static class UnsupportedType {}
-
-        void list(PrintStream out);
-        void list(PrintWriter out);
     }
 
     @Test
@@ -258,31 +246,6 @@ public class ConfigTest {
         assertEquals("pink", config.favoriteColor());
     }
 
-    @Test
-    public void testListPrintStream() throws IOException {
-        ByteArrayOutputStream expected = new ByteArrayOutputStream();
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
-        manager.load().list(new PrintStream(expected, true));
-
-        SampleConfig config = ConfigFactory.create(SampleConfig.class);
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        config.list(new PrintStream(result, true));
-
-        assertEquals(expected.toString(), result.toString());
-    }
-
-    @Test
-    public void testListPrintWriter() throws IOException {
-        StringWriter expected = new StringWriter();
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
-        manager.load().list(new PrintWriter(expected, true));
-
-        SampleConfig config = ConfigFactory.create(SampleConfig.class);
-        StringWriter result = new StringWriter();
-        config.list(new PrintWriter(result, true));
-
-        assertEquals(expected.toString(), result.toString());
-    }
 
     public static interface SubstituteAndFormat extends Config {
         @DefaultValue("Hello ${mister}")
