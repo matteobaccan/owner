@@ -30,7 +30,7 @@ import static org.aeonbits.owner.Util.reverse;
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p/>
- * Sub-interfaces may also extend {@link Listable} to allow some debugging facility, or {@link Reloadable} to allow the
+ * Sub-interfaces may also extend {@link Accessible} to allow some debugging facility, or {@link Reloadable} to allow the
  * user to programmatically reload properties.
  *
  * @author Luigi R. Viggiano

@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 enum DelegatedMethods {
-    LIST_PRINT_STREAM(getMethod(Listable.class, "list", PrintStream.class)) {
+    LIST_PRINT_STREAM(getMethod(Accessible.class, "list", PrintStream.class)) {
         @Override
         public Object delegate(PropertiesManager propsMgr, Object... args) {
             propsMgr.list((PrintStream) args[0]);
@@ -22,7 +22,7 @@ enum DelegatedMethods {
         }
     },
 
-    LIST_PRINT_WRITER(getMethod(Listable.class, "list", PrintWriter.class)) {
+    LIST_PRINT_WRITER(getMethod(Accessible.class, "list", PrintWriter.class)) {
         @Override
         public Object delegate(PropertiesManager propsMgr, Object... args) {
             propsMgr.list((PrintWriter) args[0]);

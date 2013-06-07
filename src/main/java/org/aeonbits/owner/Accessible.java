@@ -12,10 +12,13 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * <p>Allows a <tt>Config</tt> object to implement the list() methods to aid debugging.</p>
+ * <p>Allows a <tt>Config</tt> object to access the contents of the properties, providing utility methods to
+ * perform consequent operations.</p>
+ *
  * <p>Example:</p>
+ *
  * <pre>
- *     public interface MyConfig extends Config, Listable {
+ *     public interface MyConfig extends Config, Accessible {
  *         int someProperty();
  *     }
  *
@@ -30,7 +33,7 @@ import java.io.PrintWriter;
  * @author Luigi R. Viggiano
  * @since 1.0.4
  */
-public interface Listable {
+public interface Accessible {
 
     /**
      * Prints this property list out to the specified output stream. This method is useful for debugging.

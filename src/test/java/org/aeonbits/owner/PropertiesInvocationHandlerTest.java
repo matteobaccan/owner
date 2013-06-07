@@ -57,7 +57,7 @@ public class PropertiesInvocationHandlerTest {
         verify(properties).list(eq(printWriter));
     }
 
-    public interface MyConfig extends Config, Listable {
+    public interface MyConfig extends Config, Accessible {
         void list(PrintStream out);
         void list(PrintWriter out);
     }

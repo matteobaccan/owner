@@ -37,7 +37,7 @@ import static org.aeonbits.owner.Util.unsupported;
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesManager implements Reloadable, Listable, Mutable {
+class PropertiesManager implements Reloadable, Accessible, Mutable {
     private static final SystemVariablesExpander expander = new SystemVariablesExpander();
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;

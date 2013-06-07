@@ -10,7 +10,9 @@ package org.aeonbits.owner;
 
 /**
  * <p>Allows a <tt>Config</tt> object to implement the reloading of the properties at runtime.</p>
+ *
  * <p>Example:</p>
+ *
  * <pre>
  *     public interface MyConfig extends Config, Reloadable {
  *         int someProperty();
@@ -30,6 +32,7 @@ package org.aeonbits.owner;
  *         if (before != after) { ... }
  *     }
  * </pre>
+ *
  * <p>The reload method will reload the properties using the same sources used when it was instantiated the first time.
  * This can be useful to programmatically reload the configuration after the configuration files were changed.</p>
  *
