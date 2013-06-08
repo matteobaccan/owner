@@ -16,10 +16,12 @@ import java.lang.annotation.Target;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesManager.close;
 import static org.aeonbits.owner.PropertiesManager.getInputStream;
@@ -155,6 +157,31 @@ public interface Config {
     }
 
     /**
+     * <p>Specify that the class implements hot reloading of properties from filesystem baked {@link Sources} (hot
+     * reloading can't be applied to all types of URLs).</p>
+     * <p>It is possible to specify <tt>interval</tt> and <tt>unit</tt> to indicate how frequently hot-reload shall
+     * check the files for modifications and perform the reload.</p>
+     *
+     * @since 1.0.4
+     */
+    @Retention(RUNTIME)
+    @Target(TYPE)
+    @Documented
+    @interface HotReload {
+        /**
+         * The interval to perform checks on the filesystem to identify modified files and eventually perform the
+         * reloading of the properties. By default is 5000
+         */
+        long interval() default 5000;
+
+        /**
+         * The time unit for the interval. By default it is milliseconds.
+         */
+        TimeUnit unit() default MILLISECONDS;
+    }
+
+
+    /**
      * Specifies to disable some of the features supported by the API.
      * This may be useful in case the user prefers to implement by his own, or just has troubles with something that
      * is unwanted.
@@ -245,4 +272,5 @@ public interface Config {
     interface Tokenizer {
         String[] tokens(String values);
     }
+
 }
