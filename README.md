@@ -868,9 +868,9 @@ CHANGELOG
 ---------
 ### 1.0.4 (under development)
 
- * Hot reload for file based sources (work in progress)
+ * Hot reload for file based sources (work in progress). See Issue [#15][issue-15]
  * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure: 
-   setProperty, removeProperty, clear.
+   setProperty, removeProperty, clear. See Issue [#31][issue-31]
  * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and - in future - all 
    the methods giving access to the underlying properties structure.
  * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf]. At the 
@@ -885,6 +885,8 @@ CHANGELOG
  
   [issue-17]: https://github.com/lviggiano/owner/issues/17
   [issue-20]: https://github.com/lviggiano/owner/issues/20
+  [issue-31]: https://github.com/lviggiano/owner/issues/31
+  [issue-15]: https://github.com/lviggiano/owner/issues/15
   [ffbit]: https://github.com/ffbit
   [ming13]: https://github.com/ming13
   [travis-ci]: https://travis-ci.org/lviggiano/owner
