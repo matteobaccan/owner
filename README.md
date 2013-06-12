@@ -868,8 +868,14 @@ CHANGELOG
 ---------
 ### 1.0.4 (under development)
 
- * Added `Listable` interface for the `list()` methods used to aid debugging.
- * Added the `reload()` method that can be exposed implementing the interface `Reloadable`.
+ * Hot reload for file based sources (work in progress)
+ * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure: 
+   setProperty, removeProperty, clear.
+ * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and - in future - all 
+   the methods giving access to the underlying properties structure.
+ * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf]. At the 
+   current time I am thinking to merge this interface with `Mutable`, before releasing, but that reloading() is a 
+   different operation and purpose than programmatically alter things... so for now, it's here.
  * Added [Travis CI][travis-ci] to the project to track changes and run tests on different JDK versions.
  * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
@@ -882,6 +888,9 @@ CHANGELOG
   [ffbit]: https://github.com/ffbit
   [ming13]: https://github.com/ming13
   [travis-ci]: https://travis-ci.org/lviggiano/owner
+  [accessible-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Accessible.html
+  [reloadable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Reloadable.html
+  [mutable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Mutable.html
 
 ### 1.0.3
 
