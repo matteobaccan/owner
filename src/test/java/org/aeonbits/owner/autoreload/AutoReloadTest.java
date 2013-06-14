@@ -13,7 +13,6 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.FakeTime;
-import org.aeonbits.owner.Reloadable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,7 +51,7 @@ public class AutoReloadTest {
 
     @Sources(spec)
     @HotReload(interval = 5, unit = SECONDS)
-    interface AutoReloadConfig extends Config, Reloadable {
+    interface AutoReloadConfig extends Config {
         Integer someValue();
     }
 
