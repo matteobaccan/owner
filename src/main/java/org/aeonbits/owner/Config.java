@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Documented;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesManager.close;
 import static org.aeonbits.owner.PropertiesManager.getInputStream;
@@ -153,7 +154,29 @@ public interface Config {
             }
         };
 
+        private static long getLastModifiedTime(URL url) {
+            File file = Util.fileFromURL(url);
+            if (file == null)
+                return 0;
+            return file.lastModified();
+        }
+
         abstract Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException;
+
+        boolean needsReload(Sources sources, ConfigURLStreamHandler handler, long lastCheckTime) {
+            String[] values = sources.value();
+            for (String source : values) {
+                try {
+                    URL url = new URL(null, source, handler);
+                    long lastModifiedTime = getLastModifiedTime(url);
+                    if (lastModifiedTime >= lastCheckTime)
+                        return true;
+                } catch (MalformedURLException e) {
+                    ignore();
+                }
+            }
+            return false;
+        }
     }
 
     /**
@@ -170,14 +193,22 @@ public interface Config {
     @interface HotReload {
         /**
          * The interval to perform checks on the filesystem to identify modified files and eventually perform the
-         * reloading of the properties. By default is 5000
+         * reloading of the properties. By default is 5.
          */
-        long interval() default 5000;
+        long interval() default 5;
 
         /**
-         * The time unit for the interval. By default it is milliseconds.
+         * The time unit for the interval. By default it is {@link TimeUnit#SECONDS}.
+         * <p>
+         * Date resolution vary from filesystem to filesystem.<br/>
+         * For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second.<br/>
+         * For FAT32 the date resolution for the last modified time is 2 seconds. <br/>
+         * For Ext4 the date resolution is in nanoseconds.
+         * <p>
+         * So, it is a good idea to express the time unit in seconds or more, since higher time resolution
+         * will probably not be supported by the underlying filesystem.
          */
-        TimeUnit unit() default MILLISECONDS;
+        TimeUnit unit() default SECONDS;
     }
 
 

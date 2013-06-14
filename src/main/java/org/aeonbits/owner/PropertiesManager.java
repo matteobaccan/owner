@@ -9,6 +9,7 @@
 package org.aeonbits.owner;
 
 
+import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 
@@ -29,6 +30,7 @@ import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
+import static org.aeonbits.owner.Util.now;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
 
@@ -46,24 +48,44 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final ReadLock readLock = lock.readLock();
     private final WriteLock writeLock = lock.writeLock();
 
+    private final Sources sources;
+    private final LoadType loadType;
+    private final HotReload hotReload;
+    private final long interval;
+
+    private volatile long lastCheckTime = 0L;
+    private volatile boolean loading = false;
+    private final ConfigURLStreamHandler handler;
+
     PropertiesManager(Class<? extends Config> clazz, Properties properties, Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.imports = imports;
+
+        handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
+
+        sources = clazz.getAnnotation(Sources.class);
+        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
+        loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
+
+        hotReload = clazz.getAnnotation(HotReload.class);
+        interval = (hotReload != null) ? hotReload.unit().toMillis(hotReload.interval()) : 0;
     }
 
     Properties load() {
         writeLock.lock();
+        loading = true;
         try {
             defaults(properties, clazz);
             merge(properties, reverse(imports));
-            ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
             Properties loadedFromFile = doLoad(handler);
             merge(properties, loadedFromFile);
+            lastCheckTime = now();
             return properties;
         } catch (IOException e) {
             throw unsupported(e, "Properties load failed");
         } finally {
+            loading = false;
             writeLock.unlock();
         }
     }
@@ -79,9 +101,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
-        Sources sources = clazz.getAnnotation(Sources.class);
-        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
-        LoadType loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
         if (sources == null)
             return loadDefaultProperties(handler);
         else
@@ -123,11 +142,33 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     public String getProperty(String key) {
+        checkAndReload();
         readLock.lock();
         try {
             return properties.getProperty(key);
         } finally {
             readLock.unlock();
+        }
+    }
+
+    private void checkAndReload() {
+        if (sources == null || hotReload == null || loading)
+            return;
+
+        if (needsReload())
+            reload();
+    }
+
+    private synchronized boolean needsReload() {
+
+        long now = now();
+        if (now < lastCheckTime + interval || loading)
+            return false;
+
+        try {
+            return loadType.needsReload(sources, handler, lastCheckTime);
+        } finally {
+            lastCheckTime = now;
         }
     }
 

@@ -11,10 +11,15 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.DisableFeature;
 import org.aeonbits.owner.Config.DisableableFeature;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 
 import static java.lang.String.format;
+import static java.net.URLDecoder.decode;
 import static java.util.Arrays.asList;
 
 /**
@@ -23,6 +28,17 @@ import static java.util.Arrays.asList;
  * @author Luigi R. Viggiano
  */
 abstract class Util {
+    interface Time {
+        long getTime();
+    }
+
+    static Time time = new Time() {
+        @Override
+        public long getTime() {
+            return System.currentTimeMillis();
+        }
+    };
+
     Util() {
         prohibitInstantiation();
     }
@@ -44,9 +60,10 @@ abstract class Util {
         return text;
     }
 
-    static void ignore() {
+    static <T> T ignore() {
         // the ignore method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
         // complaining about empty catch methods.
+        return null;
     }
 
     static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
@@ -76,4 +93,27 @@ abstract class Util {
         return String.valueOf(result);
     }
 
+    static long now() {
+        return time.getTime();
+    }
+
+    static File fileFromURL(URL url) {
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
+            String path = url.getPath();
+            try {
+                path = decode(path, "utf-8");
+                return new File(path);
+            } catch (UnsupportedEncodingException e) {
+               return ignore(/* it can't happen */);
+            }
+        } else if ("jar".equalsIgnoreCase(url.getProtocol())) {
+            String path = url.getPath();
+            try {
+                return fileFromURL(new URL(path.substring(0, path.indexOf('!'))));
+            } catch (MalformedURLException e) {
+                return ignore(/* non critical */);
+            }
+        }
+        return null;
+    }
 }

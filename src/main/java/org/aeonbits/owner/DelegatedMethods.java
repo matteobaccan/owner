@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import static org.aeonbits.owner.Util.unreachable;
+
 enum DelegatedMethods {
     LIST_PRINT_STREAM(getMethod(Accessible.class, "list", PrintStream.class)) {
         @Override
@@ -75,8 +77,7 @@ enum DelegatedMethods {
         try {
             return aClass.getMethod(name, args);
         } catch (NoSuchMethodException e) {
-            // this can't happen.
-            throw new RuntimeException(e);
+            return unreachable(/* should never happen */);
         }
     }
 
