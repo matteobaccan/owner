@@ -75,8 +75,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     Properties load() {
         writeLock.lock();
-        loading = true;
         try {
+            loading = true;
             defaults(properties, clazz);
             merge(properties, reverse(imports));
             Properties loadedFromFile = doLoad(handler);
