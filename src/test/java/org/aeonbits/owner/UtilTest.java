@@ -20,6 +20,7 @@ import java.util.Properties;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachable;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -43,7 +44,8 @@ public class UtilTest {
 
     @Test
     public void testIgnore() {
-        ignore();
+        Object result = ignore();
+        assertNull(result);
     }
 
     @Test
