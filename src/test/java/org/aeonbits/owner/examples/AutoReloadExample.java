@@ -50,8 +50,10 @@ public class AutoReloadExample {
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
 
         System.out.println("You can change the file " + spec + " and see the changes reflected below");
-        while (true) {
-            System.out.print("\rsomeValue is: " + cfg.someValue() + "                      ");
+        int someValue = 0;
+        while (someValue >= 0) {
+            someValue = cfg.someValue();
+            System.out.print("\rsomeValue is: " + someValue + "\t\t\t\t");
             Thread.sleep(500);
         }
 
