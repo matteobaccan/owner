@@ -54,6 +54,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final long interval;
 
     private volatile long lastCheckTime = 0L;
+    private long lastLoadTime;
     private volatile boolean loading = false;
     private final ConfigURLStreamHandler handler;
 
@@ -80,7 +81,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             merge(properties, reverse(imports));
             Properties loadedFromFile = doLoad(handler);
             merge(properties, loadedFromFile);
-            lastCheckTime = now();
+            lastLoadTime = now();
+            if (lastCheckTime == 0L)
+                lastCheckTime = lastLoadTime;
             return properties;
         } catch (IOException e) {
             throw unsupported(e, "Properties load failed");
@@ -166,7 +169,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             return false;
 
         try {
-            return loadType.needsReload(sources, handler, lastCheckTime);
+            return loadType.needsReload(sources, handler, lastLoadTime);
         } finally {
             lastCheckTime = now;
         }
