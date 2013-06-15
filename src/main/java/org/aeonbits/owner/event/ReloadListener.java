@@ -24,5 +24,5 @@ public interface ReloadListener extends EventListener {
     /**
      * Invoked when a reload occurs.
      */
-    public void reloadPerformed(ReloadEvent event);
+    void reloadPerformed(ReloadEvent event);
 }
