@@ -41,7 +41,7 @@ import static org.junit.Assert.assertTrue;
 public class AutoReloadTest {
 
     private static final String propertyFileName = "AutoReloadConfig.properties";
-    private static final String jarFile = "target/test-resources/AutoReloadExample.jar";
+    private static final String jarFile = "target/test-resources/AutoReloadTest.jar";
 
     private static final String spec = "file:target/test-resources/" + propertyFileName;
     private static final String specJar = "jar:file:" + jarFile + "!/" + propertyFileName;
@@ -64,7 +64,7 @@ public class AutoReloadTest {
     }
 
     @Sources(spec)
-    @HotReload(interval = 5, unit = SECONDS)
+    @HotReload(5)
     interface AutoReloadConfig extends Config {
         Integer someValue();
     }
@@ -93,7 +93,7 @@ public class AutoReloadTest {
     }
 
     @Sources(specJar)
-    @HotReload(interval = 5, unit = SECONDS)
+    @HotReload(5)
     interface AutoReloadJarConfig extends Config {
         Integer someValue();
     }

@@ -70,7 +70,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         hotReload = clazz.getAnnotation(HotReload.class);
-        interval = (hotReload != null) ? hotReload.unit().toMillis(hotReload.interval()) : 0;
+        interval = (hotReload != null) ? hotReload.unit().toMillis(hotReload.value()) : 0;
     }
 
     Properties load() {

@@ -29,7 +29,7 @@ public class AutoReloadExample {
     private static File target;
 
     @Sources(spec)
-    @HotReload(interval = 1)
+    @HotReload(1)
     interface AutoReloadConfig extends Config {
         Integer someValue();
     }

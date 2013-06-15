@@ -180,10 +180,26 @@ public interface Config {
     }
 
     /**
-     * <p>Specify that the class implements hot reloading of properties from filesystem baked {@link Sources} (hot
-     * reloading can't be applied to all types of URLs).</p>
-     * <p>It is possible to specify <tt>interval</tt> and <tt>unit</tt> to indicate how frequently hot-reload shall
-     * check the files for modifications and perform the reload.</p>
+     * Specify that the class implements hot reloading of properties from filesystem baked {@link Sources} (hot
+     * reloading can't be applied to all types of URLs).
+     * <p/>
+     * It is possible to specify an interval to indicate how frequently the library shall check the files for
+     * modifications and perform the reload.
+     * <p/>
+     * Examples:
+     * <pre>
+     * &#64;HotReload    // will check for file changes every 5 seconds.
+     * &#64;Sources("file:foo/bar/baz.properties")
+     * interface MyConfig extends Config { ... }
+     *
+     * &#64;HotReload(2)    // will check for file changes every 2 seconds.
+     * &#64;Sources("file:foo/bar/baz.properties")
+     * interface MyConfig extends Config { ... }
+     *
+     * &#64;HotReload(500, unit = TimeUnit.MILLISECONDS);  // will check for file changes every 500 milliseconds.
+     * &#64;Sources("file:foo/bar/baz.properties")
+     * interface MyConfig extends Config { ... }
+     * </pre>
      *
      * @since 1.0.4
      */
@@ -192,25 +208,24 @@ public interface Config {
     @Documented
     @interface HotReload {
         /**
-         * The interval to perform checks on the filesystem to identify modified files and eventually perform the
-         * reloading of the properties. By default is 5.
+         * The interval, expressed in seconds (by default), to perform checks on the filesystem to identify modified
+         * files and eventually perform the reloading of the properties. By default is 5 seconds.
          */
-        long interval() default 5;
+        long value() default 5;
 
         /**
          * The time unit for the interval. By default it is {@link TimeUnit#SECONDS}.
-         * <p>
+         * <p/>
          * Date resolution vary from filesystem to filesystem.<br/>
          * For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second.<br/>
          * For FAT32 the date resolution for the last modified time is 2 seconds. <br/>
          * For Ext4 the date resolution is in nanoseconds.
-         * <p>
+         * <p/>
          * So, it is a good idea to express the time unit in seconds or more, since higher time resolution
          * will probably not be supported by the underlying filesystem.
          */
         TimeUnit unit() default SECONDS;
     }
-
 
     /**
      * Specifies to disable some of the features supported by the API.
