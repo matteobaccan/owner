@@ -50,13 +50,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private final Sources sources;
     private final LoadType loadType;
-    private final HotReload hotReload;
-    private final long interval;
+    private final SyncHotReload syncHotReload;
 
-    private volatile long lastCheckTime = 0L;
-    private long lastLoadTime;
-    private volatile boolean loading = false;
+    volatile boolean loading = false;
     private final ConfigURLStreamHandler handler;
+
+    private long lastLoadTime;
+
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, Map<?, ?>... imports) {
         this.clazz = clazz;
@@ -69,8 +69,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        hotReload = clazz.getAnnotation(HotReload.class);
-        interval = (hotReload != null) ? hotReload.unit().toMillis(hotReload.value()) : 0;
+        HotReload hotReload = clazz.getAnnotation(HotReload.class);
+        if (sources != null && hotReload != null)
+            syncHotReload = new SyncHotReload(clazz, handler, this);
+        else
+            syncHotReload = null;
     }
 
     Properties load() {
@@ -82,8 +85,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             Properties loadedFromFile = doLoad(handler);
             merge(properties, loadedFromFile);
             lastLoadTime = now();
-            if (lastCheckTime == 0L)
-                lastCheckTime = lastLoadTime;
+            if (syncHotReload != null)
+                syncHotReload.init(lastLoadTime);
             return properties;
         } catch (IOException e) {
             throw unsupported(e, "Properties load failed");
@@ -145,36 +148,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     String getProperty(String key) {
-        if (syncHotReload())
-            checkAndReload();
+        if (syncHotReload != null)
+            syncHotReload.checkAndReload(lastLoadTime);
         readLock.lock();
         try {
             return properties.getProperty(key);
         } finally {
             readLock.unlock();
-        }
-    }
-
-    private void checkAndReload() {
-        if (needsReload())
-            reload();
-    }
-
-    private boolean syncHotReload() {
-        return sources != null && hotReload != null;
-    }
-
-    private synchronized boolean needsReload() {
-        if (loading) return false;
-
-        long now = now();
-        if (now < lastCheckTime + interval)
-            return false;
-
-        try {
-            return loadType.needsReload(sources, handler, lastLoadTime);
-        } finally {
-            lastCheckTime = now;
         }
     }
 
