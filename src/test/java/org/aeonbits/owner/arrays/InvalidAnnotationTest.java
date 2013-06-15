@@ -9,8 +9,8 @@
 package org.aeonbits.owner.arrays;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.Tokenizer;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.Tokenizer;
 import org.junit.Before;
 import org.junit.Test;
 

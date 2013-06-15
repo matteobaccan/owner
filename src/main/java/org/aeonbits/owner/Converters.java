@@ -8,8 +8,6 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Tokenizer;
-
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.File;

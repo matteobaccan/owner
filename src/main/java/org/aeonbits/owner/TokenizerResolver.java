@@ -9,7 +9,6 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Separator;
-import org.aeonbits.owner.Config.Tokenizer;
 import org.aeonbits.owner.Config.TokenizerClass;
 
 import java.lang.reflect.Method;

@@ -188,17 +188,17 @@ public interface Config {
      * <p/>
      * Examples:
      * <pre>
-     * &#64;HotReload    // will check for file changes every 5 seconds.
-     * &#64;Sources("file:foo/bar/baz.properties")
-     * interface MyConfig extends Config { ... }
+     *      &#64;HotReload    // will check for file changes every 5 seconds.
+     *      &#64;Sources("file:foo/bar/baz.properties")
+     *      interface MyConfig extends Config { ... }
      *
-     * &#64;HotReload(2)    // will check for file changes every 2 seconds.
-     * &#64;Sources("file:foo/bar/baz.properties")
-     * interface MyConfig extends Config { ... }
+     *      &#64;HotReload(2)    // will check for file changes every 2 seconds.
+     *      &#64;Sources("file:foo/bar/baz.properties")
+     *      interface MyConfig extends Config { ... }
      *
-     * &#64;HotReload(500, unit = TimeUnit.MILLISECONDS);  // will check for file changes every 500 milliseconds.
-     * &#64;Sources("file:foo/bar/baz.properties")
-     * interface MyConfig extends Config { ... }
+     *      &#64;HotReload(500, unit = TimeUnit.MILLISECONDS);  // will check for file changes every 500 milliseconds.
+     *      &#64;Sources("file:foo/bar/baz.properties")
+     *      interface MyConfig extends Config { ... }
      * </pre>
      *
      * @since 1.0.4
@@ -309,14 +309,5 @@ public interface Config {
         Class<? extends Tokenizer> value();
     }
 
-    /**
-     * Tokenizer interface that specifies how to split a single value into tokens to be used as elements
-     * for arrays and collections.
-     *
-     * @since 1.0.4
-     */
-    interface Tokenizer {
-        String[] tokens(String values);
-    }
 
 }

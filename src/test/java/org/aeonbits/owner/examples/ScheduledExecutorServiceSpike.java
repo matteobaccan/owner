@@ -31,19 +31,34 @@ public class ScheduledExecutorServiceSpike {
                 }
             }
         };
-        ScheduledExecutorService stp = Executors.newScheduledThreadPool(1, tf);
+        ScheduledExecutorService stp = Executors.newSingleThreadScheduledExecutor(tf);
         stp.scheduleAtFixedRate(new Runnable() {
+            int count = 0;
             @Override
             public void run() {
+                if ( count++ % 2 == 0)
+                    System.out.printf("*");
+            }
+        }, 500, 500, TimeUnit.MILLISECONDS);
+
+
+        stp.scheduleAtFixedRate(new Runnable() {
+            int count = 0;
+            @Override
+            public void run() {
+                ++count;
+                if (count != 5 && count != 10)
                 System.out.printf(".");
+                if (count == 10) count = 0;
             }
-        }, 0, 200, TimeUnit.MILLISECONDS);
+        }, 100, 100, TimeUnit.MILLISECONDS);
         stp.scheduleAtFixedRate(new Runnable() {
+            int count = 0;
             @Override
             public void run() {
-                System.out.printf("*");
+                System.out.print(++count);
             }
-        }, 0, 500, TimeUnit.MILLISECONDS);
+        }, 1000, 1000, TimeUnit.MILLISECONDS);
 
         Thread.sleep(10000L);
     }

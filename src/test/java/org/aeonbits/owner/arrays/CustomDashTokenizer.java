@@ -8,7 +8,7 @@
 
 package org.aeonbits.owner.arrays;
 
-import org.aeonbits.owner.Config.Tokenizer;
+import org.aeonbits.owner.Tokenizer;
 
 /**
  * @author Luigi R. Viggiano

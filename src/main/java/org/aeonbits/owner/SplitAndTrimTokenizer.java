@@ -8,8 +8,6 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Tokenizer;
-
 /**
  * Tokenizer implementation based on {@link String#split(String, int)} and {@link String#trim()}.
  * This class is used to implement <tt>tokenizer</tt>s for the {@link Config.Separator} annotation.
