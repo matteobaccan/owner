@@ -12,7 +12,7 @@ package org.aeonbits.owner;
  * Tokenizer interface that specifies how to split a single value into tokens to be used as elements for arrays and
  * collections.
  *
- * @author L
+ * @author Luigi R. Viggiano
  * @since 1.0.4
  */
 public interface Tokenizer {
