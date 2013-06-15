@@ -10,12 +10,18 @@ package org.aeonbits.owner;
 
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
 
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachable;
@@ -60,6 +66,25 @@ public class UtilTest {
     public static void save(File target, Properties p) throws IOException {
         target.getParentFile().mkdirs();
         p.store(new FileWriter(target), "saved for test");
+    }
+
+    public static void saveJar(File file, String entryName, Properties props) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        props.store(out, "saved for test");
+        InputStream input = new ByteArrayInputStream(out.toByteArray());
+        JarOutputStream output = new JarOutputStream(
+                new FileOutputStream(file));
+        try {
+            ZipEntry entry = new ZipEntry(entryName);
+            output.putNextEntry(entry);
+            byte[] buffer = new byte[4096];
+            int size;
+            while ((size = input.read(buffer)) != -1)
+                output.write(buffer, 0, size);
+        } finally {
+            input.close();
+            output.close();
+        }
     }
 
     public static void debug(String format, Object... args) {

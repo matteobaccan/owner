@@ -18,20 +18,15 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
-import java.util.jar.JarOutputStream;
-import java.util.zip.ZipEntry;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.UtilTest.save;
+import static org.aeonbits.owner.UtilTest.saveJar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -100,7 +95,7 @@ public class AutoReloadTest {
 
     @Test
     public void testAutoReloadOnJarFile() throws Throwable {
-        writeJarFile(jarTarget, propertyFileName,
+        saveJar(jarTarget, propertyFileName,
                 new Properties() {{
                     setProperty("someValue", "10");
                 }});
@@ -113,7 +108,7 @@ public class AutoReloadTest {
         AutoReloadJarConfig cfg = ConfigFactory.create(AutoReloadJarConfig.class);
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
-        writeJarFile(jarTarget, propertyFileName,    // file updated, the current time is set in target.lastModified().
+        saveJar(jarTarget, propertyFileName,    // file updated, the current time is set in target.lastModified().
                 new Properties() {{
                     setProperty("someValue", "20");
                 }});
@@ -125,24 +120,6 @@ public class AutoReloadTest {
         assertEquals(Integer.valueOf(20), cfg.someValue());  // the changed file should be reloaded now.
     }
 
-    private void writeJarFile(File file, String entryName, Properties props) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        props.store(out, "saved for test");
-        InputStream input = new ByteArrayInputStream(out.toByteArray());
-        JarOutputStream output = new JarOutputStream(
-                new FileOutputStream(file));
-        try {
-            ZipEntry entry = new ZipEntry(entryName);
-            output.putNextEntry(entry);
-            byte[] buffer = new byte[4096];
-            int size;
-            while ((size = input.read(buffer)) != -1)
-                output.write(buffer, 0, size);
-        } finally {
-            input.close();
-            output.close();
-        }
-    }
 
     @After
     public void after() {
