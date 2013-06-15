@@ -144,8 +144,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             inputStream.close();
     }
 
-    public String getProperty(String key) {
-        checkAndReload();
+    String getProperty(String key) {
+        if (syncHotReload())
+            checkAndReload();
         readLock.lock();
         try {
             return properties.getProperty(key);
@@ -155,17 +156,19 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private void checkAndReload() {
-        if (sources == null || hotReload == null || loading)
-            return;
-
         if (needsReload())
             reload();
     }
 
+    private boolean syncHotReload() {
+        return sources != null && hotReload != null;
+    }
+
     private synchronized boolean needsReload() {
+        if (loading) return false;
 
         long now = now();
-        if (now < lastCheckTime + interval || loading)
+        if (now < lastCheckTime + interval)
             return false;
 
         try {
