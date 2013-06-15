@@ -11,17 +11,16 @@ package org.aeonbits.owner.event;
 /**
  * A semantic event which indicates that a reload occurred.
  *
+ * @author Luigi R. Viggiano
  * @see ReloadListener
  * @since 1.0.4
- * @author Luigi R. Viggiano
  */
 public class ReloadEvent extends Event {
     /**
      * Constructs a prototypical Event.
      *
      * @param source The object on which the Event initially occurred.
-     * @throws IllegalArgumentException
-     *          if source is null.
+     * @throws IllegalArgumentException if source is null.
      */
     public ReloadEvent(Object source) {
         super(source);

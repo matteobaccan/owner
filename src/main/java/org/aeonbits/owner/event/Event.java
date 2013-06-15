@@ -16,13 +16,12 @@ import java.util.EventObject;
  * @author Luigi R. Viggiano
  * @since 1.0.4
  */
-public class Event extends EventObject{
+public class Event extends EventObject {
     /**
      * Constructs a prototypical Event.
      *
      * @param source The object on which the Event initially occurred.
-     * @throws IllegalArgumentException
-     *          if source is null.
+     * @throws IllegalArgumentException if source is null.
      */
     public Event(Object source) {
         super(source);
