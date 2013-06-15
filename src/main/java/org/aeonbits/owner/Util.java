@@ -104,7 +104,7 @@ abstract class Util {
                 path = decode(path, "utf-8");
                 return new File(path);
             } catch (UnsupportedEncodingException e) {
-               return ignore(/* it can't happen */);
+                return unreachable(/* it can't happen since utf-8 is supported in jdk */);
             }
         } else if ("jar".equalsIgnoreCase(url.getProtocol())) {
             String path = url.getPath();
