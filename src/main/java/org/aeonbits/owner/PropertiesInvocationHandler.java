@@ -16,10 +16,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.convert;
+import static org.aeonbits.owner.PropertiesManager.Delegate;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.Util.isFeatureDisabled;
 
@@ -35,7 +38,6 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
  * @author Luigi R. Viggiano
  */
 class PropertiesInvocationHandler implements InvocationHandler {
-    private static final Method[] delegates = PropertiesManager.class.getMethods();
     private final StrSubstitutor substitutor;
     private final PropertiesManager propertiesManager;
 
@@ -95,4 +97,14 @@ class PropertiesInvocationHandler implements InvocationHandler {
         return substitutor.replace(value);
     }
 
+    private static Method[] findDelegates() {
+        List<Method> result = new LinkedList<Method>();
+        Method[] methods = PropertiesManager.class.getMethods();
+        for (Method m : methods)
+            if (m.getAnnotation(Delegate.class) != null)
+                result.add(m);
+        return result.toArray(new Method[result.size()]);
+    }
+
+    private static final Method[] delegates = findDelegates();
 }

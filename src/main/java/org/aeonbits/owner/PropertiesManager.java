@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
@@ -30,6 +32,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.aeonbits.owner.Config.LoadType;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
@@ -64,6 +68,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
 
+    @Retention(RUNTIME)
+    @Target(METHOD)
+    @interface Delegate {}
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, Map<?, ?>... imports) {
         this.clazz = clazz;
@@ -103,6 +110,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    @Delegate
     public void reload() {
         writeLock.lock();
         try {
@@ -115,11 +123,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    @Delegate
     @Override
     public void addReloadListener(ReloadListener listener) {
         reloadListeners.add(listener);
     }
 
+    @Delegate
     @Override
     public void removeReloadListener(ReloadListener listener) {
         reloadListeners.remove(listener);
@@ -177,6 +187,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    @Delegate
     @Override
     public void list(PrintStream out) {
         readLock.lock();
@@ -187,6 +198,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    @Delegate
     @Override
     public void list(PrintWriter out) {
         readLock.lock();
@@ -197,6 +209,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    @Delegate
+    @Override
     public String setProperty(String key, String value) {
         writeLock.lock();
         try {
@@ -207,6 +221,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    @Delegate
+    @Override
     public String removeProperty(String key) {
         writeLock.lock();
         try {
@@ -216,6 +232,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    @Delegate
+    @Override
     public void clear() {
         writeLock.lock();
         try {
@@ -230,4 +248,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             this.proxy = proxy;
     }
 
+    @Delegate
+    @Override
+    public String toString() {
+        readLock.lock();
+        try {
+            return properties.toString();
+        } finally {
+            readLock.unlock();
+        }
+    }
 }
