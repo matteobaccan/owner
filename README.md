@@ -897,11 +897,12 @@ CHANGELOG
 ---------
 ### 1.0.4 (under development)
 
+ * toString() method can be invoked on the Config object to get some useful text for debugging. See [#33][issue-33].
  * Hot reload for file based sources (work in progress). See Issue [#15][issue-15].
  * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure: 
    setProperty, removeProperty, clear. See Issue [#31][issue-31].
- * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and - in future - all 
-   the methods giving access to the underlying properties structure.
+ * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and other methods
+   giving read access to the underlying properties structure.
  * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf]. At the 
    current time I am thinking to merge this interface with `Mutable`, before releasing, but that reloading() is a 
    different operation and purpose than programmatically alter things... so for now, it's here.
@@ -912,6 +913,7 @@ CHANGELOG
  * Website code snippets now have syntax highlighting. Thanks [ming13][].
  * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together.
  
+  [issue-33]: https://github.com/lviggiano/owner/issues/33
   [issue-17]: https://github.com/lviggiano/owner/issues/17
   [issue-20]: https://github.com/lviggiano/owner/issues/20
   [issue-31]: https://github.com/lviggiano/owner/issues/31
