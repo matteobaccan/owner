@@ -695,7 +695,7 @@ public interface SampleConfig extends Config {
   [df]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.DisableFeature.html
 
 
-### DEBUGGING AID
+### DEBUGGING FACILITIES
 
 There are some debugging facilities that are available in Properties files that we wanted to keep in the OWNER API.
 
