@@ -17,6 +17,7 @@ import org.aeonbits.owner.event.ReloadListener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -176,12 +177,28 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             inputStream.close();
     }
 
-    String getProperty(String key) {
-        if (syncHotReload != null)
-            syncHotReload.checkAndReload(lastLoadTime);
+    @Delegate
+    @Override
+    public String getProperty(String key) {
         readLock.lock();
         try {
             return properties.getProperty(key);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    void syncReloadCheck() {
+        if (syncHotReload != null)
+            syncHotReload.checkAndReload(lastLoadTime);
+    }
+
+    @Delegate
+    @Override
+    public String getProperty(String key, String defaultValue) {
+        readLock.lock();
+        try {
+            return properties.getProperty(key, defaultValue);
         } finally {
             readLock.unlock();
         }
@@ -204,6 +221,17 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         readLock.lock();
         try {
             properties.list(out);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Delegate
+    @Override
+    public void store(OutputStream out, String comments) throws IOException {
+        readLock.lock();
+        try {
+            properties.store(out, comments);
         } finally {
             readLock.unlock();
         }

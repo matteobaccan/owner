@@ -48,6 +48,7 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {
+        propertiesManager.syncReloadCheck();
         Method delegate = getDelegateMethod(invokedMethod);
         if (delegate != null)
             return delegate(proxy, delegate, args);
