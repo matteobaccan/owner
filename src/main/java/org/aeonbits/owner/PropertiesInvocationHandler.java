@@ -13,12 +13,13 @@ import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.Key;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.convert;
-import static org.aeonbits.owner.DelegatedMethods.delegableMethods;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.Util.isFeatureDisabled;
 
@@ -34,6 +35,7 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
  * @author Luigi R. Viggiano
  */
 class PropertiesInvocationHandler implements InvocationHandler {
+    private static final Method[] delegates = PropertiesManager.class.getMethods();
     private final StrSubstitutor substitutor;
     private final PropertiesManager propertiesManager;
 
@@ -44,10 +46,33 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {
-        for (DelegatedMethods delegableMethod : delegableMethods())
-            if (delegableMethod.matches(invokedMethod))
-                return delegableMethod.delegate(propertiesManager, args);
+        Method delegate = getDelegateMethod(invokedMethod);
+        if (delegate != null)
+            return delegate(proxy, delegate, args);
+
         return resolveProperty(invokedMethod, args);
+    }
+
+    private Object delegate(Object proxy, Method delegate, Object[] args) throws Throwable {
+        try {
+            propertiesManager.setProxy(proxy);
+            return delegate.invoke(propertiesManager, args);
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException();
+        }
+    }
+
+    private Method getDelegateMethod(Method invokedMethod) {
+        for (Method delegate : delegates)
+            if (equals(invokedMethod, delegate))
+                return delegate;
+        return null;
+    }
+
+    private boolean equals(Method a, Method b) {
+        return a.getName().equals(b.getName())
+                && a.getReturnType().equals(b.getReturnType())
+                && Arrays.equals(a.getParameterTypes(), b.getParameterTypes());
     }
 
     private Object resolveProperty(Method method, Object... args) {

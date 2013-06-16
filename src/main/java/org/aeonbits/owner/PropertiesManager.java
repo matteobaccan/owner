@@ -12,6 +12,8 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.event.ReloadEvent;
+import org.aeonbits.owner.event.ReloadListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +21,9 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -56,6 +61,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final ConfigURLStreamHandler handler;
 
     private long lastLoadTime;
+    private List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
+    private Object proxy;
 
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, Map<?, ?>... imports) {
@@ -101,9 +108,21 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             clear();
             load();
+            for (ReloadListener listener : reloadListeners)
+                listener.reloadPerformed(new ReloadEvent(proxy));
         } finally {
             writeLock.unlock();
         }
+    }
+
+    @Override
+    public void addReloadListener(ReloadListener listener) {
+        reloadListeners.add(listener);
+    }
+
+    @Override
+    public void removeReloadListener(ReloadListener listener) {
+        reloadListeners.remove(listener);
     }
 
     Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
@@ -205,4 +224,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             writeLock.unlock();
         }
     }
+
+    public void setProxy(Object proxy) {
+        if (this.proxy == null)
+            this.proxy = proxy;
+    }
+
 }

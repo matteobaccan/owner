@@ -9,10 +9,18 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.event.ReloadEvent;
+import org.aeonbits.owner.event.ReloadListener;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -21,13 +29,18 @@ import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Luigi R. Viggiano
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ReloadTest {
     private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
     private static File target;
+    @Mock ReloadListener listener;
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
@@ -48,7 +61,6 @@ public class ReloadTest {
 
     @Test
     public void testReload() throws Throwable {
-
         ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class);
 
         assertEquals(Integer.valueOf(18), cfg.minimumAge());
@@ -84,6 +96,42 @@ public class ReloadTest {
     @After
     public void after() throws Throwable {
         target.delete();
+    }
+
+    @Test
+    public void testReloadListener() throws Throwable {
+        ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class);
+        cfg.addReloadListener(listener);
+        cfg.reload();
+        cfg.reload();
+        cfg.reload();
+        verify(listener, times(3)).reloadPerformed(argThat(isReloadListnerWithSource(cfg)));
+    }
+
+    @Test
+    public void testReloadListenerRemoved() throws Throwable {
+        ReloadableConfig cfg = ConfigFactory.create(ReloadableConfig.class);
+        cfg.addReloadListener(listener);
+        cfg.reload();
+        cfg.reload();
+        cfg.removeReloadListener(listener);
+        cfg.reload();
+        verify(listener, times(2)).reloadPerformed(argThat(isReloadListnerWithSource(cfg)));
+    }
+
+    private Matcher<ReloadEvent> isReloadListnerWithSource(final ReloadableConfig cfg) {
+        return new BaseMatcher<ReloadEvent>() {
+            @Override
+            public boolean matches(Object o) {
+                ReloadEvent given = (ReloadEvent) o;
+                return given.getSource() == cfg;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("does not match");
+            }
+        };
     }
 
 }

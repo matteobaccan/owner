@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.event.ReloadListener;
+
 /**
  * <p>Allows a <tt>Config</tt> object to implement the reloading of the properties at runtime.</p>
  *
@@ -47,4 +49,16 @@ public interface Reloadable {
      * @since 1.0.4
      */
     void reload();
+
+    /**
+     * Add a ReloadListener.
+     * @param listener the listener to be added
+     */
+    void addReloadListener(ReloadListener listener);
+
+    /**
+     * Remove a ReloadListener.
+     * @param listener the listener to be removed
+     */
+    void removeReloadListener(ReloadListener listener);
 }
