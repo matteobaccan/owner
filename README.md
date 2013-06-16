@@ -697,6 +697,36 @@ public interface SampleConfig extends Config {
 
 ### DEBUGGING AID
 
+There are some debugging facilities that are available in Properties files that we wanted to keep in the OWNER API.
+
+#### The toString() method
+
+The `toString()` method is helpful to see the content of a Config object using a log statement:
+
+```java
+interface MyConfig extends Config {
+    @Key("max.threads")
+    @DefaultValue("25")
+    int maxThreads();
+
+    @Key("max.folders")
+    @DefaultValue("99")
+    int maxFolders();
+
+    @Key("default.name")
+    @DefaultValue("untitled")
+    String defaultName();
+}
+
+public static void main(String[] args) {
+    MyConfig cfg = ConfigFactory.create(MyConfig.class);
+    System.out.println("cfg = " + cfg);
+    // output will be: "cfg = {default.name=untitled, max.folders=99, max.threads=25}"
+}
+```
+
+#### The list() methods
+
 In your *mapping interfaces* you can optionally define one of the following methods that may be convenient for
 debugging:
 
@@ -705,7 +735,8 @@ void list(PrintStream out);
 void list(PrintWriter out);
 ```
 
-Those two methods were available in Java [Properties][properties] to help the debugging process, so here we kept it.
+Those two methods were available in Java [Properties][properties] to help the debugging process.
+You can implement [Accessible][accessible-intf] that defines the above methods, or just add them manually.
 
 You can use them to print the resolved properties (and eventual overrides that may occur when using the
 `LoadType.MERGE`):
@@ -713,30 +744,28 @@ You can use them to print the resolved properties (and eventual overrides that m
 ```java
 public interface SampleConfig extends Config {
     @Key("server.http.port")
+    @DefaultValue("80")
     int httpPort();
 
-    void list(PrintStream out);
+    void list(PrintStream out); // manually defined
 }
 
 ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
 cfg.list(System.out);
 ```
 
-These two methods are *not* specified into `Config` interface, so you don't have them available in your *mapping
-interfaces* by default. This is done by purpose, to leave to the programmer the liberty to have this feature or not,
-keeping your mapping interface hiding its internal details.
-
-If you want to have those methods - or just one of them - in all of your *mapping interfaces* you can define an
-intermediate adapter interface like the following:
+You can also do the same implementing the Accessible interface, that declares the `list()` methods for you:
 
 ```java
-public interface MyConfig extends Config {
-    void list(PrintStream out);
-    void list(PrintWriter out);
+public interface SampleConfig extends Config, Accessible {
+    @Key("server.http.port")
+    @DefaultValue("80")
+    int httpPort();
 }
-```
 
-then, you'll extend your mapping interfaces from `MyConfig` instead than using `Config` directly.
+ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+cfg.list(System.out); // list() is defined in Accessible interface
+```
 
 JAVADOCS
 --------
