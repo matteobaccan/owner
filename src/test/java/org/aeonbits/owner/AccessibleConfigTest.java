@@ -11,6 +11,8 @@ package org.aeonbits.owner;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -18,6 +20,8 @@ import java.io.StringWriter;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author luigi
@@ -56,6 +60,39 @@ public class AccessibleConfigTest {
         config.list(new PrintWriter(result, true));
 
         assertEquals(expected.toString(), result.toString());
+    }
+
+    @Test
+    public void testStore() throws IOException {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        File tmp = File.createTempFile("owner-", ".tmp");
+        cfg.store(new FileOutputStream(tmp), "no comments");
+        assertTrue(tmp.exists());
+        assertTrue(tmp.length() > 0);
+    }
+
+    @Test
+    public void testGetProperty() throws IOException {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        assertEquals("Good Morning", cfg.getProperty("salutation.text"));
+    }
+
+    @Test
+    public void testGetPropertyThatDoesNotExists() throws IOException {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        assertNull(cfg.getProperty("foo.bar"));
+    }
+
+    @Test
+    public void testGetPropertyWithDefault() throws IOException {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        assertEquals("Good Morning", cfg.getProperty("salutation.text", "Hello"));
+    }
+
+    @Test
+    public void testGetPropertyWithDefaultThatDoesNotExists() throws IOException {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        assertEquals("Hello", cfg.getProperty("salutation.text.nonexistent", "Hello"));
     }
 
 }

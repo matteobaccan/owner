@@ -112,6 +112,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void reload() {
         writeLock.lock();
         try {
