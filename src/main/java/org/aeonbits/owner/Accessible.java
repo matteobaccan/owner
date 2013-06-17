@@ -96,5 +96,4 @@ public interface Accessible {
      */
     String getProperty(String key, String defaultValue);
 
-
 }

@@ -309,5 +309,4 @@ public interface Config {
         Class<? extends Tokenizer> value();
     }
 
-
 }
