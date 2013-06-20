@@ -33,10 +33,10 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Luigi R. Viggiano
  */
-public class AutoReloadTest {
+public class SyncAutoReloadTest {
 
     private static final String propertyFileName = "AutoReloadConfig.properties";
-    private static final String jarFile = "target/test-resources/AutoReloadTest.jar";
+    private static final String jarFile = "target/test-resources/SyncAutoReloadTest.jar";
 
     private static final String spec = "file:target/test-resources/" + propertyFileName;
     private static final String specJar = "jar:file:" + jarFile + "!/" + propertyFileName;
