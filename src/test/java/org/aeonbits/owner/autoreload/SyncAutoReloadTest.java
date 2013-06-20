@@ -76,14 +76,14 @@ public class SyncAutoReloadTest {
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
-        save(target, new Properties() {{        // file updated, the current time is set in target.lastModified().
+        save(target, new Properties() {{        // file updated, the update time is reflected in target.lastModified().
             setProperty("someValue", "20");
         }});
 
-        time.elapse(4, SECONDS);                             // make 4 seconds elapse.
+        time.elapse(4, SECONDS);                             // make 4 seconds elapse for the test.
         assertEquals(Integer.valueOf(10), cfg.someValue());  // change is not reflected yet since interval is 5 secs.
 
-        time.elapse(1, SECONDS);                             // another second is elapsed
+        time.elapse(1, SECONDS);                             // another second is elapsed for the test.
         assertEquals(Integer.valueOf(20), cfg.someValue());  // the changed file should be reloaded now.
     }
 
