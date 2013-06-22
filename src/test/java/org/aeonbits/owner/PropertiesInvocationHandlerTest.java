@@ -18,6 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -36,12 +37,14 @@ public class PropertiesInvocationHandlerTest {
     @Mock
     private Object proxy;
     private PropertiesInvocationHandler handler;
+    @Mock
+    private ScheduledExecutorService scheduler;
 
     interface Dummy extends Config {}
 
     @Before
     public void before() {
-        PropertiesManager loader = new PropertiesManager(Dummy.class, properties);
+        PropertiesManager loader = new PropertiesManager(Dummy.class, properties, scheduler);
         handler = new PropertiesInvocationHandler(loader);
     }
 

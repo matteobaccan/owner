@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class SyncAutoReloadTest {
 
-    private static final String propertyFileName = "AutoReloadConfig.properties";
+    private static final String propertyFileName = "SyncAutoReloadConfig.properties";
     private static final String jarFile = "target/test-resources/SyncAutoReloadTest.jar";
 
     private static final String spec = "file:target/test-resources/" + propertyFileName;
@@ -60,7 +60,7 @@ public class SyncAutoReloadTest {
 
     @Sources(spec)
     @HotReload(5)
-    interface AutoReloadConfig extends Config {
+    interface SyncAutoReloadConfig extends Config {
         Integer someValue();
     }
 
@@ -73,7 +73,7 @@ public class SyncAutoReloadTest {
         assertTrue(success);
         time.setTime(target.lastModified());                   // set the time for this test to match the file creation.
 
-        AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
+        SyncAutoReloadConfig cfg = ConfigFactory.create(SyncAutoReloadConfig.class);
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
         save(target, new Properties() {{        // file updated, the update time is reflected in target.lastModified().

@@ -9,6 +9,9 @@
 package org.aeonbits.owner;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,6 +21,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -26,7 +30,11 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author luigi
  */
+@RunWith(MockitoJUnitRunner.class)
 public class AccessibleConfigTest {
+    @Mock
+    private ScheduledExecutorService scheduler;
+
     public static interface AccessibleConfig extends Config, Accessible {
         @DefaultValue("Bohemian Rapsody - Queen")
         String favoriteSong();
@@ -39,7 +47,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintStream() throws IOException {
         ByteArrayOutputStream expected = new ByteArrayOutputStream();
-        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties());
+        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler);
         manager.load().list(new PrintStream(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);
@@ -52,7 +60,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintWriter() throws IOException {
         StringWriter expected = new StringWriter();
-        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties());
+        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler);
         manager.load().list(new PrintWriter(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);

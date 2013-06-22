@@ -9,25 +9,29 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.Config.HotReloadType;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;
 import org.aeonbits.owner.Config.Sources;
 
+import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.Util.now;
 
 /**
  * @author Luigi R. Viggiano
  */
-class SyncHotReload {
+class HotReloadLogic {
     private final ConfigURLStreamHandler handler;
     private final PropertiesManager manager;
     private final long interval;
     private final Sources sources;
     private final LoadType loadType;
+    private final HotReloadType type;
     private volatile long lastCheckTime = 0L;
 
-    SyncHotReload(Class<? extends Config> clazz, ConfigURLStreamHandler handler, PropertiesManager manager) {
+    HotReloadLogic(Class<? extends Config> clazz, ConfigURLStreamHandler handler, PropertiesManager manager) {
         this.handler = handler;
         this.manager = manager;
         sources = clazz.getAnnotation(Sources.class);
@@ -35,7 +39,8 @@ class SyncHotReload {
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        interval = (hotReload != null) ? hotReload.unit().toMillis(hotReload.value()) : 0;
+        type = hotReload.type();
+        interval = hotReload.unit().toMillis(hotReload.value());
     }
 
     void init(long lastLoadTime) {
@@ -49,7 +54,7 @@ class SyncHotReload {
     }
 
     private synchronized boolean needsReload(long lastLoadTime) {
-        if (manager.loading) return false;
+        if (manager.loading || ! initialized()) return false;
 
         long now = now();
         if (now < lastCheckTime + interval)
@@ -62,4 +67,16 @@ class SyncHotReload {
         }
     }
 
+    private boolean initialized() {
+        return lastCheckTime > 0;
+    }
+
+    boolean isAsync() {
+        return type == ASYNC;
+    }
+
+
+    boolean isSync() {
+        return type == SYNC;
+    }
 }

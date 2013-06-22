@@ -23,6 +23,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesManager.close;
 import static org.aeonbits.owner.PropertiesManager.getInputStream;
@@ -199,7 +200,19 @@ public interface Config {
      *      &#64;HotReload(500, unit = TimeUnit.MILLISECONDS);  // will check for file changes every 500 milliseconds.
      *      &#64;Sources("file:foo/bar/baz.properties")
      *      interface MyConfig extends Config { ... }
+     *
+     *      &#64;HotReload(type=HotReloadType.ASYNC);  // will use ASYNC reload type: will span a separate thread
+     *                                                 // that will check for the file change every 5 seconds (default).
+     *      &#64;Sources("file:foo/bar/baz.properties")
+     *      interface MyConfig extends Config { ... }
+     *
+     *      &#64;HotReload(2, type=HotReloadType.ASYNC);  // will use ASYNC reload type and will check every 2 seconds.
+     *      &#64;Sources("file:foo/bar/baz.properties")
+     *      interface MyConfig extends Config { ... }
      * </pre>
+     *
+     * <p>
+     * To intercept the {@link org.aeonbits.owner.event.ReloadEvent} see {@link Reloadable#addReloadListener(org.aeonbits.owner.event.ReloadListener)}.
      *
      * @since 1.0.4
      */
@@ -225,6 +238,34 @@ public interface Config {
          * will probably not be supported by the underlying filesystem.
          */
         TimeUnit unit() default SECONDS;
+
+        /**
+         * The type of HotReload to use. It can be:
+         *
+         * <p>
+         * {@link HotReloadType#SYNC Synchronous}: the configuration file is checked when a method is invoked on the
+         * config object. So if the config object is not used for some time, the configuration doesn't get reloaded,
+         * until its next usage. i.e. until next method invocation.
+         * <p>
+         * {@link HotReloadType#ASYNC}: the configuration file is checked by a background thread despite the fact that
+         * the config object is used or not.
+         */
+        HotReloadType type() default SYNC;
+    }
+
+    /**
+     * Allows to specify which type of HotReload should be applied.
+     */
+    enum HotReloadType {
+        /**
+         * The hot reload will happen when one of the methods is invoked on the <tt>Config</tt> class.
+         */
+        SYNC,
+
+        /**
+         * The hot reload will happen in background at the specified interval.
+         */
+        ASYNC
     }
 
     /**

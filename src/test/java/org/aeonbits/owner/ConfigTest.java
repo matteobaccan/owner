@@ -10,11 +10,15 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Sources;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,10 +29,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * TODO: maybe splitting this class in several simpler ones would help.
  * @author Luigi R. Viggiano
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ConfigTest {
+
+    @Mock
+    private ScheduledExecutorService scheduler;
 
     public static interface SampleConfig extends Config {
 
@@ -72,7 +79,7 @@ public class ConfigTest {
                 new SystemVariablesExpander());
         ConfigURLStreamHandler spy = spy(handler);
 
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler);
 
         manager.doLoad(spy);
         URL expected =
@@ -82,7 +89,7 @@ public class ConfigTest {
 
     @Test
     public void shouldReturnThePropertiesForTheClass() {
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties());
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler);
         Properties props = manager.load();
         assertNotNull(props);
         assertEquals("testValue", props.getProperty("testKey"));
@@ -146,7 +153,7 @@ public class ConfigTest {
                 return super.openConnection(url);
             }
         };
-        PropertiesManager manager = new PropertiesManager(SampleConfigWithSource.class, new Properties());
+        PropertiesManager manager = new PropertiesManager(SampleConfigWithSource.class, new Properties(), scheduler);
         manager.doLoad(handler);
         URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
                 handler);

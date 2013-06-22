@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -60,7 +61,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private final Sources sources;
     private final LoadType loadType;
-    private final SyncHotReload syncHotReload;
+    private HotReloadLogic hotReloadLogic = null;
 
     volatile boolean loading = false;
     private final ConfigURLStreamHandler handler;
@@ -71,9 +72,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Retention(RUNTIME)
     @Target(METHOD)
-    @interface Delegate {}
+    @interface Delegate {
+    }
 
-    PropertiesManager(Class<? extends Config> clazz, Properties properties, Map<?, ?>... imports) {
+    PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
+                      Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.imports = imports;
@@ -84,11 +87,22 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
+        setupHotReload(clazz, scheduler);
+    }
+
+    private void setupHotReload(Class<? extends Config> clazz, ScheduledExecutorService scheduler) {
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        if (sources != null && hotReload != null)
-            syncHotReload = new SyncHotReload(clazz, handler, this);
-        else
-            syncHotReload = null;
+        if (sources != null && hotReload != null) {
+            hotReloadLogic = new HotReloadLogic(clazz, handler, this);
+
+            if (hotReloadLogic.isAsync())
+                scheduler.scheduleAtFixedRate(new Runnable() {
+                    @Override
+                    public void run() {
+                        hotReloadLogic.checkAndReload(lastLoadTime);
+                    }
+                }, hotReload.value(), hotReload.value(), hotReload.unit());
+        }
     }
 
     Properties load() {
@@ -100,8 +114,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             Properties loadedFromFile = doLoad(handler);
             merge(properties, loadedFromFile);
             lastLoadTime = now();
-            if (syncHotReload != null)
-                syncHotReload.init(lastLoadTime);
+            if (hotReloadLogic != null)
+                hotReloadLogic.init(lastLoadTime);
             return properties;
         } catch (IOException e) {
             throw unsupported(e, "Properties load failed");
@@ -190,8 +204,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     void syncReloadCheck() {
-        if (syncHotReload != null)
-            syncHotReload.checkAndReload(lastLoadTime);
+        if (hotReloadLogic != null && hotReloadLogic.isSync())
+            hotReloadLogic.checkAndReload(lastLoadTime);
     }
 
     @Delegate
