@@ -22,7 +22,6 @@ import static org.aeonbits.owner.Util.now;
 class SyncHotReload {
     private final ConfigURLStreamHandler handler;
     private final PropertiesManager manager;
-    private final HotReload hotReload;
     private final long interval;
     private final Sources sources;
     private final LoadType loadType;
@@ -35,7 +34,7 @@ class SyncHotReload {
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        hotReload = clazz.getAnnotation(HotReload.class);
+        HotReload hotReload = clazz.getAnnotation(HotReload.class);
         interval = (hotReload != null) ? hotReload.unit().toMillis(hotReload.value()) : 0;
     }
 
