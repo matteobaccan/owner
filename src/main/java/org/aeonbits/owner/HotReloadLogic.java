@@ -33,34 +33,23 @@ class HotReloadLogic {
     private final HotReloadType type;
     private volatile long lastCheckTime = 0L;
     private boolean initialized = false;
-    private List<WatchableResource> watchableResources = new ArrayList<WatchableResource>();
+    private List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
 
-    private static class WatchableResource {
-        private final URL url;
+    private static class WatchableFile {
+        private final File file;
         private long lastModifiedTime;
 
-        WatchableResource(URL url) {
-            this.url = url;
-            this.lastModifiedTime = getLastModifiedTime(url);
+        WatchableFile(File file) {
+            this.file = file;
+            this.lastModifiedTime = file.lastModified();
         }
 
         public boolean isChanged() {
-            long lastModifiedTimeNow = getLastModifiedTime(url);
+            long lastModifiedTimeNow = file.lastModified();
             boolean changed = lastModifiedTime != lastModifiedTimeNow;
             if (changed)
                 lastModifiedTime = lastModifiedTimeNow;
             return changed;
-        }
-
-        private static long getLastModifiedTime(URL url) {
-            File file = Util.fileFromURL(url);
-            if (file == null)
-                return 0;
-            return file.lastModified();
-        }
-
-        public static boolean isWatchable(URL url) {
-            return Util.isFileURL(url);
         }
     }
 
@@ -78,8 +67,9 @@ class HotReloadLogic {
         for (String value : values)
             try {
                 URL url = new URL(null, value, handler);
-                if (WatchableResource.isWatchable(url))
-                    watchableResources.add(new WatchableResource(url));
+                File file;
+                if ((file = Util.fileFromURL(url)) != null)
+                    watchableFiles.add(new WatchableFile(file));
             } catch (MalformedURLException e) {
                 ignore();
             }
@@ -105,7 +95,7 @@ class HotReloadLogic {
             return false;
 
         try {
-            for (WatchableResource resource : watchableResources)
+            for (WatchableFile resource : watchableFiles)
                 if (resource.isChanged())
                     return true;
             return false;

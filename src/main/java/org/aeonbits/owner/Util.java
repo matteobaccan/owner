@@ -118,8 +118,4 @@ abstract class Util {
         return null;
     }
 
-    public static boolean isFileURL(URL url) {
-        return "file".equalsIgnoreCase(url.getProtocol()) || "jar".equalsIgnoreCase(url.getProtocol());
-    }
-
 }
