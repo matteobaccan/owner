@@ -31,6 +31,7 @@ public class AutoReloadExample {
     @Sources(spec)
     @HotReload(1)
     interface AutoReloadConfig extends Config {
+        @DefaultValue("5")
         Integer someValue();
     }
 
