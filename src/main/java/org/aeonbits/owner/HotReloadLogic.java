@@ -10,13 +10,17 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.HotReloadType;
-import org.aeonbits.owner.Config.LoadPolicy;
-import org.aeonbits.owner.Config.LoadType;
 import org.aeonbits.owner.Config.Sources;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
-import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.now;
 
 /**
@@ -26,34 +30,74 @@ class HotReloadLogic {
     private final ConfigURLStreamHandler handler;
     private final PropertiesManager manager;
     private final long interval;
-    private final Sources sources;
-    private final LoadType loadType;
     private final HotReloadType type;
     private volatile long lastCheckTime = 0L;
+    private boolean initialized = false;
+    private List<WatchableResource> watchableResources = new ArrayList<WatchableResource>();
+
+    private static class WatchableResource {
+        private final URL url;
+        private long lastModifiedTime;
+
+        WatchableResource(URL url) {
+            this.url = url;
+            this.lastModifiedTime = getLastModifiedTime(url);
+        }
+
+        public boolean isChanged() {
+            long lastModifiedTimeNow = getLastModifiedTime(url);
+            boolean changed = lastModifiedTime != lastModifiedTimeNow;
+            if (changed)
+                lastModifiedTime = lastModifiedTimeNow;
+            return changed;
+        }
+
+        private static long getLastModifiedTime(URL url) {
+            File file = Util.fileFromURL(url);
+            if (file == null)
+                return 0;
+            return file.lastModified();
+        }
+
+        public static boolean isWatchable(URL url) {
+            return Util.isFileURL(url);
+        }
+    }
 
     HotReloadLogic(Class<? extends Config> clazz, ConfigURLStreamHandler handler, PropertiesManager manager) {
         this.handler = handler;
         this.manager = manager;
-        sources = clazz.getAnnotation(Sources.class);
-        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
-        loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
-
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
         type = hotReload.type();
         interval = hotReload.unit().toMillis(hotReload.value());
+        setupWatchableResources(clazz.getAnnotation(Sources.class));
     }
 
-    void init(long lastLoadTime) {
-        if (lastCheckTime == 0L)
+    private void setupWatchableResources(Sources sources) {
+        String[] values = sources.value();
+        for (String value : values)
+            try {
+                URL url = new URL(null, value, handler);
+                if (WatchableResource.isWatchable(url))
+                    watchableResources.add(new WatchableResource(url));
+            } catch (MalformedURLException e) {
+                ignore();
+            }
+    }
+
+    synchronized void init(long lastLoadTime) {
+        if (! initialized) {
             lastCheckTime = lastLoadTime;
+            initialized = true;
+        }
     }
 
-    void checkAndReload(long lastLoadTime) {
-        if (needsReload(lastLoadTime))
+    void checkAndReload() {
+        if (needsReload())
             manager.reload();
     }
 
-    private synchronized boolean needsReload(long lastLoadTime) {
+    private synchronized boolean needsReload() {
         if (manager.loading || ! initialized()) return false;
 
         long now = now();
@@ -61,7 +105,10 @@ class HotReloadLogic {
             return false;
 
         try {
-            return loadType.needsReload(sources, handler, lastLoadTime);
+            for (WatchableResource resource : watchableResources)
+                if (resource.isChanged())
+                    return true;
+            return false;
         } finally {
             lastCheckTime = now;
         }

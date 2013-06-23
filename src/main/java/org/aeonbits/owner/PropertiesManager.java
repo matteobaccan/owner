@@ -99,7 +99,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 scheduler.scheduleAtFixedRate(new Runnable() {
                     @Override
                     public void run() {
-                        hotReloadLogic.checkAndReload(lastLoadTime);
+                        hotReloadLogic.checkAndReload();
                     }
                 }, hotReload.value(), hotReload.value(), hotReload.unit());
         }
@@ -205,7 +205,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     void syncReloadCheck() {
         if (hotReloadLogic != null && hotReloadLogic.isSync())
-            hotReloadLogic.checkAndReload(lastLoadTime);
+            hotReloadLogic.checkAndReload();
     }
 
     @Delegate

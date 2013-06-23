@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Documented;
@@ -155,29 +154,8 @@ public interface Config {
             }
         };
 
-        private static long getLastModifiedTime(URL url) {
-            File file = Util.fileFromURL(url);
-            if (file == null)
-                return 0;
-            return file.lastModified();
-        }
-
         abstract Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException;
 
-        boolean needsReload(Sources sources, ConfigURLStreamHandler handler, long lastCheckTime) {
-            String[] values = sources.value();
-            for (String source : values) {
-                try {
-                    URL url = new URL(null, source, handler);
-                    long lastModifiedTime = getLastModifiedTime(url);
-                    if (lastModifiedTime >= lastCheckTime)
-                        return true;
-                } catch (MalformedURLException e) {
-                    ignore();
-                }
-            }
-            return false;
-        }
     }
 
     /**

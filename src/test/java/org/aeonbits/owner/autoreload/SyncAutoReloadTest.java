@@ -61,6 +61,7 @@ public class SyncAutoReloadTest {
     @Sources(spec)
     @HotReload(5)
     interface SyncAutoReloadConfig extends Config {
+        @DefaultValue("5")
         Integer someValue();
     }
 
@@ -120,6 +121,28 @@ public class SyncAutoReloadTest {
         assertEquals(Integer.valueOf(20), cfg.someValue());  // the changed file should be reloaded now.
     }
 
+    @Test
+    public void testAutoReloadWhenFileGetsDeleted() throws IOException, InterruptedException {
+        save(target, new Properties() {{
+            setProperty("someValue", "10");
+        }});
+        boolean success = target.setLastModified(target.lastModified() - 15000); // make the file 15 seconds older.
+        assertTrue(success);
+        time.setTime(target.lastModified());                   // set the time for this test to match the file creation.
+
+        SyncAutoReloadConfig cfg = ConfigFactory.create(SyncAutoReloadConfig.class);
+        assertEquals(Integer.valueOf(10), cfg.someValue());
+
+        boolean deleted = target.delete();
+        assertTrue(deleted);
+
+        time.elapse(4, SECONDS);                             // make 4 seconds elapse for the test.
+        assertEquals(Integer.valueOf(10), cfg.someValue());  // change is not reflected yet since interval is 5 secs.
+
+        time.elapse(1, SECONDS);                             // another second is elapsed for the test.
+        assertEquals(Integer.valueOf(5), cfg.someValue());   // the deleted file should be noted now,
+                                                             // the default value is returned.
+    }
 
     @After
     public void after() {
