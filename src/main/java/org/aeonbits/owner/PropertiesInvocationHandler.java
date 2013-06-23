@@ -8,10 +8,6 @@
 
 package org.aeonbits.owner;
 
-
-import org.aeonbits.owner.Config.DefaultValue;
-import org.aeonbits.owner.Config.Key;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,9 +24,9 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
 
 /**
  * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
- * it to a property value from a property file, or a {@link DefaultValue} specified in method annotation.
+ * it to a property value from a property file, or a {@link Config.DefaultValue} specified in method annotation.
  * <p/>
- * The {@link Key} annotation can be used to override default mapping between method names and property names.
+ * The {@link Config.Key} annotation can be used to override default mapping between method names and property names.
  * <p/>
  * Automatic conversion is handled between the property value and the return type expected by the method of the
  * delegate.

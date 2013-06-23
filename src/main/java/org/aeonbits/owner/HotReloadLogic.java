@@ -67,8 +67,8 @@ class HotReloadLogic {
         for (String value : values)
             try {
                 URL url = new URL(null, value, handler);
-                File file;
-                if ((file = Util.fileFromURL(url)) != null)
+                File file = Util.fileFromURL(url);
+                if (file != null)
                     watchableFiles.add(new WatchableFile(file));
             } catch (MalformedURLException e) {
                 ignore();
@@ -82,13 +82,13 @@ class HotReloadLogic {
         }
     }
 
-    void checkAndReload() {
+    synchronized void checkAndReload() {
         if (needsReload())
             manager.reload();
     }
 
-    private synchronized boolean needsReload() {
-        if (manager.loading || ! initialized()) return false;
+    private boolean needsReload() {
+        if (manager.isLoading() || ! initialized()) return false;
 
         long now = now();
         if (now < lastCheckTime + interval)

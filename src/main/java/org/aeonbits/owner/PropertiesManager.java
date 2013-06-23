@@ -63,7 +63,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final LoadType loadType;
     private HotReloadLogic hotReloadLogic = null;
 
-    volatile boolean loading = false;
+    private volatile boolean loading = false;
     private final ConfigURLStreamHandler handler;
 
     private long lastLoadTime;
@@ -300,5 +300,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         } finally {
             readLock.unlock();
         }
+    }
+
+    boolean isLoading() {
+        return loading;
     }
 }
