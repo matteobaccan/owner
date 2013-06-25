@@ -7,6 +7,7 @@ Jenkins: [![Build Status](https://aeonbits.ci.cloudbees.com/job/owner-api/badge/
 Travis:  [![Build Status](https://travis-ci.org/lviggiano/owner.png?branch=master)](https://travis-ci.org/lviggiano/owner)
 
 [![Built with Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://owner.newinstance.it/maven-site/)
+[![Powered by Sonar](http://sheldon.dyndns.tv:9000/images/sonar.png)](http://sheldon.dyndns.tv:9000/dashboard/index/1)
 
 INTRODUCTION
 ------------
@@ -787,10 +788,11 @@ $ mvn install
 
 This will install OWNER jars in your local maven repository. Or, you can pick the jar files from the target directory.
 
-### Continuous Integration
+### Continuous Integration and Code Quality reports
 
-You can access latest builds reports from [Jenkins on CloudBees](https://aeonbits.ci.cloudbees.com/job/owner-api/)
-and on [Travis](https://travis-ci.org/lviggiano/owner).
+You can access latest builds and quality reports from [Jenkins](https://aeonbits.ci.cloudbees.com/job/owner-api/),
+ [Travis](https://travis-ci.org/lviggiano/owner) and
+ [Sonar](http://sheldon.dyndns.tv:9000/dashboard/index/org.aeonbits.owner:owner)
 
 MAVEN
 -----
