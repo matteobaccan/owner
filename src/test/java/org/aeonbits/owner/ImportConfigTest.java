@@ -46,4 +46,27 @@ public class ImportConfigTest {
         assertEquals("lime", cfg.bar()); // p1 prevails, so this is lime and not grapefruit
         assertEquals("blackberry", cfg.baz());
     }
+
+    interface ImportedPropertiesHaveHigherPriority extends Config {
+        Integer minAge();
+    }
+
+    @Test
+    public void testImportedPropertiesShouldOverrideSources() {
+        ImportedPropertiesHaveHigherPriority cfg = ConfigFactory.create(ImportedPropertiesHaveHigherPriority.class);
+        assertEquals(Integer.valueOf(18), cfg.minAge());
+
+        ImportedPropertiesHaveHigherPriority cfg2 = ConfigFactory.create(ImportedPropertiesHaveHigherPriority.class,
+                new Properties() {{
+                    setProperty("minAge", "21");
+                }},
+
+                new Properties() {{
+                    setProperty("minAge", "22");
+                }}
+
+        );
+
+        assertEquals(Integer.valueOf(21), cfg2.minAge());
+    }
 }

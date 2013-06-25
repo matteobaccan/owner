@@ -40,10 +40,10 @@ abstract class PropertiesLoader {
     static Properties load(Class<? extends Config> clazz, Map<?, ?>... imports) {
         try {
             Properties props = defaults(clazz);
-            merge(props, reverse(imports));
             ConfigURLStreamHandler handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
             Properties loadedFromFile = doLoad(clazz, handler);
             merge(props, loadedFromFile);
+            merge(props, reverse(imports));
             return props;
         } catch (IOException e) {
             throw new RuntimeException(e);
