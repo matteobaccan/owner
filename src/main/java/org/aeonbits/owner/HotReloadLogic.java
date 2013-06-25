@@ -31,8 +31,7 @@ class HotReloadLogic {
     private final PropertiesManager manager;
     private final long interval;
     private final HotReloadType type;
-    private volatile long lastCheckTime = 0L;
-    private boolean initialized = false;
+    private volatile long lastCheckTime = now();
     private List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
 
     private static class WatchableFile {
@@ -75,20 +74,13 @@ class HotReloadLogic {
             }
     }
 
-    synchronized void init(long lastLoadTime) {
-        if (! initialized) {
-            lastCheckTime = lastLoadTime;
-            initialized = true;
-        }
-    }
-
     synchronized void checkAndReload() {
         if (needsReload())
             manager.reload();
     }
 
     private boolean needsReload() {
-        if (manager.isLoading() || ! initialized()) return false;
+        if (manager.isLoading()) return false;
 
         long now = now();
         if (now < lastCheckTime + interval)
@@ -104,14 +96,9 @@ class HotReloadLogic {
         }
     }
 
-    private boolean initialized() {
-        return lastCheckTime > 0;
-    }
-
     boolean isAsync() {
         return type == ASYNC;
     }
-
 
     boolean isSync() {
         return type == SYNC;

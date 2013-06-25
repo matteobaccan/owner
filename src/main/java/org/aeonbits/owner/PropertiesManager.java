@@ -41,7 +41,6 @@ import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
-import static org.aeonbits.owner.Util.now;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
 
@@ -66,7 +65,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private volatile boolean loading = false;
     private final ConfigURLStreamHandler handler;
 
-    private long lastLoadTime;
     private List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
 
@@ -113,9 +111,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             merge(properties, reverse(imports));
             Properties loadedFromFile = doLoad(handler);
             merge(properties, loadedFromFile);
-            lastLoadTime = now();
-            if (hotReloadLogic != null)
-                hotReloadLogic.init(lastLoadTime);
             return properties;
         } catch (IOException e) {
             throw unsupported(e, "Properties load failed");
