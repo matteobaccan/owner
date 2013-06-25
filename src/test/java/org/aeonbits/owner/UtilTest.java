@@ -68,6 +68,10 @@ public class UtilTest {
         p.store(new FileWriter(target), "saved for test");
     }
 
+    public static void delete(File target) throws IOException {
+        target.delete();
+    }
+
     public static void saveJar(File file, String entryName, Properties props) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         props.store(out, "saved for test");

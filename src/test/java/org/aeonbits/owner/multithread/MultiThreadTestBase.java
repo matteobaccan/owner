@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner.multithread;
 
+import org.aeonbits.owner.Config;
+
 import java.lang.Thread.State;
 import java.util.List;
 
@@ -32,25 +34,24 @@ abstract class MultiThreadTestBase {
             }
     }
 
-    protected void assertNoErrors(ThreadBase[]... args) throws Throwable {
-        for (ThreadBase[] threads : args)
-            for (int i = 0; i < threads.length; i++) {
-                ThreadBase thread = threads[i];
+    protected <T extends Config> void assertNoErrors(ThreadBase<T>[] threads) throws Throwable {
+        for (int i = 0; i < threads.length; i++) {
+            ThreadBase<T> thread = threads[i];
 
-                int errorCount = thread.errors.size();
+            int errorCount = thread.errors.size();
 
-                if (errorCount > 0)
-                    System.err.printf("There are %d exception collected by %s#%d\n", errorCount,
-                            thread.getClass().getName(), i);
+            if (errorCount > 0)
+                System.err.printf("There are %d exception collected by %s#%d\n", errorCount,
+                        thread.getClass().getName(), i);
 
-                List<Throwable> errors = thread.errors;
-                for (Throwable error : errors) {
-                    System.err.printf("%s#%d thrown an exception: %s\n", thread.getClass().getName(), i,
-                            error.getMessage());
-                    error.printStackTrace(System.err);
-                    throw error;
-                }
+            List<Throwable> errors = thread.errors;
+            for (Throwable error : errors) {
+                System.err.printf("%s#%d thrown an exception: %s\n", thread.getClass().getName(), i,
+                        error.getMessage());
+                error.printStackTrace(System.err);
+                throw error;
             }
+        }
     }
 
     void notifyAll(Object lock) {

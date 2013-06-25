@@ -22,13 +22,12 @@ abstract class ThreadBase<T extends Config> extends Thread implements MyCloneabl
     final T cfg;
     final Object lock;
     final int loops;
-    final List<Throwable> errors;
+    final List<Throwable> errors = new ArrayList<Throwable>();
 
     ThreadBase(T cfg, Object lock, int loops) {
         this.cfg = cfg;
         this.lock = lock;
         this.loops = loops;
-        this.errors = new ArrayList<Throwable>();
     }
 
     @Override

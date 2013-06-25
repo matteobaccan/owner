@@ -42,7 +42,6 @@ class PropertiesInvocationHandler implements InvocationHandler {
         this.substitutor = new StrSubstitutor(manager.load());
     }
 
-    @Override
     public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {
         propertiesManager.syncReloadCheck();
         Method delegate = getDelegateMethod(invokedMethod);

@@ -84,10 +84,10 @@ public class SpecialTypesTest {
         EnumType enumType();
 
         @DefaultValue("java.sql.Driver")
-        Class jdbcDriver();
+        Class<?> jdbcDriver();
 
         @DefaultValue("foo.bar.UnexistentClass")
-        Class nonExistentClass();
+        Class<?> nonExistentClass();
 
         @DefaultValue("foobar")
         Reference reference();
@@ -188,7 +188,7 @@ public class SpecialTypesTest {
     @Test
     public void testClassType() throws Throwable {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
-        Class driver = config.jdbcDriver();
+        Class<?> driver = config.jdbcDriver();
         assertNotNull(driver);
         assertEquals(Driver.class, driver);
     }
@@ -196,7 +196,7 @@ public class SpecialTypesTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testClassTypeWhenClassIsNotFound() throws Throwable {
         SpecialTypes config = ConfigFactory.create(SpecialTypes.class);
-        Class nonExistent = config.nonExistentClass();
+        Class<?> nonExistent = config.nonExistentClass();
         assertNull(nonExistent);
     }
 
