@@ -68,7 +68,7 @@ public class ImportConfigTest {
     }
 
     @Test
-    public void testThatImportedPropertiesHaveLowerPriorityThanPropertiesLoadedBySources() throws IOException {
+    public void testThatImportedPropertiesHaveHigherPriorityThanPropertiesLoadedBySources() throws IOException {
         File target = new File(new URL(spec).getFile());
 
         save(target, new Properties() {{
@@ -80,7 +80,7 @@ public class ImportConfigTest {
             props.setProperty("foo", "pineapple");
             props.setProperty("bar", "lime");
             ImportConfig cfg = ConfigFactory.create(ImportConfig.class, props); // props imported!
-            assertEquals("strawberries", cfg.foo());
+            assertEquals("pineapple", cfg.foo());
             assertEquals("lime", cfg.bar());
             assertEquals("orange", cfg.baz());
         } finally {
@@ -88,5 +88,27 @@ public class ImportConfigTest {
         }
     }
 
+    interface ImportedPropertiesHaveHigherPriority extends Config {
+        Integer minAge();
+    }
+
+    @Test
+    public void testImportedPropertiesShouldOverrideSources() {
+        ImportedPropertiesHaveHigherPriority cfg = ConfigFactory.create(ImportedPropertiesHaveHigherPriority.class);
+        assertEquals(Integer.valueOf(18), cfg.minAge());
+
+        ImportedPropertiesHaveHigherPriority cfg2 = ConfigFactory.create(ImportedPropertiesHaveHigherPriority.class,
+                new Properties() {{
+                    setProperty("minAge", "21");
+                }},
+
+                new Properties() {{
+                    setProperty("minAge", "22");
+                }}
+
+        );
+
+        assertEquals(Integer.valueOf(21), cfg2.minAge());
+    }
 
 }

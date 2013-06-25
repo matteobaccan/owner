@@ -107,9 +107,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             loading = true;
             defaults(properties, clazz);
-            merge(properties, reverse(imports));
             Properties loadedFromFile = doLoad(handler);
             merge(properties, loadedFromFile);
+            merge(properties, reverse(imports));
             return properties;
         } catch (IOException e) {
             throw unsupported(e, "Properties load failed");
