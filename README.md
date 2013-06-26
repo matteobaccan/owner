@@ -927,6 +927,10 @@ CHANGELOG
   [reloadable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Reloadable.html
   [mutable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Mutable.html
 
+### 1.0.3.1
+
+ * Fixed bug [#35](https://github.com/lviggiano/owner/issues/33)
+
 ### 1.0.3
 
  * Fixed incompatibility with JRE 6 (project was compiled using JDK 7 and in some places I was catching
