@@ -66,7 +66,7 @@ public class AsyncAutoReloadTest {
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
         delete(target);
-        sleep(40);
+        sleep(100);
 
         assertEquals(1, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
@@ -74,13 +74,13 @@ public class AsyncAutoReloadTest {
         save(target, new Properties() {{ //
             setProperty("someValue", "20");
         }});
-        sleep(40);
+        sleep(100);
 
         assertEquals(2, reloadCount[0]);
         assertEquals(Integer.valueOf(20), cfg.someValue());
 
         delete(target);
-        sleep(40);
+        sleep(100);
 
         assertEquals(3, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
@@ -88,7 +88,7 @@ public class AsyncAutoReloadTest {
         save(target, new Properties() {{
             setProperty("someValue", "30");
         }});
-        sleep(40);
+        sleep(100);
 
         assertEquals(4, reloadCount[0]);
         assertEquals(Integer.valueOf(30), cfg.someValue());
