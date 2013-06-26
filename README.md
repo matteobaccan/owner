@@ -929,7 +929,7 @@ CHANGELOG
 
 ### 1.0.3.1
 
- * Fixed bug [#35](https://github.com/lviggiano/owner/issues/33)
+ * Fixed bug [#35](https://github.com/lviggiano/owner/issues/35)
 
 ### 1.0.3
 
