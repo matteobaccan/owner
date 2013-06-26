@@ -7,7 +7,7 @@ Jenkins: [![Build Status](https://aeonbits.ci.cloudbees.com/job/owner-api/badge/
 Travis:  [![Build Status](https://travis-ci.org/lviggiano/owner.png?branch=master)](https://travis-ci.org/lviggiano/owner)
 
 [![Built with Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://owner.newinstance.it/maven-site/)
-[![Powered by Sonar](http://sheldon.dyndns.tv:9000/images/sonar.png)](http://sheldon.dyndns.tv:9000/dashboard/index/1)
+<span style="border:1px solid black">[![Powered by Sonar](http://sheldon.dyndns.tv:9000/images/sonar.png)](http://sheldon.dyndns.tv:9000/dashboard/index/1)</span>
 
 INTRODUCTION
 ------------
