@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.URL;
@@ -264,6 +265,26 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         writeLock.lock();
         try {
             properties.clear();
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    @Delegate
+    public void load(InputStream inStream) throws IOException {
+        writeLock.lock();
+        try {
+            properties.load(inStream);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    @Delegate
+    public void load(Reader reader) throws IOException {
+        writeLock.lock();
+        try {
+            properties.load(reader);
         } finally {
             writeLock.unlock();
         }

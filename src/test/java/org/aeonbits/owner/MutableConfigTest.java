@@ -8,7 +8,14 @@
 
 package org.aeonbits.owner;
 
+import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -18,15 +25,21 @@ import static org.junit.Assert.assertNull;
  */
 public class MutableConfigTest {
 
+    private MutableConfig cfg;
+
     interface MutableConfig extends Config, Mutable {
         @DefaultValue("18")
         public Integer minAge();
         public Integer maxAge();
     }
 
+    @Before
+    public void before() {
+        cfg = ConfigFactory.create(MutableConfig.class);
+    }
+
     @Test
     public void testSetProperty() {
-        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         String oldValue = cfg.setProperty("minAge", "21");
         assertEquals("18", oldValue);
@@ -35,7 +48,6 @@ public class MutableConfigTest {
 
     @Test
     public void testSetPropertyThatWasNull() {
-        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertNull(cfg.maxAge());
         String oldValue = cfg.setProperty("maxAge", "999");
         assertNull(oldValue);
@@ -44,7 +56,6 @@ public class MutableConfigTest {
 
     @Test
     public void testSetPropertyWithNull() {
-        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         String oldValue = cfg.setProperty("minAge", null);
         assertEquals("18", oldValue);
@@ -53,7 +64,6 @@ public class MutableConfigTest {
 
     @Test
     public void testRemoveProperty() {
-        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         String oldValue = cfg.removeProperty("minAge");
         assertEquals("18", oldValue);
@@ -62,10 +72,36 @@ public class MutableConfigTest {
 
     @Test
     public void testClear() {
-        MutableConfig cfg = ConfigFactory.create(MutableConfig.class);
         assertEquals(Integer.valueOf(18), cfg.minAge());
         cfg.clear();
         assertNull(cfg.minAge());
     }
 
+    @Test
+    public void testLoadInputStream() throws IOException {
+        File temp = File.createTempFile("MutableConfigTest", ".properties");
+        UtilTest.save(temp, new Properties() {{
+            setProperty("minAge", "19");
+            setProperty("maxAge", "99");
+        }});
+
+        cfg.load(new FileInputStream(temp));
+
+        assertEquals(Integer.valueOf(19), cfg.minAge());
+        assertEquals(Integer.valueOf(99), cfg.maxAge());
+    }
+
+    @Test
+    public void testLoadReader() throws IOException {
+        File temp = File.createTempFile("MutableConfigTest", ".properties");
+        UtilTest.save(temp, new Properties() {{
+            setProperty("minAge", "19");
+            setProperty("maxAge", "99");
+        }});
+
+        cfg.load(new FileReader(temp));
+
+        assertEquals(Integer.valueOf(19), cfg.minAge());
+        assertEquals(Integer.valueOf(99), cfg.maxAge());
+    }
 }

@@ -8,6 +8,10 @@
 
 package org.aeonbits.owner;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+
 /**
  * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p>
  *
@@ -65,4 +69,33 @@ public interface Mutable {
      * @since 1.0.4
      */
     void clear();
+
+    /**
+     * Reads a property list (key and element pairs) from the input
+     * byte stream.
+     *
+     * @see        java.util.Properties#load(java.io.InputStream)
+     * @param      inStream   the input stream.
+     * @exception java.io.IOException  if an error occurred when reading from the
+     *             input stream.
+     * @throws     IllegalArgumentException if the input stream contains a
+     *             malformed Unicode escape sequence.
+     * @since 1.0.4
+     */
+    void load(InputStream inStream) throws IOException;
+
+    /**
+     * Reads a property list (key and element pairs) from the input
+     * character stream in a simple line-oriented format.
+     *
+     * @see     java.util.Properties#load(java.io.Reader)
+     * @param   reader   the input character stream.
+     * @throws  IOException  if an error occurred when reading from the
+     *          input stream.
+     * @throws  IllegalArgumentException if a malformed Unicode escape
+     *          appears in the input.
+     * @since   1.0.4
+     */
+    void load(Reader reader) throws IOException;
+
 }
