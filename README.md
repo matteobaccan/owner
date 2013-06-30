@@ -1,7 +1,7 @@
 OWNER
 =====
 
-OWNER, a simple API to ease Java property files usage.
+OWNER, an API to ease Java property files usage.
 
 Jenkins: [![Build Status](https://aeonbits.ci.cloudbees.com/job/owner-api/badge/icon)](https://aeonbits.ci.cloudbees.com/job/owner-api/)  
 Travis:  [![Build Status](https://travis-ci.org/lviggiano/owner.png?branch=master)](https://travis-ci.org/lviggiano/owner)
