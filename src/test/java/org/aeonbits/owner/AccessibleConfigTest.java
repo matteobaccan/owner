@@ -35,6 +35,8 @@ public class AccessibleConfigTest {
     @Mock
     private ScheduledExecutorService scheduler;
 
+    private VariablesExpander expander = new VariablesExpander(new Properties());
+
     public static interface AccessibleConfig extends Config, Accessible {
         @DefaultValue("Bohemian Rapsody - Queen")
         String favoriteSong();
@@ -47,7 +49,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintStream() throws IOException {
         ByteArrayOutputStream expected = new ByteArrayOutputStream();
-        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler);
+        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler, expander);
         manager.load().list(new PrintStream(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);
@@ -60,7 +62,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintWriter() throws IOException {
         StringWriter expected = new StringWriter();
-        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler);
+        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler, expander);
         manager.load().list(new PrintWriter(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);

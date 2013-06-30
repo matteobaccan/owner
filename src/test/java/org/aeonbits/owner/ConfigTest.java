@@ -37,6 +37,8 @@ public class ConfigTest {
     @Mock
     private ScheduledExecutorService scheduler;
 
+    private VariablesExpander expander = new VariablesExpander(new Properties());
+
     public static interface SampleConfig extends Config {
 
         String testKey();
@@ -76,10 +78,10 @@ public class ConfigTest {
     @Test
     public void shouldReturnTheResourceForAClass() throws IOException {
         ConfigURLStreamHandler handler = new ConfigURLStreamHandler(SampleConfig.class.getClassLoader(),
-                new SystemVariablesExpander());
+                new VariablesExpander(new Properties()));
         ConfigURLStreamHandler spy = spy(handler);
 
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler);
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler, expander);
 
         manager.doLoad(spy);
         URL expected =
@@ -89,7 +91,7 @@ public class ConfigTest {
 
     @Test
     public void shouldReturnThePropertiesForTheClass() {
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler);
+        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler, expander);
         Properties props = manager.load();
         assertNotNull(props);
         assertEquals("testValue", props.getProperty("testKey"));
@@ -146,14 +148,14 @@ public class ConfigTest {
     public void shouldLoadURLFromSpecifiedSource() throws IOException {
         final URL[] lastURL = { null };
         ConfigURLStreamHandler handler = new ConfigURLStreamHandler(SampleConfigWithSource.class.getClassLoader(),
-                new SystemVariablesExpander()) {
+                new VariablesExpander(new Properties())) {
             @Override
             protected URLConnection openConnection(URL url) throws IOException {
                 lastURL[0] = url;
                 return super.openConnection(url);
             }
         };
-        PropertiesManager manager = new PropertiesManager(SampleConfigWithSource.class, new Properties(), scheduler);
+        PropertiesManager manager = new PropertiesManager(SampleConfigWithSource.class, new Properties(), scheduler, expander);
         manager.doLoad(handler);
         URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
                 handler);
@@ -288,7 +290,7 @@ public class ConfigTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testWhenURLIsInvalid() {
-        InvalidURLConfig cfg = ConfigFactory.create(InvalidURLConfig.class);
+        ConfigFactory.create(InvalidURLConfig.class);
     }
 
 }

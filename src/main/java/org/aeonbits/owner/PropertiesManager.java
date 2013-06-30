@@ -51,7 +51,6 @@ import static org.aeonbits.owner.Util.unsupported;
  * @author Luigi R. Viggiano
  */
 class PropertiesManager implements Reloadable, Accessible, Mutable {
-    private static final SystemVariablesExpander expander = new SystemVariablesExpander();
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
     private final Properties properties;
@@ -75,7 +74,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
-                      Map<?, ?>... imports) {
+                      VariablesExpander expander, Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.imports = imports;

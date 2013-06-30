@@ -37,6 +37,7 @@ public abstract class ConfigFactory {
             return result;
         }
     });
+    private static Properties props = new Properties();
 
     ConfigFactory() {
         prohibitInstantiation();
@@ -53,8 +54,43 @@ public abstract class ConfigFactory {
     @SuppressWarnings("unchecked")
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
-        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, imports);
+        VariablesExpander expander = new VariablesExpander(props);
+        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, imports);
         InvocationHandler handler = new PropertiesInvocationHandler(manager);
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }
+
+    public static String setProperty(String key, String value) {
+        checkKey(key);
+        return (String) props.setProperty(key, value);
+    }
+
+    private static void checkKey(String key) {
+        if (key == null)
+            throw new NullPointerException("key can't be null");
+        if (key.isEmpty())
+            throw new IllegalArgumentException("key can't be empty");
+    }
+
+    public static Properties getProperties() {
+        return props;
+    }
+
+    public static void setProperties(Properties properties) {
+        if (properties == null)
+            props = new Properties();
+        else
+            props = properties;
+    }
+
+    public static String getProperty(String key) {
+        checkKey(key);
+        return props.getProperty(key);
+    }
+
+    public static String clearProperty(String key) {
+        checkKey(key);
+        return (String) props.remove(key);
+    }
+
 }

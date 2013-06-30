@@ -10,6 +10,8 @@ package org.aeonbits.owner;
 
 import org.junit.Test;
 
+import java.util.Properties;
+
 import static java.lang.System.getProperty;
 import static org.junit.Assert.assertEquals;
 
@@ -19,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 public class SystemVariableExpanderTest {
     @Test
     public void testExpandMultipleTilde() {
-        SystemVariablesExpander expander = new SystemVariablesExpander();
+        VariablesExpander expander = new VariablesExpander(new Properties());
         String result = expander.expand("foo-~-bar-~-baz");
         String expected = "foo-" + getProperty("user.home") + "-bar-" + getProperty("user.home") + "-baz";
         assertEquals(expected, result);
