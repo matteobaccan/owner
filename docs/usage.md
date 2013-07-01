@@ -17,8 +17,8 @@ hostname=foobar.com
 maxThreads=100
 {% endhighlight %}
 
-To access this property you need to define a convenient Java interface in
-`ServerConfig.java`:
+To access this properties file you need to define a convenient Java interface 
+`ServerConfig.java` in the same package:
 
 {% highlight java %}
 public interface ServerConfig extends Config {
@@ -33,21 +33,28 @@ We'll call this interface the *Properties Mapping Interface* or just
 *Mapping Interface* since its goal is to map Properties into a an easy to use
 piece of code.
 
-<div class="note">
-  <h5>How does the mapping work?</h5>
-  <p>
+## How does the mapping work?
+
 Since the properties file does have the same name as the Java class, and they
 are located in the same package, the OWNER API will be able to automatically
-associate the properties between the properties file and the Java class.
-So the property <tt>port</tt> defined in the properties file will be associated to the
-method <tt>int port()</tt> in the Java class.
-  </p>
-<p>
-The mapping mechanism is fully customizable, later we will see how to change it.
-</p>
-</div>
+associate them.  
+The properties names defined in the properties file will be associated to the
+methods in the Java class having the same name.  
+For instance, the property `port` defined in the properties file will be 
+associated to the method `int port()` in the Java class, the property `hostname`
+will be associated to the method `String hostname()` and the appropriate type
+conversion will apply automatically, so the method `port()` will return an int
+while the method `hostname()` will return a Java string, since the interface is
+defined in this way.
 
-Then, you can use it from inside your code:
+The mapping mechanism is fully customizable, as well the automatic type 
+conversion we just introduced is flexible enough to cover most of the Java types 
+as well as object types defined by the user.  
+You can see how in the next chapters.
+
+## Using the Config object
+
+At this point, you can create the ServerConfig object and use it in your code:
 
 {% highlight java %}
 ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
@@ -55,12 +62,26 @@ System.out.println("Server " + cfg.hostname() + ":" + cfg.port() +
                    " will run " + cfg.maxThreads());
 {% endhighlight %}
 
-Did you notice that there is also the `@DefaultValue("42")` annotation specified
-in the example? It is used in case the `maxThread` key is missing from the
+
+## Using @DefaultValue and @Key annotations
+
+Did you notice that in the above example it is specified `@DefaultValue("42")` 
+annotation? 
+
+{% highlight java %}
+public interface ServerConfig extends Config {
+    int port();
+    String hostname();
+    @DefaultValue("42")    // here!!!
+    int maxThreads();
+}
+{% endhighlight %}
+
+It is used in case the `maxThread` key is missing from the
 properties file.
+
 This annotation gets automatically converted to `int`, since `maxThreads()`
-returns an `int`. See next chapters to learn more about automatic type
-conversion.
+returns an `int`. 
 
 Using the annotations, you can also customize the property keys:
 
@@ -78,7 +99,8 @@ annotation.
 
 {% highlight java %}
 /*
- * Example of ServerConfig.java interface mapping the previous properties file
+ * Example of ServerConfig.java interface mapping the previous 
+ * properties file.
  */
 public interface ServerConfig extends Config {
     @Key("server.http.port")
@@ -104,3 +126,10 @@ OWNER API.
      You can add the properties file later or leave this task to the end user.
   </p>
 </div>
+
+## Conclusions
+Now you know the minimum to get productive with the OWNER API. But this is just
+the beginning. OWNER is a rich API that allows you to add additional behaviors
+and have more interesting features, so that you should be able to use this 
+library virtually in any other context where you where using the 
+`java.util.Properties` class.
