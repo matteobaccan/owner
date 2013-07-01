@@ -21,6 +21,8 @@ To access this properties file you need to define a convenient Java interface
 `ServerConfig.java` in the same package:
 
 {% highlight java %}
+import org.aeonbits.owner.Config;
+
 public interface ServerConfig extends Config {
     int port();
     String hostname();
@@ -29,7 +31,7 @@ public interface ServerConfig extends Config {
 }
 {% endhighlight %}
 
-Notice that the above interface extends from `org.aeonbits.owner.Config`, that
+Notice that the above interface extends from `Config`, that
 is a marker interface recognized by OWNER as valid to work with.
 
 We'll call this interface the *Properties Mapping Interface* or just
