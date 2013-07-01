@@ -33,7 +33,9 @@ We'll call this interface the *Properties Mapping Interface* or just
 *Mapping Interface* since its goal is to map Properties into a an easy to use
 piece of code.
 
-## How does the mapping work?
+
+How does the mapping work?
+--------------------------
 
 Since the properties file does have the same name as the Java class, and they
 are located in the same package, the OWNER API will be able to automatically
@@ -63,7 +65,8 @@ System.out.println("Server " + cfg.hostname() + ":" + cfg.port() +
 {% endhighlight %}
 
 
-## Using @DefaultValue and @Key annotations
+Using @DefaultValue and @Key annotations
+----------------------------------------
 
 Did you notice that in the above example it is specified `@DefaultValue("42")` 
 annotation? 
@@ -127,7 +130,10 @@ OWNER API.
   </p>
 </div>
 
-## Conclusions
+
+Conclusions
+-----------
+
 Now you know the minimum to get productive with the OWNER API. But this is just
 the beginning. OWNER is a rich API that allows you to add additional behaviors
 and have more interesting features, so that you should be able to use this 

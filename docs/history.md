@@ -1,0 +1,65 @@
+---
+layout: docs
+title: History
+prev_section: installation
+permalink: /docs/history/
+---
+
+## 1.0.4 (under development)
+
+ * Hot reload for file based sources (work in progress). See Issue [#15][issue-15].
+ * toString() method can be invoked on the Config object to get some useful text for debugging. See [#33][issue-33].
+ * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure:
+   setProperty, removeProperty, clear. See Issue [#31][issue-31].
+ * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and other methods
+   giving read access to the underlying properties structure.
+ * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf]. At the 
+   current time I am thinking to merge this interface with `Mutable`, before releasing, but that reloading() is a 
+   different operation and purpose than programmatically alter things... so for now, it's here.
+ * Added [Travis CI][travis-ci] to the project to track changes and run tests on different JDK versions.
+ * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
+ * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
+   formatting. See Issue [#20][issue-20].
+ * Website code snippets now have syntax highlighting. Thanks [ming13][].
+ * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together.
+ 
+  [issue-33]: https://github.com/lviggiano/owner/issues/33
+  [issue-17]: https://github.com/lviggiano/owner/issues/17
+  [issue-20]: https://github.com/lviggiano/owner/issues/20
+  [issue-31]: https://github.com/lviggiano/owner/issues/31
+  [issue-15]: https://github.com/lviggiano/owner/issues/15
+  [ffbit]: https://github.com/ffbit
+  [ming13]: https://github.com/ming13
+  [travis-ci]: https://travis-ci.org/lviggiano/owner
+  [accessible-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Accessible.html
+  [reloadable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Reloadable.html
+  [mutable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Mutable.html
+
+## 1.0.3.1
+
+ * Fixed bug [#35](https://github.com/lviggiano/owner/issues/35)
+
+## 1.0.3
+
+ * Fixed incompatibility with JRE 6 (project was compiled using JDK 7 and in some places I was catching
+   ReflectiveOperationException that has been introduced in JDK 7).
+ * Minor code cleanup/optimization.
+
+## 1.0.2
+
+ * Changed package name from `owner` to `org.aeonbits.owner`.
+   Sorry to break backward compatibility, but this has been necessary in order to publish the artifact on Maven Central
+   Repository.
+ * Custom & special return types.
+ * Properties variables expansion.
+ * Added possibility to specify [Properties][properties] to import with the method `ConfigFactory.create()`.
+ * Added list() methods to aide debugging. User can specify these methods in his properties mapping interfaces.
+ * Improved the documentation (this big file that you are reading), and Javadocs.
+
+## 1.0.1
+
+ * Removed [commons-lang][] transitive dependency. Minor bug fixes.
+
+## 1.0
+
+ * Initial release.

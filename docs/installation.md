@@ -19,7 +19,9 @@ it's up to you and your chosen IDE.
 Generally speaking you just need to reference the library jar in the CLASSPATH
 environment variable, as explained in the [Java tutorial](http://docs.oracle.com/javase/tutorial/essential/environment/paths.html).
 
-## Maven
+
+Maven
+-----
 
 If you are using Maven, things are quite simple, just add the following section
 to your pom.xml:
@@ -55,7 +57,8 @@ use the library APIs.
 </div>
 
 
-## Building from the sources
+Building from the sources
+-------------------------
 
 Building OWNER from the sources has some advantages. For instance you can get 
 the latest features still under development on github master branch.
@@ -91,7 +94,9 @@ faster: git://github.com/lviggiano/owner.git.
   </p>
 </div>
 
-## Building a specific version.
+
+Building a specific version
+---------------------------
 
 The `git clone` command downloads the full repository with the complete history
 on your local computer. That also contains tags for the released versions.

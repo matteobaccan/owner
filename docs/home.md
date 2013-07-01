@@ -10,7 +10,8 @@ getting started with the basic features, the advanced usages, and give you some
 advice on participating in the future development of OWNER itself.
 
 
-## So what is OWNER, exactly?
+So what is OWNER, exactly?
+--------------------------
 
 The OWNER API is a Java library with the intent to minimize the code required to
 handle application configuration via Java properties files.
@@ -29,7 +30,8 @@ we are.
   [gwt-i18n]: https://developers.google.com/web-toolkit/doc/latest/DevGuideI18nConstants
 
 
-## Tips, Notes, and Warnings
+Tips, Notes, and Warnings
+-------------------------
 
 Throughout this guide there are a number of small-but-handy pieces of
 information that can make using OWNER easier, more interesting, and less
