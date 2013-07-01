@@ -29,6 +29,9 @@ public interface ServerConfig extends Config {
 }
 {% endhighlight %}
 
+Notice that the above interface extends from `org.aeonbits.owner.Config`, that
+is a marker interface recognized by OWNER as valid to work with.
+
 We'll call this interface the *Properties Mapping Interface* or just
 *Mapping Interface* since its goal is to map Properties into a an easy to use
 piece of code.
