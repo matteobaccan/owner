@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Welcome
-next_section: usage
+next_section: installation
 permalink: /docs/home/
 ---
 
