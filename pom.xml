@@ -97,7 +97,7 @@
         <site>
             <id>newinstance-maven-website</id>
             <name>NewInstance Maven Website</name>
-            <url>ftp://newinstance.it:/public_html/owner/maven-site/</url>
+            <url>ftp://newinstance.it:/public_html/owner/${project.version}/</url>
         </site>
     </distributionManagement>
 
