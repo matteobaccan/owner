@@ -136,3 +136,12 @@ the properties loaded by `@Sources` if there is overlapping between the
 properties names. 
 This approach is used by many command line tools, that allow the user to specify
 a configuration on the command line that overrides the default one.
+
+<div class="note warning">
+  <h5>This is true only with version 1.0.3.1 and superior!</h5>
+  <p>Be aware that in versions prior to 1.0.3.1 imported properties have lower 
+  priority than others loaded properties. This behavior has been changed in
+  version 1.0.3.1 and it will be kept this way for future releases.</p>
+</div>
+
+

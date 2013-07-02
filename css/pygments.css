@@ -36,10 +36,10 @@
 .highlight .nb { color: #cd00cd } /* Name.Builtin */
 .highlight .nc { color: #00cdcd } /* Name.Class */
 .highlight .no { color: #cccccc } /* Name.Constant */
-.highlight .nd { color: #cccccc } /* Name.Decorator */
+.highlight .nd { color: #cccc00 } /* Name.Decorator */
 .highlight .ni { color: #cccccc } /* Name.Entity */
 .highlight .ne { color: #666699; font-weight: bold } /* Name.Exception */
-.highlight .nf { color: #cccccc } /* Name.Function */
+.highlight .nf { color: #f0e68c } /* Name.Function */
 .highlight .nl { color: #cccccc } /* Name.Label */
 .highlight .nn { color: #cccccc } /* Name.Namespace */
 .highlight .nx { color: #cccccc } /* Name.Other */

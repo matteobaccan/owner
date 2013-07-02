@@ -2,7 +2,6 @@
 layout: docs
 title: Basic usage
 prev_section: installation
-next_section: structure
 permalink: /docs/usage/
 ---
 
