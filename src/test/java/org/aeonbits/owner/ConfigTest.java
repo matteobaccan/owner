@@ -179,19 +179,6 @@ public class ConfigTest {
         assertNull(config.someProperty());
     }
 
-    /**
-     * @author Luigi R. Viggiano
-     */
-    public static interface UnassociatedConfig extends Config {
-        String someProperty();
-    }
-
-    @Test
-    public void testConfigWithoutPropertiesAssociated() {
-        UnassociatedConfig config = ConfigFactory.create(UnassociatedConfig.class);
-        assertNull(config.someProperty());
-    }
-
     @Test
     public void testDefaultStringValue() {
         SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
@@ -251,21 +238,6 @@ public class ConfigTest {
         SampleConfig config = ConfigFactory.create(SampleConfig.class);
         assertEquals("Good Afternoon", config.salutation());
     }
-
-    /**
-     * @author Luigi R. Viggiano
-     */
-    @Sources({"file:${user.dir}/src/test/resources/test.properties"})
-    public static interface SampleConfigWithExpansion extends Config {
-        public String favoriteColor();
-    }
-
-    @Test
-    public void testPropertyWithExpansion() {
-        SampleConfigWithExpansion config = ConfigFactory.create(SampleConfigWithExpansion.class);
-        assertEquals("pink", config.favoriteColor());
-    }
-
 
     public static interface SubstituteAndFormat extends Config {
         @DefaultValue("Hello ${mister}")

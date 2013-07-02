@@ -6,8 +6,10 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.importedprops;
 
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -23,7 +25,8 @@ public class WithImportedPropertiesTest {
     public void testSubstituteWithImports() {
         Properties propsFromTest = new Properties();
         propsFromTest.setProperty("external", "propsFromTest");
-        WithImportedProperties conf = ConfigFactory.create(WithImportedProperties.class, propsFromTest);
+        WithImportedProperties conf = ConfigFactory.create
+                (WithImportedProperties.class, propsFromTest);
         assertEquals("testing replacement from propsFromTest properties file.", conf.someValue());
     }
 

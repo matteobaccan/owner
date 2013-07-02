@@ -6,8 +6,10 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.importedprops;
 
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import java.io.File;
@@ -37,7 +39,8 @@ public class SystemPropertiesAndEnvTest {
 
     @Test
     public void testSystemEnvProperties() {
-        SystemEnvProperties cfg = ConfigFactory.create(SystemEnvProperties.class, System.getProperties(), System.getenv());
+        SystemEnvProperties cfg = ConfigFactory.create(SystemEnvProperties
+                .class, System.getProperties(), System.getenv());
         assertEquals(File.separator, cfg.fileSeparator());
         assertEquals(System.getProperty("java.home"), cfg.javaHome());
         assertEquals(System.getenv().get("HOME"), cfg.home());

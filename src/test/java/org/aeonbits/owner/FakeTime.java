@@ -29,7 +29,6 @@ public class FakeTime implements Time {
         time += unit.toMillis(interval);
     }
 
-    @Override
     public long getTime() {
         return time;
     }
