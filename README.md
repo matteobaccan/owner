@@ -56,9 +56,13 @@ public class MyApp {
 }
 ```
 
-But this is just the tip of the iceberg. Make sure to have a look 
-at the [documentation website][website] to learn how flexible and 
-powerful OWNER is, and why you may need it!
+But this is just the tip of the iceberg. 
+
+DOCUMENTATION 
+-------------
+
+Make sure to have a look at the [documentation website][website] 
+to learn how flexible and powerful OWNER is, and why you may need it!
 
   [website]: http://lviggiano.github.com/owner
 
