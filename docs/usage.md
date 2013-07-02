@@ -45,6 +45,11 @@ How does the mapping work?
 Since the properties file does have the same name as the Java class, and they
 are located in the same package, the OWNER API will be able to automatically
 associate them.  
+For instance, if your *mapping interface* is called `com.foo.bar.ServerConfig`, 
+OWNER will try to associate it to `com.foo.bar.ServerConfig.properties`, 
+loading from the classpath.  
+
+
 The properties names defined in the properties file will be associated to the
 methods in the Java class having the same name.  
 For instance, the property `port` defined in the properties file will be 
