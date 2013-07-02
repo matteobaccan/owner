@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Basic Usage
+title: Basic usage
 prev_section: installation
 next_section: structure
 permalink: /docs/usage/
@@ -140,6 +140,39 @@ OWNER API.
   </p>
 </div>
 
+Undefined properties
+--------------------
+
+Suppose you have defined a method in your *mapping interface* that cannot be 
+resolved to any property loaded from a properties file, and this method doesn't 
+define a `@DefaultValue` what happens? Simple: it will return null, or a 
+NullPointerException;
+
+Suppose our ServerConfig class was looking like this:
+
+```java
+public static interface ServerConfig extends Config {
+    String hostname();
+    int port();
+    Boolean debugEnabled();
+}
+```
+
+If we don't have any ServerConfig.properties associated to it, when we call the
+method `String hostname()` it will return null, as well as when we call the 
+method `Boolean debugEnabled()` since the return types String and Boolean are
+java objects. But if we call the method `int port()` then a 
+`NullPointerException` will be raised.
+
+<div class="note">
+  <h5>You don't want the NullPointerException?</h5>
+  <p>
+    If you don't want to get the NullPointerException, you can just define
+    a default value. For instance, you can set <tt>@DefaultValue("0")</tt> for
+    an <tt>int</tt> return type, or a <tt>@DefaultValue("false")</tt> for a 
+    <tt>boolean</tt> return type, and so on...
+  </p>
+</div>
 
 Conclusions
 -----------
