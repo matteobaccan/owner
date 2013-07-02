@@ -131,6 +131,8 @@ public static void main(String[] args) {
 }
 ```
 
-In the above example, the properties file specified by the use will override the
-properties loaded by `@Sources` if there is overlapping between the properties 
-names.
+In the above example, the properties file specified by the user will override 
+the properties loaded by `@Sources` if there is overlapping between the 
+properties names. 
+This approach is used by many command line tools, that allow the user to specify
+a configuration on the command line that overrides the default one.

@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Installation
-prev_section: hoome
+prev_section: welcome
 next_section: usage
 permalink: /docs/installation/
 ---

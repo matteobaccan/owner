@@ -2,7 +2,7 @@
 layout: docs
 title: Welcome
 next_section: installation
-permalink: /docs/home/
+permalink: /docs/welcome/
 ---
 
 This site aims to be a comprehensive guide to OWNER. We'll cover topics such as
@@ -13,7 +13,7 @@ advice on participating in the future development of OWNER itself.
 So what is OWNER, exactly?
 --------------------------
 
-The OWNER API is a Java library with the intent to minimize the code required to
+The OWNER API is a Java library with the goal of minimizing the code required to
 handle application configuration via Java properties files.
 
 OWNER is shipped as a JAR file, and it can also be downloaded from the Maven
