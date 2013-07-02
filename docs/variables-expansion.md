@@ -19,7 +19,7 @@ color=brown
 ...and the associated *mapping interface*:
 
 ```java
-public interface ConfigWithExpansion  extends Config {
+public interface ConfigWithExpansion extends Config {
     String story();
 }
 ```
