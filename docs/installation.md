@@ -29,7 +29,7 @@ Maven
 If you are using Maven, things are quite simple, just add the following section
 to your pom.xml:
 
-{% highlight xml %}
+```xml
 <dependencies>
     <dependency>
         <groupId>org.aeonbits.owner</groupId>
@@ -37,7 +37,7 @@ to your pom.xml:
         <version>1.0.3.1</version>
     </dependency>
 </dependencies>
-{% endhighlight %}
+```
 
 <div class="note">
   <h5>Finding the latest version released</h5>
@@ -76,13 +76,13 @@ your system:
 
 Then follow these steps:
 
-{% highlight bash %}
+```bash
 # Download the sources
 $ git clone https://github.com/lviggiano/owner.git owner
 $ cd owner
 # Compile, execute test, and generate the artifacts
 $ mvn install
-{% endhighlight %}
+```
 
 This will build and install OWNER jars in your local maven repository.
 At the end of the process, you should find the generated artifacts in the 
@@ -106,7 +106,7 @@ on your local computer. That also contains tags for the released versions.
 
 For instance, if I want to build the version 1.0.2
 
-{% highlight bash %}
+```bash
 # as example, this time we use the git:// URL
 $ git clone git://github.com/lviggiano/owner.git owner
 $ cd owner
@@ -120,7 +120,7 @@ owner-1.0.3.1
 $ git checkout owner-1.0.2
 HEAD is now at d2e4bbf... [maven-release-plugin] prepare release owner-1.0.2
 $ mvn install
-{% endhighlight %}
+```
 
 Please refer to [GIT documentation](http://git-scm.com/documentation) to learn 
 how to work with tags.
