@@ -191,7 +191,8 @@ So in following cases you'll get a [`UnsupportedOperationException`][unsupported
 
 ```java
 
-// @Separator and @TokenizerClass cannot be used together on class level.
+// @Separator and @TokenizerClass cannot be used together 
+// on class level.
 @TokenizerClass(CustomCommaTokenizer.class)
 @Separator(",")
 public interface Wrong extends Config {
