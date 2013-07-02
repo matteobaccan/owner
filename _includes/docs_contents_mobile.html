@@ -1,19 +1,27 @@
 <div class="docs-nav-mobile unit whole show-on-mobiles">
-  <select onchange="if (this.value) window.location.href=this.value">
-    
-    <option value="">Navigate the docs…</option>
-      
-    <optgroup label="Getting started">
-      <option value="{{ site.url }}/docs/welcome">Welcome</option>
-      <option value="{{ site.url }}/docs/installation">Installation</option>
-      <option value="{{ site.url }}/docs/usage">Basic usage</option>
-    </optgroup>
-      
-    <optgroup label="Meta">
-      <option value="{{ site.url }}/docs/contributing">Contributing</option>
-      <option value="{{ site.url }}/docs/history">History</option>
-      <option value="{{ site.url }}/docs/license">License</option>
-    </optgroup>
-      
-  </select>
+    <select onchange="if (this.value) window.location.href=this.value">
+
+        <option value="">Navigate the docs…</option>
+
+        <optgroup label="Getting started">
+            <option value="{{ site.url }}/docs/welcome">Welcome</option>
+            <option value="{{ site.url }}/docs/installation">Installation
+            </option>
+            <option value="{{ site.url }}/docs/usage">Basic usage</option>
+        </optgroup>
+
+        <optgroup label="More Features">
+            <option value="{{ site.url }}/docs/loading-strategies">Loading strategies</option>
+            <option value="{{ site.url }}/docs/importing-properties">Importing properties</option>
+            <option value="{{ site.url }}/docs/parametrized-properties">Parametrized properties</option>
+        </optgroup>
+
+        <optgroup label="Meta">
+            <option value="{{ site.url }}/docs/contributing">Contributing
+            </option>
+            <option value="{{ site.url }}/docs/history">History</option>
+            <option value="{{ site.url }}/docs/license">License</option>
+        </optgroup>
+
+    </select>
 </div>
