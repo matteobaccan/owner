@@ -4,7 +4,9 @@ title: Variables expansion
 permalink: /docs/variables-expansion/
 ---
 
-Sometimes it may be useful to expand properties values from other properties:
+Sometimes it may be useful to expand properties values from other properties.
+
+Let's have a look at this properties file:
 
 ```properties
 story=The ${animal} jumped over the ${target}
@@ -14,14 +16,17 @@ target.attribute=lazy
 color=brown
 ```
 
+...and the associated *mapping interface*:
+
 ```java
 public interface ConfigWithExpansion  extends Config {
     String story();
 }
 ```
 
-The property `story` will expand to *The quick brown fox jumped over the lazy
- dog*.
+The property `story` will expand to:
+
+<blockquote>The quick brown fox jumped over the lazy dog</blockquote>
 
 This also works with the annotations, but you need to specify every properties 
 on the methods:
@@ -55,7 +60,9 @@ String story = conf.story();
 ```
 
 Sometimes you may want expand System Properties or Environment Variables.
-This can be done using *imports* (see dedicated paragraph to learn more):
+This can be done using *imports* (see 
+[Importing properties]({{ site.url }}/docs/importing-properties/) to learn 
+more):
 
 ```java
 public interface SystemPropertiesExample 
@@ -101,6 +108,7 @@ public interface Sample extends Config {
 ```
 
 The `@DisabledFeature` annotation can be applied on method level and/or on 
-class level.
+interface level. When applied on interface level, the annotation will apply to
+all methods defined in that interface.
 
 
