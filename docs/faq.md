@@ -1,6 +1,8 @@
 ---
 layout: docs
 title: Frequently Asked Questions
+prev_section: disabling-features
+next_section: support
 permalink: /docs/faq/
 ---
 

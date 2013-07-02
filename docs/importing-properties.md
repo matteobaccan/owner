@@ -1,6 +1,8 @@
 ---
 layout: docs
 title: Importing properties
+prev_section: loading-strategies
+next_section: parametrized-properties
 permalink: /docs/importing-properties/
 ---
 You can use another mechanism to load your properties into a *mapping interface*.

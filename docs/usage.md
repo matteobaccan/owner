@@ -2,6 +2,7 @@
 layout: docs
 title: Basic usage
 prev_section: installation
+next_section: loading-strategies
 permalink: /docs/usage/
 ---
 

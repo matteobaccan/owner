@@ -1,6 +1,8 @@
 ---
 layout: docs
 title: Getting support
+prev_section: faq
+next_section: building
 permalink: /docs/support/
 ---
 

@@ -1,6 +1,8 @@
 ---
 layout: docs
 title: Building from sources
+prev_section: support
+next_section: contributing
 permalink: /docs/building/
 ---
 

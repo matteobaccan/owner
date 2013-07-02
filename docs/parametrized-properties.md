@@ -1,6 +1,8 @@
 ---
 layout: docs
 title: Parametrized properties
+prev_section: importing-properties
+next_section: type-conversion
 permalink: /docs/parametrized-properties/
 ---
 

@@ -1,6 +1,8 @@
 ---
 layout: docs
 title: Type conversion
+prev_section: parametrized-properties
+next_section: variables-expansion
 permalink: /docs/type-conversion/
 ---
 

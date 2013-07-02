@@ -1,6 +1,8 @@
 ---
 layout: docs
 title: Disabling features
+prev_section: debugging
+next_section: faq
 permalink: /docs/disabling-features/
 ---
 
