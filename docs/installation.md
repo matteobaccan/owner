@@ -6,19 +6,22 @@ next_section: usage
 permalink: /docs/installation/
 ---
 
-OWNER is a Java library. The distribution form is a [JAR file](http://docs.oracle.com/javase/tutorial/deployment/jar/).
+OWNER is a Java library. The distribution form is a [JAR file][1].
 
 However OWNER is available on Maven Central Repository, this means that if
 you want you can still download the library jar, the javadoc.jar, the sources.jar
 or a prepackaged archive containing the distributable binaries (including sources 
 and javadocs) in bin.tar.bz2 or bin.tar.gz or bin.zip format
-from [this link](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22).
+from [this link][2].
 
 Once downloaded what you need, you are ready to configure your IDE; and here, 
 it's up to you and your chosen IDE.
 Generally speaking you just need to reference the library jar in the CLASSPATH
-environment variable, as explained in the [Java tutorial](http://docs.oracle.com/javase/tutorial/essential/environment/paths.html).
+environment variable, as explained in the [Java tutorial][3].
 
+  [1]: http://docs.oracle.com/javase/tutorial/deployment/jar/
+  [2]: http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22
+  [3]: http://docs.oracle.com/javase/tutorial/essential/environment/paths.html
 
 Maven
 -----
@@ -119,4 +122,5 @@ HEAD is now at d2e4bbf... [maven-release-plugin] prepare release owner-1.0.2
 $ mvn install
 {% endhighlight %}
 
-Please refer to GIT documentation to learn how to work with tags.
+Please refer to [GIT documentation](http://git-scm.com/documentation) to learn 
+how to work with tags.

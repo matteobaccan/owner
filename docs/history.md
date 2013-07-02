@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: History
-prev_section: installation
+prev_section: contributing
+next_section: license
 permalink: /docs/history/
 ---
 
@@ -56,9 +57,13 @@ permalink: /docs/history/
  * Added list() methods to aide debugging. User can specify these methods in his properties mapping interfaces.
  * Improved the documentation (this big file that you are reading), and Javadocs.
 
+  [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
+
 ## 1.0.1
 
  * Removed [commons-lang][] transitive dependency. Minor bug fixes.
+
+  [commons-lang]: http://commons.apache.org/lang/
 
 ## 1.0
 
