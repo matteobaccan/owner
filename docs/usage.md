@@ -9,18 +9,18 @@ permalink: /docs/usage/
 The approach used by OWNER APIs, is to define a Java interface associated to a
 properties file.
 
-Suppose your properties file is defined as `ServerConfig.properties`:
+Suppose your properties file is defined as `ServerConfig.properties`:  
 
-{% highlight properties %}
+```properties
 port=80
 hostname=foobar.com
 maxThreads=100
-{% endhighlight %}
+```
 
 To access this properties file you need to define a convenient Java interface 
 `ServerConfig.java` in the same package:
 
-{% highlight java %}
+```java
 import org.aeonbits.owner.Config;
 
 public interface ServerConfig extends Config {
@@ -29,7 +29,7 @@ public interface ServerConfig extends Config {
     @DefaultValue("42")
     int maxThreads();
 }
-{% endhighlight %}
+```
 
 Notice that the above interface extends from `Config`, that
 is a marker interface recognized by OWNER as valid to work with.
@@ -68,11 +68,11 @@ You can see how in the next chapters.
 
 At this point, you can create the ServerConfig object and use it in your code:
 
-{% highlight java %}
+```java
 ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
 System.out.println("Server " + cfg.hostname() + ":" + cfg.port() +
                    " will run " + cfg.maxThreads());
-{% endhighlight %}
+```
 
 
 Using @DefaultValue and @Key annotations
@@ -81,14 +81,14 @@ Using @DefaultValue and @Key annotations
 Did you notice that in the above example it is specified `@DefaultValue("42")` 
 annotation? 
 
-{% highlight java %}
+```java
 public interface ServerConfig extends Config {
     int port();
     String hostname();
     @DefaultValue("42")    // here!!!
     int maxThreads();
 }
-{% endhighlight %}
+```
 
 It is used in case the `maxThread` key is missing from the
 properties file.
@@ -98,19 +98,19 @@ returns an `int`.
 
 Using the annotations, you can also customize the property keys:
 
-{% highlight properties %}
+```properties
 # Example of property file 'ServerConfig.properties'
 server.http.port=80
 server.host.name=foobar.com
 server.max.threads=100
-{% endhighlight %}
+```
 
 This time, as commonly happens in Java applications, the properties names are
 separated by dots. Instead of just "port" we have "server.http.port", so we
 need to map this property name to the associated method using the `@Key`
 annotation.
 
-{% highlight java %}
+```java
 /*
  * Example of ServerConfig.java interface mapping the previous 
  * properties file.
@@ -126,7 +126,7 @@ public interface ServerConfig extends Config {
     @DefaultValue("42")
     int maxThreads();
 }
-{% endhighlight %}
+```
 
 The `@DefaultValue` and `@Key` annotations are the basics to start using the
 OWNER API.
