@@ -6,8 +6,8 @@ next_section: parametrized-properties
 permalink: /docs/importing-properties/
 ---
 You can use another mechanism to load your properties into a *mapping interface*.
-And this mechanism is to specify a [Properties][properties] object 
-programmatically when calling `ConfigFactory.create()`:
+And this mechanism is to specify a Properties object programmatically when 
+calling `ConfigFactory.create()`:
 
 ```java
 public interface ImportConfig extends Config {
