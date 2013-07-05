@@ -23,14 +23,9 @@ You have the source, you can help improving the library and fix the bugs if you 
 Still, OWNER API is a very early project, and APIs may change in the future to add/change some behaviors. But the
 philosophy is to keep always backward compatibility (unless not possible).
 
-## What happens if some `key` is not bound to a default value, and the properties file has no value for that key?
+## What happens if some property is not set to any value?
 
-The returned value is `null`. This is consistent with the behavior of the [Properties][properties] class.  
-If you think that this should be changed, please submit a [change request][issues] explaining your idea.  
-A possible solution can be inventing a new annotation like `@Mandatory` on class level and/or method level for those
-methods that do not specify a `@DefaultValue`, so that if the user forgets to specify a value for the mandatory
-property, a (subclass of) RuntimeException is thrown when the Config class is instantiated, to point out the
-misconfiguration.
+See: [Undefined properties]({{ site.url }}/docs/usage/#toc_3) in [Basic usage]({{ site.url }}/docs/usage/) chapter.
 
 ## Why OWNER API doesn't implement this ${pretty.neat.feature} ?
 
