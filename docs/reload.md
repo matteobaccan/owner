@@ -50,6 +50,7 @@ when the object was initially created. If the configuration files have been
 altered, after the reload invocation, those changes will be reflected in the
 config object.
 
+
 Automatic "hot reload"
 ----------------------
 
