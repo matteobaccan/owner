@@ -35,8 +35,9 @@ misconfiguration.
 ## Why OWNER API doesn't implement this ${pretty.neat.feature} ?
 
 Explain it on [github issues][issues]. If I like the idea I will implement it.
-Or, you can implement by yourself and send me a push request on github.
+Or, you can implement by yourself and send me a push request on GitHub (see also [Contributing]({{ site.url }}/docs/contributing/).
 The idea is to keep things minimal and code clean and easy. And for every new feature, having a complete test suite to
 verify all cases.
 
   [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
+  [issues]: https://github.com/lviggiano/owner/issues
