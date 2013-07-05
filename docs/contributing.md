@@ -40,10 +40,6 @@ And Please keep the following in mind:
 
 <div class="note warning">
   <h5>Contributions will not be accepted without tests</h5>
-  <p>
-    If you’re creating a small fix or patch to an existing feature, just
-    a simple test will do.
-  </p>
 </div>
 
 
