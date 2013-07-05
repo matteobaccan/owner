@@ -53,12 +53,16 @@ public interface Reloadable {
     /**
      * Add a ReloadListener.
      * @param listener the listener to be added
+     *
+     * @since 1.0.4
      */
     void addReloadListener(ReloadListener listener);
 
     /**
      * Remove a ReloadListener.
      * @param listener the listener to be removed
+     *
+     * @since 1.0.4
      */
     void removeReloadListener(ReloadListener listener);
 }
