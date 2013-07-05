@@ -14,16 +14,15 @@ There are many ways to help improving OWNER:
 1. If you want to implement some change, you can 
    [fork the project on github][fork] then send me a pull request. 
    See the [workflow](#toc_0).
-2. If you have some idea, you can [submit it as change request][issues] on 
-     github.
+2. If you have some idea, you can submit it as change request on 
+   [GitHub issues][issues].
 3. If you've found some defect, you can submit the bug on 
-     [github issues][issues].
+   [GitHub issues][issues].
 4. If you want to help the development, you can pick a 
-     [bug or an enhancement][issues] then contribute your patches following 
-     github [collaboration process][collaborating] (see also #1).
-5. Also you can contribute on improving the documentation. Check out 
-     the `gh-pages` branch. 
-     See [Updating Documentation](#updating_documentation).
+   [bug or an enhancement][issues] then contribute your patches following 
+   the [workflow](#toc_0).
+5. Also you can contribute on improving the documentation. 
+   See [Updating Documentation](#toc_1).
 
   [fork]: https://help.github.com/articles/fork-a-repo
   [issues]: https://github.com/lviggiano/owner/issues
@@ -39,7 +38,7 @@ And Please keep the following in mind:
 * Please follow the project code style.
 
 <div class="note warning">
-  <h5>Contributions will not be accepted without tests</h5>
+  <h5>Contributions will not be accepted without tests.</h5>
 </div>
 
 
@@ -89,4 +88,5 @@ All documentation pull requests should be directed at `gh-pages`.  Pull
 requests directed at another branch will not be accepted.
 
 The [OWNER wiki](https://github.com/lviggiano/owner/wiki) on GitHub 
-can be freely updated without a pull request as all GitHub users have access.
+can be freely updated without a pull request as all GitHub users have 
+read and write access.
