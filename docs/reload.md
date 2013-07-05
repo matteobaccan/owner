@@ -7,7 +7,7 @@ permalink: /docs/reload/
 ---
 
 Owner version 1.0.4 does support programmatic reload, as well as the 
-automatic "hot reload" of configuration files.
+automatic "hot reload" for configuration files.
 
 <div class="note">
   <h5>Version 1.0.4</h5>
