@@ -6,4 +6,6 @@ permalink: /docs/why/
 
 *...and why not?*
 
-Just kidding: I need to write this, and for today I had enough of documentation writing :-)
+Just kidding: I still need to write this, and for today I had enough of documentation writing :-)
+
+Come back later.
