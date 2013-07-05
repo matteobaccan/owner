@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Debugging
-prev_section: reload
+prev_section: accessible-mutable
 next_section: disabling-features
 permalink: /docs/debugging/
 ---

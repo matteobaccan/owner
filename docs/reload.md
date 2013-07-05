@@ -2,7 +2,7 @@
 layout: docs
 title: Reload and Hot Reload
 prev_section: variables-expansion
-next_section: debugging
+next_section: accessible-mutable
 permalink: /docs/reload/
 ---
 
