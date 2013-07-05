@@ -43,3 +43,16 @@ verify all cases.
 
   [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
   [issues]: https://github.com/lviggiano/owner/issues
+
+## Who is using OWNER?
+
+I have no idea. I implemented OWNER for a web application I was working on, then I decided to share it. And it looks 
+like [somebody][#32] is now using it. Including my friend [Bruno] who is a great guy and makes me proud of it.  
+If you feel like, drop a comment [here][#32].
+
+The fact I am receiving feedback, request for features and changes, mails and questions, makes me think that this 
+library is useful to some people around the world, and this encourages me to work and improve it.  
+So, don't be shy to introduce yourself.
+
+  [#32]: https://github.com/lviggiano/owner/issues/32
+  [Bruno]: https://github.com/lviggiano/owner/issues/32#issuecomment-19466459
