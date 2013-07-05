@@ -330,3 +330,5 @@ $ java -classpath \
 
 Then you can change the file indicated by the program to see the changes being
 reflected and the reload event being intercepted.
+
+Foo.
