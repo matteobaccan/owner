@@ -2,7 +2,7 @@
 layout: docs
 title: Disabling features
 prev_section: debugging
-next_section: faq
+next_section: configuring
 permalink: /docs/disabling-features/
 ---
 
