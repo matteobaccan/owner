@@ -45,7 +45,16 @@ body > header h1, body > header nav {
 
 body > header h1 {
     margin-top: 20px;
+}
+
+body > header small {
     margin-bottom: 20px;
+    text-shadow: 0px 3px 0px #444;
+    display: block;
+    font-size: 1em;
+    font-style: italic;
+    font-weight: bold;
+    white-space: nowrap;
 }
 
 body > header h1 span {
