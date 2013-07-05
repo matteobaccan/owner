@@ -60,7 +60,8 @@ public class AutoReloadExample {
             }
         });
 
-        System.out.println("You can change the file " + spec + " and see the changes reflected below");
+        System.out.println("You can change the file " + target.getAbsolutePath() + 
+                           " and see the changes reflected below");
         int someValue = 0;
         while (someValue >= 0) {
             someValue = cfg.someValue();
