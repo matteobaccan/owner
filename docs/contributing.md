@@ -13,7 +13,7 @@ There are many ways to help improving OWNER:
 
 1. If you want to implement some change, you can 
    [fork the project on github][fork] then send me a pull request. 
-   See the [workflow](#workflow).
+   See the [workflow](#toc_0).
 2. If you have some idea, you can [submit it as change request][issues] on 
      github.
 3. If you've found some defect, you can submit the bug on 
