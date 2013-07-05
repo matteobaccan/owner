@@ -12,11 +12,15 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.Reloadable;
+import org.aeonbits.owner.event.ReloadEvent;
+import org.aeonbits.owner.event.ReloadListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.save;
@@ -30,7 +34,7 @@ public class AutoReloadExample {
 
     @Sources(spec)
     @HotReload(1)
-    interface AutoReloadConfig extends Config {
+    interface AutoReloadConfig extends Config, Reloadable {
         @DefaultValue("5")
         Integer someValue();
     }
@@ -49,6 +53,12 @@ public class AutoReloadExample {
         }});
 
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
+        
+        cfg.addReloadListener(new ReloadListener() {
+            public void reloadPerformed(ReloadEvent event) {
+                System.out.print("\rReload intercepted at " + new Date() + " \n"); 
+            }
+        });
 
         System.out.println("You can change the file " + spec + " and see the changes reflected below");
         int someValue = 0;
