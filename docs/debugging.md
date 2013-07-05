@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Debugging
-prev_section: variables-expansion
+prev_section: reload
 next_section: disabling-features
 permalink: /docs/debugging/
 ---

@@ -2,7 +2,7 @@
 layout: docs
 title: Variables expansion
 prev_section: type-conversion
-next_section: debugging
+next_section: reload
 permalink: /docs/variables-expansion/
 ---
 
