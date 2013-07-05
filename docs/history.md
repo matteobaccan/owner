@@ -9,7 +9,7 @@ permalink: /docs/history/
 ## 1.0.4 (under development)
 
  * New website for documentation.
- * Added [sonar](http://sheldon.dyndns.tv:9000) to high attention on code quality.
+ * Added [sonar](http://sheldon.dyndns.tv:9000) to keep high attention on code quality.
  * Hot reload for file based sources. See Issue [#15][issue-15].
  * toString() method can be invoked on the Config object to get some useful text for debugging. See [#33][issue-33].
  * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure:
