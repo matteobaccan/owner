@@ -2,7 +2,7 @@
 layout: docs
 title: Configuring the ConfigFactory
 prev_section: disabling-features
-next_section: faq
+next_section: features
 permalink: /docs/configuring/
 ---
 

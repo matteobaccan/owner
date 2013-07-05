@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Frequently Asked Questions
-prev_section: configuring
+prev_section: features
 next_section: support
 permalink: /docs/faq/
 ---
