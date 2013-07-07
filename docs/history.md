@@ -34,9 +34,9 @@ permalink: /docs/history/
   [ffbit]: https://github.com/ffbit
   [ming13]: https://github.com/ming13
   [travis-ci]: https://travis-ci.org/lviggiano/owner
-  [accessible-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Accessible.html
-  [reloadable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Reloadable.html
-  [mutable-intf]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Mutable.html
+  [accessible-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Accessible.html
+  [reloadable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html
+  [mutable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Mutable.html
 
 ## 1.0.3.1
 

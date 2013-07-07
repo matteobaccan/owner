@@ -81,7 +81,7 @@ system, then run the following command from the project root:
 $ mvn test
 ```
 
-  [fully tested]: http://newinstance.it/owner/maven-site/cobertura/index.html
+  [fully tested]: http://newinstance.it/owner/latest/cobertura/index.html
 
 
 Continuous Integration 
@@ -96,5 +96,5 @@ Code quality reports
 
 You can access latest code quality reports from 
 [Sonar](http://sheldon.dyndns.tv:9000/dashboard/index/org.aeonbits.owner:owner)
-and [Maven](http://owner.newinstance.it/maven-site/project-reports.html) 
+and [Maven](http://owner.newinstance.it/latest/project-reports.html) 
 websites.

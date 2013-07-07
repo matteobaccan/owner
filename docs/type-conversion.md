@@ -125,9 +125,9 @@ more complex split logic, you can define your own tokenizer class via the
 [`@TokenizerClass`][tokenizerclass] annotation plus [`Tokenizer`][tokenizer] 
 interface.
 
-  [separator]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.Separator.html
-  [tokenizerclass]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.TokenizerClass.html
-  [tokenizer]: http://owner.newinstance.it/maven-site/apidocs/org/aeonbits/owner/Config.Tokenizer.html
+  [separator]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.Separator.html
+  [tokenizerclass]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.TokenizerClass.html
+  [tokenizer]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.Tokenizer.html
 
 Example:
 
