@@ -38,17 +38,17 @@ permalink: /docs/history/
   [reloadable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html
   [mutable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Mutable.html
 
-## 1.0.3.1
+## 1.0.3.1 / 26-Jun-2013
 
  * Fixed bug [#35](https://github.com/lviggiano/owner/issues/35)
 
-## 1.0.3
+## 1.0.3 / 03-Feb-2013
 
  * Fixed incompatibility with JRE 6 (project was compiled using JDK 7 and in some places I was catching
    ReflectiveOperationException that has been introduced in JDK 7).
  * Minor code cleanup/optimization.
 
-## 1.0.2
+## 1.0.2 / 27-Jan-2013
 
  * Changed package name from `owner` to `org.aeonbits.owner`.
    Sorry to break backward compatibility, but this has been necessary in order to publish the artifact on Maven Central
@@ -61,12 +61,12 @@ permalink: /docs/history/
 
   [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
 
-## 1.0.1
+## 1.0.1 / 27-Dec-2012
 
  * Removed [commons-lang][] transitive dependency. Minor bug fixes.
 
   [commons-lang]: http://commons.apache.org/lang/
 
-## 1.0
+## 1.0 / 24-Dec-2012
 
  * Initial release.
