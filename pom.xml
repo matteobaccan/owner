@@ -16,7 +16,7 @@
 
     <name>OWNER</name>
     <url>http://owner.aeonbits.org</url>
-    <description>A simple API to ease Java(TM) property files usage.</description>
+    <description>Get rid of the boilerplate code in Java properties based configuration.</description>
 
     <inceptionYear>2012</inceptionYear>
     <organization>
