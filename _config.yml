@@ -1,5 +1,6 @@
 pygments: true
 relative_permalinks: false
+url: http://owner.aeonbits.org
 google_analytics_id: UA-462505-8
 exclude: ["CNAME", "owner.aeonbits.org.iml", "README", "bin"]
 
