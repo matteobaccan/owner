@@ -155,11 +155,9 @@ enum Converters {
             if (annotation == null) return null;
             
             Class<? extends Converter> converterClass = annotation.value();
-            Object result = null;
+            Converter<?> converter;
             try {
-                result = converterClass.newInstance().convert(targetMethod, text);
-                if (result == null) return NULL;
-                return result;
+                converter = converterClass.newInstance();
             } catch (InstantiationException e) {
                 throw unsupported(e, "Converter class %s can't be instantiated: %s", 
                         converterClass.getCanonicalName(), e.getMessage());
@@ -167,6 +165,9 @@ enum Converters {
                 throw unsupported(e, "Converter class %s can't be accessed: %s", 
                         converterClass.getCanonicalName(), e.getMessage());
             }
+            Object result = converter.convert(targetMethod, text);
+            if (result == null) return NULL;
+            return result;
         }
     },
 
