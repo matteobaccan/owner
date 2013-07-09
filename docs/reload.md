@@ -97,10 +97,10 @@ by default, prevents the hot reloading from working fine.
 
 But *maybe* in future we can also support the hot reload from the classpath too,
 but if you need this feature urgently you can request the development on this 
-opening a request on [github issues], please explain also *why* you need this. 
+opening a request on [GitHub issues], please explain also *why* you need this. 
 At the moment this is considered a low priority for the development.
 
- [github issues]: https://github.com/lviggiano/owner/issues
+ [GitHub issues]: https://github.com/lviggiano/owner/issues
 
 For the moment, if you need to load a properties resource from the classpath,
 you can't use the default load mechanism (the one that does associate the 

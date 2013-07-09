@@ -7,7 +7,7 @@ permalink: /docs/building/
 ---
 
 Building OWNER from the sources has some advantages. For instance you can get 
-the latest features still under development on github master branch.
+the latest features still under development on GitHub master branch.
 
 Building OWNER requires following software being installed and configured in 
 your system:

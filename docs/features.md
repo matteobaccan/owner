@@ -2,7 +2,7 @@
 layout: docs
 title: Features
 prev_section: configuring
-next_section: faq
+next_section: why
 permalink: /docs/features/
 ---
 

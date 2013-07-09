@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Frequently Asked Questions
-prev_section: features
+prev_section: why
 next_section: support
 permalink: /docs/faq/
 ---
@@ -29,7 +29,7 @@ See: [Undefined properties]({{ site.url }}/docs/usage/#toc_3) in [Basic usage]({
 
 ## Why OWNER API doesn't implement this ${pretty.neat.feature} ?
 
-Explain it on [github issues][issues]. If I like the idea I will implement it.  
+Explain it on [GitHub issues][issues]. If I like the idea I will implement it.  
 Or, you can implement by yourself and send me a push request on GitHub.  
 See also [Contributing]({{ site.url }}/docs/contributing/).
 
