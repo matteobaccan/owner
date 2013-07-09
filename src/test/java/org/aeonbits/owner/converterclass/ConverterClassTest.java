@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class ConverterClassTest {
     private MyConfig cfg;

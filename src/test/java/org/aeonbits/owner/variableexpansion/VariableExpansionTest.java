@@ -16,12 +16,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class VariableExpansionTest {
-    /**
-     * @author Luigi R. Viggiano
-     */
     @Sources({"file:${user.dir}/src/test/resources/test.properties"})
     public static interface SampleConfigWithExpansion extends Config {
         public String favoriteColor();

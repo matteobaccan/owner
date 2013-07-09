@@ -18,7 +18,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class TokenizerAnnotationOnClassLevelTest {
 

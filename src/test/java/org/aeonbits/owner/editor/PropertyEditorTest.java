@@ -44,7 +44,6 @@ public class PropertyEditorTest {
         cfg = ConfigFactory.create(MyAppConfig.class);
     }
 
-
     @Test
     public void testPropertyEditorWithList() {
         List<User> users = cfg.users();

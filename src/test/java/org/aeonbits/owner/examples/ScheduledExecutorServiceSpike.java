@@ -15,12 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This spike is a learning test to understand how the asynchronous reload can be implemented.
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class ScheduledExecutorServiceSpike {
     public static void main(String[] args) throws InterruptedException {
         ThreadFactory tf = new ThreadFactory() {
-            @Override
             public Thread newThread(Runnable r) {
                 try {
                     Thread result =  new Thread(r);
@@ -34,17 +33,14 @@ public class ScheduledExecutorServiceSpike {
         ScheduledExecutorService stp = Executors.newSingleThreadScheduledExecutor(tf);
         stp.scheduleAtFixedRate(new Runnable() {
             int count = 0;
-            @Override
             public void run() {
                 if ( count++ % 2 == 0)
                     System.out.printf("*");
             }
         }, 500, 500, TimeUnit.MILLISECONDS);
 
-
         stp.scheduleAtFixedRate(new Runnable() {
             int count = 0;
-            @Override
             public void run() {
                 ++count;
                 if (count != 5 && count != 10)
@@ -54,7 +50,6 @@ public class ScheduledExecutorServiceSpike {
         }, 100, 100, TimeUnit.MILLISECONDS);
         stp.scheduleAtFixedRate(new Runnable() {
             int count = 0;
-            @Override
             public void run() {
                 System.out.print(++count);
             }

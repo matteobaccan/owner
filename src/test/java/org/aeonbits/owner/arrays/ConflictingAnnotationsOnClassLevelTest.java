@@ -20,7 +20,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class ConflictingAnnotationsOnClassLevelTest {
     private ConflictingAnnotationsOnClassLevel cfg;

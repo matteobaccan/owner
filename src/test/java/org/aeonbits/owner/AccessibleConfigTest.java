@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AccessibleConfigTest {
