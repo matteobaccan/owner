@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.ConverterClass;
+
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.File;
@@ -145,6 +147,28 @@ enum Converters {
         }
 
     },
+    
+    METHOD_WITH_CONVERTER_CLASS_ANNOTATION {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            ConverterClass annotation = targetMethod.getAnnotation(ConverterClass.class);
+            if (annotation == null) return null;
+            
+            Class<? extends Converter> converterClass = annotation.value();
+            Object result = null;
+            try {
+                result = converterClass.newInstance().convert(targetMethod, text);
+                if (result == null) return NULL;
+                return result;
+            } catch (InstantiationException e) {
+                throw unsupported(e, "Converter class %s can't be instantiated: %s", 
+                        converterClass.getCanonicalName(), e.getMessage());
+            } catch (IllegalAccessException e) {
+                throw unsupported(e, "Converter class %s can't be accessed: %s", 
+                        converterClass.getCanonicalName(), e.getMessage());
+            }
+        }
+    },
 
     CLASS_WITH_STRING_CONSTRUCTOR {
         @Override
@@ -190,7 +214,7 @@ enum Converters {
             throw unsupportedConversion(targetType, text);
         }
     };
-
+    
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
     static Object convert(Method targetMethod, Class<?> targetType, String text) {
@@ -227,4 +251,7 @@ enum Converters {
             return convertedValue;
         }
     }
+
+    static final Object NULL = new Object();
+
 }

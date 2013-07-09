@@ -34,7 +34,6 @@ abstract class Util {
     }
 
     static Time time = new Time() {
-        @Override
         public long getTime() {
             return System.currentTimeMillis();
         }

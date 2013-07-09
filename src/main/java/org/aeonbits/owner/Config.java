@@ -303,7 +303,7 @@ public interface Config {
     }
 
     /**
-     * Specifies simple <tt>{@link Tokenizer}</tt> class to allow the user to specify a custom logic to split
+     * Specifies a <tt>{@link Tokenizer}</tt> class to allow the user to define a custom logic to split
      * the property value into tokens to be used as single elements for vectors and collections.
      *
      * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
@@ -328,4 +328,15 @@ public interface Config {
         Class<? extends Tokenizer> value();
     }
 
+    /**
+     * Specifies a <tt>{@link Converter}</tt> class to allow the user to define a custom conversion logic for the
+     * type returned by the method. If the method returns a collection, the Converter is used to convert a single 
+     * element.
+     */
+    @Retention(RUNTIME)
+    @Target(METHOD)
+    @Documented
+    @interface ConverterClass {
+        Class<? extends Converter> value();
+    }
 }
