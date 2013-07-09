@@ -26,19 +26,13 @@ import static org.junit.Assert.fail;
  */
 public class ConverterClassTest {
     private MyConfig cfg;
-
     static class Server {
-        private static final int DEF_PORT = 80;
         private final String name;
         private final Integer port;
 
         public Server(String name, Integer port) {
             this.name = name;
             this.port = port;
-        }
-
-        public Server(String name) {
-            this(name, DEF_PORT);
         }
 
         @Override
@@ -64,7 +58,7 @@ public class ConverterClassTest {
         public Server convert(Method targetMethod, String text) {
             String[] split = text.split(":", -1);
             String name = split[0];
-            Integer port = Server.DEF_PORT;
+            Integer port = 80;
             if (split.length >= 2)
                 port = Integer.valueOf(split[1]);
             return new Server(name, port);
