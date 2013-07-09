@@ -60,7 +60,7 @@ classpath, with `@Sources` annotation we can instruct OWNER to load the
 properties file from any URL. In this case we have specified a URL pointing to
 the filesystem, since the URL specifies `file:` as protocol. 
 
-The hot reload works only on filesystem URLs, since resources. This means that
+The hot reload works only on filesystem URLs. This means that
 you can make it work with those two types of URLs:
 
  - `file:path/to/your.properties` a filesystem backed URL.
