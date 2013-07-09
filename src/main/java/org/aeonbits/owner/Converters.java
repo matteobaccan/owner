@@ -252,6 +252,9 @@ enum Converters {
         }
     }
 
+    /**
+     * The NULL object: when tryConvert returns this object, the conversion result is null.
+     */
     static final Object NULL = new Object();
 
 }
