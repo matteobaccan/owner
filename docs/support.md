@@ -11,7 +11,7 @@ If you need help, you have a question, or you need further details on how to use
 OWNER, you can refer to the following resources:
 
  - This [documentation web site](http://owner.aeonbits.org) 
- - The [owner mailing-list](http://groups.google.com/group/owner-api)
+ - The [OWNER mailing-list](http://groups.google.com/group/owner-api)
  - The [GitHub wiki](https://github.com/lviggiano/owner/wiki), that is 
    accessible and modifiable by all GitHub users.
  - The [GitHub issues](https://github.com/lviggiano/owner/issues) where you can
