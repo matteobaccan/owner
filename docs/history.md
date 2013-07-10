@@ -8,12 +8,13 @@ permalink: /docs/history/
 
 ## 1.0.4 (under development)
 
+ * New `@ConverterClass` annotation. See [#38][issue-38].
  * New website for documentation.
  * Added [sonar](http://sheldon.dyndns.tv:9000) to keep high attention on code quality.
- * Hot reload for file based sources. See Issue [#15][issue-15].
+ * Hot reload for file based sources. See [#15][issue-15].
  * toString() method can be invoked on the Config object to get some useful text for debugging. See [#33][issue-33].
  * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure:
-   setProperty, removeProperty, clear. See Issue [#31][issue-31].
+   setProperty, removeProperty, clear. See [#31][issue-31].
  * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and other methods
    giving read access to the underlying properties structure.
  * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf]. At the 
@@ -22,10 +23,11 @@ permalink: /docs/history/
  * Added [Travis CI][travis-ci] to the project to track changes and run tests on different JDK versions.
  * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
-   formatting. See Issue [#20][issue-20].
+   formatting. See [#20][issue-20].
  * Website code snippets now have syntax highlighting. Thanks [ming13][].
  * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together.
  
+  [issue-38]: https://github.com/lviggiano/owner/issues/38
   [issue-33]: https://github.com/lviggiano/owner/issues/33
   [issue-17]: https://github.com/lviggiano/owner/issues/17
   [issue-20]: https://github.com/lviggiano/owner/issues/20

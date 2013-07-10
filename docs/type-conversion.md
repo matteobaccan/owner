@@ -67,34 +67,36 @@ constructor then return it.
 Arrays and Collections
 ----------------------
 
-Version 1.0.4 introduced first class support for Java Arrays and Collections.
+OWNER version 1.0.4 introduced first class support for Java Arrays and Collections.
 
 So now you can define properties like:
 
 ```java
 public class MyConfig extends Config {
 
-    @DefaultValue("apple, pear, orange")
-    public String[] fruit();
+  @DefaultValue("apple, pear, orange")
+  public String[] fruit();
 
-    @Separator(";")
-    @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
-    public int[] fibonacci();
+  @Separator(";")
+  @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
+  public int[] fibonacci();
 
-    @Separator(File.pathSeparator);
-    File[] path();
+  @Separator(File.pathSeparator);
+  File[] path();
 
-    @DefaultValue("1, 2, 3, 4")
-    List<Integer> ints();
+  @DefaultValue("1, 2, 3, 4")
+  List<Integer> ints();
 
-    @DefaultValue("http://owner.aeonbits.org, http://www.github.com, http://www.google.com")
-    MyOwnCollection<URL> myBookmarks();
+  @DefaultValue(
+    "http://aeonbits.org, http://github.com, http://google.com")
+  MyOwnCollection<URL> myBookmarks();
 
-    // Concrete class are allowed (in this case java.util.Stack)
-    // when type is not specified <String> is assumed as default
-    @DefaultValue(
-        "The Lord of the Rings, The Little Prince, The Da Vinci Code")
-    Stack books();
+  // Concrete class are allowed (in this case java.util.Stack)
+  // when type is not specified <String> is assumed as default
+  @DefaultValue(
+    "The Lord of the Rings,The Little Prince,The Da Vinci Code")
+  Stack books();
+
 }
 ```
 
@@ -244,6 +246,67 @@ public interface WrongButItWorks extends Config {
 It is not recommended to have above wrong annotations setup: it is considered a bug in the code, and even if this setup
 works at the moment, we may change this behavior in future.
 
+{% include version-1.0.4.html %}
+
+The @ConverterClass annotation
+------------------------------
+
+OWNER version 1.0.4 introduced the 
+[`@ConverterClass`](http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.ConverterClass.html) 
+annotation that allows the user to specify a customized conversion logic implementing the 
+[`Converter`](http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Converter.html) interface.
+
+```java    
+interface MyConfig extends Config {
+    @DefaultValue("foobar.com:8080")
+    @ConverterClass(ServerConverter.class)
+    Server server();
+
+    @DefaultValue(
+      "google.com, yahoo.com:8080, owner.aeonbits.org:4000")
+    @ConverterClass(ServerConverter.class)
+    Server[] servers();        
+}
+
+class Server {
+    private final String name;
+    private final Integer port;
+
+    public Server(String name, Integer port) {
+        this.name = name;
+        this.port = port;
+    }
+}
+
+public class ServerConverter implements Converter<Server> {
+    public Server convert(Method targetMethod, String text) {
+        String[] split = text.split(":", -1);
+        String name = split[0];
+        Integer port = 80;
+        if (split.length >= 2)
+            port = Integer.valueOf(split[1]);
+        return new Server(name, port);
+    }
+}
+
+MyConfig cfg = ConfigFactory.create(MyConfig.class);
+Server s = cfg.server(); // will return a single server
+Server[] ss = cfg.servers(); // it works also with collections
+```
+
+In the above example, when calling the method `servers()` that returns an array of Server objects, the ServerConverter
+will be used several times to convert every single element. In any case the ServerConverter in the above example always
+works with a single element.
+
+To see the complete test cases supported by owner see [ConverterClassTest] on GitHub.
+
+  [ConverterClassTest]: https://github.com/lviggiano/owner/blob/master/src/test/java/org/aeonbits/owner/converterclass/ConverterClassTest.java
+
+{% include version-1.0.4.html %}
+
+All the types supported by OWNER
+--------------------------------
+
 But there is more. OWNER API supports automatic conversion for:
 
   1. Primitive types: boolean, byte, short, integer, long, float, double.
@@ -256,9 +319,11 @@ But there is more. OWNER API supports automatic conversion for:
   8. Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object`.
   9. Any class declaring a public *static* method `valueOf(java.lang.String)` that returns an instance of itself.
   10. Any class for which you can register a [`PropertyEditor`][propedit] via
-      [`PropertyEditorManager.registerEditor()`][propeditmanager].
+      [`PropertyEditorManager.registerEditor()`][propeditmanager].  
+      (See [PropertyEditorTest] as an example).
   11. Any array having above types as elements.
-  12. Any Java Collections of all above types: Set, List, SortedSet or concrete implementations like LinkedHashSet or user
+  12. Any object that can be instantiated via `@ConverterClass` annotation explained before.
+  13. Any Java Collections of all above types: Set, List, SortedSet or concrete implementations like LinkedHashSet or user
       defined collections having a default no-arg constructor. [`Map`][Map] and sub-interfaces are not supported.
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
@@ -271,3 +336,4 @@ See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you wan
   [propeditmanager]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor
   [propedit]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditor.html
   [propeditsupport]:http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorSupport.html
+  [PropertyEditorTest]:https://github.com/lviggiano/owner/blob/master/src/test/java/org/aeonbits/owner/editor/PropertyEditorTest.java
