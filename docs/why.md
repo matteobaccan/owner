@@ -22,7 +22,7 @@ OWNER solves the problem providing an interface object that
  - doesn't need to have an actual properties file backing your configuration, if you use `@DefaultValue`.
  - provides a lot of features, like hot reloading, variables expansion, etc.
  - leaves you free to do everything you are already doing with java.util.Properties.
- - does support a super powerful type conversion, which includes arrays and collections, many standard Java objects,
-   and even the possibility to plug your own type conversion.
+ - does support a super powerful [type conversion]({{ site.url }}/docs/type-conversion/), which includes arrays, 
+   collections, many standard Java objects, and even the possibility to plug your own conversion logic.
 
 ...and more than everything, it's not an ugly, rigid, boring, repetitive list of methods doing all the same thing.
