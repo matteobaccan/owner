@@ -34,14 +34,13 @@ to your pom.xml:
     <dependency>
         <groupId>org.aeonbits.owner</groupId>
         <artifactId>owner</artifactId>
-        <version>1.0.3.1</version>
+        <version>1.0.4</version>
     </dependency>
 </dependencies>
 ```
 
 <div class="note">
   <h5>Finding the latest version released</h5>
-  <p>At the moment I am writing the last released version is the 1.0.3.1.</p>
   <p>You can search on the <a href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22">Maven Central Repository</a> 
   to verify the latest available release.</p>
 </div>

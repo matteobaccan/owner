@@ -60,6 +60,7 @@ owner-1.0.1
 owner-1.0.2
 owner-1.0.3
 owner-1.0.3.1
+owner-1.0.4
 $ git checkout owner-1.0.2
 HEAD is now at d2e4bbf... [maven-release-plugin] prepare release owner-1.0.2
 $ mvn install
