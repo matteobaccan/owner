@@ -50,8 +50,6 @@ Notice that, if you later change the value in the ConfigFactory and try to reloa
 affected, since the config object works on a snapshot of the those properties generated when the `create()` method is 
 invoked.
 
-{% include version-1.0.4.html %}
-
 Nothing prevents you to do something like:
 
 

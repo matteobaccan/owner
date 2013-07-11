@@ -6,8 +6,9 @@ next_section: license
 permalink: /docs/history/
 ---
 
-## 1.0.4 (under development)
+## 1.0.4 / 11-Jul-2013
 
+ * Fixed bug [#40][issue-40] about tilde expansion. 
  * New `@ConverterClass` annotation. See [#38][issue-38].
  * New website for documentation.
  * Added [sonar](http://sheldon.dyndns.tv:9000) to keep high attention on code quality.
@@ -27,6 +28,7 @@ permalink: /docs/history/
  * Website code snippets now have syntax highlighting. Thanks [ming13][].
  * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together.
  
+  [issue-40]: https://github.com/lviggiano/owner/issues/40
   [issue-38]: https://github.com/lviggiano/owner/issues/38
   [issue-33]: https://github.com/lviggiano/owner/issues/33
   [issue-17]: https://github.com/lviggiano/owner/issues/17

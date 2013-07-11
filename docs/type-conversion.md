@@ -246,7 +246,6 @@ public interface WrongButItWorks extends Config {
 It is not recommended to have above wrong annotations setup: it is considered a bug in the code, and even if this setup
 works at the moment, we may change this behavior in future.
 
-{% include version-1.0.4.html %}
 
 The @ConverterClass annotation
 ------------------------------
@@ -302,7 +301,6 @@ To see the complete test cases supported by owner see [ConverterClassTest] on Gi
 
   [ConverterClassTest]: https://github.com/lviggiano/owner/blob/master/src/test/java/org/aeonbits/owner/converterclass/ConverterClassTest.java
 
-{% include version-1.0.4.html %}
 
 All the types supported by OWNER
 --------------------------------
