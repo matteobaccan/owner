@@ -39,4 +39,4 @@ v1.0.4 contains some key enhancements and bug fixes:
   [reloadable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html
   [mutable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Mutable.html
 
-See the [History](/docs/history/#103__20130607) page for more information on this release.
+See the [History](/docs/history/) page for more information on this release.
