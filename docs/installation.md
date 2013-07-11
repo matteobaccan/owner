@@ -41,7 +41,7 @@ to your pom.xml:
 
 <div class="note">
   <h5>Finding the latest version released</h5>
-  <p>You can search on the <a href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22">Maven Central Repository</a> 
+  <p>You can search on the <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner/">Maven Central Repository</a> 
   to verify the latest available release.</p>
 </div>
 
