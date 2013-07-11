@@ -14,7 +14,7 @@ permalink: /feed.xml
   >
 <channel>
     <title xml:lang="en">{{ site.title }}</title>
-    <atom:link type="application/atom+xml" href="{{ site.url }}/feed/" rel="self"/>
+    <atom:link type="application/atom+xml" href="{{ site.url }}{{ page.permalink }}" rel="self"/>
     <link>{{ site.url }}</link>
     <pubDate>{{ site.time | date: "%a, %d %b %Y %H:%M:%S %z" }}</pubDate>
     <lastBuildDate>{{ site.time | date: "%a, %d %b %Y %H:%M:%S %z" }}</lastBuildDate>
