@@ -34,7 +34,7 @@ class VariablesExpander {
 
 
     String expand(String path) {
-        path = expandUserHome(path);
-        return substitutor.replace(path);
+        String expanded = expandUserHome(path);
+        return substitutor.replace(expanded);
     }
 }

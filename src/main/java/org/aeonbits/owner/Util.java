@@ -55,8 +55,10 @@ abstract class Util {
     }
 
     static String expandUserHome(String text) {
-        if (text.indexOf('~') != -1)
-            return text.replace("~", System.getProperty("user.home"));
+        if (text.equals("~"))
+            return System.getProperty("user.home");
+        if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0)
+            return text.replaceFirst("~/", System.getProperty("user.home") + "/");
         return text;
     }
 
