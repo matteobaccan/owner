@@ -11,8 +11,6 @@ v1.0.4 contains some key enhancements and bug fixes:
 
  * Fixed bug [#40][issue-40] about tilde expansion. 
  * New `@ConverterClass` annotation. See [#38][issue-38].
- * New website for documentation.
- * Added [sonar](http://sheldon.dyndns.tv:9000) to keep high attention on code quality.
  * Hot reload for file based sources. See [#15][issue-15].
  * toString() method can be invoked on the Config object to get some useful text for debugging. See [#33][issue-33].
  * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure:
@@ -22,11 +20,9 @@ v1.0.4 contains some key enhancements and bug fixes:
  * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf]. At the 
    current time I am thinking to merge this interface with `Mutable`, before releasing, but that reloading() is a 
    different operation and purpose than programmatically alter things... so for now, it's here.
- * Added [Travis CI][travis-ci] to the project to track changes and run tests on different JDK versions.
  * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
    formatting. See [#20][issue-20].
- * Website code snippets now have syntax highlighting. Thanks [ming13][].
  * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together.
  
   [issue-40]: https://github.com/lviggiano/owner/issues/40
