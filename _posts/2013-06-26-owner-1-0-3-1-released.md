@@ -11,4 +11,7 @@ v1.0.3.1 contains some key enhancements and bug fixes:
 
  * Fixed bug [#35](https://github.com/lviggiano/owner/issues/35)
 
-See the [History](/docs/history/) page for more information on this release.
+See the [announcement] and the [History] page for more information on this release.
+
+ [announcement]: http://www.aeonbits.org/owner/2013/06/26/owner-1031-released/
+ [History]: {{ site.url }}/docs/history/
