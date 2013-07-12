@@ -18,9 +18,7 @@ permalink: /docs/history/
    setProperty, removeProperty, clear. See [#31][issue-31].
  * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and other methods
    giving read access to the underlying properties structure.
- * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf]. At the 
-   current time I am thinking to merge this interface with `Mutable`, before releasing, but that reloading() is a 
-   different operation and purpose than programmatically alter things... so for now, it's here.
+ * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf].
  * Added [Travis CI][travis-ci] to the project to track changes and run tests on different JDK versions.
  * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
