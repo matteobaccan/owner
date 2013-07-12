@@ -9,7 +9,7 @@ categories: [release]
 
 v1.0.4 contains some key enhancements and bug fixes.
 
-New Features
+Enhancements
 ------------
 
  * New `@ConverterClass` annotation.  
@@ -32,7 +32,7 @@ New Features
    formatting.  
    See [Disabling Features]({{ site.url }}/docs/disabling-features/), [#20][issue-20].
 
-Bugs fixed 
+Bugs fixes 
 ----------
 
  * Fixed bug [#40][issue-40] about tilde expansion. 
