@@ -49,8 +49,6 @@ Bugs fixed
   [issue-31]: https://github.com/lviggiano/owner/issues/31
   [issue-15]: https://github.com/lviggiano/owner/issues/15
   [ffbit]: https://github.com/ffbit
-  [ming13]: https://github.com/ming13
-  [travis-ci]: https://travis-ci.org/lviggiano/owner
   [accessible-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Accessible.html
   [reloadable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html
   [mutable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Mutable.html
