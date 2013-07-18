@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2013, Luigi R. Viggiano
   ~ All rights reserved.
@@ -9,6 +10,6 @@
     fooValue
     <bar><![CDATA[this contains tags that can break <xml> or properties 
 foo=bar]]></bar>
-    <baz attr="bazValue"/>
-    <qux value="quxValue">quux</qux>
+    <baz attr="bazValue" specialChars="å∫ç∂´ƒ©˙ˆ∆ü"/>
+    <qux value="quxValue" value2="quxValue2">quux</qux>
 </foo>
