@@ -12,7 +12,7 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.FakeTime;
+import org.aeonbits.owner.TimeForTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -44,7 +44,7 @@ public class SyncAutoReloadTest {
     private static File target;
     private static File jarTarget;
 
-    private static FakeTime time;
+    private static TimeForTest time;
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
@@ -54,7 +54,7 @@ public class SyncAutoReloadTest {
 
     @Before
     public void before() {
-        time = new FakeTime();
+        time = new TimeForTest();
         time.setup();                // become owner of time (now I can control the elapse of time in this test)
     }
 

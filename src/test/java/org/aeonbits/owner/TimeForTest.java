@@ -15,13 +15,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Luigi R. Viggiano
  */
-public class FakeTime implements Time {
+public class TimeForTest implements Time {
 
     private Time backup;
 
     private long time;
 
-    public FakeTime() {
+    public TimeForTest() {
         this.time = System.currentTimeMillis();
     }
 

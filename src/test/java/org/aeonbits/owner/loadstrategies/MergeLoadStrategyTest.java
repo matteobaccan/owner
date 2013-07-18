@@ -6,10 +6,12 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.loadstrategies;
 
+import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import static org.aeonbits.owner.Config.LoadType.MERGE;
@@ -19,7 +21,7 @@ import static org.junit.Assert.assertNull;
 /**
  * @author Luigi R. Viggiano
  */
-public class MergeConfigTest {
+public class MergeLoadStrategyTest {
     @Test
     public void testPropertyMerge() {
         MergeConfig cfg = ConfigFactory.create(MergeConfig.class);

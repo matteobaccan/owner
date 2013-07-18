@@ -17,6 +17,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class ConfigWithSubstitutionTest {
 
+    public static interface ConfigWithSubstitutionFile  extends Config {
+        String story();
+    }
+
     @Test
     public void testConfigWithSubstitutionFile() {
         ConfigWithSubstitutionFile conf = ConfigFactory.create(ConfigWithSubstitutionFile.class);
@@ -36,18 +40,7 @@ public class ConfigWithSubstitutionTest {
         assertEquals("Please grandma, tell me the story of 'The quick brown fox jumped over the lazy dog'", conf.tellmeTheStory());
     }
 
-    /**
-     * @author luigi
-     */
-    public static interface ConfigWithSubstitutionFile  extends Config {
-        String story();
-    }
-
-    /**
-     * @author luigi
-     */
     public static interface ConfigWithSubtstitutionAnnotationsSubInterface extends ConfigWithSubstitutionAnnotations {
-
         @DefaultValue("grandma")
         public String teller();
 
@@ -55,9 +48,6 @@ public class ConfigWithSubstitutionTest {
         public String tellmeTheStory();
     }
 
-    /**
-     * @author luigi
-     */
     public static interface ConfigWithSubstitutionAnnotations extends Config {
 
         @DefaultValue("The ${animal} jumped over the ${target}")

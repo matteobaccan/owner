@@ -6,8 +6,13 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.interfaces;
 
+import org.aeonbits.owner.Accessible;
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.PropertiesManagerForTest;
+import org.aeonbits.owner.VariablesExpanderForTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -35,7 +40,7 @@ public class AccessibleConfigTest {
     @Mock
     private ScheduledExecutorService scheduler;
 
-    private VariablesExpander expander = new VariablesExpander(new Properties());
+    private VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
 
     public static interface AccessibleConfig extends Config, Accessible {
         @DefaultValue("Bohemian Rapsody - Queen")
@@ -49,7 +54,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintStream() throws IOException {
         ByteArrayOutputStream expected = new ByteArrayOutputStream();
-        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler, expander);
+        PropertiesManagerForTest manager = new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander);
         manager.load().list(new PrintStream(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);
@@ -62,7 +67,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintWriter() throws IOException {
         StringWriter expected = new StringWriter();
-        PropertiesManager manager = new PropertiesManager(AccessibleConfig.class, new Properties(), scheduler, expander);
+        PropertiesManagerForTest manager = new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander);
         manager.load().list(new PrintWriter(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);

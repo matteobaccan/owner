@@ -6,8 +6,12 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.interfaces;
 
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.Mutable;
+import org.aeonbits.owner.UtilTest;
 import org.junit.Before;
 import org.junit.Test;
 

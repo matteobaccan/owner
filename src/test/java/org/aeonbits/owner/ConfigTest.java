@@ -8,25 +8,17 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Sources;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Luigi R. Viggiano
@@ -36,13 +28,9 @@ public class ConfigTest {
 
     @Mock
     private ScheduledExecutorService scheduler;
-
     private VariablesExpander expander = new VariablesExpander(new Properties());
 
     public static interface SampleConfig extends Config {
-
-        String testKey();
-
         String hello(String param);
 
         @DefaultValue("Bohemian Rapsody - Queen")
@@ -70,34 +58,6 @@ public class ConfigTest {
     }
 
     @Test
-    public void shouldReturnTheValueFromTheAssociatedProperties() {
-        SampleConfig config = ConfigFactory.create(SampleConfig.class);
-        assertEquals("testValue", config.testKey());
-    }
-
-    @Test
-    public void shouldReturnTheResourceForAClass() throws IOException {
-        ConfigURLStreamHandler handler = new ConfigURLStreamHandler(SampleConfig.class.getClassLoader(),
-                new VariablesExpander(new Properties()));
-        ConfigURLStreamHandler spy = spy(handler);
-
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler, expander);
-
-        manager.doLoad(spy);
-        URL expected =
-                new URL(null, "classpath:org/aeonbits/owner/ConfigTest$SampleConfig.properties", handler);
-        verify(spy, times(1)).openConnection(eq(expected));
-    }
-
-    @Test
-    public void shouldReturnThePropertiesForTheClass() {
-        PropertiesManager manager = new PropertiesManager(SampleConfig.class, new Properties(), scheduler, expander);
-        Properties props = manager.load();
-        assertNotNull(props);
-        assertEquals("testValue", props.getProperty("testKey"));
-    }
-
-    @Test
     public void shouldDoReplacements() {
         SampleConfig config = ConfigFactory.create(SampleConfig.class, new Properties());
         assertEquals("Hello Luigi.", config.hello("Luigi"));
@@ -115,104 +75,15 @@ public class ConfigTest {
         cfg.voidMethodWithoutValue();
     }
 
-    @Sources({"classpath:foo/bar/baz.properties",
-            "file:~/.testfoobar.blahblah",
-            "file:/etc/testfoobar.blahblah",
-            "classpath:org/aeonbits/owner/FooBar.properties",
-            "file:~/blahblah.properties"})
-    public static interface SampleConfigWithSource extends Config {
-        //  @Key("hello.world");
-        //  @DefaultValue("Hello World");
-        String helloWorld();
-
+    static interface StringSubstitutionConfig extends Config {
         @DefaultValue("Hello Mr. %s!")
         String helloMr(String name);
-
-        @DefaultValue("42")
-        int answerToLifeUniverseAndEverything();
-
-        @DefaultValue("3.141592653589793")
-        double pi();
-
-        @DefaultValue("0.5")
-        float half();
-
-        @DefaultValue("false")
-        boolean worldIsFlat();
-
-        @DefaultValue("7")
-        Integer daysInWeek();
-    }
-
-    @Test
-    public void shouldLoadURLFromSpecifiedSource() throws IOException {
-        final URL[] lastURL = { null };
-        ConfigURLStreamHandler handler = new ConfigURLStreamHandler(SampleConfigWithSource.class.getClassLoader(),
-                new VariablesExpander(new Properties())) {
-            @Override
-            protected URLConnection openConnection(URL url) throws IOException {
-                lastURL[0] = url;
-                return super.openConnection(url);
-            }
-        };
-        PropertiesManager manager = new PropertiesManager(SampleConfigWithSource.class, new Properties(), scheduler, expander);
-        manager.doLoad(handler);
-        URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
-                handler);
-        assertEquals(expected, lastURL[0]);
-    }
-
-    @Test
-    public void shouldLoadPropertiesFromSpecifiedSource() throws Exception {
-        SampleConfigWithSource sample = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals("Hello World!", sample.helloWorld());
-    }
-
-    @Sources("classpath:foo/bar/thisDoesntExists.properties")
-    public static interface InvalidSourceConfig extends Config {
-        public String someProperty();
-    }
-
-    @Test
-    public void shouldReturnNullProperty() {
-        InvalidSourceConfig config = ConfigFactory.create(InvalidSourceConfig.class);
-        assertNull(config.someProperty());
     }
 
     @Test
     public void testDefaultStringValue() {
-        SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
+        StringSubstitutionConfig config = ConfigFactory.create(StringSubstitutionConfig.class);
         assertEquals("Hello Mr. Luigi!", config.helloMr("Luigi"));
-    }
-
-    @Test
-    public void testDefaultIntValue() {
-        SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals(42, config.answerToLifeUniverseAndEverything());
-    }
-
-    @Test
-    public void testDefautDoubleValue() {
-        SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals(3.141592653589793D, config.pi(), 0.000000000000001D) ;
-    }
-
-    @Test
-    public void testDefautFloatValue() {
-        SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals(0.5f, config.half(), 0.01f);
-    }
-
-    @Test
-    public void testDefautBooleanValue() {
-        SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals(false, config.worldIsFlat());
-    }
-
-    @Test
-    public void testDefaultIntegerValue() {
-        SampleConfigWithSource config = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals(new Integer(7), config.daysInWeek());
     }
 
     @Test
@@ -252,17 +123,6 @@ public class ConfigTest {
         SubstituteAndFormat cfg = ConfigFactory.create(SubstituteAndFormat.class);
         assertEquals("Hello Mr. Luigi", cfg.salutation("Luigi"));
         assertEquals("Mr. Luigi", cfg.mister("Luigi"));
-    }
-
-
-    @Sources("httpz://foo.bar.baz")
-    interface InvalidURLConfig extends Config {
-
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testWhenURLIsInvalid() {
-        ConfigFactory.create(InvalidURLConfig.class);
     }
 
 }
