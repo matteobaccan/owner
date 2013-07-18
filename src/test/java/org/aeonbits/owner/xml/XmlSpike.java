@@ -11,7 +11,6 @@ package org.aeonbits.owner.xml;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,32 +27,34 @@ import java.io.StringWriter;
 import java.util.Properties;
 import java.util.Stack;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author Luigi R. Viggiano
  */
 public class XmlSpike {
 
     static class XmlToPropsHandler extends DefaultHandler2 {
-        // The required DTD URI for exported properties
         private static final String PROPS_DTD_URI =
                 "http://java.sun.com/dtd/properties.dtd";
 
         private static final String PROPS_DTD =
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                "<!-- DTD for properties -->" +
-                "<!ELEMENT properties ( comment?, entry* ) >" +
-                "<!ATTLIST properties version CDATA #FIXED \"1.0\">" +
-                "<!ELEMENT comment (#PCDATA) >" +
-                "<!ELEMENT entry (#PCDATA) >" +
-                "<!ATTLIST entry key CDATA #REQUIRED>";
-        
+                        "<!-- DTD for properties -->" +
+                        "<!ELEMENT properties ( comment?, entry* ) >" +
+                        "<!ATTLIST properties version CDATA #FIXED \"1.0\">" +
+                        "<!ELEMENT comment (#PCDATA) >" +
+                        "<!ELEMENT entry (#PCDATA) >" +
+                        "<!ATTLIST entry key CDATA #REQUIRED>";
+
         private boolean isJavaPropertiesFormat = false;
         private final PrintWriter writer;
         private final Stack<String> paths = new Stack<String>();
-
+        private final Stack<StringBuilder> value = new Stack<StringBuilder>();
 
         @Override
-        public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
+        public InputSource resolveEntity(String name, String publicId, String baseURI,
+                                         String systemId) throws SAXException, IOException {
             if (systemId.equals(PROPS_DTD_URI)) {
                 isJavaPropertiesFormat = true;
                 InputSource is;
@@ -65,38 +66,15 @@ public class XmlSpike {
             }
         }
 
-        @Override
-        public void warning(SAXParseException e) throws SAXException {
-            System.err.println("!!!!!!!!!!!!!!!!!!!!!" + e);
-        }
-
-        @Override
-        public void error(SAXParseException e) throws SAXException {
-            System.err.println("!!!!!!!!!!!!!!!!!!!!!" + e);
-        }
-
         public XmlToPropsHandler(PrintWriter writer) {
             this.writer = writer;
         }
 
         @Override
-        public void skippedEntity(String name) throws SAXException {
-            System.err.println("skipped entity: " + name);
-        }
-
-        @Override
-        public void unparsedEntityDecl(String name, String publicId, String systemId, String notationName) throws SAXException {
-            System.err.println("skipped entity: " + name);
-        }
-
-        @Override
-        public void notationDecl(String name, String publicId, String systemId) throws SAXException {
-            System.err.println("skipped entity: " + name);
-        }
-
-        @Override
         public void startElement(String uri, String localName, String qName,
                                  Attributes attributes) throws SAXException {
+            this.value.push(new StringBuilder());
+
             if (isJavaPropertiesFormat) {
                 if ("entry".equals(qName))
                     paths.push(attributes.getValue("key"));
@@ -119,26 +97,33 @@ public class XmlSpike {
 
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
-            String value = fixNewLines(new String(ch, start, length).trim());
+            String value = new String(ch, start, length);
             if (!value.isEmpty())
-                writer.println(paths.peek() + "=" + value);
+                this.value.peek().append(value);
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
+            String key = paths.peek();
+            String value = this.value.peek().toString().trim();
+            if (!value.isEmpty() &&
+                    !(isJavaPropertiesFormat && "comment".equals(key)))
+                writer.println(key + "=" + fixNewLines(value));
+            this.value.pop();
             paths.pop();
         }
+
     }
 
-    public static Properties load(InputStream inputStream) throws ParserConfigurationException, SAXException, 
+    public static Properties load(InputStream inputStream) throws ParserConfigurationException, SAXException,
             IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setFeature("http://xml.org/sax/features/validation", true);
         SAXParser parser = factory.newSAXParser();
 
         StringWriter output = new StringWriter();
         PrintWriter pw = new PrintWriter(output);
         XmlToPropsHandler h = new XmlToPropsHandler(pw);
+        parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
         parser.parse(inputStream, h);
         pw.flush();
 
@@ -175,5 +160,7 @@ public class XmlSpike {
         props.store(System.out, "props");
         props2.store(System.out, "props2");
         props3.store(System.out, "props3");
+
+        assertEquals(props2, props3);
     }
 }

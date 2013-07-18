@@ -11,5 +11,7 @@
     <bar><![CDATA[this contains tags that can break <xml> or properties 
 foo=bar]]></bar>
     <baz attr="bazValue" specialChars="å∫ç∂´ƒ©˙ˆ∆ü"/>
-    <qux value="quxValue" value2="quxValue2">quux</qux>
+    <qux value="quxValue" value2="quxValue2">
+        quux
+    </qux>
 </foo>
