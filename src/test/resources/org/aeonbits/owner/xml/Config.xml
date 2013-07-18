@@ -7,7 +7,8 @@
   -->
 <foo>
     fooValue
-    <bar><![CDATA[ this contains tags that can break <xml> or properties foo=bar ]]></bar>
+    <bar><![CDATA[this contains tags that can break <xml> or properties 
+foo=bar]]></bar>
     <baz attr="bazValue"/>
     <qux value="quxValue">quux</qux>
 </foo>

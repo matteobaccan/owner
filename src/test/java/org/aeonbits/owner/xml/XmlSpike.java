@@ -59,16 +59,20 @@ public class XmlSpike {
             paths.push(path);
             for (int i = 0; i < attributes.getLength(); i++) {
                 String attrName = attributes.getQName(i);
-                String attrValue = attributes.getValue(i);
+                String attrValue = fixNewLines(attributes.getValue(i));
                 writer.println(path + "." + attrName + "=" + attrValue);
             }
         }
 
+        private String fixNewLines(String value) {
+            return value.replace("\n", "\\\n");
+        }
+
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
-            String value = new String(ch, start, length).trim();
+            String value = fixNewLines(new String(ch, start, length).trim());
             if (!value.isEmpty())
-                writer.println(paths.peek() + "=" + new String(ch, start, length).trim());
+                writer.println(paths.peek() + "=" + value);
         }
 
         @Override
