@@ -16,15 +16,16 @@ import org.xml.sax.ext.DefaultHandler2;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Stack;
 
 import static org.junit.Assert.assertEquals;
@@ -126,8 +127,9 @@ public class XmlSpike {
         parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
         parser.parse(inputStream, h);
         pw.flush();
+        output.flush();
 
-        System.out.println("output:\n" + output);
+        System.out.println("Output:\n" + output);
 
         Properties props = new Properties();
         props.load(new StringReader(output.toString()));
@@ -144,12 +146,11 @@ public class XmlSpike {
         File file = new File("target/test-resources/props.xml");
         file.getParentFile().mkdirs();
 
-        ByteArrayOutputStream propertiesxmlformat = new ByteArrayOutputStream();
-        props.storeToXML(propertiesxmlformat, "test");
-        String propsXmlString = propertiesxmlformat.toString();
+        props.storeToXML(new FileOutputStream(file), "test");
 
 
-        System.out.println("java xml properties format:" + propsXmlString);
+        System.out.println("java xml properties format:\n" + toString(new FileInputStream(file))) ;
+        
 
         Properties props2 = new Properties();
         props2.loadFromXML(new FileInputStream(file));
@@ -157,10 +158,18 @@ public class XmlSpike {
 
         Properties props3 = load(new FileInputStream(file));
 
+        System.out.println();
         props.store(System.out, "props");
+        System.out.println();
         props2.store(System.out, "props2");
+        System.out.println();
         props3.store(System.out, "props3");
 
         assertEquals(props2, props3);
+    }
+
+    private static String toString(InputStream is) {
+        Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 }
