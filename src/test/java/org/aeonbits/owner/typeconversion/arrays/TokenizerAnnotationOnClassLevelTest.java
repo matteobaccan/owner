@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.arrays;
+package org.aeonbits.owner.typeconversion.arrays;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.TokenizerClass;

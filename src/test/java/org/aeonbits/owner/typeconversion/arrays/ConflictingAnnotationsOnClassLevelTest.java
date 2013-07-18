@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.arrays;
+package org.aeonbits.owner.typeconversion.arrays;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Separator;
@@ -47,7 +47,7 @@ public class ConflictingAnnotationsOnClassLevelTest {
         } catch (UnsupportedOperationException ex) {
             assertThat(ex.getMessage(),
                     equalTo("You cannot specify @Separator and @TokenizerClass both together on class level for 'org" +
-                            ".aeonbits.owner.arrays.ConflictingAnnotationsOnClassLevelTest" +
+                            ".aeonbits.owner.typeconversion.arrays.ConflictingAnnotationsOnClassLevelTest" +
                             ".ConflictingAnnotationsOnClassLevel'"));
         }
     }

@@ -6,15 +6,19 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.arrays;
-
-import org.aeonbits.owner.Tokenizer;
+package org.aeonbits.owner.typeconversion.editor;
 
 /**
  * @author Luigi R. Viggiano
  */
-public class CustomDashTokenizer implements Tokenizer {
-    public String[] tokens(String values) {
-        return values.split("-", -1);
+public class User {
+    private String username;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

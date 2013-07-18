@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.collections;
+package org.aeonbits.owner.typeconversion.collections;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;

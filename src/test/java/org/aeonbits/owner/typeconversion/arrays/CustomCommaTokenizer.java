@@ -6,19 +6,15 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.editor;
+package org.aeonbits.owner.typeconversion.arrays;
+
+import org.aeonbits.owner.Tokenizer;
 
 /**
  * @author Luigi R. Viggiano
  */
-public class User {
-    private String username;
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+public class CustomCommaTokenizer implements Tokenizer {
+    public String[] tokens(String values) {
+        return values.split(",", -1);
     }
 }
