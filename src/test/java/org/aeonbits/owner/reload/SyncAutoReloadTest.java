@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.autoreload;
+package org.aeonbits.owner.reload;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
