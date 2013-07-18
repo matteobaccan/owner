@@ -11,6 +11,7 @@ package org.aeonbits.owner.xml;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,17 +37,19 @@ import static org.junit.Assert.assertEquals;
 public class XmlSpike {
 
     static class XmlToPropsHandler extends DefaultHandler2 {
+
         private static final String PROPS_DTD_URI =
                 "http://java.sun.com/dtd/properties.dtd";
 
         private static final String PROPS_DTD =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                        "<!-- DTD for properties -->" +
-                        "<!ELEMENT properties ( comment?, entry* ) >" +
-                        "<!ATTLIST properties version CDATA #FIXED \"1.0\">" +
-                        "<!ELEMENT comment (#PCDATA) >" +
-                        "<!ELEMENT entry (#PCDATA) >" +
-                        "<!ATTLIST entry key CDATA #REQUIRED>";
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+        "<!-- DTD for properties -->" +
+        "<!ELEMENT properties ( comment?, entry* ) >" +
+        "<!ATTLIST properties version CDATA #FIXED \"1.0\">" +
+        "<!ELEMENT comment (#PCDATA) >" +
+        "<!ELEMENT entry (#PCDATA) >" +
+        "<!ATTLIST entry key CDATA #REQUIRED>";
+//        "<!ATTLIST comment key CDATA #REQUIRED>"; // uncomment to test validation
 
         private boolean isJavaPropertiesFormat = false;
         private final PrintWriter writer;
@@ -65,6 +68,11 @@ public class XmlSpike {
             } else {
                 return super.resolveEntity(name, publicId, baseURI, systemId);
             }
+        }
+
+        @Override
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+            return resolveEntity(null, publicId, null, systemId);
         }
 
         public XmlToPropsHandler(PrintWriter writer) {
@@ -114,17 +122,31 @@ public class XmlSpike {
             paths.pop();
         }
 
+
+        @Override
+        public void error(SAXParseException e) throws SAXException {
+            if (isJavaPropertiesFormat)
+                throw e;
+        }
+
+        @Override
+        public void fatalError(SAXParseException e) throws SAXException {
+            error(e);
+        }
     }
 
     public static Properties load(InputStream inputStream) throws ParserConfigurationException, SAXException,
             IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setValidating(true);
+        factory.setNamespaceAware(true);
         SAXParser parser = factory.newSAXParser();
 
         StringWriter output = new StringWriter();
         PrintWriter pw = new PrintWriter(output);
         XmlToPropsHandler h = new XmlToPropsHandler(pw);
         parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
+
         parser.parse(inputStream, h);
         pw.flush();
         output.flush();
@@ -148,13 +170,10 @@ public class XmlSpike {
 
         props.storeToXML(new FileOutputStream(file), "test");
 
-
-        System.out.println("java xml properties format:\n" + toString(new FileInputStream(file))) ;
-        
+        System.out.println("java xml properties format:\n" + toString(new FileInputStream(file)));
 
         Properties props2 = new Properties();
         props2.loadFromXML(new FileInputStream(file));
-
 
         Properties props3 = load(new FileInputStream(file));
 
