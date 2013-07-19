@@ -8,8 +8,8 @@
 
 package org.aeonbits.owner;
 
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -24,9 +24,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.PropertiesManager.close;
-import static org.aeonbits.owner.PropertiesManager.getInputStream;
-import static org.aeonbits.owner.PropertiesManager.properties;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 
@@ -105,16 +102,12 @@ public interface Config {
             @Override
             Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
                 String[] values = sources.value();
+                Properties result = new Properties();
                 for (String source : values) {
                     URL url = new URL(null, source, handler);
                     try {
-                        InputStream stream = getInputStream(url);
-                        if (stream != null)
-                            try {
-                                return properties(stream);
-                            } finally {
-                                close(stream);
-                            }
+                        if (Loader.load(result, url))
+                        return result;
                     } catch (final MalformedURLException ex) {
                         throw new MalformedURLException(ex.getMessage() + " for URL " + url.toString()) {{
                             initCause(ex);
@@ -139,13 +132,7 @@ public interface Config {
                 for (String source : values) {
                     URL url = new URL(null, source, handler);
                     try {
-                        InputStream stream = getInputStream(url);
-                        if (stream != null)
-                            try {
-                                result.load(stream);
-                            } finally {
-                                close(stream);
-                            }
+                        Loader.load(result, url);
                     } catch (IOException ex) {
                         ignore(); // happens when a file specified in the sources is not found or cannot be read.
                     }

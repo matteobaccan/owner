@@ -22,9 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Stack;
@@ -42,17 +40,17 @@ public class XmlSpike {
                 "http://java.sun.com/dtd/properties.dtd";
 
         private static final String PROPS_DTD =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-        "<!-- DTD for properties -->" +
-        "<!ELEMENT properties ( comment?, entry* ) >" +
-        "<!ATTLIST properties version CDATA #FIXED \"1.0\">" +
-        "<!ELEMENT comment (#PCDATA) >" +
-        "<!ELEMENT entry (#PCDATA) >" +
-        "<!ATTLIST entry key CDATA #REQUIRED>";
-//        "<!ATTLIST comment key CDATA #REQUIRED>"; // uncomment to test validation
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                        "<!-- DTD for properties -->" +
+                        "<!ELEMENT properties ( comment?, entry* ) >" +
+                        "<!ATTLIST properties version CDATA #FIXED \"1.0\">" +
+                        "<!ELEMENT comment (#PCDATA) >" +
+                        "<!ELEMENT entry (#PCDATA) >" +
+                        "<!ATTLIST entry key CDATA #REQUIRED>";
+        //        "<!ATTLIST comment key CDATA #REQUIRED>"; // uncomment to test validation
 
         private boolean isJavaPropertiesFormat = false;
-        private final PrintWriter writer;
+        private final Properties props;
         private final Stack<String> paths = new Stack<String>();
         private final Stack<StringBuilder> value = new Stack<StringBuilder>();
 
@@ -75,8 +73,8 @@ public class XmlSpike {
             return resolveEntity(null, publicId, null, systemId);
         }
 
-        public XmlToPropsHandler(PrintWriter writer) {
-            this.writer = writer;
+        public XmlToPropsHandler(Properties props) {
+            this.props = props;
         }
 
         @Override
@@ -95,13 +93,9 @@ public class XmlSpike {
                 for (int i = 0; i < attributes.getLength(); i++) {
                     String attrName = attributes.getQName(i);
                     String attrValue = attributes.getValue(i);
-                    writer.println(path + "." + attrName + "=" + attrValue);
+                    props.setProperty(path + "." + attrName, attrValue);
                 }
             }
-        }
-
-        private String fixNewLines(String value) {
-            return value.replace("\n", "\\\n");
         }
 
         @Override
@@ -117,7 +111,7 @@ public class XmlSpike {
             String value = this.value.peek().toString().trim();
             if (!value.isEmpty() &&
                     !(isJavaPropertiesFormat && "comment".equals(key)))
-                writer.println(key + "=" + fixNewLines(value));
+                props.setProperty(key, value);
             this.value.pop();
             paths.pop();
         }
@@ -142,19 +136,15 @@ public class XmlSpike {
         factory.setNamespaceAware(true);
         SAXParser parser = factory.newSAXParser();
 
-        StringWriter output = new StringWriter();
-        PrintWriter pw = new PrintWriter(output);
-        XmlToPropsHandler h = new XmlToPropsHandler(pw);
+        Properties props = new Properties();
+        XmlToPropsHandler h = new XmlToPropsHandler(props);
         parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
 
         parser.parse(inputStream, h);
-        pw.flush();
-        output.flush();
 
-        System.out.println("Output:\n" + output);
+        System.out.println("Output:\n");
+        props.store(System.out, "output");
 
-        Properties props = new Properties();
-        props.load(new StringReader(output.toString()));
         return props;
     }
 

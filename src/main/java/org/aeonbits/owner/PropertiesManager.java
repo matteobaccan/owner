@@ -24,7 +24,6 @@ import java.io.Reader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,37 +150,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private Properties loadDefaultProperties(ConfigURLStreamHandler handler) throws IOException {
         String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
-        InputStream inputStream = getInputStream(new URL(null, spec, handler));
-        try {
-            return properties(inputStream);
-        } finally {
-            close(inputStream);
-        }
+        return Loader.load(new URL(null, spec, handler));
     }
 
-    static InputStream getInputStream(URL url) throws IOException {
-        URLConnection conn = url.openConnection();
-        if (conn == null)
-            return null;
-        return conn.getInputStream();
-    }
 
     private static void merge(Properties results, Map<?, ?>... inputs) {
         for (Map<?, ?> input : inputs)
             results.putAll(input);
     }
 
-    static Properties properties(InputStream stream) throws IOException {
-        Properties props = new Properties();
-        if (stream != null)
-            props.load(stream);
-        return props;
-    }
-
-    static void close(InputStream inputStream) throws IOException {
-        if (inputStream != null)
-            inputStream.close();
-    }
 
     @Delegate
     public String getProperty(String key) {
