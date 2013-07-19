@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -109,9 +110,7 @@ public interface Config {
                         if (Loader.load(result, url))
                         return result;
                     } catch (final MalformedURLException ex) {
-                        throw new MalformedURLException(ex.getMessage() + " for URL " + url.toString()) {{
-                            initCause(ex);
-                        }};
+                        throw malformedUrl(ex, url);
                     } catch (IOException ex) {
                         ignore(); // happens when a file specified in the sources is not found or cannot be read.
                     }
@@ -133,6 +132,8 @@ public interface Config {
                     URL url = new URL(null, source, handler);
                     try {
                         Loader.load(result, url);
+                    } catch (final MalformedURLException ex) {
+                        throw malformedUrl(ex, url);
                     } catch (IOException ex) {
                         ignore(); // happens when a file specified in the sources is not found or cannot be read.
                     }
@@ -140,6 +141,12 @@ public interface Config {
                 return result;
             }
         };
+
+        private static MalformedURLException malformedUrl(final MalformedURLException ex, URL url) {
+            return new MalformedURLException(format("%s for URL '%s'", ex.getMessage(), url.toString())) {{
+                initCause(ex);
+            }};
+        }
 
         abstract Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException;
 

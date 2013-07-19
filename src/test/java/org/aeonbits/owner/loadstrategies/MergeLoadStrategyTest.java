@@ -33,9 +33,6 @@ public class MergeLoadStrategyTest {
         assertEquals("theDefaultValue", cfg.fubar());
     }
 
-    /**
-     * @author luigi
-     */
     @Sources({"classpath:org/aeonbits/owner/first.properties",
               "classpath:foo/bar/thisDoesntExists.properties",
               "classpath:org/aeonbits/owner/second.properties",
@@ -56,4 +53,16 @@ public class MergeLoadStrategyTest {
         @DefaultValue("theDefaultValue")
         String fubar();
     }
+
+    @Sources("httpz://foo.bar.baz")
+    @LoadPolicy(MERGE)
+    interface InvalidURLConfig extends Config {
+
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testWhenURLIsInvalid() {
+        ConfigFactory.create(InvalidURLConfig.class);
+    }
+
 }
