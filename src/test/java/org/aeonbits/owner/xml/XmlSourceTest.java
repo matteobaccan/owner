@@ -1,14 +1,21 @@
+/*
+ * Copyright (c) 2013, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
 package org.aeonbits.owner.xml;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class XmlSourceTest {
 
