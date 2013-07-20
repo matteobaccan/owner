@@ -23,7 +23,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -142,28 +141,23 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
-        if (sources == null)
-            return loadDefaultProperties(handler);
-        else
-            return loadType.load(sources, handler);
+        return loadType.load(specs(sources), handler);
     }
 
-    private Properties loadDefaultProperties(ConfigURLStreamHandler handler) throws IOException {
-        Properties result = new Properties();
+    private String[] specs(Sources sources) {
+        if (sources != null) return sources.value();
+        return defaultSpecs();
+    }
+
+    private String[] defaultSpecs() {
         String prefix = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/');
-        String[] specs = {prefix + ".properties", prefix + ".xml"};
-        for (String spec : specs)
-            if (Loaders.load(result, new URL(null, spec, handler)))
-                break;
-        return result;
+        return new String[] {prefix + ".properties", prefix + ".xml"};
     }
-
 
     private static void merge(Properties results, Map<?, ?>... inputs) {
         for (Map<?, ?> input : inputs)
             results.putAll(input);
     }
-
 
     @Delegate
     public String getProperty(String key) {

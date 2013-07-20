@@ -97,14 +97,13 @@ public interface Config {
     enum LoadType {
 
         /**
-         * The first available {@link org.aeonbits.owner.Config.Sources} will be loaded.
+         * The first available of the specified sources will be loaded.
          */
         FIRST {
             @Override
-            Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
-                String[] values = sources.value();
+            Properties load(String[] sources, ConfigURLStreamHandler handler) throws MalformedURLException {
                 Properties result = new Properties();
-                for (String source : values) {
+                for (String source : sources) {
                     URL url = new URL(null, source, handler);
                     try {
                         if (Loaders.load(result, url))
@@ -120,13 +119,13 @@ public interface Config {
         },
 
         /**
-         * All the {@link org.aeonbits.owner.Config.Sources} will be loaded and merged. If the same property key is
+         * All the specified sources will be loaded and merged. If the same property key is
          * specified from more than one source, the one specified first will prevail.
          */
         MERGE {
             @Override
-            Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException {
-                String[] values = reverse(sources.value());
+            Properties load(String[] sources, ConfigURLStreamHandler handler) throws MalformedURLException {
+                String[] values = reverse(sources);
                 Properties result = new Properties();
                 for (String source : values) {
                     URL url = new URL(null, source, handler);
@@ -148,7 +147,7 @@ public interface Config {
             }};
         }
 
-        abstract Properties load(Sources sources, ConfigURLStreamHandler handler) throws MalformedURLException;
+        abstract Properties load(String[] sources, ConfigURLStreamHandler handler) throws MalformedURLException;
 
     }
 
