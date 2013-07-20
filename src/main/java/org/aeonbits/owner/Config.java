@@ -107,7 +107,7 @@ public interface Config {
                 for (String source : values) {
                     URL url = new URL(null, source, handler);
                     try {
-                        if (Loader.load(result, url))
+                        if (Loaders.load(result, url))
                         return result;
                     } catch (final MalformedURLException ex) {
                         throw malformedUrl(ex, url);
@@ -131,7 +131,7 @@ public interface Config {
                 for (String source : values) {
                     URL url = new URL(null, source, handler);
                     try {
-                        Loader.load(result, url);
+                        Loaders.load(result, url);
                     } catch (final MalformedURLException ex) {
                         throw malformedUrl(ex, url);
                     } catch (IOException ex) {

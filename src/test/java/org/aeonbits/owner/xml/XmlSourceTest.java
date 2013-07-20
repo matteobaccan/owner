@@ -1,8 +1,8 @@
 package org.aeonbits.owner.xml;
 
 import org.aeonbits.owner.Config;
+import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -33,11 +33,10 @@ public class XmlSourceTest {
         String sshUser();
     }
 
-    @Ignore
     @Test
     public void testXmlReading() {
         ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
-        assertEquals(80, cfg.httpHostname());
+        assertEquals(80, cfg.httpPort());
         assertEquals("localhost", cfg.httpHostname());
         assertEquals(22, cfg.sshPort());
         assertEquals("127.0.0.1", cfg.sshAddress());

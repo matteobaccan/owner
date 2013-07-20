@@ -149,8 +149,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private Properties loadDefaultProperties(ConfigURLStreamHandler handler) throws IOException {
-        String spec = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/') + ".properties";
-        return Loader.load(new URL(null, spec, handler));
+        Properties result = new Properties();
+        String prefix = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/');
+        String[] specs = {prefix + ".properties", prefix + ".xml"};
+        for (String spec : specs)
+            if (Loaders.load(result, new URL(null, spec, handler)))
+                break;
+        return result;
     }
 
 
