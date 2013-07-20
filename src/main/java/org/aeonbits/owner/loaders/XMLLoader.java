@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2013, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
 package org.aeonbits.owner.loaders;
 
 import org.xml.sax.Attributes;
@@ -17,7 +25,7 @@ import java.util.Properties;
 import java.util.Stack;
 
 /**
- * @author luigi
+ * @author Luigi R. Viggiano
  */
 public class XMLLoader implements Loader {
 
