@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner.debuggingaid;
+package org.aeonbits.owner.debugging;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;

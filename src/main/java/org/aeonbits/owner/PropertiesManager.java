@@ -23,6 +23,9 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,12 +58,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final ReadLock readLock = lock.readLock();
     private final WriteLock writeLock = lock.writeLock();
 
-    private final Sources sources;
     private final LoadType loadType;
+    private final ArrayList<URL> urls;
+    private final ConfigURLFactory urlFactory;
     private HotReloadLogic hotReloadLogic = null;
 
     private volatile boolean loading = false;
-    private final ConfigURLFactory urlFactory;
 
     private List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
@@ -77,18 +80,43 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.imports = imports;
 
         urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
+        urls = toURLs(clazz.getAnnotation(Sources.class));
 
-        sources = clazz.getAnnotation(Sources.class);
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         setupHotReload(clazz, scheduler);
     }
 
+    ArrayList<URL> toURLs(Sources sources) {
+        String[] specs = specs(sources);
+        ArrayList<URL> urls = new ArrayList<URL>();
+        for (String spec : specs) {
+            try {
+                URL url = urlFactory.newURL(spec);
+                if (url != null)
+                    urls.add(url);
+            } catch (MalformedURLException e) {
+                throw unsupported(e, "Can't convert '%s' to a valid URL", spec);
+            }
+        }
+        return urls;
+    }
+
+    private String[] specs(Sources sources) {
+        if (sources != null) return sources.value();
+        return defaultSpecs();
+    }
+
+    private String[] defaultSpecs() {
+        String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
+        return new String[] {prefix + ".properties", prefix + ".xml"};
+    }
+
     private void setupHotReload(Class<? extends Config> clazz, ScheduledExecutorService scheduler) {
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        if (sources != null && hotReload != null) {
-            hotReloadLogic = new HotReloadLogic(clazz, urlFactory, this);
+        if (hotReload != null) {
+            hotReloadLogic = new HotReloadLogic(hotReload, urls, this);
 
             if (hotReloadLogic.isAsync())
                 scheduler.scheduleAtFixedRate(new Runnable() {
@@ -104,7 +132,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             loading = true;
             defaults(properties, clazz);
-            Properties loadedFromFile = doLoad(urlFactory);
+            Properties loadedFromFile = doLoad();
             merge(properties, loadedFromFile);
             merge(properties, reverse(imports));
             return properties;
@@ -139,18 +167,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         reloadListeners.remove(listener);
     }
 
-    Properties doLoad(ConfigURLFactory urlFactory) throws IOException {
-        return loadType.load(specs(sources), urlFactory);
-    }
-
-    private String[] specs(Sources sources) {
-        if (sources != null) return sources.value();
-        return defaultSpecs();
-    }
-
-    private String[] defaultSpecs() {
-        String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
-        return new String[] {prefix + ".properties", prefix + ".xml"};
+    Properties doLoad() throws IOException {
+        return loadType.load(urls);
     }
 
     private static void merge(Properties results, Map<?, ?>... inputs) {

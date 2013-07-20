@@ -101,5 +101,16 @@ public class AsyncAutoReloadTest {
         assertEquals(Integer.valueOf(30), cfg.someValue());
     }
 
+    @HotReload(value=10, unit = MILLISECONDS, type = ASYNC)
+    interface OnlyHotReloadAnnotationIsSpecified extends Config, Reloadable {
+        @DefaultValue("5")
+        Integer someValue();
+    }
+
+    @Test
+    public void testShouldNotCauseNullPex() {
+        OnlyHotReloadAnnotationIsSpecified cfg = ConfigFactory.create(OnlyHotReloadAnnotationIsSpecified.class);
+        assertEquals(Integer.valueOf(5), cfg.someValue());
+    }
 
 }

@@ -16,7 +16,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static java.lang.String.format;
 import static java.net.URLDecoder.decode;
@@ -47,7 +49,12 @@ abstract class Util {
         throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
     }
 
-    @SuppressWarnings("unchecked")
+    static <T> List<T> reverse(List<T> src) {
+        List<T> copy = new ArrayList<T>(src);
+        Collections.reverse(copy);
+        return copy;
+    }
+
     static <T> T[] reverse(T[] array) {
         T[] copy = array.clone();
         Collections.reverse(asList(copy));

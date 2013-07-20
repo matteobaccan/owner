@@ -10,24 +10,20 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.HotReloadType;
-import org.aeonbits.owner.Config.Sources;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
-import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.now;
 
 /**
  * @author Luigi R. Viggiano
  */
 class HotReloadLogic {
-    private final ConfigURLFactory urlFactory;
     private final PropertiesManager manager;
     private final long interval;
     private final HotReloadType type;
@@ -52,26 +48,19 @@ class HotReloadLogic {
         }
     }
 
-    HotReloadLogic(Class<? extends Config> clazz, ConfigURLFactory urlFactory, PropertiesManager manager) {
-        this.urlFactory = urlFactory;
+    public HotReloadLogic(HotReload hotReload, ArrayList<URL> urls, PropertiesManager manager) {
         this.manager = manager;
-        HotReload hotReload = clazz.getAnnotation(HotReload.class);
         type = hotReload.type();
         interval = hotReload.unit().toMillis(hotReload.value());
-        setupWatchableResources(clazz.getAnnotation(Sources.class));
+        setupWatchableResources(urls);
     }
 
-    private void setupWatchableResources(Sources sources) {
-        String[] values = sources.value();
-        for (String value : values)
-            try {
-                URL url = urlFactory.newURL(value);
-                File file = Util.fileFromURL(url);
-                if (file != null)
-                    watchableFiles.add(new WatchableFile(file));
-            } catch (MalformedURLException e) {
-                ignore();
-            }
+    private void setupWatchableResources(ArrayList<URL> urls) {
+        for (URL url : urls) {
+            File file = Util.fileFromURL(url);
+            if (file != null)
+                watchableFiles.add(new WatchableFile(file));
+        }
     }
 
     synchronized void checkAndReload() {

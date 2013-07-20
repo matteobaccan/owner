@@ -10,7 +10,6 @@ package org.aeonbits.owner.loadstrategies;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.ConfigURLFactoryForTest;
 import org.aeonbits.owner.PropertiesManagerForTest;
 import org.aeonbits.owner.VariablesExpanderForTest;
 import org.junit.Test;
@@ -19,15 +18,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Luigi R. Viggiano
@@ -42,19 +39,15 @@ public class DefaultLoadStrategyTest {
         String testKey();
     }
 
+    // TODO: review this test.
     @Test
     public void shouldReturnTheResourceForAClass() throws IOException {
-        ConfigURLFactoryForTest handler = new ConfigURLFactoryForTest(SampleConfig.class.getClassLoader(),
-                new VariablesExpanderForTest(new Properties()));
-
-        ConfigURLFactoryForTest spy = spy(handler);
-
         PropertiesManagerForTest manager = new PropertiesManagerForTest(SampleConfig.class, new Properties(),
                 scheduler, expander);
 
-        manager.doLoad(spy);
-        String expected = "classpath:org/aeonbits/owner/loadstrategies/DefaultLoadStrategyTest$SampleConfig.properties";
-        verify(spy, times(1)).newURL(eq(expected));
+        assertEquals(1, manager.getUrls().size());
+        for(URL url : manager.getUrls()) 
+            assertTrue(url.getPath().contains("org/aeonbits/owner/loadstrategies/DefaultLoadStrategyTest$SampleConfig"));
     }
 
     @Test

@@ -13,12 +13,12 @@ import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.format;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -101,19 +101,16 @@ public interface Config {
          */
         FIRST {
             @Override
-            Properties load(String[] sources, ConfigURLFactory urlFactory) throws MalformedURLException {
+            Properties load(ArrayList<URL> urls) {
                 Properties result = new Properties();
-                for (String source : sources) {
-                    URL url = urlFactory.newURL(source);
+                for (URL url : urls)
                     try {
                         if (Loaders.load(result, url))
                         return result;
-                    } catch (final MalformedURLException ex) {
-                        throw malformedUrl(ex, url);
                     } catch (IOException ex) {
-                        ignore(); // happens when a file specified in the sources is not found or cannot be read.
+                        // happens when a file specified in the sources is not found or cannot be read.
+                        ignore(); 
                     }
-                }
                 return new Properties();
             }
         },
@@ -124,31 +121,22 @@ public interface Config {
          */
         MERGE {
             @Override
-            Properties load(String[] sources, ConfigURLFactory urlFactory) throws MalformedURLException {
-                String[] values = reverse(sources);
+            Properties load(ArrayList<URL> urls) {
+
+                List<URL> reversed = reverse(urls);
                 Properties result = new Properties();
-                for (String source : values) {
-                    URL url = urlFactory.newURL(source);
+                for (URL url : reversed) 
                     try {
                         Loaders.load(result, url);
-                    } catch (final MalformedURLException ex) {
-                        throw malformedUrl(ex, url);
                     } catch (IOException ex) {
-                        ignore(); // happens when a file specified in the sources is not found or cannot be read.
+                        // happens when a file specified in the sources is not found or cannot be read.
+                        ignore(); 
                     }
-                }
                 return result;
             }
         };
 
-        private static MalformedURLException malformedUrl(final MalformedURLException ex, URL url) {
-            return new MalformedURLException(format("%s for URL '%s'", ex.getMessage(), url.toString())) {{
-                initCause(ex);
-            }};
-        }
-
-        abstract Properties load(String[] sources, ConfigURLFactory urlFactory) throws MalformedURLException;
-
+        abstract Properties load(ArrayList<URL> urls);
     }
 
     /**
