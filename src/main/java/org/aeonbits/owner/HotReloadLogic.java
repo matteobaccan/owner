@@ -27,7 +27,7 @@ import static org.aeonbits.owner.Util.now;
  * @author Luigi R. Viggiano
  */
 class HotReloadLogic {
-    private final ConfigURLStreamHandler handler;
+    private final ConfigURLFactory urlFactory;
     private final PropertiesManager manager;
     private final long interval;
     private final HotReloadType type;
@@ -52,8 +52,8 @@ class HotReloadLogic {
         }
     }
 
-    HotReloadLogic(Class<? extends Config> clazz, ConfigURLStreamHandler handler, PropertiesManager manager) {
-        this.handler = handler;
+    HotReloadLogic(Class<? extends Config> clazz, ConfigURLFactory urlFactory, PropertiesManager manager) {
+        this.urlFactory = urlFactory;
         this.manager = manager;
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
         type = hotReload.type();
@@ -65,7 +65,7 @@ class HotReloadLogic {
         String[] values = sources.value();
         for (String value : values)
             try {
-                URL url = new URL(null, value, handler);
+                URL url = urlFactory.newURL(value);
                 File file = Util.fileFromURL(url);
                 if (file != null)
                     watchableFiles.add(new WatchableFile(file));

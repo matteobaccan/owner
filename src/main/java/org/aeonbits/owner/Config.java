@@ -101,10 +101,10 @@ public interface Config {
          */
         FIRST {
             @Override
-            Properties load(String[] sources, ConfigURLStreamHandler handler) throws MalformedURLException {
+            Properties load(String[] sources, ConfigURLFactory urlFactory) throws MalformedURLException {
                 Properties result = new Properties();
                 for (String source : sources) {
-                    URL url = new URL(null, source, handler);
+                    URL url = urlFactory.newURL(source);
                     try {
                         if (Loaders.load(result, url))
                         return result;
@@ -124,11 +124,11 @@ public interface Config {
          */
         MERGE {
             @Override
-            Properties load(String[] sources, ConfigURLStreamHandler handler) throws MalformedURLException {
+            Properties load(String[] sources, ConfigURLFactory urlFactory) throws MalformedURLException {
                 String[] values = reverse(sources);
                 Properties result = new Properties();
                 for (String source : values) {
-                    URL url = new URL(null, source, handler);
+                    URL url = urlFactory.newURL(source);
                     try {
                         Loaders.load(result, url);
                     } catch (final MalformedURLException ex) {
@@ -147,7 +147,7 @@ public interface Config {
             }};
         }
 
-        abstract Properties load(String[] sources, ConfigURLStreamHandler handler) throws MalformedURLException;
+        abstract Properties load(String[] sources, ConfigURLFactory urlFactory) throws MalformedURLException;
 
     }
 

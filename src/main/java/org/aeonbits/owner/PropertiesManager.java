@@ -37,7 +37,6 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.aeonbits.owner.Config.LoadType;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.ConfigURLStreamHandler.CLASSPATH_PROTOCOL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
 import static org.aeonbits.owner.Util.reverse;
@@ -61,7 +60,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private HotReloadLogic hotReloadLogic = null;
 
     private volatile boolean loading = false;
-    private final ConfigURLStreamHandler handler;
+    private final ConfigURLFactory urlFactory;
 
     private List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
@@ -77,7 +76,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.properties = properties;
         this.imports = imports;
 
-        handler = new ConfigURLStreamHandler(clazz.getClassLoader(), expander);
+        urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
 
         sources = clazz.getAnnotation(Sources.class);
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
@@ -89,7 +88,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private void setupHotReload(Class<? extends Config> clazz, ScheduledExecutorService scheduler) {
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
         if (sources != null && hotReload != null) {
-            hotReloadLogic = new HotReloadLogic(clazz, handler, this);
+            hotReloadLogic = new HotReloadLogic(clazz, urlFactory, this);
 
             if (hotReloadLogic.isAsync())
                 scheduler.scheduleAtFixedRate(new Runnable() {
@@ -105,7 +104,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             loading = true;
             defaults(properties, clazz);
-            Properties loadedFromFile = doLoad(handler);
+            Properties loadedFromFile = doLoad(urlFactory);
             merge(properties, loadedFromFile);
             merge(properties, reverse(imports));
             return properties;
@@ -140,8 +139,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         reloadListeners.remove(listener);
     }
 
-    Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
-        return loadType.load(specs(sources), handler);
+    Properties doLoad(ConfigURLFactory urlFactory) throws IOException {
+        return loadType.load(specs(sources), urlFactory);
     }
 
     private String[] specs(Sources sources) {
@@ -150,7 +149,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private String[] defaultSpecs() {
-        String prefix = CLASSPATH_PROTOCOL + ":" + clazz.getName().replace('.', '/');
+        String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
         return new String[] {prefix + ".properties", prefix + ".xml"};
     }
 

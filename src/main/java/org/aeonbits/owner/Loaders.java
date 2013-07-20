@@ -45,6 +45,7 @@ abstract class Loaders {
     }
     
     private static InputStream getInputStream(URL url) throws IOException {
+        if (url == null) return null;
         URLConnection conn = url.openConnection();
         if (conn == null)
             return null;

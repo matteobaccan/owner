@@ -8,20 +8,19 @@
 
 package org.aeonbits.owner;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * @author Luigi R. Viggiano
  */
-public class ConfigURLStreamHandlerForTest extends ConfigURLStreamHandler {
-    public ConfigURLStreamHandlerForTest(ClassLoader classLoader, VariablesExpander expander) {
+public class ConfigURLFactoryForTest extends ConfigURLFactory {
+    public ConfigURLFactoryForTest(ClassLoader classLoader, VariablesExpander expander) {
         super(classLoader, expander);
     }
 
     @Override
-    public URLConnection openConnection(URL url) throws IOException {
-        return super.openConnection(url);
+    public URL newURL(String spec) throws MalformedURLException {
+        return super.newURL(spec);
     }
 }

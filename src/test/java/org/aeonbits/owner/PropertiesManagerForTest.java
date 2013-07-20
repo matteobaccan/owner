@@ -23,7 +23,7 @@ public class PropertiesManagerForTest extends PropertiesManager {
     }
 
     @Override
-    public Properties doLoad(ConfigURLStreamHandler handler) throws IOException {
+    public Properties doLoad(ConfigURLFactory handler) throws IOException {
         return super.doLoad(handler);
     }
 

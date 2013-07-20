@@ -12,7 +12,7 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.ConfigURLStreamHandlerForTest;
+import org.aeonbits.owner.ConfigURLFactoryForTest;
 import org.aeonbits.owner.PropertiesManagerForTest;
 import org.aeonbits.owner.VariablesExpanderForTest;
 import org.junit.Test;
@@ -21,8 +21,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -95,20 +95,19 @@ public class FirstLoadStrategyTest {
 
     @Test
     public void shouldLoadURLFromSpecifiedSource() throws IOException {
-        final URL[] lastURL = { null };
-        ConfigURLStreamHandlerForTest handler = new ConfigURLStreamHandlerForTest(SampleConfigWithSource.class.getClassLoader(),
+        final String[] lastSpec = { null };
+        ConfigURLFactoryForTest handler = new ConfigURLFactoryForTest(SampleConfigWithSource.class.getClassLoader(),
                 new VariablesExpanderForTest(new Properties())) {
             @Override
-            public URLConnection openConnection(URL url) throws IOException {
-                lastURL[0] = url;
-                return super.openConnection(url);
+            public URL newURL(String spec) throws MalformedURLException {
+                lastSpec[0] = spec;
+                return super.newURL(spec);
             }
         };
         PropertiesManagerForTest manager = new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(), scheduler, expander);
         manager.doLoad(handler);
-        URL expected = new URL(null, "classpath:org/aeonbits/owner/FooBar.properties",
-                handler);
-        assertEquals(expected, lastURL[0]);
+        String expected = "classpath:org/aeonbits/owner/FooBar.properties";
+        assertEquals(expected, lastSpec[0]);
     }
 
     @Test
