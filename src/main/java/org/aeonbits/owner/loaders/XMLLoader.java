@@ -66,15 +66,13 @@ public class XMLLoader implements Loader {
         @Override
         public InputSource resolveEntity(String name, String publicId, String baseURI,
                                          String systemId) throws SAXException, IOException {
+            InputSource inputSource = null;
             if (systemId.equals(PROPS_DTD_URI)) {
                 isJavaPropertiesFormat = true;
-                InputSource is;
-                is = new InputSource(new StringReader(PROPS_DTD));
-                is.setSystemId(PROPS_DTD_URI);
-                return is;
-            } else {
-                return super.resolveEntity(name, publicId, baseURI, systemId);
-            }
+                inputSource = new InputSource(new StringReader(PROPS_DTD));
+                inputSource.setSystemId(PROPS_DTD_URI);
+            } 
+            return inputSource; 
         }
 
         public XmlToPropsHandler(Properties props) {
@@ -124,11 +122,6 @@ public class XMLLoader implements Loader {
         public void error(SAXParseException e) throws SAXException {
             if (isJavaPropertiesFormat)
                 throw e;
-        }
-
-        @Override
-        public void fatalError(SAXParseException e) throws SAXException {
-            error(e);
         }
     }
 
