@@ -28,7 +28,7 @@ class HotReloadLogic {
     private final long interval;
     private final HotReloadType type;
     private volatile long lastCheckTime = now();
-    private List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
+    private final List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
 
     private static class WatchableFile {
         private final File file;

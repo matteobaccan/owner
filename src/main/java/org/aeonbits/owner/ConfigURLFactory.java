@@ -7,7 +7,7 @@ import java.net.URL;
  * @author Luigi R. Viggiano
  */
 class ConfigURLFactory {
-    static final String CLASSPATH_PROTOCOL = "classpath:";
+    private static final String CLASSPATH_PROTOCOL = "classpath:";
     private final ClassLoader classLoader;
     private final VariablesExpander expander;
 

@@ -41,7 +41,7 @@ import static java.util.regex.Pattern.compile;
  * @author Luigi R. Viggiano
  */
 class StrSubstitutor {
-    private Properties values;
+    private final Properties values;
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
 
     /**

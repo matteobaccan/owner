@@ -28,7 +28,7 @@ import static org.aeonbits.owner.Util.prohibitInstantiation;
  */
 public abstract class ConfigFactory {
 
-    private static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
         public Thread newThread(Runnable r) {
             Thread result = new Thread(r);
             result.setDaemon(true);

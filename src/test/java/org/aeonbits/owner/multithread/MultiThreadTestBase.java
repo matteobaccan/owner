@@ -17,13 +17,13 @@ import java.util.List;
  * @author Luigi R. Viggiano
  */
 abstract class MultiThreadTestBase {
-    protected void join(ThreadBase[]... args) throws InterruptedException {
+    void join(ThreadBase[]... args) throws InterruptedException {
         for (ThreadBase[] threads : args)
             for (Thread thread : threads)
                 thread.join();
     }
 
-    protected void start(ThreadBase[]... args) throws InterruptedException {
+    void start(ThreadBase[]... args) throws InterruptedException {
         for (ThreadBase[] threads : args)
             for (Thread thread : threads) {
                 thread.start();
@@ -34,7 +34,7 @@ abstract class MultiThreadTestBase {
             }
     }
 
-    protected <T extends Config> void assertNoErrors(ThreadBase<T>[] threads) throws Throwable {
+    <T extends Config> void assertNoErrors(ThreadBase<T>[] threads) throws Throwable {
         for (int i = 0; i < threads.length; i++) {
             ThreadBase<T> thread = threads[i];
 

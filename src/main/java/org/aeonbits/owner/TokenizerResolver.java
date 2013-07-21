@@ -25,7 +25,7 @@ abstract class TokenizerResolver {
         prohibitInstantiation();
     }
 
-    private static Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
+    private static final Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
 
     static Tokenizer resolveTokenizer(Method targetMethod) {
         Tokenizer methodLevelTokenizer = resolveTokenizerOnMethodLevel(targetMethod);

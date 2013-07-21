@@ -18,7 +18,7 @@ import static org.aeonbits.owner.UtilTest.debug;
 
 abstract class ThreadBase<T extends Config> extends Thread implements MyCloneable {
     private static long counter = 0;
-    final long uniqueThreadId = ++counter;
+    private final long uniqueThreadId = ++counter;
     final T cfg;
     final Object lock;
     final int loops;

@@ -42,8 +42,8 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
     @Mock
     private ScheduledExecutorService scheduler;
     @Spy
-    private LoadersManagerForTest loaders = new LoadersManagerForTest();
-    private VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
+    private final LoadersManagerForTest loaders = new LoadersManagerForTest();
+    private final VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
 
 
     @Sources({"classpath:foo/bar/baz.properties",

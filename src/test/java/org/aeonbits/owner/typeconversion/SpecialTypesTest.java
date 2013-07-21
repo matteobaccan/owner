@@ -35,11 +35,6 @@ public class SpecialTypesTest {
             this.text = text;
         }
 
-        @Override
-        public String toString() {
-            return super.toString();
-        }
-
         public InvalidValueOf valueOf(String text) {
             return new InvalidValueOf(text);
         }

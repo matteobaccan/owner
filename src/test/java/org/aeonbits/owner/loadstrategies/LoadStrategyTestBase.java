@@ -10,7 +10,7 @@ import java.net.URL;
  * @author Luigi R. Viggiano
  */
 public class LoadStrategyTestBase {
-    protected Matcher<URL> urlMatches(final String path) {
+    Matcher<URL> urlMatches(final String path) {
         return new BaseMatcher<URL>(){
             public URL url;
 

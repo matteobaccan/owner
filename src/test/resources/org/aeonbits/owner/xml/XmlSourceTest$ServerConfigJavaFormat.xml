@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2013, Luigi R. Viggiano
+  ~ All rights reserved.
+  ~
+  ~ This software is distributable under the BSD license.
+  ~ See the terms of the BSD license in the documentation provided with this software.
+  -->
+
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>this is an example</comment>
+    <entry key="server.http.port">8080</entry>
+    <entry key="server.http.hostname">foobar</entry>
+    <entry key="server.ssh.port">2222</entry>
+    <entry key="server.ssh.address">10.0.0.1</entry>
+    <entry key="server.ssh.alive.interval">30</entry>
+    <entry key="server.ssh.user">root</entry>
+</properties>

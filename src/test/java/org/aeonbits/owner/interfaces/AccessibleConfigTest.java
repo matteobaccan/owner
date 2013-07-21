@@ -43,7 +43,7 @@ public class AccessibleConfigTest {
     @Mock
     private LoadersManagerForTest loaders;
 
-    private VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
+    private final VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
 
     public static interface AccessibleConfig extends Config, Accessible {
         @DefaultValue("Bohemian Rapsody - Queen")

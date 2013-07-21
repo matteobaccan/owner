@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class PropertiesInvocationHandlerTest {
     @Spy
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
     @Mock
     private PrintStream printStream;
     @Mock
@@ -41,7 +41,7 @@ public class PropertiesInvocationHandlerTest {
     private ScheduledExecutorService scheduler;
     @Mock
     private LoadersManager loaders;
-    private VariablesExpander expander = new VariablesExpander(new Properties());
+    private final VariablesExpander expander = new VariablesExpander(new Properties());
 
     interface Dummy extends Config {}
 

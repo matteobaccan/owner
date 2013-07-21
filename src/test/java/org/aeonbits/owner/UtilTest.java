@@ -68,7 +68,7 @@ public class UtilTest {
         p.store(new FileWriter(target), "saved for test");
     }
 
-    public static void delete(File target) throws IOException {
+    public static void delete(File target) {
         target.delete();
     }
 

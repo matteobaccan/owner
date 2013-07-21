@@ -65,7 +65,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private volatile boolean loading = false;
 
-    private List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
+    private final List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
     private final LoadersManager loaders;
 
@@ -138,8 +138,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             merge(properties, loadedFromFile);
             merge(properties, reverse(imports));
             return properties;
-        } catch (IOException e) {
-            throw unsupported(e, "Properties load failed");
         } finally {
             loading = false;
             writeLock.unlock();
@@ -169,7 +167,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         reloadListeners.remove(listener);
     }
 
-    Properties doLoad() throws IOException {
+    Properties doLoad() {
         return loadType.load(urls, loaders);
     }
 

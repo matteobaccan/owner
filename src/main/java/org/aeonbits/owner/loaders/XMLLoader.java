@@ -31,7 +31,7 @@ public class XMLLoader implements Loader {
 
     private volatile SAXParserFactory factory = null;
 
-    public SAXParserFactory factory() {
+    private SAXParserFactory factory() {
         if (factory == null) {
             synchronized (this) {
                 if (factory == null) {
