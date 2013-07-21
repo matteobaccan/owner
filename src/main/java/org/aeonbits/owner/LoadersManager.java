@@ -15,7 +15,6 @@ import org.aeonbits.owner.loaders.XMLLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,24 +38,14 @@ class LoadersManager {
         registerLoader(new XMLLoader());
     }
             
-    InputStream getInputStream(URL url) throws IOException {
-        URLConnection conn = url.openConnection();
-        if (conn == null)
-            return null;
-        return conn.getInputStream();
-    }
-
-    boolean load(Properties result, URL url) throws IOException {
-        InputStream stream = getInputStream(url);
-        if (stream != null)
-            try {
-                Loader loader = findLoader(url);
-                loader.load(result, stream);
-                return true;
-            } finally {
-                stream.close();
-            }
-        return false;
+    void load(Properties result, URL url) throws IOException {
+        InputStream stream = url.openStream();
+        try {
+            Loader loader = findLoader(url);
+            loader.load(result, stream);
+        } finally {
+            stream.close();
+        }
     }
 
     Loader findLoader(URL url) {

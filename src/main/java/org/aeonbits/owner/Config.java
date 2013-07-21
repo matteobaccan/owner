@@ -15,7 +15,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -105,13 +104,13 @@ public interface Config {
                 Properties result = new Properties();
                 for (URL url : urls)
                     try {
-                        if (loaders.load(result, url))
-                        return result;
+                        loaders.load(result, url);
+                        break;
                     } catch (IOException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
                         ignore(); 
                     }
-                return new Properties();
+                return result;
             }
         },
 
@@ -122,10 +121,8 @@ public interface Config {
         MERGE {
             @Override
             Properties load(ArrayList<URL> urls, LoadersManager loaders) {
-
-                List<URL> reversed = reverse(urls);
                 Properties result = new Properties();
-                for (URL url : reversed) 
+                for (URL url :  reverse(urls)) 
                     try {
                         loaders.load(result, url);
                     } catch (IOException ex) {
