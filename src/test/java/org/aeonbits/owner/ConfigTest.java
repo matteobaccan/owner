@@ -28,7 +28,6 @@ public class ConfigTest {
 
     @Mock
     private ScheduledExecutorService scheduler;
-    private VariablesExpander expander = new VariablesExpander(new Properties());
 
     public static interface SampleConfig extends Config {
         String hello(String param);
