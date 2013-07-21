@@ -67,6 +67,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
+    private final LoadersManager loaders;
 
     @Retention(RUNTIME)
     @Target(METHOD)
@@ -74,9 +75,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
-                      VariablesExpander expander, Map<?, ?>... imports) {
+                      VariablesExpander expander, LoadersManager loaders, Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
+        this.loaders = loaders;
         this.imports = imports;
 
         urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
@@ -168,7 +170,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     Properties doLoad() throws IOException {
-        return loadType.load(urls);
+        return loadType.load(urls, loaders);
     }
 
     private static void merge(Properties results, Map<?, ?>... inputs) {

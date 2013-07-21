@@ -101,11 +101,11 @@ public interface Config {
          */
         FIRST {
             @Override
-            Properties load(ArrayList<URL> urls) {
+            Properties load(ArrayList<URL> urls, LoadersManager loaders) {
                 Properties result = new Properties();
                 for (URL url : urls)
                     try {
-                        if (Loaders.load(result, url))
+                        if (loaders.load(result, url))
                         return result;
                     } catch (IOException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
@@ -121,13 +121,13 @@ public interface Config {
          */
         MERGE {
             @Override
-            Properties load(ArrayList<URL> urls) {
+            Properties load(ArrayList<URL> urls, LoadersManager loaders) {
 
                 List<URL> reversed = reverse(urls);
                 Properties result = new Properties();
                 for (URL url : reversed) 
                     try {
-                        Loaders.load(result, url);
+                        loaders.load(result, url);
                     } catch (IOException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
                         ignore(); 
@@ -136,7 +136,7 @@ public interface Config {
             }
         };
 
-        abstract Properties load(ArrayList<URL> urls);
+        abstract Properties load(ArrayList<URL> urls, LoadersManager loaders);
     }
 
     /**

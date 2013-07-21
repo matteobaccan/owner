@@ -29,9 +29,4 @@ public class UnsupportedInstantiationTest {
     public void testConfigFactoryInstantiation() {
         new ConfigFactory(){};
     }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testLoadersInstantiation() {
-        new Loaders(){};
-    }
 }

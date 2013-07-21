@@ -11,6 +11,7 @@ package org.aeonbits.owner.interfaces;
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.LoadersManagerForTest;
 import org.aeonbits.owner.PropertiesManagerForTest;
 import org.aeonbits.owner.VariablesExpanderForTest;
 import org.junit.Test;
@@ -39,6 +40,8 @@ import static org.junit.Assert.assertTrue;
 public class AccessibleConfigTest {
     @Mock
     private ScheduledExecutorService scheduler;
+    @Mock
+    private LoadersManagerForTest loaders;
 
     private VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
 
@@ -54,7 +57,8 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintStream() throws IOException {
         ByteArrayOutputStream expected = new ByteArrayOutputStream();
-        PropertiesManagerForTest manager = new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander);
+        PropertiesManagerForTest manager = 
+                new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander, loaders);
         manager.load().list(new PrintStream(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);
@@ -67,7 +71,8 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintWriter() throws IOException {
         StringWriter expected = new StringWriter();
-        PropertiesManagerForTest manager = new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander);
+        PropertiesManagerForTest manager = 
+                new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander, loaders);
         manager.load().list(new PrintWriter(expected, true));
 
         AccessibleConfig config = ConfigFactory.create(AccessibleConfig.class);

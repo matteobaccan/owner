@@ -12,28 +12,37 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.LoadersManagerForTest;
 import org.aeonbits.owner.PropertiesManagerForTest;
 import org.aeonbits.owner.VariablesExpanderForTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
-public class FirstLoadStrategyTest {
+public class FirstLoadStrategyTest extends LoadStrategyTestBase {
     @Mock
     private ScheduledExecutorService scheduler;
+    @Spy
+    private LoadersManagerForTest loaders = new LoadersManagerForTest();
     private VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
 
 
@@ -92,15 +101,12 @@ public class FirstLoadStrategyTest {
 
     @Test
     public void shouldLoadURLFromSpecifiedSource() throws IOException {
-        PropertiesManagerForTest manager = new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(),
-                scheduler, expander);
-
+        PropertiesManagerForTest manager = 
+                new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(),
+                scheduler, expander, loaders);
         manager.load();
-        assertEquals(4, manager.getUrls().size());
-
-        // TODO: review this test.        
-        // need to verify that the url used is the one with "classpath:org/aeonbits/owner/FooBar.properties"
-        // ie. spying the loader?
+        verify(loaders, times(1)).findLoader(any(URL.class));
+        verify(loaders, times(1)).findLoader(argThat(urlMatches("org/aeonbits/owner/FooBar.properties")));
     }
 
     @Test

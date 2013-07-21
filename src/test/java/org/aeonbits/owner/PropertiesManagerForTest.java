@@ -8,11 +8,6 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Sources;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,29 +16,14 @@ import java.util.concurrent.ScheduledExecutorService;
  * @author Luigi R. Viggiano
  */
 public class PropertiesManagerForTest extends PropertiesManager {
-    private ArrayList<URL> urls;
-
     public PropertiesManagerForTest(Class<? extends Config> clazz, Properties properties, 
-                             ScheduledExecutorService scheduler, VariablesExpander expander, Map<?, ?>... imports) {
-        super(clazz, properties, scheduler, expander, imports);
-    }
-
-    @Override
-    public ArrayList<URL> toURLs(Sources sources) {
-        return urls = super.toURLs(sources);
+                             ScheduledExecutorService scheduler, VariablesExpander expander, LoadersManager loaders, 
+                             Map<?, ?>... imports) {
+        super(clazz, properties, scheduler, expander, loaders, imports);
     }
 
     @Override
     public Properties load() {
         return super.load();
-    }
-
-    @Override
-    public Properties doLoad() throws IOException {
-        return super.doLoad();
-    }
-
-    public ArrayList<URL> getUrls() {
-        return urls;
     }
 }

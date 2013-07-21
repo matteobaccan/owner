@@ -55,7 +55,8 @@ public abstract class ConfigFactory {
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = new Class<?>[]{clazz};
         VariablesExpander expander = new VariablesExpander(props);
-        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, imports);
+        LoadersManager loaders = new LoadersManager();
+        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loaders, imports);
         InvocationHandler handler = new PropertiesInvocationHandler(manager);
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }

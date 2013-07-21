@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import static org.aeonbits.owner.Util.prohibitInstantiation;
 import static org.aeonbits.owner.Util.unsupported;
 
 
@@ -32,27 +31,22 @@ import static org.aeonbits.owner.Util.unsupported;
  * @author Luigi R. Viggiano
  * @since 1.0.5
  */
-abstract class Loaders {
-    private static final List<Loader> loaders = Collections.synchronizedList(new LinkedList<Loader>());
-    
-    static {
+class LoadersManager {
+    private final List<Loader> loaders = Collections.synchronizedList(new LinkedList<Loader>());
+
+    LoadersManager() {
         registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
     }
             
-    Loaders() {
-        prohibitInstantiation();
-    }
-    
-    private static InputStream getInputStream(URL url) throws IOException {
-        if (url == null) return null;
+    InputStream getInputStream(URL url) throws IOException {
         URLConnection conn = url.openConnection();
         if (conn == null)
             return null;
         return conn.getInputStream();
     }
 
-    static boolean load(Properties result, URL url) throws IOException {
+    boolean load(Properties result, URL url) throws IOException {
         InputStream stream = getInputStream(url);
         if (stream != null)
             try {
@@ -65,14 +59,14 @@ abstract class Loaders {
         return false;
     }
 
-    private static Loader findLoader(URL url) {
+    Loader findLoader(URL url) {
         for (Loader loader : loaders)
             if (loader.accept(url))
                 return loader;
         throw unsupported("Can't resolve a Loader for the URL %s.", url.toString());
     }
 
-    private static void close(InputStream inputStream) throws IOException {
+    private void close(InputStream inputStream) throws IOException {
         if (inputStream != null)
             inputStream.close();
     }
@@ -83,7 +77,7 @@ abstract class Loaders {
      * @since 1.0.5
      * @param loader the {@link Loader} to register.
      */
-    private static void registerLoader(Loader loader) {
+    private void registerLoader(Loader loader) {
         loaders.add(0, loader);
     }
 
