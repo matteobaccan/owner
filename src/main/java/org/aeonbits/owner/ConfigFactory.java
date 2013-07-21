@@ -28,8 +28,6 @@ import static org.aeonbits.owner.Util.prohibitInstantiation;
  */
 public abstract class ConfigFactory {
 
-    // TODO: extract this into a class HotReloadScheduler that allows scheduling only once per class,
-    // and keeps a reference to the command scheduled and - possibly - allows the user to dispose the scheduled command.
     private static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
         public Thread newThread(Runnable r) {
             Thread result = new Thread(r);
