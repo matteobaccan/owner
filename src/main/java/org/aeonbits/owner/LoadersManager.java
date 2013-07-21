@@ -54,7 +54,7 @@ class LoadersManager {
                 loader.load(result, stream);
                 return true;
             } finally {
-                close(stream);
+                stream.close();
             }
         return false;
     }
@@ -64,11 +64,6 @@ class LoadersManager {
             if (loader.accept(url))
                 return loader;
         throw unsupported("Can't resolve a Loader for the URL %s.", url.toString());
-    }
-
-    private void close(InputStream inputStream) throws IOException {
-        if (inputStream != null)
-            inputStream.close();
     }
 
     /**
