@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ReloadTest {
-    private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
+    private static final String spec = "file:target/test-generated-resources/ReloadableConfig.properties";
     private static File target;
     @Mock ReloadListener listener;
 

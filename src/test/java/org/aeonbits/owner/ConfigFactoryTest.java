@@ -34,14 +34,14 @@ public class ConfigFactoryTest {
     @Before
     public void before() throws IOException {
         ConfigFactory.setProperties(new Properties());
-        save(new File("target/test-resources/myconfig.properties"), new Properties() {{
+        save(new File("target/test-generated-resources/myconfig.properties"), new Properties() {{
             setProperty("someValue", "foobar");
         }});
     }
 
     @Test
     public void testSetProperty()  {
-        ConfigFactory.setProperty("mypath", "target/test-resources");
+        ConfigFactory.setProperty("mypath", "target/test-generated-resources");
 
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
@@ -60,14 +60,14 @@ public class ConfigFactoryTest {
 
     @Test
     public void testSetPropertyTwice()  {
-        assertNull(ConfigFactory.setProperty("mypath", "target/test-resources"));
-        assertEquals("target/test-resources", ConfigFactory.setProperty("mypath", "target/test-resources-2"));
-        assertEquals("target/test-resources-2", ConfigFactory.getProperty("mypath"));
+        assertNull(ConfigFactory.setProperty("mypath", "target/test-generated-resources"));
+        assertEquals("target/test-generated-resources", ConfigFactory.setProperty("mypath", "target/test-generated-resources-2"));
+        assertEquals("target/test-generated-resources-2", ConfigFactory.getProperty("mypath"));
     }
 
     @Test
     public void testGetProperties() {
-        ConfigFactory.getProperties().setProperty("mypath", "target/test-resources");
+        ConfigFactory.getProperties().setProperty("mypath", "target/test-generated-resources");
 
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
@@ -77,7 +77,7 @@ public class ConfigFactoryTest {
     @Test
     public void testSetProperties() {
         ConfigFactory.setProperties(new Properties() {{
-            setProperty("mypath", "target/test-resources");
+            setProperty("mypath", "target/test-generated-resources");
         }});
 
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
@@ -96,8 +96,8 @@ public class ConfigFactoryTest {
 
     @Test
     public void testGetProperty() {
-        ConfigFactory.setProperty("mypath", "target/test-resources");
-        assertEquals("target/test-resources", ConfigFactory.getProperty("mypath"));
+        ConfigFactory.setProperty("mypath", "target/test-generated-resources");
+        assertEquals("target/test-generated-resources", ConfigFactory.getProperty("mypath"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -112,8 +112,8 @@ public class ConfigFactoryTest {
 
     @Test
     public void testGetClearProperty() {
-        ConfigFactory.setProperty("mypath", "target/test-resources");
-        assertEquals("target/test-resources", ConfigFactory.clearProperty("mypath"));
+        ConfigFactory.setProperty("mypath", "target/test-generated-resources");
+        assertEquals("target/test-generated-resources", ConfigFactory.clearProperty("mypath"));
         assertNull(ConfigFactory.getProperty("mypath"));
     }
 

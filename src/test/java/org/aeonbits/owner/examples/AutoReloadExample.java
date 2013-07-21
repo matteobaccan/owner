@@ -29,7 +29,7 @@ import static org.aeonbits.owner.UtilTest.save;
  * @author Luigi R. Viggiano
  */
 public class AutoReloadExample {
-    private static final String spec = "file:target/test-resources/AutoReloadExample.properties";
+    private static final String spec = "file:target/test-generated-resources/AutoReloadExample.properties";
     private static File target;
 
     @Sources(spec)

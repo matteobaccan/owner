@@ -8,9 +8,16 @@
 
 package org.aeonbits.owner.xml;
 
+import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,7 +26,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class XmlSourceTest {
 
-    public static interface ServerConfig extends Config {
+    public static interface ServerConfig extends Config, Accessible {
 
         @Key("server.http.port")
         int httpPort();
@@ -49,6 +56,24 @@ public class XmlSourceTest {
         assertEquals("127.0.0.1", cfg.sshAddress());
         assertEquals(60, cfg.aliveInterval());
         assertEquals("admin", cfg.sshUser());
+    }
+    
+    @Test
+    public void testStoreToXML() throws IOException {
+        ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+        File target = new File("target/test-generated-resources/XmlSourceTest$ServerConfig.properties.xml");
+        target.getParentFile().mkdirs();
+        cfg.storeToXML(new FileOutputStream(target), "this is an example");
+        
+        Properties props = new Properties();
+        props.loadFromXML(new FileInputStream(target));
+
+        assertEquals(String.valueOf(cfg.httpPort()), props.getProperty("server.http.port"));
+        assertEquals(cfg.httpHostname(), props.getProperty("server.http.hostname"));
+        assertEquals(String.valueOf(cfg.sshPort()), props.getProperty("server.ssh.port"));
+        assertEquals(cfg.sshAddress(), props.getProperty("server.ssh.address"));
+        assertEquals(String.valueOf(cfg.aliveInterval()), props.getProperty("server.ssh.alive.interval"));
+        assertEquals(cfg.sshUser(), props.getProperty("server.ssh.user"));
     }
 
 }

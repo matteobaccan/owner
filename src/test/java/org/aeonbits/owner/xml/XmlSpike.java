@@ -155,7 +155,7 @@ public class XmlSpike {
 
         Properties props = load(in);
 
-        File file = new File("target/test-resources/props.xml");
+        File file = new File("target/test-generated-resources/props.xml");
         file.getParentFile().mkdirs();
 
         props.storeToXML(new FileOutputStream(file), "test");

@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 public class AsyncAutoReloadTest {
     private static final String propertyFileName = "AsyncAutoReloadConfig.properties";
 
-    private static final String spec = "file:target/test-resources/" + propertyFileName;
+    private static final String spec = "file:target/test-generated-resources/" + propertyFileName;
 
     private static File target;
 

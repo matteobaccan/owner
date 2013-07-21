@@ -36,9 +36,9 @@ import static org.junit.Assert.assertTrue;
 public class SyncAutoReloadTest {
 
     private static final String propertyFileName = "SyncAutoReloadConfig.properties";
-    private static final String jarFile = "target/test-resources/SyncAutoReloadTest.jar";
+    private static final String jarFile = "target/test-generated-resources/SyncAutoReloadTest.jar";
 
-    private static final String spec = "file:target/test-resources/" + propertyFileName;
+    private static final String spec = "file:target/test-generated-resources/" + propertyFileName;
     private static final String specJar = "jar:file:" + jarFile + "!/" + propertyFileName;
 
     private static File target;

@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
  * @author Luigi R. Viggiano
  */
 public class MultiThreadReloadTest extends MultiThreadTestBase {
-    private static final String spec = "file:target/test-resources/ReloadableConfig.properties";
+    private static final String spec = "file:target/test-generated-resources/ReloadableConfig.properties";
     private static File target;
     private ReloadableConfig reloadableConfig;
 

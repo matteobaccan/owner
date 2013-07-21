@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
  * @author Luigi R. Viggiano
  */
 public class ImportConfigTest {
-    private static final String spec = "file:target/test-resources/ImportConfig.properties";
+    private static final String spec = "file:target/test-generated-resources/ImportConfig.properties";
 
     @Sources(spec)
     public static interface ImportConfig extends Config {
