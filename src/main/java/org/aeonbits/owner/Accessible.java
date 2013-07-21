@@ -96,4 +96,6 @@ public interface Accessible {
      */
     String getProperty(String key, String defaultValue);
 
+    //TODO: javadocs
+    void storeToXML(OutputStream os, String comment) throws IOException;
 }

@@ -204,6 +204,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    public void storeToXML(OutputStream os, String comment) throws IOException {
+        readLock.lock();
+        try {
+            properties.storeToXML(os, comment);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Delegate
     public void list(PrintStream out) {
         readLock.lock();
         try {
