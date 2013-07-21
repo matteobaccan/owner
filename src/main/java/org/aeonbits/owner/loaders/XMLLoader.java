@@ -102,9 +102,7 @@ public class XMLLoader implements Loader {
 
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
-            String content = new String(ch, start, length);
-            if (!content.isEmpty())
-                value.peek().append(content);
+            value.peek().append(new String(ch, start, length));
         }
 
         @Override
