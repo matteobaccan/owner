@@ -11,6 +11,7 @@ package org.aeonbits.owner.xml;
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.TestConstants;
 import org.junit.Test;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -26,7 +27,7 @@ import static org.junit.Assert.assertNull;
 /**
  * @author Luigi R. Viggiano
  */
-public class XmlSourceTest {
+public class XmlSourceTest implements TestConstants {
 
     public static interface ServerConfig extends Config, Accessible {
 
@@ -63,7 +64,7 @@ public class XmlSourceTest {
     @Test
     public void testStoreToXML() throws IOException {
         ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
-        File target = new File("target/test-generated-resources/XmlSourceTest$ServerConfig.properties.xml");
+        File target = new File(RESOURCES_DIR + "/XmlSourceTest$ServerConfig.properties.xml");
         target.getParentFile().mkdirs();
         cfg.storeToXML(new FileOutputStream(target), "this is an example");
 

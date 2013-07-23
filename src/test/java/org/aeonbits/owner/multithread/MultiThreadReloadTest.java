@@ -12,6 +12,7 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
+import org.aeonbits.owner.TestConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -30,8 +31,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Luigi R. Viggiano
  */
-public class MultiThreadReloadTest extends MultiThreadTestBase {
-    private static final String spec = "file:target/test-generated-resources/ReloadableConfig.properties";
+public class MultiThreadReloadTest extends MultiThreadTestBase implements TestConstants {
+    private static final String spec = "file:" + RESOURCES_DIR + "/ReloadableConfig.properties";
     private static File target;
     private ReloadableConfig reloadableConfig;
 

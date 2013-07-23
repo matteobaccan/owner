@@ -13,6 +13,7 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
+import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 import org.junit.BeforeClass;
@@ -33,10 +34,10 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Luigi R. Viggiano
  */
-public class AsyncAutoReloadTest {
+public class AsyncAutoReloadTest implements TestConstants {
     private static final String propertyFileName = "AsyncAutoReloadConfig.properties";
 
-    private static final String spec = "file:target/test-generated-resources/" + propertyFileName;
+    private static final String spec = "file:"+ RESOURCES_DIR + "/" + propertyFileName;
 
     private static File target;
 

@@ -12,6 +12,7 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.TimeForTest;
 import org.junit.After;
 import org.junit.Before;
@@ -33,12 +34,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Luigi R. Viggiano
  */
-public class SyncAutoReloadTest {
+public class SyncAutoReloadTest implements TestConstants {
 
     private static final String propertyFileName = "SyncAutoReloadConfig.properties";
-    private static final String jarFile = "target/test-generated-resources/SyncAutoReloadTest.jar";
+    private static final String jarFile = RESOURCES_DIR + "/SyncAutoReloadTest.jar";
 
-    private static final String spec = "file:target/test-generated-resources/" + propertyFileName;
+    private static final String spec = "file:"+ RESOURCES_DIR + "/" + propertyFileName;
     private static final String specJar = "jar:file:" + jarFile + "!/" + propertyFileName;
 
     private static File target;

@@ -11,6 +11,7 @@ package org.aeonbits.owner.importedprops;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.TestConstants;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,8 +25,8 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Luigi R. Viggiano
  */
-public class ImportConfigTest {
-    private static final String spec = "file:target/test-generated-resources/ImportConfig.properties";
+public class ImportConfigTest implements TestConstants {
+    private static final String spec = "file:" + RESOURCES_DIR + "/ImportConfig.properties";
 
     @Sources(spec)
     public static interface ImportConfig extends Config {

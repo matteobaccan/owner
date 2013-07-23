@@ -12,6 +12,7 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
+import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 import org.hamcrest.BaseMatcher;
@@ -40,10 +41,11 @@ import static org.mockito.Mockito.verify;
  * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ReloadTest {
-    private static final String spec = "file:target/test-generated-resources/ReloadableConfig.properties";
+public class ReloadTest implements TestConstants {
+    private static final String spec = "file:" + RESOURCES_DIR + "/ReloadableConfig.properties";
     private static File target;
-    @Mock ReloadListener listener;
+    @Mock
+    ReloadListener listener;
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
@@ -83,7 +85,7 @@ public class ReloadTest {
     @Test
     public void testReloadWithImportedProperties() throws Throwable {
         Properties props = new Properties() {{
-           setProperty("minimumAge", "18");
+            setProperty("minimumAge", "18");
         }};
 
         ReloadImportConfig cfg = ConfigFactory.create(ReloadImportConfig.class, props);

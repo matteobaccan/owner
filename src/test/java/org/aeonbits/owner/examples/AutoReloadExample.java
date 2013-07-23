@@ -13,6 +13,7 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
+import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 
@@ -28,8 +29,8 @@ import static org.aeonbits.owner.UtilTest.save;
 /**
  * @author Luigi R. Viggiano
  */
-public class AutoReloadExample {
-    private static final String spec = "file:target/test-generated-resources/AutoReloadExample.properties";
+public class AutoReloadExample implements TestConstants {
+    private static final String spec = "file:" + RESOURCES_DIR + "/AutoReloadExample.properties";
     private static File target;
 
     @Sources(spec)
