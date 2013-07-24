@@ -8,5 +8,5 @@ cat > _serve.yml <<-EOF
 	url: http://localhost:4000
 EOF
 
-jekyll serve -w --config _config.yml,_serve.yml
+jekyll serve -w --config _config.yml,_serve.yml $@
 rm _serve.yml
