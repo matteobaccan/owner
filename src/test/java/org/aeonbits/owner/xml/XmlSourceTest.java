@@ -13,8 +13,11 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.TestConstants;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -23,6 +26,10 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Luigi R. Viggiano
@@ -97,7 +104,7 @@ public class XmlSourceTest implements TestConstants {
     public void testSAXParserMisconfigured() {
         System.setProperty("javax.xml.parsers.SAXParserFactory", "foo.bar.baz");
         try {
-            ConfigFactory.create(ServerConfigJavaFormat.class);            
+            ConfigFactory.create(ServerConfigJavaFormat.class);
         } finally {
             System.getProperties().remove("javax.xml.parsers.SAXParserFactory");
         }
@@ -105,11 +112,30 @@ public class XmlSourceTest implements TestConstants {
 
     static interface ServerConfigInvalid extends ServerConfig {
     }
-    
+
     @Test
-    public void testServerConfigInvalid() throws Throwable{
+    public void testServerConfigInvalid() throws Throwable {
         ServerConfigInvalid cfg = ConfigFactory.create(ServerConfigInvalid.class);
         assertNull(cfg.httpHostname());
+    }
+
+    @Test
+    public void testParserConfigurationException() throws ParserConfigurationException, SAXException {
+        SAXParserFactory factory = mock(SAXParserFactory.class);
+        ParserConfigurationException expected = new ParserConfigurationException();
+        doThrow(expected).when(factory).newSAXParser();
+
+        SAXParserFactoryForTest.setDelegate(factory);
+
+        System.setProperty("javax.xml.parsers.SAXParserFactory", SAXParserFactoryForTest.class.getName());
+        try {
+            ConfigFactory.create(ServerConfigJavaFormat.class);
+            fail("exception is expected");
+        } catch (IllegalArgumentException ex) {
+            assertSame(expected, ex.getCause());
+        } finally {
+            System.getProperties().remove("javax.xml.parsers.SAXParserFactory");
+        }
     }
 
 }

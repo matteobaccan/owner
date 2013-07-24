@@ -134,7 +134,7 @@ public class XMLLoader implements Loader {
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
             parser.parse(input, h);
         } catch (ParserConfigurationException e) {
-            throw new IOException(e);
+            throw new IllegalArgumentException(e);
         } catch (SAXException e) {
             throw new IOException(e);
         }
