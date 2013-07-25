@@ -33,7 +33,8 @@ And Please keep the following in mind:
 
 * If you're creating a small fix or patch to an existing feature, just a simple
   test will do. Please stay in the confines of the current test suite.
-* Also, some help on documentation on the gh-pages branch would be appreciated. 
+* Also, some help on documentation on the site folder of the master branch 
+  would be appreciated. 
   Great docs make a great project!
 * Please follow the project code style.
 
@@ -81,10 +82,10 @@ open-sourced our docs and we welcome any pull requests if you find it
 lacking.
 
 You can find the documentation for owner.aeonbits.org in the
-[gh-pages branch](https://github.com/lviggiano/owner/tree/gh-pages) of
-OWNER's repo on GitHub.com.
+[site](https://github.com/lviggiano/owner/tree/master/site) folder of the
+master branch.
 
-All documentation pull requests should be directed at `gh-pages`.  Pull
+All documentation pull requests should be directed at `master`.  Pull
 requests directed at another branch will not be accepted.
 
 The [OWNER wiki](https://github.com/lviggiano/owner/wiki) on GitHub 
