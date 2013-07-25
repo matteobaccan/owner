@@ -33,8 +33,8 @@ And Please keep the following in mind:
 
 * If you're creating a small fix or patch to an existing feature, just a simple
   test will do. Please stay in the confines of the current test suite.
-* Also, some help on documentation on the site folder of the master branch 
-  would be appreciated. 
+* Also, some help on documentation would be appreciated. Documentation sources
+  can be found on the site folder of the master branch. 
   Great docs make a great project!
 * Please follow the project code style.
 
