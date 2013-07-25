@@ -34,7 +34,7 @@
     <target name="commit" depends="copy">
         <git dir="${gh-pages.directory}" command="add ."/>
         <git-hash dir="${basedir}" property="sha"/>
-        <git dir="${gh-pages.directory}" command="commit -m 'Updating to #${sha}.'"/>
+        <git dir="${gh-pages.directory}" command="commit -m 'Updating to ${sha}.'"/>
     </target>
 
     <target name="push" depends="commit">
