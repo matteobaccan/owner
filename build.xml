@@ -18,11 +18,10 @@
 
     <target name="clone" depends="test-gh-pages" unless="gh-pages.available">
         <mkdir dir="${build.directory}"/>
-        <git dir="${build.directory}" command="clone ${basedir} --branch gh-pages gh-pages"/>
-        <git dir="${gh-pages.directory}" command="remote set-url origin git@github.com:lviggiano/owner"/>
+        <git dir="${build.directory}" command="clone git@github.com:lviggiano/owner --branch gh-pages gh-pages"/>
     </target>
 
-    <target name="pull" depends="clone">
+    <target name="pull" depends="clone" if="gh-pages.available">
         <git dir="${gh-pages.directory}" command="pull origin gh-pages"/>
     </target>
 
