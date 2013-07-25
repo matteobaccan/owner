@@ -18,10 +18,11 @@
 
     <target name="clone" depends="test-gh-pages" unless="gh-pages.available">
         <mkdir dir="${build.directory}"/>
-        <git dir="${build.directory}" command="clone git@github.com:lviggiano/owner --branch gh-pages gh-pages"/>
+        <git dir="${build.directory}" command="clone ${basedir} --branch gh-pages gh-pages"/>
+        <git dir="${gh-pages.directory}" command="remote set-url origin git@github.com:lviggiano/owner"/>
     </target>
 
-    <target name="pull" depends="clone" if="gh-pages.available">
+    <target name="pull" depends="clone">
         <git dir="${gh-pages.directory}" command="pull origin gh-pages"/>
     </target>
 
@@ -34,7 +35,7 @@
     <target name="commit" depends="copy">
         <git dir="${gh-pages.directory}" command="add ."/>
         <git-hash dir="${basedir}" property="sha"/>
-        <git dir="${gh-pages.directory}" command="commit -m 'Updating to #${sha}.'"/>
+        <git dir="${gh-pages.directory}" command="commit -m 'Updating to ${sha}.'"/>
     </target>
 
     <target name="push" depends="commit">
