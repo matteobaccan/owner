@@ -1,0 +1,86 @@
+<!--
+  ~ Copyright (c) 2013, Luigi R. Viggiano
+  ~ All rights reserved.
+  ~
+  ~ This software is distributable under the BSD license.
+  ~ See the terms of the BSD license in the documentation provided with this software.
+  -->
+
+<project name="site" basedir=".." default="help">
+    <property environment="env"/>
+    <property name="build.directory" value="${basedir}/target"/>
+    <property name="site.directory" value="${basedir}/site"/>
+    <property name="gh-pages.directory" value="${build.directory}/gh-pages"/>
+
+    <target name="test-gh-pages">
+        <available file="${gh-pages.directory}" type="dir" property="gh-pages.available"/>
+    </target>
+
+    <target name="clone" depends="test-gh-pages" unless="gh-pages.available">
+        <mkdir dir="${build.directory}"/>
+        <git dir="${build.directory}" command="clone git@github.com:lviggiano/owner --branch gh-pages gh-pages"/>
+    </target>
+
+    <target name="pull" depends="clone" if="gh-pages.available">
+        <git dir="${gh-pages.directory}" command="pull origin gh-pages"/>
+    </target>
+
+    <target name="copy" depends="pull">
+        <copy todir="${gh-pages.directory}" overwrite="true">
+            <fileset dir="${site.directory}"/>
+        </copy>
+    </target>
+
+    <target name="commit" depends="copy">
+        <git dir="${gh-pages.directory}" command="add ."/>
+        <git-hash dir="${basedir}" property="sha"/>
+        <git dir="${gh-pages.directory}" command="commit -m 'Updating to #${sha}.'"/>
+    </target>
+
+    <target name="push" depends="commit">
+        <git dir="${gh-pages.directory}" command="push origin gh-pages"/>
+    </target>
+
+    <target name="publish" depends="push"/>
+
+    <target name="clean">
+        <delete dir="${gh-pages.directory}"/>
+    </target>
+
+    <target name="run">
+        <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_serve-" suffix=".yml" property="serve.file"/>
+        <echo file="${serve.file}" message="url: http://localhost:4000"/>
+        <exec dir="${site.directory}" executable="jekyll">
+            <arg line="serve -w ${env.JEKYLL_OPTS} --config _config.yml,${serve.file}"/>
+        </exec>
+    </target>
+    
+    <target name="help">
+        <echo>
+        ant clean                           - cleans up the target dir
+        ant publish                         - publish site to gh-pages
+        ant run                             - run jekyll
+        JEKYLL_OPTS="--drafts" ant run      - run jekyll with "--drafts" option
+        </echo>
+    </target>
+
+    <macrodef name="git">
+        <attribute name="dir"/>
+        <attribute name="command"/>
+        <sequential>
+            <exec dir="@{dir}" executable="git">
+                <arg line="@{command}"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="git-hash">
+        <attribute name="dir"/>
+        <attribute name="property"/>
+        <sequential>
+            <exec dir="@{dir}" executable="bash" outputproperty="@{property}">
+                <arg line="-c 'git log --pretty=%H  | head -1'"/>
+            </exec>
+        </sequential>
+    </macrodef>
+</project>
