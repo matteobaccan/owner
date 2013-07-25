@@ -6,22 +6,22 @@ next_section: history
 permalink: /docs/contributing/
 ---
 
-So you've got an awesome idea to throw into OWNER.  
-Great! 
+So you've got an awesome idea to throw into OWNER.
+Great!
 
 There are many ways to help improving OWNER:
 
-1. If you want to implement some change, you can 
-   [fork the project on GitHub][fork] then send me a pull request. 
+1. If you want to implement some change, you can
+   [fork the project on GitHub][fork] then send me a pull request.
    See the [workflow](#toc_0).
-2. If you have some idea, you can submit it as change request on 
+2. If you have some idea, you can submit it as change request on
    [GitHub issues][issues].
-3. If you've found some defect, you can submit the bug on 
+3. If you've found some defect, you can submit the bug on
    [GitHub issues][issues].
-4. If you want to help the development, you can pick a 
-   [bug or an enhancement][issues] then contribute your patches following 
+4. If you want to help the development, you can pick a
+   [bug or an enhancement][issues] then contribute your patches following
    the [workflow](#toc_0).
-5. Also you can contribute on improving the documentation. 
+5. Also you can contribute on improving the documentation.
    See [Updating Documentation](#toc_1).
 
   [fork]: https://help.github.com/articles/fork-a-repo
@@ -34,7 +34,7 @@ And Please keep the following in mind:
 * If you're creating a small fix or patch to an existing feature, just a simple
   test will do. Please stay in the confines of the current test suite.
 * Also, some help on documentation would be appreciated. Documentation sources
-  can be found on the site folder of the master branch. 
+  can be found on the site folder of the master branch.
   Great docs make a great project!
 * Please follow the project code style.
 
@@ -88,6 +88,6 @@ master branch.
 All documentation pull requests should be directed at `master`.  Pull
 requests directed at another branch will not be accepted.
 
-The [OWNER wiki](https://github.com/lviggiano/owner/wiki) on GitHub 
-can be freely updated without a pull request as all GitHub users have 
+The [OWNER wiki](https://github.com/lviggiano/owner/wiki) on GitHub
+can be freely updated without a pull request as all GitHub users have
 read and write access.
