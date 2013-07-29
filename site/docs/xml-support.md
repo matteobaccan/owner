@@ -73,8 +73,8 @@ server.ssh.alive.interval=60
 server.ssh.user=admin
 ```
 
-Loading the XML into OWNER Config object
-----------------------------------------
+Loading the XML
+---------------
 
 How to load the XML into OWNER Config object? Simple: in the same way as you already do for properties file.
 
@@ -106,6 +106,16 @@ interface ServerConfig extends Config {
     String sshUser();
 }
 ```
+
+Storing to XML
+--------------
+
+If you are looking for the method to store a Config object into an XML stream, you should have a look at the method
+[`storeToXML`][storeToXML] in the `Accessible` interface.
+
+  [storeToXML]: http://owner.newinstance.it/1.0.5-SNAPSHOT/apidocs/org/aeonbits/owner/Accessible.html#storeToXML(java.io.OutputStream,%20java.lang.String)
+
+When saving a Config object to XML, the Java XML Properties format will be used.
 
 Conclusions
 -----------
