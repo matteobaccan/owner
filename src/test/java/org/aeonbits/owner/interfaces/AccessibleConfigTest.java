@@ -27,10 +27,14 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -57,7 +61,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintStream() throws IOException {
         ByteArrayOutputStream expected = new ByteArrayOutputStream();
-        PropertiesManagerForTest manager = 
+        PropertiesManagerForTest manager =
                 new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander, loaders);
         manager.load().list(new PrintStream(expected, true));
 
@@ -71,7 +75,7 @@ public class AccessibleConfigTest {
     @Test
     public void testListPrintWriter() throws IOException {
         StringWriter expected = new StringWriter();
-        PropertiesManagerForTest manager = 
+        PropertiesManagerForTest manager =
                 new PropertiesManagerForTest(AccessibleConfig.class, new Properties(), scheduler, expander, loaders);
         manager.load().list(new PrintWriter(expected, true));
 
@@ -113,6 +117,14 @@ public class AccessibleConfigTest {
     public void testGetPropertyWithDefaultThatDoesNotExists() throws IOException {
         AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
         assertEquals("Hello", cfg.getProperty("salutation.text.nonexistent", "Hello"));
+    }
+
+    @Test
+    public void testStringPropertyNames() throws Throwable {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        Set<String> propNames = cfg.propertyNames();
+        assertThat(propNames.size(), is(2));
+        assertThat(propNames, containsInAnyOrder("favoriteSong", "salutation.text"));
     }
 
 }

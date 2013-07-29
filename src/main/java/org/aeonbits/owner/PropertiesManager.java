@@ -26,11 +26,13 @@ import java.lang.annotation.Target;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -38,6 +40,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
@@ -65,7 +68,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private volatile boolean loading = false;
 
-    private final List<ReloadListener> reloadListeners = Collections.synchronizedList(new LinkedList<ReloadListener>());
+    private final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
     private final LoadersManager loaders;
 
@@ -206,6 +209,19 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         readLock.lock();
         try {
             properties.storeToXML(os, comment);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Delegate
+    public Set<String> propertyNames() {
+        readLock.lock();
+        try {
+            LinkedHashSet<String> result = new LinkedHashSet<String>();
+            for (Enumeration<?> propertyNames = properties.propertyNames(); propertyNames.hasMoreElements();)
+                result.add((String)propertyNames.nextElement());
+            return result;
         } finally {
             readLock.unlock();
         }

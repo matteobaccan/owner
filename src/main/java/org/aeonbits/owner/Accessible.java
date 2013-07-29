@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * <p>Allows a <tt>Config</tt> object to access the contents of the properties, providing utility methods to perform
@@ -98,4 +99,7 @@ public interface Accessible {
 
     //TODO: javadocs
     void storeToXML(OutputStream os, String comment) throws IOException;
+
+    //TODO: javadocs
+    Set<String> propertyNames();
 }
