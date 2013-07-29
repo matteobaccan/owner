@@ -6,15 +6,18 @@ next_section: accessible-mutable
 permalink: /docs/reload/
 ---
 
-Owner version 1.0.4 does support programmatic reload, as well as the 
+Owner version 1.0.4 does support programmatic reload, as well as the
 automatic "hot reload" for configuration files.
+
+There are two ways on how the automatic HotReload can be implemented
+with OWNER: synchronous or asynchronous. 
 
 
 Programmatic reload
 -------------------
 
-You can manually ask a configuration object to reload. This is done via 
-the [Reloadable] interface. 
+You can manually ask a configuration object to reload. This is done via
+the [Reloadable] interface.
 
 Example:
 
@@ -25,11 +28,11 @@ interface MyConfig extends Config, Reloadable {
 }
 
 MyConfig cfg = ConfigFactory.create(MyConfig.class);
-cfg.reload(); 
+cfg.reload();
 ```
 
 The `cfg.reload()` will perform the reload of all properties in the same way as
-when the object was initially created. If the configuration files have been 
+when the object was initially created. If the configuration files have been
 altered, after the reload invocation, those changes will be reflected in the
 config object.
 
@@ -37,7 +40,7 @@ config object.
 Automatic "hot reload"
 ----------------------
 
-You can instruct OWNER to automatically reload the properties files if they are 
+You can instruct OWNER to automatically reload the properties files if they are
 modified on the filesystem.
 
 For instance:
@@ -51,12 +54,8 @@ interface MyConfig extends Config {
 }
 ```
 
-You see in the above example we have specified the annotation `@HotReload` on 
-the interface level. Also notice that we have specified the `@Sources` 
-annotation: this is necessary. By default OWNER loads the configuration from the
-classpath, with `@Sources` annotation we can instruct OWNER to load the 
-properties file from any URL. In this case we have specified a URL pointing to
-the filesystem, since the URL specifies `file:` as protocol. 
+You see in the above example we have specified the annotation `@HotReload` on
+the interface level.
 
 The hot reload works only on filesystem URLs. This means that
 you can make it work with those two types of URLs:
@@ -64,50 +63,39 @@ you can make it work with those two types of URLs:
  - `file:path/to/your.properties` a filesystem backed URL.
  - `jar:file:path/to/some.jar!/path/to/your.properties` a jar file in your
    local filesystem that contains a properties files.
+ - `classpath:path/to/your.properties` a resource loaded from the classpath,
+   *if* the classpath resource is stored on filesystem (from inside a jar or
+   from inside a classpath folder). If the ClassLoader is loading the resource
+   from a remote url (for instance from a jar accessed via http protocol),
+   then it won't work. Almost always, the application loads classes and
+   resources from a filesystem backed classpath. So this should work *almost*
+   always.
 
-The hot reload annotation instructs OWNER to monitor those resources for 
-changes and reload them eventually.
+If you don't specify the `@Sources` annotation, then OWNER will try to load
+the properties file from the classpath from a resource matching the same package and
+class name of the *mapping interface*.
 
-Why only 'file:' and 'jar:file' URLs?
--------------------------------------
+The hot reload annotation instructs OWNER to monitor those resources for
+changes and reload them when they change.
 
-Monitoring remote URLs, such as "http" or "ftp", will involve network 
-communication to download those files from remote servers frequently just for 
-checking if they are changed, and it is not convenient to implement the hot 
-reload doing frequent heavy operations like these. 
-You can still perform the reload programmatically, using the [Reloadable] 
+Why only 'file:', 'jar:file' and 'classpath:' URLs?
+---------------------------------------------------
+
+Monitoring remote URLs, such as "http" or "ftp", will involve network
+communication to download those files from remote servers frequently just for
+checking if they are changed, and it is not convenient to implement the hot
+reload doing frequent heavy operations like these.
+You can still perform the reload programmatically, using the [Reloadable]
 interface, for these cases.
 
   [Reloadable]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html
- 
+
 While instead, monitoring the filesystem is not a big deal, also because
 filesystems implement 'last modification date' that can be checked to detect
 modifications without actually check the content of the file for changes.
 
 This is the reason why OWNER implements "hot reload" only on filesystem based
 URLs.
-
-As we said, if you don't specify the `@Sources` annotation owner would load the
-configuration from the classpath. But this doesn't work well with the hot reload
-since the Java classpath doesn't have the 'last modification date' for the 
-resources loaded, and the Java ClassLoader also implements some caching which, 
-by default, prevents the hot reloading from working fine. 
-
-But *maybe* in future we can also support the hot reload from the classpath too,
-but if you need this feature urgently you can request the development on this 
-opening a request on [GitHub issues], please explain also *why* you need this. 
-At the moment this is considered a low priority for the development.
-
- [GitHub issues]: https://github.com/lviggiano/owner/issues
-
-For the moment, if you need to load a properties resource from the classpath,
-you can't use the default load mechanism (the one that does associate the 
-*mapping interface* to the properties resource using the package and the class 
-name), nor the "classpath:" URL. You need to specify it as "file:" url, or as
-"jar:file" url if your properties is contained inside of a jar or war file.
-
-There are two ways on how the hot reload can be implemented with OWNER: 
-synchronous or asynchronous.
 
 
 The @HotReload annotation
@@ -133,17 +121,17 @@ You can check the [latest javadocs] for further details.
 
   [latest javadocs]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.HotReload.html
 
-So you can specify also the interval for the hot reload, expressed by `value` 
-and `unit`, and you can also specify the type of hot reload that you need. 
+So you can specify also the interval for the hot reload, expressed by `value`
+and `unit`, and you can also specify the type of hot reload that you need.
 
 Some examples:
 
 ```java
 // Using the default values:
 // will check for file changes with interval
-// of 5 seconds. 
+// of 5 seconds.
 // It will use SYNC hot reload.
-@HotReload    
+@HotReload
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 
@@ -155,19 +143,19 @@ interface MyConfig extends Config { ... }
 
 // Will check for file changes every 500 millis.
 // it will use SYNC hot reload.
-@HotReload(500, unit = TimeUnit.MILLISECONDS);  
+@HotReload(500, unit = TimeUnit.MILLISECONDS);
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 
-// Will use ASYNC reload type: will span a 
+// Will use ASYNC reload type: will span a
 // separate thread that will check for file
 // changes every 5 seconds (default)
-@HotReload(type=HotReloadType.ASYNC);  
+@HotReload(type=HotReloadType.ASYNC);
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 
 // Will use ASYNC reload type and will check every 2 seconds.
-@HotReload(2, type=HotReloadType.ASYNC);  
+@HotReload(2, type=HotReloadType.ASYNC);
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 ```
@@ -199,10 +187,10 @@ be checked for modifications, then eventually reload the files.
 This means that, if you don't use the config object for long periods there will
 be no checks on the filesystem, and consequently no reload will be performed.
 
-So, we can define this behavior a *lazy* hot reload, since it does that only 
+So, we can define this behavior a *lazy* hot reload, since it does that only
 when needed, at the very last time.
 
-This is the default for the `@HotReload` annotation, but you can also specify 
+This is the default for the `@HotReload` annotation, but you can also specify
 this type of hot reload explicitly with `type=SYNC`:
 
 ```java
@@ -218,10 +206,10 @@ executed on a separate thread on the specified interval, to check the files for
 modification and eventually reload them.
 
 This means that, if you don't use the config object for long periods, the check
-on the filesystem will be done in background anyway and eventually the reload 
+on the filesystem will be done in background anyway and eventually the reload
 will be performed.
 
-To enable this behavior you need to specify `type=ASYNC` to the hot reload 
+To enable this behavior you need to specify `type=ASYNC` to the hot reload
 annotation:
 
 ```java
@@ -231,8 +219,8 @@ annotation:
 Intercepting reload events
 --------------------------
 
-Since reload can happen programmatically, and automatically synchronously and 
-asynchronously, it may be helpful for to have some notification mechanism to 
+Since reload can happen programmatically, and automatically synchronously and
+asynchronously, it may be helpful for to have some notification mechanism to
 intercept reload events.
 
 For this, please look at the [Reloadable] interface, that allows the user to
@@ -246,9 +234,9 @@ In the project's sources it is included a working example:
 ```java
 
 public class AutoReloadExample {
-    private static final String spec = 
+    private static final String spec =
       "file:target/test-resources/AutoReloadExample.properties";
-    
+
     private static File target;
 
     @Sources(spec)
@@ -266,28 +254,28 @@ public class AutoReloadExample {
         }
     }
 
-    public static void main(String[] args) 
+    public static void main(String[] args)
         throws IOException, InterruptedException {
-        
+
         save(target, new Properties() { {
             setProperty("someValue", "10");
         }});
 
-        AutoReloadConfig cfg = 
+        AutoReloadConfig cfg =
             ConfigFactory.create(AutoReloadConfig.class);
-        
+
         cfg.addReloadListener(new ReloadListener() {
             public void reloadPerformed(ReloadEvent event) {
                 System.out.print(
-                    "\rReload intercepted at " 
-                    + new Date() + " \n"); 
+                    "\rReload intercepted at "
+                    + new Date() + " \n");
             }
         });
 
-        System.out.println("You can change the file " 
-            + target.getAbsolutePath() + 
+        System.out.println("You can change the file "
+            + target.getAbsolutePath() +
             " and see the changes reflected below");
-            
+
         int someValue = 0;
         while (someValue >= 0) {
             someValue = cfg.someValue();

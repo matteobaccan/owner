@@ -145,6 +145,43 @@ public class SyncAutoReloadTest implements TestConstants {
                                                              // the default value is returned.
     }
 
+    @HotReload(5)
+    interface SyncAutoReloadConfigFromClasspath extends Config {
+        @DefaultValue("5")
+        Integer someValue();
+    }
+
+    @Test
+    public void testAutoReloadFromClasspath() throws IOException, InterruptedException {
+        File classpathTarget =
+                new File("target/test-classes/" +
+                        "org/aeonbits/owner/reload/" +
+                        "SyncAutoReloadTest$SyncAutoReloadConfigFromClasspath.properties");
+        classpathTarget.deleteOnExit();
+
+        save(classpathTarget, new Properties() {{
+            setProperty("someValue", "10");
+        }});
+
+        boolean success = classpathTarget.setLastModified(classpathTarget.lastModified() - 15000); // make the file 15 seconds older.
+        assertTrue(success);
+        time.setTime(classpathTarget.lastModified());                   // set the time for this test to match the file creation.
+
+        SyncAutoReloadConfigFromClasspath cfg = ConfigFactory.create(SyncAutoReloadConfigFromClasspath.class);
+        assertEquals(Integer.valueOf(10), cfg.someValue());
+
+        save(classpathTarget, new Properties() {{        // file updated, the update time is reflected in target.lastModified().
+            setProperty("someValue", "20");
+        }});
+
+        time.elapse(4, SECONDS);                             // make 4 seconds elapse for the test.
+        assertEquals(Integer.valueOf(10), cfg.someValue());  // change is not reflected yet since interval is 5 secs.
+
+        time.elapse(1, SECONDS);                             // another second is elapsed for the test.
+        assertEquals(Integer.valueOf(20), cfg.someValue());  // the changed file should be reloaded now.
+    }
+
+
     @After
     public void after() {
         time.tearDown();
