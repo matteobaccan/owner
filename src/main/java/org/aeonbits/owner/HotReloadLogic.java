@@ -48,14 +48,14 @@ class HotReloadLogic {
         }
     }
 
-    public HotReloadLogic(HotReload hotReload, ArrayList<URL> urls, PropertiesManager manager) {
+    public HotReloadLogic(HotReload hotReload, List<URL> urls, PropertiesManager manager) {
         this.manager = manager;
         type = hotReload.type();
         interval = hotReload.unit().toMillis(hotReload.value());
         setupWatchableResources(urls);
     }
 
-    private void setupWatchableResources(ArrayList<URL> urls) {
+    private void setupWatchableResources(List<URL> urls) {
         for (URL url : urls) {
             File file = Util.fileFromURL(url);
             if (file != null)

@@ -14,7 +14,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -100,7 +100,7 @@ public interface Config {
          */
         FIRST {
             @Override
-            Properties load(ArrayList<URL> urls, LoadersManager loaders) {
+            Properties load(List<URL> urls, LoadersManager loaders) {
                 Properties result = new Properties();
                 for (URL url : urls)
                     try {
@@ -108,7 +108,7 @@ public interface Config {
                         break;
                     } catch (IOException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
-                        ignore(); 
+                        ignore();
                     }
                 return result;
             }
@@ -120,20 +120,20 @@ public interface Config {
          */
         MERGE {
             @Override
-            Properties load(ArrayList<URL> urls, LoadersManager loaders) {
+            Properties load(List<URL> urls, LoadersManager loaders) {
                 Properties result = new Properties();
-                for (URL url :  reverse(urls)) 
+                for (URL url :  reverse(urls))
                     try {
                         loaders.load(result, url);
                     } catch (IOException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
-                        ignore(); 
+                        ignore();
                     }
                 return result;
             }
         };
 
-        abstract Properties load(ArrayList<URL> urls, LoadersManager loaders);
+        abstract Properties load(List<URL> urls, LoadersManager loaders);
     }
 
     /**
@@ -308,7 +308,7 @@ public interface Config {
 
     /**
      * Specifies a <tt>{@link Converter}</tt> class to allow the user to define a custom conversion logic for the
-     * type returned by the method. If the method returns a collection, the Converter is used to convert a single 
+     * type returned by the method. If the method returns a collection, the Converter is used to convert a single
      * element.
      */
     @Retention(RUNTIME)

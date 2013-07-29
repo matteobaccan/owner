@@ -62,7 +62,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final WriteLock writeLock = lock.writeLock();
 
     private final LoadType loadType;
-    private final ArrayList<URL> urls;
+    private final List<URL> urls;
     private final ConfigURLFactory urlFactory;
     private HotReloadLogic hotReloadLogic = null;
 
@@ -93,19 +93,19 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         setupHotReload(clazz, scheduler);
     }
 
-    ArrayList<URL> toURLs(Sources sources) {
+    private List<URL> toURLs(Sources sources) {
         String[] specs = specs(sources);
-        ArrayList<URL> urls = new ArrayList<URL>();
+        ArrayList<URL> result = new ArrayList<URL>();
         for (String spec : specs) {
             try {
                 URL url = urlFactory.newURL(spec);
                 if (url != null)
-                    urls.add(url);
+                    result.add(url);
             } catch (MalformedURLException e) {
                 throw unsupported(e, "Can't convert '%s' to a valid URL", spec);
             }
         }
-        return urls;
+        return result;
     }
 
     private String[] specs(Sources sources) {
