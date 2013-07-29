@@ -1,6 +1,7 @@
 .idea/
 target/
 owner.iml
+.DS_Store
 
 # Eclipse IDE
 .classpath
