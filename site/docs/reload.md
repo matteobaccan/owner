@@ -10,7 +10,7 @@ Owner version 1.0.4 does support programmatic reload, as well as the
 automatic "hot reload" for configuration files.
 
 There are two ways on how the automatic HotReload can be implemented
-with OWNER: synchronous or asynchronous. 
+with OWNER: synchronous or asynchronous.
 
 
 Programmatic reload
