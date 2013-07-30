@@ -72,7 +72,7 @@ converted to properties values.
 
 This means that the above xml would be equivalent to a properties file like the following:
 
-```
+```properties
 server.http.port=80
 server.http.hostname=localhost
 server.ssh.port=22
