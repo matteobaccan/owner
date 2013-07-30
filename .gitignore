@@ -1,6 +1,9 @@
+# IntelliJ IDEA
 .idea/
-target/
 owner.iml
+
+# Maven and Macs
+target/
 .DS_Store
 
 # Eclipse IDE
