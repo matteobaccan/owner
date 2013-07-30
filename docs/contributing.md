@@ -2,7 +2,7 @@
 layout: docs
 title: Contributing
 prev_section: building
-next_section: history
+next_section: license
 permalink: /docs/contributing/
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: License
-prev_section: history
+prev_section: contributing
 permalink: /docs/license/
 ---
 
