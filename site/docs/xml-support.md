@@ -121,4 +121,4 @@ Conclusions
 -----------
 
 If you like XML format more than properties format (well, *I don't*), you can use XML to achieve the same result as
-using properties file.
+using properties files.
