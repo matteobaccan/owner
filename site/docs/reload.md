@@ -132,7 +132,6 @@ Some examples:
 // of 5 seconds.
 // It will use SYNC hot reload.
 @HotReload
-@Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 
 // will check for file changes every 2 seconds.
