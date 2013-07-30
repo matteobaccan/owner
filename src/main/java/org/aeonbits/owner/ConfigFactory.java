@@ -59,6 +59,16 @@ public abstract class ConfigFactory {
         return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
     }
 
+    /**
+     * Set a property in the ConfigFactory.
+     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the
+     * ConfigFactory to configure its own behavior.
+     *
+     * @since 1.0.4
+     * @param key the key for the property.
+     * @param value the value for the property.
+     * @return the old value.
+     */
     public static String setProperty(String key, String value) {
         checkKey(key);
         return (String) props.setProperty(key, value);
@@ -71,10 +81,24 @@ public abstract class ConfigFactory {
             throw new IllegalArgumentException("key can't be empty");
     }
 
+    /**
+     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the
+     * ConfigFactory to configure its own behavior.
+     *
+     * @since 1.0.4
+     * @return the properties in the ConfigFactory
+     */
     public static Properties getProperties() {
         return props;
     }
 
+    /**
+     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the
+     * ConfigFactory to configure its own behavior.
+     *
+     * @since 1.0.4
+     * @param properties the properties to set in the config Factory.
+     */
     public static void setProperties(Properties properties) {
         if (properties == null)
             props = new Properties();
@@ -82,11 +106,25 @@ public abstract class ConfigFactory {
             props = properties;
     }
 
+    /**
+     * Returns the value for a given property.
+     *
+     * @since 1.0.4
+     * @param key the key for the property
+     * @return the value for the property, or <tt>null</tt> if the property is not set.
+     */
     public static String getProperty(String key) {
         checkKey(key);
         return props.getProperty(key);
     }
 
+    /**
+     * Clears the value for the property having the given key. This means, that the given property is removed.
+     *
+     * @since 1.0.4
+     * @param key the key for the property to remove.
+     * @return the old value for the given key, or <tt>null</tt> if the property was not set.
+     */
     public static String clearProperty(String key) {
         checkKey(key);
         return (String) props.remove(key);
