@@ -127,4 +127,20 @@ public class ConfigFactoryTest implements TestConstants {
         ConfigFactory.clearProperty("");
     }
 
+    @Sources("${myurl}")
+    interface MyConfigWithoutProtocol extends Config {
+        @DefaultValue("defaultValue")
+        String someValue();
+    }
+
+    @Test
+    public void testSetPropertyWithoutProtocol()  {
+        ConfigFactory.setProperty("mypath", RESOURCES_DIR);
+        ConfigFactory.setProperty("myurl", "file:${mypath}/myconfig.properties");
+
+        MyConfigWithoutProtocol cfg = ConfigFactory.create(MyConfigWithoutProtocol.class);
+
+        assertEquals("foobar", cfg.someValue());
+    }
+
 }
