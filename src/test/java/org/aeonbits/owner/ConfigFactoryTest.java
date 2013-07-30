@@ -9,6 +9,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Sources;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,7 +37,7 @@ public class ConfigFactoryTest implements TestConstants {
 
     @Before
     public void before() throws IOException {
-        ConfigFactory.setProperties(new Properties());
+        ConfigFactory.setProperties(null);
         save(new File(RESOURCES_DIR + "/myconfig.properties"), new Properties() {{
             setProperty("someValue", "foobar");
         }});
@@ -158,4 +159,8 @@ public class ConfigFactoryTest implements TestConstants {
         assertThat(cfg.propertyNames().size(), is(1));
     }
 
+    @After
+    public void after() {
+        ConfigFactory.setProperties(null); // clean up things.
+    }
 }
