@@ -17,8 +17,11 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.save;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Luigi R. Viggiano
@@ -128,19 +131,31 @@ public class ConfigFactoryTest implements TestConstants {
     }
 
     @Sources("${myurl}")
-    interface MyConfigWithoutProtocol extends Config {
+    interface MyConfigWithoutProtocol extends Config, Accessible {
         @DefaultValue("defaultValue")
         String someValue();
     }
 
     @Test
-    public void testSetPropertyWithoutProtocol()  {
+    public void testSetPropertyWithoutProtocol() {
         ConfigFactory.setProperty("mypath", RESOURCES_DIR);
         ConfigFactory.setProperty("myurl", "file:${mypath}/myconfig.properties");
 
         MyConfigWithoutProtocol cfg = ConfigFactory.create(MyConfigWithoutProtocol.class);
 
         assertEquals("foobar", cfg.someValue());
+    }
+
+    @Test
+    public void testSetPropertyWithoutProtocolWhenFileIsNotFound()  {
+        ConfigFactory.setProperty("mypath", RESOURCES_DIR);
+        ConfigFactory.setProperty("myurl", "file:${mypath}/non-existent.properties");
+
+        MyConfigWithoutProtocol cfg = ConfigFactory.create(MyConfigWithoutProtocol.class);
+
+        assertEquals("defaultValue", cfg.someValue());
+        assertThat(cfg.propertyNames(), contains("someValue"));
+        assertThat(cfg.propertyNames().size(), is(1));
     }
 
 }
