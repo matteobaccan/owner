@@ -11,7 +11,7 @@ v1.0.5 contains following enhancements and bug fixes.
 Enhancements
 ------------
 
- * Added method `Set<String> propertyNames();` in the `Accessible` interface.
+ * Added method `Set<String> propertyNames()` in the `Accessible` interface.
   (See issue [#46](https://github.com/lviggiano/owner/issues/46))
  * Support for "classpath:" URLs in HotReload. Also it works with the default files associated to the mapping
    interface, when `@Sources` is not specified.
