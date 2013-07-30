@@ -17,7 +17,8 @@ Enhancements
    interface, when `@Sources` is not specified.
  * Support for XML. OWNER is now able to load not only from properties files, but also from XML files. The XML
    can follow the [Java XML Properties format](http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html),
-   or can be freely defined by the user. (See issue [#5](https://github.com/lviggiano/owner/issues/5))
+   or can be freely defined by the user.<br/>
+   See [XML support]({{ site.url }}/docs/xml-support/), issue [#5](https://github.com/lviggiano/owner/issues/5))
 
 
 Bugs fixes

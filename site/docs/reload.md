@@ -128,20 +128,20 @@ Some examples:
 
 ```java
 // Using the default values:
-// will check for file changes with interval
-// of 5 seconds.
+// will check for MyConfig.properties file changes in classpath
+// with interval of 5 seconds.
 // It will use SYNC hot reload.
 @HotReload
 interface MyConfig extends Config { ... }
 
-// will check for file changes every 2 seconds.
-// it will use SYNC hot reload.
+// Will check for file changes every 2 seconds.
+// It will use SYNC hot reload.
 @HotReload(2)
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 
 // Will check for file changes every 500 millis.
-// it will use SYNC hot reload.
+// It will use SYNC hot reload.
 @HotReload(500, unit = TimeUnit.MILLISECONDS);
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
