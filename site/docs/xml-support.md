@@ -12,6 +12,14 @@ There is no reason why OWNER API shouldn't implement XML support as the Properti
 
 But OWNER goes beyond that.
 
+<div class="note">
+  <h5>OWNER - Version 1.0.5</h5>
+  <p>This feature is not yet released, but it is available on the master branch.
+     If you need this, you need to cook your own jar,
+     see <a href="{{ site.url }}/docs/building/">Building from sources</a> chapter.</p>
+</div>
+
+
 
 The Java XML Properties format
 ------------------------------
