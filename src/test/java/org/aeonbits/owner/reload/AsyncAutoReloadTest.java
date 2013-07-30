@@ -35,18 +35,19 @@ import static org.junit.Assert.assertEquals;
  * @author Luigi R. Viggiano
  */
 public class AsyncAutoReloadTest implements TestConstants {
-    private static final String propertyFileName = "AsyncAutoReloadConfig.properties";
+    private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
+    private static final int DELAY = 150;
 
-    private static final String spec = "file:"+ RESOURCES_DIR + "/" + propertyFileName;
+    private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
 
     private static File target;
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
-        target = new File(new URL(spec).getFile());
+        target = new File(new URL(SPEC).getFile());
     }
 
-    @Sources(spec)
+    @Sources(SPEC)
     @HotReload(value=10, unit = MILLISECONDS, type = ASYNC)
     interface AsyncAutoReloadConfig extends Config, Reloadable {
         @DefaultValue("5")
@@ -74,7 +75,7 @@ public class AsyncAutoReloadTest implements TestConstants {
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
         delete(target);
-        sleep(100);
+        sleep(DELAY);
 
         assertEquals(1, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
@@ -82,13 +83,13 @@ public class AsyncAutoReloadTest implements TestConstants {
         save(target, new Properties() {{ //
             setProperty("someValue", "20");
         }});
-        sleep(100);
+        sleep(DELAY);
 
         assertEquals(2, reloadCount[0]);
         assertEquals(Integer.valueOf(20), cfg.someValue());
 
         delete(target);
-        sleep(100);
+        sleep(DELAY);
 
         assertEquals(3, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
@@ -96,7 +97,7 @@ public class AsyncAutoReloadTest implements TestConstants {
         save(target, new Properties() {{
             setProperty("someValue", "30");
         }});
-        sleep(100);
+        sleep(DELAY);
 
         assertEquals(4, reloadCount[0]);
         assertEquals(Integer.valueOf(30), cfg.someValue());
