@@ -12,5 +12,3 @@ v1.0.1 contains some key enhancements and bug fixes:
  * Removed [commons-lang][] transitive dependency. Minor bug fixes.
 
   [commons-lang]: http://commons.apache.org/lang/
-
-See the [History](/docs/history/) page for more information on this release.

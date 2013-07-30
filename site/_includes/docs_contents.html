@@ -13,10 +13,10 @@
         <a href="{{ site.url }}/docs/usage">Basic usage</a>
       </li>
     </ul>
-      
+
     <h4>More Features</h4>
     {% include features.html %}
-      
+
     <h4>Miscellaneous</h4>
     <ul>
         <li class="{% if page.title == "Features" %}current{% endif %}">
@@ -33,7 +33,7 @@
             <a href="{{ site.url }}/docs/support/">Getting support</a>
         </li>
     </ul>
-      
+
     <h4>Meta</h4>
     <ul>
       <li class="{% if page.title == "Building from sources" %}current{% endif %}">
@@ -42,9 +42,6 @@
       <li class="{% if page.title == "Contributing" %}current{% endif %}">
         <a href="{{ site.url }}/docs/contributing">Contributing</a>
       </li>
-      <li class="{% if page.title == "History" %}current{% endif %}">
-        <a href="{{ site.url }}/docs/history">History</a>
-      </li>
       <li class="{% if page.title == "License" %}current{% endif %}">
         <a href="{{ site.url }}/docs/license">License</a>
       </li>
@@ -52,6 +49,7 @@
 
     <h4>Other stuff</h4>
     <ul>
+      <li><a href="{{ site.url }}/news/releases/">History</a></li>
       <li><a href="http://owner.newinstance.it/latest/apidocs/index.html">Javadocs</a></li>
       <li><a href="https://aeonbits.ci.cloudbees.com/job/owner-api/">Jenkins reports</a></li>
       <li><a href="https://travis-ci.org/lviggiano/owner">Travis CI reports</a></li>
