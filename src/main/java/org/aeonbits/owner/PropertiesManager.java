@@ -9,9 +9,7 @@
 package org.aeonbits.owner;
 
 
-import org.aeonbits.owner.Config.HotReload;
-import org.aeonbits.owner.Config.LoadPolicy;
-import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.event.PropertyChangeListener;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 
@@ -41,7 +39,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Collections.synchronizedList;
-import static org.aeonbits.owner.Config.LoadType;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
@@ -71,6 +68,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<ReloadListener>());
     private Object proxy;
     private final LoadersManager loaders;
+    private List<PropertyChangeListener> propertyChangeListeners =
+            synchronizedList(new LinkedList<PropertyChangeListener>());
 
     @Retention(RUNTIME)
     @Target(METHOD)
@@ -170,6 +169,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         reloadListeners.remove(listener);
     }
 
+    @Delegate
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeListeners.add(listener);
+    }
+
     Properties doLoad() {
         return loadType.load(urls, loaders);
     }
@@ -219,8 +223,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         readLock.lock();
         try {
             LinkedHashSet<String> result = new LinkedHashSet<String>();
-            for (Enumeration<?> propertyNames = properties.propertyNames(); propertyNames.hasMoreElements();)
-                result.add((String)propertyNames.nextElement());
+            for (Enumeration<?> propertyNames = properties.propertyNames(); propertyNames.hasMoreElements(); )
+                result.add((String) propertyNames.nextElement());
             return result;
         } finally {
             readLock.unlock();

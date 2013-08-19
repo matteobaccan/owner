@@ -33,7 +33,7 @@ import java.util.Set;
  * @author Luigi R. Viggiano
  * @since 1.0.4
  */
-public interface Accessible {
+public interface Accessible extends Config {
 
     /**
      * Prints this property list out to the specified output stream. This method is useful for debugging.

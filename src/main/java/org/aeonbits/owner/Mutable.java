@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.event.PropertyChangeListener;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -36,7 +38,7 @@ import java.io.Reader;
  * @author  Luigi R. Viggiano
  * @since   1.0.4
  */
-public interface Mutable {
+public interface Mutable extends Config {
 
     /**
      * <p>Sets a given property to the specified value.</p>
@@ -97,5 +99,13 @@ public interface Mutable {
      * @since   1.0.4
      */
     void load(Reader reader) throws IOException;
+
+    /**
+     * Adds a <tt>PropertyChangeListener</tt> to the Mutable interface.
+     *
+     * @param listener the listener to be added.
+     * @since 1.0.5
+     */
+    void addPropertyChangeListener(PropertyChangeListener listener);
 
 }
