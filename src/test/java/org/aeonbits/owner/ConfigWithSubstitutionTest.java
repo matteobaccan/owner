@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ConfigWithSubstitutionTest {
 
-    public static interface ConfigWithSubstitutionFile  extends Config {
+    public static interface ConfigWithSubstitutionFile extends Config {
         String story();
     }
 
@@ -37,7 +37,8 @@ public class ConfigWithSubstitutionTest {
     public void testSubInterface() {
         ConfigWithSubtstitutionAnnotationsSubInterface conf = ConfigFactory.create
                 (ConfigWithSubtstitutionAnnotationsSubInterface.class);
-        assertEquals("Please grandma, tell me the story of 'The quick brown fox jumped over the lazy dog'", conf.tellmeTheStory());
+        assertEquals("Please grandma, tell me the story of 'The quick brown fox jumped over the lazy dog'",
+                conf.tellmeTheStory());
     }
 
     public static interface ConfigWithSubtstitutionAnnotationsSubInterface extends ConfigWithSubstitutionAnnotations {

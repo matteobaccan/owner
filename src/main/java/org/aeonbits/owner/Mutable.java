@@ -101,11 +101,17 @@ public interface Mutable extends Config {
     void load(Reader reader) throws IOException;
 
     /**
-     * Adds a <tt>PropertyChangeListener</tt> to the Mutable interface.
+     * Adds a {@link PropertyChangeListener} to the Mutable interface.
      *
      * @param listener the listener to be added.
      * @since 1.0.5
      */
     void addPropertyChangeListener(PropertyChangeListener listener);
 
+    /**
+     * Removes a {@link PropertyChangeListener} from the Mutable interface.
+     *
+     * @param listener
+     */
+    void removePropertyChangeListener(PropertyChangeListener listener);
 }

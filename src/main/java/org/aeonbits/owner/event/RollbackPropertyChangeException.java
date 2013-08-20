@@ -9,7 +9,9 @@
 package org.aeonbits.owner.event;
 
 /**
+ * Indicates that the property change event should be rolled back.
  * @author Luigi R. Viggiano
+ * @since 1.0.5
  */
-public class RollbackPropertyChangeException extends Exception {
+public class RollbackPropertyChangeException extends RollbackEventException {
 }

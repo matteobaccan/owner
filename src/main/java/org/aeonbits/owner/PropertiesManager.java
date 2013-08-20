@@ -12,7 +12,9 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.event.PropertyChangeListener;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
+import org.aeonbits.owner.event.RollbackEventException;
 
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -152,11 +154,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             clear();
             load();
-            for (ReloadListener listener : reloadListeners)
-                listener.reloadPerformed(new ReloadEvent(proxy));
+            fireReloadEvent();
         } finally {
             writeLock.unlock();
         }
+    }
+
+    private void fireReloadEvent() {
+        for (ReloadListener listener : reloadListeners)
+            listener.reloadPerformed(new ReloadEvent(proxy));
     }
 
     @Delegate
@@ -172,6 +178,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     @Delegate
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeListeners.add(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeListeners.remove(listener);
     }
 
     Properties doLoad() {
@@ -265,18 +275,50 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public String setProperty(String key, String value) {
         writeLock.lock();
         try {
-            if (value == null) return removeProperty(key);
-            return asString(properties.setProperty(key, value));
+            PropertyChangeEvent event = createPropertyChangeEvent(key, value);
+            try {
+                fireBeforePropertyChange(event);
+                if (value == null) return removeProperty(key);
+                String result = asString(properties.setProperty(key, value));
+                firePropertyChange(event);
+                return result;
+            } catch (RollbackEventException e) {
+                return properties.getProperty(key);
+            }
         } finally {
             writeLock.unlock();
         }
     }
 
+    private void firePropertyChange(PropertyChangeEvent event) {
+        for (PropertyChangeListener listener : propertyChangeListeners)
+            listener.propertyChange(event);
+    }
+
+    private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackEventException {
+        for (PropertyChangeListener listener : propertyChangeListeners)
+            listener.beforePropertyChange(event);
+    }
+
+    private PropertyChangeEvent createPropertyChangeEvent(String propertyName, String newValue) {
+        String oldValue = properties.getProperty(propertyName);
+        return new PropertyChangeEvent(proxy, propertyName, oldValue, newValue);
+    }
+
+
     @Delegate
     public String removeProperty(String key) {
         writeLock.lock();
         try {
-            return asString(properties.remove(key));
+            PropertyChangeEvent event = createPropertyChangeEvent(key, null);
+            try {
+                fireBeforePropertyChange(event);
+                String result = asString(properties.remove(key));
+                firePropertyChange(event);
+                return result;
+            } catch (RollbackEventException e) {
+                return properties.getProperty(key);
+            }
         } finally {
             writeLock.unlock();
         }
