@@ -22,8 +22,11 @@ import java.beans.PropertyChangeEvent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 /**
@@ -34,14 +37,13 @@ public class PropertyChangeListenerTest {
 
     @Mock PropertyChangeListener listener;
 
-
     interface MyConfig extends Mutable {
         @DefaultValue("13")
         String primeNumber();
     }
 
     @Test
-    public void testAddPropertyChangeListener() throws Throwable {
+    public void testSetProperty() throws Throwable {
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
         cfg.addPropertyChangeListener(listener);
 
@@ -54,6 +56,25 @@ public class PropertyChangeListenerTest {
         InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testSetPropertyThrowingRollbackOperationException() throws  Throwable {
+        doThrow(new RollbackOperationException()).when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+        MyConfig cfg = ConfigFactory.create(MyConfig.class);
+        cfg.addPropertyChangeListener(listener);
+
+        assertEquals("13", cfg.primeNumber());
+
+        cfg.setProperty("primeNumber", "17");       // is rolled back!
+        assertEquals("13", cfg.primeNumber());
+
+        PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "primeNumber", "13", "17");
+        InOrder inOrder = inOrder(listener);
+        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
+        inOrder.verify(listener, never()).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
     }
 
     private Matcher<PropertyChangeEvent> matches(final PropertyChangeEvent expectedEvent) {
@@ -90,6 +111,27 @@ public class PropertyChangeListenerTest {
         InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testRemovePropertyThrowingRollbackOperationException() throws Throwable {
+        doThrow(new RollbackOperationException()).when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+
+        MyConfig cfg = ConfigFactory.create(MyConfig.class);
+        cfg.addPropertyChangeListener(listener);
+
+        assertEquals("13", cfg.primeNumber());
+
+        cfg.removeProperty("primeNumber");  // rolled back!
+        assertEquals("13", cfg.primeNumber());
+
+        PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "primeNumber", "13", null);
+
+        InOrder inOrder = inOrder(listener);
+        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
+        inOrder.verify(listener, never()).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
@@ -108,6 +150,7 @@ public class PropertyChangeListenerTest {
         InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
     }
 
 }
