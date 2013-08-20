@@ -12,7 +12,7 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.event.PropertyChangeListener;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
-import org.aeonbits.owner.event.RollbackEventException;
+import org.aeonbits.owner.event.RollbackException;
 
 import java.beans.PropertyChangeEvent;
 import java.io.IOException;
@@ -282,7 +282,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 String result = asString(properties.setProperty(key, value));
                 firePropertyChange(event);
                 return result;
-            } catch (RollbackEventException e) {
+            } catch (RollbackException e) {
                 return properties.getProperty(key);
             }
         } finally {
@@ -295,7 +295,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             listener.propertyChange(event);
     }
 
-    private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackEventException {
+    private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackException {
         for (PropertyChangeListener listener : propertyChangeListeners)
             listener.beforePropertyChange(event);
     }
@@ -316,7 +316,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 String result = asString(properties.remove(key));
                 firePropertyChange(event);
                 return result;
-            } catch (RollbackEventException e) {
+            } catch (RollbackException e) {
                 return properties.getProperty(key);
             }
         } finally {

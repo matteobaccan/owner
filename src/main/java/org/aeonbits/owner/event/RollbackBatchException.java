@@ -9,10 +9,12 @@
 package org.aeonbits.owner.event;
 
 /**
- * Superclass for event rollback.
+ * Indicates that whole batch of event must be rolled back.
+ * A batch is intended as a group of operations are executed in a row.
+ * For instance this happens when the whole list of properties is reloaded or cleared.
  *
  * @author Luigi R. Viggiano
  * @since 1.0.5
  */
-public class RollbackEventException extends Exception {
+public class RollbackBatchException extends RollbackException {
 }

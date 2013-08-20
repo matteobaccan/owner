@@ -14,8 +14,7 @@ import java.beans.PropertyChangeEvent;
  * @author Luigi R. Viggiano
  */
 public class PropertyChangeAdapter implements PropertyChangeListener {
-    public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackPropertyChangeException,
-            RollbackReloadException {
+    public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,RollbackBatchException {
     }
 
     public void propertyChange(PropertyChangeEvent evt) {

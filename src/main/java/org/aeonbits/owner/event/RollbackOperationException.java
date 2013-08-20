@@ -9,10 +9,10 @@
 package org.aeonbits.owner.event;
 
 /**
- * Indicates that the Reload should be rolled back.
+ * Indicates that operation must be rolled back.
  *
  * @author Luigi R. Viggiano
  * @since 1.0.5
  */
-public class RollbackReloadException extends RollbackEventException {
+public class RollbackOperationException extends RollbackException {
 }
