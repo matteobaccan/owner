@@ -35,7 +35,8 @@ import static org.mockito.Mockito.times;
 @RunWith(MockitoJUnitRunner.class)
 public class PropertyChangeListenerTest {
 
-    @Mock PropertyChangeListener listener;
+    @Mock
+    TransactionalPropertyChangeListener listener;
 
     interface MyConfig extends Mutable {
         @DefaultValue("13")

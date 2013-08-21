@@ -9,12 +9,13 @@
 package org.aeonbits.owner;
 
 
-import org.aeonbits.owner.event.PropertyChangeListener;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 import org.aeonbits.owner.event.RollbackException;
+import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
 
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -297,7 +298,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackException {
         for (PropertyChangeListener listener : propertyChangeListeners)
-            listener.beforePropertyChange(event);
+            if (listener instanceof TransactionalPropertyChangeListener)
+                ((TransactionalPropertyChangeListener) listener).beforePropertyChange(event);
     }
 
     private PropertyChangeEvent createPropertyChangeEvent(String propertyName, String newValue) {

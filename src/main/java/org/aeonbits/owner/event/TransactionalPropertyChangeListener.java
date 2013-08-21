@@ -9,13 +9,14 @@
 package org.aeonbits.owner.event;
 
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * A Listener that is aware of properties changes.
  *
  * @author Luigi R. Viggiano
  */
-public interface PropertyChangeListener extends java.beans.PropertyChangeListener {
+public interface TransactionalPropertyChangeListener extends PropertyChangeListener {
 
     /**
      * This method is invoked before the property is changed. When this method is invoked we cannot assume that the

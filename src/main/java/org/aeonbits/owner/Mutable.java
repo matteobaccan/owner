@@ -8,17 +8,14 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.event.PropertyChangeListener;
-
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
 /**
- * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p>
- *
- * <p>Example:</p>
- *
+ * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p> <p/> <p>Example:</p>
+ * <p/>
  * <pre>
  *     public interface MyConfig extends Config, Mutable {
  *         &#64;DefaultValue("18")
@@ -35,21 +32,19 @@ import java.io.Reader;
  *     }
  * </pre>
  *
- * @author  Luigi R. Viggiano
- * @since   1.0.4
+ * @author Luigi R. Viggiano
+ * @since 1.0.4
  */
 public interface Mutable extends Config {
 
     /**
-     * <p>Sets a given property to the specified value.</p>
-     *
-     * <p>Differently than {@link java.util.Properties#setProperty(String, String)},
-     * if <tt>key</tt> is set to <tt>null</tt> then this call is equivalent to {@link #removeProperty(String)}.</p>
+     * <p>Sets a given property to the specified value.</p> <p/> <p>Differently than {@link
+     * java.util.Properties#setProperty(String, String)}, if <tt>key</tt> is set to <tt>null</tt> then this call is
+     * equivalent to {@link #removeProperty(String)}.</p>
      *
      * @param key   the key to be placed into the property list.
      * @param value the value corresponding to <tt>key</tt>, or <tt>null</tt> if the property must be removed.
-     * @return      the previous value of the specified key,
-     *              or <code>null</code> if it did not have one.
+     * @return the previous value of the specified key, or <code>null</code> if it did not have one.
      * @since 1.0.4
      */
     String setProperty(String key, String value);
@@ -57,9 +52,8 @@ public interface Mutable extends Config {
     /**
      * Removes a given property.
      *
-     * @param key   the key of the property to remove.
-     * @return      the previous value of the specified key,
-     *              or <code>null</code> if it did not have one.
+     * @param key the key of the property to remove.
+     * @return the previous value of the specified key, or <code>null</code> if it did not have one.
      * @see java.util.Hashtable#remove(Object)
      * @since 1.0.4
      */
@@ -73,30 +67,24 @@ public interface Mutable extends Config {
     void clear();
 
     /**
-     * Reads a property list (key and element pairs) from the input
-     * byte stream.
+     * Reads a property list (key and element pairs) from the input byte stream.
      *
-     * @see        java.util.Properties#load(java.io.InputStream)
-     * @param      inStream   the input stream.
-     * @exception java.io.IOException  if an error occurred when reading from the
-     *             input stream.
-     * @throws     IllegalArgumentException if the input stream contains a
-     *             malformed Unicode escape sequence.
+     * @param inStream the input stream.
+     * @throws java.io.IOException      if an error occurred when reading from the input stream.
+     * @throws IllegalArgumentException if the input stream contains a malformed Unicode escape sequence.
+     * @see java.util.Properties#load(java.io.InputStream)
      * @since 1.0.4
      */
     void load(InputStream inStream) throws IOException;
 
     /**
-     * Reads a property list (key and element pairs) from the input
-     * character stream in a simple line-oriented format.
+     * Reads a property list (key and element pairs) from the input character stream in a simple line-oriented format.
      *
-     * @see     java.util.Properties#load(java.io.Reader)
-     * @param   reader   the input character stream.
-     * @throws  IOException  if an error occurred when reading from the
-     *          input stream.
-     * @throws  IllegalArgumentException if a malformed Unicode escape
-     *          appears in the input.
-     * @since   1.0.4
+     * @param reader the input character stream.
+     * @throws IOException              if an error occurred when reading from the input stream.
+     * @throws IllegalArgumentException if a malformed Unicode escape appears in the input.
+     * @see java.util.Properties#load(java.io.Reader)
+     * @since 1.0.4
      */
     void load(Reader reader) throws IOException;
 
