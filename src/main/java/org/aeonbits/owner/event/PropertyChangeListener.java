@@ -18,9 +18,10 @@ import java.beans.PropertyChangeEvent;
 public interface PropertyChangeListener extends java.beans.PropertyChangeListener {
 
     /**
-     * This method is invoked before the property is changed.
+     * This method is invoked before the property is changed. When this method is invoked we cannot assume that the
+     * change is effective, since some listener can ask to roll back the change operation.
      *
-     * @param evt the {@link PropertyChangeEvent event} of property change
+     * @param evt the {@link PropertyChangeEvent event} of property change.
      * @throws RollbackOperationException  when the listener wants to rollback the change of this property
      * @throws RollbackBatchException when the listener wants to rollback the entire set of changes if
      *         executed in a batch.
@@ -28,5 +29,11 @@ public interface PropertyChangeListener extends java.beans.PropertyChangeListene
     public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException, RollbackBatchException;
 
 
+    /**
+     * This method is invoked after the property is changed. When this method is invoked we can assume that the
+     * change is effective.
+     *
+     * @param evt the {@link PropertyChangeEvent event} of property change.
+     */
     public void propertyChange(PropertyChangeEvent evt);
 }
