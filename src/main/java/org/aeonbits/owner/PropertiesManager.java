@@ -45,6 +45,7 @@ import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
+import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
 
@@ -153,7 +154,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void reload() {
         writeLock.lock();
         try {
-            clear();
+            doClear();
             load();
             fireReloadEvent();
         } finally {
@@ -330,10 +331,29 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void clear() {
         writeLock.lock();
         try {
-            properties.clear();
+
+            Set<Object> keys = properties.keySet();
+            List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
+            for (Object key : keys) {
+                PropertyChangeEvent event = createPropertyChangeEvent((String) key, null);
+                fireBeforePropertyChange(event);
+                events.add(event);
+            }
+
+            doClear();
+
+            for (PropertyChangeEvent event : events)
+                firePropertyChange(event);
+
+        } catch (RollbackException e) {
+            ignore();
         } finally {
             writeLock.unlock();
         }
+    }
+
+    private void doClear() {
+        properties.clear();
     }
 
     @Delegate

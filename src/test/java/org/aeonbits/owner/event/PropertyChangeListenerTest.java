@@ -125,14 +125,7 @@ public class PropertyChangeListenerTest {
         assertEquals("13", cfg.primeNumber());
 
         cfg.removeProperty("primeNumber");  // rolled back!
-        assertEquals("13", cfg.primeNumber());
-
-        PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "primeNumber", "13", null);
-
-        InOrder inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
-        inOrder.verify(listener, never()).propertyChange(argThat(matches(expectedEvent)));
-        inOrder.verifyNoMoreInteractions();
+        thingsAreRolledBack(cfg);
     }
 
     @Test
@@ -151,6 +144,66 @@ public class PropertyChangeListenerTest {
         InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+
+    @Test
+    public void testClear() throws  Throwable {
+        MyConfig cfg = ConfigFactory.create(MyConfig.class);
+        cfg.addPropertyChangeListener(listener);
+
+        assertEquals("13", cfg.primeNumber());
+
+        cfg.clear();
+
+        assertNull(cfg.primeNumber());
+
+        PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "primeNumber", "13", null);
+
+        InOrder inOrder = inOrder(listener);
+        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
+        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testClearOnRollbackOperationException() throws  Throwable {
+        MyConfig cfg = ConfigFactory.create(MyConfig.class);
+        cfg.addPropertyChangeListener(listener);
+
+        doThrow(new RollbackOperationException()).when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+
+        assertEquals("13", cfg.primeNumber());
+
+        cfg.clear();
+
+        thingsAreRolledBack(cfg);
+    }
+
+    @Test
+    public void testClearOnRollbackBatchException() throws  Throwable {
+        MyConfig cfg = ConfigFactory.create(MyConfig.class);
+        cfg.addPropertyChangeListener(listener);
+
+        doThrow(new RollbackBatchException()).when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+
+        assertEquals("13", cfg.primeNumber());
+
+        cfg.clear();
+
+        thingsAreRolledBack(cfg);
+    }
+
+    private void thingsAreRolledBack(MyConfig cfg) throws RollbackOperationException, RollbackBatchException {
+
+        assertEquals("13", cfg.primeNumber());
+
+        PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "primeNumber", "13", null);
+
+        InOrder inOrder = inOrder(listener);
+        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
+        inOrder.verify(listener, never()).propertyChange(argThat(matches(expectedEvent)));
         inOrder.verifyNoMoreInteractions();
     }
 
