@@ -154,7 +154,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void reload() {
         writeLock.lock();
         try {
-            doClear();
+            performClear();
             load();
             fireReloadEvent();
         } finally {
@@ -340,7 +340,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 events.add(event);
             }
 
-            doClear();
+            performClear();
 
             for (PropertyChangeEvent event : events)
                 firePropertyChange(event);
@@ -352,7 +352,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private void doClear() {
+    private void performClear() {
         properties.clear();
     }
 
