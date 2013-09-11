@@ -322,14 +322,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         writeLock.lock();
         try {
             PropertyChangeEvent event = createPropertyChangeEvent(key, null);
-            try {
-                fireBeforePropertyChange(event);
-                String result = performRemoveProperty(key);
-                firePropertyChange(event);
-                return result;
-            } catch (RollbackException e) {
-                return properties.getProperty(key);
-            }
+            fireBeforePropertyChange(event);
+            String result = performRemoveProperty(key);
+            firePropertyChange(event);
+            return result;
+        } catch (RollbackException e) {
+            return properties.getProperty(key);
         } finally {
             writeLock.unlock();
         }

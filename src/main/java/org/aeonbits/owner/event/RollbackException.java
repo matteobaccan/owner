@@ -14,5 +14,5 @@ package org.aeonbits.owner.event;
  * @author Luigi R. Viggiano
  * @since 1.0.5
  */
-public class RollbackException extends Exception {
+public abstract class RollbackException extends Exception {
 }
