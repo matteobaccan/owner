@@ -139,15 +139,22 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     Properties load() {
         writeLock.lock();
         try {
+            return load(properties);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    private Properties load(Properties props) {
+        try {
             loading = true;
-            defaults(properties, clazz);
+            defaults(props, clazz);
             Properties loadedFromFile = doLoad();
-            merge(properties, loadedFromFile);
-            merge(properties, reverse(imports));
-            return properties;
+            merge(props, loadedFromFile);
+            merge(props, reverse(imports));
+            return props;
         } finally {
             loading = false;
-            writeLock.unlock();
         }
     }
 
@@ -364,7 +371,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             Properties loaded = new Properties();
             loaded.load(inStream);
-            performLoad(loaded);
+            performLoad(loaded.keySet(), loaded);
         } catch (RollbackException ex) {
             ignore();
         } finally {
@@ -372,8 +379,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private void performLoad(Properties props) throws RollbackException {
-        Set<Object> keys = props.keySet();
+    private void performLoad(Set<Object> keys, Properties props) throws RollbackException {
         List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, props);
 
         for (PropertyChangeEvent event : events)
@@ -420,7 +426,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             Properties loaded = new Properties();
             loaded.load(reader);
-            performLoad(loaded);
+            performLoad(loaded.keySet(), loaded);
         } catch (RollbackException ex) {
             ignore();
         } finally {
