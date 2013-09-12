@@ -10,11 +10,8 @@ package org.aeonbits.owner.event;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -25,6 +22,7 @@ import java.beans.PropertyChangeEvent;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 
+import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
@@ -98,29 +96,6 @@ public class PropertyChangeListenerTest {
         inOrder.verifyNoMoreInteractions();
     }
 
-    private Matcher<PropertyChangeEvent> matches(final PropertyChangeEvent expectedEvent) {
-        return new ArgumentMatcher<PropertyChangeEvent>() {
-            @Override
-            public boolean matches(Object argument) {
-                PropertyChangeEvent arg = (PropertyChangeEvent) argument;
-                return expectedEvent.getSource() == arg.getSource() &&
-                        eq(expectedEvent.getOldValue(), arg.getOldValue()) &&
-                        eq(expectedEvent.getNewValue(), arg.getNewValue()) &&
-                        eq(expectedEvent.getPropertyName(), arg.getPropertyName());
-            }
-
-            private boolean eq(Object expected, Object actual) {
-                if (expected == actual) return true;
-                if (expected == null) return actual == null;
-                return expected.equals(actual);
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(String.valueOf(expectedEvent));
-            }
-        };
-    }
 
     @Test
     public void testRemoveProperty() throws Throwable {

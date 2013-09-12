@@ -35,7 +35,7 @@ import java.io.Reader;
  * @author Luigi R. Viggiano
  * @since 1.0.4
  */
-public interface Mutable extends Config {
+public interface Mutable extends Reloadable {
 
     /**
      * <p>Sets a given property to the specified value.</p> <p/> <p>Differently than {@link
