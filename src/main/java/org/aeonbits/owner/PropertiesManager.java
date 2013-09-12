@@ -368,20 +368,22 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             Properties loaded = new Properties();
             loaded.load(inStream);
-
-            Set<Object> keys = loaded.keySet();
-            List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, loaded);
-
-            for (PropertyChangeEvent event : events)
-                performSetProperty(event.getPropertyName(), (String) event.getNewValue());
-
-            firePropertyChangeEvents(events);
-
+            performLoad(loaded);
         } catch (RollbackException ex) {
             ignore();
         } finally {
             writeLock.unlock();
         }
+    }
+
+    private void performLoad(Properties props) throws RollbackException {
+        Set<Object> keys = props.keySet();
+        List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, props);
+
+        for (PropertyChangeEvent event : events)
+            performSetProperty(event.getPropertyName(), (String) event.getNewValue());
+
+        firePropertyChangeEvents(events);
     }
 
     private void firePropertyChangeEvents(List<PropertyChangeEvent> events) {
@@ -390,10 +392,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(Set<Object> keys, Properties oldValues,
-                                                                     Properties newValues)
-            throws RollbackException {
+                                                                     Properties newValues) throws RollbackException {
         List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
-
         for (Object keyObject : keys) {
             String key = (String) keyObject;
             String currentValue = oldValues.getProperty(key);
@@ -408,7 +408,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 }
             }
         }
-
         return events;
     }
 
@@ -423,7 +422,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void load(Reader reader) throws IOException {
         writeLock.lock();
         try {
-            properties.load(reader);
+            Properties loaded = new Properties();
+            loaded.load(reader);
+            performLoad(loaded);
+        } catch (RollbackException ex) {
+            ignore();
         } finally {
             writeLock.unlock();
         }

@@ -23,6 +23,7 @@ import org.mockito.stubbing.Answer;
 
 import java.beans.PropertyChangeEvent;
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -75,7 +76,7 @@ public class PropertyChangeListenerTest {
 
         cfg.setProperty("primeNumber", "13");
         assertEquals("13", cfg.primeNumber());
-        
+
         verifyZeroInteractions(listener);
     }
 
@@ -242,31 +243,13 @@ public class PropertyChangeListenerTest {
         Server server = ConfigFactory.create(Server.class);
         server.addPropertyChangeListener(listener);
 
-        String inputStream = "hostname = foobar\n" +
+        String properties = "hostname = foobar\n" +
                 "port = 80\n" +
                 "protocol = http\n";
 
-        server.load(new ByteArrayInputStream(inputStream.getBytes()));
+        server.load(new ByteArrayInputStream(properties.getBytes()));
 
-        assertEquals("foobar", server.hostname());
-        assertEquals(80, server.port());
-        assertEquals("http", server.protocol());
-
-        PropertyChangeEvent hostnameChangeEvent = new PropertyChangeEvent(server, "hostname", "localhost", "foobar");
-        PropertyChangeEvent portChangeEvent = new PropertyChangeEvent(server, "port", "8080", "80");
-
-        verify(listener, times(1)).beforePropertyChange(argThat(matches(hostnameChangeEvent)));
-        verify(listener, times(1)).beforePropertyChange(argThat(matches(portChangeEvent)));
-        verify(listener, times(1)).propertyChange(argThat(matches(hostnameChangeEvent)));
-        verify(listener, times(1)).propertyChange(argThat(matches(portChangeEvent)));
-
-        InOrder inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(hostnameChangeEvent)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(hostnameChangeEvent)));
-
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(portChangeEvent)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(portChangeEvent)));
+        checkAfterLoad(server);
     }
 
     @Test
@@ -306,6 +289,42 @@ public class PropertyChangeListenerTest {
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(protocolChangeEvent)));
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(protocolChangeEvent)));
 
+    }
+
+    @Test
+    public void testLoadReader() throws Throwable {
+        Server server = ConfigFactory.create(Server.class);
+        server.addPropertyChangeListener(listener);
+
+        String properties = "hostname = foobar\n" +
+                "port = 80\n" +
+                "protocol = http\n";
+
+        server.load(new StringReader(properties));
+
+        checkAfterLoad(server);
+    }
+
+    private void checkAfterLoad(Server server) throws RollbackOperationException, RollbackBatchException {
+        assertEquals("foobar", server.hostname());
+        assertEquals(80, server.port());
+        assertEquals("http", server.protocol());
+
+        PropertyChangeEvent hostnameChangeEvent = new PropertyChangeEvent(server, "hostname", "localhost", "foobar");
+        PropertyChangeEvent portChangeEvent = new PropertyChangeEvent(server, "port", "8080", "80");
+
+        verify(listener, times(1)).beforePropertyChange(argThat(matches(hostnameChangeEvent)));
+        verify(listener, times(1)).beforePropertyChange(argThat(matches(portChangeEvent)));
+        verify(listener, times(1)).propertyChange(argThat(matches(hostnameChangeEvent)));
+        verify(listener, times(1)).propertyChange(argThat(matches(portChangeEvent)));
+
+        InOrder inOrder = inOrder(listener);
+        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(hostnameChangeEvent)));
+        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(hostnameChangeEvent)));
+
+        inOrder = inOrder(listener);
+        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(portChangeEvent)));
+        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(portChangeEvent)));
     }
 
 }
