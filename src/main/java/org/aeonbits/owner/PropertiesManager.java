@@ -155,16 +155,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void reload() {
         writeLock.lock();
         try {
-            performClear();
+            properties.clear();
             load();
             fireReloadEvent();
         } finally {
             writeLock.unlock();
         }
-    }
-
-    private void performClear() {
-        properties.clear();
     }
 
     private void fireReloadEvent() {
