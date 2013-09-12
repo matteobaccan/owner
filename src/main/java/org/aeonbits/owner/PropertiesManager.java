@@ -348,7 +348,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         writeLock.lock();
         try {
             Properties nullProperties = new Properties();
-            List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(properties, nullProperties);
+            Set<Object> keys = properties.keySet();
+            List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, nullProperties);
 
             for (PropertyChangeEvent event : events)
                 performSetProperty(event.getPropertyName(), (String) event.getNewValue());
@@ -368,7 +369,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             Properties loaded = new Properties();
             loaded.load(inStream);
 
-            List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(loaded, loaded);
+            Set<Object> keys = loaded.keySet();
+            List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, loaded);
 
             for (PropertyChangeEvent event : events)
                 performSetProperty(event.getPropertyName(), (String) event.getNewValue());
@@ -387,16 +389,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             firePropertyChange(event);
     }
 
-    private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(Properties source, Properties newValues)
+    private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(Set<Object> keys, Properties oldValues,
+                                                                     Properties newValues)
             throws RollbackException {
         List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
 
-        Set<Object> keys = source.keySet();
         for (Object keyObject : keys) {
             String key = (String) keyObject;
-            String currentValue = properties.getProperty(key);
+            String currentValue = oldValues.getProperty(key);
             String newValue = newValues.getProperty(key);
-            if (! equals(currentValue, newValue)) {
+            if (!equals(currentValue, newValue)) {
                 PropertyChangeEvent event = createPropertyChangeEvent(key, newValues.getProperty(key));
                 try {
                     fireBeforePropertyChange(event);
