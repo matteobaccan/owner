@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner;
 
-import java.lang.reflect.InvocationHandler;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -55,8 +54,10 @@ public abstract class ConfigFactory {
         VariablesExpander expander = new VariablesExpander(props);
         LoadersManager loaders = new LoadersManager();
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loaders, imports);
-        InvocationHandler handler = new PropertiesInvocationHandler(manager);
-        return (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
+        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager);
+        T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
+        handler.setProxy(proxy);
+        return proxy;
     }
 
     /**

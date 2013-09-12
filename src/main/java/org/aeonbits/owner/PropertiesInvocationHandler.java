@@ -46,14 +46,13 @@ class PropertiesInvocationHandler implements InvocationHandler {
         propertiesManager.syncReloadCheck();
         Method delegate = getDelegateMethod(invokedMethod);
         if (delegate != null)
-            return delegate(proxy, delegate, args);
+            return delegate(delegate, args);
 
         return resolveProperty(invokedMethod, args);
     }
 
-    private Object delegate(Object proxy, Method delegate, Object[] args) throws Throwable {
+    private Object delegate(Method delegate, Object[] args) throws Throwable {
         try {
-            propertiesManager.setProxy(proxy);
             return delegate.invoke(propertiesManager, args);
         } catch (InvocationTargetException e) {
             throw e.getTargetException();
@@ -105,4 +104,8 @@ class PropertiesInvocationHandler implements InvocationHandler {
     }
 
     private static final Method[] delegates = findDelegates();
+
+    public <T extends Config> void setProxy(T proxy) {
+        propertiesManager.setProxy(proxy);
+    }
 }
