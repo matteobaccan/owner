@@ -164,9 +164,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         writeLock.lock();
         try {
             Properties loaded = load(new Properties());
-            Set<Object> keys = new HashSet<Object>(loaded.keySet());
-            keys.addAll(properties.keySet());
-            List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, loaded);
+            List<PropertyChangeEvent> events =
+                    fireBeforePropertyChangeEvents(keys(properties, loaded), properties, loaded);
             applyPropertyChangeEvents(events);
             firePropertyChangeEvents(events);
             fireReloadEvent();
@@ -175,6 +174,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         } finally {
             writeLock.unlock();
         }
+    }
+
+    private Set<Object> keys(Map... maps) {
+        Set<Object> keys = new HashSet<Object>();
+        for (Map map : maps)
+            keys.addAll(map.keySet());
+        return keys;
     }
 
     private void applyPropertyChangeEvents(List<PropertyChangeEvent> events) {
@@ -315,15 +321,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackException {
-        for (PropertyChangeListener listener : propertyChangeListeners)
-            if (listener instanceof TransactionalPropertyChangeListener)
-                ((TransactionalPropertyChangeListener) listener).beforePropertyChange(event);
-    }
-
-    private void firePropertyChange(PropertyChangeEvent event) {
-        for (PropertyChangeListener listener : propertyChangeListeners)
-            listener.propertyChange(event);
+    private String performSetProperty(String key, Object value) {
+        return (value == null) ?
+                performRemoveProperty(key) :
+                asString(properties.setProperty(key, asString(value)));
     }
 
     @Delegate
@@ -344,12 +345,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private String performSetProperty(String key, Object value) {
-        return (value == null) ?
-                performRemoveProperty(key) :
-                asString(properties.setProperty(key, asString(value)));
-    }
-
     private String performRemoveProperty(String key) {
         return asString(properties.remove(key));
     }
@@ -358,9 +353,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void clear() {
         writeLock.lock();
         try {
-            Properties nullProperties = new Properties();
-            Set<Object> keys = properties.keySet();
-            List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, nullProperties);
+            List<PropertyChangeEvent> events =
+                    fireBeforePropertyChangeEvents(keys(properties), properties, new Properties());
             applyPropertyChangeEvents(events);
             firePropertyChangeEvents(events);
         } catch (RollbackException e) {
@@ -376,7 +370,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             Properties loaded = new Properties();
             loaded.load(inStream);
-            performLoad(loaded.keySet(), loaded);
+            performLoad(keys(loaded), loaded);
         } catch (RollbackException ex) {
             ignore();
         } finally {
@@ -388,32 +382,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, props);
         applyPropertyChangeEvents(events);
         firePropertyChangeEvents(events);
-    }
-
-    private void firePropertyChangeEvents(List<PropertyChangeEvent> events) {
-        for (PropertyChangeEvent event : events)
-            firePropertyChange(event);
-    }
-
-    private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(Set<Object> keys, Properties oldValues,
-                                                                     Properties newValues) throws RollbackException {
-        List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
-        for (Object keyObject : keys) {
-            String key = (String) keyObject;
-            String oldValue = oldValues.getProperty(key);
-            String newValue = newValues.getProperty(key);
-            if (!equals(oldValue, newValue)) {
-                PropertyChangeEvent event =
-                        new PropertyChangeEvent(proxy, key, oldValue, newValue);
-                try {
-                    fireBeforePropertyChange(event);
-                    events.add(event);
-                } catch (RollbackOperationException e) {
-                    ignore();
-                }
-            }
-        }
-        return events;
     }
 
     private boolean equals(String oldValue, String newValue) {
@@ -429,7 +397,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             Properties loaded = new Properties();
             loaded.load(reader);
-            performLoad(loaded.keySet(), loaded);
+            performLoad(keys(loaded), loaded);
         } catch (RollbackException ex) {
             ignore();
         } finally {
@@ -455,4 +423,42 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     boolean isLoading() {
         return loading;
     }
+
+    private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(Set<Object> keys, Properties oldValues,
+                                                                     Properties newValues) throws RollbackException {
+        List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
+        for (Object keyObject : keys) {
+            String key = (String) keyObject;
+            String oldValue = oldValues.getProperty(key);
+            String newValue = newValues.getProperty(key);
+            if (!equals(oldValue, newValue)) {
+                PropertyChangeEvent event =
+                        new PropertyChangeEvent(proxy, key, oldValue, newValue);
+                try {
+                    fireBeforePropertyChange(event);
+                    events.add(event);
+                } catch (RollbackOperationException e) {
+                    ignore();
+                }
+            }
+        }
+        return events;
+    }
+
+    private void firePropertyChangeEvents(List<PropertyChangeEvent> events) {
+        for (PropertyChangeEvent event : events)
+            firePropertyChange(event);
+    }
+
+    private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackException {
+        for (PropertyChangeListener listener : propertyChangeListeners)
+            if (listener instanceof TransactionalPropertyChangeListener)
+                ((TransactionalPropertyChangeListener) listener).beforePropertyChange(event);
+    }
+
+    private void firePropertyChange(PropertyChangeEvent event) {
+        for (PropertyChangeListener listener : propertyChangeListeners)
+            listener.propertyChange(event);
+    }
+
 }
