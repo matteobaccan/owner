@@ -34,6 +34,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * @author Luigi R. Viggiano
@@ -64,6 +65,18 @@ public class PropertyChangeListenerTest {
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(expectedEvent)));
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testSetPropertyWhenValuesAreEqual() throws Throwable {
+        MyConfig cfg = ConfigFactory.create(MyConfig.class);
+        cfg.addPropertyChangeListener(listener);
+        assertEquals("13", cfg.primeNumber());
+
+        cfg.setProperty("primeNumber", "13");
+        assertEquals("13", cfg.primeNumber());
+        
+        verifyZeroInteractions(listener);
     }
 
     @Test
