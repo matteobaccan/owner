@@ -11,6 +11,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
+import org.aeonbits.owner.event.RollbackBatchException;
 import org.aeonbits.owner.event.RollbackException;
 import org.aeonbits.owner.event.RollbackOperationException;
 import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
@@ -169,7 +170,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             applyPropertyChangeEvents(events);
             firePropertyChangeEvents(events);
             fireReloadEvent();
-        } catch (RollbackException e) {
+        } catch (RollbackBatchException e) {
             ignore();
         } finally {
             writeLock.unlock();
@@ -357,7 +358,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                     fireBeforePropertyChangeEvents(keys(properties), properties, new Properties());
             applyPropertyChangeEvents(events);
             firePropertyChangeEvents(events);
-        } catch (RollbackException e) {
+        } catch (RollbackBatchException e) {
             ignore();
         } finally {
             writeLock.unlock();
@@ -371,14 +372,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             Properties loaded = new Properties();
             loaded.load(inStream);
             performLoad(keys(loaded), loaded);
-        } catch (RollbackException ex) {
+        } catch (RollbackBatchException ex) {
             ignore();
         } finally {
             writeLock.unlock();
         }
     }
 
-    private void performLoad(Set<Object> keys, Properties props) throws RollbackException {
+    private void performLoad(Set<Object> keys, Properties props) throws RollbackBatchException {
         List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, props);
         applyPropertyChangeEvents(events);
         firePropertyChangeEvents(events);
@@ -398,7 +399,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             Properties loaded = new Properties();
             loaded.load(reader);
             performLoad(keys(loaded), loaded);
-        } catch (RollbackException ex) {
+        } catch (RollbackBatchException ex) {
             ignore();
         } finally {
             writeLock.unlock();
@@ -425,7 +426,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(Set<Object> keys, Properties oldValues,
-                                                                     Properties newValues) throws RollbackException {
+                                                                     Properties newValues) throws RollbackBatchException {
         List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
         for (Object keyObject : keys) {
             String key = (String) keyObject;
@@ -450,7 +451,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             firePropertyChange(event);
     }
 
-    private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackException {
+    private void fireBeforePropertyChange(PropertyChangeEvent event) throws RollbackBatchException,
+            RollbackOperationException {
         for (PropertyChangeListener listener : propertyChangeListeners)
             if (listener instanceof TransactionalPropertyChangeListener)
                 ((TransactionalPropertyChangeListener) listener).beforePropertyChange(event);
