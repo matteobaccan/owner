@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -217,14 +218,24 @@ public class PropertyChangeListenerTest {
     public void testLoadInputStream() throws Throwable {
         Server server = ConfigFactory.create(Server.class);
         server.addPropertyChangeListener(listener);
-
-        String properties = "hostname = foobar\n" +
-                "port = 80\n" +
-                "protocol = http\n";
-
+        String properties = getPropertiesTextForLoad();
         server.load(new ByteArrayInputStream(properties.getBytes()));
+        verifyLoad(server);
+    }
 
-        checkAfterLoad(server);
+    @Test
+    public void testLoadReader() throws Throwable {
+        Server server = ConfigFactory.create(Server.class);
+        server.addPropertyChangeListener(listener);
+        String properties = getPropertiesTextForLoad();
+        server.load(new StringReader(properties));
+        verifyLoad(server);
+    }
+
+    private String getPropertiesTextForLoad() {
+        return "hostname = foobar\n" +
+                    "port = 80\n" +
+                    "protocol = http\n";
     }
 
     @Test
@@ -267,20 +278,43 @@ public class PropertyChangeListenerTest {
     }
 
     @Test
-    public void testLoadReader() throws Throwable {
+    public void testLoadReaderOnRollbackBatchException() throws Throwable {
+        Server server = prepareLoadForRollbackBatch();
+        String properties = getPropertiesAsText();
+        server.load(new StringReader(properties));
+        verifyLoadIsRolledBackCompletely(server);
+    }
+
+    @Test
+    public void testLoadInputStreamOnRollbackBatchException() throws Throwable {
+        Server server = prepareLoadForRollbackBatch();
+        String properties = getPropertiesAsText();
+        server.load(new ByteArrayInputStream(properties.getBytes()));
+        verifyLoadIsRolledBackCompletely(server);
+    }
+
+    private void verifyLoadIsRolledBackCompletely(Server server) {
+        assertEquals("localhost", server.hostname());
+        assertEquals(8080, server.port());
+        assertEquals("http", server.protocol());
+    }
+
+    private String getPropertiesAsText() {
+        return "hostname = foobar\n" +
+                    "port = 80\n" +
+                    "protocol = ftp\n";
+    }
+
+    private Server prepareLoadForRollbackBatch() throws RollbackOperationException, RollbackBatchException {
         Server server = ConfigFactory.create(Server.class);
         server.addPropertyChangeListener(listener);
 
-        String properties = "hostname = foobar\n" +
-                "port = 80\n" +
-                "protocol = http\n";
-
-        server.load(new StringReader(properties));
-
-        checkAfterLoad(server);
+        doNothing().doNothing().doThrow(new RollbackBatchException())
+                .when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+        return server;
     }
 
-    private void checkAfterLoad(Server server) throws RollbackOperationException, RollbackBatchException {
+    private void verifyLoad(Server server) throws RollbackOperationException, RollbackBatchException {
         assertEquals("foobar", server.hostname());
         assertEquals(80, server.port());
         assertEquals("http", server.protocol());
