@@ -141,7 +141,7 @@ public class PropertyChangeListenerTest {
 
         cfg.removePropertyChangeListener(listener);
 
-        cfg.setProperty("primeNumber", "17");
+        cfg.setProperty("primeNumber", "3");
         assertEquals("3", cfg.primeNumber());
 
         PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "primeNumber", "13", "17");
