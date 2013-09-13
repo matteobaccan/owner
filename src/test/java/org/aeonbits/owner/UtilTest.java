@@ -110,4 +110,8 @@ public class UtilTest {
         return (T[]) array;
     }
 
+    public static boolean eq(Object o1, Object o2) {
+        return Util.eq(o1, o2);
+    }
+
 }

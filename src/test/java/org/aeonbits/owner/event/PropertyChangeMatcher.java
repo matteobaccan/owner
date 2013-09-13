@@ -14,6 +14,8 @@ import org.mockito.ArgumentMatcher;
 
 import java.beans.PropertyChangeEvent;
 
+import static org.aeonbits.owner.UtilTest.eq;
+
 /**
  * @author Luigi R. Viggiano
  */
@@ -27,10 +29,6 @@ class PropertyChangeMatcher {
                         eq(expectedEvent.getOldValue(), arg.getOldValue()) &&
                         eq(expectedEvent.getNewValue(), arg.getNewValue()) &&
                         eq(expectedEvent.getPropertyName(), arg.getPropertyName());
-            }
-
-            private boolean eq(Object expected, Object actual) {
-                return expected == actual || expected != null && expected.equals(actual);
             }
 
             @Override

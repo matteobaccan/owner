@@ -48,6 +48,7 @@ import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
+import static org.aeonbits.owner.Util.eq;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
@@ -307,8 +308,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             String oldValue = properties.getProperty(key);
             try {
-                if (equals(oldValue, newValue))
-                    return oldValue;
+                if (eq(oldValue, newValue)) return oldValue;
 
                 PropertyChangeEvent event = new PropertyChangeEvent(proxy, key, oldValue, newValue);
                 fireBeforePropertyChange(event);
@@ -386,10 +386,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         firePropertyChangeEvents(events);
     }
 
-    private boolean equals(String oldValue, String newValue) {
-        return oldValue == newValue || oldValue != null && oldValue.equals(newValue);
-    }
-
     @Delegate
     public void load(Reader reader) throws IOException {
         writeLock.lock();
@@ -423,14 +419,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         return loading;
     }
 
-    private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(Set<Object> keys, Properties oldValues,
-                                                                     Properties newValues) throws RollbackBatchException {
+    private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(
+            Set<Object> keys, Properties oldValues, Properties newValues) throws RollbackBatchException {
+
         List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
         for (Object keyObject : keys) {
             String key = (String) keyObject;
             String oldValue = oldValues.getProperty(key);
             String newValue = newValues.getProperty(key);
-            if (!equals(oldValue, newValue)) {
+            if (!eq(oldValue, newValue)) {
                 PropertyChangeEvent event =
                         new PropertyChangeEvent(proxy, key, oldValue, newValue);
                 try {
