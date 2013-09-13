@@ -141,6 +141,9 @@ public class PropertyChangeListenerTest {
 
         cfg.removePropertyChangeListener(listener);
 
+        cfg.setProperty("primeNumber", "17");
+        assertEquals("3", cfg.primeNumber());
+
         PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "primeNumber", "13", "17");
         InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
@@ -335,5 +338,6 @@ public class PropertyChangeListenerTest {
         inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(portChangeEvent)));
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(portChangeEvent)));
     }
+
 
 }

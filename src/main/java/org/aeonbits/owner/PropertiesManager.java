@@ -209,6 +209,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         propertyChangeListeners.add(listener);
     }
 
+    @Delegate
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeListeners.remove(listener);
     }
