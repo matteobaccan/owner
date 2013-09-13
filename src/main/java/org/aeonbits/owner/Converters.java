@@ -28,7 +28,7 @@ import java.util.TreeSet;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Util.expandUserHome;
-import static org.aeonbits.owner.Util.unreachable;
+import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.aeonbits.owner.Util.unsupported;
 
 /**
@@ -147,22 +147,22 @@ enum Converters {
         }
 
     },
-    
+
     METHOD_WITH_CONVERTER_CLASS_ANNOTATION {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             ConverterClass annotation = targetMethod.getAnnotation(ConverterClass.class);
             if (annotation == null) return null;
-            
+
             Class<? extends Converter> converterClass = annotation.value();
             Converter<?> converter;
             try {
                 converter = converterClass.newInstance();
             } catch (InstantiationException e) {
-                throw unsupported(e, "Converter class %s can't be instantiated: %s", 
+                throw unsupported(e, "Converter class %s can't be instantiated: %s",
                         converterClass.getCanonicalName(), e.getMessage());
             } catch (IllegalAccessException e) {
-                throw unsupported(e, "Converter class %s can't be accessed: %s", 
+                throw unsupported(e, "Converter class %s can't be accessed: %s",
                         converterClass.getCanonicalName(), e.getMessage());
             }
             Object result = converter.convert(targetMethod, text);
@@ -215,7 +215,7 @@ enum Converters {
             throw unsupportedConversion(targetType, text);
         }
     };
-    
+
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
     static Object convert(Method targetMethod, Class<?> targetType, String text) {
@@ -228,7 +228,7 @@ enum Converters {
             if (convertedValue != null)
                 return new ConversionResult(converter, convertedValue);
         }
-        return unreachable(); // this line is unreachable, but compiler needs it.
+        return unreachableButCompilerNeedsThis();
     }
 
     private static UnsupportedOperationException unsupportedConversion(Class<?> targetType, String text) {

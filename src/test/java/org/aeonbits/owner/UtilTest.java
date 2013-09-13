@@ -24,7 +24,7 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.unreachable;
+import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -57,7 +57,7 @@ public class UtilTest {
     @Test
     public void testUnreachable() {
         try {
-            unreachable();
+            unreachableButCompilerNeedsThis();
         } catch(AssertionError err) {
             assertEquals("this code should never be reached", err.getMessage());
         }

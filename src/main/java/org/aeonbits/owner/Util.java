@@ -94,7 +94,7 @@ abstract class Util {
         return new UnsupportedOperationException(format(msg, args));
     }
 
-    static <T> T unreachable() {
+    static <T> T unreachableButCompilerNeedsThis() {
         throw new AssertionError("this code should never be reached");
     }
 
@@ -114,7 +114,7 @@ abstract class Util {
                 path = decode(path, "utf-8");
                 return new File(path);
             } catch (UnsupportedEncodingException e) {
-                return unreachable(/* it can't happen since utf-8 is supported in jdk */);
+                return unreachableButCompilerNeedsThis(/* utf-8 is supported in jre libraries */);
             }
         } else if ("jar".equalsIgnoreCase(url.getProtocol())) {
             String path = url.getPath();
