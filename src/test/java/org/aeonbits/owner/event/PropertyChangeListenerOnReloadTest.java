@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner.event;
 
-import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
@@ -23,15 +22,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.save;
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,8 +51,20 @@ public class PropertyChangeListenerOnReloadTest implements TestConstants {
     private TransactionalPropertyChangeListener listener;
     private MyConfig cfg;
 
+    @Before
+    public void before() throws MalformedURLException {
+        target = new File(new URL(spec).getFile());
+        target.delete();
+        cfg = ConfigFactory.create(MyConfig.class);
+        cfg.addPropertyChangeListener(listener);
+    }
+
+    @After
+    public void after() {
+        target.delete();
+    }
+
     @Sources(spec)
-    @HotReload(1)
     interface MyConfig extends Mutable {
         @DefaultValue("5")
         Integer someInteger();
@@ -64,29 +78,58 @@ public class PropertyChangeListenerOnReloadTest implements TestConstants {
         String nullsByDefault();
     }
 
-    @Before
-    public void before() throws MalformedURLException {
-        target = new File(new URL(spec).getFile());
-        cfg = ConfigFactory.create(MyConfig.class);
-        cfg.addPropertyChangeListener(listener);
-    }
+    @Test
+    public void testReloadOnRollbackBatchException() throws Throwable {
 
-    @After
-    public void after() {
-        target.delete();
+        save(target, new Properties() {{
+            setProperty("someInteger", "5");
+            setProperty("someString", "bazbar");
+            setProperty("someDouble", "2.718");
+            setProperty("nullByDefault", "NotNullNow");
+        }});
+
+        doNothing().doNothing().doThrow(new RollbackBatchException())
+                .when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+
+        cfg.reload();
+
+        assertEquals(new Integer(5), cfg.someInteger());
+        assertEquals("foobar", cfg.someString());
+        assertEquals(new Double("3.14"), cfg.someDouble());
+        assertNull(cfg.nullsByDefault());
     }
 
 
     @Test
-    public void testReloadWhenNoChangesHaveBeenMade() throws IOException, RollbackBatchException,
-            RollbackOperationException {
+    public void testReloadOnRollbackOperationException() throws Throwable {
 
+        save(target, new Properties() {{
+            setProperty("someString", "bazbar");
+            setProperty("someDouble", "2.718");
+            setProperty("nullsByDefault", "NotNullNow");
+        }});
+
+        PropertyChangeEvent eventToRollback = new PropertyChangeEvent(cfg, "someString", "foobar", "bazbar");
+
+        doThrow(new RollbackOperationException())
+                .when(listener).beforePropertyChange(argThat(matches(eventToRollback)));
+
+        cfg.reload();
+
+        assertEquals(new Integer(5), cfg.someInteger());
+        assertEquals("foobar", cfg.someString());
+        assertEquals(new Double("2.718"), cfg.someDouble());
+        assertEquals("NotNullNow", cfg.nullsByDefault());
+    }
+
+    @Test
+    public void testReloadWhenNoChangesHaveBeenMade() throws Throwable {
         cfg.reload();
         verifyZeroInteractions(listener);
     }
 
     @Test
-    public void testReloadWhenChangeHappen() throws IOException, RollbackBatchException, RollbackOperationException {
+    public void testReloadWhenChangeHappen() throws Throwable{
         save(target, new Properties() {{
             setProperty("someInteger", "5");
             setProperty("someString", "bazbar");
