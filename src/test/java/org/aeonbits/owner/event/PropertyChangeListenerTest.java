@@ -181,18 +181,6 @@ public class PropertyChangeListenerTest {
         thingsAreRolledBack(cfg);
     }
 
-    @Test
-    public void testClearOnRollbackBatchException() throws Throwable {
-        MyConfig cfg = ConfigFactory.create(MyConfig.class);
-        cfg.addPropertyChangeListener(listener);
-
-        doThrow(new RollbackBatchException()).when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
-
-        cfg.clear();
-
-        thingsAreRolledBack(cfg);
-    }
-
     private void thingsAreRolledBack(MyConfig cfg) throws RollbackOperationException, RollbackBatchException {
 
         assertEquals("13", cfg.primeNumber());
@@ -216,6 +204,25 @@ public class PropertyChangeListenerTest {
         @DefaultValue("http")
         String protocol();
     }
+
+    @Test
+    public void testClearOnRollbackBatchException() throws Throwable {
+        Server cfg = ConfigFactory.create(Server.class);
+        cfg.addPropertyChangeListener(listener);
+
+        doNothing().doNothing().doThrow(new RollbackBatchException())
+                .when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+
+        cfg.clear();
+
+        assertEquals("localhost", cfg.hostname());
+        assertEquals(8080, cfg.port());
+        assertEquals("http", cfg.protocol());
+
+        verify(listener, times(3)).beforePropertyChange(any(PropertyChangeEvent.class));
+        verify(listener, never()).propertyChange(any(PropertyChangeEvent.class));
+    }
+
 
     @Test
     public void testLoadInputStream() throws Throwable {
@@ -296,10 +303,12 @@ public class PropertyChangeListenerTest {
         verifyLoadIsRolledBackCompletely(server);
     }
 
-    private void verifyLoadIsRolledBackCompletely(Server server) {
+    private void verifyLoadIsRolledBackCompletely(Server server) throws RollbackBatchException, RollbackOperationException {
         assertEquals("localhost", server.hostname());
         assertEquals(8080, server.port());
         assertEquals("http", server.protocol());
+        verify(listener, times(3)).beforePropertyChange(any(PropertyChangeEvent.class));
+        verify(listener, never()).propertyChange(any(PropertyChangeEvent.class));
     }
 
     private String getPropertiesAsText() {
