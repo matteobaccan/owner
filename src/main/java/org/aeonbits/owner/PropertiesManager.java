@@ -387,7 +387,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private boolean equals(String oldValue, String newValue) {
-        return oldValue == null && newValue == null || oldValue != null && oldValue.equals(newValue);
+        return oldValue == newValue || oldValue != null && oldValue.equals(newValue);
     }
 
     @Delegate

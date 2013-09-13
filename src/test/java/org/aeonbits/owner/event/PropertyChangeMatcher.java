@@ -30,9 +30,7 @@ class PropertyChangeMatcher {
             }
 
             private boolean eq(Object expected, Object actual) {
-                if (expected == actual) return true;
-                if (expected == null) return actual == null;
-                return expected.equals(actual);
+                return expected == actual || expected != null && expected.equals(actual);
             }
 
             @Override
