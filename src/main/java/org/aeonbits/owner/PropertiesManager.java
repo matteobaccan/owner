@@ -178,9 +178,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private Set<Object> keys(Map... maps) {
+    private Set<?> keys(Map<?,?>... maps) {
         Set<Object> keys = new HashSet<Object>();
-        for (Map map : maps)
+        for (Map<?,?> map : maps)
             keys.addAll(map.keySet());
         return keys;
     }
@@ -380,7 +380,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private void performLoad(Set<Object> keys, Properties props) throws RollbackBatchException {
+    private void performLoad(Set keys, Properties props) throws RollbackBatchException {
         List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, props);
         applyPropertyChangeEvents(events);
         firePropertyChangeEvents(events);
@@ -420,7 +420,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(
-            Set<Object> keys, Properties oldValues, Properties newValues) throws RollbackBatchException {
+            Set keys, Properties oldValues, Properties newValues) throws RollbackBatchException {
 
         List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
         for (Object keyObject : keys) {
