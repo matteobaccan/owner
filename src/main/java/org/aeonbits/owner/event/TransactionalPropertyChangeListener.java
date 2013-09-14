@@ -14,6 +14,7 @@ import java.beans.PropertyChangeListener;
 /**
  * A Listener that is aware of properties changes.
  *
+ * @since 1.0.5
  * @author Luigi R. Viggiano
  */
 public interface TransactionalPropertyChangeListener extends PropertyChangeListener {
@@ -23,9 +24,9 @@ public interface TransactionalPropertyChangeListener extends PropertyChangeListe
      * change is effective, since some listener can ask to roll back the change operation.
      *
      * @param evt the {@link PropertyChangeEvent event} of property change.
-     * @throws RollbackOperationException when the listener wants to rollback the change of this property
-     * @throws RollbackBatchException     when the listener wants to rollback the entire set of changes if executed in a
-     *                                    batch.
+     * @throws RollbackOperationException when the listener wants to rollback the change on the property intercepted
+     * @throws RollbackBatchException     when the listener wants to rollback the entire set of changes if executed in
+     *                                    the batch.
      */
     void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException, RollbackBatchException;
 

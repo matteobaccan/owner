@@ -25,6 +25,10 @@ import java.util.Properties;
 import java.util.Stack;
 
 /**
+ * A {@link Loader loader} able to read properties from standard XML Java properties files, as well as user defined
+ * XML properties files.
+ *
+ * @since 1.0.5
  * @author Luigi R. Viggiano
  */
 public class XMLLoader implements Loader {
@@ -71,8 +75,8 @@ public class XMLLoader implements Loader {
                 isJavaPropertiesFormat = true;
                 inputSource = new InputSource(new StringReader(PROPS_DTD));
                 inputSource.setSystemId(PROPS_DTD_URI);
-            } 
-            return inputSource; 
+            }
+            return inputSource;
         }
 
         public XmlToPropsHandler(Properties props) {
