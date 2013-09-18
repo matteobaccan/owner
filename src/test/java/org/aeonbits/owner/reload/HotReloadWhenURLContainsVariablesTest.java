@@ -84,12 +84,12 @@ public class HotReloadWhenURLContainsVariablesTest implements TestConstants {
 
     @After
     public void after() throws Throwable {
-        target.deleteOnExit();
+        target.delete();
     }
 
     private void waitForReload() throws InterruptedException {
         synchronized (reloadLock) {
-            reloadLock.wait();
+            reloadLock.wait(1000);
         }
     }
 
