@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
-import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.UtilTest.delete;
@@ -34,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Luigi R. Viggiano
  */
-public class AsyncAutoReloadTest implements TestConstants {
+public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConstants {
     private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
     private static final int DELAY = 150;
 
@@ -62,6 +61,12 @@ public class AsyncAutoReloadTest implements TestConstants {
         }});
 
         AsyncAutoReloadConfig cfg = ConfigFactory.create(AsyncAutoReloadConfig.class);
+        cfg.addReloadListener(new ReloadListener() {
+            public void reloadPerformed(ReloadEvent event) {
+                notifyReload();
+            }
+        });
+
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
         final int[] reloadCount = {0};
@@ -75,7 +80,7 @@ public class AsyncAutoReloadTest implements TestConstants {
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
         delete(target);
-        sleep(DELAY);
+        waitForReload(DELAY);
 
         assertEquals(1, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
@@ -83,13 +88,13 @@ public class AsyncAutoReloadTest implements TestConstants {
         save(target, new Properties() {{ //
             setProperty("someValue", "20");
         }});
-        sleep(DELAY);
+        waitForReload(DELAY);
 
         assertEquals(2, reloadCount[0]);
         assertEquals(Integer.valueOf(20), cfg.someValue());
 
         delete(target);
-        sleep(DELAY);
+        waitForReload(DELAY);
 
         assertEquals(3, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
@@ -97,7 +102,7 @@ public class AsyncAutoReloadTest implements TestConstants {
         save(target, new Properties() {{
             setProperty("someValue", "30");
         }});
-        sleep(DELAY);
+        waitForReload(DELAY);
 
         assertEquals(4, reloadCount[0]);
         assertEquals(Integer.valueOf(30), cfg.someValue());

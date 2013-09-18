@@ -1,0 +1,29 @@
+/*
+ * Copyright (c) 2013, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
+package org.aeonbits.owner.reload;
+
+/**
+ * @author luigi
+ */
+public class AsyncReloadSupport {
+    private Object reloadLock = new Object();
+
+    void waitForReload(final long timeout) throws InterruptedException {
+        synchronized (reloadLock) {
+            reloadLock.wait(timeout);
+        }
+    }
+
+    void notifyReload() {
+        synchronized (reloadLock) {
+            reloadLock.notifyAll();
+        }
+    }
+
+}

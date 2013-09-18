@@ -32,10 +32,9 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Luigi R. Viggiano
  */
-public class HotReloadWhenURLContainsVariablesTest implements TestConstants {
+public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport implements TestConstants {
     private static final String SPEC = "file:${user.dir}/" + RESOURCES_DIR + "/AutoReloadExample.properties";
     private static File target;
-    final Object reloadLock = new Object();
 
     @Sources(SPEC)
     @HotReload(value=5, unit = MILLISECONDS, type = ASYNC)
@@ -76,7 +75,7 @@ public class HotReloadWhenURLContainsVariablesTest implements TestConstants {
             setProperty("someValue", "20");
         }});
 
-        waitForReload();
+        waitForReload(150);
 
         assertEquals(new Integer(20), cfg.someValue());
 
@@ -85,18 +84,6 @@ public class HotReloadWhenURLContainsVariablesTest implements TestConstants {
     @After
     public void after() throws Throwable {
         target.delete();
-    }
-
-    private void waitForReload() throws InterruptedException {
-        synchronized (reloadLock) {
-            reloadLock.wait(1000);
-        }
-    }
-
-    private void notifyReload() {
-        synchronized (reloadLock) {
-            reloadLock.notifyAll();
-        }
     }
 
 }
