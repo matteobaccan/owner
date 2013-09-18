@@ -48,18 +48,19 @@
     </target>
 
     <target name="run">
-        <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_serve-" suffix=".yml" property="serve.file"/>
-        <echo file="${serve.file}" message="url: http://localhost:4000"/>
-        <exec dir="${site.directory}" executable="jekyll">
-            <arg line="serve -w --drafts ${env.JEKYLL_OPTS} --config _config.yml,${serve.file}"/>
-        </exec>
+        <jekyll-serve options="-w --drafts" />
+    </target>
+
+    <target name="preview">
+        <jekyll-serve options="-w" />
     </target>
 
     <target name="help">
         <echo>
         ant clean                           - cleans up the target dir
         ant publish                         - publish site to gh-pages
-        ant run                             - run jekyll (with '--drafts -w' options)
+        ant run                             - run jekyll serve (with '-w --drafts' options)
+        ant preview                         - run jekyll serve (with '-w' option)
         </echo>
     </target>
 
@@ -81,5 +82,17 @@
                 <arg line="-c 'git log --pretty=%H  | head -1'"/>
             </exec>
         </sequential>
+    </macrodef>
+
+    <macrodef name="jekyll-serve">
+        <attribute name="options"/>
+        <sequential>
+            <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_serve-" suffix=".yml" property="serve.file"/>
+            <echo file="${serve.file}" message="url: http://localhost:4000"/>
+            <exec dir="${site.directory}" executable="jekyll">
+                <arg line="serve @{options} ${env.JEKYLL_OPTS} --config _config.yml,${serve.file}"/>
+            </exec>
+        </sequential>
+
     </macrodef>
 </project>
