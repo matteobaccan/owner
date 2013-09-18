@@ -17,4 +17,9 @@ public class VariablesExpanderForTest extends VariablesExpander {
     public VariablesExpanderForTest(Properties properties) {
         super(properties);
     }
+
+    @Override
+    public String expand(String path) {
+        return super.expand(path);
+    }
 }
