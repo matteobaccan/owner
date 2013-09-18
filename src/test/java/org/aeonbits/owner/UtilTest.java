@@ -37,15 +37,16 @@ import static org.junit.Assert.assertTrue;
 public class UtilTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testConstructor() {
-        new Util(){};
+        new Util() {
+        };
     }
 
     @Test
     public void testReverse() {
-        Integer[] i = { 1, 2, 3, 4, 5};
+        Integer[] i = {1, 2, 3, 4, 5};
         Integer[] result = Util.reverse(i);
-        assertTrue(Arrays.equals(new Integer[]{1, 2, 3, 4, 5}, i));
-        assertTrue(Arrays.equals(new Integer[]{5, 4, 3, 2, 1}, result));
+        assertTrue(Arrays.equals(new Integer[] {1, 2, 3, 4, 5}, i));
+        assertTrue(Arrays.equals(new Integer[] {5, 4, 3, 2, 1}, result));
     }
 
     @Test
@@ -64,8 +65,21 @@ public class UtilTest {
     }
 
     public static void save(File target, Properties p) throws IOException {
-        target.getParentFile().mkdirs();
-        p.store(new FileWriter(target), "saved for test");
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        if (isWindows()) {
+            p.store(new FileWriter(target), "saved for test");
+        } else {
+            File tempFile = File.createTempFile(target.getName(), "temp", parent);
+            p.store(new FileWriter(tempFile), "saved for test");
+            if (!tempFile.renameTo(target))
+                throw new IOException(String.format("Failed to overwrite %s to %s", tempFile.toString(),
+                        target.toString()));
+        }
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
     }
 
     public static void delete(File target) {
