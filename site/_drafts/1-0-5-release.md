@@ -12,6 +12,7 @@ Enhancements
 ------------
 
  * Added event support for property changes. (See [#47](https://github.com/lviggiano/owner/issues/47)).
+ * Website reorganized, moved from `gh-pages` trunk to `master`, with publish ant scripts `build.xml`.
  * Added method `Set<String> propertyNames()` in the `Accessible` interface.
   (See [#46](https://github.com/lviggiano/owner/issues/46)).
  * Support for "classpath:" URLs in HotReload. Also it works with the default files associated to the mapping
