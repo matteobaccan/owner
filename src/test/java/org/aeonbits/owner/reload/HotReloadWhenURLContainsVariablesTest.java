@@ -89,14 +89,12 @@ public class HotReloadWhenURLContainsVariablesTest {
     }
 
     private void waitForReload() throws InterruptedException {
-        System.out.println("waitForReload");
         synchronized (reloadLock) {
             reloadLock.wait(1000);
         }
     }
 
     private void notifyReload() {
-        System.out.println("notifyReload()");
         synchronized (reloadLock) {
             reloadLock.notifyAll();
         }
