@@ -38,36 +38,6 @@ import static org.aeonbits.owner.Util.unsupported;
  */
 enum Converters {
 
-    PROPERTY_EDITOR {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
-            if (editor == null) return null;
-            editor.setAsText(text);
-            return editor.getValue();
-        }
-    },
-
-    FILE {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (targetType != File.class) return null;
-            return new File(expandUserHome(text));
-        }
-    },
-
-    CLASS {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (targetType != Class.class) return null;
-            try {
-                return Class.forName(text);
-            } catch (ClassNotFoundException ex) {
-                throw unsupported(ex, "Cannot convert '%s' to %s", text, targetType.getCanonicalName());
-            }
-        }
-    },
-
     ARRAY {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
@@ -168,6 +138,36 @@ enum Converters {
             Object result = converter.convert(targetMethod, text);
             if (result == null) return NULL;
             return result;
+        }
+    },
+
+    PROPERTY_EDITOR {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
+            if (editor == null) return null;
+            editor.setAsText(text);
+            return editor.getValue();
+        }
+    },
+
+    FILE {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (targetType != File.class) return null;
+            return new File(expandUserHome(text));
+        }
+    },
+
+    CLASS {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (targetType != Class.class) return null;
+            try {
+                return Class.forName(text);
+            } catch (ClassNotFoundException ex) {
+                throw unsupported(ex, "Cannot convert '%s' to %s", text, targetType.getCanonicalName());
+            }
         }
     },
 

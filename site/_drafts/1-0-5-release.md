@@ -11,6 +11,7 @@ v1.0.5 contains following enhancements and bug fixes.
 Enhancements
 ------------
 
+ * Allow `@ConverterClass` annotation to override default converters (i.e. primitive types, etc)
  * Added event support for property changes. (See [#47](https://github.com/lviggiano/owner/issues/47)).
  * Website reorganized, moved from `gh-pages` trunk to `master`, with publish ant scripts `build.xml`.
  * Added method `Set<String> propertyNames()` in the `Accessible` interface.

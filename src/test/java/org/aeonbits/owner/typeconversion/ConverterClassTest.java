@@ -64,7 +64,7 @@ public class ConverterClassTest {
             return new Server(name, port);
         }
     }
-    
+
     public static class ReturningNullConverter implements Converter<Server> {
         public Server convert(Method method, String input) {
             return null;
@@ -82,7 +82,7 @@ public class ConverterClassTest {
             throw new NullPointerException();
         }
     }
-    
+
     public abstract static class CantBeInstantiated implements Converter<Server> { // abstract
         public Server convert(Method method, String input) {
             return null;
@@ -103,7 +103,7 @@ public class ConverterClassTest {
         @DefaultValue("google.com, yahoo.com:8080, owner.aeonbits.org:4000")
         @ConverterClass(ServerConverter.class)
         Server[] servers();
-        
+
         @DefaultValue("foobar:80")
         @ConverterClass(ReturningNullConverter.class)
         Server returningNull();
@@ -115,7 +115,7 @@ public class ConverterClassTest {
         @DefaultValue("foobar:80")
         @ConverterClass(ReturningNullPointerException.class)
         Server returningNullPointerException();
-        
+
         @DefaultValue("foobar:80")
         @ConverterClass(CantBeInstantiated.class)
         Server converterClassCantBeInstantiated();
@@ -123,12 +123,22 @@ public class ConverterClassTest {
         @DefaultValue("foobar:80")
         @ConverterClass(CantBeAccessed.class)
         Server converterClassCantBeAccessed();
+
+        @DefaultValue("10")
+        @ConverterClass(OverridesIntegerConversion.class)
+        int overridden();
     }
 
     @Before
     public void before() {
         this.cfg = ConfigFactory.create(MyConfig.class);
     }
+
+    @Test
+    public void testOverriddenConversion() {
+        assertEquals(42, cfg.overridden());
+    }
+
 
     @Test
     public void testSingleObject() {
@@ -180,4 +190,9 @@ public class ConverterClassTest {
         }
     }
 
+    public static class OverridesIntegerConversion implements Converter {
+        public Object convert(Method method, String input) {
+            return 42;
+        }
+    }
 }
