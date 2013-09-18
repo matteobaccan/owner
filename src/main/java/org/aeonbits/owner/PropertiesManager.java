@@ -85,13 +85,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        setupHotReload(clazz, scheduler);
+        setupHotReload(clazz, scheduler, expander);
     }
 
-    private void setupHotReload(Class<? extends Config> clazz, ScheduledExecutorService scheduler) {
+    private void setupHotReload(Class<? extends Config> clazz,
+                                ScheduledExecutorService scheduler, VariablesExpander expander) {
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
         if (sources != null && hotReload != null) {
-            hotReloadLogic = new HotReloadLogic(clazz, handler, this);
+            hotReloadLogic = new HotReloadLogic(clazz, handler, expander, this);
 
             if (hotReloadLogic.isAsync())
                 scheduler.scheduleAtFixedRate(new Runnable() {

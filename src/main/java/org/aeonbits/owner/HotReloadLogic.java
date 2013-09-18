@@ -52,20 +52,20 @@ class HotReloadLogic {
         }
     }
 
-    HotReloadLogic(Class<? extends Config> clazz, ConfigURLStreamHandler handler, PropertiesManager manager) {
+    HotReloadLogic(Class<? extends Config> clazz, ConfigURLStreamHandler handler, VariablesExpander expander, PropertiesManager manager) {
         this.handler = handler;
         this.manager = manager;
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
         type = hotReload.type();
         interval = hotReload.unit().toMillis(hotReload.value());
-        setupWatchableResources(clazz.getAnnotation(Sources.class));
+        setupWatchableResources(clazz.getAnnotation(Sources.class), expander);
     }
 
-    private void setupWatchableResources(Sources sources) {
+    private void setupWatchableResources(Sources sources, VariablesExpander expander) {
         String[] values = sources.value();
         for (String value : values)
             try {
-                URL url = new URL(null, value, handler);
+                URL url = new URL(null, expander.expand(value), handler);
                 File file = Util.fileFromURL(url);
                 if (file != null)
                     watchableFiles.add(new WatchableFile(file));
