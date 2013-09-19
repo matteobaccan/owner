@@ -75,10 +75,24 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private volatile boolean loading = false;
 
     private final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<ReloadListener>());
+
     private Object proxy;
     private final LoadersManager loaders;
-    private List<PropertyChangeListener> propertyChangeListeners =
-            synchronizedList(new LinkedList<PropertyChangeListener>());
+    private List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
+            new LinkedList<PropertyChangeListener>() {
+                @Override
+                public boolean remove(Object o) {
+                    Iterator iterator = iterator();
+                    while (iterator.hasNext()) {
+                        Object item = iterator.next();
+                        if (item.equals(o)) {
+                            iterator.remove();
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
 
     @Retention(RUNTIME)
     @Target(METHOD)
@@ -213,12 +227,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        Iterator<PropertyChangeListener> iterator = propertyChangeListeners.iterator();
-        while (iterator.hasNext()) {
-            PropertyChangeListener item = iterator.next();
-            if (item.equals(listener))
-                iterator.remove();
-        }
+        propertyChangeListeners.remove(listener);
     }
 
     @Delegate
@@ -453,7 +462,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(
             Set keys, Properties oldValues, Properties newValues) throws RollbackBatchException {
-
         List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
         for (Object keyObject : keys) {
             String key = (String) keyObject;

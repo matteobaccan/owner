@@ -369,7 +369,6 @@ public class PropertyChangeListenerTest {
     @Test
     public void testRemovePropertyChangeListenerWithPropertyName() throws Throwable {
         Server cfg = ConfigFactory.create(Server.class);
-        ListenerForTest listener = new ListenerForTest();
         cfg.addPropertyChangeListener("hostname", listener);
         cfg.removePropertyChangeListener(listener);
 
@@ -377,40 +376,6 @@ public class PropertyChangeListenerTest {
         cfg.setProperty("hostname", "google.com");
         cfg.setProperty("port", "22");
 
-        listener.verifyZeroInteractions();
-    }
-
-
-    private class ListenerForTest implements TransactionalPropertyChangeListener {
-        private int invocations = 0;
-        private int beforePropertyChangeInvocations = 0;
-        private int propertyChangeInvocations = 0;
-
-        public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,
-                RollbackBatchException {
-            countInvocations();
-            beforePropertyChangeInvocations++;
-        }
-
-        public void propertyChange(PropertyChangeEvent evt) {
-            countInvocations();
-            propertyChangeInvocations++;
-        }
-
-        private void countInvocations() {
-            invocations++;
-        }
-
-        public void verifyZeroInteractions() {
-            if (invocations != 0)
-                throw new AssertionError(String.format(
-                        "No invocations where expected, but got " +
-                                "beforePropertyChangeInvocations: %d and " +
-                                "propertyChangeInvocations: %d, " +
-                                "total invocations: %d",
-                        beforePropertyChangeInvocations,
-                        propertyChangeInvocations,
-                        invocations));
-        }
+        verifyZeroInteractions(listener);
     }
 }
