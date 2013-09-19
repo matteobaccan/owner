@@ -237,6 +237,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     public void addPropertyChangeListener(final String propertyName, final PropertyChangeListener listener) {
+        if (propertyName == null || listener == null) return;
+
         final boolean transactional = listener instanceof TransactionalPropertyChangeListener;
         propertyChangeListeners.add(new TransactionalPropertyChangeListener() {
             public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,

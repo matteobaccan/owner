@@ -438,4 +438,22 @@ public class PropertyChangeListenerTest {
         assertTrue(propertiesManager.getReloadListeners().isEmpty());
     }
 
+    @Test
+    public void testAddPropertyChangeListenerNullSomething() throws Throwable {
+        propertiesManager.addPropertyChangeListener(null, propertyChangeListener);
+        assertTrue(propertiesManager.getPropertyChangeListeners().isEmpty());
+    }
+
+    @Test
+    public void testAddPropertyChangeListenerSomethingNull() throws Throwable {
+        propertiesManager.addPropertyChangeListener("something", null);
+        assertTrue(propertiesManager.getPropertyChangeListeners().isEmpty());
+    }
+
+    @Test
+    public void testAddPropertyChangeListenerNullNull() throws Throwable {
+        propertiesManager.addPropertyChangeListener(null, null);
+        assertTrue(propertiesManager.getPropertyChangeListeners().isEmpty());
+    }
+
 }
