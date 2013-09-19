@@ -74,11 +74,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private volatile boolean loading = false;
 
-    private final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<ReloadListener>());
+    final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<ReloadListener>());
 
     private Object proxy;
     private final LoadersManager loaders;
-    private List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
+
+    final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
                 @Override
                 public boolean remove(Object o) {
@@ -212,22 +213,26 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     public void addReloadListener(ReloadListener listener) {
-        reloadListeners.add(listener);
+        if (listener != null)
+            reloadListeners.add(listener);
     }
 
     @Delegate
     public void removeReloadListener(ReloadListener listener) {
-        reloadListeners.remove(listener);
+        if (listener != null)
+            reloadListeners.remove(listener);
     }
 
     @Delegate
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeListeners.add(listener);
+        if (listener != null)
+            propertyChangeListeners.add(listener);
     }
 
     @Delegate
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeListeners.remove(listener);
+        if (listener != null)
+            propertyChangeListeners.remove(listener);
     }
 
     @Delegate
