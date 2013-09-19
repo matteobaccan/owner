@@ -46,6 +46,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Collections.synchronizedList;
+import static java.util.Collections.unmodifiableList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
@@ -485,7 +486,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 }
             }
         }
-        return events;
+        return unmodifiableList(events);
     }
 
     private void firePropertyChangeEvents(List<PropertyChangeEvent> events) {
