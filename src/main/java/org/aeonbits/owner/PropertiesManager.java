@@ -261,6 +261,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             public boolean equals(Object obj) {
                 return listener.equals(obj);
             }
+
+            @Override
+            public int hashCode() {
+                return listener.hashCode();
+            }
         });
     }
 
@@ -505,6 +510,5 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         for (PropertyChangeListener listener : propertyChangeListeners)
             listener.propertyChange(event);
     }
-
 
 }
