@@ -75,7 +75,7 @@ public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport im
             setProperty("someValue", "20");
         }});
 
-        waitForReload(150);
+        waitForReload(1000);
 
         assertEquals(new Integer(20), cfg.someValue());
 
