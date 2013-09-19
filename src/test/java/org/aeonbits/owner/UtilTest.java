@@ -14,15 +14,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+import static java.io.File.createTempFile;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
@@ -59,7 +60,7 @@ public class UtilTest {
     public void testUnreachable() {
         try {
             unreachableButCompilerNeedsThis();
-        } catch(AssertionError err) {
+        } catch (AssertionError err) {
             assertEquals("this code should never be reached", err.getMessage());
         }
     }
@@ -68,14 +69,16 @@ public class UtilTest {
         File parent = target.getParentFile();
         parent.mkdirs();
         if (isWindows()) {
-            p.store(new FileWriter(target), "saved for test");
+            store(new FileOutputStream(target), p);
         } else {
-            File tempFile = File.createTempFile(target.getName(), "temp", parent);
-            p.store(new FileWriter(tempFile), "saved for test");
-            if (!tempFile.renameTo(target))
-                throw new IOException(String.format("Failed to overwrite %s to %s", tempFile.toString(),
-                        target.toString()));
+            File tempFile = createTempFile(target.getName(), ".temp", parent);
+            store(new FileOutputStream(tempFile), p);
+            rename(tempFile, target);
         }
+    }
+
+    private static void store(OutputStream out, Properties p) throws IOException {
+        p.store(out, "saved for test");
     }
 
     private static boolean isWindows() {
@@ -86,12 +89,22 @@ public class UtilTest {
         target.delete();
     }
 
-    public static void saveJar(File file, String entryName, Properties props) throws IOException {
+    public static void saveJar(File target, String entryName, Properties props) throws IOException {
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        storeJar(target, entryName, props);
+    }
+
+    private static void rename(File source, File target) throws IOException {
+        if (!source.renameTo(target))
+            throw new IOException(String.format("Failed to overwrite %s to %s", source.toString(), target.toString()));
+    }
+
+    private static void storeJar(File target, String entryName, Properties props) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        props.store(out, "saved for test");
+        store(out, props);
         InputStream input = new ByteArrayInputStream(out.toByteArray());
-        JarOutputStream output = new JarOutputStream(
-                new FileOutputStream(file));
+        JarOutputStream output = new JarOutputStream(new FileOutputStream(target));
         try {
             ZipEntry entry = new ZipEntry(entryName);
             output.putNextEntry(entry);
