@@ -102,4 +102,15 @@ public interface Mutable extends Reloadable {
      * @param listener
      */
     void removePropertyChangeListener(PropertyChangeListener listener);
+
+    /**
+     * Adds a PropertyChangeListener to the listener list for a specific
+     * property.
+     * If <code>propertyName</code> or <code>listener</code> is <code>null</code>,
+     * no exception is thrown and no action is taken.
+     *
+     * @param propertyName one of the property names listed above
+     * @param listener the property change listener to be added
+     */
+    void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
 }

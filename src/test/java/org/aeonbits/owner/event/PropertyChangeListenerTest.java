@@ -244,8 +244,8 @@ public class PropertyChangeListenerTest {
 
     private String getPropertiesTextForLoad() {
         return "hostname = foobar\n" +
-                    "port = 80\n" +
-                    "protocol = http\n";
+                "port = 80\n" +
+                "protocol = http\n";
     }
 
     @Test
@@ -254,7 +254,7 @@ public class PropertyChangeListenerTest {
 
         doAnswer(new Answer() {
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                PropertyChangeEvent evt = (PropertyChangeEvent)invocation.getArguments()[0];
+                PropertyChangeEvent evt = (PropertyChangeEvent) invocation.getArguments()[0];
                 if (evt.getPropertyName().equals("port"))
                     throw new RollbackOperationException();
                 return null;
@@ -303,7 +303,8 @@ public class PropertyChangeListenerTest {
         verifyLoadIsRolledBackCompletely(server);
     }
 
-    private void verifyLoadIsRolledBackCompletely(Server server) throws RollbackBatchException, RollbackOperationException {
+    private void verifyLoadIsRolledBackCompletely(Server server) throws RollbackBatchException,
+            RollbackOperationException {
         assertEquals("localhost", server.hostname());
         assertEquals(8080, server.port());
         assertEquals("http", server.protocol());
@@ -313,8 +314,8 @@ public class PropertyChangeListenerTest {
 
     private String getPropertiesAsText() {
         return "hostname = foobar\n" +
-                    "port = 80\n" +
-                    "protocol = ftp\n";
+                "port = 80\n" +
+                "protocol = ftp\n";
     }
 
     private Server prepareLoadForRollbackBatch() throws RollbackOperationException, RollbackBatchException {
@@ -348,5 +349,68 @@ public class PropertyChangeListenerTest {
         inOrder.verify(listener, times(1)).propertyChange(argThat(matches(portChangeEvent)));
     }
 
+    @Test
+    public void testAddPropertyChangeListenerWithPropertyName() throws Throwable {
 
+        Server cfg = ConfigFactory.create(Server.class);
+        cfg.addPropertyChangeListener("hostname", listener);
+
+        cfg.setProperty("protocol", "ssh");
+        cfg.setProperty("hostname", "google.com");
+        cfg.setProperty("port", "22");
+
+        PropertyChangeEvent expectedEvent = new PropertyChangeEvent(cfg, "hostname", "localhost", "google.com");
+        InOrder inOrder = inOrder(listener);
+        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(expectedEvent)));
+        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(expectedEvent)));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testRemovePropertyChangeListenerWithPropertyName() throws Throwable {
+        Server cfg = ConfigFactory.create(Server.class);
+        ListenerForTest listener = new ListenerForTest();
+        cfg.addPropertyChangeListener("hostname", listener);
+        cfg.removePropertyChangeListener(listener);
+
+        cfg.setProperty("protocol", "ssh");
+        cfg.setProperty("hostname", "google.com");
+        cfg.setProperty("port", "22");
+
+        listener.verifyZeroInteractions();
+    }
+
+
+    private class ListenerForTest implements TransactionalPropertyChangeListener {
+        private int invocations = 0;
+        private int beforePropertyChangeInvocations = 0;
+        private int propertyChangeInvocations = 0;
+
+        public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,
+                RollbackBatchException {
+            countInvocations();
+            beforePropertyChangeInvocations++;
+        }
+
+        public void propertyChange(PropertyChangeEvent evt) {
+            countInvocations();
+            propertyChangeInvocations++;
+        }
+
+        private void countInvocations() {
+            invocations++;
+        }
+
+        public void verifyZeroInteractions() {
+            if (invocations != 0)
+                throw new AssertionError(String.format(
+                        "No invocations where expected, but got " +
+                                "beforePropertyChangeInvocations: %d and " +
+                                "propertyChangeInvocations: %d, " +
+                                "total invocations: %d",
+                        beforePropertyChangeInvocations,
+                        propertyChangeInvocations,
+                        invocations));
+        }
+    }
 }

@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -178,9 +179,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private Set<?> keys(Map<?,?>... maps) {
+    private Set<?> keys(Map<?, ?>... maps) {
         Set<Object> keys = new HashSet<Object>();
-        for (Map<?,?> map : maps)
+        for (Map<?, ?> map : maps)
             keys.addAll(map.keySet());
         return keys;
     }
@@ -212,7 +213,38 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeListeners.remove(listener);
+        Iterator<PropertyChangeListener> iterator = propertyChangeListeners.iterator();
+        while (iterator.hasNext()) {
+            PropertyChangeListener item = iterator.next();
+            if (item.equals(listener))
+                iterator.remove();
+        }
+    }
+
+    @Delegate
+    public void addPropertyChangeListener(final String propertyName, final PropertyChangeListener listener) {
+        final boolean transactional = listener instanceof TransactionalPropertyChangeListener;
+        propertyChangeListeners.add(new TransactionalPropertyChangeListener() {
+            public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,
+                    RollbackBatchException {
+                if (transactional && propertyNameMatches(evt))
+                    ((TransactionalPropertyChangeListener) listener).beforePropertyChange(evt);
+            }
+
+            private boolean propertyNameMatches(PropertyChangeEvent evt) {
+                return propertyName.equals(evt.getPropertyName());
+            }
+
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (propertyNameMatches(evt))
+                    listener.propertyChange(evt);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return listener.equals(obj);
+            }
+        });
     }
 
     Properties doLoad() {
@@ -457,5 +489,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         for (PropertyChangeListener listener : propertyChangeListeners)
             listener.propertyChange(event);
     }
+
 
 }
