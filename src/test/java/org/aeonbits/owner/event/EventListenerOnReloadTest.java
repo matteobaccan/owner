@@ -48,7 +48,7 @@ public class EventListenerOnReloadTest implements TestConstants {
     private static final String spec = "file:" + RESOURCES_DIR + "/EventListenerOnReloadTest.properties";
     private File target;
     @Mock
-    private TransactionalPropertyChangeListener listener;
+    private TransactionalPropertyChangeListener propertyChangeListener;
     private MyConfig cfg;
 
     @Before
@@ -56,7 +56,7 @@ public class EventListenerOnReloadTest implements TestConstants {
         target = new File(new URL(spec).getFile());
         target.delete();
         cfg = ConfigFactory.create(MyConfig.class);
-        cfg.addPropertyChangeListener(listener);
+        cfg.addPropertyChangeListener(propertyChangeListener);
     }
 
     @After
@@ -79,7 +79,7 @@ public class EventListenerOnReloadTest implements TestConstants {
     }
 
     @Test
-    public void testReloadOnRollbackBatchException() throws Throwable {
+    public void testPropertyChangeListenerReloadOnRollbackBatchException() throws Throwable {
 
         save(target, new Properties() {{
             setProperty("someInteger", "5");
@@ -89,7 +89,7 @@ public class EventListenerOnReloadTest implements TestConstants {
         }});
 
         doNothing().doNothing().doThrow(new RollbackBatchException())
-                .when(listener).beforePropertyChange(any(PropertyChangeEvent.class));
+                .when(propertyChangeListener).beforePropertyChange(any(PropertyChangeEvent.class));
 
         cfg.reload();
 
@@ -101,7 +101,7 @@ public class EventListenerOnReloadTest implements TestConstants {
 
 
     @Test
-    public void testReloadOnRollbackOperationException() throws Throwable {
+    public void testPropertyChangeListenerReloadOnRollbackOperationException() throws Throwable {
 
         save(target, new Properties() {{
             setProperty("someString", "bazbar");
@@ -112,7 +112,7 @@ public class EventListenerOnReloadTest implements TestConstants {
         PropertyChangeEvent eventToRollback = new PropertyChangeEvent(cfg, "someString", "foobar", "bazbar");
 
         doThrow(new RollbackOperationException())
-                .when(listener).beforePropertyChange(argThat(matches(eventToRollback)));
+                .when(propertyChangeListener).beforePropertyChange(argThat(matches(eventToRollback)));
 
         cfg.reload();
 
@@ -123,9 +123,9 @@ public class EventListenerOnReloadTest implements TestConstants {
     }
 
     @Test
-    public void testReloadWhenNoChangesHaveBeenMade() throws Throwable {
+    public void testPropertyChangeListenerReloadWhenNoChangesHaveBeenMade() throws Throwable {
         cfg.reload();
-        verifyZeroInteractions(listener);
+        verifyZeroInteractions(propertyChangeListener);
     }
 
     @Test
@@ -139,50 +139,50 @@ public class EventListenerOnReloadTest implements TestConstants {
 
         cfg.reload();
 
-        verify(listener, times(3)).beforePropertyChange(any(PropertyChangeEvent.class));
-        verify(listener, times(3)).propertyChange(any(PropertyChangeEvent.class));
+        verify(propertyChangeListener, times(3)).beforePropertyChange(any(PropertyChangeEvent.class));
+        verify(propertyChangeListener, times(3)).propertyChange(any(PropertyChangeEvent.class));
 
         PropertyChangeEvent someStringChange = new PropertyChangeEvent(cfg, "someString", "foobar", "bazbar");
         PropertyChangeEvent someDoubleChange = new PropertyChangeEvent(cfg, "someDouble", "3.14", "2.718");
         PropertyChangeEvent nullByDefaultChange = new PropertyChangeEvent(cfg, "nullByDefault", null, "NotNullNow");
 
-        InOrder inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(someStringChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(someStringChange)));
+        InOrder inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(someStringChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(someStringChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(someDoubleChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(someDoubleChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(someDoubleChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(someDoubleChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(nullByDefaultChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(nullByDefaultChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(nullByDefaultChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(nullByDefaultChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(someStringChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(someDoubleChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(someStringChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(someDoubleChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(someDoubleChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(someStringChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(someDoubleChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(someStringChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(someStringChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(nullByDefaultChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(someStringChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(nullByDefaultChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(someDoubleChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(nullByDefaultChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(someDoubleChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(nullByDefaultChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(nullByDefaultChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(someStringChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(nullByDefaultChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(someStringChange)));
 
-        inOrder = inOrder(listener);
-        inOrder.verify(listener, times(1)).beforePropertyChange(argThat(matches(nullByDefaultChange)));
-        inOrder.verify(listener, times(1)).propertyChange(argThat(matches(someDoubleChange)));
+        inOrder = inOrder(propertyChangeListener);
+        inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(nullByDefaultChange)));
+        inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(someDoubleChange)));
 
-        verifyNoMoreInteractions(listener);
+        verifyNoMoreInteractions(propertyChangeListener);
     }
 
 }
