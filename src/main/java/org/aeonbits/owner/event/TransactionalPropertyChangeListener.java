@@ -12,7 +12,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * A Listener that is aware of properties changes.
+ * A Listener that is aware of properties changes, with transactional capability.
  *
  * @since 1.0.5
  * @author Luigi R. Viggiano

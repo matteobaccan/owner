@@ -22,6 +22,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
@@ -49,6 +50,8 @@ public class EventListenerOnReloadTest implements TestConstants {
     private File target;
     @Mock
     private TransactionalPropertyChangeListener propertyChangeListener;
+    @Mock
+    private TransactionalReloadListener reloadListener;
     private MyConfig cfg;
 
     @Before
@@ -57,6 +60,7 @@ public class EventListenerOnReloadTest implements TestConstants {
         target.delete();
         cfg = ConfigFactory.create(MyConfig.class);
         cfg.addPropertyChangeListener(propertyChangeListener);
+        cfg.addReloadListener(reloadListener);
     }
 
     @After
@@ -79,7 +83,7 @@ public class EventListenerOnReloadTest implements TestConstants {
     }
 
     @Test
-    public void testPropertyChangeListenerReloadOnRollbackBatchException() throws Throwable {
+    public void testPropertyChangeListenerOnReloadWhenRollbackBatchException() throws Throwable {
 
         save(target, new Properties() {{
             setProperty("someInteger", "5");
@@ -101,7 +105,7 @@ public class EventListenerOnReloadTest implements TestConstants {
 
 
     @Test
-    public void testPropertyChangeListenerReloadOnRollbackOperationException() throws Throwable {
+    public void testPropertyChangeListenerOnReloadWhenRollbackOperationException() throws Throwable {
 
         save(target, new Properties() {{
             setProperty("someString", "bazbar");
@@ -123,13 +127,13 @@ public class EventListenerOnReloadTest implements TestConstants {
     }
 
     @Test
-    public void testPropertyChangeListenerReloadWhenNoChangesHaveBeenMade() throws Throwable {
+    public void testPropertyChangeListenerOnReloadWhenNoChangesHaveBeenMade() throws Throwable {
         cfg.reload();
         verifyZeroInteractions(propertyChangeListener);
     }
 
     @Test
-    public void testReloadWhenChangeHappen() throws Throwable{
+    public void testPropertyChangeListenerOnReloadWhenChangeHappen() throws Throwable{
         save(target, new Properties() {{
             setProperty("someInteger", "5");
             setProperty("someString", "bazbar");
@@ -183,6 +187,23 @@ public class EventListenerOnReloadTest implements TestConstants {
         inOrder.verify(propertyChangeListener, times(1)).propertyChange(argThat(matches(someDoubleChange)));
 
         verifyNoMoreInteractions(propertyChangeListener);
+    }
+
+    @Test
+    public void testReloadListenerIsInvokedOnReload() throws IOException, RollbackBatchException {
+        save(target, new Properties() {{
+            setProperty("someInteger", "5");
+            setProperty("someString", "bazbar");
+            setProperty("someDouble", "2.718");
+            setProperty("nullByDefault", "NotNullNow");
+        }});
+
+        cfg.reload();
+
+        InOrder inOrder = inOrder(reloadListener);
+        inOrder.verify(reloadListener, times(1)).beforeReload(any(ReloadEvent.class));
+        inOrder.verify(reloadListener, times(1)).reloadPerformed(any(ReloadEvent.class));
+        verifyNoMoreInteractions(reloadListener);
     }
 
 }

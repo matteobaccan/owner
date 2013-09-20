@@ -15,6 +15,7 @@ import org.aeonbits.owner.event.RollbackBatchException;
 import org.aeonbits.owner.event.RollbackException;
 import org.aeonbits.owner.event.RollbackOperationException;
 import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
+import org.aeonbits.owner.event.TransactionalReloadListener;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -46,7 +47,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Collections.synchronizedList;
-import static java.util.Collections.unmodifiableList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
@@ -185,9 +185,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             Properties loaded = load(new Properties());
             List<PropertyChangeEvent> events =
                     fireBeforePropertyChangeEvents(keys(properties, loaded), properties, loaded);
+            ReloadEvent reloadEvent = fireBeforeReloadEvent(events, properties, loaded);
             applyPropertyChangeEvents(events);
             firePropertyChangeEvents(events);
-            fireReloadEvent();
+            fireReloadEvent(reloadEvent);
         } catch (RollbackBatchException e) {
             ignore();
         } finally {
@@ -207,10 +208,20 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             performSetProperty(event.getPropertyName(), event.getNewValue());
     }
 
-    private void fireReloadEvent() {
+    private void fireReloadEvent(ReloadEvent reloadEvent) {
         for (ReloadListener listener : reloadListeners)
-            listener.reloadPerformed(new ReloadEvent(proxy));
+            listener.reloadPerformed(reloadEvent);
     }
+
+    private ReloadEvent fireBeforeReloadEvent(List<PropertyChangeEvent> events, Properties oldProperties,
+                                              Properties newProperties) throws RollbackBatchException {
+        ReloadEvent reloadEvent = new ReloadEvent(proxy, events, oldProperties, newProperties);
+        for (ReloadListener listener : reloadListeners)
+            if (listener instanceof TransactionalReloadListener)
+                ((TransactionalReloadListener) listener).beforeReload(reloadEvent);
+        return reloadEvent;
+    }
+
 
     @Delegate
     public void addReloadListener(ReloadListener listener) {
@@ -491,7 +502,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 }
             }
         }
-        return unmodifiableList(events);
+        return events;
     }
 
     private void firePropertyChangeEvents(List<PropertyChangeEvent> events) {
