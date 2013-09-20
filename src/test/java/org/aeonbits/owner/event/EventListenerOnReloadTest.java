@@ -44,8 +44,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PropertyChangeListenerOnReloadTest implements TestConstants {
-    private static final String spec = "file:" + RESOURCES_DIR + "/PropertyChangeListenerOnReloadTest.properties";
+public class EventListenerOnReloadTest implements TestConstants {
+    private static final String spec = "file:" + RESOURCES_DIR + "/EventListenerOnReloadTest.properties";
     private File target;
     @Mock
     private TransactionalPropertyChangeListener listener;

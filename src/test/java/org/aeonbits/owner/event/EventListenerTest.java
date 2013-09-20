@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PropertyChangeListenerTest {
+public class EventListenerTest {
 
     @Mock
     private TransactionalPropertyChangeListener propertyChangeListener;
@@ -404,7 +404,6 @@ public class PropertyChangeListenerTest {
 
         verifyZeroInteractions(propertyChangeListener);
     }
-
 
     @Before
     public void before() {
