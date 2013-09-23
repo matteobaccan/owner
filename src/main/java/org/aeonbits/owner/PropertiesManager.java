@@ -49,6 +49,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
+import static org.aeonbits.owner.PropertiesMapper.mapValues;
 import static org.aeonbits.owner.Util.asString;
 import static org.aeonbits.owner.Util.eq;
 import static org.aeonbits.owner.Util.ignore;
@@ -170,6 +171,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             loading = true;
             defaults(props, clazz);
             Properties loadedFromFile = doLoad();
+	        mapValues(loadedFromFile, props, clazz);
             merge(props, loadedFromFile);
             merge(props, reverse(imports));
             return props;
@@ -288,6 +290,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         for (Map<?, ?> input : inputs)
             results.putAll(input);
     }
+
+	public Object getObject(String key) {
+		readLock.lock();
+		try {
+			return properties.get(key);
+		} finally {
+			readLock.unlock();
+		}
+	}
 
     @Delegate
     public String getProperty(String key) {

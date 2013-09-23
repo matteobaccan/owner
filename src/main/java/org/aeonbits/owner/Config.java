@@ -88,6 +88,16 @@ public interface Config {
         String value();
     }
 
+	/**
+	 * The key used for map properties (map1 in map1.value1). If not present, values such as map1.value1 will be treated as standard properties.
+	 */
+	@Retention(RUNTIME)
+	@Target(METHOD)
+	@Documented
+	@interface MapValue {
+		String value();
+	}
+
     /**
      * Specifies the policy type to use to load the {@link org.aeonbits.owner.Config.Sources} files for properties.
      *

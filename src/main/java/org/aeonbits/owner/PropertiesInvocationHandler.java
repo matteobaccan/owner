@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
@@ -74,12 +75,16 @@ class PropertiesInvocationHandler implements InvocationHandler {
 
     private Object resolveProperty(Method method, Object... args) {
         String key = key(method);
-        String value = propertiesManager.getProperty(key);
-        if (value == null)
-            return null;
-        Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
-        if (result == Converters.NULL) return null;
-        return result;
+	    if (method.getReturnType().equals(Map.class)) {
+		    return propertiesManager.getObject(key);
+	    } else {
+		    String value = propertiesManager.getProperty(key);
+		    if (value == null)
+			    return null;
+		    Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
+		    if (result == Converters.NULL) return null;
+		    return result;
+	    }
     }
 
     private String format(Method method, String format, Object... args) {

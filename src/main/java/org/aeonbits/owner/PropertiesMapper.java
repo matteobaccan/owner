@@ -12,7 +12,7 @@ import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.Key;
 
 import java.lang.reflect.Method;
-import java.util.Properties;
+import java.util.*;
 
 import static org.aeonbits.owner.Util.prohibitInstantiation;
 
@@ -46,4 +46,33 @@ abstract class PropertiesMapper {
                 properties.put(key, value);
         }
     }
+
+	static String mapValue(Method method) {
+		Config.MapValue mapValue = method.getAnnotation(Config.MapValue.class);
+		return mapValue != null ? mapValue.value() : null;
+	}
+
+	static void mapValues(Properties inputProperties, Properties outputProperties, Class<? extends Config> clazz) {
+		Method[] methods = clazz.getMethods();
+		for (Method method : methods) {
+			String value = mapValue(method);
+			if (value != null) {
+				Map<String, String> map = new HashMap<String, String>();
+				List<String> keysToRemove = new ArrayList<String>();
+				for(java.util.Map.Entry<Object, Object> property : inputProperties.entrySet()) {
+					String propKey = (String) property.getKey();
+					if (propKey.startsWith(value)) {
+						String realKey = propKey.replaceFirst(value + ".", "");
+						map.put(realKey, (String) property.getValue());
+						keysToRemove.add(propKey);
+					}
+				}
+
+				for(String key : keysToRemove) {
+					inputProperties.remove(key);
+				}
+				outputProperties.put(value, map);
+			}
+		}
+	}
 }
