@@ -63,10 +63,12 @@ abstract class Util {
     }
 
     static String expandUserHome(String text) {
-        if (text.equals("~"))
-            return System.getProperty("user.home");
-        if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0)
-            return text.replaceFirst("~/", System.getProperty("user.home") + "/");
+	    if (text.equals("~")) {
+		    return System.getProperty("user.home");
+	    } else if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0) {
+		    String safeHome = System.getProperty("user.home").replace("\\", "\\\\");
+		    return text.replaceFirst("~/", safeHome + "/");
+	    }
         return text;
     }
 

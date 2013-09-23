@@ -69,7 +69,13 @@ class StrSubstitutor {
         while (m.find()) {
             String var = m.group(1);
             String value = values.getProperty(var);
-            String replacement = (value != null) ? replace(value) : "";
+	        String replacement;
+	        if (value != null) {
+		        String safeValue = value.replace("\\", "\\\\");
+		        replacement = replace(safeValue);
+	        } else {
+		        replacement = "";
+	        }
             m.appendReplacement(sb, replacement);
         }
         m.appendTail(sb);

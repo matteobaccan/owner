@@ -49,6 +49,8 @@ public class WithImportedPropertiesTest {
         Properties propsFromTest = new Properties();
         propsFromTest.setProperty("external", "propsFromTest");
 
+	    String winPath = "C:\\windows\\path";
+	    System.setProperty("value.with.backslash", winPath);
         String userHome = System.getProperty("user.home");
         String envHome = System.getenv("HOME");
         WithImportedProperties conf =
@@ -56,6 +58,7 @@ public class WithImportedPropertiesTest {
                         propsFromTest, System.getProperties(), System.getenv());
         assertEquals(userHome, conf.userHome());
         assertEquals(envHome, conf.envHome());
+	    assertEquals(winPath, conf.valueWithBackslash());
         assertEquals("testing replacement from propsFromTest properties file.", conf.someValue());
     }
 
@@ -70,5 +73,8 @@ public class WithImportedPropertiesTest {
 
         @DefaultValue("${HOME}")
         String envHome();
+
+	    @DefaultValue("${value.with.backslash}")
+	    String valueWithBackslash();
     }
 }
