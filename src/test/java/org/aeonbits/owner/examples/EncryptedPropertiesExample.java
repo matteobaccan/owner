@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 /**
+ * @author Luigi R. Viggiano
+ *
  * To encrypt the password:
  *   System.out.println(new BASE64Encoder().encode(xor("tiger".getBytes(), "secret".getBytes())));
  */
