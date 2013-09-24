@@ -31,11 +31,22 @@ public class StrSubstitutorTest {
     public void shouldReplaceVariables() {
         Properties values = new Properties();
         values.setProperty("animal", "quick brown fox");
-        values.setProperty("target", "lazy\\slow dog");
+        values.setProperty("target", "lazy dog");
         String templateString = "The ${animal} jumped over the ${target}.";
         StrSubstitutor sub = new StrSubstitutor(values);
         String resolvedString = sub.replace(templateString);
-        assertEquals("The quick brown fox jumped over the lazy\\slow dog.", resolvedString);
+        assertEquals("The quick brown fox jumped over the lazy dog.", resolvedString);
+    }
+
+    @Test
+    public void shouldReplaceVariablesWithBackSlashes() {
+        Properties values = new Properties();
+        values.setProperty("animal", "quick\\brown\\fox");
+        values.setProperty("target", "lazy\\dog");
+        String templateString = "The ${animal} jumped over the ${target}.";
+        StrSubstitutor sub = new StrSubstitutor(values);
+        String resolvedString = sub.replace(templateString);
+        assertEquals("The quick\\brown\\fox jumped over the lazy\\dog.", resolvedString);
     }
 
     @Test
