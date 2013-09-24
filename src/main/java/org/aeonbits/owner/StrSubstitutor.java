@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
+import static org.aeonbits.owner.Util.fixBackslashForRegex;
 
 /**
  * Substitutes variables within a string by values.
@@ -69,14 +70,8 @@ class StrSubstitutor {
         while (m.find()) {
             String var = m.group(1);
             String value = values.getProperty(var);
-	        String replacement;
-	        if (value != null) {
-		        String safeValue = value.replace("\\", "\\\\");
-		        replacement = replace(safeValue);
-	        } else {
-		        replacement = "";
-	        }
-            m.appendReplacement(sb, replacement);
+            String replacement = (value != null) ? replace(value) : "";
+            m.appendReplacement(sb, fixBackslashForRegex(replacement));
         }
         m.appendTail(sb);
         return sb.toString();

@@ -96,7 +96,7 @@ abstract class Util {
         return text;
     }
 
-    private static String fixBackslashForRegex(String text) {
+    static String fixBackslashForRegex(String text) {
         return text.replace("\\", "\\\\");
     }
 

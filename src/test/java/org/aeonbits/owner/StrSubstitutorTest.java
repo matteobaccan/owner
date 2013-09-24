@@ -39,14 +39,30 @@ public class StrSubstitutorTest {
     }
 
     @Test
-    public void shouldReplaceVariablesWithBackSlashes() {
+    public void shouldReplaceVariablesHavingBackslashes() {
         Properties values = new Properties();
         values.setProperty("animal", "quick\\brown\\fox");
         values.setProperty("target", "lazy\\dog");
-        String templateString = "The ${animal} jumped over the ${target}.";
+        String templateString = "The\\${animal}\\jumped\\over\\the\\${target}.";
         StrSubstitutor sub = new StrSubstitutor(values);
         String resolvedString = sub.replace(templateString);
-        assertEquals("The quick\\brown\\fox jumped over the lazy\\dog.", resolvedString);
+        assertEquals("The\\quick\\brown\\fox\\jumped\\over\\the\\lazy\\dog.", resolvedString);
+    }
+
+    @Test
+    public void shouldReplaceVariablesWithBackSlashesAndShouldWorkWithRecursion() {
+        Properties values = new Properties();
+        values.setProperty("color", "bro\\wn");
+        values.setProperty("animal", "qui\\ck\\${color}\\fo\\x");
+        values.setProperty("target.attribute", "la\\zy");
+        values.setProperty("target.animal", "do\\g");
+        values.setProperty("target", "${target.attribute}\\${target.animal}");
+        values.setProperty("template", "The ${animal} jum\\ped over the ${target}.");
+        values.setProperty("wrapper", "\\foo\\${template}\\bar\\");
+        values.setProperty("wrapper2", "\\baz\\${wrapper}\\qux\\");
+        StrSubstitutor sub = new StrSubstitutor(values);
+        String resolvedString = sub.replace("${wrapper2}");
+        assertEquals("\\baz\\\\foo\\The qui\\ck\\bro\\wn\\fo\\x jum\\ped over the la\\zy\\do\\g.\\bar\\\\qux\\", resolvedString);
     }
 
     @Test
