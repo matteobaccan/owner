@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConstants {
     private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
-    private static final int DELAY = 1000;
+    private static final int DELAY = 2000;
 
     private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
 
@@ -47,7 +47,7 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
     }
 
     @Sources(SPEC)
-    @HotReload(value=20, unit = MILLISECONDS, type = ASYNC)
+    @HotReload(value=300, unit = MILLISECONDS, type = ASYNC)
     interface AsyncAutoReloadConfig extends Config, Reloadable {
         @DefaultValue("5")
         Integer someValue();
