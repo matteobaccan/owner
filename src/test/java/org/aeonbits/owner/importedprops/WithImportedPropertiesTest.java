@@ -49,8 +49,6 @@ public class WithImportedPropertiesTest {
         Properties propsFromTest = new Properties();
         propsFromTest.setProperty("external", "propsFromTest");
 
-	    String winPath = "C:\\windows\\path";
-	    System.setProperty("value.with.backslash", winPath);
         String userHome = System.getProperty("user.home");
         String envHome = System.getenv("HOME");
         WithImportedProperties conf =
@@ -58,13 +56,35 @@ public class WithImportedPropertiesTest {
                         propsFromTest, System.getProperties(), System.getenv());
         assertEquals(userHome, conf.userHome());
         assertEquals(envHome, conf.envHome());
-	    assertEquals(winPath, conf.valueWithBackslash());
         assertEquals("testing replacement from propsFromTest properties file.", conf.someValue());
     }
 
-    /**
-     * @author luigi
-     */
+    @Test
+    public void testBackSlash() {
+        Properties propsFromTest = new Properties();
+        propsFromTest.setProperty("external", "propsFromTest");
+        String winPath = "C:\\windows\\path";
+        propsFromTest.setProperty("value.with.backslash", winPath);
+
+        WithImportedProperties conf =
+                ConfigFactory.create(WithImportedProperties.class,
+                        propsFromTest);
+
+        assertEquals(winPath, conf.valueWithBackslash());
+    }
+
+    @Test
+    public void testPropertyComingFromExternalObject() {
+        Properties propsFromTest = new Properties();
+        propsFromTest.setProperty("external", "propsFromTest");
+
+        WithImportedProperties conf =
+                ConfigFactory.create(WithImportedProperties.class,
+                        propsFromTest);
+
+        assertEquals("propsFromTest", conf.external());
+    }
+
     public static interface WithImportedProperties extends Config {
         String someValue();
 
@@ -74,7 +94,9 @@ public class WithImportedPropertiesTest {
         @DefaultValue("${HOME}")
         String envHome();
 
-	    @DefaultValue("${value.with.backslash}")
-	    String valueWithBackslash();
+        @DefaultValue("${value.with.backslash}")
+        String valueWithBackslash();
+
+        String external();
     }
 }
