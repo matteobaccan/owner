@@ -40,7 +40,7 @@ abstract class Util {
     interface SystemProvider {
         String getProperty(String key);
 
-        Map<?, ?> getenv();
+        Map<String, String> getenv();
 
         Properties getProperties();
     }
@@ -56,7 +56,7 @@ abstract class Util {
             return System.getProperty(key);
         }
 
-        public java.util.Map<String, String> getenv() {
+        public Map<String, String> getenv() {
             return System.getenv();
         }
 
