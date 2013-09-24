@@ -47,7 +47,7 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
     }
 
     @Sources(SPEC)
-    @HotReload(value=300, unit = MILLISECONDS, type = ASYNC)
+    @HotReload(value=10, unit = MILLISECONDS, type = ASYNC)
     interface AsyncAutoReloadConfig extends Config, Reloadable {
         @DefaultValue("5")
         Integer someValue();
@@ -85,7 +85,7 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
         assertEquals(1, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
 
-        save(target, new Properties() {{ //
+        save(target, new Properties() {{
             setProperty("someValue", "20");
         }});
         waitForReload(DELAY);
