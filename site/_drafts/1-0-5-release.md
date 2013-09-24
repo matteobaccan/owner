@@ -30,6 +30,8 @@ Site Enhancements
 Bugs fixes
 ----------
 
+ * Fixed bug [#51](https://github.com/lviggiano/owner/pull/51), variables expansion, and path expansion not working
+   properly with string containing the backslash characters `'\'`.
  * Fixed bug [#42](https://github.com/lviggiano/owner/issues/42), regarding the incompatibility of the OWNER
    library with the Google App Engine security restrictions.
 

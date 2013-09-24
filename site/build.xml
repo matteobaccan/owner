@@ -47,11 +47,11 @@
         <delete dir="${gh-pages.directory}"/>
     </target>
 
-    <target name="run">
+    <target name="run-drafts">
         <jekyll-serve options="-w --drafts" />
     </target>
 
-    <target name="preview">
+    <target name="run">
         <jekyll-serve options="-w" />
     </target>
 
@@ -59,8 +59,8 @@
         <echo>
         ant clean                           - cleans up the target dir
         ant publish                         - publish site to gh-pages
-        ant run                             - run jekyll serve (with '-w --drafts' options)
-        ant preview                         - run jekyll serve (with '-w' option)
+        ant run-drafts                      - run jekyll serve (with '-w --drafts' options)
+        ant run                             - run jekyll serve (with '-w' option)
         </echo>
     </target>
 
