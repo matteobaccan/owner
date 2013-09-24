@@ -26,8 +26,8 @@ class VariablesExpander {
 
     VariablesExpander(Properties props) {
         Properties variables = new Properties();
-        variables.putAll(System.getenv());
-        variables.putAll(System.getProperties());
+        variables.putAll(Util.system().getenv());
+        variables.putAll(Util.system().getProperties());
         variables.putAll(props);
         substitutor = new StrSubstitutor(variables);
     }

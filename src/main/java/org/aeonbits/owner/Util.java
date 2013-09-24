@@ -19,6 +19,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static java.lang.String.format;
 import static java.net.URLDecoder.decode;
@@ -31,13 +33,35 @@ import static java.util.Arrays.asList;
  */
 abstract class Util {
 
-    interface Time {
+    interface TimeProvider {
         long getTime();
     }
 
-    static Time time = new Time() {
+    interface SystemProvider {
+        String getProperty(String key);
+
+        Map<?, ?> getenv();
+
+        Properties getProperties();
+    }
+
+    static TimeProvider timeProvider = new TimeProvider() {
         public long getTime() {
             return System.currentTimeMillis();
+        }
+    };
+
+    static SystemProvider system = new SystemProvider() {
+        public String getProperty(String key) {
+            return System.getProperty(key);
+        }
+
+        public java.util.Map<String, String> getenv() {
+            return System.getenv();
+        }
+
+        public Properties getProperties() {
+            return System.getProperties();
         }
     };
 
@@ -63,12 +87,12 @@ abstract class Util {
     }
 
     static String expandUserHome(String text) {
-	    if (text.equals("~")) {
-		    return System.getProperty("user.home");
-	    } else if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0) {
-		    String safeHome = System.getProperty("user.home").replace("\\", "\\\\");
-		    return text.replaceFirst("~/", safeHome + "/");
-	    }
+        if (text.equals("~")) {
+            return system.getProperty("user.home");
+        } else if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0) {
+            String safeHome = system.getProperty("user.home").replace("\\", "\\\\");
+            return text.replaceFirst("~/", safeHome + "/");
+        }
         return text;
     }
 
@@ -106,7 +130,7 @@ abstract class Util {
     }
 
     static long now() {
-        return time.getTime();
+        return timeProvider.getTime();
     }
 
     static File fileFromURL(URL url) {
@@ -133,4 +157,7 @@ abstract class Util {
         return o1 == o2 || o1 != null && o1.equals(o2);
     }
 
+    static SystemProvider system() {
+        return system;
+    }
 }

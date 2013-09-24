@@ -8,20 +8,20 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Util.Time;
+import org.aeonbits.owner.Util.TimeProvider;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Luigi R. Viggiano
  */
-public class TimeForTest implements Time {
+public class TimeProviderForTest implements TimeProvider {
 
-    private Time backup;
+    private TimeProvider backup;
 
     private long time;
 
-    public TimeForTest() {
+    public TimeProviderForTest() {
         this.time = System.currentTimeMillis();
     }
 
@@ -34,12 +34,12 @@ public class TimeForTest implements Time {
     }
 
     public void setup() {
-        backup = Util.time;
-        Util.time = this;
+        backup = Util.timeProvider;
+        Util.timeProvider = this;
     }
 
     public void tearDown() {
-        Util.time = backup;
+        Util.timeProvider = backup;
     }
 
     public void setTime(long time) {
