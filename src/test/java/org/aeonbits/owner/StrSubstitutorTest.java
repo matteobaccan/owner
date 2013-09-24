@@ -62,7 +62,8 @@ public class StrSubstitutorTest {
         values.setProperty("wrapper2", "\\baz\\${wrapper}\\qux\\");
         StrSubstitutor sub = new StrSubstitutor(values);
         String resolvedString = sub.replace("${wrapper2}");
-        assertEquals("\\baz\\\\foo\\The qui\\ck\\bro\\wn\\fo\\x jum\\ped over the la\\zy\\do\\g.\\bar\\\\qux\\", resolvedString);
+        assertEquals("\\baz\\\\foo\\The qui\\ck\\bro\\wn\\fo\\x jum\\ped over the la\\zy\\do\\g.\\bar\\\\qux\\",
+                resolvedString);
     }
 
     @Test
