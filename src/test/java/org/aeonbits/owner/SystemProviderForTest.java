@@ -19,9 +19,9 @@ import java.util.Properties;
 public class SystemProviderForTest implements SystemProvider {
 
     private final Properties system;
-    private final Map<?, ?> env;
+    private final Map<String, String> env;
 
-    public SystemProviderForTest(Properties system, Map<?, ?> env) {
+    public SystemProviderForTest(Properties system, Map<String, String> env) {
         this.system = system;
         this.env = env;
     }
@@ -30,7 +30,7 @@ public class SystemProviderForTest implements SystemProvider {
         return system.getProperty(key);
     }
 
-    public Map<?, ?> getenv() {
+    public Map<String, String> getenv() {
         return env;
     }
 

@@ -20,12 +20,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 import static java.io.File.createTempFile;
-import static java.util.Collections.emptyMap;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
@@ -150,7 +150,7 @@ public class UtilTest {
             Util.system = new SystemProviderForTest(
                     new Properties() {{
                         setProperty("user.home", "/home/john");
-                    }}, emptyMap()
+                    }},  new HashMap<String, String>()
             );
             assertEquals("/home/john", Util.expandUserHome("~"));
             assertEquals("/home/john/foo/bar/", Util.expandUserHome("~/foo/bar/"));
@@ -172,7 +172,7 @@ public class UtilTest {
             Util.system = new SystemProviderForTest(
                     new Properties() {{
                         setProperty("user.home", "C:\\Users\\John");
-                    }}, emptyMap()
+                    }}, new HashMap<String, String>()
             );
             assertEquals("C:\\Users\\John", Util.expandUserHome("~"));
             assertEquals("C:\\Users\\John/foo/bar/", Util.expandUserHome("~/foo/bar/"));
