@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Util.SystemProvider;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -24,6 +25,7 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 import static java.io.File.createTempFile;
+import static java.util.Collections.emptyMap;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
@@ -139,6 +141,51 @@ public class UtilTest {
 
     public static boolean eq(Object o1, Object o2) {
         return Util.eq(o1, o2);
+    }
+
+    @Test
+    public void testExpandUserHomeOnUnix() {
+        SystemProvider save = Util.system;
+        try {
+            Util.system = new SystemProviderForTest(
+                    new Properties() {{
+                        setProperty("user.home", "/home/john");
+                    }}, emptyMap()
+            );
+            assertEquals("/home/john", Util.expandUserHome("~"));
+            assertEquals("/home/john/foo/bar/", Util.expandUserHome("~/foo/bar/"));
+            assertEquals("file:/home/john/foo/bar/", Util.expandUserHome("file:~/foo/bar/"));
+            assertEquals("jar:file:/home/john/foo/bar/", Util.expandUserHome("jar:file:~/foo/bar/"));
+
+            assertEquals("/home/john\\foo\\bar\\", Util.expandUserHome("~\\foo\\bar\\"));
+            assertEquals("file:/home/john\\foo\\bar\\", Util.expandUserHome("file:~\\foo\\bar\\"));
+            assertEquals("jar:file:/home/john\\foo\\bar\\", Util.expandUserHome("jar:file:~\\foo\\bar\\"));
+        } finally {
+            Util.system = save;
+        }
+    }
+
+    @Test
+    public void testExpandUserHomeOnWindows() {
+        SystemProvider save = Util.system;
+        try {
+            Util.system = new SystemProviderForTest(
+                    new Properties() {{
+                        setProperty("user.home", "C:\\Users\\John");
+                    }}, emptyMap()
+            );
+            assertEquals("C:\\Users\\John", Util.expandUserHome("~"));
+            assertEquals("C:\\Users\\John/foo/bar/", Util.expandUserHome("~/foo/bar/"));
+            assertEquals("file:C:\\Users\\John/foo/bar/", Util.expandUserHome("file:~/foo/bar/"));
+            assertEquals("jar:file:C:\\Users\\John/foo/bar/", Util.expandUserHome("jar:file:~/foo/bar/"));
+
+            assertEquals("C:\\Users\\John\\foo\\bar\\", Util.expandUserHome("~\\foo\\bar\\"));
+            assertEquals("file:C:\\Users\\John\\foo\\bar\\", Util.expandUserHome("file:~\\foo\\bar\\"));
+            assertEquals("jar:file:C:\\Users\\John\\foo\\bar\\", Util.expandUserHome("jar:file:~\\foo\\bar\\"));
+        } finally {
+            Util.system = save;
+        }
+
     }
 
 }

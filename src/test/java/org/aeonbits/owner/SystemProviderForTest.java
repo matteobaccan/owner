@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2013, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
+package org.aeonbits.owner;
+
+import org.aeonbits.owner.Util.SystemProvider;
+
+import java.util.Map;
+import java.util.Properties;
+
+/**
+ * @author Luigi R. Viggiano
+ */
+public class SystemProviderForTest implements SystemProvider {
+
+    private final Properties system;
+    private final Map<?, ?> env;
+
+    public SystemProviderForTest(Properties system, Map<?, ?> env) {
+        this.system = system;
+        this.env = env;
+    }
+
+    public String getProperty(String key) {
+        return system.getProperty(key);
+    }
+
+    public Map<?, ?> getenv() {
+        return env;
+    }
+
+    public Properties getProperties() {
+        return system;
+    }
+}

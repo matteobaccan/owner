@@ -87,13 +87,17 @@ abstract class Util {
     }
 
     static String expandUserHome(String text) {
-        if (text.equals("~")) {
+        if (text.equals("~"))
             return system.getProperty("user.home");
-        } else if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0) {
-            String safeHome = system.getProperty("user.home").replace("\\", "\\\\");
-            return text.replaceFirst("~/", safeHome + "/");
-        }
+        if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0)
+            return text.replaceFirst("~/", fixBackslashForRegex(system.getProperty("user.home")) + "/");
+        if (text.indexOf("~\\") == 0 || text.indexOf("file:~\\") == 0 || text.indexOf("jar:file:~\\") == 0)
+            return text.replaceFirst("~\\\\", fixBackslashForRegex(system.getProperty("user.home")) + "\\\\");
         return text;
+    }
+
+    private static String fixBackslashForRegex(String text) {
+        return text.replace("\\", "\\\\");
     }
 
     static <T> T ignore() {
