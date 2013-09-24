@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConstants {
     private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
-    private static final int DELAY = 2000;
+    private static final int DELAY = 1000;
 
     private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
 
@@ -61,6 +61,12 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
         }});
 
         AsyncAutoReloadConfig cfg = ConfigFactory.create(AsyncAutoReloadConfig.class);
+        final int[] reloadCount = {0};
+        cfg.addReloadListener(new ReloadListener() {
+            public void reloadPerformed(ReloadEvent event) {
+                reloadCount[0]++;
+            }
+        });
         cfg.addReloadListener(new ReloadListener() {
             public void reloadPerformed(ReloadEvent event) {
                 notifyReload();
@@ -68,13 +74,6 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
         });
 
         assertEquals(Integer.valueOf(10), cfg.someValue());
-
-        final int[] reloadCount = {0};
-        cfg.addReloadListener(new ReloadListener() {
-            public void reloadPerformed(ReloadEvent event) {
-                reloadCount[0]++;
-            }
-        });
 
         assertEquals(0, reloadCount[0]);
         assertEquals(Integer.valueOf(10), cfg.someValue());
