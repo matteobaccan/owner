@@ -71,11 +71,20 @@ public class UtilTest {
         File parent = target.getParentFile();
         parent.mkdirs();
         if (isWindows()) {
-            store(new FileOutputStream(target), p);
+            store(target, p);
         } else {
             File tempFile = createTempFile(target.getName(), ".temp", parent);
-            store(new FileOutputStream(tempFile), p);
+            store(tempFile, p);
             rename(tempFile, target);
+        }
+    }
+
+    private static void store(File target, Properties p) throws IOException {
+        OutputStream out = new FileOutputStream(target);
+        try {
+            store(out, p);
+        } finally {
+            out.close();
         }
     }
 
@@ -103,9 +112,8 @@ public class UtilTest {
     }
 
     private static void storeJar(File target, String entryName, Properties props) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        store(out, props);
-        InputStream input = new ByteArrayInputStream(out.toByteArray());
+        byte[] bytes = toBytes(props);
+        InputStream input = new ByteArrayInputStream(bytes);
         JarOutputStream output = new JarOutputStream(new FileOutputStream(target));
         try {
             ZipEntry entry = new ZipEntry(entryName);
@@ -117,6 +125,16 @@ public class UtilTest {
         } finally {
             input.close();
             output.close();
+        }
+    }
+
+    private static byte[] toBytes(Properties props) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            store(out, props);
+            return out.toByteArray();
+        } finally {
+            out.close();
         }
     }
 
