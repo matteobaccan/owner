@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+import static java.io.File.createTempFile;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
@@ -67,9 +68,15 @@ public class UtilTest {
     }
 
     public static void save(File target, Properties p) throws IOException {
-        File tempFile = createTempFile(target);
-        store(tempFile, p);
-        rename(tempFile, target);
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        if (isWindows()) {
+            store(target, p);
+        } else {
+            File tempFile = createTempFile(target.getName(), ".temp", parent);
+            store(tempFile, p);
+            rename(tempFile, target);
+        }
     }
 
     private static void store(File target, Properties p) throws IOException {
@@ -85,15 +92,29 @@ public class UtilTest {
         p.store(out, "saved for test");
     }
 
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+    }
+
     public static void delete(File target) {
         target.delete();
     }
 
     public static void saveJar(File target, String entryName, Properties props) throws IOException {
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        storeJar(target, entryName, props);
+    }
+
+    private static void rename(File source, File target) throws IOException {
+        if (!source.renameTo(target))
+            throw new IOException(String.format("Failed to overwrite %s to %s", source.toString(), target.toString()));
+    }
+
+    private static void storeJar(File target, String entryName, Properties props) throws IOException {
         byte[] bytes = toBytes(props);
         InputStream input = new ByteArrayInputStream(bytes);
-        FileOutputStream fos = new FileOutputStream(target);
-        JarOutputStream output = new JarOutputStream(fos);
+        JarOutputStream output = new JarOutputStream(new FileOutputStream(target));
         try {
             ZipEntry entry = new ZipEntry(entryName);
             output.putNextEntry(entry);
@@ -101,23 +122,10 @@ public class UtilTest {
             int size;
             while ((size = input.read(buffer)) != -1)
                 output.write(buffer, 0, size);
-            output.flush();
         } finally {
             input.close();
             output.close();
-            fos.close();
         }
-    }
-
-    private static File createTempFile(File target) throws IOException {
-        File parent = target.getParentFile();
-        parent.mkdirs();
-        return File.createTempFile(target.getName(), ".temp", parent);
-    }
-
-    private static void rename(File source, File target) throws IOException {
-        if (!source.renameTo(target))
-            throw new IOException(String.format("Failed to overwrite %s to %s", source.toString(), target.toString()));
     }
 
     private static byte[] toBytes(Properties props) throws IOException {
