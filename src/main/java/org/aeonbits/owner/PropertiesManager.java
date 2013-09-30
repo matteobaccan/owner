@@ -544,13 +544,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     @Override
     public boolean equals(Object obj) {
         if (! (obj instanceof Proxy)) return false;
-        InvocationHandler h = Proxy.getInvocationHandler(obj);
-        if (! (h instanceof PropertiesInvocationHandler))
+        InvocationHandler handler = Proxy.getInvocationHandler(obj);
+        if (! (handler instanceof PropertiesInvocationHandler))
             return false;
-        PropertiesInvocationHandler pih = (PropertiesInvocationHandler)h;
-        PropertiesManager that = pih.propertiesManager;
-        if (! this.clazz.isAssignableFrom(that.clazz) && ! that.clazz.isAssignableFrom(this.clazz))
-            return false;
+        PropertiesInvocationHandler propsInvocationHandler = (PropertiesInvocationHandler)handler;
+        PropertiesManager that = propsInvocationHandler.propertiesManager;
+        return (this.clazz.isAssignableFrom(that.clazz) || that.clazz.isAssignableFrom(this.clazz)) && equals(that);
+    }
+
+    private boolean equals(PropertiesManager that) {
         this.readLock.lock();
         try {
             that.readLock.lock();
