@@ -12,6 +12,7 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.HotReloadType;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ import static org.aeonbits.owner.Util.now;
 /**
  * @author Luigi R. Viggiano
  */
-class HotReloadLogic {
+class HotReloadLogic implements Serializable {
     private final PropertiesManager manager;
     private final long interval;
     private final HotReloadType type;

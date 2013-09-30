@@ -74,7 +74,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final LoadType loadType;
     private final List<URL> urls;
     private final ConfigURLFactory urlFactory;
-    private HotReloadLogic hotReloadLogic = null;
+    private final HotReloadLogic hotReloadLogic;
 
     private volatile boolean loading = false;
 
@@ -117,7 +117,19 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        setupHotReload(clazz, scheduler);
+        HotReload hotReload = clazz.getAnnotation(HotReload.class);
+        if (hotReload != null) {
+            hotReloadLogic = new HotReloadLogic(hotReload, urls, this);
+
+            if (hotReloadLogic.isAsync())
+                scheduler.scheduleAtFixedRate(new Runnable() {
+                    public void run() {
+                        hotReloadLogic.checkAndReload();
+                    }
+                }, hotReload.value(), hotReload.value(), hotReload.unit());
+        } else {
+            hotReloadLogic = null;
+        }
     }
 
     private List<URL> toURLs(Sources sources) {
@@ -143,20 +155,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private String[] defaultSpecs() {
         String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
         return new String[] {prefix + ".properties", prefix + ".xml"};
-    }
-
-    private void setupHotReload(Class<? extends Config> clazz, ScheduledExecutorService scheduler) {
-        HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        if (hotReload != null) {
-            hotReloadLogic = new HotReloadLogic(hotReload, urls, this);
-
-            if (hotReloadLogic.isAsync())
-                scheduler.scheduleAtFixedRate(new Runnable() {
-                    public void run() {
-                        hotReloadLogic.checkAndReload();
-                    }
-                }, hotReload.value(), hotReload.value(), hotReload.unit());
-        }
     }
 
     Properties load() {
