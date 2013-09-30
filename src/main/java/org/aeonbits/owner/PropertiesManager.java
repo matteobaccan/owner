@@ -25,8 +25,11 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -252,32 +255,47 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         if (propertyName == null || listener == null) return;
 
         final boolean transactional = listener instanceof TransactionalPropertyChangeListener;
-        propertyChangeListeners.add(new TransactionalPropertyChangeListener() {
-            public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,
-                    RollbackBatchException {
-                if (transactional && propertyNameMatches(evt))
-                    ((TransactionalPropertyChangeListener) listener).beforePropertyChange(evt);
-            }
+        propertyChangeListeners.add(new PropertyChangeListenerWrapper(propertyName, listener, transactional));
+    }
 
-            private boolean propertyNameMatches(PropertyChangeEvent evt) {
-                return propertyName.equals(evt.getPropertyName());
-            }
+    private static class PropertyChangeListenerWrapper implements TransactionalPropertyChangeListener, Serializable {
 
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (propertyNameMatches(evt))
-                    listener.propertyChange(evt);
-            }
+        private final String propertyName;
+        private final PropertyChangeListener listener;
+        private final boolean transactional;
 
-            @Override
-            public boolean equals(Object obj) {
-                return listener.equals(obj);
-            }
+        public PropertyChangeListenerWrapper(String propertyName, PropertyChangeListener listener,
+                                             boolean transactional) {
+            this.propertyName = propertyName;
+            this.listener = listener;
+            this.transactional = transactional;
 
-            @Override
-            public int hashCode() {
-                return listener.hashCode();
-            }
-        });
+        }
+
+        public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,
+                RollbackBatchException {
+            if (transactional && propertyNameMatches(evt))
+                ((TransactionalPropertyChangeListener) listener).beforePropertyChange(evt);
+        }
+
+        private boolean propertyNameMatches(PropertyChangeEvent evt) {
+            return propertyName.equals(evt.getPropertyName());
+        }
+
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (propertyNameMatches(evt))
+                listener.propertyChange(evt);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return listener.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return listener.hashCode();
+        }
     }
 
     Properties doLoad() {
@@ -520,6 +538,27 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private void firePropertyChange(PropertyChangeEvent event) {
         for (PropertyChangeListener listener : propertyChangeListeners)
             listener.propertyChange(event);
+    }
+
+    @Delegate
+    @Override
+    public boolean equals(Object obj) {
+        if (! (obj instanceof Proxy)) return false;
+        InvocationHandler h = Proxy.getInvocationHandler(obj);
+        if (! (h instanceof PropertiesInvocationHandler))
+            return false;
+        PropertiesInvocationHandler pih = (PropertiesInvocationHandler)h;
+        PropertiesManager that = pih.propertiesManager;
+        return this.getProperties().equals(that.getProperties());
+    }
+
+    private Properties getProperties() {
+        readLock.lock();
+        try {
+            return properties;
+        } finally {
+            readLock.unlock();
+        }
     }
 
 }

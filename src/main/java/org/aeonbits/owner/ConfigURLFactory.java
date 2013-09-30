@@ -8,15 +8,16 @@
 
 package org.aeonbits.owner;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
  * @author Luigi R. Viggiano
  */
-class ConfigURLFactory {
+class ConfigURLFactory implements Serializable {
     private static final String CLASSPATH_PROTOCOL = "classpath:";
-    private final ClassLoader classLoader;
+    private transient final ClassLoader classLoader;
     private final VariablesExpander expander;
 
     ConfigURLFactory(ClassLoader classLoader, VariablesExpander expander) {

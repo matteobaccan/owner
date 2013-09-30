@@ -10,11 +10,11 @@ package org.aeonbits.owner;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static org.aeonbits.owner.Util.prohibitInstantiation;
 
 /**
@@ -27,7 +27,7 @@ import static org.aeonbits.owner.Util.prohibitInstantiation;
  */
 public abstract class ConfigFactory {
 
-    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+    private static final ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor(new ThreadFactory() {
         public Thread newThread(Runnable r) {
             Thread result = new Thread(r);
             result.setDaemon(true);
@@ -50,10 +50,11 @@ public abstract class ConfigFactory {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
-        Class<?>[] interfaces = new Class<?>[]{clazz};
+        Class<?>[] interfaces = new Class<?>[] {clazz};
         VariablesExpander expander = new VariablesExpander(props);
         LoadersManager loaders = new LoadersManager();
-        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loaders, imports);
+        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loaders,
+                imports);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager);
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
@@ -61,14 +62,13 @@ public abstract class ConfigFactory {
     }
 
     /**
-     * Set a property in the ConfigFactory.
-     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the
-     * ConfigFactory to configure its own behavior.
+     * Set a property in the ConfigFactory. Those properties will be used to expand variables specified in the `@Source`
+     * annotation, or by the ConfigFactory to configure its own behavior.
      *
-     * @since 1.0.4
-     * @param key the key for the property.
+     * @param key   the key for the property.
      * @param value the value for the property.
      * @return the old value.
+     * @since 1.0.4
      */
     public static String setProperty(String key, String value) {
         checkKey(key);
@@ -83,22 +83,22 @@ public abstract class ConfigFactory {
     }
 
     /**
-     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the
-     * ConfigFactory to configure its own behavior.
+     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the ConfigFactory
+     * to configure its own behavior.
      *
-     * @since 1.0.4
      * @return the properties in the ConfigFactory
+     * @since 1.0.4
      */
     public static Properties getProperties() {
         return props;
     }
 
     /**
-     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the
-     * ConfigFactory to configure its own behavior.
+     * Those properties will be used to expand variables specified in the `@Source` annotation, or by the ConfigFactory
+     * to configure its own behavior.
      *
-     * @since 1.0.4
      * @param properties the properties to set in the config Factory.
+     * @since 1.0.4
      */
     public static void setProperties(Properties properties) {
         if (properties == null)
@@ -110,9 +110,9 @@ public abstract class ConfigFactory {
     /**
      * Returns the value for a given property.
      *
-     * @since 1.0.4
      * @param key the key for the property
      * @return the value for the property, or <tt>null</tt> if the property is not set.
+     * @since 1.0.4
      */
     public static String getProperty(String key) {
         checkKey(key);
@@ -122,9 +122,9 @@ public abstract class ConfigFactory {
     /**
      * Clears the value for the property having the given key. This means, that the given property is removed.
      *
-     * @since 1.0.4
      * @param key the key for the property to remove.
      * @return the old value for the given key, or <tt>null</tt> if the property was not set.
+     * @since 1.0.4
      */
     public static String clearProperty(String key) {
         checkKey(key);

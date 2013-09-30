@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,9 +34,9 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesInvocationHandler implements InvocationHandler {
+class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private final StrSubstitutor substitutor;
-    private final PropertiesManager propertiesManager;
+    final PropertiesManager propertiesManager;
 
     PropertiesInvocationHandler(PropertiesManager manager) {
         this.propertiesManager = manager;

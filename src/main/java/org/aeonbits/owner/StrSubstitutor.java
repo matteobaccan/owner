@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import java.io.Serializable;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +42,7 @@ import static org.aeonbits.owner.Util.fixBackslashForRegex;
  *
  * @author Luigi R. Viggiano
  */
-class StrSubstitutor {
+class StrSubstitutor implements Serializable {
     private final Properties values;
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
 

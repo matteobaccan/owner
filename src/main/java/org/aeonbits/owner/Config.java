@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -36,7 +37,7 @@ import static org.aeonbits.owner.Util.reverse;
  * @author Luigi R. Viggiano
  * @see java.util.Properties
  */
-public interface Config {
+public interface Config extends Serializable {
 
     /**
      * Specifies the policy for loading the properties files. By default the first available properties file specified

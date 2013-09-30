@@ -9,6 +9,7 @@
 package org.aeonbits.owner;
 
 
+import java.io.Serializable;
 import java.util.Properties;
 
 import static org.aeonbits.owner.Util.expandUserHome;
@@ -20,7 +21,7 @@ import static org.aeonbits.owner.Util.expandUserHome;
  *
  * @author Luigi R. Viggiano
  */
-class VariablesExpander {
+class VariablesExpander implements Serializable {
 
     private final StrSubstitutor substitutor;
 

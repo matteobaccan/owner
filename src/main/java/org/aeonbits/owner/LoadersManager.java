@@ -14,6 +14,7 @@ import org.aeonbits.owner.loaders.XMLLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -24,20 +25,20 @@ import static org.aeonbits.owner.Util.unsupported;
 
 
 /**
- * This class is responsible of locating an appropriate Loader for a given URL (based the extension in the resource 
+ * This class is responsible of locating an appropriate Loader for a given URL (based the extension in the resource
  * name)and load the properties from it.
- * 
+ *
  * @author Luigi R. Viggiano
  * @since 1.0.5
  */
-class LoadersManager {
+class LoadersManager implements Serializable {
     private final List<Loader> loaders = Collections.synchronizedList(new LinkedList<Loader>());
 
     LoadersManager() {
         registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
     }
-            
+
     void load(Properties result, URL url) throws IOException {
         InputStream stream = url.openStream();
         try {
@@ -57,7 +58,7 @@ class LoadersManager {
 
     /**
      * Allows the user to register a {@link Properties properties} {@link Loader}.
-     * 
+     *
      * @since 1.0.5
      * @param loader the {@link Loader} to register.
      */
