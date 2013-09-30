@@ -29,8 +29,11 @@ import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -419,10 +422,24 @@ public class EventListenerTest {
     }
 
     @Test
+    public void testRemoveReloadListenerThatIsNotThere() throws Throwable {
+        assertThat(propertiesManager.getReloadListeners(), is(empty()));
+        propertiesManager.removeReloadListener(reloadListener);
+        assertThat(propertiesManager.getReloadListeners(), is(empty()));
+    }
+
+    @Test
     public void testRemovePropertyChangeListenerNull() throws Throwable {
         propertiesManager.addPropertyChangeListener(propertyChangeListener);
         propertiesManager.removePropertyChangeListener(null);
         assertEquals(1, propertiesManager.getPropertyChangeListeners().size());
+    }
+
+    @Test
+    public void testRemovePropertyChangeThatIsNotThere() throws Throwable {
+        assertThat(propertiesManager.getPropertyChangeListeners(), is(empty()));
+        propertiesManager.removePropertyChangeListener(propertyChangeListener);
+        assertThat(propertiesManager.getPropertyChangeListeners(), is(empty()));
     }
 
     @Test
