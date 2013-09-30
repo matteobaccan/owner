@@ -549,16 +549,29 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             return false;
         PropertiesInvocationHandler pih = (PropertiesInvocationHandler)h;
         PropertiesManager that = pih.propertiesManager;
-        return this.getProperties().equals(that.getProperties());
+        if (! this.clazz.isAssignableFrom(that.clazz) && ! that.clazz.isAssignableFrom(this.clazz))
+            return false;
+        this.readLock.lock();
+        try {
+            that.readLock.lock();
+            try {
+                return this.properties.equals(that.properties);
+            } finally {
+                that.readLock.unlock();
+            }
+        } finally {
+            this.readLock.unlock();
+        }
     }
 
-    private Properties getProperties() {
+    @Delegate
+    @Override
+    public int hashCode() {
         readLock.lock();
         try {
-            return properties;
+            return properties.hashCode();
         } finally {
             readLock.unlock();
         }
     }
-
 }
