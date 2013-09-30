@@ -549,10 +549,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             return false;
         PropertiesInvocationHandler propsInvocationHandler = (PropertiesInvocationHandler)handler;
         PropertiesManager that = propsInvocationHandler.propertiesManager;
-        return (this.clazz.isAssignableFrom(that.clazz) || that.clazz.isAssignableFrom(this.clazz)) && equals(that);
+        return equals(that);
     }
 
     private boolean equals(PropertiesManager that) {
+        if (! isAssignationCompatible(that))
+            return false;
         this.readLock.lock();
         try {
             that.readLock.lock();
@@ -564,6 +566,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         } finally {
             this.readLock.unlock();
         }
+    }
+
+    private boolean isAssignationCompatible(PropertiesManager that) {
+        return this.clazz.isAssignableFrom(that.clazz) || that.clazz.isAssignableFrom(this.clazz);
     }
 
     @Delegate
