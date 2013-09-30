@@ -31,7 +31,7 @@ class HotReloadLogic implements Serializable {
     private volatile long lastCheckTime = now();
     private final List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
 
-    private static class WatchableFile implements Serializable{
+    private static class WatchableFile implements Serializable {
         private final File file;
         private long lastModifiedTime;
 

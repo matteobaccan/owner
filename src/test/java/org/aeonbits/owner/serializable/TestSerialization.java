@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner.serializable;
 
+import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
 import org.aeonbits.owner.TestConstants;
@@ -33,9 +35,14 @@ import static org.junit.Assert.assertEquals;
  * @author Luigi R. Viggiano
  */
 public class TestSerialization implements TestConstants {
+    private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
+
+    private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
 
     private File target;
 
+    @HotReload
+    @Sources(SPEC)
     public static interface MyConfig extends Mutable {
         @DefaultValue("someText")
         public String someText();
