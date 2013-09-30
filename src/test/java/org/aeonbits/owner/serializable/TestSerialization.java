@@ -68,8 +68,6 @@ public class TestSerialization implements TestConstants {
         MyConfig deserialized = deserialize(target);
 
         assertEquals(cfg, deserialized);
-        System.out.println(cfg);
-        System.out.println(deserialized);
     }
 
     private MyConfig deserialize(File target) throws IOException, ClassNotFoundException {
