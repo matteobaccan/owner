@@ -89,7 +89,7 @@ public class EventListenerOnReloadTest implements TestConstants {
             setProperty("someInteger", "5");
             setProperty("someString", "bazbar");
             setProperty("someDouble", "2.718");
-            setProperty("nullByDefault", "NotNullNow");
+            setProperty("nullsByDefault", "NotNullNow");
         }});
 
         doNothing().doNothing().doThrow(new RollbackBatchException())
@@ -138,7 +138,7 @@ public class EventListenerOnReloadTest implements TestConstants {
             setProperty("someInteger", "5");
             setProperty("someString", "bazbar");
             setProperty("someDouble", "2.718");
-            setProperty("nullByDefault", "NotNullNow");
+            setProperty("nullsByDefault", "NotNullNow");
         }});
 
         cfg.reload();
@@ -148,7 +148,7 @@ public class EventListenerOnReloadTest implements TestConstants {
 
         PropertyChangeEvent someStringChange = new PropertyChangeEvent(cfg, "someString", "foobar", "bazbar");
         PropertyChangeEvent someDoubleChange = new PropertyChangeEvent(cfg, "someDouble", "3.14", "2.718");
-        PropertyChangeEvent nullByDefaultChange = new PropertyChangeEvent(cfg, "nullByDefault", null, "NotNullNow");
+        PropertyChangeEvent nullByDefaultChange = new PropertyChangeEvent(cfg, "nullsByDefault", null, "NotNullNow");
 
         InOrder inOrder = inOrder(propertyChangeListener);
         inOrder.verify(propertyChangeListener, times(1)).beforePropertyChange(argThat(matches(someStringChange)));
@@ -195,7 +195,7 @@ public class EventListenerOnReloadTest implements TestConstants {
             setProperty("someInteger", "5");
             setProperty("someString", "bazbar");
             setProperty("someDouble", "2.718");
-            setProperty("nullByDefault", "NotNullNow");
+            setProperty("nullsByDefault", "NotNullNow");
         }});
 
         cfg.reload();
@@ -204,6 +204,31 @@ public class EventListenerOnReloadTest implements TestConstants {
         inOrder.verify(reloadListener, times(1)).beforeReload(any(ReloadEvent.class));
         inOrder.verify(reloadListener, times(1)).reloadPerformed(any(ReloadEvent.class));
         verifyNoMoreInteractions(reloadListener);
+
+        assertEquals(new Integer(5), cfg.someInteger());
+        assertEquals("bazbar", cfg.someString());
+        assertEquals(new Double("2.718"), cfg.someDouble());
+        assertEquals("NotNullNow", cfg.nullsByDefault());
+
+    }
+
+    @Test
+    public void testReloadWhenRollbackBatchExceptionIsThrown() throws Throwable {
+        save(target, new Properties() {{
+            setProperty("someInteger", "5");
+            setProperty("someString", "bazbar");
+            setProperty("someDouble", "2.718");
+            setProperty("nullsByDefault", "NotNullNow");
+        }});
+
+        doThrow(RollbackBatchException.class).when(reloadListener).beforeReload(any(ReloadEvent.class));
+
+        cfg.reload();
+
+        assertEquals(new Integer(5), cfg.someInteger());
+        assertEquals("foobar", cfg.someString());
+        assertEquals(new Double("3.14"), cfg.someDouble());
+        assertNull(cfg.nullsByDefault());
     }
 
 }
