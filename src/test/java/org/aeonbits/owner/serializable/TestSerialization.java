@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import static java.io.File.createTempFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -45,7 +46,9 @@ public class TestSerialization implements TestConstants {
 
     @Before
     public void before() throws IOException {
-        target = File.createTempFile("TestSerialization", ".ser", new File(RESOURCES_DIR));
+        File parent = new File(RESOURCES_DIR);
+        parent.mkdirs();
+        target = createTempFile("TestSerialization", ".ser", parent);
     }
 
     @After
