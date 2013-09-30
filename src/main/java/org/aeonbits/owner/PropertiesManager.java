@@ -73,7 +73,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private final LoadType loadType;
     private final List<URL> urls;
-    private final ConfigURLFactory urlFactory;
     private final HotReloadLogic hotReloadLogic;
 
     private volatile boolean loading = false;
@@ -111,8 +110,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.loaders = loaders;
         this.imports = imports;
 
-        urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
-        urls = toURLs(clazz.getAnnotation(Sources.class));
+        ConfigURLFactory urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
+        urls = toURLs(clazz.getAnnotation(Sources.class), urlFactory);
 
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
@@ -132,8 +131,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private List<URL> toURLs(Sources sources) {
-        String[] specs = specs(sources);
+    private List<URL> toURLs(Sources sources, ConfigURLFactory urlFactory) {
+        String[] specs = specs(sources, urlFactory);
         ArrayList<URL> result = new ArrayList<URL>();
         for (String spec : specs) {
             try {
@@ -147,12 +146,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         return result;
     }
 
-    private String[] specs(Sources sources) {
+    private String[] specs(Sources sources, ConfigURLFactory urlFactory) {
         if (sources != null) return sources.value();
-        return defaultSpecs();
+        return defaultSpecs(urlFactory);
     }
 
-    private String[] defaultSpecs() {
+    private String[] defaultSpecs(ConfigURLFactory urlFactory) {
         String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
         return new String[] {prefix + ".properties", prefix + ".xml"};
     }
