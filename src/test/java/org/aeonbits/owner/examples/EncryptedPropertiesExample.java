@@ -1,17 +1,18 @@
 package org.aeonbits.owner.examples;
+
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Converter;
-import sun.misc.BASE64Decoder;
+import org.apache.commons.codec.binary.Base64;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 /**
+ *  To encrypt the password:
+ *  <pre>
+ *  System.out.println(Base64.encodeBase64String(xor("tiger".getBytes(), "secret".getBytes())));
+ *  </pre>
  * @author Luigi R. Viggiano
- *
- * To encrypt the password:
- *   System.out.println(new BASE64Encoder().encode(xor("tiger".getBytes(), "secret".getBytes())));
  */
 public class EncryptedPropertiesExample {
 
@@ -23,12 +24,8 @@ public class EncryptedPropertiesExample {
 
     public static class DecryptConverter implements Converter {
         public Object convert(Method method, String input) {
-            try {
-                String key = System.getProperty("example.encryption.key");
-                return new String(xor(new BASE64Decoder().decodeBuffer(input), key.getBytes()));
-            } catch (IOException e) {
-                throw new UnsupportedOperationException(e);
-            }
+            String key = System.getProperty("example.encryption.key");
+            return new String(xor(Base64.decodeBase64(input), key.getBytes()));
         }
     }
 
