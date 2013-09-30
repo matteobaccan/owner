@@ -553,7 +553,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private boolean equals(PropertiesManager that) {
-        if (! this.isAssignationCompatible(that))
+        if (! this.isAssignationCompatibleWith(that))
             return false;
         this.readLock.lock();
         try {
@@ -568,7 +568,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private boolean isAssignationCompatible(PropertiesManager that) {
+    private boolean isAssignationCompatibleWith(PropertiesManager that) {
         return this.clazz.isAssignableFrom(that.clazz) || that.clazz.isAssignableFrom(this.clazz);
     }
 
