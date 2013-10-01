@@ -33,7 +33,6 @@ class VariablesExpander implements Serializable {
         substitutor = new StrSubstitutor(variables);
     }
 
-
     String expand(String path) {
         String expanded = expandUserHome(path);
         return substitutor.replace(expanded);
