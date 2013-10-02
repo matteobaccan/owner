@@ -12,16 +12,12 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Factory class to instantiate {@link Config} instances.
- * By default a {link Config} sub-interface is associated to a property having the same package name and class name as
- * the interface itself.
- * <p/>
- * Method names are mapped to property names contained in the property files.
+ * Interface for factory implementation used to instantiate {@link Config} instances.
  *
  * @since 1.0.5
  * @author Luigi R. Viggiano
  */
-public interface ConfigFactoryInstance {
+public interface AbstractConfigFactory {
 
     /**
      * Creates a {@link Config} instance from the specified interface

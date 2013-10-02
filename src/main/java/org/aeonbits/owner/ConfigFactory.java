@@ -29,9 +29,12 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
  */
 public final class ConfigFactory {
 
-    private static final ConfigFactoryInstance instance = newConfigFactoryInstance();
+    private static final AbstractConfigFactory instance = newInstance();
 
-    private static ConfigFactoryInstance newConfigFactoryInstance() {
+    /** Don't let anyone instantiate this class */
+    private ConfigFactory() {}
+
+    private static AbstractConfigFactory newInstance() {
         ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor(new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread result = new Thread(r);
@@ -40,11 +43,8 @@ public final class ConfigFactory {
             }
         });
         Properties props = new Properties();
-        return new ConfigFactoryInstanceImpl(scheduler, props);
+        return new DefaultConfigFactory(scheduler, props);
     }
-
-    /** Don't let anyone instantiate this class */
-    private ConfigFactory() {}
 
     /**
      * Creates a {@link Config} instance from the specified interface

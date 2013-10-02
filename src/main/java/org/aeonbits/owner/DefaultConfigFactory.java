@@ -15,15 +15,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import static java.lang.reflect.Proxy.newProxyInstance;
 
 /**
- * Default implementation for {@link ConfigFactoryInstance}.
+ * Default implementation for {@link AbstractConfigFactory}.
  *
  * @author Luigi R. Viggiano
  */
-class ConfigFactoryInstanceImpl implements ConfigFactoryInstance {
+class DefaultConfigFactory implements AbstractConfigFactory {
     private final ScheduledExecutorService scheduler;
     private Properties props;
 
-    ConfigFactoryInstanceImpl(ScheduledExecutorService scheduler, Properties props) {
+    DefaultConfigFactory(ScheduledExecutorService scheduler, Properties props) {
         this.scheduler = scheduler;
         this.props = props;
     }
