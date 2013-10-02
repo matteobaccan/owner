@@ -13,32 +13,38 @@ import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-import static java.lang.reflect.Proxy.newProxyInstance;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
-import static org.aeonbits.owner.Util.prohibitInstantiation;
 
 /**
- * Factory class to instantiate {@link Config} instances. By default a {link Config} sub-interface is associated to a
- * property having the same package name and class name as the interface itself.
+ * Factory class to instantiate {@link Config} instances.
+ * By default a {link Config} sub-interface is associated to a property having the same package name and class name as
+ * the interface itself.
  * <p/>
  * Method names are mapped to property names contained in the property files.
  *
+ * This is a singleton static class, to be used as convenience when only a single factory is needed inside an
+ * application.
+ *
  * @author Luigi R. Viggiano
  */
-public abstract class ConfigFactory {
+public final class ConfigFactory {
 
-    private static final ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor(new ThreadFactory() {
-        public Thread newThread(Runnable r) {
-            Thread result = new Thread(r);
-            result.setDaemon(true);
-            return result;
-        }
-    });
-    private static Properties props = new Properties();
+    private static final ConfigFactoryInstance instance = newConfigFactoryInstance();
 
-    ConfigFactory() {
-        prohibitInstantiation();
+    private static ConfigFactoryInstance newConfigFactoryInstance() {
+        ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor(new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread result = new Thread(r);
+                result.setDaemon(true);
+                return result;
+            }
+        });
+        Properties props = new Properties();
+        return new ConfigFactoryInstanceImpl(scheduler, props);
     }
+
+    /** Don't let anyone instantiate this class */
+    private ConfigFactory() {}
 
     /**
      * Creates a {@link Config} instance from the specified interface
@@ -48,17 +54,8 @@ public abstract class ConfigFactory {
      * @param <T>     type of the interface.
      * @return an object implementing the given interface, which maps methods to property values.
      */
-    @SuppressWarnings("unchecked")
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
-        Class<?>[] interfaces = new Class<?>[] {clazz};
-        VariablesExpander expander = new VariablesExpander(props);
-        LoadersManager loaders = new LoadersManager();
-        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loaders,
-                imports);
-        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager);
-        T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
-        handler.setProxy(proxy);
-        return proxy;
+        return instance.create(clazz, imports);
     }
 
     /**
@@ -71,15 +68,7 @@ public abstract class ConfigFactory {
      * @since 1.0.4
      */
     public static String setProperty(String key, String value) {
-        checkKey(key);
-        return (String) props.setProperty(key, value);
-    }
-
-    private static void checkKey(String key) {
-        if (key == null)
-            throw new NullPointerException("key can't be null");
-        if (key.isEmpty())
-            throw new IllegalArgumentException("key can't be empty");
+        return instance.setProperty(key, value);
     }
 
     /**
@@ -90,7 +79,7 @@ public abstract class ConfigFactory {
      * @since 1.0.4
      */
     public static Properties getProperties() {
-        return props;
+        return instance.getProperties();
     }
 
     /**
@@ -101,10 +90,7 @@ public abstract class ConfigFactory {
      * @since 1.0.4
      */
     public static void setProperties(Properties properties) {
-        if (properties == null)
-            props = new Properties();
-        else
-            props = properties;
+        instance.setProperties(properties);
     }
 
     /**
@@ -115,8 +101,7 @@ public abstract class ConfigFactory {
      * @since 1.0.4
      */
     public static String getProperty(String key) {
-        checkKey(key);
-        return props.getProperty(key);
+        return instance.getProperty(key);
     }
 
     /**
@@ -127,8 +112,7 @@ public abstract class ConfigFactory {
      * @since 1.0.4
      */
     public static String clearProperty(String key) {
-        checkKey(key);
-        return (String) props.remove(key);
+        return instance.clearProperty(key);
     }
 
 }

@@ -13,17 +13,15 @@ import org.aeonbits.owner.Config.TokenizerClass;
 
 import java.lang.reflect.Method;
 
-import static org.aeonbits.owner.Util.prohibitInstantiation;
 import static org.aeonbits.owner.Util.unsupported;
 
 /**
  * @author Luigi R. Viggiano
  */
-abstract class TokenizerResolver {
+final class TokenizerResolver {
 
-    TokenizerResolver() {
-        prohibitInstantiation();
-    }
+    /** Don't let anyone instantiate this class */
+    private TokenizerResolver() {}
 
     private static final Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
 

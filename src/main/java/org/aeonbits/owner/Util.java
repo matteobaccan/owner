@@ -65,13 +65,8 @@ abstract class Util {
         }
     };
 
-    Util() {
-        prohibitInstantiation();
-    }
-
-    static void prohibitInstantiation() {
-        throw new UnsupportedOperationException("This class is not supposed to be instantiated.");
-    }
+    /** Don't let anyone instantiate this class */
+    private Util() {}
 
     static <T> List<T> reverse(List<T> src) {
         List<T> copy = new ArrayList<T>(src);

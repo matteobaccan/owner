@@ -14,18 +14,15 @@ import org.aeonbits.owner.Config.Key;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
-import static org.aeonbits.owner.Util.prohibitInstantiation;
-
 /**
  * Maps methods to properties keys and defaultValues. Maps a class to default property values.
  *
  * @author Luigi R. Viggiano
  */
-abstract class PropertiesMapper {
+final class PropertiesMapper {
 
-    PropertiesMapper() {
-        prohibitInstantiation();
-    }
+    /** Don't let anyone instantiate this class */
+    private PropertiesMapper() {}
 
     static String key(Method method) {
         Key key = method.getAnnotation(Key.class);

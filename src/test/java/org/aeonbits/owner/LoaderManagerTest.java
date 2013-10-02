@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.UtilTest.fileFromURL;
 
 /**
@@ -51,21 +50,16 @@ public class LoaderManagerTest implements TestConstants {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testProxyCreationWhenLoaderCantBeRisolvedForGivenURL() {
-        create(MyConfig.class, new LoadersManager() {{
-            loaders.clear();
-            registerLoader(new XMLLoader());
-        }});
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends Config> T create(Class<? extends T> clazz, LoadersManager loaders) {
-        Class<?>[] interfaces = new Class<?>[] {clazz};
-        VariablesExpander expander = new VariablesExpander(new Properties());
-        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loaders);
-        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager);
-        T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
-        handler.setProxy(proxy);
-        return proxy;
+        ConfigFactoryInstanceImpl instance = new ConfigFactoryInstanceImpl(scheduler, new Properties()) {
+            @Override
+            LoadersManager newLoadersManager() {
+                return new LoadersManager() {{
+                    loaders.clear();
+                    registerLoader(new XMLLoader());
+                }};
+            }
+        };
+        instance.create(MyConfig.class);
     }
 
 }

@@ -38,12 +38,6 @@ import static org.junit.Assert.assertTrue;
  * @author Luigi R. Viggiano
  */
 public class UtilTest {
-    @Test(expected = UnsupportedOperationException.class)
-    public void testConstructor() {
-        new Util() {
-        };
-    }
-
     @Test
     public void testReverse() {
         Integer[] i = {1, 2, 3, 4, 5};
