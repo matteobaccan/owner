@@ -40,6 +40,7 @@ public class LoaderManagerTest implements TestConstants {
     @Before
     public void before() throws IOException {
         target = fileFromURL(SPEC);
+        target.getParentFile().mkdirs();
         target.createNewFile();
     }
 
