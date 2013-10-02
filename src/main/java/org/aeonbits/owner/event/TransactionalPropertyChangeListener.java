@@ -23,11 +23,11 @@ public interface TransactionalPropertyChangeListener extends PropertyChangeListe
      * This method is invoked before the property is changed. When this method is invoked we cannot assume that the
      * change is effective, since some listener can ask to roll back the change operation.
      *
-     * @param evt the {@link PropertyChangeEvent event} of property change.
+     * @param event the {@link PropertyChangeEvent event} of property change.
      * @throws RollbackOperationException when the listener wants to rollback the change on the property intercepted
      * @throws RollbackBatchException     when the listener wants to rollback the entire set of changes if executed in
      *                                    the batch.
      */
-    void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException, RollbackBatchException;
+    void beforePropertyChange(PropertyChangeEvent event) throws RollbackOperationException, RollbackBatchException;
 
 }

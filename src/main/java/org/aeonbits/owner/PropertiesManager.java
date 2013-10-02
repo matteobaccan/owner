@@ -269,19 +269,19 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
         }
 
-        public void beforePropertyChange(PropertyChangeEvent evt) throws RollbackOperationException,
+        public void beforePropertyChange(PropertyChangeEvent event) throws RollbackOperationException,
                 RollbackBatchException {
-            if (transactional && propertyNameMatches(evt))
-                ((TransactionalPropertyChangeListener) listener).beforePropertyChange(evt);
+            if (transactional && propertyNameMatches(event))
+                ((TransactionalPropertyChangeListener) listener).beforePropertyChange(event);
         }
 
-        private boolean propertyNameMatches(PropertyChangeEvent evt) {
-            return propertyName.equals(evt.getPropertyName());
+        private boolean propertyNameMatches(PropertyChangeEvent event) {
+            return propertyName.equals(event.getPropertyName());
         }
 
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (propertyNameMatches(evt))
-                listener.propertyChange(evt);
+        public void propertyChange(PropertyChangeEvent event) {
+            if (propertyNameMatches(event))
+                listener.propertyChange(event);
         }
 
         @Override

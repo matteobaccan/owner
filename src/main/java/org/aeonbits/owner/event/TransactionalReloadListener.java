@@ -19,8 +19,8 @@ public interface TransactionalReloadListener extends ReloadListener {
      * This method is invoked before the property are reloaded. When this method is invoked we cannot assume that the
      * changes are effective, since some listener can ask to roll back the change.
      *
-     * @param evt the {@link ReloadEvent event} of property reload.
+     * @param event the {@link ReloadEvent event} of property reload.
      * @throws RollbackBatchException     when the listener wants to rollback the entire reload.
      */
-    void beforeReload(ReloadEvent evt) throws RollbackBatchException;
+    void beforeReload(ReloadEvent event) throws RollbackBatchException;
 }

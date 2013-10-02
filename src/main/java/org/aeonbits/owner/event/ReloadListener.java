@@ -21,8 +21,12 @@ import java.util.EventListener;
  * @since 1.0.4
  */
 public interface ReloadListener extends EventListener {
+
     /**
-     * Invoked when a reload occurs.
+     * This method is invoked after the property are reloaded.
+     * When this method is invoked we can assume that the changes are effective.
+     *
+     * @param event the {@link ReloadEvent event} of property reload.
      */
     void reloadPerformed(ReloadEvent event);
 }
