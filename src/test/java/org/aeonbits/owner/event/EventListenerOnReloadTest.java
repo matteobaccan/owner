@@ -24,13 +24,17 @@ import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.fileFromURL;
+import static org.aeonbits.owner.UtilTest.ignore;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doNothing;
@@ -46,7 +50,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class EventListenerOnReloadTest implements TestConstants {
-    private static final String spec = "file:" + RESOURCES_DIR + "/EventListenerOnReloadTest.properties";
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/EventListenerOnReloadTest.properties";
     private File target;
     @Mock
     private TransactionalPropertyChangeListener propertyChangeListener;
@@ -56,7 +60,7 @@ public class EventListenerOnReloadTest implements TestConstants {
 
     @Before
     public void before() throws MalformedURLException {
-        target = new File(new URL(spec).getFile());
+        target = fileFromURL(SPEC);
         target.delete();
         cfg = ConfigFactory.create(MyConfig.class);
         cfg.addPropertyChangeListener(propertyChangeListener);
@@ -68,7 +72,7 @@ public class EventListenerOnReloadTest implements TestConstants {
         target.delete();
     }
 
-    @Sources(spec)
+    @Sources(SPEC)
     interface MyConfig extends Mutable {
         @DefaultValue("5")
         Integer someInteger();
@@ -229,6 +233,56 @@ public class EventListenerOnReloadTest implements TestConstants {
         assertEquals("foobar", cfg.someString());
         assertEquals(new Double("3.14"), cfg.someDouble());
         assertNull(cfg.nullsByDefault());
+    }
+
+    @Test
+    public void testReloadEventIsNotModifiable() throws Throwable {
+        save(target, new Properties() {{
+            setProperty("someInteger", "5");
+            setProperty("someString", "bazbar");
+            setProperty("someDouble", "2.718");
+            setProperty("nullsByDefault", "NotNullNow");
+        }});
+
+        final ReloadEvent[] beforeEvent = new ReloadEvent[1];
+        final ReloadEvent[] afterEvent = new ReloadEvent[1];
+
+        cfg.addReloadListener(new TransactionalReloadListener() {
+            public void beforeReload(ReloadEvent event) throws RollbackBatchException {
+                beforeEvent[0] = event;
+            }
+
+            public void reloadPerformed(ReloadEvent event) {
+                afterEvent[0] = event;
+            }
+        });
+
+        cfg.reload();
+
+        assertNotNull(beforeEvent[0]);
+        assertNotNull(afterEvent[0]);
+        assertSame(beforeEvent[0], afterEvent[0]);
+
+        try {
+            beforeEvent[0].getEvents().clear();
+            fail("it should return an unmodifiable collection");
+        } catch (UnsupportedOperationException x) {
+            ignore();
+        }
+
+        try {
+            beforeEvent[0].getOldProperties().clear();
+            fail("it should return an unmodifiable collection");
+        } catch (UnsupportedOperationException x) {
+            ignore();
+        }
+
+        try {
+            beforeEvent[0].getNewProperties().clear();
+            fail("it should return an unmodifiable collection");
+        } catch (UnsupportedOperationException x) {
+            ignore();
+        }
     }
 
 }

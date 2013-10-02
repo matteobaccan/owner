@@ -16,9 +16,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.fileFromURL;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 
@@ -26,9 +26,9 @@ import static org.junit.Assert.assertEquals;
  * @author Luigi R. Viggiano
  */
 public class ImportConfigTest implements TestConstants {
-    private static final String spec = "file:" + RESOURCES_DIR + "/ImportConfig.properties";
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/ImportConfig.properties";
 
-    @Sources(spec)
+    @Sources(SPEC)
     public static interface ImportConfig extends Config {
 
         @DefaultValue("apple")
@@ -72,7 +72,7 @@ public class ImportConfigTest implements TestConstants {
 
     @Test
     public void testThatImportedPropertiesHaveHigherPriorityThanPropertiesLoadedBySources() throws IOException {
-        File target = new File(new URL(spec).getFile());
+        File target = fileFromURL(SPEC);
 
         save(target, new Properties() {{
             setProperty("foo", "strawberries");

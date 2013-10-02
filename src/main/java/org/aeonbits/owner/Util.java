@@ -149,12 +149,16 @@ abstract class Util {
         } else if ("jar".equalsIgnoreCase(url.getProtocol())) {
             String path = url.getPath();
             try {
-                return fileFromURL(new URL(path.substring(0, path.indexOf('!'))));
+                return fileFromURL(path.substring(0, path.indexOf('!')));
             } catch (MalformedURLException e) {
                 return ignore(/* non critical */);
             }
         }
         return null;
+    }
+
+    static File fileFromURL(String urlSpec) throws MalformedURLException {
+        return fileFromURL(new URL(urlSpec));
     }
 
     static boolean eq(Object o1, Object o2) {

@@ -22,10 +22,10 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.aeonbits.owner.UtilTest.fileFromURL;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.aeonbits.owner.UtilTest.saveJar;
 import static org.junit.Assert.assertEquals;
@@ -36,11 +36,11 @@ import static org.junit.Assert.assertTrue;
  */
 public class SyncAutoReloadTest implements TestConstants {
 
-    private static final String propertyFileName = "SyncAutoReloadConfig.properties";
-    private static final String jarFile = RESOURCES_DIR + "/SyncAutoReloadTest.jar";
+    private static final String PROPERTY_FILE_NAME = "SyncAutoReloadConfig.properties";
+    private static final String JAR_FILE = RESOURCES_DIR + "/SyncAutoReloadTest.jar";
 
-    private static final String spec = "file:"+ RESOURCES_DIR + "/" + propertyFileName;
-    private static final String specJar = "jar:file:" + jarFile + "!/" + propertyFileName;
+    private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
+    private static final String SPEC_JAR = "jar:file:" + JAR_FILE + "!/" + PROPERTY_FILE_NAME;
 
     private static File target;
     private static File jarTarget;
@@ -49,8 +49,8 @@ public class SyncAutoReloadTest implements TestConstants {
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
-        target = new File(new URL(spec).getFile());
-        jarTarget = new File(jarFile);
+        target = fileFromURL(SPEC);
+        jarTarget = new File(JAR_FILE);
     }
 
     @Before
@@ -59,7 +59,7 @@ public class SyncAutoReloadTest implements TestConstants {
         time.setup();                // become owner of time (now I can control the elapse of time in this test)
     }
 
-    @Sources(spec)
+    @Sources(SPEC)
     @HotReload(5)
     interface SyncAutoReloadConfig extends Config {
         @DefaultValue("5")
@@ -89,7 +89,7 @@ public class SyncAutoReloadTest implements TestConstants {
         assertEquals(Integer.valueOf(20), cfg.someValue());  // the changed file should be reloaded now.
     }
 
-    @Sources(specJar)
+    @Sources(SPEC_JAR)
     @HotReload(5)
     interface AutoReloadJarConfig extends Config {
         Integer someValue();
@@ -97,7 +97,7 @@ public class SyncAutoReloadTest implements TestConstants {
 
     @Test
     public void testAutoReloadOnJarFile() throws Throwable {
-        saveJar(jarTarget, propertyFileName,
+        saveJar(jarTarget, PROPERTY_FILE_NAME,
                 new Properties() {{
                     setProperty("someValue", "10");
                 }});
@@ -110,7 +110,7 @@ public class SyncAutoReloadTest implements TestConstants {
         AutoReloadJarConfig cfg = ConfigFactory.create(AutoReloadJarConfig.class);
         assertEquals(Integer.valueOf(10), cfg.someValue());
 
-        saveJar(jarTarget, propertyFileName,    // file updated, the update time is reflected in target.lastModified().
+        saveJar(jarTarget, PROPERTY_FILE_NAME,    // file updated, the update time is reflected in target.lastModified().
                 new Properties() {{
                     setProperty("someValue", "20");
                 }});

@@ -20,9 +20,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.fileFromURL;
 import static org.aeonbits.owner.UtilTest.newArray;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertNotNull;
@@ -32,13 +32,13 @@ import static org.junit.Assert.assertTrue;
  * @author Luigi R. Viggiano
  */
 public class MultiThreadReloadTest extends MultiThreadTestBase implements TestConstants {
-    private static final String spec = "file:" + RESOURCES_DIR + "/ReloadableConfig.properties";
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/ReloadableConfig.properties";
     private static File target;
     private ReloadableConfig reloadableConfig;
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
-        target = new File(new URL(spec).getFile());
+        target = fileFromURL(SPEC);
     }
 
     @Before
@@ -52,7 +52,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase implements TestCo
         }
     }
 
-    @Sources(spec)
+    @Sources(SPEC)
     public interface ReloadableConfig extends Config, Reloadable {
         Integer someValue();
     }

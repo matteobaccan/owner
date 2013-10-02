@@ -28,9 +28,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 
+import static org.aeonbits.owner.UtilTest.fileFromURL;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.argThat;
@@ -42,14 +42,14 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ReloadTest implements TestConstants {
-    private static final String spec = "file:" + RESOURCES_DIR + "/ReloadableConfig.properties";
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/ReloadableConfig.properties";
     private static File target;
     @Mock
     ReloadListener listener;
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
-        target = new File(new URL(spec).getFile());
+        target = fileFromURL(SPEC);
     }
 
     @Before
@@ -59,7 +59,7 @@ public class ReloadTest implements TestConstants {
         }});
     }
 
-    @Sources(spec)
+    @Sources(SPEC)
     public interface ReloadableConfig extends Config, Reloadable {
         Integer minimumAge();
     }

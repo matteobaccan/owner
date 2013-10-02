@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
@@ -26,7 +27,6 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 import static java.io.File.createTempFile;
-import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -141,6 +141,14 @@ public class UtilTest {
     public static void debug(String format, Object... args) {
         if (Boolean.getBoolean("debug"))
             System.out.printf(format, args);
+    }
+
+    public static <T> T  ignore() {
+        return Util.ignore();
+    }
+
+    public static File fileFromURL(String spec) throws MalformedURLException {
+        return Util.fileFromURL(spec);
     }
 
     public static interface MyCloneable extends Cloneable {

@@ -21,12 +21,12 @@ import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.UtilTest.delete;
+import static org.aeonbits.owner.UtilTest.fileFromURL;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 
@@ -43,7 +43,7 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
 
     @BeforeClass
     public static void beforeClass() throws MalformedURLException {
-        target = new File(new URL(SPEC).getFile());
+        target = fileFromURL(SPEC);
     }
 
     @Sources(SPEC)

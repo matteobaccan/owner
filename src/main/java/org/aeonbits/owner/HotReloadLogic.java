@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
+import static org.aeonbits.owner.Util.fileFromURL;
 import static org.aeonbits.owner.Util.now;
 
 /**
@@ -58,7 +59,7 @@ class HotReloadLogic implements Serializable {
 
     private void setupWatchableResources(List<URL> urls) {
         for (URL url : urls) {
-            File file = Util.fileFromURL(url);
+            File file = fileFromURL(url);
             if (file != null)
                 watchableFiles.add(new WatchableFile(file));
         }

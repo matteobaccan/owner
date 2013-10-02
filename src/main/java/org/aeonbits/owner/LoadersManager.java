@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static org.aeonbits.owner.Util.unsupported;
 
@@ -32,7 +33,7 @@ import static org.aeonbits.owner.Util.unsupported;
  * @since 1.0.5
  */
 class LoadersManager implements Serializable {
-    private final List<Loader> loaders = Collections.synchronizedList(new LinkedList<Loader>());
+    final List<Loader> loaders = Collections.synchronizedList(new LinkedList<Loader>());
 
     LoadersManager() {
         registerLoader(new PropertiesLoader());
@@ -58,12 +59,14 @@ class LoadersManager implements Serializable {
 
     /**
      * Allows the user to register a {@link Properties properties} {@link Loader}.
+     * <p/>
+     * This method may be exposed in a future release to allow user to register its own {@link Loader loaders}. Better
+     * lock synchronization needs to be implemented for this purpose, with {@link ReentrantReadWriteLock}.
      *
-     * @since 1.0.5
      * @param loader the {@link Loader} to register.
+     * @since {future release}
      */
-    private void registerLoader(Loader loader) {
+    void registerLoader(Loader loader) {
         loaders.add(0, loader);
     }
-
 }

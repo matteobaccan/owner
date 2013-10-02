@@ -14,13 +14,13 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
 import org.aeonbits.owner.TestConstants;
+import org.aeonbits.owner.UtilTest;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.util.Properties;
 
@@ -30,10 +30,10 @@ import static org.aeonbits.owner.UtilTest.save;
  * @author Luigi R. Viggiano
  */
 public class AutoReloadExample implements TestConstants {
-    private static final String spec = "file:" + RESOURCES_DIR + "/AutoReloadExample.properties";
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/AutoReloadExample.properties";
     private static File target;
 
-    @Sources(spec)
+    @Sources(SPEC)
     @HotReload(1)
     interface AutoReloadConfig extends Config, Reloadable {
         @DefaultValue("5")
@@ -42,7 +42,7 @@ public class AutoReloadExample implements TestConstants {
 
     static {
         try {
-            target = new File(new URL(spec).getFile());
+            target = UtilTest.fileFromURL(SPEC);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -54,14 +54,14 @@ public class AutoReloadExample implements TestConstants {
         }});
 
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
-        
+
         cfg.addReloadListener(new ReloadListener() {
             public void reloadPerformed(ReloadEvent event) {
-                System.out.print("\rReload intercepted at " + new Date() + " \n"); 
+                System.out.print("\rReload intercepted at " + new Date() + " \n");
             }
         });
 
-        System.out.println("You can change the file " + target.getAbsolutePath() + 
+        System.out.println("You can change the file " + target.getAbsolutePath() +
                            " and see the changes reflected below");
         int someValue = 0;
         while (someValue >= 0) {
