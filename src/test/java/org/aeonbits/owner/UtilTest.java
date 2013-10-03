@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -38,6 +39,21 @@ import static org.junit.Assert.assertTrue;
  * @author Luigi R. Viggiano
  */
 public class UtilTest {
+
+    public static SystemProvider setSystem(Object system) {
+        SystemProvider save = Util.system;
+        Util.system = (SystemProvider)system;
+        return save;
+    }
+
+    public static Properties getSystemProperties() {
+        return Util.system().getProperties();
+    }
+
+    public SystemProvider system() {
+        return Util.system();
+    }
+
     @Test
     public void testReverse() {
         Integer[] i = {1, 2, 3, 4, 5};
@@ -145,6 +161,18 @@ public class UtilTest {
         return Util.fileFromURL(spec);
     }
 
+    public static String getSystemProperty(String key) {
+        return Util.system().getProperty(key);
+    }
+
+    public static String getenv(String home) {
+        return Util.system().getenv().get(home);
+    }
+
+    public static Map<String, String> getenv() {
+        return Util.system().getenv();
+    }
+
     public static interface MyCloneable extends Cloneable {
         // for some stupid reason java.lang.Cloneable doesn't define this method...
         public Object clone() throws CloneNotSupportedException;
@@ -165,13 +193,13 @@ public class UtilTest {
 
     @Test
     public void testExpandUserHomeOnUnix() {
-        SystemProvider save = Util.system;
+        SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("user.home", "/home/john");
+                }},  new HashMap<String, String>()
+        ));
+
         try {
-            Util.system = new SystemProviderForTest(
-                    new Properties() {{
-                        setProperty("user.home", "/home/john");
-                    }},  new HashMap<String, String>()
-            );
             assertEquals("/home/john", Util.expandUserHome("~"));
             assertEquals("/home/john/foo/bar/", Util.expandUserHome("~/foo/bar/"));
             assertEquals("file:/home/john/foo/bar/", Util.expandUserHome("file:~/foo/bar/"));
@@ -181,19 +209,18 @@ public class UtilTest {
             assertEquals("file:/home/john\\foo\\bar\\", Util.expandUserHome("file:~\\foo\\bar\\"));
             assertEquals("jar:file:/home/john\\foo\\bar\\", Util.expandUserHome("jar:file:~\\foo\\bar\\"));
         } finally {
-            Util.system = save;
+            UtilTest.setSystem(save);
         }
     }
 
     @Test
     public void testExpandUserHomeOnWindows() {
-        SystemProvider save = Util.system;
+        SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("user.home", "C:\\Users\\John");
+                }}, new HashMap<String, String>()
+        ));
         try {
-            Util.system = new SystemProviderForTest(
-                    new Properties() {{
-                        setProperty("user.home", "C:\\Users\\John");
-                    }}, new HashMap<String, String>()
-            );
             assertEquals("C:\\Users\\John", Util.expandUserHome("~"));
             assertEquals("C:\\Users\\John/foo/bar/", Util.expandUserHome("~/foo/bar/"));
             assertEquals("file:C:\\Users\\John/foo/bar/", Util.expandUserHome("file:~/foo/bar/"));
@@ -203,9 +230,8 @@ public class UtilTest {
             assertEquals("file:C:\\Users\\John\\foo\\bar\\", Util.expandUserHome("file:~\\foo\\bar\\"));
             assertEquals("jar:file:C:\\Users\\John\\foo\\bar\\", Util.expandUserHome("jar:file:~\\foo\\bar\\"));
         } finally {
-            Util.system = save;
+            UtilTest.setSystem(save);
         }
-
     }
 
 }

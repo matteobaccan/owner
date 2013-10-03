@@ -10,8 +10,11 @@ package org.aeonbits.owner.importedprops;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.SystemProviderForTest;
+import org.aeonbits.owner.UtilTest;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -39,24 +42,50 @@ public class WithImportedPropertiesTest {
 
     @Test
     public void testSystemEnv() {
-        String envHome = System.getenv("HOME");
-        WithImportedProperties conf = ConfigFactory.create(WithImportedProperties.class, System.getenv());
-        assertEquals(envHome, conf.envHome());
+        Object save = UtilTest.setSystem(
+                new SystemProviderForTest(
+                        new Properties() {{
+                            setProperty("user.home", "/home/foobar");
+                        }},
+                        new HashMap<String, String>() {{
+                            put("HOME", "/home/foobar");
+                        }}
+                ));
+        try {
+            String envHome = UtilTest.getenv("HOME");
+            WithImportedProperties conf = ConfigFactory.create(WithImportedProperties.class, UtilTest.getenv());
+            assertEquals(envHome, conf.envHome());
+        } finally {
+            UtilTest.setSystem(save);
+        }
     }
 
     @Test
     public void testMultipleImports() {
-        Properties propsFromTest = new Properties();
-        propsFromTest.setProperty("external", "propsFromTest");
+        Object save = UtilTest.setSystem(
+                new SystemProviderForTest(
+                        new Properties() {{
+                            setProperty("user.home", "/home/foobar");
+                        }},
+                        new HashMap<String, String>() {{
+                            put("HOME", "/home/foobar");
+                        }}
+                ));
+        try {
+            Properties propsFromTest = new Properties();
+            propsFromTest.setProperty("external", "propsFromTest");
 
-        String userHome = System.getProperty("user.home");
-        String envHome = System.getenv("HOME");
-        WithImportedProperties conf =
-                ConfigFactory.create(WithImportedProperties.class,
-                        propsFromTest, System.getProperties(), System.getenv());
-        assertEquals(userHome, conf.userHome());
-        assertEquals(envHome, conf.envHome());
-        assertEquals("testing replacement from propsFromTest properties file.", conf.someValue());
+            String userHome = UtilTest.getSystemProperty("user.home");
+            String envHome = UtilTest.getenv("HOME");
+            WithImportedProperties conf =
+                    ConfigFactory.create(WithImportedProperties.class,
+                            propsFromTest, UtilTest.getSystemProperties(), UtilTest.getenv());
+            assertEquals(userHome, conf.userHome());
+            assertEquals(envHome, conf.envHome());
+            assertEquals("testing replacement from propsFromTest properties file.", conf.someValue());
+        } finally {
+            UtilTest.setSystem(save);
+        }
     }
 
     @Test
