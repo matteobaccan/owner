@@ -16,25 +16,34 @@ import java.util.concurrent.ThreadFactory;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 /**
- * Factory class to instantiate {@link Config} instances.
+ * A static factory class to instantiate {@link Config} instances.
+ * <p/>
  * By default a {link Config} sub-interface is associated to a property having the same package name and class name as
  * the interface itself.
  * <p/>
  * Method names are mapped to property names contained in the property files.
- *
+ * <p/>
  * This is a singleton static class, to be used as convenience when only a single factory is needed inside an
- * application.
+ * application. It exposes the {@link #newInstance()} method to create new instances of {@link Factory} objects.
  *
  * @author Luigi R. Viggiano
  */
 public final class ConfigFactory {
 
-    private static final AbstractConfigFactory INSTANCE = newInstance();
+    private static final Factory INSTANCE = newInstance();
 
-    /** Don't let anyone instantiate this class */
-    private ConfigFactory() {}
+    /**
+     * Don't let anyone instantiate this class
+     */
+    private ConfigFactory() {
+    }
 
-    private static AbstractConfigFactory newInstance() {
+    /**
+     * Returns a new instance of a config Factory object.
+     *
+     * @return a new instance of a config Factory object.
+     */
+    public static Factory newInstance() {
         ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor(new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread result = new Thread(r);
@@ -43,7 +52,7 @@ public final class ConfigFactory {
             }
         });
         Properties props = new Properties();
-        return new DefaultConfigFactory(scheduler, props);
+        return new DefaultFactory(scheduler, props);
     }
 
     /**

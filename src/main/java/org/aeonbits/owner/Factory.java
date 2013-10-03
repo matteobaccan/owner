@@ -17,7 +17,7 @@ import java.util.Properties;
  * @since 1.0.5
  * @author Luigi R. Viggiano
  */
-public interface AbstractConfigFactory {
+public interface Factory {
 
     /**
      * Creates a {@link Config} instance from the specified interface

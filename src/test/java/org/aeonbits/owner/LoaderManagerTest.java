@@ -51,7 +51,7 @@ public class LoaderManagerTest implements TestConstants {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testProxyCreationWhenLoaderCantBeRisolvedForGivenURL() {
-        DefaultConfigFactory instance = new DefaultConfigFactory(scheduler, new Properties()) {
+        Factory instance = new DefaultFactory(scheduler, new Properties()) {
             @Override
             LoadersManager newLoadersManager() {
                 return new LoadersManager() {{
