@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.loaders.Loader;
+
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,11 +34,8 @@ public final class ConfigFactory {
 
     private static final Factory INSTANCE = newInstance();
 
-    /**
-     * Don't let anyone instantiate this class
-     */
-    private ConfigFactory() {
-    }
+    /** Don't let anyone instantiate this class */
+    private ConfigFactory() {}
 
     /**
      * Returns a new instance of a config Factory object.
@@ -122,6 +121,17 @@ public final class ConfigFactory {
      */
     public static String clearProperty(String key) {
         return INSTANCE.clearProperty(key);
+    }
+
+    /**
+     * Registers a loader to enables additional file formats.
+     *
+     * @param loader the loader to register.
+     * @throws NullPointerException if specified loader is <tt>null</tt>.
+     * @since 1.0.5
+     */
+    public static void registerLoader(Loader loader) {
+        INSTANCE.registerLoader(loader);
     }
 
 }

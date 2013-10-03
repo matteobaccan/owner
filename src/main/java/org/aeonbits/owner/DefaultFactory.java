@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.loaders.Loader;
+
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,27 +25,24 @@ class DefaultFactory implements Factory {
 
     private final ScheduledExecutorService scheduler;
     private Properties props;
+    final LoadersManager loadersManager;
 
     DefaultFactory(ScheduledExecutorService scheduler, Properties props) {
         this.scheduler = scheduler;
         this.props = props;
+        this.loadersManager = new LoadersManager();
     }
 
     @SuppressWarnings("unchecked")
     public <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = new Class<?>[] {clazz};
         VariablesExpander expander = new VariablesExpander(props);
-        LoadersManager loaders = newLoadersManager();
-        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loaders,
+        PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
                 imports);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager);
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
         return proxy;
-    }
-
-    LoadersManager newLoadersManager() {
-        return new LoadersManager();
     }
 
     public String setProperty(String key, String value) {
@@ -67,6 +66,10 @@ class DefaultFactory implements Factory {
             props = new Properties();
         else
             props = properties;
+    }
+
+    public void registerLoader(Loader loader) {
+        loadersManager.registerLoader(loader);
     }
 
     public String getProperty(String key) {

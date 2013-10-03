@@ -8,14 +8,16 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.loaders.Loader;
+
 import java.util.Map;
 import java.util.Properties;
 
 /**
  * Interface for factory implementation used to instantiate {@link Config} instances.
  *
- * @since 1.0.5
  * @author Luigi R. Viggiano
+ * @since 1.0.5
  */
 public interface Factory {
 
@@ -76,5 +78,14 @@ public interface Factory {
      * @since 1.0.5
      */
     void setProperties(Properties properties);
+
+    /**
+     * Registers a loader to enables additional file formats.
+     *
+     * @param loader the loader to register.
+     * @throws NullPointerException if specified loader is <tt>null</tt>.
+     * @since 1.0.5
+     */
+    void registerLoader(Loader loader);
 
 }

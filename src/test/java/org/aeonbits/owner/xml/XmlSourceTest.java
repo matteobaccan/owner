@@ -10,8 +10,9 @@ package org.aeonbits.owner.xml;
 
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.Factory;
 import org.aeonbits.owner.TestConstants;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -24,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static org.aeonbits.owner.ConfigFactory.newInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -35,6 +37,8 @@ import static org.mockito.Mockito.mock;
  * @author Luigi R. Viggiano
  */
 public class XmlSourceTest implements TestConstants {
+
+    private Factory factory;
 
     public static interface ServerConfig extends Config, Accessible {
 
@@ -57,9 +61,14 @@ public class XmlSourceTest implements TestConstants {
         String sshUser();
     }
 
+    @Before
+    public void before() {
+        factory = newInstance();
+    }
+
     @Test
     public void testXmlReading() {
-        ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+        ServerConfig cfg = factory.create(ServerConfig.class);
         assertEquals(80, cfg.httpPort());
         assertEquals("localhost", cfg.httpHostname());
         assertEquals(22, cfg.sshPort());
@@ -70,7 +79,7 @@ public class XmlSourceTest implements TestConstants {
 
     @Test
     public void testStoreToXML() throws IOException {
-        ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+        ServerConfig cfg = factory.create(ServerConfig.class);
         File target = new File(RESOURCES_DIR + "/XmlSourceTest$ServerConfig.properties.xml");
         target.getParentFile().mkdirs();
         cfg.storeToXML(new FileOutputStream(target), "this is an example");
@@ -91,7 +100,7 @@ public class XmlSourceTest implements TestConstants {
 
     @Test
     public void testXmlReadingJavaFormat() {
-        ServerConfigJavaFormat cfg = ConfigFactory.create(ServerConfigJavaFormat.class);
+        ServerConfigJavaFormat cfg = factory.create(ServerConfigJavaFormat.class);
         assertEquals(8080, cfg.httpPort());
         assertEquals("foobar", cfg.httpHostname());
         assertEquals(2222, cfg.sshPort());
@@ -104,7 +113,7 @@ public class XmlSourceTest implements TestConstants {
     public void testSAXParserMisconfigured() {
         System.setProperty("javax.xml.parsers.SAXParserFactory", "foo.bar.baz");
         try {
-            ConfigFactory.create(ServerConfigJavaFormat.class);
+            factory.create(ServerConfigJavaFormat.class);
         } finally {
             System.getProperties().remove("javax.xml.parsers.SAXParserFactory");
         }
@@ -115,21 +124,21 @@ public class XmlSourceTest implements TestConstants {
 
     @Test
     public void testServerConfigInvalid() throws Throwable {
-        ServerConfigInvalid cfg = ConfigFactory.create(ServerConfigInvalid.class);
+        ServerConfigInvalid cfg = factory.create(ServerConfigInvalid.class);
         assertNull(cfg.httpHostname());
     }
 
     @Test
     public void testParserConfigurationException() throws ParserConfigurationException, SAXException {
-        SAXParserFactory factory = mock(SAXParserFactory.class);
+        SAXParserFactory saxFactory = mock(SAXParserFactory.class);
         ParserConfigurationException expected = new ParserConfigurationException();
-        doThrow(expected).when(factory).newSAXParser();
+        doThrow(expected).when(saxFactory).newSAXParser();
 
-        SAXParserFactoryForTest.setDelegate(factory);
+        SAXParserFactoryForTest.setDelegate(saxFactory);
 
         System.setProperty("javax.xml.parsers.SAXParserFactory", SAXParserFactoryForTest.class.getName());
         try {
-            ConfigFactory.create(ServerConfigJavaFormat.class);
+            factory.create(ServerConfigJavaFormat.class);
             fail("exception is expected");
         } catch (IllegalArgumentException ex) {
             assertSame(expected, ex.getCause());
