@@ -29,4 +29,8 @@ public class PropertiesLoader implements Loader {
         result.load(input);
     }
 
+    public String defaultSpecFor(String urlPrefix) {
+        return urlPrefix + ".properties";
+    }
+
 }

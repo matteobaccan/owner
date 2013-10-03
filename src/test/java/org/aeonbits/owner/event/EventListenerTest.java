@@ -64,8 +64,7 @@ public class EventListenerTest {
     @Mock
     private VariablesExpanderForTest expander;
 
-    @Mock
-    private LoadersManagerForTest loaders;
+    private LoadersManagerForTest loaders = new LoadersManagerForTest();
 
     @Mock
     private ReloadListener reloadListener;

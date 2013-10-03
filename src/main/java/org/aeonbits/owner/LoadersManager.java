@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,4 +71,13 @@ class LoadersManager implements Serializable {
         loaders.add(0, loader);
     }
 
+    String[] defaultSpecs(String prefix) {
+        List<String> defaultSpecs = new ArrayList<String>(loaders.size());
+        for (Loader loader : loaders) {
+            String spec = loader.defaultSpecFor(prefix);
+            if (spec != null)
+                defaultSpecs.add(spec);
+        }
+        return defaultSpecs.toArray(new String[0]);
+    }
 }

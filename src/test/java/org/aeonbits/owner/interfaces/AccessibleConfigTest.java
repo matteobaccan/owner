@@ -44,8 +44,7 @@ import static org.junit.Assert.assertTrue;
 public class AccessibleConfigTest {
     @Mock
     private ScheduledExecutorService scheduler;
-    @Mock
-    private LoadersManagerForTest loaders;
+    private LoadersManagerForTest loaders = new LoadersManagerForTest();
 
     private final VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
 

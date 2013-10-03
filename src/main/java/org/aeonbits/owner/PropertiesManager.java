@@ -152,10 +152,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         return defaultSpecs(urlFactory);
     }
 
-    // TODO: this logic should probably come from LoadersManager
     private String[] defaultSpecs(ConfigURLFactory urlFactory) {
         String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
-        return new String[] {prefix + ".properties", prefix + ".xml"};
+        return loaders.defaultSpecs(prefix);
     }
 
     Properties load() {

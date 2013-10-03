@@ -9,6 +9,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.loaders.PropertiesLoader;
 import org.aeonbits.owner.loaders.XMLLoader;
 import org.junit.After;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.aeonbits.owner.UtilTest.fileFromURL;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Luigi R. Viggiano
@@ -34,6 +36,10 @@ public class LoaderManagerTest implements TestConstants {
 
     @Sources(SPEC)
     interface MyConfig extends Config {
+        String foo();
+    }
+
+    interface MyConfigDefaultSpec extends Config {
         String foo();
     }
 
@@ -61,6 +67,54 @@ public class LoaderManagerTest implements TestConstants {
             }
         };
         instance.create(MyConfig.class);
+    }
+    @Test
+    public void testProxyCreationInNormalSituation() {
+        Factory factory = new DefaultFactory(scheduler, new Properties());
+        MyConfigDefaultSpec cfg = factory.create(MyConfigDefaultSpec.class);
+        assertEquals("bar", cfg.foo());
+    }
+
+    @Test
+    public void testProxyCreationWhenLoaderReturnsFooBarAsDefaultSpec() {
+        Factory factory = new DefaultFactory(scheduler, new Properties()) {
+            @Override
+            LoadersManager newLoadersManager() {
+                return new LoadersManager() {{
+                    loaders.clear();
+                    registerLoader(new PropertiesLoader());
+                    registerLoader(new PropertiesLoader() {
+                        @Override
+                        public String defaultSpecFor(String urlPrefix) {
+                            return urlPrefix + ".foobar";
+                        }
+                    });
+                }};
+            }
+        };
+        MyConfigDefaultSpec cfg = factory.create(MyConfigDefaultSpec.class);
+        assertEquals("foobar", cfg.foo());
+    }
+
+    @Test
+    public void testProxyCreationWhenLoaderReturnsNullAsDefaultSpec() {
+        Factory factory = new DefaultFactory(scheduler, new Properties()) {
+            @Override
+            LoadersManager newLoadersManager() {
+                return new LoadersManager() {{
+                    loaders.clear();
+                    registerLoader(new PropertiesLoader());
+                    registerLoader(new PropertiesLoader() {
+                        @Override
+                        public String defaultSpecFor(String urlPrefix) {
+                            return null;
+                        }
+                    });
+                }};
+            }
+        };
+        MyConfigDefaultSpec cfg = factory.create(MyConfigDefaultSpec.class);
+        assertEquals("bar", cfg.foo());
     }
 
 }

@@ -39,8 +39,7 @@ public class PropertiesInvocationHandlerTest {
     private PropertiesInvocationHandler handler;
     @Mock
     private ScheduledExecutorService scheduler;
-    @Mock
-    private LoadersManager loaders;
+    private LoadersManager loaders = new LoadersManagerForTest();
     private final VariablesExpander expander = new VariablesExpander(new Properties());
 
     interface Dummy extends Config {}

@@ -144,4 +144,8 @@ public class XMLLoader implements Loader {
         }
     }
 
+    public String defaultSpecFor(String urlPrefix) {
+        return urlPrefix + ".xml";
+    }
+
 }

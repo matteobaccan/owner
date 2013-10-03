@@ -40,4 +40,11 @@ public interface Loader extends Serializable {
      */
     void load(Properties result, InputStream input) throws IOException;
 
+    /**
+     * Returns the default URL specification for a given url resource, that can be handled by this loader.
+     *
+     * @param urlPrefix the prefix identifying the url resource.
+     * @return the default URL specification for a given url resource, that can be handled by this loader.
+     */
+    String defaultSpecFor(String urlPrefix);
 }
