@@ -35,6 +35,8 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
  * @author Luigi R. Viggiano
  */
 class PropertiesInvocationHandler implements InvocationHandler, Serializable {
+
+    private static final Method[] DELEGATES = findDelegates();
     private final StrSubstitutor substitutor;
     final PropertiesManager propertiesManager;
 
@@ -61,7 +63,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     }
 
     private Method getDelegateMethod(Method invokedMethod) {
-        for (Method delegate : delegates)
+        for (Method delegate : DELEGATES)
             if (equals(invokedMethod, delegate))
                 return delegate;
         return null;
@@ -104,9 +106,8 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         return result.toArray(new Method[result.size()]);
     }
 
-    private static final Method[] delegates = findDelegates();
-
     public <T extends Config> void setProxy(T proxy) {
         propertiesManager.setProxy(proxy);
     }
+
 }

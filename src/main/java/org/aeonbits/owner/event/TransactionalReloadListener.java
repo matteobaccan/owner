@@ -15,6 +15,7 @@ package org.aeonbits.owner.event;
  * @author Luigi R. Viggiano
  */
 public interface TransactionalReloadListener extends ReloadListener {
+
     /**
      * This method is invoked before the property are reloaded. When this method is invoked we cannot assume that the
      * changes are effective, since some listener can ask to roll back the change.
@@ -23,4 +24,5 @@ public interface TransactionalReloadListener extends ReloadListener {
      * @throws RollbackBatchException     when the listener wants to rollback the entire reload.
      */
     void beforeReload(ReloadEvent event) throws RollbackBatchException;
+
 }

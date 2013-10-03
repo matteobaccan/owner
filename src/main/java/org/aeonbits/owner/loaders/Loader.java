@@ -21,6 +21,7 @@ import java.util.Properties;
  * @since 1.0.5
  */
 public interface Loader extends Serializable {
+
     /**
      * Indicates wether this Loader does accept the URL, guessing the content type from it.
      *
@@ -38,4 +39,5 @@ public interface Loader extends Serializable {
      * @param input     the {@link InputStream} from where to load the properties.
      */
     void load(Properties result, InputStream input) throws IOException;
+
 }

@@ -43,4 +43,5 @@ final class PropertiesMapper {
                 properties.put(key, value);
         }
     }
+
 }

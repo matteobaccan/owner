@@ -29,4 +29,5 @@ public interface ReloadListener extends EventListener {
      * @param event the {@link ReloadEvent event} of property reload.
      */
     void reloadPerformed(ReloadEvent event);
+
 }

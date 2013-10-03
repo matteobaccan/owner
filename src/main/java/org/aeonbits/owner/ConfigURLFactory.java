@@ -15,6 +15,7 @@ import java.net.URL;
  * @author Luigi R. Viggiano
  */
 class ConfigURLFactory {
+
     private static final String CLASSPATH_PROTOCOL = "classpath:";
     private final transient ClassLoader classLoader;
     private final VariablesExpander expander;
@@ -45,4 +46,5 @@ class ConfigURLFactory {
     String toClasspathURLSpec(String name) {
         return CLASSPATH_PROTOCOL + name.replace('.', '/');
     }
+
 }

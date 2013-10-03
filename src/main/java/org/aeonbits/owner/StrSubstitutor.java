@@ -43,6 +43,7 @@ import static org.aeonbits.owner.Util.fixBackslashForRegex;
  * @author Luigi R. Viggiano
  */
 class StrSubstitutor implements Serializable {
+
     private final Properties values;
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
 

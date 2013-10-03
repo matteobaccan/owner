@@ -318,4 +318,5 @@ public interface Config extends Serializable {
     @interface ConverterClass {
         Class<? extends Converter> value();
     }
+
 }

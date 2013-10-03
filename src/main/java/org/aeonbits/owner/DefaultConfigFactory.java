@@ -20,6 +20,7 @@ import static java.lang.reflect.Proxy.newProxyInstance;
  * @author Luigi R. Viggiano
  */
 class DefaultConfigFactory implements AbstractConfigFactory {
+
     private final ScheduledExecutorService scheduler;
     private Properties props;
 

@@ -13,12 +13,13 @@ import java.lang.reflect.Method;
 /**
  * Converter interface specifies how to convert an input string coming from a property value to a target object returned
  * by the Config method.
- * 
+ *
  * @param <T> the type of the class that should be returned from the conversion.
  * @author Luigi R. Viggiano
  * @since 1.0.4
  */
 public interface Converter<T> {
+
     /**
      * Converts the given input into an Object of type T.
      * If the method returns null, null will be returned by the Config object.
@@ -30,4 +31,5 @@ public interface Converter<T> {
      * @since 1.0.4
      */
     T convert(Method method, String input);
+
 }

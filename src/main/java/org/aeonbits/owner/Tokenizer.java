@@ -16,12 +16,14 @@ package org.aeonbits.owner;
  * @since 1.0.4
  */
 public interface Tokenizer {
+
     /**
      * Splits the given string, into tokens that identify single elements.
-     * 
+     *
      * @since 1.0.4
      * @param values the string representation for the properties values
      * @return the items identifying single elements to convert.
      */
     String[] tokens(String values);
+
 }

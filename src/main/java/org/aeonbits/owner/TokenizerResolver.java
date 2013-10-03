@@ -23,7 +23,7 @@ final class TokenizerResolver {
     /** Don't let anyone instantiate this class */
     private TokenizerResolver() {}
 
-    private static final Tokenizer defaultTokenizer = new SplitAndTrimTokenizer(",");
+    private static final Tokenizer DEFAULT_TOKENIZER = new SplitAndTrimTokenizer(",");
 
     static Tokenizer resolveTokenizer(Method targetMethod) {
         Tokenizer methodLevelTokenizer = resolveTokenizerOnMethodLevel(targetMethod);
@@ -34,7 +34,7 @@ final class TokenizerResolver {
         if (classLevelTokenizer != null)
             return classLevelTokenizer;
 
-        return defaultTokenizer;
+        return DEFAULT_TOKENIZER;
     }
 
     private static Tokenizer resolveTokenizerOnClassLevel(Class<?> declaringClass) {
@@ -82,4 +82,5 @@ final class TokenizerResolver {
                     tokenizerClass.getCanonicalName());
         }
     }
+
 }

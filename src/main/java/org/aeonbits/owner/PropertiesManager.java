@@ -64,6 +64,7 @@ import static org.aeonbits.owner.Util.unsupported;
  * @author Luigi R. Viggiano
  */
 class PropertiesManager implements Reloadable, Accessible, Mutable {
+
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
     private final Properties properties;
@@ -580,4 +581,5 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             readLock.unlock();
         }
     }
+
 }

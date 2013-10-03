@@ -20,6 +20,7 @@ import java.util.Properties;
  * @author Luigi R. Viggiano
  */
 public class PropertiesLoader implements Loader {
+
     public boolean accept(URL url) {
         return true;
     }
@@ -27,4 +28,5 @@ public class PropertiesLoader implements Loader {
     public void load(Properties result, InputStream input) throws IOException {
         result.load(input);
     }
+
 }

@@ -26,6 +26,7 @@ import static org.aeonbits.owner.Util.now;
  * @author Luigi R. Viggiano
  */
 class HotReloadLogic implements Serializable {
+
     private final PropertiesManager manager;
     private final long interval;
     private final HotReloadType type;
@@ -94,4 +95,5 @@ class HotReloadLogic implements Serializable {
     boolean isSync() {
         return type == SYNC;
     }
+
 }

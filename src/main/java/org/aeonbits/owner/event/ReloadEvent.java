@@ -73,4 +73,5 @@ public class ReloadEvent extends Event {
     public Properties getNewProperties() {
         return newProperties;
     }
+
 }

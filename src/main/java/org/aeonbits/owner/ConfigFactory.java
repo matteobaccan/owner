@@ -29,7 +29,7 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
  */
 public final class ConfigFactory {
 
-    private static final AbstractConfigFactory instance = newInstance();
+    private static final AbstractConfigFactory INSTANCE = newInstance();
 
     /** Don't let anyone instantiate this class */
     private ConfigFactory() {}
@@ -55,7 +55,7 @@ public final class ConfigFactory {
      * @return an object implementing the given interface, which maps methods to property values.
      */
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
-        return instance.create(clazz, imports);
+        return INSTANCE.create(clazz, imports);
     }
 
     /**
@@ -68,7 +68,7 @@ public final class ConfigFactory {
      * @since 1.0.4
      */
     public static String setProperty(String key, String value) {
-        return instance.setProperty(key, value);
+        return INSTANCE.setProperty(key, value);
     }
 
     /**
@@ -79,7 +79,7 @@ public final class ConfigFactory {
      * @since 1.0.4
      */
     public static Properties getProperties() {
-        return instance.getProperties();
+        return INSTANCE.getProperties();
     }
 
     /**
@@ -90,7 +90,7 @@ public final class ConfigFactory {
      * @since 1.0.4
      */
     public static void setProperties(Properties properties) {
-        instance.setProperties(properties);
+        INSTANCE.setProperties(properties);
     }
 
     /**
@@ -101,7 +101,7 @@ public final class ConfigFactory {
      * @since 1.0.4
      */
     public static String getProperty(String key) {
-        return instance.getProperty(key);
+        return INSTANCE.getProperty(key);
     }
 
     /**
@@ -112,7 +112,7 @@ public final class ConfigFactory {
      * @since 1.0.4
      */
     public static String clearProperty(String key) {
-        return instance.clearProperty(key);
+        return INSTANCE.clearProperty(key);
     }
 
 }

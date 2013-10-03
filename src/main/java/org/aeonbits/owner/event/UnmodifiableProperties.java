@@ -21,6 +21,7 @@ import static java.util.Collections.unmodifiableSet;
  * @author Luigi R. Viggiano
  */
 class UnmodifiableProperties extends Properties {
+
     public UnmodifiableProperties(Properties properties) {
         fill(properties);
     }
@@ -59,4 +60,5 @@ class UnmodifiableProperties extends Properties {
     public Collection<Object> values() {
         return unmodifiableCollection(super.values());
     }
+
 }

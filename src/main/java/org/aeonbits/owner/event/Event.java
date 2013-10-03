@@ -17,6 +17,7 @@ import java.util.EventObject;
  * @since 1.0.4
  */
 public class Event extends EventObject {
+
     /**
      * Constructs a prototypical Event.
      *
@@ -26,4 +27,5 @@ public class Event extends EventObject {
     public Event(Object source) {
         super(source);
     }
+
 }

@@ -16,6 +16,7 @@ package org.aeonbits.owner;
  * @author Luigi R. Viggiano
  */
 class SplitAndTrimTokenizer implements Tokenizer {
+
     private final String regex;
 
     public SplitAndTrimTokenizer(String regex) {
@@ -28,4 +29,5 @@ class SplitAndTrimTokenizer implements Tokenizer {
             chunks[i] = chunks[i].trim();
         return chunks;
     }
+
 }

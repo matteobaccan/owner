@@ -138,4 +138,5 @@ public interface Accessible extends Config {
      * @since   1.0.5
      */
     Set<String> propertyNames();
+
 }
