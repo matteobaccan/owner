@@ -40,8 +40,6 @@ The `Reloadable` interface extends from `Config`:
 
 ![config-hierarchy]({{site.url}}/img/config-hierarchy.png)
 
-
-
 Automatic "hot reload"
 ----------------------
 

@@ -11,6 +11,7 @@ package org.aeonbits.owner.event;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
+import org.aeonbits.owner.Reloadable;
 import org.aeonbits.owner.TestConstants;
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +74,7 @@ public class EventListenerOnReloadTest implements TestConstants {
     }
 
     @Sources(SPEC)
-    interface MyConfig extends Mutable {
+    interface MyConfig extends Mutable, Reloadable {
         @DefaultValue("5")
         Integer someInteger();
 

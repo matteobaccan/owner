@@ -30,7 +30,7 @@ Example:
 
 ```java
 
-interface MyConfig extends Config, Mutable {
+interface MyConfig extends Mutable {
     @DefaultValue("18")
     public Integer minAge();
     public Integer maxAge();
