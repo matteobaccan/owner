@@ -32,9 +32,11 @@ import static org.aeonbits.owner.UtilTest.ignore;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -138,7 +140,7 @@ public class EventListenerOnReloadTest implements TestConstants {
     }
 
     @Test
-    public void testPropertyChangeListenerOnReloadWhenChangeHappen() throws Throwable{
+    public void testPropertyChangeListenerOnReloadWhenChangeHappen() throws Throwable {
         save(target, new Properties() {{
             setProperty("someInteger", "5");
             setProperty("someString", "bazbar");
@@ -284,6 +286,57 @@ public class EventListenerOnReloadTest implements TestConstants {
         } catch (UnsupportedOperationException x) {
             ignore();
         }
+    }
+
+    @Test
+    public void testFullReloadCycle() throws IOException {
+        final boolean[] reloadPerformed = new boolean[] {false};
+        cfg.addReloadListener(new TransactionalReloadListener() {
+
+            public void beforeReload(ReloadEvent event) throws RollbackBatchException {
+                String notAllowedValue = "42";
+                String newSomeInteger = event.getNewProperties().getProperty("someInteger");
+                if (notAllowedValue.equals(newSomeInteger))
+                    throw new RollbackBatchException("42 is not allowed for property 'someInteger'");
+            }
+
+            public void reloadPerformed(ReloadEvent event) {
+                reloadPerformed[0] = true;
+            }
+
+        });
+
+        save(target, new Properties() {{
+            setProperty("someInteger", "41");
+            setProperty("someString", "bazbar");
+            setProperty("someDouble", "2.718");
+            setProperty("nullsByDefault", "NotNullNow");
+        }});
+
+        cfg.reload();
+
+        assertTrue(reloadPerformed[0]);
+        assertEquals(new Integer(41), cfg.someInteger());
+        assertEquals("bazbar", cfg.someString());
+        assertEquals(new Double("2.718"), cfg.someDouble());
+        assertNotNull(cfg.nullsByDefault());
+
+        reloadPerformed[0] = false;
+
+        save(target, new Properties() {{
+            setProperty("someInteger", "42");
+            setProperty("someString", "blahblah");
+            setProperty("someDouble", "1.234");
+        }});
+
+        cfg.reload();
+
+        assertFalse(reloadPerformed[0]);
+        assertEquals(new Integer(41), cfg.someInteger());
+        assertEquals("bazbar", cfg.someString());
+        assertEquals(new Double("2.718"), cfg.someDouble());
+        assertNotNull(cfg.nullsByDefault());
+
     }
 
 }

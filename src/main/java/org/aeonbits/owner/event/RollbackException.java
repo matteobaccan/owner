@@ -15,4 +15,20 @@ package org.aeonbits.owner.event;
  * @since 1.0.5
  */
 public abstract class RollbackException extends Exception {
+
+    public RollbackException() {
+        super();
+    }
+
+    public RollbackException(String msg) {
+        super(msg);
+    }
+
+    public RollbackException(Throwable cause) {
+        super(cause);
+    }
+
+    public RollbackException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

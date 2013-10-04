@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="84.6111111111112" y="94.66666666666677">org.aeonbits.owner.event.TransactionalReloadListener</node>
+    <node x="-252.8888888888888" y="400.77777777777777">java.beans.PropertyChangeEvent</node>
+    <node x="-284.66666666666663" y="203.66666666666663">org.aeonbits.owner.event.ReloadEvent</node>
+    <node x="-291.66666666666663" y="6.444444444444457">org.aeonbits.owner.Reloadable</node>
+    <node x="145.22222222222229" y="158.33333333333337">org.aeonbits.owner.event.RollbackBatchException</node>
+    <node x="74.1111111111112" y="6.666666666666771">org.aeonbits.owner.event.ReloadListener</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.aeonbits.owner.event.ReloadEvent" target="java.beans.PropertyChangeEvent">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="org.aeonbits.owner.event.TransactionalReloadListener" target="org.aeonbits.owner.event.ReloadListener">
+      <point x="0.0" y="-26.0" />
+      <point x="0.0" y="26.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="330.5" y="296.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Inner Classes</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

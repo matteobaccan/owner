@@ -17,4 +17,21 @@ package org.aeonbits.owner.event;
  * @since 1.0.5
  */
 public class RollbackBatchException extends RollbackException {
+
+    public RollbackBatchException() {
+        super();
+    }
+
+    public RollbackBatchException(String message) {
+        super(message);
+    }
+
+    public RollbackBatchException(Throwable cause) {
+        super(cause);
+    }
+
+    public RollbackBatchException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

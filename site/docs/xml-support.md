@@ -2,7 +2,7 @@
 layout: docs
 title: XML support
 prev_section: configuring
-next_section: features
+next_section: event-support
 permalink: /docs/xml-support/
 ---
 
