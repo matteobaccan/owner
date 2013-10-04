@@ -66,7 +66,7 @@ interface allows for read access.
 Example:
 
 ```java
-interface MyConfig extends Config, Accessible {
+interface MyConfig extends Accessible {
     @DefaultValue("Bohemian Rapsody - Queen")
     String favoriteSong();
 
