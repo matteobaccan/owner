@@ -11,7 +11,8 @@ v1.0.5 contains following enhancements and bug fixes.
 Enhancements
 ------------
 
- * Support for XML. OWNER is now able to load not only from properties files, but also from XML files. The XML
+ * [Support for XML](http://localhost:4000/docs/xml-support/).
+   OWNER is now able to load not only from properties files, but also from XML files. The XML
    can follow the [Java XML Properties format](http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html),
    or can be freely defined by the user.<br/>
    See [XML support]({{ site.url }}/docs/xml-support/), [#5](https://github.com/lviggiano/owner/issues/5)).
