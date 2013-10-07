@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="-372.0" y="304.0">java.beans.PropertyChangeEvent</node>
+    <node x="-206.0" y="249.0">org.aeonbits.owner.event.RollbackBatchException</node>
+    <node x="-233.0" y="210.0">org.aeonbits.owner.event.RollbackOperationException</node>
+    <node x="-368.0" y="54.0">java.beans.PropertyChangeListener</node>
+    <node x="-387.0" y="149.0">org.aeonbits.owner.event.TransactionalPropertyChangeListener</node>
+    <node x="-397.0" y="-175.0">org.aeonbits.owner.Mutable</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.aeonbits.owner.event.TransactionalPropertyChangeListener" target="java.beans.PropertyChangeListener">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="0.5" y="340.0" />
+  <SelectedNodes>
+    <node>java.beans.PropertyChangeEvent</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

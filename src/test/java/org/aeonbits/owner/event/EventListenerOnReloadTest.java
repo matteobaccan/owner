@@ -339,4 +339,97 @@ public class EventListenerOnReloadTest implements TestConstants {
 
     }
 
+
+    @Test
+    public void testFullPropertyChangeCycleCycle() throws IOException {
+        final boolean[] reloadPerformed = new boolean[] {false};
+
+        cfg.addPropertyChangeListener("someInteger",
+                new TransactionalPropertyChangeListener() {
+            public void beforePropertyChange(PropertyChangeEvent event)
+                    throws RollbackOperationException, RollbackBatchException {
+                String notAllowedValue = "88";
+                String makesEverythingToRollback = "42";
+
+                String newSomeInteger = (String)event.getNewValue();
+                if (notAllowedValue.equals(newSomeInteger))
+                    throw new RollbackOperationException("88 is not allowed for property 'someInteger', " +
+                            "the single property someInteger is rolled back");
+
+                if (makesEverythingToRollback.equals(newSomeInteger))
+                    throw new RollbackBatchException("42 is not allowed for property 'someInteger', " +
+                            "the whole event is rolled back");
+
+            }
+
+            public void propertyChange(PropertyChangeEvent evt) {
+                reloadPerformed[0] = true;
+            }
+        });
+
+        save(target, new Properties() {{
+            setProperty("someInteger", "41");
+            setProperty("someString", "bazbar");
+            setProperty("someDouble", "2.718");
+            setProperty("nullsByDefault", "NotNullNow");
+        }});
+
+        cfg.reload();
+
+        assertTrue(reloadPerformed[0]);
+        assertEquals(new Integer(41), cfg.someInteger());
+        assertEquals("bazbar", cfg.someString());
+        assertEquals(new Double("2.718"), cfg.someDouble());
+        assertNotNull(cfg.nullsByDefault());
+
+        reloadPerformed[0] = false;
+
+        cfg.setProperty("someInteger", "55");
+        assertTrue(reloadPerformed[0]);
+        assertEquals(new Integer(55), cfg.someInteger());
+
+        reloadPerformed[0] = false;
+
+
+        cfg.setProperty("someInteger", "88");
+        // 88 is rolled back.
+        assertFalse(reloadPerformed[0]);
+        assertEquals(new Integer(55), cfg.someInteger());
+
+        reloadPerformed[0] = false;
+
+        save(target, new Properties() {{
+            setProperty("someInteger", "42");
+            setProperty("someString", "blahblah");
+            setProperty("someDouble", "1.234");
+        }});
+
+        cfg.reload();
+
+        assertFalse(reloadPerformed[0]);
+        assertEquals(new Integer(55), cfg.someInteger());
+        assertEquals("bazbar", cfg.someString());
+        assertEquals(new Double("2.718"), cfg.someDouble());
+        assertNotNull(cfg.nullsByDefault());
+
+
+        reloadPerformed[0] = false;
+
+        save(target, new Properties() {{
+            setProperty("someInteger", "88");
+            setProperty("someString", "this is not rolled back");
+            setProperty("someDouble", "1.2345");
+        }});
+
+        cfg.reload();
+
+        assertFalse(reloadPerformed[0]);
+        // only someInteger=88 is rolled back
+        assertEquals(new Integer(55), cfg.someInteger());
+        assertEquals("this is not rolled back", cfg.someString());
+        assertEquals(new Double("1.2345"), cfg.someDouble());
+        assertNull(cfg.nullsByDefault());
+
+    }
+
 }
