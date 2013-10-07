@@ -308,7 +308,7 @@ assertNull(cfg.nullsByDefault());
 Conclusions
 -----------
 
-With ReloadListener and PropertyChangeListener it is possible to get notified when your configuration changes.
+With `ReloadListener` and `PropertyChangeListener` it is possible to get notified when your configuration changes.
 This allows your application to take actions subsequently.
 
 With `TransactionalReloadListener` and `TransactionalPropertyChangeListener` you can also check if the changes being
