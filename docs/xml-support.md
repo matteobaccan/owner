@@ -2,7 +2,7 @@
 layout: docs
 title: XML support
 prev_section: configuring
-next_section: features
+next_section: event-support
 permalink: /docs/xml-support/
 ---
 
@@ -11,14 +11,6 @@ Since JDK 1.5 Java properties support XML format via `loadFromXML()` and `storeT
 There is no reason why OWNER API shouldn't implement XML support as the Properties class.
 
 But OWNER goes beyond that.
-
-<div class="note">
-  <h5>OWNER - Version 1.0.5</h5>
-  <p>This feature is not yet released, but it is available on the master branch.
-     If you need this, you need to cook your own jar,
-     see <a href="{{ site.url }}/docs/building/">Building from sources</a> chapter.</p>
-</div>
-
 
 
 The Java XML Properties format
@@ -121,7 +113,7 @@ Storing to XML
 If you are looking for the method to store a Config object into an XML stream, you should have a look at the method
 [`storeToXML`][storeToXML] in the `Accessible` interface.
 
-  [storeToXML]: http://owner.newinstance.it/1.0.5-SNAPSHOT/apidocs/org/aeonbits/owner/Accessible.html#storeToXML(java.io.OutputStream,%20java.lang.String)
+  [storeToXML]: http://owner.newinstance.it/1.0.5-SNAPSHOT/apidocs/org/aeonbits/owner/Accessible.html#storeToXML(java.io.OutputStream,+java.lang.String)
 
 When saving a Config object to XML, the Java XML Properties format will be used.
 

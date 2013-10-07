@@ -6,7 +6,7 @@ next_section: debugging
 permalink: /docs/accessible-mutable/
 ---
 
-By default, object created by OWNER are immutable and promote information hiding.  
+By default, object created by OWNER are immutable and promote information hiding.
 
 This means that once the Config object is created its properties cannot be modified, and cannot be accessed in any other
 way than using the methods that are properties mapping methods.
@@ -17,6 +17,10 @@ interfaces [Mutable] and [Accessible].
   [Mutable]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Mutable.html
   [Accessible]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Accessible.html
 
+This is the hierarchy of the `Mutable` and `Accessible` interfaces:
+
+![config-hierarchy]({{site.url}}/img/config-hierarchy.png)
+
 The Mutable interface
 ---------------------
 
@@ -26,7 +30,7 @@ Example:
 
 ```java
 
-interface MyConfig extends Config, Mutable {
+interface MyConfig extends Mutable {
     @DefaultValue("18")
     public Integer minAge();
     public Integer maxAge();
@@ -36,11 +40,11 @@ interface MyConfig extends Config, Mutable {
 MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
 // this comes from the @DefaultValue
-assertEquals(Integer.valueOf(18), cfg.minAge()); 
+assertEquals(Integer.valueOf(18), cfg.minAge());
 
 // now we change the minAge to 21 using setProperty
 String oldValue = cfg.setProperty("minAge", "21");
-assertEquals("18", oldValue); // the old value was 18 
+assertEquals("18", oldValue); // the old value was 18
 assertEquals(Integer.valueOf(21), cfg.minAge()); // now is 21
 
 // now we remove the minAge property
@@ -49,7 +53,7 @@ assertEquals("21", oldValue); // the old value is 21
 assertNull(cfg.minAge()); // now is null
 ```
 
-In the above example we saw `setProperty` and `removeProperty` in action, but the Mutable interface adds even more 
+In the above example we saw `setProperty` and `removeProperty` in action, but the Mutable interface adds even more
 methods like `clear()`, `load(InputStream)` and `load(Reader)`, and it should allow you to achieve complete write access
 to the properties contained inside a Config object.
 
@@ -57,12 +61,12 @@ The Accessible interface
 ------------------------
 
 As the [Mutable] interface allows for write access to the properties contained inside a Config object, the [Accessible]
-interface allows for read access. 
+interface allows for read access.
 
 Example:
 
 ```java
-interface MyConfig extends Config, Accessible {
+interface MyConfig extends Accessible {
     @DefaultValue("Bohemian Rapsody - Queen")
     String favoriteSong();
 

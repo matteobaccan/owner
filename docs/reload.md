@@ -23,7 +23,7 @@ Example:
 
 ```java
 @Sources{...}
-interface MyConfig extends Config, Reloadable {
+interface MyConfig extends Reloadable {
     String someProperties();
 }
 
@@ -36,6 +36,9 @@ when the object was initially created. If the configuration files have been
 altered, after the reload invocation, those changes will be reflected in the
 config object.
 
+The `Reloadable` interface extends from `Config`:
+
+![config-hierarchy]({{site.url}}/img/config-hierarchy.png)
 
 Automatic "hot reload"
 ----------------------
