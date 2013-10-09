@@ -31,7 +31,7 @@ The variable ${mypath} would be expanded from the System properties or from the 
 there. But this isn't convenient enough: environment properties are read only, and sometimes it is not convenient to
 change system properties, especially for applications deployed in shared JVMs.
 
-So OWNER 1.0.4 now does have some context properties associated to the ConfigFactory itself:
+So OWNER does have some context properties associated to the ConfigFactory itself:
 
 ```java
 // notice ${mypath} here

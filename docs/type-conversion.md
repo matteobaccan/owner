@@ -7,12 +7,12 @@ permalink: /docs/type-conversion/
 ---
 
 OWER API supports properties conversion for primitive types and enums.
-When you define the *mapping interface* you can use a wide set of return types, 
-and they will be automatically converted from `String` to the primitive types 
+When you define the *mapping interface* you can use a wide set of return types,
+and they will be automatically converted from `String` to the primitive types
 and enums:
 
 ```java
-// conversion happens from the value specified in the 
+// conversion happens from the value specified in the
 // properties files (if available).
 int maxThreads();
 
@@ -26,11 +26,10 @@ double pi();
 TimeUnit timeUnit();
 ```
 
-Since version 1.0.2 it is possible to have configuration interfaces to declare 
-business objects as return types, many are compatible and you can also define 
-your own objects:
+It is possible to have configuration interfaces to declare business objects as return types, many are compatible and
+you can also define your own objects:
 
-The easiest way is to define your business object with a public constructor 
+The easiest way is to define your business object with a public constructor
 taking a single parameter of type `java.lang.String`:
 
 ```java
@@ -61,13 +60,13 @@ public interface SpecialTypes extends Config {
 }
 ```
 
-OWNER API will take the value "example" and pass it to the CustomType 
+OWNER API will take the value "example" and pass it to the CustomType
 constructor then return it.
 
 Arrays and Collections
 ----------------------
 
-OWNER version 1.0.4 introduced first class support for Java Arrays and Collections.
+OWNER have first class support for Java Arrays and Collections.
 
 So now you can define properties like:
 
@@ -100,12 +99,12 @@ public class MyConfig extends Config {
 }
 ```
 
-You can use array of objects or primitive Java types, as well as Java 
-collections, as specified by interfaces [`Collection`][Collection], 
-[`List`][List], [`Set`][Set], [`SortedSet`][SortedSet] or concrete 
-implementations like [`Vector`][Vector], [`Stack`][Stack], 
+You can use array of objects or primitive Java types, as well as Java
+collections, as specified by interfaces [`Collection`][Collection],
+[`List`][List], [`Set`][Set], [`SortedSet`][SortedSet] or concrete
+implementations like [`Vector`][Vector], [`Stack`][Stack],
 [`LinkedList`][LinkedList] etc. or your own concrete implementation of the Java
-Collections Framework interfaces, as long as your implementation class defines 
+Collections Framework interfaces, as long as your implementation class defines
 a default no-arg constructor.
 
   [Collection]: http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html
@@ -120,11 +119,11 @@ The [`Map`][Map] interface and sub-interfaces are not supported.
 
   [Map]: http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
 
-By default OWNER uses the comma `","` character to tokenize values for the 
-arrays and collections, but you can specify different characters (and regexp) 
-with the [`@Separator`][separator] annotation or, if your property format has a 
-more complex split logic, you can define your own tokenizer class via the 
-[`@TokenizerClass`][tokenizerclass] annotation plus [`Tokenizer`][tokenizer] 
+By default OWNER uses the comma `","` character to tokenize values for the
+arrays and collections, but you can specify different characters (and regexp)
+with the [`@Separator`][separator] annotation or, if your property format has a
+more complex split logic, you can define your own tokenizer class via the
+[`@TokenizerClass`][tokenizerclass] annotation plus [`Tokenizer`][tokenizer]
 interface.
 
   [separator]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.Separator.html
@@ -147,21 +146,21 @@ public class MyConfig extends Config {
 }
 
 public class CustomDashTokenizer implements Tokenizer {
-    
+
     // this logic can be as much complex as you need
     @Override
     public String[] tokens(String values) {
-        return values.split("-", -1);  
+        return values.split("-", -1);
     }
 }
 ```
 
-The [`@Separator`][separator] and [`@TokenizerClass`][tokenizerclass] 
-annotations can be specified on method level and on class level. When specified 
-on method level, the annotation will affect only that method. When specified on 
+The [`@Separator`][separator] and [`@TokenizerClass`][tokenizerclass]
+annotations can be specified on method level and on class level. When specified
+on method level, the annotation will affect only that method. When specified on
 class level, the annotation will affect the complete class.
 
-Annotations specified on method level override the setting specified on the 
+Annotations specified on method level override the setting specified on the
 class level:
 
 ```java
@@ -170,7 +169,7 @@ public interface ArrayExample extends Config {
 
     // takes the class level @Separator
     @DefaultValue("1; 2; 3; 4")
-    public int[] semicolonSeparated(); 
+    public int[] semicolonSeparated();
 
     // overrides the class-level @Separator(";")
     @Separator(",")
@@ -186,8 +185,8 @@ public interface ArrayExample extends Config {
 
 <div class="note warning">
   <h5>@Separator and @TokenizerClass don't go together!</h5>
-    Notice that it is invalid to specify together on the same level both 
-    <tt>@Separator</tt> and <tt>@TokenizerClass</tt> annotations: 
+    Notice that it is invalid to specify together on the same level both
+    <tt>@Separator</tt> and <tt>@TokenizerClass</tt> annotations:
     you cannot specify two different ways to do the same thing!
 </div>
 
@@ -195,7 +194,7 @@ So in following cases you'll get a [`UnsupportedOperationException`][unsupported
 
 ```java
 
-// @Separator and @TokenizerClass cannot be used together 
+// @Separator and @TokenizerClass cannot be used together
 // on class level.
 @TokenizerClass(CustomCommaTokenizer.class)
 @Separator(",")
@@ -203,32 +202,32 @@ public interface Wrong extends Config {
 
     // will throw UnsupportedOperationException!
     @DefaultValue("1, 2, 3, 4")
-    public int[] commaSeparated(); 
+    public int[] commaSeparated();
 
 }
 
 public interface AlsoWrong extends Config {
 
     // will throw UnsupportedOperationException!
-    // @Separator and @TokenizerClass cannot be 
+    // @Separator and @TokenizerClass cannot be
     // used together on method level.
     @Separator(";")
     @TokenizerClass(CustomDashTokenizer.class)
     @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
-    public int[] conflictingAnnotationsOnMethodLevel(); 
+    public int[] conflictingAnnotationsOnMethodLevel();
 
 }
 ```
 
   [unsupported-ex]: http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html
 
-But even though the following example contains a conflict on class level 
+But even though the following example contains a conflict on class level
 (and should be considered a bug in the example), OWNER is able to resolve things
 correctly on method level:
 
 ```java
 
-// @Separator and @TokenizerClass cannot be used together 
+// @Separator and @TokenizerClass cannot be used together
 // on class level.
 @Separator(";")
 @TokenizerClass(CustomDashTokenizer.class)
@@ -236,7 +235,7 @@ public interface WrongButItWorks extends Config {
 
     // but this overrides the class level annotations
     // hence it will work!
-    @Separator(";") 
+    @Separator(";")
     @DefaultValue("1, 2, 3, 4")
     public int[] commaSeparated();
 
@@ -250,12 +249,12 @@ works at the moment, we may change this behavior in future.
 The @ConverterClass annotation
 ------------------------------
 
-OWNER version 1.0.4 introduced the 
-[`@ConverterClass`](http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.ConverterClass.html) 
-annotation that allows the user to specify a customized conversion logic implementing the 
+OWNER provides the
+[`@ConverterClass`](http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.ConverterClass.html)
+annotation that allows the user to specify a customized conversion logic implementing the
 [`Converter`](http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Converter.html) interface.
 
-```java    
+```java
 interface MyConfig extends Config {
     @DefaultValue("foobar.com:8080")
     @ConverterClass(ServerConverter.class)
@@ -264,7 +263,7 @@ interface MyConfig extends Config {
     @DefaultValue(
       "google.com, yahoo.com:8080, owner.aeonbits.org:4000")
     @ConverterClass(ServerConverter.class)
-    Server[] servers();        
+    Server[] servers();
 }
 
 class Server {
@@ -317,7 +316,7 @@ But there is more. OWNER API supports automatic conversion for:
   8. Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object`.
   9. Any class declaring a public *static* method `valueOf(java.lang.String)` that returns an instance of itself.
   10. Any class for which you can register a [`PropertyEditor`][propedit] via
-      [`PropertyEditorManager.registerEditor()`][propeditmanager].  
+      [`PropertyEditorManager.registerEditor()`][propeditmanager].
       (See [PropertyEditorTest] as an example).
   11. Any array having above types as elements.
   12. Any object that can be instantiated via `@ConverterClass` annotation explained before.
@@ -328,7 +327,7 @@ If OWNER API cannot find any way to map your business object, you'll receive a [
 with some meaningful description to identify the problem as quickly as possible.
 
 You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your business objects
-using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].  
+using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].
 See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you want to implement a `PropertyEditor`.
 
   [propeditmanager]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor
