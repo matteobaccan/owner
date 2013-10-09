@@ -58,4 +58,5 @@ Bugs fixes
  * Fixed bug [#42](https://github.com/lviggiano/owner/issues/42), regarding the incompatibility of the OWNER
    library with the Google App Engine security restrictions.
 
-
+Downloadable artifacts are published on
+[Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner/1.0.5/).
