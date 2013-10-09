@@ -45,7 +45,7 @@ Enhancements
 
 Site Enhancements
 -----------------
- * Website sources reorganized: moved from `gh-pages` trunk to `master`, with publish ant scripts `build.xml`.
+ * Website sources reorganized: moved from `gh-pages` branch to `master`, with publish ant scripts `build.xml`.
  * Added news section, with release announcements and blog posts.
 
 Bugs fixes
