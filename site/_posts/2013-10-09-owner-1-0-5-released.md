@@ -1,6 +1,7 @@
 ---
 layout: news_item
 title: "Owner 1.0.5 Released"
+date: "2013-10-09 16:25:00 +0200"
 author: lviggiano
 version: 1.0.5
 categories: [release]
