@@ -52,7 +52,7 @@ public class ConfigFactoryTest implements TestConstants {
         assertEquals("foobar", cfg.someValue());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testSetPropertyNullKey() {
         ConfigFactory.setProperty(null, "foobar");
     }
@@ -104,7 +104,7 @@ public class ConfigFactoryTest implements TestConstants {
         assertEquals(RESOURCES_DIR, ConfigFactory.getProperty("mypath"));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testGetPropertyNullKey() {
         ConfigFactory.getProperty(null);
     }
@@ -121,7 +121,7 @@ public class ConfigFactoryTest implements TestConstants {
         assertNull(ConfigFactory.getProperty("mypath"));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testClearPropertyNullKey() {
         ConfigFactory.clearProperty(null);
     }

@@ -66,7 +66,7 @@ class LoadersManager implements Serializable {
 
     final void registerLoader(Loader loader) {
         if (loader == null)
-            throw new NullPointerException("loader can't be null");
+            throw new IllegalArgumentException("loader can't be null");
         lock.writeLock().lock();
         try {
             loaders.add(0, loader);

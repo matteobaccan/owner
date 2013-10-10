@@ -111,13 +111,13 @@ public class LoaderManagerTest implements TestConstants {
         assertEquals("bar", cfg.foo());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRegisterNull() {
         Factory factory = ConfigFactory.newInstance();
         factory.registerLoader(null);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRegisterNullOnSingleton() {
         ConfigFactory.registerLoader(null);
     }

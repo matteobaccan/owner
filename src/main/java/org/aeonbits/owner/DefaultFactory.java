@@ -52,7 +52,7 @@ class DefaultFactory implements Factory {
 
     private void checkKey(String key) {
         if (key == null)
-            throw new NullPointerException("key can't be null");
+            throw new IllegalArgumentException("key can't be null");
         if (key.isEmpty())
             throw new IllegalArgumentException("key can't be empty");
     }
