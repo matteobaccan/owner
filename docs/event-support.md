@@ -9,9 +9,9 @@ permalink: /docs/event-support/
 The HotReload is a cool feature, however it would be nice to know which properties has changed so that you can
 re-configure only the affected services.
 
-This is why OWNER implements a feature rich event system that allow the user to know when a reload event occurs, when a
-property is changed, and also let the user to check if the new value is compliant to a certain requirement and, if not
-to rollback the property change or the entire change set.
+This is why OWNER implements a feature rich event system that allows to know when a reload event occurs, when a
+property is changed, and lets you to check if the new value is compliant to your application requirements and,
+if not, you can rollback the property change or the entire change set.
 
 Listening for Reloads
 ---------------------
@@ -23,8 +23,8 @@ To get notified when a reload event occurs, your interface must extend `Reloadab
 register a `ReloadListener`.
 
 There is also the possibility to implement a `TransactionalReloadListener` which does notify you before the reload
-is performed and allows you to check what is changed and eventually to rollback the reload operation if the changes you
-see are not compliant to your application's requirements.
+becomes effective and allows you to check what is changed and eventually to rollback the reload operation if the
+changes you see are not compliant to your application's requirements.
 
 ![reload-event]({{site.url}}/img/reload-event.png)
 
@@ -137,8 +137,8 @@ To get notified when a property change event occurs, your interface must extend 
 register a `PropertyChangeListener`.
 
 There is also the possibility to implement a `TransactionalPropertyChangeListener` which does notify you before the
-property change is performed and allows you to check what is changed and eventually to rollback the single property
-change operation or the whole set of changes triggered by the source event.
+property change becomes effective and allows you to check what is changed and eventually to rollback the single
+property change operation or the whole set of changes triggered by the source event.
 
 ![propertychange-event]({{site.url}}/img/propertychange-event.png)
 
@@ -313,8 +313,8 @@ This allows your application to take actions subsequently.
 
 With `TransactionalReloadListener` and `TransactionalPropertyChangeListener` you can also check if the changes being
 applied are coherent to your requirements and eventually rollback the single property change or the
-complete set of changes, keeping things as they where before a reload, for instance.
+complete set of changes, keeping things as they where before a reload.
 
-This is a basic mechanism which allows for some basic validation.
+This is a mechanism which allows for some basic validation.
 A more simple and powerful validation mechanism is planned for the future releases, and the event mechanism will be
-probably the backbone of it.
+probably the backbone of this.
