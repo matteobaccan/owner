@@ -113,7 +113,7 @@ Storing to XML
 If you are looking for the method to store a Config object into an XML stream, you should have a look at the method
 [`storeToXML`][storeToXML] in the `Accessible` interface.
 
-  [storeToXML]: http://owner.newinstance.it/1.0.5-SNAPSHOT/apidocs/org/aeonbits/owner/Accessible.html#storeToXML(java.io.OutputStream,+java.lang.String)
+  [storeToXML]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Accessible.html#storeToXML(java.io.OutputStream,+java.lang.String)
 
 When saving a Config object to XML, the Java XML Properties format will be used.
 
