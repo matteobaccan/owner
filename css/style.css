@@ -61,7 +61,7 @@ body > header h1 span {
 }
 
 body > header .shadow {
-    text-shadow: 0px 3.5px 0px rgba(0,0,0,.5);    
+    text-shadow: 0px 3.5px 0px rgba(0,0,0,.5);
 }
 
 nav ul {
@@ -200,6 +200,7 @@ body > footer a:hover img {
 
 .intro .unit {
   padding: 10px 0 40px;
+  font-style: italic;
 }
 
 .intro p {
