@@ -8,3 +8,6 @@ jdk:
   - openjdk5
 install: mvn install -DskipTests=true -B
 script: mvn test -B
+
+after_success:
+  - mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:cobertura
