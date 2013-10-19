@@ -54,10 +54,18 @@
     <target name="run">
         <jekyll-serve options="-w" />
     </target>
+    
+    <target name="build">
+        <property name="site.destination.directory" value="${build.directory}/www"/>
+        <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_build-" suffix=".yml" property="build.file"/>
+        <echo file="${build.file}" message="url: file://${site.destination.directory}"/>
+        <jekyll dir="${site.directory}" command="build" options="--destination ${site.destination.directory} --config _config.yml,${build.file}" />
+    </target>
 
     <target name="help">
         <echo>
         ant clean                           - cleans up the target dir
+        ant build                           - generates the website in the _site dir
         ant publish                         - publish site to gh-pages
         ant run-drafts                      - run jekyll serve (with '-w --drafts' options)
         ant run                             - run jekyll serve (with '-w' option)
@@ -89,10 +97,19 @@
         <sequential>
             <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_serve-" suffix=".yml" property="serve.file"/>
             <echo file="${serve.file}" message="url: http://localhost:4000"/>
-            <exec dir="${site.directory}" executable="jekyll">
-                <arg line="serve @{options} ${env.JEKYLL_OPTS} --config _config.yml,${serve.file}"/>
+            <jekyll dir="${site.directory}" command="serve" options="@{options} --config _config.yml,${serve.file}"/>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="jekyll">
+        <attribute name="dir"/>
+        <attribute name="command"/>
+        <attribute name="options"/>
+        <sequential>
+            <exec dir="@{dir}" executable="jekyll">
+                <arg line="@{command} @{options} ${env.JEKYLL_OPTS}"/>
             </exec>
         </sequential>
-
     </macrodef>
+
 </project>
