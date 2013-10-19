@@ -1,6 +1,6 @@
 # IntelliJ IDEA
 .idea/
-owner.iml
+*.iml
 
 # Maven and Macs
 target/
