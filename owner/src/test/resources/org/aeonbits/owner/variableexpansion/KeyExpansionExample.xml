@@ -1,0 +1,16 @@
+<servers>
+    <dev>
+        <name>DEV</name>
+        <hostname>devhost</hostname>
+        <port>6000</port>
+        <user>myuser1</user>
+        <password>mypass1</password>
+    </dev>
+    <uat>
+        <name>UAT</name>
+        <hostname>uathost</hostname>
+        <port>60020</port>
+        <user>myuser2</user>
+        <password>mypass2</password>
+    </uat>
+</servers>
