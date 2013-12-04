@@ -30,7 +30,7 @@ import static org.aeonbits.owner.Util.reverse;
 
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
- * <p/>
+ *
  * Sub-interfaces may also extend {@link Accessible} to allow some debugging facility, or {@link Reloadable} to allow the
  * user to programmatically reload properties.
  *
@@ -140,10 +140,10 @@ public interface Config extends Serializable {
     /**
      * Specify that the class implements hot reloading of properties from filesystem baked {@link Sources} (hot
      * reloading can't be applied to all types of URLs).
-     * <p/>
+     *
      * It is possible to specify an interval to indicate how frequently the library shall check the files for
      * modifications and perform the reload.
-     * <p/>
+     *
      * Examples:
      * <pre>
      *      &#64;HotReload    // will check for file changes every 5 seconds.
@@ -185,12 +185,12 @@ public interface Config extends Serializable {
 
         /**
          * The time unit for the interval. By default it is {@link TimeUnit#SECONDS}.
-         * <p/>
+         *
          * Date resolution vary from filesystem to filesystem.<br/>
          * For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second.<br/>
          * For FAT32 the date resolution for the last modified time is 2 seconds. <br/>
          * For Ext4 the date resolution is in nanoseconds.
-         * <p/>
+         *
          * So, it is a good idea to express the time unit in seconds or more, since higher time resolution
          * will probably not be supported by the underlying filesystem.
          */

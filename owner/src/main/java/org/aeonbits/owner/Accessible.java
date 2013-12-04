@@ -16,7 +16,9 @@ import java.util.Set;
 
 /**
  * <p>Allows a <tt>Config</tt> object to access the contents of the properties, providing utility methods to perform
- * consequent operations.</p> <p/> <p>Example:</p> <p/>
+ * consequent operations.</p>
+ *
+ * <p>Example:</p>
  * <pre>
  *     public interface MyConfig extends Config, Accessible {
  *         int someProperty();
