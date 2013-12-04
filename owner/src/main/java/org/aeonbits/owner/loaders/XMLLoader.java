@@ -33,6 +33,7 @@ import java.util.Stack;
  */
 public class XMLLoader implements Loader {
 
+    private static final long serialVersionUID = -894351666332018767L;
     private transient volatile SAXParserFactory factory = null;
 
     private SAXParserFactory factory() {

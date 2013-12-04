@@ -21,6 +21,8 @@ import java.util.Properties;
  */
 public class PropertiesLoader implements Loader {
 
+    private static final long serialVersionUID = -1781643040589572341L;
+
     public boolean accept(URL url) {
         return true;
     }

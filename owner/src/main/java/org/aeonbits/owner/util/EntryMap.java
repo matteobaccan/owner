@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner.util;
 
+import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +34,8 @@ import static java.util.Collections.unmodifiableSet;
  * @since 1.0.6
  * @author Luigi R. Viggiano
  */
-public class EntryMap<K, V> extends AbstractMap<K, V> {
+public class EntryMap<K, V> extends AbstractMap<K, V> implements Serializable {
+    private static final long serialVersionUID = -789853606407653214L;
     private final Entry<K, V> entry;
     private final Set<Entry<K, V>> entrySet;
 
