@@ -33,7 +33,7 @@ import java.util.Stack;
  */
 public class XMLLoader implements Loader {
 
-    private volatile SAXParserFactory factory = null;
+    private transient volatile SAXParserFactory factory = null;
 
     private SAXParserFactory factory() {
         if (factory == null) {
