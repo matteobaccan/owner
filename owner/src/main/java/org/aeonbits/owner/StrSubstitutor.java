@@ -18,10 +18,10 @@ import static org.aeonbits.owner.Util.fixBackslashForRegex;
 
 /**
  * Substitutes variables within a string by values.
- *
+ * <p/>
  * This class takes a piece of text and substitutes all the variables within it. The definition of a variable is
  * <code>${variableName}</code>.
- *
+ * <p/>
  * Typical usage of this class follows the following pattern: First an instance is created and initialized with the
  * values that contains the values for the available variables. If a prefix and/or suffix for variables should be used
  * other than the default ones, the appropriate settings can be performed. After that the <code>replace()</code> method
