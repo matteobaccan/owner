@@ -13,7 +13,6 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
 import org.aeonbits.owner.TestConstants;
-import org.aeonbits.owner.util.EntryMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +28,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import static java.io.File.createTempFile;
+import static org.aeonbits.owner.util.Collections.map;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -66,7 +66,7 @@ public class TestSerialization implements TestConstants {
 
     @Test
     public void testSerialization() throws IOException, ClassNotFoundException {
-        MyConfig cfg = ConfigFactory.create(MyConfig.class, EntryMap.map("foo", "bar"));
+        MyConfig cfg = ConfigFactory.create(MyConfig.class, map("foo", "bar"));
         assertEquals("someText", cfg.someText());
         assertArrayEquals(new String[] {"some", "array"}, cfg.someArray());
         cfg.addPropertyChangeListener("someText", new MyPropertyChangeListener());

@@ -15,7 +15,7 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
-import static org.aeonbits.owner.util.EntryMap.map;
+import static org.aeonbits.owner.util.Collections.map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
