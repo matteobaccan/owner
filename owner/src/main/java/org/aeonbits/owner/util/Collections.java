@@ -51,6 +51,7 @@ public abstract class Collections {
             this.entries = set(entries);
         }
 
+        @SuppressWarnings("unchecked")
         private EntryMap(K key, V value) {
             this(entry(key, value));
         }
