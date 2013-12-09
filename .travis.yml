@@ -1,11 +1,11 @@
 language: java
 jdk:
   - oraclejdk7
-  - oraclejdk6
-  - oraclejdk5
+#  - oraclejdk6
+#  - oraclejdk5
   - openjdk7
   - openjdk6
-  - openjdk5
+#  - openjdk5
 install: mvn install -DskipTests=true -B
 script: mvn test -B
 
