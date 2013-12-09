@@ -8,7 +8,6 @@
 
 package org.aeonbits.owner.util;
 
-
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
