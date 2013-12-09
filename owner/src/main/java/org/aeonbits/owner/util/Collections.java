@@ -45,10 +45,10 @@ public abstract class Collections {
 
     private static class EntryMap<K, V> extends AbstractMap<K, V> implements Serializable {
         private static final long serialVersionUID = -789853606407653214L;
-        private final Set<Entry<K, V>> entrySet;
+        private final Set<Entry<K, V>> entries;
 
-        private EntryMap(Entry<K, V>... entry) {
-            entrySet = set(entry);
+        private EntryMap(Entry<K, V>... entries) {
+            this.entries = set(entries);
         }
 
         private EntryMap(K key, V value) {
@@ -57,7 +57,7 @@ public abstract class Collections {
 
         @Override
         public Set<Entry<K, V>> entrySet() {
-            return entrySet;
+            return entries;
         }
     }
 
