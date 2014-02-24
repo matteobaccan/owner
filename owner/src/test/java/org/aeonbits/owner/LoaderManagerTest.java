@@ -9,6 +9,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.loaders.ConfigurationSourceNotFoundException;
 import org.aeonbits.owner.loaders.Loader;
 import org.aeonbits.owner.loaders.PropertiesLoader;
 import org.aeonbits.owner.loaders.XMLLoader;
@@ -133,7 +134,7 @@ public class LoaderManagerTest implements TestConstants {
             return false;
         }
 
-        public void load(Properties result, InputStream input) throws IOException {
+        public void load(Properties result, URI uri) throws ConfigurationSourceNotFoundException {
         }
 
         public String defaultSpecFor(String urlPrefix) {

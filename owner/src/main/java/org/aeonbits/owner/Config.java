@@ -9,7 +9,6 @@
 package org.aeonbits.owner;
 
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -18,6 +17,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
+import org.aeonbits.owner.loaders.ConfigurationSourceNotFoundException;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -107,7 +108,7 @@ public interface Config extends Serializable {
                     try {
                         loaders.load(result, uri);
                         break;
-                    } catch (IOException ex) {
+                    } catch (ConfigurationSourceNotFoundException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
                         ignore();
                     }
@@ -126,7 +127,7 @@ public interface Config extends Serializable {
                 for (URI uri :  reverse(uris))
                     try {
                         loaders.load(result, uri);
-                    } catch (IOException ex) {
+                    } catch (ConfigurationSourceNotFoundException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
                         ignore();
                     }

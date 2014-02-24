@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.loaders.ConfigurationSourceNotFoundException;
 import org.aeonbits.owner.loaders.Loader;
 import org.aeonbits.owner.loaders.PropertiesLoader;
 import org.aeonbits.owner.loaders.XMLLoader;
@@ -43,19 +44,9 @@ class LoadersManager implements Serializable {
         registerLoader(new XMLLoader());
     }
 
-    void load(Properties result, URI uri) throws IOException {
-    	
-    	InputStream stream = null;
-    	if("file".equals(uri.getScheme()) || "jar".equals(uri.getScheme())) {
-    		stream = uri.toURL().openStream();
-    	}
-
-        try {
-        	Loader loader = findLoader(uri);
-            loader.load(result, stream);
-        } finally {
-            if(stream != null) stream.close();
-        }
+    void load(Properties result, URI uri) throws ConfigurationSourceNotFoundException {
+    	Loader loader = findLoader(uri);
+        loader.load(result, uri);
     }
 
     Loader findLoader(URI uri) {
