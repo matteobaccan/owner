@@ -40,6 +40,10 @@ class LoadersManager implements Serializable {
     private final List<Loader> loaders = new LinkedList<Loader>();
 
     LoadersManager() {
+    	registerDefaultLoaders();
+    }
+    
+    void registerDefaultLoaders() {
         registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
     }
