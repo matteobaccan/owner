@@ -13,13 +13,14 @@ import org.aeonbits.owner.Config.HotReloadType;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
-import static org.aeonbits.owner.Util.fileFromURL;
+import static org.aeonbits.owner.Util.fileFromURI;
 import static org.aeonbits.owner.Util.now;
 
 /**
@@ -51,16 +52,16 @@ class HotReloadLogic implements Serializable {
         }
     }
 
-    public HotReloadLogic(HotReload hotReload, List<URL> urls, PropertiesManager manager) {
+    public HotReloadLogic(HotReload hotReload, List<URI> uris, PropertiesManager manager) {
         this.manager = manager;
         type = hotReload.type();
         interval = hotReload.unit().toMillis(hotReload.value());
-        setupWatchableResources(urls);
+        setupWatchableResources(uris);
     }
 
-    private void setupWatchableResources(List<URL> urls) {
-        for (URL url : urls) {
-            File file = fileFromURL(url);
+    private void setupWatchableResources(List<URI> uris) {
+        for (URI url : uris) {
+            File file = fileFromURI(url);
             if (file != null)
                 watchableFiles.add(new WatchableFile(file));
         }

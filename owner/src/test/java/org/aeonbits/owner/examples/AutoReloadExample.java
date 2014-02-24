@@ -21,6 +21,7 @@ import org.aeonbits.owner.event.ReloadListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -43,7 +44,7 @@ public class AutoReloadExample implements TestConstants {
     static {
         try {
             target = UtilTest.fileFromURL(SPEC);
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
     }

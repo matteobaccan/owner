@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -48,7 +49,7 @@ public class SyncAutoReloadTest implements TestConstants {
     private static TimeProviderForTest time;
 
     @BeforeClass
-    public static void beforeClass() throws MalformedURLException {
+    public static void beforeClass() throws URISyntaxException {
         target = fileFromURL(SPEC);
         jarTarget = new File(JAR_FILE);
     }

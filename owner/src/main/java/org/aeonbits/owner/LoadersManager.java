@@ -15,6 +15,7 @@ import org.aeonbits.owner.loaders.XMLLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -42,23 +43,28 @@ class LoadersManager implements Serializable {
         registerLoader(new XMLLoader());
     }
 
-    void load(Properties result, URL url) throws IOException {
-        InputStream stream = url.openStream();
+    void load(Properties result, URI uri) throws IOException {
+    	
+    	InputStream stream = null;
+    	if("file".equals(uri.getScheme()) || "jar".equals(uri.getScheme())) {
+    		stream = uri.toURL().openStream();
+    	}
+
         try {
-            Loader loader = findLoader(url);
+        	Loader loader = findLoader(uri);
             loader.load(result, stream);
         } finally {
-            stream.close();
+            if(stream != null) stream.close();
         }
     }
 
-    Loader findLoader(URL url) {
+    Loader findLoader(URI uri) {
         lock.readLock().lock();
         try {
             for (Loader loader : loaders)
-                if (loader.accept(url))
+                if (loader.accept(uri))
                     return loader;
-            throw unsupported("Can't resolve a Loader for the URL %s.", url.toString());
+            throw unsupported("Can't resolve a Loader for the URL %s.", uri.toString());
         } finally {
             lock.readLock().unlock();
         }

@@ -12,23 +12,24 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import java.net.URI;
 import java.net.URL;
 
 /**
  * @author Luigi R. Viggiano
  */
 public class LoadStrategyTestBase {
-    Matcher<URL> urlMatches(final String path) {
-        return new BaseMatcher<URL>(){
-            public URL url;
+    Matcher<URI> uriMatches(final String path) {
+        return new BaseMatcher<URI>(){
+            public URI uri;
 
             public boolean matches(Object o) {
-                url = (URL)o;
-                return url.getPath().endsWith(path);
+                uri = (URI)o;
+                return uri.getPath().endsWith(path);
             }
 
             public void describeTo(Description description) {
-                description.appendText("expected <" + (url != null ? url : "url") + "> ending with " + path);
+                description.appendText("expected <" + (uri != null ? uri : "uri") + "> ending with " + path);
             }
         };
     }

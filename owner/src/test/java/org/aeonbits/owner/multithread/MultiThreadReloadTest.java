@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.fileFromURL;
@@ -37,7 +38,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase implements TestCo
     private ReloadableConfig reloadableConfig;
 
     @BeforeClass
-    public static void beforeClass() throws MalformedURLException {
+    public static void beforeClass() throws URISyntaxException {
         target = fileFromURL(SPEC);
     }
 

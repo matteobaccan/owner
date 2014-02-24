@@ -11,6 +11,7 @@ package org.aeonbits.owner.loaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.Properties;
 
@@ -26,10 +27,10 @@ public interface Loader extends Serializable {
      * Indicates wether this Loader does accept the URL, guessing the content type from it.
      *
      * @since 1.0.5
-     * @param url   the URL
+     * @param uri   the URL
      * @return true, if the loader is able to handle the content of the URL based on the filename.
      */
-    boolean accept(URL url);
+    boolean accept(URI uri);
 
     /**
      * Loads the given {@link InputStream input} into the given {@link Properties result}
@@ -41,10 +42,10 @@ public interface Loader extends Serializable {
     void load(Properties result, InputStream input) throws IOException;
 
     /**
-     * Returns the default URL specification for a given url resource, that can be handled by this loader.
+     * Returns the default URL specification for a given uri resource, that can be handled by this loader.
      *
-     * @param urlPrefix the prefix identifying the url resource.
-     * @return the default URL specification for a given url resource, that can be handled by this loader.
+     * @param urlPrefix the prefix identifying the uri resource.
+     * @return the default URL specification for a given uri resource, that can be handled by this loader.
      */
     String defaultSpecFor(String urlPrefix);
 }

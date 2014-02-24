@@ -20,7 +20,8 @@ import org.mockito.Mock;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -47,7 +48,7 @@ public class LoaderManagerTest implements TestConstants {
     }
 
     @Before
-    public void before() throws IOException {
+    public void before() throws IOException, URISyntaxException {
         target = fileFromURL(SPEC);
         target.getParentFile().mkdirs();
         target.createNewFile();
@@ -128,7 +129,7 @@ public class LoaderManagerTest implements TestConstants {
     }
 
     public static class LoaderThatDoesNothing implements Loader {
-        public boolean accept(URL url) {
+        public boolean accept(URI uri) {
             return false;
         }
 

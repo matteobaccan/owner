@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.fileFromURL;
@@ -71,7 +72,7 @@ public class ImportConfigTest implements TestConstants {
     }
 
     @Test
-    public void testThatImportedPropertiesHaveHigherPriorityThanPropertiesLoadedBySources() throws IOException {
+    public void testThatImportedPropertiesHaveHigherPriorityThanPropertiesLoadedBySources() throws IOException, URISyntaxException {
         File target = fileFromURL(SPEC);
 
         save(target, new Properties() {{

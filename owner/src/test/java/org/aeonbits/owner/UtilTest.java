@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -157,7 +158,7 @@ public class UtilTest {
         return Util.ignore();
     }
 
-    public static File fileFromURL(String spec) throws MalformedURLException {
+    public static File fileFromURL(String spec) throws URISyntaxException {
         return Util.fileFromURL(spec);
     }
 

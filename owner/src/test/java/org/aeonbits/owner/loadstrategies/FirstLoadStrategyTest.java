@@ -22,6 +22,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
@@ -105,8 +106,8 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
                 new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(),
                 scheduler, expander, loaders);
         manager.load();
-        verify(loaders, times(1)).findLoader(any(URL.class));
-        verify(loaders, times(1)).findLoader(argThat(urlMatches("org/aeonbits/owner/FooBar.properties")));
+        verify(loaders, times(1)).findLoader(any(URI.class));
+        verify(loaders, times(1)).findLoader(argThat(uriMatches("org/aeonbits/owner/FooBar.properties")));
     }
 
     @Test
