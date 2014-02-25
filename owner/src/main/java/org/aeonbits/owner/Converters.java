@@ -146,8 +146,12 @@ enum Converters {
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
             if (editor == null) return null;
-            editor.setAsText(text);
-            return editor.getValue();
+            try {
+                editor.setAsText(text);
+                return editor.getValue();
+            } catch (Exception e) {
+                throw unsupportedConversion(targetType, text);
+            }
         }
     },
 

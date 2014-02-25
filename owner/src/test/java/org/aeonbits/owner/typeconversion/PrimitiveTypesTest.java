@@ -34,8 +34,11 @@ public class PrimitiveTypesTest {
 
         @DefaultValue("7")
         Integer daysInWeek();
+
+        @DefaultValue("invalid")
+        Integer invalid();
     }
-    
+
     @Test
     public void testDefaultIntValue() {
         PrimitiveTypesConfig config = ConfigFactory.create(PrimitiveTypesConfig.class);
@@ -64,6 +67,12 @@ public class PrimitiveTypesTest {
     public void testDefaultIntegerValue() {
         PrimitiveTypesConfig config = ConfigFactory.create(PrimitiveTypesConfig.class);
         assertEquals(new Integer(7), config.daysInWeek());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testInvalid() {
+        PrimitiveTypesConfig config = ConfigFactory.create(PrimitiveTypesConfig.class);
+        config.invalid();
     }
 
 }
