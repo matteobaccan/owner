@@ -17,9 +17,12 @@ import org.xml.sax.ext.DefaultHandler2;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Properties;
 import java.util.Stack;
@@ -31,7 +34,7 @@ import java.util.Stack;
  * @since 1.0.5
  * @author Luigi R. Viggiano
  */
-public class XMLLoader implements Loader {
+public class XMLLoader extends AbstractFileBasedLoader implements Loader {
 
     private static final long serialVersionUID = -894351666332018767L;
     private transient volatile SAXParserFactory factory = null;
@@ -128,11 +131,16 @@ public class XMLLoader implements Loader {
         }
     }
 
-    public boolean accept(URL url) {
-        return url.getFile().toLowerCase().endsWith(".xml");
+    public boolean accept(URI uri) {
+		try {
+			URL url = uri.toURL();
+			return url.getFile().toLowerCase().endsWith(".xml");
+		} catch (MalformedURLException e) {
+			return false;
+		}
     }
 
-    public void load(Properties result, InputStream input) throws IOException {
+    public void doLoadInternal(Properties result, InputStream input) throws IOException {
         try {
             SAXParser parser = factory().newSAXParser();
             XmlToPropsHandler h = new XmlToPropsHandler(result);

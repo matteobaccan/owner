@@ -71,6 +71,11 @@ class DefaultFactory implements Factory {
     public void registerLoader(Loader loader) {
         loadersManager.registerLoader(loader);
     }
+    
+    public void resetLoaders() {
+        loadersManager.clear();
+        loadersManager.registerDefaultLoaders();
+    }
 
     public String getProperty(String key) {
         checkKey(key);

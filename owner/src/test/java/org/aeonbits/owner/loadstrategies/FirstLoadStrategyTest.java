@@ -22,14 +22,12 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -105,8 +103,13 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
                 new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(),
                 scheduler, expander, loaders);
         manager.load();
-        verify(loaders, times(1)).findLoader(any(URL.class));
-        verify(loaders, times(1)).findLoader(argThat(urlMatches("org/aeonbits/owner/FooBar.properties")));
+        
+        /**
+         * This test is not valid anymore, since it expected LoadersManager#load to throw an IOException
+         * before LoadersManager#findLoader was executed
+         */
+        //verify(loaders, times(1)).findLoader(any(URI.class));
+        verify(loaders, times(1)).findLoader(argThat(uriMatches("org/aeonbits/owner/FooBar.properties")));
     }
 
     @Test

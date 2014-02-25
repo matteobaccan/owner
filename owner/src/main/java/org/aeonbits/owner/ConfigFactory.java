@@ -133,5 +133,9 @@ public final class ConfigFactory {
     public static void registerLoader(Loader loader) {
         INSTANCE.registerLoader(loader);
     }
+    
+    public static void resetLoaders() {
+        INSTANCE.resetLoaders();
+    }
 
 }

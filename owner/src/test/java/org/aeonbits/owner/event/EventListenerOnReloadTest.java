@@ -25,6 +25,7 @@ import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.fileFromURL;
@@ -62,7 +63,7 @@ public class EventListenerOnReloadTest implements TestConstants {
     private MyConfig cfg;
 
     @Before
-    public void before() throws MalformedURLException {
+    public void before() throws URISyntaxException {
         target = fileFromURL(SPEC);
         target.delete();
         cfg = ConfigFactory.create(MyConfig.class);

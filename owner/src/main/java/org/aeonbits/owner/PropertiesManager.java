@@ -31,6 +31,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -73,7 +75,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final WriteLock writeLock = lock.writeLock();
 
     private final LoadType loadType;
-    private final List<URL> urls;
+    private final List<URI> urls;
     private final HotReloadLogic hotReloadLogic;
 
     private volatile boolean loading = false;
@@ -111,8 +113,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.loaders = loaders;
         this.imports = imports;
 
-        ConfigURLFactory urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
-        urls = toURLs(clazz.getAnnotation(Sources.class), urlFactory);
+        ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
+        urls = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
@@ -132,27 +134,29 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private List<URL> toURLs(Sources sources, ConfigURLFactory urlFactory) {
+    private List<URI> toURIs(Sources sources, ConfigURIFactory urlFactory) {
         String[] specs = specs(sources, urlFactory);
-        ArrayList<URL> result = new ArrayList<URL>();
+        List<URI> result = new ArrayList<URI>();
         for (String spec : specs) {
             try {
-                URL url = urlFactory.newURL(spec);
-                if (url != null)
-                    result.add(url);
+                URI uri = urlFactory.newURI(spec);
+                if (uri != null)
+                    result.add(uri);
             } catch (MalformedURLException e) {
                 throw unsupported(e, "Can't convert '%s' to a valid URL", spec);
-            }
+            } catch (URISyntaxException e) {
+            	throw unsupported(e, "Can't convert '%s' to a valid URI", spec);
+			}
         }
         return result;
     }
 
-    private String[] specs(Sources sources, ConfigURLFactory urlFactory) {
+    private String[] specs(Sources sources, ConfigURIFactory urlFactory) {
         if (sources != null) return sources.value();
         return defaultSpecs(urlFactory);
     }
 
-    private String[] defaultSpecs(ConfigURLFactory urlFactory) {
+    private String[] defaultSpecs(ConfigURIFactory urlFactory) {
         String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
         return loaders.defaultSpecs(prefix);
     }

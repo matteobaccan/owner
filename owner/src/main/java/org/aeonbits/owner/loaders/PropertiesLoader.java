@@ -10,7 +10,8 @@ package org.aeonbits.owner.loaders;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Properties;
 
 /**
@@ -19,15 +20,20 @@ import java.util.Properties;
  * @since 1.0.5
  * @author Luigi R. Viggiano
  */
-public class PropertiesLoader implements Loader {
+public class PropertiesLoader extends AbstractFileBasedLoader implements Loader {
 
     private static final long serialVersionUID = -1781643040589572341L;
 
-    public boolean accept(URL url) {
-        return true;
+    public boolean accept(URI uri) {
+		try {
+			uri.toURL();
+			return true;
+		} catch (MalformedURLException e) {
+			return false;
+		}
     }
 
-    public void load(Properties result, InputStream input) throws IOException {
+    protected void doLoadInternal(Properties result, InputStream input) throws IOException {
         result.load(input);
     }
 

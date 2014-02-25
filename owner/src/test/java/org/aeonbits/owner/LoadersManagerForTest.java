@@ -8,16 +8,16 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.loaders.Loader;
+import java.net.URI;
 
-import java.net.URL;
+import org.aeonbits.owner.loaders.Loader;
 
 /**
  * @author Luigi R. Viggiano
  */
 public class LoadersManagerForTest extends LoadersManager {
     @Override
-    public Loader findLoader(URL url) {
-        return super.findLoader(url);
+    public Loader findLoader(URI uri) {
+        return super.findLoader(uri);
     }
 }

@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.loaders.ConfigurationSourceNotFoundException;
 import org.aeonbits.owner.loaders.Loader;
 import org.aeonbits.owner.loaders.PropertiesLoader;
 import org.aeonbits.owner.loaders.XMLLoader;
@@ -15,6 +16,7 @@ import org.aeonbits.owner.loaders.XMLLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -38,27 +40,26 @@ class LoadersManager implements Serializable {
     private final List<Loader> loaders = new LinkedList<Loader>();
 
     LoadersManager() {
+    	registerDefaultLoaders();
+    }
+    
+    void registerDefaultLoaders() {
         registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
     }
 
-    void load(Properties result, URL url) throws IOException {
-        InputStream stream = url.openStream();
-        try {
-            Loader loader = findLoader(url);
-            loader.load(result, stream);
-        } finally {
-            stream.close();
-        }
+    void load(Properties result, URI uri) throws ConfigurationSourceNotFoundException {
+    	Loader loader = findLoader(uri);
+        loader.load(result, uri);
     }
 
-    Loader findLoader(URL url) {
+    Loader findLoader(URI uri) {
         lock.readLock().lock();
         try {
             for (Loader loader : loaders)
-                if (loader.accept(url))
+                if (loader.accept(uri))
                     return loader;
-            throw unsupported("Can't resolve a Loader for the URL %s.", url.toString());
+            throw unsupported("Can't resolve a Loader for the URL %s.", uri.toString());
         } finally {
             lock.readLock().unlock();
         }

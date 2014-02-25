@@ -87,5 +87,8 @@ public interface Factory {
      * @since 1.0.5
      */
     void registerLoader(Loader loader);
+    
+    void resetLoaders();
+    
 
 }

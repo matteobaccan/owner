@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -132,28 +134,36 @@ abstract class Util {
         return timeProvider.getTime();
     }
 
-    static File fileFromURL(URL url) {
-        if ("file".equalsIgnoreCase(url.getProtocol())) {
-            String path = url.getPath();
+    static File fileFromURI(URI uri) {
+        //if ("file".equalsIgnoreCase(url.getProtocol())) {
+    	if ("file".equalsIgnoreCase(uri.getScheme())) {
+            String path = uri.getSchemeSpecificPart();
             try {
                 path = decode(path, "utf-8");
                 return new File(path);
             } catch (UnsupportedEncodingException e) {
                 return unreachableButCompilerNeedsThis(/* utf-8 is supported in jre libraries */);
             }
-        } else if ("jar".equalsIgnoreCase(url.getProtocol())) {
+        //} else if ("jar".equalsIgnoreCase(url.getProtocol())) {
+    	} else if ("jar".equalsIgnoreCase(uri.getScheme())) {
+    		URL url = null;
+    		try {
+				url = uri.toURL();
+			} catch (MalformedURLException e1) {
+                return unreachableButCompilerNeedsThis(/* utf-8 is supported in jre libraries */);
+			}
             String path = url.getPath();
             try {
                 return fileFromURL(path.substring(0, path.indexOf('!')));
-            } catch (MalformedURLException e) {
-                return ignore(/* non critical */);
-            }
+            } catch (URISyntaxException e) {
+            	return ignore(/* non critical */);
+			}
         }
         return null;
     }
 
-    static File fileFromURL(String urlSpec) throws MalformedURLException {
-        return fileFromURL(new URL(urlSpec));
+    static File fileFromURL(String urlSpec) throws URISyntaxException {
+        return fileFromURI(new URI(urlSpec));
     }
 
     static boolean eq(Object o1, Object o2) {
