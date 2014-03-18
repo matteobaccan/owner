@@ -44,20 +44,16 @@ public abstract class Collections {
 
     private static class EntryMap<K, V> extends AbstractMap<K, V> implements Serializable {
         private static final long serialVersionUID = -789853606407653214L;
-        private final Set<Entry<K, V>> entries;
+        private final Set<Entry<? extends K, ? extends V>> entries;
 
-        private EntryMap(Entry<K, V>... entries) {
+        private EntryMap(Entry<? extends K, ? extends V>... entries) {
             this.entries = set(entries);
         }
 
         @SuppressWarnings("unchecked")
-        private EntryMap(K key, V value) {
-            this(entry(key, value));
-        }
-
         @Override
         public Set<Entry<K, V>> entrySet() {
-            return entries;
+            return (Set) entries;
         }
     }
 
@@ -65,8 +61,13 @@ public abstract class Collections {
         return new SimpleEntry<K, V>(key, value);
     }
 
+    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> map(K key, V value) {
-        return new EntryMap<K, V>(key, value);
+        return map(entry(key, value));
+    }
+
+    public static <K, V> Map<K, V> map(Map.Entry<? extends K, ? extends V>... entries) {
+        return new EntryMap<K, V>(entries);
     }
 
     public static <E> Set<E> set(E... elements) {
