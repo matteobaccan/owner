@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Luigi R. Viggiano
+ * Copyright (c) 2012-2014, Luigi R. Viggiano
  * All rights reserved.
  *
  * This software is distributable under the BSD license.

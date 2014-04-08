@@ -7,7 +7,7 @@ permalink: /docs/license/
 
 OWNER is released under the BSD license:
 
-Copyright (c) 2012, Luigi R. Viggiano
+Copyright (c) 2012-2014, Luigi R. Viggiano
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
