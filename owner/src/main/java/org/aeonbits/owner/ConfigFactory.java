@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Luigi R. Viggiano
+ * Copyright (c) 2013-2014, Luigi R. Viggiano
  * All rights reserved.
  *
  * This software is distributable under the BSD license.
@@ -32,7 +32,7 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
  */
 public final class ConfigFactory {
 
-    private static final Factory INSTANCE = newInstance();
+    static final Factory INSTANCE = newInstance();
 
     /** Don't let anyone instantiate this class */
     private ConfigFactory() {}
