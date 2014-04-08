@@ -13,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Utility class to have a cache singleton for Config instances.
+ * Utility class to have a cache for Config instances, that can be used as a singleton factory.
+ *
+ * The <tt>ConfigCache</tt> is designed to be thread safe.
  *
  * @author Luigi R. Viggiano
  * @since 1.0.6
@@ -134,4 +136,5 @@ public final class ConfigCache {
     public static <T extends Config> T remove(Object key) {
         return (T) CACHE.remove(key);
     }
+
 }
