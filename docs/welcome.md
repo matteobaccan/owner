@@ -53,6 +53,12 @@ hazardous. Here’s what to look out for.
   <p>Be aware of these messages if you wish to avoid certain death.</p>
 </div>
 
+<div class="note unreleased">
+  <h5>You'll see this by a feature that hasn't been released</h5>
+  <p>Some pieces of this website are for future versions of Jekyll that
+    are not yet released.</p>
+</div>
+
 If you come across anything along the way that we haven’t covered, or if you
 know of a tip you think others would find handy, please [file an
 issue](https://github.com/lviggiano/owner/issues/new) and we’ll see about
