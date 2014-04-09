@@ -118,8 +118,8 @@ Variable expansion for the @Key
 
 <div class="note unreleased">
   <h5>Variable expansion for the @Key will be available in 1.0.6</h5>
-  If you need or you want to try this feature, you can [build]({{site.url}}/docs/building/)
-  version 1.0.6-SNAPSHOT available on GitHub <tt>master</tt> branch.
+  If you need or you want to try this feature, you can <a href="{{site.url}}/docs/building/">build</a>
+  version <tt>1.0.6-SNAPSHOT</tt> available on GitHub <tt>master</tt> branch.
 </div>
 
 
