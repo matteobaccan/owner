@@ -116,6 +116,13 @@ all methods defined in that interface.
 Variable expansion for the @Key
 ---------------------------------
 
+<div class="note unreleased">
+  <h5>Variable expansion for the @Key will be available in 1.0.6</h5>
+  If you need or you want to try this feature, you can [build]({{site.url}}/docs/building/)
+  version 1.0.6-SNAPSHOT available on GitHub <tt>master</tt> branch.
+</div>
+
+
 Some time ago, I used to work for a company where - for security reason - it was required to deploy the exact same
 artifact to production after being tried and verified in a testing environment.
 The artifact was signed by a deployment tool to ensure that no changes were made during the passage from the
