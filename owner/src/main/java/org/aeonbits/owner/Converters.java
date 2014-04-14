@@ -30,6 +30,7 @@ import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Util.expandUserHome;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.aeonbits.owner.Util.unsupported;
+import static org.aeonbits.owner.util.Reflection.isClassAvailable;
 
 /**
  * Converter class from {@link java.lang.String} to property types.
@@ -142,8 +143,12 @@ enum Converters {
     },
 
     PROPERTY_EDITOR {
+
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (canUsePropertyEditors())
+                return null;
+
             PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
             if (editor == null) return null;
             try {
@@ -152,6 +157,36 @@ enum Converters {
             } catch (Exception e) {
                 throw unsupportedConversion(targetType, text);
             }
+        }
+
+        private boolean canUsePropertyEditors() {
+            return ! isPropertyEditoryAvailable() || isPropertyEditorDisabled();
+        }
+
+        private boolean isPropertyEditoryAvailable() {
+            return isClassAvailable("java.beans.PropertyEditorManager");
+        }
+
+        private boolean isPropertyEditorDisabled() {
+            return Boolean.getBoolean("org.aeonbits.owner.property.editor.disabled");
+        }
+    },
+
+    /*
+     * This is needed for cases like when the PropertyEditor classes are not available
+     */
+    PRIMITIVE {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (! targetType.isPrimitive()) return null;
+            if (targetType == Byte.TYPE) return Byte.parseByte(text);
+            if (targetType == Short.TYPE) return Short.parseShort(text);
+            if (targetType == Integer.TYPE) return Integer.parseInt(text);
+            if (targetType == Long.TYPE) return Long.parseLong(text);
+            if (targetType == Boolean.TYPE) return Boolean.parseBoolean(text);
+            if (targetType == Float.TYPE) return Float.parseFloat(text);
+            if (targetType == Double.TYPE) return Double.parseDouble(text);
+            return null;
         }
     },
 

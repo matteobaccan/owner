@@ -16,7 +16,10 @@ import org.junit.Test;
 import java.beans.PropertyEditorManager;
 import java.util.List;
 
+import static org.aeonbits.owner.typeconversion.editor.PropertyEditorTestUtil.assumePropertyEditorIsEnabled;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Luigi R. Viggiano
@@ -33,15 +36,16 @@ public class PropertyEditorTest {
         List<User> users();
     }
 
+    @Before
+    public void setUp() {
+        assumePropertyEditorIsEnabled();
+        PropertyEditorManager.registerEditor(User.class, UserPropertyEditor.class);
+        cfg = ConfigFactory.create(MyAppConfig.class);
+    }
+
     @Test
     public void testPropertyEditor() {
         assertEquals("admin", cfg.user().getUsername());
-    }
-
-    @Before
-    public void setUp() {
-        PropertyEditorManager.registerEditor(User.class, UserPropertyEditor.class);
-        cfg = ConfigFactory.create(MyAppConfig.class);
     }
 
     @Test
