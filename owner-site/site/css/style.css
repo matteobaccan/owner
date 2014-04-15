@@ -287,7 +287,7 @@ body > footer a:hover img {
 }
 
 .quickstart .code .shell {
-  padding: 20px;
+  padding: 0px;
   text-shadow: none;
   margin: 0 20px;
   background: #3d3d3d;
