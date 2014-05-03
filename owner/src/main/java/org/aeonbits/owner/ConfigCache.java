@@ -81,7 +81,7 @@ public final class ConfigCache {
      *                  which maps methods to property values.
      */
     public static <T extends Config> T getOrCreate(Factory factory, Object key,
-                                                   Class<? extends T> clazz, Map<?, ?>[] imports) {
+                                                   Class<? extends T> clazz, Map<?, ?>... imports) {
         T existing = get(key);
         if (existing != null) return existing;
         T created = factory.create(clazz, imports);
