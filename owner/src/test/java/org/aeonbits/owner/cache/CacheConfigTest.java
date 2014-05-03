@@ -18,7 +18,6 @@ import org.mockito.Matchers;
 
 import java.util.Map;
 
-import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
