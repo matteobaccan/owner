@@ -2,7 +2,7 @@
 layout: docs
 title: Event support
 prev_section: xml-support
-next_section: features
+next_section: singleton
 permalink: /docs/event-support/
 ---
 
