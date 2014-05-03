@@ -7,7 +7,7 @@ permalink: /docs/singleton/
 ---
 
 <div class="note unreleased">
-  <h5>This feature that hasn't been released yet</h5>
+  <h5>This feature hasn't been released yet</h5>
   <p>The examples below are available on the `master` branch and they will be released soon, but since they aren't yet,
     they are subject to changes and fixes.</p>
 </div>
