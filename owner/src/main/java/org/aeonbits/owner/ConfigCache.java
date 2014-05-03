@@ -96,6 +96,7 @@ public final class ConfigCache {
      * @param <T>       type of the interface.
      * @return          the {@link Config} object from the cache if exists, or <tt>null</tt> if it doesn't.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Config> T get(Object key) {
         return (T) CACHE.get(key);
     }
@@ -109,6 +110,7 @@ public final class ConfigCache {
      * @return          the previous value associated with the specified key, or
      *                  <tt>null</tt> if there was no mapping for the key.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Config> T add(Object key, T instance) {
         return (T) CACHE.putIfAbsent(key, instance);
     }
@@ -134,6 +136,7 @@ public final class ConfigCache {
      * @return      the previous instance associated with <tt>key</tt>, or
      *              <tt>null</tt> if there was no instance for <tt>key</tt>.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Config> T remove(Object key) {
         return (T) CACHE.remove(key);
     }
