@@ -95,6 +95,6 @@ Code quality reports
 --------------------
 
 You can access latest code quality reports from
-[Sonar](http://sheldon.dyndns.tv:9000/dashboard/index/org.aeonbits.owner:owner)
+[Sonar](http://dev.aeonbits.org:9000/dashboard/index/org.aeonbits.owner:owner)
 and [Maven](http://owner.newinstance.it/latest/project-reports.html)
 websites.

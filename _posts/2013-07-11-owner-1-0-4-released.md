@@ -36,7 +36,7 @@ Site Enhancements
 -----------------
 
  * New website for documentation.
- * Added [sonar](http://sheldon.dyndns.tv:9000) to keep high attention on code quality.
+ * Added [sonar](http://dev.aeonbits.org:9000) to keep high attention on code quality.
  * Added [Travis CI][travis-ci] to the project to track changes and run tests on different JDK versions.
  * Website code snippets now have syntax highlighting. Thanks [ming13][].
 
