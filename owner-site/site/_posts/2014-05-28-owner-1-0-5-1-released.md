@@ -11,6 +11,7 @@ v1.0.5.1 contains following enhancements and bug fixes.
 
 Enhancements
 ------------
+ * Java8 fixes, so now it is officially supported.
  * Added UTF-8 Support for properties files. (See [#77](https://github.com/lviggiano/owner/issues/77) and
    [#78](https://github.com/lviggiano/owner/issues/78), thanks [@SvetaNesterenko](https://github.com/SvetaNesterenko) )
  * Added [ConfigCache (Singleton)]({{ site.url }}/docs/singleton/) feature. (See [#64](https://github.com/lviggiano/owner/issues/64))

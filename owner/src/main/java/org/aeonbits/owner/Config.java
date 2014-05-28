@@ -30,7 +30,7 @@ import static org.aeonbits.owner.Util.reverse;
 
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
- * <p/>
+ * <p>&nbsp;</p>
  * Sub-interfaces may also extend {@link Accessible} to allow some debugging facility, or {@link Reloadable} to allow the
  * user to programmatically reload properties.
  *
@@ -140,10 +140,10 @@ public interface Config extends Serializable {
     /**
      * Specify that the class implements hot reloading of properties from filesystem baked {@link Sources} (hot
      * reloading can't be applied to all types of URLs).
-     * <p/>
+     * <p>&nbsp;</p>
      * It is possible to specify an interval to indicate how frequently the library shall check the files for
      * modifications and perform the reload.
-     * <p/>
+     * <p>&nbsp;</p>
      * Examples:
      * <pre>
      *      &#64;HotReload    // will check for file changes every 5 seconds.

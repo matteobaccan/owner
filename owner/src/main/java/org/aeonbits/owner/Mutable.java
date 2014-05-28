@@ -14,8 +14,10 @@ import java.io.InputStream;
 import java.io.Reader;
 
 /**
- * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p> <p/> <p>Example:</p>
- * <p/>
+ * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p>
+ * <p>&nbsp;</p>
+ * <p>Example:</p>
+ * <p>&nbsp;</p>
  * <pre>
  *     public interface MyConfig extends Config, Mutable {
  *         &#64;DefaultValue("18")
