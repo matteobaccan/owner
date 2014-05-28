@@ -42,7 +42,7 @@ public abstract class Collections {
     // Suppresses default constructor, ensuring non-instantiability.
     private Collections() {}
 
-    private static class EntryMap<K, V> extends AbstractMap<K, V> implements Serializable {
+    private static final class EntryMap<K, V> extends AbstractMap<K, V> implements Serializable {
         private static final long serialVersionUID = -789853606407653214L;
         private final Set<Entry<? extends K, ? extends V>> entries;
 

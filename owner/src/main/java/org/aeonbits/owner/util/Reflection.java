@@ -12,6 +12,10 @@ package org.aeonbits.owner.util;
  * @author Luigi R. Viggiano
  */
 public class Reflection {
+    
+    // Suppresses default constructor, ensuring non-instantiability.
+    private Reflection() {}
+
     public static boolean isClassAvailable(String className) {
         try {
             Class.forName(className);
