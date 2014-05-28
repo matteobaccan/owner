@@ -185,12 +185,12 @@ public interface Config extends Serializable {
 
         /**
          * The time unit for the interval. By default it is {@link TimeUnit#SECONDS}.
-         * <p/>
-         * Date resolution vary from filesystem to filesystem.<br/>
-         * For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second.<br/>
-         * For FAT32 the date resolution for the last modified time is 2 seconds. <br/>
+         * <p>&nbsp;</p>
+         * Date resolution vary from filesystem to filesystem.<br></br>
+         * For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second.<br></br>
+         * For FAT32 the date resolution for the last modified time is 2 seconds. <br></br>
          * For Ext4 the date resolution is in nanoseconds.
-         * <p/>
+         * <p>&nbsp;</p>
          * So, it is a good idea to express the time unit in seconds or more, since higher time resolution
          * will probably not be supported by the underlying filesystem.
          */
