@@ -14,7 +14,8 @@ package org.aeonbits.owner.util;
 public class Reflection {
     public static boolean isClassAvailable(String className) {
         try {
-            return Class.forName(className) != null;
+            Class.forName(className);
+            return true;
         } catch (ClassNotFoundException e) {
             return false;
         }
