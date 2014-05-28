@@ -31,5 +31,4 @@ Bugs fixes
  * Code cleanup, removed warnings.
  * Fixed compatibility issue on exception raised by Java7 and Java6. (See [#71](https://github.com/lviggiano/owner/issues/71))
 
-Downloadable artifacts are published on
-[Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner/1.0.5.1/).
+Downloadable artifacts are published on [GitHub](https://github.com/lviggiano/owner/releases/tag/owner-1.0.5.1) and on [Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner/1.0.5.1/).
