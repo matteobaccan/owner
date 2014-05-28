@@ -180,19 +180,23 @@ public interface Config extends Serializable {
         /**
          * The interval, expressed in seconds (by default), to perform checks on the filesystem to identify modified
          * files and eventually perform the reloading of the properties. By default is 5 seconds.
+         *
+         * @return the hot reload value; default is 5.
          */
         long value() default 5;
 
         /**
          * The time unit for the interval. By default it is {@link TimeUnit#SECONDS}.
          * <p>&nbsp;</p>
-         * Date resolution vary from filesystem to filesystem.<br></br>
-         * For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second.<br></br>
-         * For FAT32 the date resolution for the last modified time is 2 seconds. <br></br>
+         * Date resolution vary from filesystem to filesystem.<br>
+         * For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second.<br>
+         * For FAT32 the date resolution for the last modified time is 2 seconds. <br>
          * For Ext4 the date resolution is in nanoseconds.
          * <p>&nbsp;</p>
          * So, it is a good idea to express the time unit in seconds or more, since higher time resolution
          * will probably not be supported by the underlying filesystem.
+         *
+         * @return the time unit; default is SECONDS.
          */
         TimeUnit unit() default SECONDS;
 
@@ -206,6 +210,8 @@ public interface Config extends Serializable {
          * <p>
          * {@link HotReloadType#ASYNC}: the configuration file is checked by a background thread despite the fact that
          * the config object is used or not.
+         *
+         * @return the hot reload type; default is SYNC.
          */
         HotReloadType type() default SYNC;
     }

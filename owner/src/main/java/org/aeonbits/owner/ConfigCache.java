@@ -132,6 +132,7 @@ public final class ConfigCache {
      * <p>The cache will not contain the instance for the specified key once the
      * call returns.
      *
+     * @param <T>   type of the interface.
      * @param key   key whose instance is to be removed from the cache.
      * @return      the previous instance associated with <tt>key</tt>, or
      *              <tt>null</tt> if there was no instance for <tt>key</tt>.

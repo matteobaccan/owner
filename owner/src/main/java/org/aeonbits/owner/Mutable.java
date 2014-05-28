@@ -103,7 +103,7 @@ public interface Mutable extends Config {
     /**
      * Removes a {@link PropertyChangeListener} from the Mutable interface.
      *
-     * @param listener
+     * @param listener the property change listener to be removed
      */
     void removePropertyChangeListener(PropertyChangeListener listener);
 

@@ -28,6 +28,7 @@ import static org.aeonbits.owner.Util.fixBackslashForRegex;
  * can be called passing in the source text for interpolation. In the returned text all variable references (as long as
  * their values are known) will be resolved. The following example demonstrates this:
  * <p>&nbsp;</p>
+ * <pre>
  * Map valuesMap = new HashMap();
  * valuesMap.put(&quot;animal&quot;, &quot;quick brown fox&quot;);
  * valuesMap.put(&quot;target&quot;, &quot;lazy dog&quot;);

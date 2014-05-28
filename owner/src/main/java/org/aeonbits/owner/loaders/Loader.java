@@ -37,6 +37,7 @@ public interface Loader extends Serializable {
      * @since 1.0.5
      * @param result    the resulting properties where to load the {@link InputStream input}
      * @param input     the {@link InputStream} from where to load the properties.
+     * @throws java.io.IOException if there is some I/O error during the load.
      */
     void load(Properties result, InputStream input) throws IOException;
 
