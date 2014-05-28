@@ -6,13 +6,6 @@ next_section: features
 permalink: /docs/singleton/
 ---
 
-<div class="note unreleased">
-  <h5>This feature hasn't been released yet</h5>
-  <p>The examples below are available on the `master` branch and they will be released soon, but since they aren't yet,
-    they are subject to changes and fixes.</p>
-</div>
-
-
 It makes sense for the configuration for an application to be a sort of [Singleton](http://c2.com/cgi/wiki?SingletonPattern).
 
 In the most common case, to instantiate a `Config` object, you would do:
