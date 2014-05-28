@@ -15,9 +15,7 @@ import java.io.Reader;
 
 /**
  * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p>
- * <p>&nbsp;</p>
  * <p>Example:</p>
- * <p>&nbsp;</p>
  * <pre>
  *     public interface MyConfig extends Config, Mutable {
  *         &#64;DefaultValue("18")
@@ -41,7 +39,6 @@ public interface Mutable extends Config {
 
     /**
      * <p>Sets a given property to the specified value.</p>
-     * <p>&nbsp;</p>
      * <p>Differently than {@link
      * java.util.Properties#setProperty(String, String)}, if <tt>key</tt> is set to <tt>null</tt> then this call is
      * equivalent to {@link #removeProperty(String)}.</p>

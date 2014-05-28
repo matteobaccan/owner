@@ -19,15 +19,15 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 /**
  * A static factory class to instantiate {@link Config} instances.
- * <p>&nbsp;</p>
- * By default a {link Config} sub-interface is associated to a property having the same package name and class name as
- * the interface itself.
- * <p>&nbsp;</p>
- * Method names are mapped to property names contained in the property files.
- * <p>&nbsp;</p>
+ * <p>
+ * By default a {@link Config} sub-interface is associated to a property having the same package name and class name as
+ * the interface itself.</p>
+ * <p>
+ * Method names are mapped to property names contained in the property files.</p>
+ * <p>
  * This is a singleton static class, to be used as convenience when only a single factory is needed inside an
  * application. It exposes the {@link #newInstance()} method to create new instances of {@link Factory} objects.
- *
+ * </p>
  * @author Luigi R. Viggiano
  */
 public final class ConfigFactory {

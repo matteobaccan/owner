@@ -17,17 +17,20 @@ import static java.util.regex.Pattern.compile;
 import static org.aeonbits.owner.Util.fixBackslashForRegex;
 
 /**
+ * <p>
  * Substitutes variables within a string by values.
- * <p>&nbsp;</p>
+ * </p>
+ * <p>
  * This class takes a piece of text and substitutes all the variables within it. The definition of a variable is
  * <code>${variableName}</code>.
- * <p>&nbsp;</p>
+ * </p>
+ * <p>
  * Typical usage of this class follows the following pattern: First an instance is created and initialized with the
  * values that contains the values for the available variables. If a prefix and/or suffix for variables should be used
  * other than the default ones, the appropriate settings can be performed. After that the <code>replace()</code> method
  * can be called passing in the source text for interpolation. In the returned text all variable references (as long as
  * their values are known) will be resolved. The following example demonstrates this:
- * <p>&nbsp;</p>
+ * </p>
  * <pre>
  * Map valuesMap = new HashMap();
  * valuesMap.put(&quot;animal&quot;, &quot;quick brown fox&quot;);

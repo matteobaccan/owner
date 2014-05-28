@@ -26,11 +26,13 @@ import static org.aeonbits.owner.Util.isFeatureDisabled;
 /**
  * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
  * it to a property value from a property file, or a {@link Config.DefaultValue} specified in method annotation.
- * <p>&nbsp;</p>
+ * <p>
  * The {@link Config.Key} annotation can be used to override default mapping between method names and property names.
- * <p>&nbsp;</p>
+ * </p>
+ * <p>
  * Automatic conversion is handled between the property value and the return type expected by the method of the
  * delegate.
+ * </p>
  *
  * @author Luigi R. Viggiano
  */

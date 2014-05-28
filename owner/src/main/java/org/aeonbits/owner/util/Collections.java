@@ -21,9 +21,7 @@ import static java.util.Arrays.asList;
 
 /**
  * Utility class to create a maps, lists and sets
- * <p>&nbsp;</p>
  * <p> Examples of usage: </p>
- * <p>&nbsp;</p>
  * <pre>
  * import static org.aeonbits.owner.util.Collections.map;
  * import static org.aeonbits.owner.util.Collections.entry;
