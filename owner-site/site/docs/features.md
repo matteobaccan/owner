@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Features
-prev_section: xml-support
+prev_section: singleton
 next_section: why
 permalink: /docs/features/
 ---
