@@ -19,7 +19,7 @@ application configuration through Java properties files.
 Full documentation available on [project website][website].
 
 BASIC USAGE
------
+-----------
 
 The approach used by OWNER APIs, is to define a Java interface
 associated to a properties file.
@@ -63,6 +63,13 @@ public class MyApp {
 But this is just the tip of the iceberg.
 
 Continue reading here: [Basic usage](http://owner.aeonbits.org/docs/usage/).
+
+DOWNLOAD
+--------
+
+Public Releases can be downloaded from [GitHub Releases](https://github.com/lviggiano/owner/releases) page or
+[Maven Central Repository](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22).
+
 
 DOCUMENTATION
 -------------
