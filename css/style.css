@@ -991,3 +991,17 @@ code.option, code.flag, code.filter, code.output {
     padding: 0 10px;
   }
 }
+
+/* GitHub ribbon display rules */
+
+@media (max-width: 800px){
+    .ribbon {
+        display: none;
+    }
+}
+
+@media (min-width: 800px){
+    .ribbon {
+        display: inline;
+    }
+}
