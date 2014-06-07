@@ -146,7 +146,7 @@ enum Converters {
 
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (canUsePropertyEditors())
+            if (canNotUsePropertyEditors())
                 return null;
 
             PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
@@ -159,7 +159,7 @@ enum Converters {
             }
         }
 
-        private boolean canUsePropertyEditors() {
+        private boolean canNotUsePropertyEditors() {
             return ! isPropertyEditoryAvailable() || isPropertyEditorDisabled();
         }
 
