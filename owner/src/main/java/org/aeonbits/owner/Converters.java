@@ -42,7 +42,7 @@ enum Converters {
     ARRAY {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!targetType.isArray()) return null;
+            if (!targetType.isArray()) return SKIP;
 
             Class<?> type = targetType.getComponentType();
 
@@ -68,7 +68,7 @@ enum Converters {
     COLLECTION {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!Collection.class.isAssignableFrom(targetType)) return null;
+            if (!Collection.class.isAssignableFrom(targetType)) return SKIP;
 
             Object[] array = convertToArray(targetMethod, text);
             Collection<Object> collection = Arrays.asList(array);
@@ -123,7 +123,7 @@ enum Converters {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             ConverterClass annotation = targetMethod.getAnnotation(ConverterClass.class);
-            if (annotation == null) return null;
+            if (annotation == null) return SKIP;
 
             Class<? extends Converter> converterClass = annotation.value();
             Converter<?> converter;
@@ -147,10 +147,10 @@ enum Converters {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (canUsePropertyEditors())
-                return null;
+                return SKIP;
 
             PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
-            if (editor == null) return null;
+            if (editor == null) return SKIP;
             try {
                 editor.setAsText(text);
                 return editor.getValue();
@@ -178,7 +178,7 @@ enum Converters {
     PRIMITIVE {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (! targetType.isPrimitive()) return null;
+            if (! targetType.isPrimitive()) return SKIP;
             if (targetType == Byte.TYPE) return Byte.parseByte(text);
             if (targetType == Short.TYPE) return Short.parseShort(text);
             if (targetType == Integer.TYPE) return Integer.parseInt(text);
@@ -186,14 +186,14 @@ enum Converters {
             if (targetType == Boolean.TYPE) return Boolean.parseBoolean(text);
             if (targetType == Float.TYPE) return Float.parseFloat(text);
             if (targetType == Double.TYPE) return Double.parseDouble(text);
-            return null;
+            return SKIP;
         }
     },
 
     FILE {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (targetType != File.class) return null;
+            if (targetType != File.class) return SKIP;
             return new File(expandUserHome(text));
         }
     },
@@ -201,7 +201,7 @@ enum Converters {
     CLASS {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (targetType != Class.class) return null;
+            if (targetType != Class.class) return SKIP;
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException ex) {
@@ -217,7 +217,7 @@ enum Converters {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
                 return constructor.newInstance(text);
             } catch (Exception e) {
-                return null;
+                return SKIP;
             }
         }
     },
@@ -229,9 +229,9 @@ enum Converters {
                 Method method = targetType.getMethod("valueOf", String.class);
                 if (isStatic(method.getModifiers()))
                     return method.invoke(null, text);
-                return null;
+                return SKIP;
             } catch (Exception e) {
-                return null;
+                return SKIP;
             }
         }
     },
@@ -243,7 +243,7 @@ enum Converters {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
                 return constructor.newInstance(text);
             } catch (Exception e) {
-                return null;
+                return SKIP;
             }
         }
     },
@@ -264,7 +264,7 @@ enum Converters {
     private static ConversionResult doConvert(Method targetMethod, Class<?> targetType, String text) {
         for (Converters converter : values()) {
             Object convertedValue = converter.tryConvert(targetMethod, targetType, text);
-            if (convertedValue != null)
+            if (convertedValue != SKIP)
                 return new ConversionResult(converter, convertedValue);
         }
         return unreachableButCompilerNeedsThis();
@@ -296,5 +296,10 @@ enum Converters {
      * The NULL object: when tryConvert returns this object, the conversion result is null.
      */
     static final Object NULL = new Object();
+
+    /**
+     * The SKIP object: when tryConvert returns this object the conversion is skipped in favour of the next one.
+     */
+    static final Object SKIP = new Object();
 
 }
