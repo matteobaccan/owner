@@ -82,7 +82,10 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         String value = propertiesManager.getProperty(key);
         if (value == null)
             return null;
-        Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
+        
+        String input = format(method, expandVariables(method, value), args);
+        Object result = TypeConverter.parseType(input, method);
+//        Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
         if (result == Converters.NULL) return null;
         return result;
     }
