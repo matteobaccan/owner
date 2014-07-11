@@ -41,7 +41,7 @@
         <dependency>
         	<groupId>com.github.drapostolos</groupId>
         	<artifactId>type-parser</artifactId>
-        	<version>0.3.0</version>
+        	<version>0.4.0</version>
         </dependency>
     </dependencies>
 

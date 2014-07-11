@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.github.drapostolos.typeparser.DynamicParser;
-import com.github.drapostolos.typeparser.InputPreprocessor;
-import com.github.drapostolos.typeparser.InputPreprocessorHelper;
 import com.github.drapostolos.typeparser.NoSuchRegisteredParserException;
+import com.github.drapostolos.typeparser.NullStringStrategy;
+import com.github.drapostolos.typeparser.NullStringStrategyHelper;
 import com.github.drapostolos.typeparser.Parser;
 import com.github.drapostolos.typeparser.ParserHelper;
 import com.github.drapostolos.typeparser.SplitStrategy;
@@ -31,13 +31,10 @@ class TypeConverter {
             return new File(Util.expandUserHome(input));
         }
     };
-    private final static InputPreprocessor inputPreprocessor = new InputPreprocessor() {
+    private final static NullStringStrategy nullStringStrategy = new NullStringStrategy() {
 
-        public String prepare(String input, InputPreprocessorHelper helper) {
-            if (input.trim().isEmpty()) {
-                return null;
-            }
-            return input;
+        public boolean isNullString(String input, NullStringStrategyHelper helper) {
+            return input.trim().isEmpty();
         }
     };
     private final static DynamicParser propertyEditorParser = new DynamicParser() {
@@ -52,7 +49,7 @@ class TypeConverter {
         Type targetType = method.getGenericReturnType();
         try {
             return TypeParser.newBuilder()
-                    .setInputPreprocessor(inputPreprocessor)
+                    .setNullStringStrategy(nullStringStrategy)
                     .registerParser(File.class, fileParser)
                     .setSplitStrategy(new OwnerSplitStrategyAdapter(method))
                     .registerDynamicParser(new ConverterAnnotationParserAdapter(method))
