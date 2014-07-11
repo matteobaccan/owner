@@ -38,6 +38,11 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
+        <dependency>
+        	<groupId>com.github.drapostolos</groupId>
+        	<artifactId>type-parser</artifactId>
+        	<version>0.4.0</version>
+        </dependency>
     </dependencies>
 
     <build>
