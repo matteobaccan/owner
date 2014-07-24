@@ -131,4 +131,23 @@ public class KeyExpansionTest {
         assertNull("mypass2", cfg.password()); // expansion is disabled on method level
     }
 
+    @Sources("classpath:org/aeonbits/owner/variableexpansion/KeyExpansionExample.xml")
+    public interface UseOfDefaultValueIfNotFound extends Config {
+
+        @DefaultValue("dev")
+        String env();
+
+        @Config.Key("servers.${env}.nonDefinedInSourceKey")
+        @Config.DefaultValue("wantedValue")
+        String undefinedPropInSource();
+
+    }
+
+    @Test
+    public void testKeyExpansionAndDefaultValue() {
+        UseOfDefaultValueIfNotFound cfg = ConfigFactory.create(UseOfDefaultValueIfNotFound.class);
+
+        assertEquals("dev", cfg.env());
+        assertEquals("wantedValue", cfg.undefinedPropInSource());
+    }
 }

@@ -80,6 +80,10 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private Object resolveProperty(Method method, Object... args) {
         String key = expandKey(method);
         String value = propertiesManager.getProperty(key);
+        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
+            String unexpandedKey = key(method);
+            value = propertiesManager.getProperty(unexpandedKey);
+        }
         if (value == null)
             return null;
         Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
