@@ -125,7 +125,7 @@ public static void main(String[] args) {
     MyConfig cfg;
     if (args.lenght() > 0) {
         Properties props = new Properties();
-        props.load(new File(args[0]);
+        props.load(new FileInputStream(new File(args[0])));
         cfg = ConfigFactory.create(MyConfig.class, userProps);
     } else {
         cfg = ConfigFactory.create(MyConfig.class);
