@@ -80,9 +80,6 @@ public class MyConfig extends Config {
   @DefaultValue("0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55")
   public int[] fibonacci();
 
-  @Separator(File.pathSeparator);
-  File[] path();
-
   @DefaultValue("1, 2, 3, 4")
   List<Integer> ints();
 
