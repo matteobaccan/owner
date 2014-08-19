@@ -1,4 +1,4 @@
-pygments: true
+highlighter: pygments
 relative_permalinks: false
 url: http://owner.aeonbits.org
 title: OWNER • Java™ properties reinvented.
