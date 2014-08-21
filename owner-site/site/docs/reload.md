@@ -144,7 +144,7 @@ interface MyConfig extends Config { ... }
 
 // Will check for file changes every 500 millis.
 // It will use SYNC hot reload.
-@HotReload(500, unit = TimeUnit.MILLISECONDS);
+@HotReload(value=500, unit = TimeUnit.MILLISECONDS)
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 
@@ -156,7 +156,7 @@ interface MyConfig extends Config { ... }
 interface MyConfig extends Config { ... }
 
 // Will use ASYNC reload type and will check every 2 seconds.
-@HotReload(2, type=HotReloadType.ASYNC);
+@HotReload(value=2, type=HotReloadType.ASYNC);
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 ```
