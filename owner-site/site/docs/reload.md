@@ -151,12 +151,12 @@ interface MyConfig extends Config { ... }
 // Will use ASYNC reload type: will span a
 // separate thread that will check for file
 // changes every 5 seconds (default)
-@HotReload(type=HotReloadType.ASYNC);
+@HotReload(type=HotReloadType.ASYNC)
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 
 // Will use ASYNC reload type and will check every 2 seconds.
-@HotReload(value=2, type=HotReloadType.ASYNC);
+@HotReload(value=2, type=HotReloadType.ASYNC)
 @Sources("file:foo/bar/baz.properties")
 interface MyConfig extends Config { ... }
 ```
