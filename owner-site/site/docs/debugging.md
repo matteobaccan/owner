@@ -77,7 +77,7 @@ You can also do the same implementing the Accessible interface, that declares
 the `list()` methods for you:
 
 ```java
-public interface SampleConfig extends Config, Accessible {
+public interface SampleConfig extends Accessible {
     @Key("server.http.port")
     @DefaultValue("80")
     int httpPort();
