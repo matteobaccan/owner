@@ -112,12 +112,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.imports = imports;
 
         ConfigURLFactory urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
-        urls = toURLs(clazz.getAnnotation(Sources.class), urlFactory);
+        
+        urls = toURLs(getSources(clazz), urlFactory);
 
-        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
+        LoadPolicy loadPolicy = getLoadPolicy(clazz);
+        
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        HotReload hotReload = clazz.getAnnotation(HotReload.class);
+        HotReload hotReload = getHotReload(clazz);
         if (hotReload != null) {
             hotReloadLogic = new HotReloadLogic(hotReload, urls, this);
 
@@ -132,6 +134,66 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
+    /**
+     * Method to recursively find Sources annotation from the current interface class or from its extended parents
+     * @param clazz
+     * @return
+     */
+    private Sources getSources(Class<?> clazz)
+    {
+        Sources sources = clazz.getAnnotation(Sources.class);
+        if (sources == null && clazz.getInterfaces() != null)
+        {
+            for (Class<?> i : clazz.getInterfaces())
+            {
+                Sources s = getSources(i);
+                if (s != null)
+                    return s;
+            }
+        }
+        return sources;
+    }
+    
+    /**
+     * Method to recursively find LoadPolicy annotation from the current interface class or from its extended parents
+     * @param clazz
+     * @return
+     */
+    private LoadPolicy getLoadPolicy(Class<?> clazz)
+    {
+        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
+        if (loadPolicy == null && clazz.getInterfaces() != null)
+        {
+            for (Class<?> i : clazz.getInterfaces())
+            {
+                LoadPolicy l = getLoadPolicy(i);
+                if (l != null)
+                    return l;
+            }
+        }
+        return loadPolicy;
+    }
+    
+    /**
+     * Method to recursively find HotReload annotation from the current interface class or from its extended parents
+     * @param clazz
+     * @return
+     */
+    private HotReload getHotReload(Class<?> clazz)
+    {
+        HotReload hotReload = clazz.getAnnotation(HotReload.class);
+        if (hotReload == null && clazz.getInterfaces() != null)
+        {
+            for (Class<?> i : clazz.getInterfaces())
+            {
+                HotReload h = getHotReload(i);
+                if (h != null)
+                    return h;
+            }
+        }
+        return hotReload;
+    }
+    
     private List<URL> toURLs(Sources sources, ConfigURLFactory urlFactory) {
         String[] specs = specs(sources, urlFactory);
         ArrayList<URL> result = new ArrayList<URL>();
