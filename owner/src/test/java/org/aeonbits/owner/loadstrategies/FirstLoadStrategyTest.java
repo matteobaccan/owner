@@ -15,6 +15,13 @@ import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.LoadersManagerForTest;
 import org.aeonbits.owner.PropertiesManagerForTest;
 import org.aeonbits.owner.VariablesExpanderForTest;
+import org.aeonbits.owner.loaders.ZookeeperLoader;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.curator.test.TestingServer;
+import org.apache.curator.utils.ZKPaths;
+import org.apache.zookeeper.KeeperException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -23,6 +30,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -52,7 +61,7 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
             "classpath:org/aeonbits/owner/FooBar.properties",  // it will be loaded from here
             "file:~/blahblah.properties"})
     public static interface SampleConfigWithSource extends Config {
-        String helloWorld(); 
+        String helloWorld();
     }
 
     @Test
@@ -101,9 +110,9 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
 
     @Test
     public void shouldLoadURLFromSpecifiedSource() throws IOException {
-        PropertiesManagerForTest manager = 
+        PropertiesManagerForTest manager =
                 new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(),
-                scheduler, expander, loaders);
+                        scheduler, expander, loaders);
         manager.load();
         verify(loaders, times(1)).findLoader(any(URL.class));
         verify(loaders, times(1)).findLoader(argThat(urlMatches("org/aeonbits/owner/FooBar.properties")));
@@ -115,4 +124,44 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
         assertEquals("Hello World!", sample.helloWorld());
     }
 
+    @Sources("zk:dummyProp.zk")
+    public static interface ZooConfigWithSource extends Config {
+        String thanks();
+        List<String> greetings();
+    }
+
+    @Test
+    public void shouldLoadPropertiesFromZookeeperSource() throws Exception {
+        System.setProperty("zookeeper.host", "127.0.0.1");
+        System.setProperty("zookeeper.port", "65403");
+        System.setProperty("zookeeper.node.root", "/test/properties");
+
+        //Start dummy zookeeper server
+        TestingServer server = new TestingServer(65403);
+        server.start();
+        CuratorFramework zkClient = CuratorFrameworkFactory.newClient(server.getConnectString(), new ExponentialBackoffRetry(1000, 3));
+        zkClient.start();
+
+        String thanksPath = ZKPaths.makePath("/test/properties/dummyProp.zk", "thanks");
+        try {
+            zkClient.setData().forPath(thanksPath, "welcome".getBytes());
+        } catch (KeeperException.NoNodeException e) {
+            zkClient.create().creatingParentsIfNeeded().forPath(thanksPath, "welcome".getBytes());
+        }
+
+        String greetingsPath = ZKPaths.makePath("/test/properties/dummyProp.zk", "greetings");
+        try {
+            zkClient.setData().forPath(greetingsPath, "hi,bonjour,hiya,hi!".getBytes());
+        } catch (KeeperException.NoNodeException e) {
+            zkClient.create().creatingParentsIfNeeded().forPath(greetingsPath, "hi,bonjour,hiya,hi!".getBytes());
+        }
+
+        zkClient.getChildren();
+
+        ConfigFactory.registerLoader(new ZookeeperLoader());
+        ZooConfigWithSource sample = ConfigFactory.create(ZooConfigWithSource.class);
+
+        assertEquals("welcome", sample.thanks());
+        assertEquals(true, sample.greetings().containsAll(Arrays.asList("hi", "bonjour", "hiya", "hi!")));
+    }
 }
