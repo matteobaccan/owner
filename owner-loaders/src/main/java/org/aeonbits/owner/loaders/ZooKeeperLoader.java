@@ -8,8 +8,8 @@
 
 package org.aeonbits.owner.loaders;
 
-import sun.net.www.protocol.zookeper.Handler;
-import sun.net.www.protocol.zookeper.ZookeeperConnection;
+import sun.net.www.protocol.zookeeper.Handler;
+import sun.net.www.protocol.zookeeper.ZooKeeperConnection;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,13 +20,13 @@ import java.util.Properties;
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
  */
-public class ZookeeperLoader implements Loader {
+public class ZooKeeperLoader implements Loader {
     public boolean accept(URL url) {
         return url.getProtocol().equals(Handler.PROTOCOL);
     }
 
     public void load(Properties result, InputStream input) throws IOException {
-        ZookeeperConnection.ZookeeperStream zkStream = (ZookeeperConnection.ZookeeperStream) input;
+        ZooKeeperConnection.ZooKeeperStream zkStream = (ZooKeeperConnection.ZooKeeperStream) input;
         result.putAll(zkStream.pairs());
     }
 

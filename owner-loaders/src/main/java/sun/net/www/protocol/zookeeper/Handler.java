@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package sun.net.www.protocol.zookeper;
+package sun.net.www.protocol.zookeeper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,10 +18,10 @@ import java.net.URLStreamHandler;
  * @author Luigi R. Viggiano
  */
 public class Handler extends URLStreamHandler {
-    public static final String PROTOCOL = "zookeper";
+    public static final String PROTOCOL = "zookeeper";
 
     @Override
     protected URLConnection openConnection(URL url) throws IOException {
-        return new ZookeeperConnection(url);
+        return new ZooKeeperConnection(url);
     }
 }

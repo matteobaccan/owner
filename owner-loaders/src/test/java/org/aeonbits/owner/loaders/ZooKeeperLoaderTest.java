@@ -32,19 +32,19 @@ import static org.junit.Assert.*;
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
  */
-public class ZookeeperLoaderTest {
+public class ZooKeeperLoaderTest {
     private TestingServer server;
     private Factory configFactory;
 
-    @Sources("zookeper://127.0.0.1:65403/test")
-    public static interface ZookeperConfig extends Config {
+    @Sources("zookeeper://127.0.0.1:65403/test")
+    public static interface ZooKeeperConfig extends Config {
         String thanks();
         List<String> greetings();
         String notAvailable();
     }
 
-    @Sources("zookeper://127.0.0.1:65403/wrong")
-    public static interface ZookeeperWrongPathConfig extends Config {
+    @Sources("zookeeper://127.0.0.1:65403/wrong")
+    public static interface ZooKeeperWrongPathConfig extends Config {
         String thanks();
         List<String> greetings();
         String notAvailable();
@@ -52,7 +52,7 @@ public class ZookeeperLoaderTest {
 
     @Test
     public void shouldLoadPropertiesFromZookeeperSource() throws Exception {
-        ZookeperConfig sample = configFactory.create(ZookeperConfig.class);
+        ZooKeeperConfig sample = configFactory.create(ZooKeeperConfig.class);
         assertEquals("welcome", sample.thanks());
         assertTrue(sample.greetings().containsAll(asList("hi", "bonjour", "hiya", "hi!")));
         assertNull(sample.notAvailable());
@@ -60,7 +60,7 @@ public class ZookeeperLoaderTest {
 
     @Test
     public void whenPathIsWrongEverythingIsNull() throws Exception {
-        ZookeeperWrongPathConfig config = configFactory.create(ZookeeperWrongPathConfig.class);
+        ZooKeeperWrongPathConfig config = configFactory.create(ZooKeeperWrongPathConfig.class);
         assertNull(config.notAvailable());
         assertNull(config.greetings());
         assertNull(config.thanks());
@@ -84,7 +84,7 @@ public class ZookeeperLoaderTest {
         }
 
         configFactory = ConfigFactory.newInstance();
-        configFactory.registerLoader(new ZookeeperLoader());
+        configFactory.registerLoader(new ZooKeeperLoader());
     }
 
     private RetryPolicy noRetryPolicy() {

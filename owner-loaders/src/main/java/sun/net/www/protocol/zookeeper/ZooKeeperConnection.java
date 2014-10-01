@@ -6,7 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package sun.net.www.protocol.zookeper;
+package sun.net.www.protocol.zookeeper;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -25,7 +25,7 @@ import java.util.Map;
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
  */
-public class ZookeeperConnection extends URLConnection {
+public class ZooKeeperConnection extends URLConnection {
     private final String basePath;
     private final CuratorFramework client;
 
@@ -36,7 +36,7 @@ public class ZookeeperConnection extends URLConnection {
      * @param url the specified URL.
      * @throws java.net.MalformedURLException if the URL is malformed.j
      */
-    protected ZookeeperConnection(URL url) throws MalformedURLException {
+    protected ZooKeeperConnection(URL url) throws MalformedURLException {
         super(url);
         String host = url.getHost();
         int port = url.getPort();
@@ -53,15 +53,15 @@ public class ZookeeperConnection extends URLConnection {
     @Override
     public InputStream getInputStream() throws IOException {
         connect();
-        return new ZookeeperStream(client, basePath);
+        return new ZooKeeperStream(client, basePath);
     }
 
-    public static class ZookeeperStream extends InputStream {
+    public static class ZooKeeperStream extends InputStream {
 
         private final CuratorFramework client;
         private final String basePath;
 
-        public ZookeeperStream(CuratorFramework client, String basePath) {
+        public ZooKeeperStream(CuratorFramework client, String basePath) {
             this.client = client;
             this.basePath = basePath;
         }
