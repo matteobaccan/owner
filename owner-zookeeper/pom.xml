@@ -29,10 +29,13 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
+            <optional>true</optional>
+            <scope>test</scope>
         </dependency>
         <!-- Order matters -->
         <dependency>
