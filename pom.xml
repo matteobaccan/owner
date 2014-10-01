@@ -22,6 +22,7 @@
         <module>owner</module>
         <module>owner-site</module>
         <module>owner-loaders</module>
+        <module>owner-assembly</module>
     </modules>
 
     <inceptionYear>2012</inceptionYear>
@@ -303,6 +304,7 @@
                         <format>html</format>
                     </formats>
                     <aggregate>true</aggregate>
+                    <check/>
                 </configuration>
             </plugin>
         </plugins>
