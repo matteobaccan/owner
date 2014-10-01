@@ -1,4 +1,12 @@
-package sun.net.www.protocol.zk;
+/*
+ * Copyright (c) 2012-2014, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
+package sun.net.www.protocol.zookeper;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -14,17 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Author: Koray Sariteke
+ * @author Koray Sariteke
+ * @author Luigi R. Viggiano
  */
 public class ZookeeperConnection extends URLConnection {
-    private static final String ZOOKEEPER_HOST = "zookeeper.host";
-    private static final String ZOOKEEPER_PORT = "zookeeper.port";
-    private static final String ZOOKEEPER_NODE_ROOT = "zookeeper.node.root";
-
-    private String host;
-    private Integer port;
-
-    private final String path;
+    private final String basePath;
     private final CuratorFramework client;
 
     /**
@@ -32,19 +34,15 @@ public class ZookeeperConnection extends URLConnection {
      * the object referenced by the URL is not created.
      *
      * @param url the specified URL.
+     * @throws java.net.MalformedURLException if the URL is malformed.j
      */
     protected ZookeeperConnection(URL url) throws MalformedURLException {
         super(url);
-
-        host = System.getProperty(ZOOKEEPER_HOST);
-        port = System.getProperty(ZOOKEEPER_PORT) == null ? null : Integer.valueOf(System.getProperty(ZOOKEEPER_PORT));
-        String rootNode = System.getProperty(ZOOKEEPER_NODE_ROOT);
-        if (null == host || null == port || null == rootNode) {
-            throw new MalformedURLException("host - port - zookeeper root node are needed...");
-        }
-
-        path = ZKPaths.makePath(rootNode, url.getPath());
-        client = CuratorFrameworkFactory.newClient(host + ":" + port, new ExponentialBackoffRetry(1000, 3));
+        String host = url.getHost();
+        int port = url.getPort();
+        basePath = url.getPath();
+        String connectString = (port == -1) ? host : host + ":" + port;
+        client = CuratorFrameworkFactory.newClient(connectString, new ExponentialBackoffRetry(1000, 3));
     }
 
     @Override
@@ -52,41 +50,36 @@ public class ZookeeperConnection extends URLConnection {
         client.start();
     }
 
-    private void close() throws IOException {
-        client.close();
-    }
-
     @Override
     public InputStream getInputStream() throws IOException {
-        this.connect();
-        return new ZookeeperStream(this);
+        connect();
+        return new ZookeeperStream(client, basePath);
     }
 
+    public static class ZookeeperStream extends InputStream {
 
-    public class ZookeeperStream extends InputStream {
-        private final ZookeeperConnection connection;
+        private final CuratorFramework client;
+        private final String basePath;
 
-        public ZookeeperStream(ZookeeperConnection cache) {
-            this.connection = cache;
+        public ZookeeperStream(CuratorFramework client, String basePath) {
+            this.client = client;
+            this.basePath = basePath;
         }
 
-        public Map<String, String> pairs() {
+        public Map<String, String> pairs() throws IOException {
+            Map<String, String> pairsMap = new HashMap<String, String>();
             try {
-                Map<String, String> pairsMap = new HashMap<String, String>();
-
-                for (String key : connection.client.getChildren().forPath(path)) {
-                    pairsMap.put(key, new String(connection.client.getData().forPath(ZKPaths.makePath(path, key))));
-                }
-
+                for (String key : client.getChildren().forPath(basePath))
+                    pairsMap.put(key, new String(client.getData().forPath(ZKPaths.makePath(basePath, key))));
                 return pairsMap;
-            } catch (Exception exp) {
-                throw new RuntimeException(exp);
+            } catch (Exception ex) {
+                throw new IOException(ex);
             }
         }
 
         @Override
         public void close() throws IOException {
-            connection.close();
+            client.close();
         }
 
         @Override

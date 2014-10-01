@@ -37,5 +37,12 @@
       <directory>${project.build.directory}/site</directory>
       <outputDirectory>docs</outputDirectory>
     </fileSet>
+    <fileSet>
+        <directory>${project.parent.basedir}/owner-loaders/target</directory>
+        <outputDirectory>extras</outputDirectory>
+        <includes>
+            <include>*.jar</include>
+        </includes>
+    </fileSet>
   </fileSets>
 </assembly>
