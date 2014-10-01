@@ -30,6 +30,10 @@ public class ConfigURLFactoryTest {
 
     @Test
     public void testshouldReturnNullForZookeeper() throws Exception {
+        System.clearProperty("zookeeper.host");
+        System.clearProperty("zookeeper.port");
+        System.clearProperty("zookeeper.node.root");
+
         ConfigURLFactory factory =new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
         URL url = factory.newURL("zk:test.zk");
         assertNull(url);
@@ -44,6 +48,7 @@ public class ConfigURLFactoryTest {
 
         ConfigURLFactory factory =new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
         URL url = factory.newURL("zk:test.zk");
+
         assertNotNull(url);
     }
 }
