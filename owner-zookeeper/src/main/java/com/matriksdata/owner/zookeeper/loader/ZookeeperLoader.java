@@ -1,5 +1,6 @@
-package org.aeonbits.owner.loaders;
+package com.matriksdata.owner.zookeeper.loader;
 
+import org.aeonbits.owner.loaders.Loader;
 import sun.net.www.protocol.zk.ZookeeperConnection;
 
 import java.io.IOException;

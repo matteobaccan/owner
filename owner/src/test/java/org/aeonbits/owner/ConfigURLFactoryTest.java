@@ -27,28 +27,4 @@ public class ConfigURLFactoryTest {
         URL url = h.newURL("classpath:test.properties");
         assertNotNull(url);
     }
-
-    @Test
-    public void testshouldReturnNullForZookeeper() throws Exception {
-        System.clearProperty("zookeeper.host");
-        System.clearProperty("zookeeper.port");
-        System.clearProperty("zookeeper.node.root");
-
-        ConfigURLFactory factory =new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
-        URL url = factory.newURL("zk:test.zk");
-        assertNull(url);
-    }
-
-
-    @Test
-    public void testshouldReturnURLForZookeeper() throws Exception {
-        System.setProperty("zookeeper.host", "127.0.0.1");
-        System.setProperty("zookeeper.port", "65403");
-        System.setProperty("zookeeper.node.root", "/test/properties");
-
-        ConfigURLFactory factory =new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
-        URL url = factory.newURL("zk:test.zk");
-
-        assertNotNull(url);
-    }
 }

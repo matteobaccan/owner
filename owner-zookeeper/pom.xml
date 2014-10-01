@@ -15,12 +15,25 @@
         <version>1.0.6-SNAPSHOT</version>
     </parent>
 
-    <name>OWNER :: Core</name>
-    <artifactId>owner</artifactId>
+    <name>OWNER :: ZOOKEEPER LOADER</name>
+    <artifactId>owner-zookeeper</artifactId>
     <description>Get rid of the boilerplate code in Java properties based configuration.</description>
     <packaging>jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
+        </dependency>
         <!-- Order matters -->
         <dependency>
             <groupId>org.hamcrest</groupId>

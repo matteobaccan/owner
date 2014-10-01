@@ -21,6 +21,7 @@
     <modules>
         <module>owner</module>
         <module>owner-site</module>
+        <module>owner-zookeeper</module>
     </modules>
 
     <inceptionYear>2012</inceptionYear>

@@ -7,6 +7,7 @@ import org.apache.curator.utils.ZKPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ import java.util.Map;
  * Author: Koray Sariteke
  */
 public class ZookeeperConnection extends URLConnection {
+    private static final String ZOOKEEPER_HOST = "zookeeper.host";
+    private static final String ZOOKEEPER_PORT = "zookeeper.port";
+    private static final String ZOOKEEPER_NODE_ROOT = "zookeeper.node.root";
 
     private String host;
     private Integer port;
@@ -29,12 +33,17 @@ public class ZookeeperConnection extends URLConnection {
      *
      * @param url the specified URL.
      */
-    protected ZookeeperConnection(URL url) {
+    protected ZookeeperConnection(URL url) throws MalformedURLException {
         super(url);
-        host = url.getHost();
-        port = url.getPort();
 
-        path = url.getPath();
+        host = System.getProperty(ZOOKEEPER_HOST);
+        port = System.getProperty(ZOOKEEPER_PORT) == null ? null : Integer.valueOf(System.getProperty(ZOOKEEPER_PORT));
+        String rootNode = System.getProperty(ZOOKEEPER_NODE_ROOT);
+        if (null == host || null == port || null == rootNode) {
+            throw new MalformedURLException("host - port - zookeeper root node are needed...");
+        }
+
+        path = ZKPaths.makePath(rootNode, url.getPath());
         client = CuratorFrameworkFactory.newClient(host + ":" + port, new ExponentialBackoffRetry(1000, 3));
     }
 
