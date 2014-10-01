@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Luigi R. Viggiano
@@ -24,6 +25,25 @@ public class ConfigURLFactoryTest {
     public void shouldReturnAnURL() throws MalformedURLException {
         ConfigURLFactory h = new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
         URL url = h.newURL("classpath:test.properties");
+        assertNotNull(url);
+    }
+
+    @Test
+    public void testshouldReturnNullForZookeeper() throws Exception {
+        ConfigURLFactory factory =new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
+        URL url = factory.newURL("zk:test.zk");
+        assertNull(url);
+    }
+
+
+    @Test
+    public void testshouldReturnURLForZookeeper() throws Exception {
+        System.setProperty("zookeeper.host", "127.0.0.1");
+        System.setProperty("zookeeper.port", "65403");
+        System.setProperty("zookeeper.node.root", "/test/properties");
+
+        ConfigURLFactory factory =new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
+        URL url = factory.newURL("zk:test.zk");
         assertNotNull(url);
     }
 }
