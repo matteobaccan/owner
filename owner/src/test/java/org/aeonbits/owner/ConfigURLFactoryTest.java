@@ -15,7 +15,6 @@ import java.net.URL;
 import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Luigi R. Viggiano
