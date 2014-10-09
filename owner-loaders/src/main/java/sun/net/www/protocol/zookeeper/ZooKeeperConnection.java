@@ -44,6 +44,7 @@ public class ZooKeeperConnection extends URLConnection {
         basePath = url.getPath();
         String connectString = (port == -1) ? host : host + ":" + port;
         client = CuratorFrameworkFactory.newClient(connectString, new RetryPolicy() {
+
             @Override
             public boolean allowRetry(int i, long l, RetrySleeper retrySleeper) {
                 return false;
@@ -90,7 +91,9 @@ public class ZooKeeperConnection extends URLConnection {
 
         @Override
         public void close() throws IOException {
-            client.close();
+            if (true == client.getZookeeperClient().isConnected()) {
+                client.close();
+            }
         }
 
         @Override
