@@ -8,8 +8,6 @@
 
 package sun.net.www.protocol.zookeeper;
 
-import org.apache.curator.RetryPolicy;
-import org.apache.curator.RetrySleeper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.utils.ZKPaths;
@@ -43,12 +41,7 @@ public class ZooKeeperConnection extends URLConnection {
         int port = url.getPort();
         basePath = url.getPath();
         String connectString = (port == -1) ? host : host + ":" + port;
-        client = CuratorFrameworkFactory.newClient(connectString, new RetryPolicy() {
-            @Override
-            public boolean allowRetry(int i, long l, RetrySleeper retrySleeper) {
-                return false;
-            }
-        });
+        client = CuratorFrameworkFactory.newClient(connectString, new NoRetryPolicy());
 
     }
 
