@@ -8,9 +8,10 @@
 
 package sun.net.www.protocol.zookeeper;
 
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.RetrySleeper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.ZKPaths;
 
 import java.io.IOException;
@@ -42,12 +43,22 @@ public class ZooKeeperConnection extends URLConnection {
         int port = url.getPort();
         basePath = url.getPath();
         String connectString = (port == -1) ? host : host + ":" + port;
-        client = CuratorFrameworkFactory.newClient(connectString, new ExponentialBackoffRetry(1000, 3));
+        client = CuratorFrameworkFactory.newClient(connectString, new RetryPolicy() {
+            @Override
+            public boolean allowRetry(int i, long l, RetrySleeper retrySleeper) {
+                return false;
+            }
+        });
+
     }
 
     @Override
-    public void connect() {
-        client.start();
+    public void connect() throws IOException {
+        try {
+            client.start();
+        } catch (Exception exp) {
+            throw new IOException("not able to connect to zookeeper");
+        }
     }
 
     @Override
