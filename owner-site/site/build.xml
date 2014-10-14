@@ -27,7 +27,7 @@
 
     <target name="copy" depends="pull">
         <copy todir="${gh-pages.directory}" overwrite="true">
-            <fileset dir="${site.directory}"/>
+            <fileset dir="${site.directory}" excludes="build.xml"/>
         </copy>
         <copy file="${site.directory}/.gitignore" todir="${gh-pages.directory}"/>
     </target>
