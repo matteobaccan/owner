@@ -75,11 +75,11 @@
     <macrodef name="git">
         <attribute name="dir"/>
         <attribute name="command"/>
-        <element name="out" optional="true" />
+        <element name="elements" optional="true" implicit="true"/>
         <sequential>
             <exec dir="@{dir}" executable="git" taskname="git">
                 <arg line="@{command}"/>
-                <out/>
+                <elements/>
             </exec>
         </sequential>
     </macrodef>
@@ -89,9 +89,7 @@
         <attribute name="property"/>
         <sequential>
             <git dir="@{dir}" command="log -1 --pretty=%h">
-                <out>
-                    <redirector outputproperty="@{property}"/>
-                </out>
+                <redirector outputproperty="@{property}"/>
             </git>
         </sequential>
     </macrodef>
