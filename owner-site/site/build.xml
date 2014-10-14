@@ -29,6 +29,7 @@
         <copy todir="${gh-pages.directory}" overwrite="true">
             <fileset dir="${site.directory}"/>
         </copy>
+        <copy file="${site.directory}/.gitignore" todir="${gh-pages.directory}"/>
     </target>
 
     <target name="commit" depends="copy">
