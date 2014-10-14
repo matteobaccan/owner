@@ -75,8 +75,9 @@
     <macrodef name="git">
         <attribute name="dir"/>
         <attribute name="command"/>
+        <attribute name="property" default="git.out"/>
         <sequential>
-            <exec dir="@{dir}" executable="git">
+            <exec dir="@{dir}" executable="git" outputproperty="@{property}">
                 <arg line="@{command}"/>
             </exec>
         </sequential>
@@ -86,9 +87,7 @@
         <attribute name="dir"/>
         <attribute name="property"/>
         <sequential>
-            <exec dir="@{dir}" executable="bash" outputproperty="@{property}">
-                <arg line="-c 'git log --pretty=%H  | head -1'"/>
-            </exec>
+            <git dir="@{dir}" command="log -1 --pretty=%H" property="@{property}"/>
         </sequential>
     </macrodef>
 
