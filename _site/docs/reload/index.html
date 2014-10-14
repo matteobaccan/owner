@@ -1,0 +1,568 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title>Reload and Hot Reload</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="alternate" type="application/rss+xml" title="OWNER • Java™ properties reinvented. - Feed" href="/feed.xml" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to OWNER’s master branch" href="https://github.com/lviggiano/owner/commits/master.atom" />
+  <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Arizonia' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="http://localhost:4000/css/normalize.css" />
+  <link rel="stylesheet" href="http://localhost:4000/css/gridism.css" />
+  <link rel="stylesheet" href="http://localhost:4000/css/style.css" />
+  <link rel="stylesheet" href="http://localhost:4000/css/pygments.css" />
+  <link rel="icon" type="image/x-icon" href="http://localhost:4000/favicon.png" />
+  <script src="http://localhost:4000/js/modernizr-2.5.3.min.js"></script>
+</head>
+
+
+<body class="wrap">
+
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="http://localhost:4000/">Overview</a>
+  </li>
+  <li class="current">
+    <a href="http://localhost:4000/docs/welcome">Doc<span class="show-on-mobiles">s</span><span class="hide-on-mobiles">umentation</span></a>
+  </li>
+  <li class="">
+    <a href="http://localhost:4000/news">News</a>
+  </li>
+  <li class="">
+    <a href="https://github.com/lviggiano/owner"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+      <a href="http://localhost:4000/">
+        <h1>
+          <span class="shadow">OWNER</span>
+        </h1>
+        <small class="shadow">Java&trade; properties reinvented.</small>
+      </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="http://localhost:4000/">Overview</a>
+  </li>
+  <li class="current">
+    <a href="http://localhost:4000/docs/welcome">Doc<span class="show-on-mobiles">s</span><span class="hide-on-mobiles">umentation</span></a>
+  </li>
+  <li class="">
+    <a href="http://localhost:4000/news">News</a>
+  </li>
+  <li class="">
+    <a href="https://github.com/lviggiano/owner"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+  <div class="ribbon">
+    <a href="https://github.com/lviggiano/owner"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+  </div>
+</header>
+
+
+    <section class="docs">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+    <select onchange="if (this.value) window.location.href=this.value">
+
+        <option value="">Navigate the docs…</option>
+
+        <optgroup label="Getting started">
+            <option value="http://localhost:4000/docs/welcome/">Welcome</option>
+            <option value="http://localhost:4000/docs/installation/">Installation
+            </option>
+            <option value="http://localhost:4000/docs/usage/">Basic usage</option>
+        </optgroup>
+
+        <optgroup label="More Features">
+            <option value="http://localhost:4000/docs/loading-strategies/">Loading strategies</option>
+            <option value="http://localhost:4000/docs/importing-properties/">Importing properties</option>
+            <option value="http://localhost:4000/docs/parametrized-properties/">Parametrized properties</option>
+            <option value="http://localhost:4000/docs/type-conversion/">Type conversion</option>
+            <option value="http://localhost:4000/docs/variables-expansion/">Variables expansion</option>
+            <option value="http://localhost:4000/docs/reload/">Reload and Hot Reload</option>
+            <option value="http://localhost:4000/docs/accessible-mutable/">Accessible and Mutable</option>
+            <option value="http://localhost:4000/docs/debugging/">Debugging</option>
+            <option value="http://localhost:4000/docs/disabling-features/">Disabling features</option>
+            <option value="http://localhost:4000/docs/configuring/">Metaconfiguring</option>
+            <option value="http://localhost:4000/docs/xml-support/">XML support</option>
+            <option value="http://localhost:4000/docs/event-support/">Event support</option>
+            <option value="http://localhost:4000/docs/singleton/">Singleton</option>
+        </optgroup>
+
+        <optgroup label="Miscellaneous">
+            <option value="http://localhost:4000/docs/features/">Features</option>
+            <option value="http://localhost:4000/docs/why/">Why OWNER?</option>
+            <option value="http://localhost:4000/docs/faq/">FAQ</option>
+            <option value="http://localhost:4000/docs/support/">Getting support</option>
+        </optgroup>
+
+        <optgroup label="Meta">
+            <option value="http://localhost:4000/docs/building/">Building from sources</option>
+            <option value="http://localhost:4000/docs/contributing/">Contributing</option>
+            <option value="http://localhost:4000/docs/license/">License</option>
+        </optgroup>
+
+        <optgroup label="Other stuff">
+            <option value="http://localhost:4000/news/releases/">History</option>
+            <option value="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22">Downloads</option>
+            <option value="https://github.com/lviggiano/owner/releases">Releases</option>
+            <option value="http://owner.newinstance.it/latest/apidocs/index.html">Javadocs</option>
+            <option value="https://aeonbits.ci.cloudbees.com/job/owner-api/">Jenkins reports</option>
+            <option value="https://travis-ci.org/lviggiano/owner">Travis CI reports</option>
+            <option value="http://dev.aeonbits.org:9000/dashboard/index/org.aeonbits.owner:owner">Sonar reports</option>
+            <option value="https://coveralls.io/r/lviggiano/owner">Coveralls reports</option>
+            <option value="http://newinstance.it/owner/latest/">Maven site</option>
+            <option value="https://www.ohloh.net/p/owner">OWNER at Ohloh</option>
+        </optgroup>
+
+    </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <h1>Reload and Hot Reload</h1>
+          <p>Owner does support programmatic reload, as well as the automatic &quot;hot reload&quot; for configuration files.</p>
+
+<p>There are two ways on how the automatic HotReload can be implemented
+with OWNER: synchronous or asynchronous.</p>
+
+<h2 id="programmatic-reload">Programmatic reload</h2>
+
+<p>You can manually ask a configuration object to reload. This is done via
+the <a href="http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html">Reloadable</a> interface.</p>
+
+<p>Example:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Sources</span><span class="o">{...}</span>
+<span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Reloadable</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="nf">someProperties</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="n">MyConfig</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">MyConfig</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">cfg</span><span class="o">.</span><span class="na">reload</span><span class="o">();</span>
+</code></pre></div>
+<p>The <code>cfg.reload()</code> will perform the reload of all properties in the same way as
+when the object was initially created. If the configuration files have been
+altered, after the reload invocation, those changes will be reflected in the
+config object.</p>
+
+<p>The <code>Reloadable</code> interface extends from <code>Config</code>:</p>
+
+<p><img src="http://localhost:4000/img/config-hierarchy.png" alt="config-hierarchy"></p>
+
+<h2 id="automatic-&quot;hot-reload&quot;">Automatic &quot;hot reload&quot;</h2>
+
+<p>You can instruct OWNER to automatically reload the properties files if they are
+modified on the filesystem.</p>
+
+<p>For instance:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@HotReload</span>
+<span class="nd">@Sources</span><span class="o">(</span><span class="s">&quot;file:foo/bar/baz.properties&quot;</span><span class="o">)</span>
+<span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">serverName</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>You see in the above example we have specified the annotation <code>@HotReload</code> on
+the interface level.</p>
+
+<p>The hot reload works only on filesystem URLs. This means that
+you can make it work with those two types of URLs:</p>
+
+<ul>
+<li><code>file:path/to/your.properties</code> a filesystem backed URL.</li>
+<li><code>jar:file:path/to/some.jar!/path/to/your.properties</code> a jar file in your
+local filesystem that contains a properties files.</li>
+<li><code>classpath:path/to/your.properties</code> a resource loaded from the classpath,
+<em>if</em> the classpath resource is stored on filesystem (from inside a jar or
+from inside a classpath folder). If the ClassLoader is loading the resource
+from a remote url (for instance from a jar accessed via http protocol),
+then it won&#39;t work. Almost always, the application loads classes and
+resources from a filesystem backed classpath. So this should work <em>almost</em>
+always.</li>
+</ul>
+
+<p>If you don&#39;t specify the <code>@Sources</code> annotation, then OWNER will try to load
+the properties file from the classpath from a resource matching the same package and
+class name of the <em>mapping interface</em>.</p>
+
+<p>The hot reload annotation instructs OWNER to monitor those resources for
+changes and reload them when they change.</p>
+
+<h2 id="why-only-&#39;file:&#39;,-&#39;jar:file&#39;-and-&#39;classpath:&#39;-urls?">Why only &#39;file:&#39;, &#39;jar:file&#39; and &#39;classpath:&#39; URLs?</h2>
+
+<p>Monitoring remote URLs, such as &quot;http&quot; or &quot;ftp&quot;, will involve network
+communication to download those files from remote servers frequently just for
+checking if they are changed, and it is not convenient to implement the hot
+reload doing frequent heavy operations like these.
+You can still perform the reload programmatically, using the <a href="http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html">Reloadable</a>
+interface, for these cases.</p>
+
+<p>While instead, monitoring the filesystem is not a big deal, also because
+filesystems implement &#39;last modification date&#39; that can be checked to detect
+modifications without actually check the content of the file for changes.</p>
+
+<p>This is the reason why OWNER implements &quot;hot reload&quot; only on filesystem based
+URLs.</p>
+
+<h2 id="the-@hotreload-annotation">The @HotReload annotation</h2>
+
+<p>The <code>@HotReload</code> annotation accepts 3 optional parameters.</p>
+
+<p>And is defined as:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@interface</span> <span class="n">HotReload</span> <span class="o">{</span>
+    <span class="kt">long</span> <span class="nf">value</span><span class="o">()</span> <span class="k">default</span> <span class="mi">5</span><span class="o">;</span>
+    <span class="n">TimeUnit</span> <span class="nf">unit</span><span class="o">()</span> <span class="k">default</span> <span class="n">SECONDS</span><span class="o">;</span>
+    <span class="n">HotReloadType</span> <span class="nf">type</span><span class="o">()</span> <span class="k">default</span> <span class="n">SYNC</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">enum</span> <span class="n">HotReloadType</span> <span class="o">{</span>
+    <span class="n">SYNC</span><span class="o">,</span> <span class="n">ASYNC</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>You can check the <a href="http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.HotReload.html">latest javadocs</a> for further details.</p>
+
+<p>So you can specify also the interval for the hot reload, expressed by <code>value</code>
+and <code>unit</code>, and you can also specify the type of hot reload that you need.</p>
+
+<p>Some examples:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// Using the default values:</span>
+<span class="c1">// will check for MyConfig.properties file changes in classpath</span>
+<span class="c1">// with interval of 5 seconds.</span>
+<span class="c1">// It will use SYNC hot reload.</span>
+<span class="nd">@HotReload</span>
+<span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+
+<span class="c1">// Will check for file changes every 2 seconds.</span>
+<span class="c1">// It will use SYNC hot reload.</span>
+<span class="nd">@HotReload</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="nd">@Sources</span><span class="o">(</span><span class="s">&quot;file:foo/bar/baz.properties&quot;</span><span class="o">)</span>
+<span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+
+<span class="c1">// Will check for file changes every 500 millis.</span>
+<span class="c1">// It will use SYNC hot reload.</span>
+<span class="nd">@HotReload</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="mi">500</span><span class="o">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">)</span>
+<span class="nd">@Sources</span><span class="o">(</span><span class="s">&quot;file:foo/bar/baz.properties&quot;</span><span class="o">)</span>
+<span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+
+<span class="c1">// Will use ASYNC reload type: will span a</span>
+<span class="c1">// separate thread that will check for file</span>
+<span class="c1">// changes every 5 seconds (default)</span>
+<span class="nd">@HotReload</span><span class="o">(</span><span class="n">type</span><span class="o">=</span><span class="n">HotReloadType</span><span class="o">.</span><span class="na">ASYNC</span><span class="o">)</span>
+<span class="nd">@Sources</span><span class="o">(</span><span class="s">&quot;file:foo/bar/baz.properties&quot;</span><span class="o">)</span>
+<span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+
+<span class="c1">// Will use ASYNC reload type and will check every 2 seconds.</span>
+<span class="nd">@HotReload</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="mi">2</span><span class="o">,</span> <span class="n">type</span><span class="o">=</span><span class="n">HotReloadType</span><span class="o">.</span><span class="na">ASYNC</span><span class="o">)</span>
+<span class="nd">@Sources</span><span class="o">(</span><span class="s">&quot;file:foo/bar/baz.properties&quot;</span><span class="o">)</span>
+<span class="kd">interface</span> <span class="nc">MyConfig</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+</code></pre></div>
+<p>The difference between SYNC and ASYNC hot reload will be explained below.</p>
+
+<p>As explained before the <a href="http://docs.oracle.com/javase/7/docs/api/java/io/File.html#lastModified()">last modified</a> date of the file will be used to detect
+changes on the files.</p>
+
+<div class="note warning">
+  <h5>Filesystems quirks</h5>
+  <p>
+The date resolution vary from filesystem to filesystem. <br/>
+For instance, for Ext3, ReiserFS and HSF+ the date resolution is of 1 second. <br/>
+For FAT32 the date resolution for the last modified time is 2 seconds. <br/>
+For Ext4 the date resolution is in nanoseconds.
+  </p>
+</div>
+
+<h2 id="the-synchronous-hot-reload">The synchronous hot reload</h2>
+
+<p>The synchronous hot reload works this way: every time you call a method on the
+config object created by <code>ConfigFactory.create()</code> the configuration files will
+be checked for modifications, then eventually reload the files.</p>
+
+<p>This means that, if you don&#39;t use the config object for long periods there will
+be no checks on the filesystem, and consequently no reload will be performed.</p>
+
+<p>So, we can define this behavior a <em>lazy</em> hot reload, since it does that only
+when needed, at the very last time.</p>
+
+<p>This is the default for the <code>@HotReload</code> annotation, but you can also specify
+this type of hot reload explicitly with <code>type=SYNC</code>:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@HotReload</span><span class="o">(</span><span class="n">type</span><span class="o">=</span><span class="n">HotReloadType</span><span class="o">.</span><span class="na">SYNC</span><span class="o">)</span>
+</code></pre></div>
+<h2 id="the-asynchronous-hot-reload">The asynchronous hot reload</h2>
+
+<p>The asynchronous hot reload works this way: it schedule a periodic task to be
+executed on a separate thread on the specified interval, to check the files for
+modification and eventually reload them.</p>
+
+<p>This means that, if you don&#39;t use the config object for long periods, the check
+on the filesystem will be done in background anyway and eventually the reload
+will be performed.</p>
+
+<p>To enable this behavior you need to specify <code>type=ASYNC</code> to the hot reload
+annotation:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@HotReload</span><span class="o">(</span><span class="n">type</span><span class="o">=</span><span class="n">HotReloadType</span><span class="o">.</span><span class="na">ASYNC</span><span class="o">)</span>
+</code></pre></div>
+<h2 id="intercepting-reload-events">Intercepting reload events</h2>
+
+<p>Since reload can happen programmatically, and automatically synchronously and
+asynchronously, it may be helpful for to have some notification mechanism to
+intercept reload events.</p>
+
+<p>For this, please look at the <a href="http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html">Reloadable</a> interface, that allows the user to
+attach ReloadListeners to the config object.</p>
+
+<h2 id="hot-reload-example">Hot reload example</h2>
+
+<p>In the project&#39;s sources it is included a working example:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AutoReloadExample</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">spec</span> <span class="o">=</span>
+      <span class="s">&quot;file:target/test-resources/AutoReloadExample.properties&quot;</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">File</span> <span class="n">target</span><span class="o">;</span>
+
+    <span class="nd">@Sources</span><span class="o">(</span><span class="n">spec</span><span class="o">)</span>
+    <span class="nd">@HotReload</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+    <span class="kd">interface</span> <span class="nc">AutoReloadConfig</span> <span class="kd">extends</span> <span class="n">Config</span><span class="o">,</span> <span class="n">Reloadable</span> <span class="o">{</span>
+        <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;5&quot;</span><span class="o">)</span>
+        <span class="n">Integer</span> <span class="nf">someValue</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">File</span><span class="o">(</span><span class="k">new</span> <span class="nf">URL</span><span class="o">(</span><span class="n">spec</span><span class="o">).</span><span class="na">getFile</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">MalformedURLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+        <span class="kd">throws</span> <span class="n">IOException</span><span class="o">,</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+
+        <span class="n">save</span><span class="o">(</span><span class="n">target</span><span class="o">,</span> <span class="k">new</span> <span class="nf">Properties</span><span class="o">()</span> <span class="o">{</span> <span class="o">{</span>
+            <span class="n">setProperty</span><span class="o">(</span><span class="s">&quot;someValue&quot;</span><span class="o">,</span> <span class="s">&quot;10&quot;</span><span class="o">);</span>
+        <span class="o">}});</span>
+
+        <span class="n">AutoReloadConfig</span> <span class="n">cfg</span> <span class="o">=</span>
+            <span class="n">ConfigFactory</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">AutoReloadConfig</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+        <span class="n">cfg</span><span class="o">.</span><span class="na">addReloadListener</span><span class="o">(</span><span class="k">new</span> <span class="nf">ReloadListener</span><span class="o">()</span> <span class="o">{</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">reloadPerformed</span><span class="o">(</span><span class="n">ReloadEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span>
+                    <span class="s">&quot;\rReload intercepted at &quot;</span>
+                    <span class="o">+</span> <span class="k">new</span> <span class="nf">Date</span><span class="o">()</span> <span class="o">+</span> <span class="s">&quot; \n&quot;</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;You can change the file &quot;</span>
+            <span class="o">+</span> <span class="n">target</span><span class="o">.</span><span class="na">getAbsolutePath</span><span class="o">()</span> <span class="o">+</span>
+            <span class="s">&quot; and see the changes reflected below&quot;</span><span class="o">);</span>
+
+        <span class="kt">int</span> <span class="n">someValue</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">someValue</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">someValue</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="na">someValue</span><span class="o">();</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span>
+               <span class="s">&quot;\rsomeValue is: &quot;</span> <span class="o">+</span> <span class="n">someValue</span> <span class="o">+</span> <span class="s">&quot;\t\t\t\t&quot;</span><span class="o">);</span>
+            <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+        <span class="o">}</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>To run this example, you need to follow these steps:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># after downloading the sources in the directory &#39;owner&#39;</span>
+<span class="nv">$ </span><span class="nb">cd </span>owner
+<span class="nv">$ </span>mvn clean compile <span class="nb">test</span>-compile
+<span class="nv">$ </span>java -classpath <span class="se">\</span>
+       target/classes/:target/test-classes/ <span class="se">\</span>
+       org.aeonbits.owner.examples.AutoReloadExample
+</code></pre></div>
+<p>Then you can change the file indicated by the program to see the changes being
+reflected and the reload event being intercepted.</p>
+
+          <div class="section-nav">
+  <div class="left align-right">
+    
+      <a href="http://localhost:4000/docs/variables-expansion" class="prev">
+        Back
+      </a>
+    
+  </div>
+  <div class="right align-left">
+    
+      <a href="http://localhost:4000/docs/accessible-mutable" class="next">
+        Next
+      </a>
+    
+  </div>
+  <div class="clear"></div>
+</div>
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+
+    <h4>Getting Started</h4>
+    <ul>
+      <li class="">
+        <a href="http://localhost:4000/docs/welcome">Welcome</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/installation">Installation</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/usage">Basic usage</a>
+      </li>
+    </ul>
+
+    <h4>More Features</h4>
+    <ul>
+    <li class="">
+    <a href="http://localhost:4000/docs/loading-strategies">Loading strategies</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/importing-properties">Importing properties</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/parametrized-properties/">Parametrized properties</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/type-conversion/">Type conversion</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/variables-expansion/">Variables expansion</a>
+    </li>
+    <li class="current">
+    <a href="http://localhost:4000/docs/reload/">Reload and Hot Reload</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/accessible-mutable/">Accessible and Mutable</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/debugging/">Debugging</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/disabling-features/">Disabling features</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/configuring/">Metaconfiguring</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/xml-support/">XML support</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/event-support/">Event support</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/singleton/">Singleton</a>
+    </li>
+</ul>
+
+
+    <h4>Miscellaneous</h4>
+    <ul>
+        <li class="">
+            <a href="http://localhost:4000/docs/features/">Features</a>
+        </li>
+        <li class="">
+          <a href="http://localhost:4000/docs/why/">Why OWNER?</a>
+        </li>
+        <li class="">
+            <a href="http://localhost:4000/docs/faq/">FAQ</a>
+        </li>
+
+        <li class="">
+            <a href="http://localhost:4000/docs/support/">Getting support</a>
+        </li>
+    </ul>
+
+    <h4>Meta</h4>
+    <ul>
+      <li class="">
+        <a href="http://localhost:4000/docs/building">Building from sources</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/contributing">Contributing</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/license">License</a>
+      </li>
+    </ul>
+
+    <h4>Other stuff</h4>
+    <ul>
+      <li><a href="http://localhost:4000/news/releases/">History</a></li>
+      <li><a href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22">Downloads</a></li>
+      <li><a href="https://github.com/lviggiano/owner/releases">Releases</a></li>
+      <li><a href="http://owner.newinstance.it/latest/apidocs/index.html">Javadocs</a></li>
+      <li><a href="https://aeonbits.ci.cloudbees.com/job/owner-api/">Jenkins reports</a></li>
+      <li><a href="https://travis-ci.org/lviggiano/owner">Travis CI reports</a></li>
+      <li><a href="http://dev.aeonbits.org:9000/dashboard/index/org.aeonbits.owner:owner">Sonar reports</a></li>
+      <li><a href="https://coveralls.io/r/lviggiano/owner">Coveralls reports</a></li>
+      <li><a href="http://newinstance.it/owner/latest/">Maven site</a></li>
+      <li><a href="https://www.ohloh.net/p/owner">OWNER at Ohloh</a></li>
+    </ul>
+
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+  <footer>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+      <p>Project maintained by <a href="https://github.com/lviggiano">Luigi R. Viggiano</a>,
+          and the <a href="https://github.com/lviggiano/owner/graphs/contributors">awesome contributors</a>.</p>
+    </div>
+    <div class="unit two-thirds align-right center-on-mobiles">
+      <p>
+        Hosted on
+        <a href="https://github.com">
+          <img src="http://localhost:4000/img/footer-logo.png" alt="GitHub • Social coding">
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+  
+
+
+  <!-- Google Analytics (http://google.com/analytics) -->
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-462505-8']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+</body>
+
+</html>
+

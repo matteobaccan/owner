@@ -1,0 +1,508 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title>Variables expansion</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="alternate" type="application/rss+xml" title="OWNER • Java™ properties reinvented. - Feed" href="/feed.xml" />
+  <link rel="alternate" type="application/atom+xml" title="Recent commits to OWNER’s master branch" href="https://github.com/lviggiano/owner/commits/master.atom" />
+  <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Arizonia' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="http://localhost:4000/css/normalize.css" />
+  <link rel="stylesheet" href="http://localhost:4000/css/gridism.css" />
+  <link rel="stylesheet" href="http://localhost:4000/css/style.css" />
+  <link rel="stylesheet" href="http://localhost:4000/css/pygments.css" />
+  <link rel="icon" type="image/x-icon" href="http://localhost:4000/favicon.png" />
+  <script src="http://localhost:4000/js/modernizr-2.5.3.min.js"></script>
+</head>
+
+
+<body class="wrap">
+
+  <header>
+  <nav class="mobile-nav show-on-mobiles">
+    <ul>
+  <li class="">
+    <a href="http://localhost:4000/">Overview</a>
+  </li>
+  <li class="current">
+    <a href="http://localhost:4000/docs/welcome">Doc<span class="show-on-mobiles">s</span><span class="hide-on-mobiles">umentation</span></a>
+  </li>
+  <li class="">
+    <a href="http://localhost:4000/news">News</a>
+  </li>
+  <li class="">
+    <a href="https://github.com/lviggiano/owner"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+  </nav>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+      <a href="http://localhost:4000/">
+        <h1>
+          <span class="shadow">OWNER</span>
+        </h1>
+        <small class="shadow">Java&trade; properties reinvented.</small>
+      </a>
+    </div>
+    <nav class="main-nav unit two-thirds hide-on-mobiles">
+      <ul>
+  <li class="">
+    <a href="http://localhost:4000/">Overview</a>
+  </li>
+  <li class="current">
+    <a href="http://localhost:4000/docs/welcome">Doc<span class="show-on-mobiles">s</span><span class="hide-on-mobiles">umentation</span></a>
+  </li>
+  <li class="">
+    <a href="http://localhost:4000/news">News</a>
+  </li>
+  <li class="">
+    <a href="https://github.com/lviggiano/owner"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+  <div class="ribbon">
+    <a href="https://github.com/lviggiano/owner"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+  </div>
+</header>
+
+
+    <section class="docs">
+    <div class="grid">
+
+      <div class="docs-nav-mobile unit whole show-on-mobiles">
+    <select onchange="if (this.value) window.location.href=this.value">
+
+        <option value="">Navigate the docs…</option>
+
+        <optgroup label="Getting started">
+            <option value="http://localhost:4000/docs/welcome/">Welcome</option>
+            <option value="http://localhost:4000/docs/installation/">Installation
+            </option>
+            <option value="http://localhost:4000/docs/usage/">Basic usage</option>
+        </optgroup>
+
+        <optgroup label="More Features">
+            <option value="http://localhost:4000/docs/loading-strategies/">Loading strategies</option>
+            <option value="http://localhost:4000/docs/importing-properties/">Importing properties</option>
+            <option value="http://localhost:4000/docs/parametrized-properties/">Parametrized properties</option>
+            <option value="http://localhost:4000/docs/type-conversion/">Type conversion</option>
+            <option value="http://localhost:4000/docs/variables-expansion/">Variables expansion</option>
+            <option value="http://localhost:4000/docs/reload/">Reload and Hot Reload</option>
+            <option value="http://localhost:4000/docs/accessible-mutable/">Accessible and Mutable</option>
+            <option value="http://localhost:4000/docs/debugging/">Debugging</option>
+            <option value="http://localhost:4000/docs/disabling-features/">Disabling features</option>
+            <option value="http://localhost:4000/docs/configuring/">Metaconfiguring</option>
+            <option value="http://localhost:4000/docs/xml-support/">XML support</option>
+            <option value="http://localhost:4000/docs/event-support/">Event support</option>
+            <option value="http://localhost:4000/docs/singleton/">Singleton</option>
+        </optgroup>
+
+        <optgroup label="Miscellaneous">
+            <option value="http://localhost:4000/docs/features/">Features</option>
+            <option value="http://localhost:4000/docs/why/">Why OWNER?</option>
+            <option value="http://localhost:4000/docs/faq/">FAQ</option>
+            <option value="http://localhost:4000/docs/support/">Getting support</option>
+        </optgroup>
+
+        <optgroup label="Meta">
+            <option value="http://localhost:4000/docs/building/">Building from sources</option>
+            <option value="http://localhost:4000/docs/contributing/">Contributing</option>
+            <option value="http://localhost:4000/docs/license/">License</option>
+        </optgroup>
+
+        <optgroup label="Other stuff">
+            <option value="http://localhost:4000/news/releases/">History</option>
+            <option value="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22">Downloads</option>
+            <option value="https://github.com/lviggiano/owner/releases">Releases</option>
+            <option value="http://owner.newinstance.it/latest/apidocs/index.html">Javadocs</option>
+            <option value="https://aeonbits.ci.cloudbees.com/job/owner-api/">Jenkins reports</option>
+            <option value="https://travis-ci.org/lviggiano/owner">Travis CI reports</option>
+            <option value="http://dev.aeonbits.org:9000/dashboard/index/org.aeonbits.owner:owner">Sonar reports</option>
+            <option value="https://coveralls.io/r/lviggiano/owner">Coveralls reports</option>
+            <option value="http://newinstance.it/owner/latest/">Maven site</option>
+            <option value="https://www.ohloh.net/p/owner">OWNER at Ohloh</option>
+        </optgroup>
+
+    </select>
+</div>
+
+
+      <div class="unit four-fifths">
+        <article>
+          <h1>Variables expansion</h1>
+          <p>Sometimes it may be useful to expand properties values from other properties.</p>
+
+<p>Let&#39;s have a look at this properties file:</p>
+<div class="highlight"><pre><code class="language-properties" data-lang="properties"><span class="na">story</span><span class="o">=</span><span class="s">The ${animal} jumped over the ${target}</span>
+<span class="na">animal</span><span class="o">=</span><span class="s">quick ${color} fox</span>
+<span class="na">target</span><span class="o">=</span><span class="s">${target.attribute} dog</span>
+<span class="na">target.attribute</span><span class="o">=</span><span class="s">lazy</span>
+<span class="na">color</span><span class="o">=</span><span class="s">brown</span>
+</code></pre></div>
+<p>...and the associated <em>mapping interface</em>:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ConfigWithExpansion</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="nf">story</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The property <code>story</code> will expand to:</p>
+
+<blockquote>The quick brown fox jumped over the lazy dog</blockquote>
+
+<p>This also works with the annotations, but you need to specify every properties
+on the methods:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ConfigWithExpansion</span>
+        <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+
+    <span class="nd">@DefaultValue</span><span class="o">(</span>
+        <span class="s">&quot;The ${animal} jumped over the ${target}&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">story</span><span class="o">();</span>
+
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;quick ${color} fox&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">animal</span><span class="o">();</span>
+
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;${target.attribute} dog&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">target</span><span class="o">();</span>
+
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">&quot;target.attribute&quot;</span><span class="o">)</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;lazy&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">targetAttribute</span><span class="o">();</span>
+
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;brown&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">color</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="n">ConfigWithExpansion</span> <span class="n">conf</span> <span class="o">=</span> <span class="n">ConfigFactory</span>
+    <span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ConfigWithExpansion</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+<span class="n">String</span> <span class="n">story</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">story</span><span class="o">();</span>
+</code></pre></div>
+<p>Sometimes you may want expand System Properties or Environment Variables.
+This can be done using <em>imports</em> (see
+<a href="http://localhost:4000/docs/importing-properties/">Importing properties</a> to learn
+more):</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">SystemPropertiesExample</span>
+        <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;Welcome: ${user.name}&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">welcomeString</span><span class="o">();</span>
+
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;${TMPDIR}/tempFile.tmp&quot;</span><span class="o">)</span>
+    <span class="n">File</span> <span class="nf">tempFile</span><span class="o">();</span>
+
+<span class="o">}</span>
+
+<span class="n">SystemPropertiesExample</span> <span class="n">conf</span> <span class="o">=</span> <span class="n">ConfigFactory</span>
+    <span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">SystemPropertiesExample</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">getProperties</span><span class="o">(),</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">());</span>
+
+<span class="n">String</span> <span class="n">welcome</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">welcomeString</span><span class="o">();</span>
+<span class="n">File</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="na">tempFile</span><span class="o">();</span>
+</code></pre></div>
+<h2 id="disabling-variables-expansion">Disabling variables expansion</h2>
+
+<p>The variables expansion feature can be disabled if the user doesn&#39;t find it
+convenient for some reason.
+This can be done using the <code>@DisableFeature</code> annotation:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Sample</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;Earth&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">world</span><span class="o">();</span>
+
+    <span class="nd">@DisableFeature</span><span class="o">(</span><span class="n">VARIABLE_EXPANSION</span><span class="o">)</span>
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;Hello ${world}.&quot;</span><span class="o">)</span>
+
+    <span class="c1">// will return the string &quot;Hello ${world}.&quot;</span>
+    <span class="n">String</span> <span class="nf">sayHello</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The <code>@DisabledFeature</code> annotation can be applied on method level and/or on
+interface level. When applied on interface level, the annotation will apply to
+all methods defined in that interface.</p>
+
+<h2 id="variable-expansion-for-the-@key">Variable expansion for the @Key</h2>
+
+<p>Some time ago, I used to work for a company where - for security reason - it was required to deploy the exact same
+artifact to production after being tried and verified in a testing environment.
+The artifact was signed by a deployment tool to ensure that no changes were made during the passage from the
+user acceptance test to the production environment. And the configuration was (correctly, in my opinion) considered part
+of the deployment artifact.</p>
+
+<p>The deployment artifact then, was containing all the runtime configurations, and the administrator or the application
+itself was responsible to select the appropriate configuration to run with.
+I really liked this approach, because was preventing having uncontrolled code running in prod/test enviroments. And
+since configuration vastly impacts on how the application works, it must be versioned and under strict control as any
+other source code.</p>
+
+<p>Since version 1.0.6 it&#39;s possible to use variable expansion also in the <code>@Key</code> annotation, and this really adapts to
+the above usage pattern, where we had all the configurations for different running enviroments in the same files,
+and having the application or the administrator select the appropriate settings.</p>
+
+<p>Suppose in your configuration you have defined three running environment: production
+development and test. So you have a configuration XML looking like this:</p>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;servers&gt;</span>
+    <span class="nt">&lt;dev&gt;</span> <span class="c">&lt;!-- development environment --&gt;</span>
+        <span class="nt">&lt;name&gt;</span>Development<span class="nt">&lt;/name&gt;</span>
+        <span class="nt">&lt;hostname&gt;</span>devhost<span class="nt">&lt;/hostname&gt;</span>
+        <span class="nt">&lt;port&gt;</span>6000<span class="nt">&lt;/port&gt;</span>
+        <span class="nt">&lt;user&gt;</span>myuser1<span class="nt">&lt;/user&gt;</span>
+        <span class="nt">&lt;password&gt;</span>mypass1<span class="nt">&lt;/password&gt;</span>
+    <span class="nt">&lt;/dev&gt;</span>
+    <span class="nt">&lt;uat&gt;</span> <span class="c">&lt;!-- user acceptance test environment --&gt;</span>
+        <span class="nt">&lt;name&gt;</span>User Acceptance Test<span class="nt">&lt;/name&gt;</span>
+        <span class="nt">&lt;hostname&gt;</span>uathost<span class="nt">&lt;/hostname&gt;</span>
+        <span class="nt">&lt;port&gt;</span>60020<span class="nt">&lt;/port&gt;</span>
+        <span class="nt">&lt;user&gt;</span>myuser2<span class="nt">&lt;/user&gt;</span>
+        <span class="nt">&lt;password&gt;</span>mypass2<span class="nt">&lt;/password&gt;</span>
+    <span class="nt">&lt;/uat&gt;</span>
+    <span class="nt">&lt;prod&gt;</span> <span class="c">&lt;!--  production environment --&gt;</span>
+        <span class="nt">&lt;name&gt;</span>Production<span class="nt">&lt;/name&gt;</span>
+        <span class="nt">&lt;hostname&gt;</span>prod-host<span class="nt">&lt;/hostname&gt;</span>
+        <span class="nt">&lt;port&gt;</span>600<span class="nt">&lt;/port&gt;</span>
+        <span class="nt">&lt;user&gt;</span>prod-user<span class="nt">&lt;/user&gt;</span>
+        <span class="nt">&lt;password&gt;</span>secret<span class="nt">&lt;/password&gt;</span>
+    <span class="nt">&lt;/prod&gt;</span>
+<span class="nt">&lt;/servers&gt;</span>
+</code></pre></div>
+<p>Or - if you prefer - a properties file that is equivalent to the above:</p>
+<div class="highlight"><pre><code class="language-properties" data-lang="properties"><span class="na">servers.dev.name</span><span class="o">=</span><span class="s">Development</span>
+<span class="na">servers.dev.hostname</span><span class="o">=</span><span class="s">devhost</span>
+<span class="na">servers.dev.port</span><span class="o">=</span><span class="s">6000</span>
+<span class="na">servers.dev.user</span><span class="o">=</span><span class="s">myuser1</span>
+<span class="na">servers.dev.password</span><span class="o">=</span><span class="s">mypass1</span>
+
+<span class="na">servers.uat.name</span><span class="o">=</span><span class="s">User Acceptance Test</span>
+<span class="na">servers.uat.hostname</span><span class="o">=</span><span class="s">uathost</span>
+<span class="na">servers.uat.port</span><span class="o">=</span><span class="s">60020</span>
+<span class="na">servers.uat.user</span><span class="o">=</span><span class="s">myuser2</span>
+<span class="na">servers.uat.password</span><span class="o">=</span><span class="s">mypass2</span>
+
+<span class="na">servers.prod.name</span><span class="o">=</span><span class="s">Production</span>
+<span class="na">servers.prod.hostname</span><span class="o">=</span><span class="s">prod-host</span>
+<span class="na">servers.prod.port</span><span class="o">=</span><span class="s">600</span>
+<span class="na">servers.prod.user</span><span class="o">=</span><span class="s">prod-user</span>
+<span class="na">servers.prod.password</span><span class="o">=</span><span class="s">secret</span>
+</code></pre></div>
+<p>You can define the configuration mapping file as:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Sources</span><span class="o">(</span><span class="s">&quot;classpath:org/aeonbits/owner/variableexpansion/KeyExpansionExample.xml&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ExpandsFromAnotherKey</span> <span class="kd">extends</span> <span class="n">Config</span> <span class="o">{</span>
+
+    <span class="nd">@DefaultValue</span><span class="o">(</span><span class="s">&quot;dev&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">env</span><span class="o">();</span>
+
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">&quot;servers.${env}.name&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">name</span><span class="o">();</span>
+
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">&quot;servers.${env}.hostname&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">hostname</span><span class="o">();</span>
+
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">&quot;servers.${env}.port&quot;</span><span class="o">)</span>
+    <span class="n">Integer</span> <span class="nf">port</span><span class="o">();</span>
+
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">&quot;servers.${env}.user&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">user</span><span class="o">();</span>
+
+    <span class="nd">@Key</span><span class="o">(</span><span class="s">&quot;servers.${env}.password&quot;</span><span class="o">)</span>
+    <span class="n">String</span> <span class="nf">password</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Notice, on the above, that I defined the <code>env()</code> method to default with &quot;dev&quot; value. The subsequent <code>${env}</code> variables
+specified in the <code>@Key</code> annotation would use &quot;dev&quot; as default value.</p>
+
+<p>But now you can specify the <code>${env}</code> variable at runtime when creating the config object:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Map</span> <span class="n">myVars</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">HashMap</span><span class="o">();</span>
+<span class="n">myVars</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;env&quot;</span><span class="o">,</span> <span class="s">&quot;uat&quot;</span><span class="o">);</span> <span class="c1">// here!</span>
+
+<span class="n">ExpandsFromAnotherKey</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigFactory</span>
+    <span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ExpandsFromAnotherKey</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">myVars</span><span class="o">);</span> <span class="c1">// here!</span>
+
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">&quot;User Acceptance Test&quot;</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">name</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">&quot;uathost&quot;</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">hostname</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="k">new</span> <span class="nf">Integer</span><span class="o">(</span><span class="mi">60020</span><span class="o">),</span> <span class="n">cfg</span><span class="o">.</span><span class="na">port</span><span class="o">());</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="s">&quot;myuser2&quot;</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">user</span><span class="o">());</span>
+<span class="n">assertNull</span><span class="o">(</span><span class="s">&quot;mypass2&quot;</span><span class="o">,</span> <span class="n">cfg</span><span class="o">.</span><span class="na">password</span><span class="o">());</span>
+</code></pre></div>
+<p>This way you can select <code>${env}</code> when using the <code>ConfigFactory</code> (or from the system properties
+and/or the environment variables if you prefer) and have the above interface map
+to the appropriate section.
+In the above example I selected &quot;uat&quot; as value for the <code>${env}</code> variables, so the &quot;user acceptance test&quot; configuration
+would be selected.</p>
+
+          <div class="section-nav">
+  <div class="left align-right">
+    
+      <a href="http://localhost:4000/docs/type-conversion" class="prev">
+        Back
+      </a>
+    
+  </div>
+  <div class="right align-left">
+    
+      <a href="http://localhost:4000/docs/reload" class="next">
+        Next
+      </a>
+    
+  </div>
+  <div class="clear"></div>
+</div>
+
+
+        </article>
+      </div>
+
+      <div class="unit one-fifth hide-on-mobiles">
+  <aside>
+
+    <h4>Getting Started</h4>
+    <ul>
+      <li class="">
+        <a href="http://localhost:4000/docs/welcome">Welcome</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/installation">Installation</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/usage">Basic usage</a>
+      </li>
+    </ul>
+
+    <h4>More Features</h4>
+    <ul>
+    <li class="">
+    <a href="http://localhost:4000/docs/loading-strategies">Loading strategies</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/importing-properties">Importing properties</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/parametrized-properties/">Parametrized properties</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/type-conversion/">Type conversion</a>
+    </li>
+    <li class="current">
+    <a href="http://localhost:4000/docs/variables-expansion/">Variables expansion</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/reload/">Reload and Hot Reload</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/accessible-mutable/">Accessible and Mutable</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/debugging/">Debugging</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/disabling-features/">Disabling features</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/configuring/">Metaconfiguring</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/xml-support/">XML support</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/event-support/">Event support</a>
+    </li>
+    <li class="">
+    <a href="http://localhost:4000/docs/singleton/">Singleton</a>
+    </li>
+</ul>
+
+
+    <h4>Miscellaneous</h4>
+    <ul>
+        <li class="">
+            <a href="http://localhost:4000/docs/features/">Features</a>
+        </li>
+        <li class="">
+          <a href="http://localhost:4000/docs/why/">Why OWNER?</a>
+        </li>
+        <li class="">
+            <a href="http://localhost:4000/docs/faq/">FAQ</a>
+        </li>
+
+        <li class="">
+            <a href="http://localhost:4000/docs/support/">Getting support</a>
+        </li>
+    </ul>
+
+    <h4>Meta</h4>
+    <ul>
+      <li class="">
+        <a href="http://localhost:4000/docs/building">Building from sources</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/contributing">Contributing</a>
+      </li>
+      <li class="">
+        <a href="http://localhost:4000/docs/license">License</a>
+      </li>
+    </ul>
+
+    <h4>Other stuff</h4>
+    <ul>
+      <li><a href="http://localhost:4000/news/releases/">History</a></li>
+      <li><a href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22">Downloads</a></li>
+      <li><a href="https://github.com/lviggiano/owner/releases">Releases</a></li>
+      <li><a href="http://owner.newinstance.it/latest/apidocs/index.html">Javadocs</a></li>
+      <li><a href="https://aeonbits.ci.cloudbees.com/job/owner-api/">Jenkins reports</a></li>
+      <li><a href="https://travis-ci.org/lviggiano/owner">Travis CI reports</a></li>
+      <li><a href="http://dev.aeonbits.org:9000/dashboard/index/org.aeonbits.owner:owner">Sonar reports</a></li>
+      <li><a href="https://coveralls.io/r/lviggiano/owner">Coveralls reports</a></li>
+      <li><a href="http://newinstance.it/owner/latest/">Maven site</a></li>
+      <li><a href="https://www.ohloh.net/p/owner">OWNER at Ohloh</a></li>
+    </ul>
+
+  </aside>
+</div>
+
+
+      <div class="clear"></div>
+
+    </div>
+  </section>
+
+
+  <footer>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+      <p>Project maintained by <a href="https://github.com/lviggiano">Luigi R. Viggiano</a>,
+          and the <a href="https://github.com/lviggiano/owner/graphs/contributors">awesome contributors</a>.</p>
+    </div>
+    <div class="unit two-thirds align-right center-on-mobiles">
+      <p>
+        Hosted on
+        <a href="https://github.com">
+          <img src="http://localhost:4000/img/footer-logo.png" alt="GitHub • Social coding">
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+  
+
+
+  <!-- Google Analytics (http://google.com/analytics) -->
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-462505-8']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+</body>
+
+</html>
+
