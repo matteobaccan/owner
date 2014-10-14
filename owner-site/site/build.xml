@@ -77,9 +77,10 @@
         <attribute name="command"/>
         <attribute name="property" default="git.out"/>
         <sequential>
-            <exec dir="@{dir}" executable="git" outputproperty="@{property}">
+            <exec dir="@{dir}" executable="git" outputproperty="@{property}" taskname="git">
                 <arg line="@{command}"/>
             </exec>
+            <echo message="${@{property}}" taskname="git"/>
         </sequential>
     </macrodef>
 
@@ -87,7 +88,7 @@
         <attribute name="dir"/>
         <attribute name="property"/>
         <sequential>
-            <git dir="@{dir}" command="log -1 --pretty=%H" property="@{property}"/>
+            <git dir="@{dir}" command="log -1 --pretty=%h" property="@{property}"/>
         </sequential>
     </macrodef>
 
@@ -105,7 +106,7 @@
         <attribute name="command"/>
         <attribute name="options"/>
         <sequential>
-            <exec dir="@{dir}" executable="jekyll">
+            <exec dir="@{dir}" executable="jekyll" taskname="jekyll">
                 <arg line="@{command} @{options} ${env.JEKYLL_OPTS}"/>
             </exec>
         </sequential>
