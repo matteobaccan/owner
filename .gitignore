@@ -10,3 +10,4 @@ target/
 .classpath
 .settings
 .project
+.ant-targets-build.xml
