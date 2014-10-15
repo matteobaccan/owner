@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 import static org.aeonbits.owner.Config.Sources;
@@ -76,6 +77,7 @@ public class ZooKeeperLoaderTest {
         CuratorFramework client = CuratorFrameworkFactory.newClient(connectString, 50, 50, noRetryPolicy());
         try {
             client.start();
+            client.blockUntilConnected(2, TimeUnit.MINUTES);
             String basePath = "/test";
             setDataInZookeperServer(client, basePath, "thanks", "welcome");
             setDataInZookeperServer(client, basePath, "greetings", "hi,bonjour,hiya,hi!");
