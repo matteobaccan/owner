@@ -9,13 +9,16 @@
 package org.aeonbits.owner;
 
 
-import org.aeonbits.owner.event.ReloadEvent;
-import org.aeonbits.owner.event.ReloadListener;
-import org.aeonbits.owner.event.RollbackBatchException;
-import org.aeonbits.owner.event.RollbackException;
-import org.aeonbits.owner.event.RollbackOperationException;
-import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
-import org.aeonbits.owner.event.TransactionalReloadListener;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Collections.synchronizedList;
+import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.PropertiesMapper.defaults;
+import static org.aeonbits.owner.Util.asString;
+import static org.aeonbits.owner.Util.eq;
+import static org.aeonbits.owner.Util.ignore;
+import static org.aeonbits.owner.Util.reverse;
+import static org.aeonbits.owner.Util.unsupported;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -47,16 +50,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.Collections.synchronizedList;
-import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.PropertiesMapper.defaults;
-import static org.aeonbits.owner.Util.asString;
-import static org.aeonbits.owner.Util.eq;
-import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.reverse;
-import static org.aeonbits.owner.Util.unsupported;
+import org.aeonbits.owner.event.ReloadEvent;
+import org.aeonbits.owner.event.ReloadListener;
+import org.aeonbits.owner.event.RollbackBatchException;
+import org.aeonbits.owner.event.RollbackException;
+import org.aeonbits.owner.event.RollbackOperationException;
+import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
+import org.aeonbits.owner.event.TransactionalReloadListener;
+import org.aeonbits.owner.util.Reflection;
 
 /**
  * Loads properties and manages access to properties handling concurrency.
@@ -113,13 +114,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
         ConfigURLFactory urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
         
-        urls = toURLs(getSources(clazz), urlFactory);
+        urls = toURLs((Sources)Reflection.getAnnotation(clazz, Sources.class), urlFactory);
 
-        LoadPolicy loadPolicy = getLoadPolicy(clazz);
+        LoadPolicy loadPolicy = (LoadPolicy)Reflection.getAnnotation(clazz, LoadPolicy.class);
         
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        HotReload hotReload = getHotReload(clazz);
+        HotReload hotReload = (HotReload)Reflection.getAnnotation(clazz, HotReload.class);
         if (hotReload != null) {
             hotReloadLogic = new HotReloadLogic(hotReload, urls, this);
 
@@ -134,66 +135,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    /**
-     * Method to recursively find Sources annotation from the current interface class or from its extended parents
-     * @param clazz
-     * @return
-     */
-    private Sources getSources(Class<?> clazz)
-    {
-        Sources sources = clazz.getAnnotation(Sources.class);
-        if (sources == null && clazz.getInterfaces() != null)
-        {
-            for (Class<?> i : clazz.getInterfaces())
-            {
-                Sources s = getSources(i);
-                if (s != null)
-                    return s;
-            }
-        }
-        return sources;
-    }
-    
-    /**
-     * Method to recursively find LoadPolicy annotation from the current interface class or from its extended parents
-     * @param clazz
-     * @return
-     */
-    private LoadPolicy getLoadPolicy(Class<?> clazz)
-    {
-        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
-        if (loadPolicy == null && clazz.getInterfaces() != null)
-        {
-            for (Class<?> i : clazz.getInterfaces())
-            {
-                LoadPolicy l = getLoadPolicy(i);
-                if (l != null)
-                    return l;
-            }
-        }
-        return loadPolicy;
-    }
-    
-    /**
-     * Method to recursively find HotReload annotation from the current interface class or from its extended parents
-     * @param clazz
-     * @return
-     */
-    private HotReload getHotReload(Class<?> clazz)
-    {
-        HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        if (hotReload == null && clazz.getInterfaces() != null)
-        {
-            for (Class<?> i : clazz.getInterfaces())
-            {
-                HotReload h = getHotReload(i);
-                if (h != null)
-                    return h;
-            }
-        }
-        return hotReload;
-    }
-    
     private List<URL> toURLs(Sources sources, ConfigURLFactory urlFactory) {
         String[] specs = specs(sources, urlFactory);
         ArrayList<URL> result = new ArrayList<URL>();

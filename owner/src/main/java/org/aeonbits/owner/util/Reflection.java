@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner.util;
 
+import java.lang.annotation.Annotation;
+
 /**
  * @author Luigi R. Viggiano
  */
@@ -24,4 +26,25 @@ public class Reflection {
             return false;
         }
     }
+    
+    /**
+     * Method to recursively find annotated config class from the current interface class or from its parents
+     * @param clazz, annotationClazz
+     * @return
+     */
+    public static Annotation getAnnotation(Class<?> clazz, Class<? extends Annotation> annotationClazz)
+    {
+        Annotation annotations = clazz.getAnnotation(annotationClazz);
+        if (annotations == null && clazz.getInterfaces() != null)
+        {
+            for (Class<?> i : clazz.getInterfaces())
+            {
+                Annotation annotation = getAnnotation(i, annotationClazz);
+                if (annotation != null)
+                    return annotation;
+            }
+        }
+        return annotations;
+    }
+    
 }
