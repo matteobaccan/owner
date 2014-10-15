@@ -22,9 +22,9 @@ import sun.net.www.protocol.zookeeper.NoRetryPolicy;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.Sources;
 import static org.junit.Assert.*;
 
@@ -76,7 +76,7 @@ public class ZooKeeperLoaderTest {
         CuratorFramework client = CuratorFrameworkFactory.newClient(connectString, 50, 50, new NoRetryPolicy());
         try {
             client.start();
-            client.blockUntilConnected(2, TimeUnit.MINUTES);
+            client.blockUntilConnected(30, SECONDS);
             String basePath = "/test";
             setDataInZookeperServer(client, basePath, "thanks", "welcome");
             setDataInZookeperServer(client, basePath, "greetings", "hi,bonjour,hiya,hi!");

@@ -20,6 +20,10 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.System.getProperty;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
@@ -47,10 +51,13 @@ public class ZooKeeperConnection extends URLConnection {
 
     @Override
     public void connect() throws IOException {
+        client.start();
         try {
-            client.start();
-        } catch (Exception exp) {
-            throw new IOException("not able to connect to zookeeper");
+            int timeout = getZookeeperTimeout();
+            client.blockUntilConnected(timeout, SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
         }
     }
 
@@ -58,6 +65,10 @@ public class ZooKeeperConnection extends URLConnection {
     public InputStream getInputStream() throws IOException {
         connect();
         return new ZooKeeperStream(client, basePath);
+    }
+
+    public int getZookeeperTimeout() {
+        return parseInt(getProperty("owner.zookeeper.connection.timeout.seconds", "30"));
     }
 
     public static class ZooKeeperStream extends InputStream {
