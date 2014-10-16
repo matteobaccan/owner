@@ -13,6 +13,22 @@
     <artifactId>owner-assembly</artifactId>
     <packaging>pom</packaging>
 
+    <profiles>
+        <profile>
+            <id>java8</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.aeonbits.owner</groupId>
+                    <artifactId>owner-java8</artifactId>
+                    <version>1.0.6-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -35,4 +51,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

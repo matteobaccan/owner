@@ -22,6 +22,8 @@ import static org.aeonbits.owner.Converters.convert;
 import static org.aeonbits.owner.PropertiesManager.Delegate;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.Util.isFeatureDisabled;
+import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
+import static org.aeonbits.owner.util.Reflection.isDefault;
 
 /**
  * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
@@ -49,6 +51,10 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
     public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {
         propertiesManager.syncReloadCheck();
+
+        if (isDefault(invokedMethod))
+            return invokeDefaultMethod(proxy, invokedMethod, args);
+
         Method delegate = getDelegateMethod(invokedMethod);
         if (delegate != null)
             return delegate(delegate, args);
