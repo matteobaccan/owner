@@ -52,16 +52,6 @@
                 <role>dev</role>
             </roles>
         </developer>
-        <developer>
-            <id>ffbit</id>
-            <name>Dmytro Chyzhykov</name>
-            <email>dmytro.chyzhykov@gmail.com</email>
-            <url>http://ffbit.com/</url>
-            <timezone>+3</timezone>
-            <roles>
-                <role>dev</role>
-            </roles>
-        </developer>
     </developers>
 
     <mailingLists>
@@ -243,6 +233,17 @@
                             <format>html</format>
                         </formats>
                         <aggregate>true</aggregate>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>1.4.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <instructions>
+                            <Export-Package>org.aeonbits.owner.*</Export-Package>
+                        </instructions>
                     </configuration>
                 </plugin>
             </plugins>
