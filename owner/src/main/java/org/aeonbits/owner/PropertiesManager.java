@@ -9,13 +9,16 @@
 package org.aeonbits.owner;
 
 
-import org.aeonbits.owner.event.ReloadEvent;
-import org.aeonbits.owner.event.ReloadListener;
-import org.aeonbits.owner.event.RollbackBatchException;
-import org.aeonbits.owner.event.RollbackException;
-import org.aeonbits.owner.event.RollbackOperationException;
-import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
-import org.aeonbits.owner.event.TransactionalReloadListener;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Collections.synchronizedList;
+import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.PropertiesMapper.defaults;
+import static org.aeonbits.owner.Util.asString;
+import static org.aeonbits.owner.Util.eq;
+import static org.aeonbits.owner.Util.ignore;
+import static org.aeonbits.owner.Util.reverse;
+import static org.aeonbits.owner.Util.unsupported;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -47,16 +50,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.Collections.synchronizedList;
-import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.PropertiesMapper.defaults;
-import static org.aeonbits.owner.Util.asString;
-import static org.aeonbits.owner.Util.eq;
-import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.reverse;
-import static org.aeonbits.owner.Util.unsupported;
+import org.aeonbits.owner.event.ReloadEvent;
+import org.aeonbits.owner.event.ReloadListener;
+import org.aeonbits.owner.event.RollbackBatchException;
+import org.aeonbits.owner.event.RollbackException;
+import org.aeonbits.owner.event.RollbackOperationException;
+import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
+import org.aeonbits.owner.event.TransactionalReloadListener;
+import org.aeonbits.owner.util.Reflection;
 
 /**
  * Loads properties and manages access to properties handling concurrency.
@@ -112,12 +113,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.imports = imports;
 
         ConfigURLFactory urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
-        urls = toURLs(clazz.getAnnotation(Sources.class), urlFactory);
+        
+        urls = toURLs((Sources)Reflection.getAnnotation(clazz, Sources.class), urlFactory);
 
-        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
+        LoadPolicy loadPolicy = (LoadPolicy)Reflection.getAnnotation(clazz, LoadPolicy.class);
+        
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        HotReload hotReload = clazz.getAnnotation(HotReload.class);
+        HotReload hotReload = (HotReload)Reflection.getAnnotation(clazz, HotReload.class);
         if (hotReload != null) {
             hotReloadLogic = new HotReloadLogic(hotReload, urls, this);
 

@@ -9,6 +9,7 @@
 package org.aeonbits.owner.util;
 
 import java.lang.reflect.Method;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Luigi R. Viggiano
@@ -63,6 +64,29 @@ public class Reflection {
 
     public static Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
         return JAVA_8_SUPPORT.invokeDefaultMethod(proxy, method, args);
+    }
+
+    /**
+     * Method to recursively find an annotation over an interface hierarchy.
+     *
+     * @param   clazz the class to inspect to find the annotation.
+     * @param   annotationClass the annotation class to look for.
+     * @return  the Annotation if found, or null otherwise.
+     */
+    public static Annotation getAnnotation(Class<?> clazz, Class<? extends Annotation> annotationClass)
+    {
+        Annotation annotation = clazz.getAnnotation(annotationClass);
+        if (annotation != null)
+            return annotation;
+
+        for (Class<?> interfaceClass : clazz.getInterfaces())
+        {
+            annotation = getAnnotation(interfaceClass, annotationClass);
+            if (annotation != null)
+                return annotation;
+        }
+
+        return null;
     }
 
 }
