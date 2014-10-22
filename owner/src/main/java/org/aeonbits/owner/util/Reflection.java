@@ -73,9 +73,9 @@ public class Reflection {
      * @param   annotationClass the annotation class to look for.
      * @return  the Annotation if found, or null otherwise.
      */
-    public static Annotation getAnnotation(Class<?> clazz, Class<? extends Annotation> annotationClass)
+    public static <T extends Annotation> T getAnnotation(Class<?> clazz, Class<T> annotationClass)
     {
-        Annotation annotation = clazz.getAnnotation(annotationClass);
+        T annotation = clazz.getAnnotation(annotationClass);
         if (annotation != null)
             return annotation;
 

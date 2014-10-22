@@ -8,13 +8,6 @@
 
 package org.aeonbits.owner.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.lang.annotation.Annotation;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.LoadPolicy;
@@ -23,34 +16,14 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.TestConstants;
 import org.junit.Test;
 
+import java.lang.annotation.Annotation;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Luigi R. Viggiano
  */
 public class ReflectionTest {
-
-    private static final String PARENT_SPEC = "file:" + TestConstants.RESOURCES_DIR + "/parent.properties";
-    private static final String CHILD_SPEC = "file:" + TestConstants.RESOURCES_DIR + "/child.properties";
-    
-    /**
-     * Sample test interfaces extending Config class to verify following use cases:
-     * 1) parent class extending Config with annotations
-     * 2) parent extending Config without annotation
-     * 3) child class extending parent class with its own annotations
-     * 4) child class extending parent class without annotation
-     */
-    @Sources(PARENT_SPEC)
-    @LoadPolicy(LoadType.MERGE)
-    @HotReload(value=1)
-    interface parentClazz extends Config {}
-    
-    @Sources(CHILD_SPEC)
-    @LoadPolicy(LoadType.FIRST)
-    @HotReload(value=2)
-    interface childClazz extends parentClazz {}
-
-    interface noAnnotationClazz extends Config {}
-
-    interface noAnnotationChildClazz extends parentClazz {}
 
     @Test
     public void testAvailableWithNonExistentClass() {
@@ -63,38 +36,57 @@ public class ReflectionTest {
         boolean available = Reflection.isClassAvailable("java.lang.String");
         assertTrue(available);
     }
-    
+
+
+    private static final String PARENT_SPEC = "file:" + TestConstants.RESOURCES_DIR + "/parent.properties";
+    private static final String CHILD_SPEC = "file:" + TestConstants.RESOURCES_DIR + "/child.properties";
+
+    @Sources(PARENT_SPEC)
+    @LoadPolicy(LoadType.MERGE)
+    @HotReload(value=1)
+    interface ParentConfig extends Config {}
+
+    @Sources(CHILD_SPEC)
+    @LoadPolicy(LoadType.FIRST)
+    @HotReload(value=2)
+    interface ChildConfig extends ParentConfig {}
+
+    interface NonAnnotatedConfig extends Config {}
+
+    interface NonAnnotatedChildConfig extends ParentConfig {}
+
     @Test
     public void testGetAnnotationWithNonExistentAnnotation() {
-        assertNull(Reflection.getAnnotation(parentClazz.class, Annotation.class));
+        assertNull(Reflection.getAnnotation(ParentConfig.class, Annotation.class));
+        assertNull(Reflection.getAnnotation(ChildConfig.class, Annotation.class));
     }
 
     @Test
-    public void testGetAnnotationWithParentClass() {
-        assertEquals(PARENT_SPEC, ((Sources)Reflection.getAnnotation(parentClazz.class, Sources.class)).value()[0]);
-        assertEquals(LoadType.MERGE, ((LoadPolicy)Reflection.getAnnotation(parentClazz.class, LoadPolicy.class)).value());
-        assertEquals(1, ((HotReload)Reflection.getAnnotation(parentClazz.class, HotReload.class)).value());
+    public void testGetAnnotationWithParentConfig() {
+        assertEquals(PARENT_SPEC, (Reflection.getAnnotation(ParentConfig.class, Sources.class)).value()[0]);
+        assertEquals(LoadType.MERGE, (Reflection.getAnnotation(ParentConfig.class, LoadPolicy.class)).value());
+        assertEquals(1, (Reflection.getAnnotation(ParentConfig.class, HotReload.class)).value());
     }
 
     @Test
-    public void testGetAnnotationWithChildClass() {
-        assertEquals(CHILD_SPEC, ((Sources)Reflection.getAnnotation(childClazz.class, Sources.class)).value()[0]);
-        assertEquals(LoadType.FIRST, ((LoadPolicy)Reflection.getAnnotation(childClazz.class, LoadPolicy.class)).value());
-        assertEquals(2, ((HotReload)Reflection.getAnnotation(childClazz.class, HotReload.class)).value());
+    public void testGetAnnotationWithChildConfig() {
+        assertEquals(CHILD_SPEC, (Reflection.getAnnotation(ChildConfig.class, Sources.class)).value()[0]);
+        assertEquals(LoadType.FIRST, (Reflection.getAnnotation(ChildConfig.class, LoadPolicy.class)).value());
+        assertEquals(2, (Reflection.getAnnotation(ChildConfig.class, HotReload.class)).value());
     }
 
     @Test
-    public void testGetAnnotationWithNoAnnotationClass() {
-        assertNull(Reflection.getAnnotation(noAnnotationClazz.class, Sources.class));
-        assertNull(Reflection.getAnnotation(noAnnotationClazz.class, LoadPolicy.class));
-        assertNull(Reflection.getAnnotation(noAnnotationClazz.class, HotReload.class));
+    public void testGetAnnotationWithNonAnnotatedConfig() {
+        assertNull(Reflection.getAnnotation(NonAnnotatedConfig.class, Sources.class));
+        assertNull(Reflection.getAnnotation(NonAnnotatedConfig.class, LoadPolicy.class));
+        assertNull(Reflection.getAnnotation(NonAnnotatedConfig.class, HotReload.class));
     }
 
     @Test
-    public void testGetAnnotationWithNoAnnotationChildClass() {
-        assertEquals(PARENT_SPEC, ((Sources)Reflection.getAnnotation(noAnnotationChildClazz.class, Sources.class)).value()[0]);
-        assertEquals(LoadType.MERGE, ((LoadPolicy)Reflection.getAnnotation(noAnnotationChildClazz.class, LoadPolicy.class)).value());
-        assertEquals(1, ((HotReload)Reflection.getAnnotation(noAnnotationChildClazz.class, HotReload.class)).value());
+    public void testGetAnnotationWithNonAnnotatedChildConfig() {
+        assertEquals(PARENT_SPEC, (Reflection.getAnnotation(NonAnnotatedChildConfig.class, Sources.class)).value()[0]);
+        assertEquals(LoadType.MERGE, (Reflection.getAnnotation(NonAnnotatedChildConfig.class, LoadPolicy.class)).value());
+        assertEquals(1, (Reflection.getAnnotation(NonAnnotatedChildConfig.class, HotReload.class)).value());
     }
 
 }
