@@ -52,7 +52,7 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
             "classpath:org/aeonbits/owner/FooBar.properties",  // it will be loaded from here
             "file:~/blahblah.properties"})
     public static interface SampleConfigWithSource extends Config {
-        String helloWorld(); 
+        String helloWorld();
     }
 
     @Test
@@ -101,9 +101,9 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
 
     @Test
     public void shouldLoadURLFromSpecifiedSource() throws IOException {
-        PropertiesManagerForTest manager = 
+        PropertiesManagerForTest manager =
                 new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(),
-                scheduler, expander, loaders);
+                        scheduler, expander, loaders);
         manager.load();
         verify(loaders, times(1)).findLoader(any(URL.class));
         verify(loaders, times(1)).findLoader(argThat(urlMatches("org/aeonbits/owner/FooBar.properties")));
@@ -114,5 +114,4 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
         SampleConfigWithSource sample = ConfigFactory.create(SampleConfigWithSource.class);
         assertEquals("Hello World!", sample.helloWorld());
     }
-
 }

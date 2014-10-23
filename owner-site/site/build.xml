@@ -27,8 +27,9 @@
 
     <target name="copy" depends="pull">
         <copy todir="${gh-pages.directory}" overwrite="true">
-            <fileset dir="${site.directory}"/>
+            <fileset dir="${site.directory}" excludes="build.xml"/>
         </copy>
+        <copy file="${site.directory}/.gitignore" todir="${gh-pages.directory}"/>
     </target>
 
     <target name="commit" depends="copy">
@@ -75,9 +76,11 @@
     <macrodef name="git">
         <attribute name="dir"/>
         <attribute name="command"/>
+        <element name="elements" optional="true" implicit="true"/>
         <sequential>
-            <exec dir="@{dir}" executable="git">
+            <exec dir="@{dir}" executable="git" taskname="git">
                 <arg line="@{command}"/>
+                <elements/>
             </exec>
         </sequential>
     </macrodef>
@@ -86,9 +89,9 @@
         <attribute name="dir"/>
         <attribute name="property"/>
         <sequential>
-            <exec dir="@{dir}" executable="bash" outputproperty="@{property}">
-                <arg line="-c 'git log --pretty=%H  | head -1'"/>
-            </exec>
+            <git dir="@{dir}" command="log -1 --pretty=%h">
+                <redirector outputproperty="@{property}"/>
+            </git>
         </sequential>
     </macrodef>
 
@@ -106,7 +109,7 @@
         <attribute name="command"/>
         <attribute name="options"/>
         <sequential>
-            <exec dir="@{dir}" executable="jekyll">
+            <exec dir="@{dir}" executable="jekyll" taskname="jekyll">
                 <arg line="@{command} @{options} ${env.JEKYLL_OPTS}"/>
             </exec>
         </sequential>

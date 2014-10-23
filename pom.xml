@@ -21,6 +21,8 @@
     <modules>
         <module>owner</module>
         <module>owner-site</module>
+        <module>owner-loaders</module>
+        <module>owner-assembly</module>
     </modules>
 
     <inceptionYear>2012</inceptionYear>
@@ -46,16 +48,6 @@
             <organization>NewInstance Ltd.</organization>
             <organizationUrl>http://en.newinstance.it</organizationUrl>
             <timezone>+1</timezone>
-            <roles>
-                <role>dev</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>ffbit</id>
-            <name>Dmytro Chyzhykov</name>
-            <email>dmytro.chyzhykov@gmail.com</email>
-            <url>http://ffbit.com/</url>
-            <timezone>+3</timezone>
             <roles>
                 <role>dev</role>
             </roles>
@@ -137,6 +129,15 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>java8</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <modules>
+                <module>owner-java8</module>
+            </modules>
         </profile>
     </profiles>
 
@@ -243,6 +244,17 @@
                         <aggregate>true</aggregate>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>1.4.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <instructions>
+                            <Export-Package>org.aeonbits.owner.*</Export-Package>
+                        </instructions>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <extensions>
@@ -302,6 +314,7 @@
                         <format>html</format>
                     </formats>
                     <aggregate>true</aggregate>
+                    <check/>
                 </configuration>
             </plugin>
         </plugins>

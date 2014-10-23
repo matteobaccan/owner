@@ -8,15 +8,17 @@
 
 package org.aeonbits.owner.util;
 
+import java.lang.reflect.Method;
 import java.lang.annotation.Annotation;
 
 /**
  * @author Luigi R. Viggiano
  */
 public class Reflection {
-    
-    // Suppresses default constructor, ensuring non-instantiability.
-    private Reflection() {}
+
+    // Suppresses default LOOKUP_CONSTRUCTOR, ensuring non-instantiability.
+    private Reflection() {
+    }
 
     public static boolean isClassAvailable(String className) {
         try {
@@ -26,25 +28,65 @@ public class Reflection {
             return false;
         }
     }
-    
-    /**
-     * Method to recursively find annotated config class from the current interface class or from its parents
-     * @param clazz, annotationClazz
-     * @return
-     */
-    public static Annotation getAnnotation(Class<?> clazz, Class<? extends Annotation> annotationClazz)
-    {
-        Annotation annotations = clazz.getAnnotation(annotationClazz);
-        if (annotations == null && clazz.getInterfaces() != null)
-        {
-            for (Class<?> i : clazz.getInterfaces())
-            {
-                Annotation annotation = getAnnotation(i, annotationClazz);
-                if (annotation != null)
-                    return annotation;
-            }
-        }
-        return annotations;
+
+    static interface Java8Support {
+        public boolean isDefault(Method method);
+
+        public Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable;
     }
-    
+
+    private static final Java8Support JAVA_8_SUPPORT = getJava8Support();
+
+    private static Java8Support getJava8Support() {
+        try {
+            return (Java8Support) Class.forName("org.aeonbits.owner.util.Java8SupportImpl").newInstance();
+        } catch (Exception e) {
+            return java8NotSupported();
+        }
+    }
+
+    private static Java8Support java8NotSupported() {
+        return new Java8Support() {
+            public boolean isDefault(Method method) {
+                return false;
+            }
+
+            public Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
+                return null;
+            }
+        };
+    }
+
+
+    public static boolean isDefault(Method method) {
+        return JAVA_8_SUPPORT.isDefault(method);
+    }
+
+    public static Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
+        return JAVA_8_SUPPORT.invokeDefaultMethod(proxy, method, args);
+    }
+
+    /**
+     * Method to recursively find an annotation over an interface hierarchy.
+     *
+     * @param   clazz the class to inspect to find the annotation.
+     * @param   annotationClass the annotation class to look for.
+     * @return  the Annotation if found, or null otherwise.
+     */
+    public static <T extends Annotation> T getAnnotation(Class<?> clazz, Class<T> annotationClass)
+    {
+        T annotation = clazz.getAnnotation(annotationClass);
+        if (annotation != null)
+            return annotation;
+
+        for (Class<?> interfaceClass : clazz.getInterfaces())
+        {
+            annotation = getAnnotation(interfaceClass, annotationClass);
+            if (annotation != null)
+                return annotation;
+        }
+
+        return null;
+    }
+
 }
