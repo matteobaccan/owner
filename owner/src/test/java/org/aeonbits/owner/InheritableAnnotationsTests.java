@@ -31,6 +31,7 @@ public class InheritableAnnotationsTests {
     private static final String MOMMY_PROPERTIES_FILE = "mommy.properties";
     private static final String SISTER_PROPERTIES_FILE = "sister.properties";
     private static final String SPOUSE_PROPERTIES_FILE = "spouse.properties";
+    private static final String GRANDCHILD_PROPERTIES_FILE = "grandchild.properties";
     
     private static Path configDir;
     
@@ -67,6 +68,8 @@ public class InheritableAnnotationsTests {
             new String("sources="+SISTER_PROPERTIES_FILE).getBytes());
         Files.write(Paths.get(configDir.toAbsolutePath() + File.separator + SPOUSE_PROPERTIES_FILE ),
             new String("sources="+SPOUSE_PROPERTIES_FILE).getBytes());
+        Files.write(Paths.get(configDir.toAbsolutePath() + File.separator + GRANDCHILD_PROPERTIES_FILE ),
+                new String("sources="+GRANDCHILD_PROPERTIES_FILE).getBytes());
     }
 
     /**
@@ -105,10 +108,16 @@ public class InheritableAnnotationsTests {
     static interface Sister2Config extends DaddyChildConfig {}
     
     // Brother and Spouse are married having the GrandChild as their child
-    // Grand brother child inheritance: BrotherConfig -> MommyChildConfig -> MommyConfig -> MommyFamilyConfig
-    // Grand Spouse child inheritance: SpouseConfig -> SpouseFamilyConfig
+    // GrandBrother child inheritance: BrotherConfig -> MommyChildConfig -> MommyConfig -> MommyFamilyConfig
+    // GrandSpouse child inheritance: SpouseConfig -> SpouseFamilyConfig
+    // GrandSon child inheritance: he has his own properties
+    // GrandDaughter child inheritance: she has his own properties
     static interface GrandBrotherChildConfig extends BrotherConfig, SpouseConfig {} 
     static interface GrandSpouseChildConfig extends SpouseConfig, BrotherConfig {} 
+    @Sources({ "file:${config.dir}/"+GRANDCHILD_PROPERTIES_FILE })
+    static interface GrandSonChildConfig extends BrotherConfig, SpouseConfig {} 
+    @Sources({ "file:${config.dir}/"+GRANDCHILD_PROPERTIES_FILE })
+    static interface GrandDaughterChildConfig extends SpouseConfig, BrotherConfig {} 
 
      @Test
      public void testTestConfig() {
@@ -141,5 +150,7 @@ public class InheritableAnnotationsTests {
      public void testGrandChildConfig() {
          assertEquals(MOMMY_FAMILY_PROPERTIES_FILE, ConfigFactory.create(GrandBrotherChildConfig.class).sources());
          assertEquals(SPOUSE_FAMILY_PROPERTIES_FILE, ConfigFactory.create(GrandSpouseChildConfig.class).sources());
+         assertEquals(GRANDCHILD_PROPERTIES_FILE, ConfigFactory.create(GrandSonChildConfig.class).sources());
+         assertEquals(GRANDCHILD_PROPERTIES_FILE, ConfigFactory.create(GrandDaughterChildConfig.class).sources());
      }
 }
