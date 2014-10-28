@@ -8,6 +8,14 @@
 
 package org.aeonbits.owner;
 
+import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
+import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
+import static org.aeonbits.owner.Converters.convert;
+import static org.aeonbits.owner.PropertiesMapper.key;
+import static org.aeonbits.owner.Util.isFeatureDisabled;
+import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
+import static org.aeonbits.owner.util.Reflection.isDefault;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -16,14 +24,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
-import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
-import static org.aeonbits.owner.Converters.convert;
-import static org.aeonbits.owner.PropertiesManager.Delegate;
-import static org.aeonbits.owner.PropertiesMapper.key;
-import static org.aeonbits.owner.Util.isFeatureDisabled;
-import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
-import static org.aeonbits.owner.util.Reflection.isDefault;
+import org.aeonbits.owner.PropertiesManager.Delegate;
 
 /**
  * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
@@ -44,9 +45,9 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private final StrSubstitutor substitutor;
     final PropertiesManager propertiesManager;
 
-    PropertiesInvocationHandler(PropertiesManager manager) {
+    PropertiesInvocationHandler(PropertiesManager manager, Class<? extends Config> clazz) {
         this.propertiesManager = manager;
-        this.substitutor = new StrSubstitutor(manager.load());
+        this.substitutor = new StrSubstitutor(manager.load(), clazz);
     }
 
     public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {

@@ -8,20 +8,20 @@
 
 package org.aeonbits.owner;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author Luigi R. Viggiano
@@ -47,7 +47,7 @@ public class PropertiesInvocationHandlerTest {
     @Before
     public void before() {
         PropertiesManager loader = new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders);
-        handler = new PropertiesInvocationHandler(loader);
+        handler = new PropertiesInvocationHandler(loader, Dummy.class);
     }
 
     @Test

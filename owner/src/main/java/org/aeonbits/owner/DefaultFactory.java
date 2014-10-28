@@ -8,13 +8,13 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.loaders.Loader;
+import static java.lang.reflect.Proxy.newProxyInstance;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.lang.reflect.Proxy.newProxyInstance;
+import org.aeonbits.owner.loaders.Loader;
 
 /**
  * Default implementation for {@link Factory}.
@@ -39,7 +39,7 @@ class DefaultFactory implements Factory {
         VariablesExpander expander = new VariablesExpander(props);
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
                 imports);
-        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager);
+        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager, clazz);
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
         return proxy;

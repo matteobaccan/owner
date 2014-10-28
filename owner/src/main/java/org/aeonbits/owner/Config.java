@@ -9,6 +9,15 @@
 package org.aeonbits.owner;
 
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.aeonbits.owner.Config.HotReloadType.SYNC;
+import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.Util.ignore;
+import static org.aeonbits.owner.Util.reverse;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Documented;
@@ -18,15 +27,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.aeonbits.owner.Config.HotReloadType.SYNC;
-import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.reverse;
 
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
@@ -327,6 +327,18 @@ public interface Config extends Serializable {
     @Documented
     @interface ConverterClass {
         Class<? extends Converter> value();
+    }
+
+    /**
+     * Registers {@link Substitutor} classes, with given names, to allow the user to define custom
+     * substitutor logic when expanding variables in property strings.
+     */
+    @Retention(RUNTIME)
+    @Target(TYPE)
+    @Documented
+    @interface SubstitutorClasses {
+        String[] names();
+        Class<? extends Substitutor>[] classes();
     }
 
 }
