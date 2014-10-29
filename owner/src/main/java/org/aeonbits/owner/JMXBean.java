@@ -9,7 +9,7 @@ import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.ReflectionException;
 
-public interface JMXBean extends Config, DynamicMBean {
+public interface JMXBean extends Accessible, DynamicMBean {
 	
 	public Object getAttribute(String attribute) throws AttributeNotFoundException, MBeanException,
 	ReflectionException;
