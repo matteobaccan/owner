@@ -662,16 +662,27 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, JMXBean {
 		MBeanParameterInfo paramsValue = new MBeanParameterInfo(
 				"Propertyvalue", "java.lang.String", "Value of the property");
 
-		MBeanOperationInfo[] operations = {
-				new MBeanOperationInfo("getProperty", "getProperties",
-						new MBeanParameterInfo[] { paramsKey },
-						"java.lang.String", MBeanOperationInfo.INFO),
-				new MBeanOperationInfo("setProperty", "setProperties",
-						new MBeanParameterInfo[] { paramsKey, paramsValue },
-						"void", MBeanOperationInfo.ACTION_INFO),
-				new MBeanOperationInfo("reload", "Reload properties",
-						null, // no parameters
-						"void", MBeanOperationInfo.ACTION) };
+		
+		MBeanOperationInfo getOperation = new MBeanOperationInfo("getProperty", "getProperties",
+				new MBeanParameterInfo[] { paramsKey }, "java.lang.String", MBeanOperationInfo.INFO);
+		MBeanOperationInfo setOperation = new MBeanOperationInfo("setProperty", "setProperties",
+				new MBeanParameterInfo[] { paramsKey, paramsValue },"void", MBeanOperationInfo.ACTION);
+		MBeanOperationInfo reloadOperation = new MBeanOperationInfo("reload", "Reload properties",
+				null, // no parameters
+				"void", MBeanOperationInfo.ACTION);		
+		
+		List<MBeanOperationInfo> operationsList = new ArrayList<MBeanOperationInfo>();
+		if(Accessible.class.isAssignableFrom(clazz)){
+			operationsList.add(getOperation);
+		}
+		if(Mutable.class.isAssignableFrom(clazz)){
+			operationsList.add(setOperation);
+		}
+		if(Reloadable.class.isAssignableFrom(clazz)){
+			operationsList.add(reloadOperation);
+		}		
+		MBeanOperationInfo[] operations = new MBeanOperationInfo[operationsList.size()];
+		operations = operationsList.toArray(operations);
 
 		return new MBeanInfo(clazz.getName(), "Owner MBean", attributes, null,
 				operations, null);
