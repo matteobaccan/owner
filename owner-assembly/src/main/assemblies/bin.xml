@@ -39,7 +39,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/owner-extras/target</directory>
-            <outputDirectory>extras</outputDirectory>
+            <outputDirectory>/</outputDirectory>
             <includes>
                 <include>*.jar</include>
             </includes>
