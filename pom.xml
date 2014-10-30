@@ -21,7 +21,7 @@
     <modules>
         <module>owner</module>
         <module>owner-site</module>
-        <module>owner-loaders</module>
+        <module>owner-extras</module>
         <module>owner-assembly</module>
     </modules>
 

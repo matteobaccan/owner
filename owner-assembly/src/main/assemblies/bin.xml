@@ -38,7 +38,7 @@
             <outputDirectory>docs</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.parent.basedir}/owner-loaders/target</directory>
+            <directory>${project.parent.basedir}/owner-extras/target</directory>
             <outputDirectory>extras</outputDirectory>
             <includes>
                 <include>*.jar</include>

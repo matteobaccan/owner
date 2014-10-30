@@ -15,9 +15,9 @@
         <version>1.0.6-SNAPSHOT</version>
     </parent>
 
-    <name>OWNER :: Third Party Loaders</name>
-    <artifactId>owner-loaders</artifactId>
-    <description>Third Party Loaders for OWNER library</description>
+    <name>OWNER :: Third Party Extras</name>
+    <artifactId>owner-extras</artifactId>
+    <description>Third Party Extras for OWNER library</description>
     <packaging>bundle</packaging>
 
     <dependencies>
