@@ -41,6 +41,18 @@ faster: git://github.com/lviggiano/owner.git.
 </div>
 
 
+Building with support for Java 8
+--------------------------------
+
+Since version 1.0.6 OWNER supports some language features introduced by Java 8, such as [`default` methods][def-methods]
+in interfaces.
+
+The support classes for these features are encapsulated in the maven module called `owner-java8` that gets
+included into the build process only when maven is invoked from JDK 8.
+
+  [def-methods]: http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html
+
+
 Building a specific version
 ---------------------------
 
@@ -90,6 +102,7 @@ Continuous Integration
 You can access latest builds from
  [Jenkins](https://aeonbits.ci.cloudbees.com/job/owner-api/) and
  [Travis](https://travis-ci.org/lviggiano/owner) websites.
+
 
 Code quality reports
 --------------------
