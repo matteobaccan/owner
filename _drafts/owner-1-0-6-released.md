@@ -11,6 +11,8 @@ v1.0.6 contains following enhancements and bug fixes.
 Enhancements
 ------------
  * Added basic support for ZooKeeper [#81](https://github.com/lviggiano/owner/issues/81). Thanks [@ksaritek](https://github.com/ksaritek).
+ * Added Java 8 Support (default and static methods on interfaces). See [#94](https://github.com/lviggiano/owner/issues/94).
+ * Added OSGi support. See [#101](https://github.com/lviggiano/owner/issues/101).
 
 Site Enhancements
 -----------------

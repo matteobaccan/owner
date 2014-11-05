@@ -34,12 +34,12 @@ to your pom.xml:
     <dependency>
         <groupId>org.aeonbits.owner</groupId>
         <artifactId>owner</artifactId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
     </dependency>
 </dependencies>
 ```
 
-Replace 1.0.5 with the latest version available. At the time of writing this page, the latest version is 1.0.5, but you
+Replace 1.0.6 with the latest version available. At the time of writing this page, the latest version is 1.0.6, but you
 need to check if there is any newer version.
 
 <div class="note">
@@ -52,12 +52,39 @@ Many modern IDEs integrate well with maven, so after adding the above section
 in your pom file and refreshing your project in your IDE, you should be ready to
 use the library APIs.
 
+Java 8
+------
+
+Java 8 introduces some new language features, such as [`default` methods][def-methods] in interfaces.
+
+In this case you should specify the `owner-java8` artifactId instead:
+
+To use it, you need to have JDK 8 installed properly in your system; then, you need to declare a maven
+dependency in your project `pom.xml`:
+
+```xml
+<dependencies>
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner-java8</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+</dependencies>
+```
+
+`owner-java8` artifact depends to the artifact `owner`, so you don't need to specify both in your
+maven dependencies.
+
+
+  [def-methods]: http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html
+
+
 <div class="note info">
   <h5>No transitive dependencies, full freedom!</h5>
   <p>
-  The OWNER library does not introduce any transitive dependency to your project,
-  so this should prevent any conflict with libraries from which your project
-  depends on.
+  The OWNER library does not introduce any transitive dependency to third party libraries
+  into your project, so this should prevent any conflict with libraries from which your
+  project depends on.
   </p>
 </div>
 
