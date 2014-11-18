@@ -16,6 +16,10 @@
     <version>1.0.6-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
+    <properties>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
