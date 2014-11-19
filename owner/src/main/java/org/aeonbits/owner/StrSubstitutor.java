@@ -8,13 +8,18 @@
 
 package org.aeonbits.owner;
 
+import static java.util.regex.Pattern.compile;
+import static org.aeonbits.owner.Util.fixBackslashForRegex;
+import static org.aeonbits.owner.Util.unsupported;
+
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.compile;
-import static org.aeonbits.owner.Util.fixBackslashForRegex;
+import org.aeonbits.owner.Config.SubstitutorClasses;
 
 /**
  * <p>
@@ -48,8 +53,10 @@ import static org.aeonbits.owner.Util.fixBackslashForRegex;
  */
 class StrSubstitutor implements Serializable {
 
-    private final Properties values;
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
+    private static final String DEFAULT_SUBSTITUTOR_NAME = "";
+    private static final int TO_SIZE_2 = 2;
+    private final Map<String, Substitutor> substitutors = new HashMap<String, Substitutor>();
 
     /**
      * Creates a new instance and initializes it. Uses defaults for variable prefix and suffix and the escaping
@@ -58,7 +65,41 @@ class StrSubstitutor implements Serializable {
      * @param values the variables' values, may be null
      */
     StrSubstitutor(Properties values) {
-        this.values = values;
+        substitutors.put(DEFAULT_SUBSTITUTOR_NAME, new DefaultSubstitutor(values));
+    }
+
+    StrSubstitutor(Properties values, Class<? extends Config> clazz) {
+        substitutors.put(DEFAULT_SUBSTITUTOR_NAME, new DefaultSubstitutor(values));
+        addCustomSubstitutors(clazz);
+    }
+
+    private void addCustomSubstitutors(Class<? extends Config> configClazz) {
+        SubstitutorClasses annotation = configClazz.getAnnotation(SubstitutorClasses.class);
+        if (annotation != null) {
+            checkSameSize(annotation);
+            for (int i = 0; i < annotation.names().length; i++) {
+                String name = annotation.names()[i];
+                Class<? extends Substitutor> clazz = annotation.classes()[i];
+                try {
+                    substitutors.put(name, clazz.newInstance());
+                } catch (Exception e) {
+                    throw unsupported(e,
+                            "Substitutor class '%s' cannot be instantiated; see the cause below in the stack trace",
+                            clazz.getCanonicalName());
+                }
+            }
+        }
+
+    }
+
+    private void checkSameSize(SubstitutorClasses annotation) {
+        int numOfNames = annotation.names().length;
+        int numOfClasses = annotation.classes().length;
+        if (numOfNames != numOfClasses) {
+            throw unsupported(
+                    "Mismatch in number of names (%s) and classes (%s) in annotation %s",
+                    numOfNames, numOfClasses, annotation);
+        }
     }
 
     /**
@@ -74,13 +115,29 @@ class StrSubstitutor implements Serializable {
         Matcher m = PATTERN.matcher(source);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
-            String var = m.group(1);
-            String value = values.getProperty(var);
+            String value = replaceValueUsingSubstitutors(m.group(1));
             String replacement = (value != null) ? replace(value) : "";
             m.appendReplacement(sb, fixBackslashForRegex(replacement));
         }
         m.appendTail(sb);
         return sb.toString();
+    }
+
+    private String replaceValueUsingSubstitutors(final String strToReplace) {
+        String name = DEFAULT_SUBSTITUTOR_NAME;
+        String value = strToReplace;
+        if (strToReplace.contains(":")) {
+            String[] pair = strToReplace.split(":", TO_SIZE_2);
+            name = pair[0];
+            value = pair[1];
+        }
+        if (name.equals(DEFAULT_SUBSTITUTOR_NAME)) {
+            return substitutors.get(DEFAULT_SUBSTITUTOR_NAME).replace(strToReplace);
+        }
+        if (substitutors.containsKey(name)) {
+            return substitutors.get(name).replace(value);
+        }
+        return substitutors.get(DEFAULT_SUBSTITUTOR_NAME).replace(strToReplace);
     }
 
 }
