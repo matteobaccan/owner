@@ -24,4 +24,4 @@ Bugs fixes
 ----------
  * Use of default value for for properties using the Key Expansion mechanism [#84]( https://github.com/lviggiano/owner/pull/84).
 
-Downloadable artifacts are published on [GitHub](https://github.com/lviggiano/owner/releases/tag/owner-1.0.6) and on [Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner/1.0.6/).
+Downloadable artifacts are published on [GitHub](https://github.com/lviggiano/owner/releases/tag/owner-1.0.6) and on [Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.6/).
