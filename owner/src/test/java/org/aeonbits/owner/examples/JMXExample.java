@@ -15,7 +15,6 @@ import org.aeonbits.owner.Reloadable;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 
-import javax.management.DynamicMBean;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
@@ -31,7 +30,7 @@ import java.lang.management.ManagementFactory;
  */
 public class JMXExample {
 
-    public interface MyConfig extends DynamicMBean, Mutable, Accessible, Reloadable {
+    public interface MyConfig extends Mutable, Accessible, Reloadable {
 
         @Key("server.port.number")
         @DefaultValue("80")
@@ -61,7 +60,7 @@ public class JMXExample {
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
-        mbs.registerMBean(cfg, new ObjectName("org.aeonbits.owner.examples:type=MyConfig"));
+        mbs.registerMBean(cfg, new ObjectName("org.aeonbits.owner:type=configuration,name=MyConfig"));
 
         System.out.println("Now, launch jconsole and attach to the java process. Set a negative port number to exit.");
 

@@ -160,10 +160,10 @@ enum Converters {
         }
 
         private boolean canUsePropertyEditors() {
-            return isPropertyEditoryAvailable() && !isPropertyEditorDisabled();
+            return isPropertyEditorAvailable() && !isPropertyEditorDisabled();
         }
 
-        private boolean isPropertyEditoryAvailable() {
+        private boolean isPropertyEditorAvailable() {
             return isClassAvailable("java.beans.PropertyEditorManager");
         }
 

@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * @author Luigi R. Viggiano
  */
-public class JMXSupport implements Serializable {
+class JMXSupport implements Serializable {
 
     private final Class<?> clazz;
     private final PropertiesManager manager;

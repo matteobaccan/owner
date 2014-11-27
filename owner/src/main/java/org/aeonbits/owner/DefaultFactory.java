@@ -10,11 +10,13 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.loaders.Loader;
 
+import javax.management.DynamicMBean;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
+import static org.aeonbits.owner.util.Reflection.isClassAvailable;
 
 /**
  * Default implementation for {@link Factory}.
@@ -23,6 +25,7 @@ import static java.lang.reflect.Proxy.newProxyInstance;
  */
 class DefaultFactory implements Factory {
 
+    private static final boolean isJMXAvailable = isClassAvailable("javax.management.DynamicMBean");
     private final ScheduledExecutorService scheduler;
     private Properties props;
     final LoadersManager loadersManager;
@@ -35,11 +38,11 @@ class DefaultFactory implements Factory {
 
     @SuppressWarnings("unchecked")
     public <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
-        Class<?>[] interfaces = new Class<?>[] {clazz};
+        Class<?>[] interfaces = interfaces(clazz);
         VariablesExpander expander = new VariablesExpander(props);
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
                 imports);
-        JMXSupport jmxSupport = new JMXSupport(clazz, manager);
+        Object jmxSupport = getJMXSupport(clazz, manager);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager, jmxSupport);
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
@@ -81,6 +84,19 @@ class DefaultFactory implements Factory {
     public String clearProperty(String key) {
         checkKey(key);
         return (String) props.remove(key);
+    }
+
+    private Object getJMXSupport(Class<?> clazz, PropertiesManager manager) {
+        if (isJMXAvailable)
+            return new JMXSupport(clazz, manager);
+        return null;
+    }
+
+    private <T extends Config> Class<?>[] interfaces(Class<? extends T> clazz) {
+        if (isJMXAvailable)
+            return new Class<?>[]{clazz, DynamicMBean.class};
+        else
+            return new Class<?>[]{clazz};
     }
 
 }

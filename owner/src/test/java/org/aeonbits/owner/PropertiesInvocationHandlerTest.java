@@ -34,7 +34,6 @@ public class PropertiesInvocationHandlerTest {
     @Mock private Object proxy;
     private PropertiesInvocationHandler handler;
     @Mock private ScheduledExecutorService scheduler;
-    @Mock private JMXSupport jmxSupport;
     private LoadersManager loaders = new LoadersManagerForTest();
     private final VariablesExpander expander = new VariablesExpander(new Properties());
 
@@ -44,7 +43,7 @@ public class PropertiesInvocationHandlerTest {
     @Before
     public void before() {
         PropertiesManager loader = new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders);
-        handler = new PropertiesInvocationHandler(loader, jmxSupport);
+        handler = new PropertiesInvocationHandler(loader, null);
     }
 
     @Test
