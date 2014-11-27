@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * @author Robin Meißner
  * @author Luigi R. Viggiano
  */
 class JMXSupport implements Serializable {

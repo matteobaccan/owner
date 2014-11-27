@@ -23,6 +23,9 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Robin Meißner
+ */
 public class JMXMBeanTest {
 
 	private static interface JMXConfigMutableReloadable extends DynamicMBean, Mutable, Reloadable {
