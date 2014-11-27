@@ -8,18 +8,16 @@
 
 package org.aeonbits.owner;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.convert;
-import static org.aeonbits.owner.PropertiesManager.Delegate;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.Util.isFeatureDisabled;
 import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
@@ -40,12 +38,15 @@ import static org.aeonbits.owner.util.Reflection.isDefault;
  */
 class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
-    private static final Method[] DELEGATES = findDelegates();
+    private transient List<DelegateMethodHandle> delegates;
+    private final Object jmxSupport;
     private final StrSubstitutor substitutor;
     final PropertiesManager propertiesManager;
 
-    PropertiesInvocationHandler(PropertiesManager manager) {
+    PropertiesInvocationHandler(PropertiesManager manager, Object jmxSupport) {
         this.propertiesManager = manager;
+        this.jmxSupport = jmxSupport;
+        delegates = findDelegates(manager, jmxSupport);
         this.substitutor = new StrSubstitutor(manager.load());
     }
 
@@ -55,32 +56,18 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         if (isDefault(invokedMethod))
             return invokeDefaultMethod(proxy, invokedMethod, args);
 
-        Method delegate = getDelegateMethod(invokedMethod);
+        DelegateMethodHandle delegate = getDelegateMethod(invokedMethod);
         if (delegate != null)
-            return delegate(delegate, args);
+            return delegate.invoke(args);
 
         return resolveProperty(invokedMethod, args);
     }
 
-    private Object delegate(Method delegate, Object[] args) throws Throwable {
-        try {
-            return delegate.invoke(propertiesManager, args);
-        } catch (InvocationTargetException e) {
-            throw e.getTargetException();
-        }
-    }
-
-    private Method getDelegateMethod(Method invokedMethod) {
-        for (Method delegate : DELEGATES)
-            if (equals(invokedMethod, delegate))
+    private DelegateMethodHandle getDelegateMethod(Method invokedMethod) {
+        for (DelegateMethodHandle delegate : delegates)
+            if (delegate.matches(invokedMethod))
                 return delegate;
         return null;
-    }
-
-    private boolean equals(Method a, Method b) {
-        return a.getName().equals(b.getName())
-                && a.getReturnType().equals(b.getReturnType())
-                && Arrays.equals(a.getParameterTypes(), b.getParameterTypes());
     }
 
     private Object resolveProperty(Method method, Object... args) {
@@ -116,17 +103,26 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         return substitutor.replace(value);
     }
 
-    private static Method[] findDelegates() {
-        List<Method> result = new LinkedList<Method>();
-        Method[] methods = PropertiesManager.class.getMethods();
-        for (Method m : methods)
-            if (m.getAnnotation(Delegate.class) != null)
-                result.add(m);
-        return result.toArray(new Method[result.size()]);
+    private List<DelegateMethodHandle> findDelegates(Object... targets) {
+        List<DelegateMethodHandle> result = new LinkedList<DelegateMethodHandle>();
+        for (Object target : targets) {
+            if (target == null)
+                continue;
+            Method[] methods = target.getClass().getMethods();
+            for (Method m : methods)
+                if (m.getAnnotation(Delegate.class) != null)
+                    result.add(new DelegateMethodHandle(target, m));
+        }
+        return result;
     }
 
     public <T extends Config> void setProxy(T proxy) {
         propertiesManager.setProxy(proxy);
     }
 
+    private void readObject(java.io.ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        delegates = findDelegates(propertiesManager, jmxSupport);
+    }
 }

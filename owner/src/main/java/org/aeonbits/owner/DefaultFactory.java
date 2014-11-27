@@ -39,7 +39,8 @@ class DefaultFactory implements Factory {
         VariablesExpander expander = new VariablesExpander(props);
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
                 imports);
-        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager);
+        JMXSupport jmxSupport = new JMXSupport(clazz, manager);
+        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager, jmxSupport);
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
         return proxy;

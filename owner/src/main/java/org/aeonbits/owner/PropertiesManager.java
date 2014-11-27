@@ -16,16 +16,6 @@ import org.aeonbits.owner.event.RollbackOperationException;
 import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
 import org.aeonbits.owner.event.TransactionalReloadListener;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
-import javax.management.ReflectionException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -35,8 +25,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
@@ -56,8 +44,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
@@ -107,11 +93,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                     return false;
                 }
             });
-
-    @Retention(RUNTIME)
-    @Target(METHOD)
-    @interface Delegate {
-    }
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
                       VariablesExpander expander, LoadersManager loaders, Map<?, ?>... imports) {
@@ -588,74 +569,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         } finally {
             readLock.unlock();
         }
-    }
-
-    @Delegate
-    public Object getAttribute(String attribute)
-            throws AttributeNotFoundException, MBeanException,
-            ReflectionException {
-        return getProperty(attribute);
-    }
-
-    @Delegate
-    public void setAttribute(Attribute attribute)
-            throws AttributeNotFoundException, InvalidAttributeValueException,
-            MBeanException, ReflectionException {
-        setProperty(attribute.getName(), (String) attribute.getValue());
-    }
-
-    @Delegate
-    public AttributeList getAttributes(String[] attributes) {
-        List<Attribute> attrList = new LinkedList<Attribute>();
-        for (String propertyName : attributes)
-            attrList.add(new Attribute(propertyName, getProperty(propertyName)));
-        return new AttributeList(attrList);
-    }
-
-    @Delegate
-    public AttributeList setAttributes(AttributeList attributes) {
-        for (Attribute attr : attributes.asList())
-            setProperty(attr.getName(), (String) attr.getValue());
-        return attributes;
-    }
-
-    @Delegate
-    public Object invoke(String actionName, Object[] params, String[] signature)
-            throws MBeanException, ReflectionException {
-        if (actionName.equals("getProperty") && params != null && params.length == 1) {
-            return getProperty((String) params[0]);
-        } else if (actionName.equals("setProperty") && params != null && params.length == 2) {
-            setProperty((String) params[0], (String) params[1]);
-            return null;
-        } else if (actionName.equals("reload") && (params == null || params.length == 0)) {
-            reload();
-            return null;
-        }
-        throw new ReflectionException(new NoSuchMethodException(actionName));
-    }
-
-    @Delegate
-    public MBeanInfo getMBeanInfo() {
-        List<MBeanAttributeInfo> attributesInfo = new ArrayList<MBeanAttributeInfo>();
-        Set<String> propertyNames = propertyNames();
-        for (String name : propertyNames)
-            attributesInfo.add(new MBeanAttributeInfo(name, "java.lang.String", name, true, true, false));
-
-        MBeanAttributeInfo[] attributes = attributesInfo.toArray(new MBeanAttributeInfo[propertyNames.size()]);
-
-        MBeanParameterInfo key = new MBeanParameterInfo("key", "java.lang.String", "Key of the property");
-        MBeanParameterInfo value = new MBeanParameterInfo("value", "java.lang.String", "Value of the property");
-
-        MBeanOperationInfo[] operations = new MBeanOperationInfo[] {
-                new MBeanOperationInfo("getProperty", "Gets value for a property",
-                        new MBeanParameterInfo[] { key }, "java.lang.String", MBeanOperationInfo.INFO),
-                new MBeanOperationInfo("setProperty", "Sets the value for a property",
-                        new MBeanParameterInfo[] { key, value }, "void", MBeanOperationInfo.ACTION),
-                new MBeanOperationInfo("reload", "Reload properties", null, "void", MBeanOperationInfo.ACTION)
-        };
-
-        return new MBeanInfo(clazz.getName(), clazz.getSimpleName() + " OWNER MBean",
-                attributes, null, operations, null);
     }
 
 }

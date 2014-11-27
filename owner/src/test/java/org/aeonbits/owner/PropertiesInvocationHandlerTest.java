@@ -28,26 +28,23 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PropertiesInvocationHandlerTest {
-    @Spy
-    private final Properties properties = new Properties();
-    @Mock
-    private PrintStream printStream;
-    @Mock
-    private PrintWriter printWriter;
-    @Mock
-    private Object proxy;
+    @Spy private final Properties properties = new Properties();
+    @Mock private PrintStream printStream;
+    @Mock private PrintWriter printWriter;
+    @Mock private Object proxy;
     private PropertiesInvocationHandler handler;
-    @Mock
-    private ScheduledExecutorService scheduler;
+    @Mock private ScheduledExecutorService scheduler;
+    @Mock private JMXSupport jmxSupport;
     private LoadersManager loaders = new LoadersManagerForTest();
     private final VariablesExpander expander = new VariablesExpander(new Properties());
+
 
     interface Dummy extends Config {}
 
     @Before
     public void before() {
         PropertiesManager loader = new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders);
-        handler = new PropertiesInvocationHandler(loader);
+        handler = new PropertiesInvocationHandler(loader, jmxSupport);
     }
 
     @Test
