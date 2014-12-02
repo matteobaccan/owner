@@ -3,7 +3,7 @@ HOT RELOAD EXAMPLE
 
 This example is a demonstration on how Hot Reload works.
 
-To run the example, from the current directory
+To run the example, from the current directory type the following command at prompt
 
 ```console
 $ mvn compile exec:java
@@ -14,8 +14,14 @@ You'll see something like:
 ```console
 $ mvn compile exec:java
 
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building OWNER :: Examples :: Hot Reload 1.0.7-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
 
-## some maven logs...
+## some more maven logs here...
 
  HOT RELOAD EXAMPLE
 
