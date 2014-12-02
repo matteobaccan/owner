@@ -11,7 +11,13 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.DisableFeature;
 import org.aeonbits.owner.Config.DisableableFeature;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -21,7 +27,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
 
+import static java.io.File.createTempFile;
 import static java.lang.String.format;
 import static java.net.URLDecoder.decode;
 import static java.util.Arrays.asList;
@@ -162,6 +171,78 @@ abstract class Util {
 
     static SystemProvider system() {
         return system;
+    }
+
+    static void save(File target, Properties p) throws IOException {
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        if (isWindows()) {
+            store(target, p);
+        } else {
+            File tempFile = createTempFile(target.getName(), ".temp", parent);
+            store(tempFile, p);
+            rename(tempFile, target);
+        }
+
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+    }
+
+    static void delete(File target) {
+        target.delete();
+    }
+
+    private static void store(File target, Properties p) throws IOException {
+        OutputStream out = new FileOutputStream(target);
+        try {
+            store(out, p);
+        } finally {
+            out.close();
+        }
+    }
+
+    private static void store(OutputStream out, Properties p) throws IOException {
+        p.store(out, "saved for test");
+    }
+
+    static void saveJar(File target, String entryName, Properties props) throws IOException {
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        storeJar(target, entryName, props);
+    }
+
+    private static void rename(File source, File target) throws IOException {
+        if (!source.renameTo(target))
+            throw new IOException(String.format("Failed to overwrite %s to %s", source.toString(), target.toString()));
+    }
+
+    private static void storeJar(File target, String entryName, Properties props) throws IOException {
+        byte[] bytes = toBytes(props);
+        InputStream input = new ByteArrayInputStream(bytes);
+        JarOutputStream output = new JarOutputStream(new FileOutputStream(target));
+        try {
+            ZipEntry entry = new ZipEntry(entryName);
+            output.putNextEntry(entry);
+            byte[] buffer = new byte[4096];
+            int size;
+            while ((size = input.read(buffer)) != -1)
+                output.write(buffer, 0, size);
+        } finally {
+            input.close();
+            output.close();
+        }
+    }
+
+    private static byte[] toBytes(Properties props) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            store(out, props);
+            return out.toByteArray();
+        } finally {
+            out.close();
+        }
     }
 
 }

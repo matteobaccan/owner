@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2012-2014, Luigi R. Viggiano
+  ~ All rights reserved.
+  ~
+  ~ This software is distributable under the BSD license.
+  ~ See the terms of the BSD license in the documentation provided with this software.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>owner-examples</artifactId>
+        <groupId>org.aeonbits.owner</groupId>
+        <version>1.0.7-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>owner-examples-hotreload</artifactId>
+    <name>OWNER :: Examples :: Hot Reload</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner</artifactId>
+            <version>1.0.7-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner-examples-common</artifactId>
+            <version>1.0.7-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>org.aeonbits.owner.examples.HotReloadExample</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

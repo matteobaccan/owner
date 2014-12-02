@@ -12,9 +12,8 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.ExamplesBase;
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.TestConstants;
-import org.aeonbits.owner.UtilTest;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 
@@ -24,31 +23,31 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Properties;
 
-import static org.aeonbits.owner.UtilTest.save;
-
 /**
  * @author Luigi R. Viggiano
  */
-public class AutoReloadExample implements TestConstants {
-    private static final String SPEC = "file:" + RESOURCES_DIR + "/AutoReloadExample.properties";
+public class HotReloadExample extends ExamplesBase {
+    private static final String CFG_FILE = "file:target/examples-generated-resources/HotReloadExample.properties";
     private static File target;
 
-    @Sources(SPEC)
+    static {
+        try {
+            target = fileFromURL(CFG_FILE);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Sources(CFG_FILE)
     @HotReload(1)
     interface AutoReloadConfig extends Config, Reloadable {
         @DefaultValue("5")
         Integer someValue();
     }
 
-    static {
-        try {
-            target = UtilTest.fileFromURL(SPEC);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void main(String[] args) throws IOException, InterruptedException {
+        System.out.printf("\n\n HOT RELOAD EXAMPLE \n\n");
+
         save(target, new Properties() {{
             setProperty("someValue", "10");
         }});
@@ -61,14 +60,15 @@ public class AutoReloadExample implements TestConstants {
             }
         });
 
-        System.out.println("You can change the file " + target.getAbsolutePath() +
-                           " and see the changes reflected below");
+        System.out.println("The program is running. ");
+
+        System.out.println("Now you can change the file located at: \n\n\t" + target.getAbsolutePath() +
+                           "\n\n ...and see the changes reflected below\n\n");
         int someValue = 0;
         while (someValue >= 0) {
             someValue = cfg.someValue();
             System.out.print("\rsomeValue is: " + someValue + "\t\t\t\t");
             Thread.sleep(500);
         }
-
     }
 }
