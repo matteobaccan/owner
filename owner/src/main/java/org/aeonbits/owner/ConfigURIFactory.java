@@ -8,35 +8,36 @@
 
 package org.aeonbits.owner;
 
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
  * @author Luigi R. Viggiano
  */
-class ConfigURLFactory {
+class ConfigURIFactory {
 
     private static final String CLASSPATH_PROTOCOL = "classpath:";
     private final transient ClassLoader classLoader;
     private final VariablesExpander expander;
 
-    ConfigURLFactory(ClassLoader classLoader, VariablesExpander expander) {
+    ConfigURIFactory(ClassLoader classLoader, VariablesExpander expander) {
         this.classLoader = classLoader;
         this.expander = expander;
     }
 
-    URL newURL(String spec) throws MalformedURLException {
+    URI newURI(String spec) throws URISyntaxException {
         String expanded = expand(spec);
-        URL url;
+        URI uri;
         if (expanded.startsWith(CLASSPATH_PROTOCOL)) {
             String path = expanded.substring(CLASSPATH_PROTOCOL.length());
-            url = classLoader.getResource(path);
+            URL url = classLoader.getResource(path);
             if (url == null)
                 return null;
+            return url.toURI();
         } else {
-            url = new URL(expanded);
+            return new URI(expanded);
         }
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), expand(url.getPath()));
     }
 
     private String expand(String path) {

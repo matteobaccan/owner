@@ -27,8 +27,8 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -68,7 +68,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final WriteLock writeLock = lock.writeLock();
 
     private final LoadType loadType;
-    private final List<URL> urls;
+    private final List<URI> uris;
     private final HotReloadLogic hotReloadLogic;
 
     private volatile boolean loading = false;
@@ -101,15 +101,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.loaders = loaders;
         this.imports = imports;
 
-        ConfigURLFactory urlFactory = new ConfigURLFactory(clazz.getClassLoader(), expander);
-        urls = toURLs(clazz.getAnnotation(Sources.class), urlFactory);
+        ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
+        uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
         if (hotReload != null) {
-            hotReloadLogic = new HotReloadLogic(hotReload, urls, this);
+            hotReloadLogic = new HotReloadLogic(hotReload, uris, this);
 
             if (hotReloadLogic.isAsync())
                 scheduler.scheduleAtFixedRate(new Runnable() {
@@ -122,28 +122,28 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    private List<URL> toURLs(Sources sources, ConfigURLFactory urlFactory) {
-        String[] specs = specs(sources, urlFactory);
-        ArrayList<URL> result = new ArrayList<URL>();
+    private List<URI> toURIs(Sources sources, ConfigURIFactory uriFactory) {
+        String[] specs = specs(sources, uriFactory);
+        List<URI> result = new ArrayList<URI>();
         for (String spec : specs) {
             try {
-                URL url = urlFactory.newURL(spec);
-                if (url != null)
-                    result.add(url);
-            } catch (MalformedURLException e) {
-                throw unsupported(e, "Can't convert '%s' to a valid URL", spec);
+                URI uri = uriFactory.newURI(spec);
+                if (uri != null)
+                    result.add(uri);
+            } catch (URISyntaxException e) {
+                throw unsupported(e, "Can't convert '%s' to a valid URI", spec);
             }
         }
         return result;
     }
 
-    private String[] specs(Sources sources, ConfigURLFactory urlFactory) {
+    private String[] specs(Sources sources, ConfigURIFactory uriFactory) {
         if (sources != null) return sources.value();
-        return defaultSpecs(urlFactory);
+        return defaultSpecs(uriFactory);
     }
 
-    private String[] defaultSpecs(ConfigURLFactory urlFactory) {
-        String prefix = urlFactory.toClasspathURLSpec(clazz.getName());
+    private String[] defaultSpecs(ConfigURIFactory uriFactory) {
+        String prefix = uriFactory.toClasspathURLSpec(clazz.getName());
         return loaders.defaultSpecs(prefix);
     }
 
@@ -287,7 +287,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     Properties doLoad() {
-        return loadType.load(urls, loaders);
+        return loadType.load(uris, loaders);
     }
 
     private static void merge(Properties results, Map<?, ?>... inputs) {

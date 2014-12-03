@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,8 +90,8 @@ public class UtilTest {
         return Util.ignore();
     }
 
-    public static File fileFromURL(String spec) throws MalformedURLException {
-        return Util.fileFromURL(spec);
+    public static File fileFromURI(String spec) throws URISyntaxException {
+        return Util.fileFromURI(spec);
     }
 
     public static String getSystemProperty(String key) {

@@ -20,6 +20,8 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Properties;
 import java.util.Stack;
@@ -128,11 +130,17 @@ public class XMLLoader implements Loader {
         }
     }
 
-    public boolean accept(URL url) {
-        return url.getFile().toLowerCase().endsWith(".xml");
+    public boolean accept(URI uri) {
+        try {
+            URL url = uri.toURL();
+            return url.getFile().toLowerCase().endsWith(".xml");
+        } catch (MalformedURLException ex) {
+            return false;
+        }
     }
 
-    public void load(Properties result, InputStream input) throws IOException {
+    public void load(Properties result, URI uri) throws IOException {
+        InputStream input = uri.toURL().openStream();
         try {
             SAXParser parser = factory().newSAXParser();
             XmlToPropsHandler h = new XmlToPropsHandler(result);
@@ -142,6 +150,8 @@ public class XMLLoader implements Loader {
             throw new IllegalArgumentException(e);
         } catch (SAXException e) {
             throw new IOException(e);
+        } finally {
+            input.close();
         }
     }
 

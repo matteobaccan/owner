@@ -22,14 +22,12 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -101,12 +99,13 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
 
     @Test
     public void shouldLoadURLFromSpecifiedSource() throws IOException {
+        Properties props = new Properties();
         PropertiesManagerForTest manager =
-                new PropertiesManagerForTest(SampleConfigWithSource.class, new Properties(),
+                new PropertiesManagerForTest(SampleConfigWithSource.class, props,
                         scheduler, expander, loaders);
         manager.load();
-        verify(loaders, times(1)).findLoader(any(URL.class));
-        verify(loaders, times(1)).findLoader(argThat(urlMatches("org/aeonbits/owner/FooBar.properties")));
+        verify(loaders, times(1)).findLoader(argThat(uriMatches("org/aeonbits/owner/FooBar.properties")));
+        assertEquals("Hello World!", props.getProperty("helloWorld"));
     }
 
     @Test

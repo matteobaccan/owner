@@ -20,7 +20,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -53,8 +53,8 @@ public class DefaultLoadStrategyTest extends LoadStrategyTestBase {
 
         manager.load();
         
-        verify(loaders, times(1)).findLoader(any(URL.class));
-        verify(loaders, times(1)).findLoader(argThat(urlMatches(
+        verify(loaders, times(1)).findLoader(any(URI.class));
+        verify(loaders, times(1)).findLoader(argThat(uriMatches(
                 "org/aeonbits/owner/loadstrategies/DefaultLoadStrategyTest$SampleConfig.properties")));
     }
 

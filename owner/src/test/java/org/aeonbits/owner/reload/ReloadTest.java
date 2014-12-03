@@ -27,10 +27,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
-import static org.aeonbits.owner.UtilTest.fileFromURL;
+import static org.aeonbits.owner.UtilTest.fileFromURI;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.argThat;
@@ -48,8 +48,8 @@ public class ReloadTest implements TestConstants {
     ReloadListener listener;
 
     @BeforeClass
-    public static void beforeClass() throws MalformedURLException {
-        target = fileFromURL(SPEC);
+    public static void beforeClass() throws URISyntaxException {
+        target = fileFromURI(SPEC);
     }
 
     @Before

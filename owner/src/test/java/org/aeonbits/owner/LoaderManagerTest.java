@@ -19,12 +19,12 @@ import org.mockito.Mock;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.aeonbits.owner.UtilTest.fileFromURL;
+import static org.aeonbits.owner.UtilTest.fileFromURI;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -47,8 +47,8 @@ public class LoaderManagerTest implements TestConstants {
     }
 
     @Before
-    public void before() throws IOException {
-        target = fileFromURL(SPEC);
+    public void before() throws URISyntaxException, IOException {
+        target = fileFromURI(SPEC);
         target.getParentFile().mkdirs();
         target.createNewFile();
     }
@@ -84,8 +84,8 @@ public class LoaderManagerTest implements TestConstants {
         factory.registerLoader(new PropertiesLoader());
         factory.registerLoader(new PropertiesLoader() {
             @Override
-            public String defaultSpecFor(String urlPrefix) {
-                return urlPrefix + ".foobar";
+            public String defaultSpecFor(String uriPrefix) {
+                return uriPrefix + ".foobar";
             }
         });
 
@@ -102,7 +102,7 @@ public class LoaderManagerTest implements TestConstants {
         factory.registerLoader(new PropertiesLoader());
         factory.registerLoader(new PropertiesLoader() {
             @Override
-            public String defaultSpecFor(String urlPrefix) {
+            public String defaultSpecFor(String uriPrefix) {
                 return null;
             }
         });
@@ -128,11 +128,11 @@ public class LoaderManagerTest implements TestConstants {
     }
 
     public static class LoaderThatDoesNothing implements Loader {
-        public boolean accept(URL url) {
+        public boolean accept(URI uri) {
             return false;
         }
 
-        public void load(Properties result, InputStream input) throws IOException {
+        public void load(Properties result, URI uri) throws IOException {
         }
 
         public String defaultSpecFor(String urlPrefix) {

@@ -10,8 +10,8 @@ package org.aeonbits.owner;
 
 import org.junit.Test;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
@@ -19,11 +19,11 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Luigi R. Viggiano
  */
-public class ConfigURLFactoryTest {
+public class ConfigURIFactoryTest {
     @Test
-    public void shouldReturnAnURL() throws MalformedURLException {
-        ConfigURLFactory h = new ConfigURLFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
-        URL url = h.newURL("classpath:test.properties");
-        assertNotNull(url);
+    public void shouldReturnAnURI() throws URISyntaxException {
+        ConfigURIFactory h = new ConfigURIFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
+        URI uri = h.newURI("classpath:test.properties");
+        assertNotNull(uri);
     }
 }

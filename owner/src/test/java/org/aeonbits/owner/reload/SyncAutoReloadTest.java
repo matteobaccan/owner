@@ -21,11 +21,11 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.aeonbits.owner.UtilTest.fileFromURL;
+import static org.aeonbits.owner.UtilTest.fileFromURI;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.aeonbits.owner.UtilTest.saveJar;
 import static org.junit.Assert.assertEquals;
@@ -48,8 +48,8 @@ public class SyncAutoReloadTest implements TestConstants {
     private static TimeProviderForTest time;
 
     @BeforeClass
-    public static void beforeClass() throws MalformedURLException {
-        target = fileFromURL(SPEC);
+    public static void beforeClass() throws URISyntaxException {
+        target = fileFromURI(SPEC);
         jarTarget = new File(JAR_FILE);
     }
 

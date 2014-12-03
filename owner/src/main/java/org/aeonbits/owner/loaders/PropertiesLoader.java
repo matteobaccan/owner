@@ -11,6 +11,8 @@ package org.aeonbits.owner.loaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Properties;
 
@@ -25,16 +27,31 @@ public class PropertiesLoader implements Loader {
     private static final long serialVersionUID = -1781643040589572341L;
     private static final String DEFAULT_ENCODING = "UTF-8";
 
-    public boolean accept(URL url) {
-        return true;
+    public boolean accept(URI uri) {
+        try {
+            uri.toURL();
+            return true;
+        } catch (MalformedURLException ex) {
+            return false;
+        }
     }
 
-    public void load(Properties result, InputStream input) throws IOException {
+    public void load(Properties result, URI uri) throws IOException {
+        URL url = uri.toURL();
+        InputStream input = url.openStream();
+        try {
+            load(result, input);
+        } finally {
+            input.close();
+        }
+    }
+
+    void load(Properties result, InputStream input) throws IOException {
         result.load(new InputStreamReader(input, DEFAULT_ENCODING));
     }
 
-    public String defaultSpecFor(String urlPrefix) {
-        return urlPrefix + ".properties";
+    public String defaultSpecFor(String uriPrefix) {
+        return uriPrefix + ".properties";
     }
 
 }

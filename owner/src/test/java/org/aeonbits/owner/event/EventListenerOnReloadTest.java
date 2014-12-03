@@ -24,10 +24,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
-import static org.aeonbits.owner.UtilTest.fileFromURL;
+import static org.aeonbits.owner.UtilTest.fileFromURI;
 import static org.aeonbits.owner.UtilTest.ignore;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
@@ -62,8 +62,8 @@ public class EventListenerOnReloadTest implements TestConstants {
     private MyConfig cfg;
 
     @Before
-    public void before() throws MalformedURLException {
-        target = fileFromURL(SPEC);
+    public void before() throws URISyntaxException {
+        target = fileFromURI(SPEC);
         target.delete();
         cfg = ConfigFactory.create(MyConfig.class);
         cfg.addPropertyChangeListener(propertyChangeListener);

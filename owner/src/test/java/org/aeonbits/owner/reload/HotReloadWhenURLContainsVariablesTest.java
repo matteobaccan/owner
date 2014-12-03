@@ -25,7 +25,7 @@ import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
-import static org.aeonbits.owner.UtilTest.fileFromURL;
+import static org.aeonbits.owner.UtilTest.fileFromURI;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 
@@ -49,7 +49,7 @@ public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport im
         // here I need to expand SPEC manually to create the file for the test
         String spec = new VariablesExpanderForTest(new Properties()).expand(SPEC);
 
-        target = fileFromURL(spec);
+        target = fileFromURI(spec);
         save(target, new Properties() {{
             setProperty("someValue", "10");
         }});

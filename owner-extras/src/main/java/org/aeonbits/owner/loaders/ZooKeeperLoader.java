@@ -13,7 +13,7 @@ import sun.net.www.protocol.zookeeper.ZooKeeperConnection;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Properties;
 
 /**
@@ -21,11 +21,22 @@ import java.util.Properties;
  * @author Luigi R. Viggiano
  */
 public class ZooKeeperLoader implements Loader {
-    public boolean accept(URL url) {
-        return url.getProtocol().equals(Handler.PROTOCOL);
+
+
+    public boolean accept(URI uri) {
+        return uri.getScheme().equals(Handler.PROTOCOL);
     }
 
-    public void load(Properties result, InputStream input) throws IOException {
+    public void load(Properties result, URI uri) throws IOException {
+        InputStream input = uri.toURL().openStream();
+        try {
+            load(result, input);
+        } finally {
+            input.close();
+        }
+    }
+
+    void load(Properties result, InputStream input) throws IOException {
         ZooKeeperConnection.ZooKeeperStream zkStream = (ZooKeeperConnection.ZooKeeperStream) input;
         result.putAll(zkStream.pairs());
     }

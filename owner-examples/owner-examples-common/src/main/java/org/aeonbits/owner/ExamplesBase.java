@@ -10,7 +10,7 @@ package org.aeonbits.owner;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 /**
@@ -21,7 +21,7 @@ public class ExamplesBase {
         Util.save(target, p);
     }
 
-    public static File fileFromURL(String spec) throws MalformedURLException {
-        return Util.fileFromURL(spec);
+    public static File fileFromURI(String spec) throws URISyntaxException {
+        return Util.fileFromURI(spec);
     }
 }
