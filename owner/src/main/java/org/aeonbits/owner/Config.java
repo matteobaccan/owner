@@ -56,9 +56,9 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies the source from which to load the properties file. It has to be specified in a URL string format.
-     * Allowed protocols are the ones allowed by {@link java.net.URL} plus
-     * <tt>classpath:path/to/resource.properties</tt>
+     * Specifies the source from which to load the properties file. It has to be specified in a URI string format.
+     * By default, allowed protocols are the ones allowed by {@link java.net.URL} plus
+     * <tt>classpath:path/to/resource.properties</tt>, but user can specify his own additional protocols.
      *
      * @since 1.0.2
      */
@@ -135,12 +135,12 @@ public interface Config extends Serializable {
             }
         };
 
-        abstract Properties load(List<URI> urls, LoadersManager loaders);
+        abstract Properties load(List<URI> uris, LoadersManager loaders);
     }
 
     /**
      * Specify that the class implements hot reloading of properties from filesystem baked {@link Sources} (hot
-     * reloading can't be applied to all types of URLs).
+     * reloading can't be applied to all types of URIs).
      * <p>
      * It is possible to specify an interval to indicate how frequently the library shall check the files for
      * modifications and perform the reload.
