@@ -23,12 +23,6 @@
                     <artifactId>owner-java8</artifactId>
                     <version>1.0.7-SNAPSHOT</version>
                 </dependency>
-                <dependency>
-                    <groupId>org.aeonbits.owner</groupId>
-                    <artifactId>owner-examples</artifactId>
-                    <version>1.0.7-SNAPSHOT</version>
-                    <type>pom</type>
-                </dependency>
             </dependencies>
         </profile>
     </profiles>
@@ -55,5 +49,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
