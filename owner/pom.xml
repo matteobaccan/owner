@@ -18,7 +18,7 @@
     <name>OWNER :: Core</name>
     <artifactId>owner</artifactId>
     <description>Get rid of the boilerplate code in Java properties based configuration.</description>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!-- Order matters -->

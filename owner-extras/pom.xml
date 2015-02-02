@@ -18,7 +18,7 @@
     <name>OWNER :: Third Party Extras</name>
     <artifactId>owner-extras</artifactId>
     <description>Third Party Extras for OWNER library</description>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

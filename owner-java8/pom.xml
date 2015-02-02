@@ -12,7 +12,7 @@
     <artifactId>owner-java8</artifactId>
     <name>OWNER :: Java 8 Support</name>
     <version>1.0.7-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
