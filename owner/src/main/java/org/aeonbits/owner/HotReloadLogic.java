@@ -15,7 +15,9 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
@@ -59,11 +61,14 @@ class HotReloadLogic implements Serializable {
     }
 
     private void setupWatchableResources(List<URI> uris) {
+        Set<File> files = new LinkedHashSet<File>();
         for (URI uri : uris) {
             File file = fileFromURI(uri);
             if (file != null)
-                watchableFiles.add(new WatchableFile(file));
+                files.add(file);
         }
+        for (File file : files)
+            watchableFiles.add(new WatchableFile(file));
     }
 
     synchronized void checkAndReload() {
