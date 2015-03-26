@@ -28,10 +28,10 @@ public class Reflection {
         }
     }
 
-    static interface Java8Support {
-        public boolean isDefault(Method method);
+    interface Java8Support {
+        boolean isDefault(Method method);
 
-        public Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable;
+        Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable;
     }
 
     private static final Java8Support JAVA_8_SUPPORT = getJava8Support();
