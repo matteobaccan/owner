@@ -1,13 +1,13 @@
 ---
 layout: news_item
-title: "Owner 1.0.7 Released"
+title: "Owner 1.0.8 Released"
 date: "2015-03-30 22:30:00 +0200"
 author: lviggiano
-version: 1.0.7
+version: 1.0.8
 categories: [release]
 ---
 
-v1.0.7 contains following enhancements and bug fixes.
+v1.0.8 contains following enhancements and bug fixes.
 
 Enhancements
 ------------
