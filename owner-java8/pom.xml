@@ -22,10 +22,6 @@
     <version>1.0.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <properties>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
@@ -39,6 +35,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
