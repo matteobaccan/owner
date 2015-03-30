@@ -11,7 +11,7 @@
     <parent>
         <artifactId>owner-examples</artifactId>
         <groupId>org.aeonbits.owner</groupId>
-        <version>1.0.7</version>
+        <version>1.0.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>org.aeonbits.owner</groupId>
             <artifactId>owner</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
