@@ -22,7 +22,6 @@
         <module>owner</module>
         <module>owner-site</module>
         <module>owner-extras</module>
-        <module>owner-examples</module>
         <module>owner-assembly</module>
     </modules>
 
@@ -139,6 +138,17 @@
             </activation>
             <modules>
                 <module>owner-java8</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>examples</id>
+            <activation>
+                <property>
+                    <name>!performRelease</name>
+                </property>
+            </activation>
+            <modules>
+                <module>owner-examples</module>
             </modules>
         </profile>
     </profiles>
