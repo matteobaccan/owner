@@ -11,7 +11,7 @@
 
     <groupId>org.aeonbits.owner</groupId>
     <artifactId>owner-parent</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>OWNER :: Parent</name>
@@ -78,7 +78,7 @@
         <url>https://github.com/lviggiano/owner/tree/master</url>
         <connection>scm:git:git://github.com/lviggiano/owner.git</connection>
         <developerConnection>scm:git:git@github.com:lviggiano/owner.git</developerConnection>
-        <tag>owner-parent-1.0.8</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
