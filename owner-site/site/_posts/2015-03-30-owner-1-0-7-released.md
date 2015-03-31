@@ -7,6 +7,12 @@ version: 1.0.7
 categories: [release]
 ---
 
+<div class="note warning">
+  <h5>Release 1.0.7 failed deployment in Maven Central Repository</h5>
+  <p>Some required pom was skipped, and if you try to use it as dependency in your project, it may raise some
+     maven error or other issues. So, avoid using 1.0.7 and jump to 1.0.8!</p>
+</div>
+
 v1.0.7 contains following enhancements and bug fixes.
 
 Enhancements

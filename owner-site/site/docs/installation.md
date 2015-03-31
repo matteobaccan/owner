@@ -34,12 +34,12 @@ to your pom.xml:
     <dependency>
         <groupId>org.aeonbits.owner</groupId>
         <artifactId>owner</artifactId>
-        <version>1.0.6</version>
+        <version>1.0.8</version>
     </dependency>
 </dependencies>
 ```
 
-Replace 1.0.6 with the latest version available. At the time of writing this page, the latest version is 1.0.6, but you
+Replace 1.0.8 with the latest version available. At the time of writing this page, the latest version is 1.0.8, but you
 need to check if there is any newer version.
 
 <div class="note">
