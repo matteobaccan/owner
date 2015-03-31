@@ -8,22 +8,21 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.loaders.Loader;
-import org.aeonbits.owner.loaders.PropertiesLoader;
-import org.aeonbits.owner.loaders.XMLLoader;
+import static org.aeonbits.owner.Util.unsupported;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.aeonbits.owner.Util.unsupported;
+import org.aeonbits.owner.loaders.Loader;
+import org.aeonbits.owner.loaders.PropertiesLoader;
+import org.aeonbits.owner.loaders.SystemLoader;
+import org.aeonbits.owner.loaders.XMLLoader;
 
 
 /**
@@ -41,6 +40,7 @@ class LoadersManager implements Serializable {
     LoadersManager() {
         registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
+        registerLoader(new SystemLoader());
     }
 
     void load(Properties result, URI uri) throws IOException {
