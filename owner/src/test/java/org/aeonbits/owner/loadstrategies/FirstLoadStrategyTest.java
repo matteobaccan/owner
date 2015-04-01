@@ -26,8 +26,6 @@ import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.LoadersManagerForTest;
 import org.aeonbits.owner.PropertiesManagerForTest;
 import org.aeonbits.owner.VariablesExpanderForTest;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,8 +42,7 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
     @Spy
     private final LoadersManagerForTest loaders = new LoadersManagerForTest();
     private final VariablesExpanderForTest expander = new VariablesExpanderForTest(new Properties());
-    
-    private Properties defaultProps;
+
 
     @Sources({"classpath:foo/bar/baz.properties",
             "file:~/.testfoobar.blahblah",
@@ -115,60 +112,5 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
     public void shouldLoadPropertiesFromSpecifiedSource() throws Exception {
         SampleConfigWithSource sample = ConfigFactory.create(SampleConfigWithSource.class);
         assertEquals("Hello World!", sample.helloWorld());
-    }
-
-    @Sources({"system:properties",
-            "system:env"})
-    @LoadPolicy(FIRST)
-    public static interface SystemPropertiesConfig extends Config {
-        @DefaultValue("this should be ignored")
-        String foo();
-
-        @DefaultValue("this should be ignored")
-        String bar();
-
-        @DefaultValue("user.home")
-        String userHome();
-
-        @Key("PATH")
-        String path();
-
-        String nullProp();
-
-        @DefaultValue("theDefaultValue")
-        String useDefault();
-    }
-
-    @Test
-    public void loadSystemProperties() {
-        System.setProperty("foo", "FOO");
-        System.setProperty("bar", "BAR");
-
-        SystemPropertiesConfig config = ConfigFactory.create(SystemPropertiesConfig.class);
-
-        assertEquals("FOO", config.foo());
-        assertEquals("BAR", config.bar());
-    }
-
-    @Test
-    public void nullProp() {
-        SystemPropertiesConfig config = ConfigFactory.create(SystemPropertiesConfig.class);
-        assertNull(config.nullProp());
-    }
-
-    @Test
-    public void loadSysPropFirst_ignoreEnvVars() {
-        SystemPropertiesConfig config = ConfigFactory.create(SystemPropertiesConfig.class);
-        assertNull(config.path());
-    }
-
-    @Before
-    public void storeDefaultSysProps(){
-        defaultProps = new Properties(System.getProperties());
-    }
-
-    @After
-    public void cleanSystemProperties() {
-        System.setProperties(defaultProps);
     }
 }
