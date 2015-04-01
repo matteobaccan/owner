@@ -32,48 +32,33 @@ public class SystemPropertiesReloadTest extends AsyncReloadSupport {
         String propKey = "someValue";
 
         AsyncAutoReloadConfig cfg = ConfigFactory.create(AsyncAutoReloadConfig.class);
-        
-        final int[] reloadCount = {0};
-        cfg.addReloadListener(new ReloadListener() {
-            public void reloadPerformed(ReloadEvent event) {
-                reloadCount[0]++;
-            }
-        });
+
         cfg.addReloadListener(new ReloadListener() {
             public void reloadPerformed(ReloadEvent event) {
                 notifyReload();
             }
         });
 
-        systemPropertiesHelper.setProperty(propKey, "10");
-        waitForReload(DELAY);
-        assertEquals(Integer.valueOf(10), cfg.someValue());
-
-        assertEquals(0, reloadCount[0]);
-        assertEquals(Integer.valueOf(10), cfg.someValue());
+        assertEquals(Integer.valueOf(5), cfg.someValue());
 
         systemPropertiesHelper.setProperty(propKey, "5");
         waitForReload(DELAY);
 
-        assertEquals(1, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
 
         systemPropertiesHelper.setProperty(propKey, "20");
         waitForReload(DELAY);
 
-        assertEquals(2, reloadCount[0]);
         assertEquals(Integer.valueOf(20), cfg.someValue());
 
         systemPropertiesHelper.cleanProperty(propKey);
         waitForReload(DELAY);
 
-        assertEquals(3, reloadCount[0]);
         assertEquals(Integer.valueOf(5), cfg.someValue());
 
         systemPropertiesHelper.setProperty(propKey, "30");
         waitForReload(DELAY);
 
-        assertEquals(4, reloadCount[0]);
         assertEquals(Integer.valueOf(30), cfg.someValue());
     }
 
