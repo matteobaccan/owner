@@ -6,19 +6,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.SystemPropertiesHelper;
 import org.junit.After;
 import org.junit.Test;
 
-/**
- * Date: Mar 31, 2015 Copyright 2015 Motif Investing, Inc.
- *
- * @author ting-kuanwu
- */
 public class SystemLoaderTest {
 
     private SystemPropertiesHelper systemPropertiesHelper = new SystemPropertiesHelper();
@@ -128,22 +121,5 @@ public class SystemLoaderTest {
     @After
     public void cleanSystemProperties() {
         systemPropertiesHelper.cleanNonDefaultSysProps();
-    }
-
-    private class SystemPropertiesHelper {
-
-        private List<String> sysProps = new ArrayList<String>();
-
-        public void setProperty(String key, String val) {
-            System.setProperty(key, val);
-            sysProps.add(key);
-        }
-
-        public void cleanNonDefaultSysProps() {
-            for (String prop : sysProps) {
-                System.clearProperty(prop);
-            }
-            sysProps.clear();
-        }
     }
 }
