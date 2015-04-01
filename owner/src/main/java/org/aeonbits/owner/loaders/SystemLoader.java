@@ -4,11 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
-/**
- * Date: Mar 31, 2015 Copyright 2015 Motif Investing, Inc.
- *
- * @author ting-kuanwu
- */
 public class SystemLoader implements Loader {
 
     private static final String SYSTEM_PROPERTIES_URI = "system:properties";
