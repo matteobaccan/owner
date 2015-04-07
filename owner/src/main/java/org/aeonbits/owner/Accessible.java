@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,6 +70,18 @@ public interface Accessible extends Config {
      * @since 1.0.4
      */
     void store(OutputStream out, String comments) throws IOException;
+
+    /**
+     * Fills the given {@link java.util.Map} with the properties contained by this object. <br>
+     * This is useful to extract the content of the config object into a {@link java.util.Map}.
+     * <p>
+     * Notice that you can specify a properties object as parameter instead of a map,
+     * since {@link java.util.Properties} implements the {@link java.util.Map} interface.
+     *
+     * @param map the {@link java.util.Map} to fill.
+     * @since 1.0.9
+     */
+    void fill(Map map);
 
     /**
      * Searches for the property with the specified key in this property list.

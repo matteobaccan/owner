@@ -126,4 +126,15 @@ public class AccessibleConfigTest {
         assertThat(propNames, containsInAnyOrder("favoriteSong", "salutation.text"));
     }
 
+    @Test
+    public void testFill() throws Throwable {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        Properties props = new Properties();
+        cfg.fill(props);
+
+        assertEquals(2, props.size());
+        assertEquals("Good Morning", props.getProperty("salutation.text"));
+        assertEquals("Bohemian Rapsody - Queen", props.getProperty("favoriteSong"));
+    }
+
 }

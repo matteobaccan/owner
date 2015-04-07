@@ -374,6 +374,17 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    public void fill(Map map) {
+        readLock.lock();
+        try {
+            for (String propertyName : propertyNames())
+                map.put(propertyName, getProperty(propertyName));
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Delegate
     public String setProperty(String key, String newValue) {
         writeLock.lock();
         try {
