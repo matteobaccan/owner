@@ -28,7 +28,6 @@ class ConfigURIFactory {
 
     URI newURI(String spec) throws URISyntaxException {
         String expanded = expand(spec);
-        URI uri;
         if (expanded.startsWith(CLASSPATH_PROTOCOL)) {
             String path = expanded.substring(CLASSPATH_PROTOCOL.length());
             URL url = classLoader.getResource(path);
