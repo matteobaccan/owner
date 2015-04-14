@@ -12,6 +12,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import static org.aeonbits.owner.Util.fixBackslashesToSlashes;
+
 /**
  * @author Luigi R. Viggiano
  */
@@ -28,14 +30,15 @@ class ConfigURIFactory {
 
     URI newURI(String spec) throws URISyntaxException {
         String expanded = expand(spec);
-        if (expanded.startsWith(CLASSPATH_PROTOCOL)) {
-            String path = expanded.substring(CLASSPATH_PROTOCOL.length());
+        String fixed = fixBackslashesToSlashes(expanded);
+        if (fixed.startsWith(CLASSPATH_PROTOCOL)) {
+            String path = fixed.substring(CLASSPATH_PROTOCOL.length());
             URL url = classLoader.getResource(path);
             if (url == null)
                 return null;
             return url.toURI();
         } else {
-            return new URI(expanded);
+            return new URI(fixed);
         }
     }
 
