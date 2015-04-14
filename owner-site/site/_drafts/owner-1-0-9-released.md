@@ -19,7 +19,9 @@ Site Enhancements
 
 Bugs fixes
 ----------
- * None.
+ * Config.Sources with ~ doesn't create a valid URI on Windows.
+   See [#123](https://github.com/lviggiano/owner/issues/123), thanks [@outofrange](https://github.com/outofrange) for
+   spotting this bug.
 
 Downloadable artifacts are published on [GitHub](https://github.com/lviggiano/owner/releases/tag/owner-parent-1.0.9) and
 on [Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.9/).
