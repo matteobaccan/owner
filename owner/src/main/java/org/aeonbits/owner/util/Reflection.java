@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 /**
  * @author Luigi R. Viggiano
  */
-public class Reflection {
+public final class Reflection {
 
     // Suppresses default LOOKUP_CONSTRUCTOR, ensuring non-instantiability.
     private Reflection() {

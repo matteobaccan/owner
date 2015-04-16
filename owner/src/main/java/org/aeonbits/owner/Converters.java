@@ -27,6 +27,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static java.lang.reflect.Modifier.isStatic;
+import static org.aeonbits.owner.Converters.SpecialValue.NULL;
+import static org.aeonbits.owner.Converters.SpecialValue.SKIP;
 import static org.aeonbits.owner.Util.expandUserHome;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.aeonbits.owner.Util.unsupported;
@@ -155,7 +157,7 @@ enum Converters {
                 editor.setAsText(text);
                 return editor.getValue();
             } catch (Exception e) {
-                throw unsupportedConversion(targetType, text);
+                throw unsupportedConversion(e, targetType, text);
             }
         }
 
@@ -205,7 +207,7 @@ enum Converters {
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException ex) {
-                throw unsupported(ex, "Cannot convert '%s' to %s", text, targetType.getCanonicalName());
+                throw unsupported(ex, CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName());
             }
         }
     },
@@ -270,8 +272,12 @@ enum Converters {
         return unreachableButCompilerNeedsThis();
     }
 
+    private static UnsupportedOperationException unsupportedConversion(Exception cause, Class<?> targetType, String text) {
+        return unsupported(cause, CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName());
+    }
+
     private static UnsupportedOperationException unsupportedConversion(Class<?> targetType, String text) {
-        return unsupported("Cannot convert '%s' to %s", text, targetType.getCanonicalName());
+        return unsupported(CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName());
     }
 
     private static class ConversionResult {
@@ -292,14 +298,18 @@ enum Converters {
         }
     }
 
-    /**
-     * The NULL object: when tryConvert returns this object, the conversion result is null.
-     */
-    static final Object NULL = new Object();
+    enum SpecialValue {
+        /**
+         * The NULL object: when tryConvert returns this object, the conversion result is null.
+         */
+        NULL,
 
-    /**
-     * The SKIP object: when tryConvert returns this object the conversion is skipped in favour of the next one.
-     */
-    static final Object SKIP = new Object();
+        /**
+         * The SKIP object: when tryConvert returns this object the conversion is skipped in favour of the next one.
+         */
+        SKIP
+    }
+
+    static final String CANNOT_CONVERT_MESSAGE = "Cannot convert '%s' to %s";
 
 }

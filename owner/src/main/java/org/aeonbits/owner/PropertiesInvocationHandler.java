@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
+import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.convert;
 import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
 import static org.aeonbits.owner.PropertiesMapper.key;
@@ -39,10 +40,12 @@ import static org.aeonbits.owner.util.Reflection.isDefault;
  */
 class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
+    private static final long serialVersionUID = 5432212884255718342L;
     private transient List<DelegateMethodHandle> delegates;
     private final Object jmxSupport;
     private final StrSubstitutor substitutor;
     final PropertiesManager propertiesManager;
+
 
     PropertiesInvocationHandler(PropertiesManager manager, Object jmxSupport) {
         this.propertiesManager = manager;
@@ -82,7 +85,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
             return null;
         value = preProcess(method, value);
         Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
-        if (result == Converters.NULL) return null;
+        if (result == NULL) return null;
         return result;
     }
 
