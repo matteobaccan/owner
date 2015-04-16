@@ -13,10 +13,8 @@ import org.aeonbits.owner.loaders.PropertiesLoader;
 import org.aeonbits.owner.loaders.XMLLoader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
