@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNull;
  */
 public class UndefinedPropertiesTest {
     
-    public static interface Person extends Config {
+    public interface Person extends Config {
         String name();
         int age();
         Double weight();

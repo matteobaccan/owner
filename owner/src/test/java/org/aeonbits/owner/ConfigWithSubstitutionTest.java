@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ConfigWithSubstitutionTest {
 
-    public static interface ConfigWithSubstitutionFile extends Config {
+    public interface ConfigWithSubstitutionFile extends Config {
         String story();
     }
 

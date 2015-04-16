@@ -9,8 +9,12 @@
 package org.aeonbits.owner;
 
 /**
- * @author luigi
+ * Preprocessor interface specifies how to pre-process an input string coming from a property value before being used by
+ * OWNER.
+ *
+ * @author Luigi R. Viggiano
+ * @since 1.0.9
  */
-public interface TestConstants {
-    String RESOURCES_DIR = "target/test-generated-resources";
+public interface Preprocessor {
+    String process(String input);
 }

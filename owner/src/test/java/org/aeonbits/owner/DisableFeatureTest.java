@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
  * @author Luigi R. Viggiano
  */
 public class DisableFeatureTest {
-    public static interface ConfigWithSubstitutionDisabledOnMethod extends Config {
+    public interface ConfigWithSubstitutionDisabledOnMethod extends Config {
         @DefaultValue("Earth")
         String world();
 

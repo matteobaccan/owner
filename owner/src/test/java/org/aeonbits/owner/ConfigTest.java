@@ -29,7 +29,7 @@ public class ConfigTest {
     @Mock
     private ScheduledExecutorService scheduler;
 
-    public static interface SampleConfig extends Config {
+    public interface SampleConfig extends Config {
         String hello(String param);
 
         @DefaultValue("Bohemian Rapsody - Queen")

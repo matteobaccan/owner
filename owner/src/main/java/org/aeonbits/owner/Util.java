@@ -249,4 +249,19 @@ abstract class Util {
         }
     }
 
+    public static <T> T newInstance(Class<T> clazz) {
+        try {
+            return clazz.newInstance();
+        } catch (Exception e) {
+            throw unsupported(e,
+                    "Class '%s' cannot be instantiated; see the cause below in the stack trace",
+                    clazz.getCanonicalName());
+        }
+    }
+
+    public static <T> List<T> newInstance(Class<? extends T>[] classes, List<T> result) {
+        for (Class<? extends T> clazz : classes)
+            result.add(newInstance(clazz));
+        return result;
+    }
 }

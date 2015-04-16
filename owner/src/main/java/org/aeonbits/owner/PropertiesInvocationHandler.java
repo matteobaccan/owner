@@ -18,6 +18,7 @@ import java.util.List;
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.convert;
+import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.Util.isFeatureDisabled;
 import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
@@ -79,8 +80,17 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         }
         if (value == null)
             return null;
+        value = preProcess(method, value);
         Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
         if (result == Converters.NULL) return null;
+        return result;
+    }
+
+    private String preProcess(Method method, String value) {
+        List<Preprocessor> preprocessors = resolvePreprocessors(method);
+        String result = value;
+        for (Preprocessor preprocessor : preprocessors)
+            result = preprocessor.process(result);
         return result;
     }
 

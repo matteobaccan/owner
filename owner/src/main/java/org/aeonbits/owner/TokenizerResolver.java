@@ -13,6 +13,7 @@ import org.aeonbits.owner.Config.TokenizerClass;
 
 import java.lang.reflect.Method;
 
+import static org.aeonbits.owner.Util.newInstance;
 import static org.aeonbits.owner.Util.unsupported;
 
 /**
@@ -50,7 +51,7 @@ final class TokenizerResolver {
             return new SplitAndTrimTokenizer(separatorAnnotationOnClassLevel.value());
 
         if (tokenizerClassAnnotationOnClassLevel != null)
-            return createTokenizer(tokenizerClassAnnotationOnClassLevel.value());
+            return newInstance(tokenizerClassAnnotationOnClassLevel.value());
 
         return null;
     }
@@ -68,19 +69,9 @@ final class TokenizerResolver {
             return new SplitAndTrimTokenizer(separatorAnnotationOnMethodLevel.value());
 
         if (tokenizerClassAnnotationOnMethodLevel != null)
-            return createTokenizer(tokenizerClassAnnotationOnMethodLevel.value());
+            return newInstance(tokenizerClassAnnotationOnMethodLevel.value());
 
         return null;
-    }
-
-    private static Tokenizer createTokenizer(Class<? extends Tokenizer> tokenizerClass) {
-        try {
-            return tokenizerClass.newInstance();
-        } catch (Exception e) {
-            throw unsupported(e,
-                    "Tokenizer class '%s' cannot be instantiated; see the cause below in the stack trace",
-                    tokenizerClass.getCanonicalName());
-        }
     }
 
 }

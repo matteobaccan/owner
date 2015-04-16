@@ -106,9 +106,9 @@ public class UtilTest {
         return Util.system().getenv();
     }
 
-    public static interface MyCloneable extends Cloneable {
+    public interface MyCloneable extends Cloneable {
         // for some stupid reason java.lang.Cloneable doesn't define this method...
-        public Object clone() throws CloneNotSupportedException;
+        Object clone() throws CloneNotSupportedException;
     }
 
     @SuppressWarnings("unchecked")

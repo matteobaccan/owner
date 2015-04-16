@@ -329,4 +329,17 @@ public interface Config extends Serializable {
         Class<? extends Converter> value();
     }
 
+    /**
+     * Specifies a <tt>{@link Preprocessor}</tt> class to allow the user to define a custom logic to pre-process
+     * the property value before being used by the library.
+     *
+     * @since 1.0.9
+     */
+    @Retention(RUNTIME)
+    @Target({METHOD, TYPE})
+    @Documented
+    @interface PreprocessorClasses {
+        Class<? extends Preprocessor>[] value();
+    }
+
 }
