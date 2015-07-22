@@ -1,7 +1,7 @@
 ---
 layout: news_item
 title: "Owner 1.0.9 Released"
-date: "2015-04-01 00:41:00 +0200"
+date: "2015-07-22 17:17:00 +0200"
 author: lviggiano
 version: 1.0.9
 categories: [release]
@@ -12,6 +12,8 @@ v1.0.9 contains following enhancements and bug fixes.
 Enhancements
 ------------
  * Added `fill(java.util.Map)` method to the `Accessible` interface.
+ * Added pre-processing feature. See [#123](https://github.com/lviggiano/owner/issues/120), thanks
+   [@a1730](https://github.com/a1730) for the feedback.
 
 Site Enhancements
 -----------------
