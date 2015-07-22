@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.aeonbits.owner</groupId>
         <artifactId>owner-parent</artifactId>
-        <version>1.0.9-SNAPSHOT</version>
+        <version>1.0.9</version>
     </parent>
 
     <name>OWNER :: Third Party Extras</name>

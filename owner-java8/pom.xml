@@ -13,13 +13,13 @@
     <parent>
         <artifactId>owner-parent</artifactId>
         <groupId>org.aeonbits.owner</groupId>
-        <version>1.0.9-SNAPSHOT</version>
+        <version>1.0.9</version>
     </parent>
 
     <groupId>org.aeonbits.owner</groupId>
     <artifactId>owner-java8</artifactId>
     <name>OWNER :: Java 8 Support</name>
-    <version>1.0.9-SNAPSHOT</version>
+    <version>1.0.9</version>
     <packaging>jar</packaging>
 
     <build>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.aeonbits.owner</groupId>
             <artifactId>owner</artifactId>
-            <version>1.0.9-SNAPSHOT</version>
+            <version>1.0.9</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
