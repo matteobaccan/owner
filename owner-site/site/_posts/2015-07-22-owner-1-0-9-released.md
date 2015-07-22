@@ -12,7 +12,7 @@ v1.0.9 contains following enhancements and bug fixes.
 Enhancements
 ------------
  * Added `fill(java.util.Map)` method to the `Accessible` interface.
- * Added pre-processing feature. See [#123](https://github.com/lviggiano/owner/issues/120), thanks
+ * Added pre-processing feature. See [#120](https://github.com/lviggiano/owner/issues/120), thanks
    [@a1730](https://github.com/a1730) for the feedback.
 
 Site Enhancements
