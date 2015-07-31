@@ -8,8 +8,8 @@ public class ParseURI {
     public static void main(String[] args) throws URISyntaxException {
         String spec = "file:${my.properties}";
 
-        URI url = new URI(spec);
+        URI uri = new URI(spec);
 
-        System.out.println("The parsed URI is: " + url);
+        System.out.println("The parsed URI is: " + uri);
     }
 }
