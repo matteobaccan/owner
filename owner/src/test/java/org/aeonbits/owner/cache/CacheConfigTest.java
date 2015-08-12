@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
@@ -58,6 +59,18 @@ public class CacheConfigTest {
         MyConfig first = ConfigCache.getOrCreate("MyConfig", MyConfig.class);
         MyConfig second = ConfigCache.getOrCreate("MyConfig", MyConfig.class);
         assertSame(first, second);
+    }
+
+    @Test
+    public void testList() {
+        ConfigCache.getOrCreate("MyConfig1", MyConfig.class);
+        ConfigCache.getOrCreate("MyConfig2", MyConfig.class);
+        ConfigCache.getOrCreate("MyConfig3", MyConfig.class);
+        Set<Object> keys = ConfigCache.list();
+        assertTrue(keys.contains("MyConfig1"));
+        assertTrue(keys.contains("MyConfig2"));
+        assertTrue(keys.contains("MyConfig3"));
+        assertTrue(3 == keys.size());
     }
 
     @Test
