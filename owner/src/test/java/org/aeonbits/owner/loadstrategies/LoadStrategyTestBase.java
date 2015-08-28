@@ -24,7 +24,7 @@ public class LoadStrategyTestBase {
 
             public boolean matches(Object o) {
                 uri = (URI)o;
-                return uri.getPath().endsWith(path);
+                return uri.toString().endsWith(path);
             }
 
             public void describeTo(Description description) {

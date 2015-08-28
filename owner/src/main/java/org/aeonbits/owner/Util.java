@@ -166,7 +166,13 @@ abstract class Util {
     }
 
     static File fileFromURI(String uriSpec) throws URISyntaxException {
-        return fileFromURI(new URI(uriSpec));
+        try {
+            return fileFromURI(new URI(uriSpec));
+        } catch (URISyntaxException e) {
+            // Perhaps the path contains backslashes
+            uriSpec = uriSpec.replace('\\', '/');
+            return fileFromURI(new URI(uriSpec));
+        }
     }
 
     static boolean eq(Object o1, Object o2) {
