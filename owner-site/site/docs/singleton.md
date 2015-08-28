@@ -135,6 +135,17 @@ MyConfig thirdFromCache = ConfigCache.getOrCreate("bar", MyConfig.class);
 
 The `id` is defined as `java.lang.Object`, but you can use a `String` such as a name, as in the above example.
 
+In some cases, it may be useful list all configuration objects in an application, for instance for debugging. This can
+be accomplished using the `ConfigCache.list()` method, which returns a set of the `id` objects in the cache. This set
+can be used to iterate over all configuration objects in the cache, for instance as follows.
+
+```java
+for (Object id : ConfigCache.list()) {
+   Config cfg = ConfigCache.get(id);
+   // do something
+}
+```
+
 As for the `ConfigFactory` you can pass a list of imports to `ConfigCache`. In fact the `ConfigCache` interface is
 pretty similar to `ConfigFactory`:
 

@@ -8,7 +8,7 @@
 
 package org.aeonbits.owner;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -123,11 +123,11 @@ public final class ConfigCache {
      * @return a set containing the key objects for all instance in the cache.
      */
     public static Set<Object> list() {
-        // Create a new Set to ensure that the caller does not modify the contents of our
-        // private map via the result of this call. The key objects themselves are the same
-        // as those contained in the private map, which means that if they are mutable, the
-        // caller will be able to affect the contents of the map (albeit only the keys).
-        return new HashSet<Object>(CACHE.keySet());
+        // Return an unmodifiableSet to ensure that the caller does not modify the contents of our
+        // private map via the result of this call. The key objects themselves are the same as
+        // those contained in the private map, which means that if they are mutable, the caller
+        // will be able to affect the contents of the map (albeit only the keys).
+        return Collections.unmodifiableSet(CACHE.keySet());
     }
 
     /**
