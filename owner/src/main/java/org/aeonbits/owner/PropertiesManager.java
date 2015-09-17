@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,6 +54,10 @@ import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
 
+import org.aeonbits.owner.crypto.AESEncryption;
+import org.aeonbits.owner.crypto.Decrypter;
+import org.aeonbits.owner.crypto.IdentityDecrypter;
+
 /**
  * Loads properties and manages access to properties handling concurrency.
  *
@@ -78,6 +83,18 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private Object proxy;
     private final LoadersManager loaders;
 
+    /**
+     * Decrypter used in this configuration.
+     * Every configuration contains one and only one decrypter for all encrypted keys.
+     */
+    private final Decrypter decrypter;
+
+    /**
+     * A cache of encryptedKeys.
+     * Reflection is slow.
+     */
+    private List<Method> encryptedKeys = new ArrayList<Method>();
+
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
                 @Override
@@ -100,7 +117,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.properties = properties;
         this.loaders = loaders;
         this.imports = imports;
-
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
         uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
@@ -120,6 +136,41 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         } else {
             hotReloadLogic = null;
         }
+
+        // We try to identify the DecrypterManagerClass annotation, to assign the Decrypter to this configuration.
+        // If it isn't present then we assign the IdentityDecrypter.
+        DecrypterManagerClass decrypterManager = clazz.getAnnotation(DecrypterManagerClass.class);
+        Class<? extends Decrypter> decrypterClazz;
+        if ( decrypterManager != null && decrypterManager.value() != null ) {
+            decrypterClazz = decrypterManager.value();
+        } else {
+            decrypterClazz = IdentityDecrypter.class;
+        }
+        this.decrypter = Util.newInstance( decrypterClazz );
+
+        // Reflection is slow, so we will cache all methods with EncryptedKey annotation.
+        Method[] methods = clazz.getMethods();
+        for (Method method : methods) {
+            if ( PropertiesMapper.isEncryptedKey(method) ) {
+                encryptedKeys.add( method );
+            }
+        }
+    }
+
+    /**
+     * Decrypts the value with the DecrypterManagerClass if method contains the EncryptedKey annotation.
+     * @param method
+     * @param value the value to decrypt when the method contains the EncryptedKey annotation
+     * @return
+     *      the <code>value</code> if the method doesn't contains the EncryptedKey annotation
+     *      or the <code>result of decrypt the value</code> if it does.
+     */
+    protected String decryptIfNecessary( Method method, String value ) {
+        // Value can't be null, it has been checked previously in PropertiesInvocationHandler.resolveProperty
+        if ( this.encryptedKeys.contains( method) ) {
+            return this.decrypter.decrypt( value );
+        }
+        return value;
     }
 
     private List<URI> toURIs(Sources sources, ConfigURIFactory uriFactory) {

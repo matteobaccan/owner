@@ -28,6 +28,8 @@ import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 
+import org.aeonbits.owner.crypto.Decrypter;
+import org.aeonbits.owner.crypto.IdentityDecrypter;
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p>
@@ -39,7 +41,6 @@ import static org.aeonbits.owner.Util.reverse;
  * @see java.util.Properties
  */
 public interface Config extends Serializable {
-
     /**
      * Specifies the policy for loading the properties files. By default the first available properties file specified
      * by {@link Sources} will be loaded, see {@link LoadType#FIRST}. User can also specify that the load policy is
@@ -88,6 +89,26 @@ public interface Config extends Serializable {
     @Documented
     @interface Key {
         String value();
+    }
+
+    /**
+     *
+     */
+    @Retention(RUNTIME)
+    @Target(METHOD)
+    @Documented
+    @interface EncryptedKey {
+
+    }
+
+    /**
+     *
+     */
+    @Retention(RUNTIME)
+    @Target(TYPE)
+    @Documented
+    @interface DecrypterManagerClass {
+        Class<? extends Decrypter> value() default IdentityDecrypter.class;
     }
 
     /**

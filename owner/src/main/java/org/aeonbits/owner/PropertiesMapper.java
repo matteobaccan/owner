@@ -9,6 +9,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.DefaultValue;
+import org.aeonbits.owner.Config.EncryptedKey;
 import org.aeonbits.owner.Config.Key;
 
 import java.lang.reflect.Method;
@@ -23,6 +24,10 @@ final class PropertiesMapper {
 
     /** Don't let anyone instantiate this class */
     private PropertiesMapper() {}
+
+    static boolean isEncryptedKey( Method method ) {
+        return ( method.getAnnotation( EncryptedKey.class ) ) != null;
+    }
 
     static String key(Method method) {
         Key key = method.getAnnotation(Key.class);
