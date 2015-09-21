@@ -2,7 +2,7 @@
 layout: docs
 title: Singleton
 prev_section: event-support
-next_section: features
+next_section: crypto
 permalink: /docs/singleton/
 ---
 
