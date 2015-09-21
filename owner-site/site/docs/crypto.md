@@ -63,6 +63,17 @@ public interface Sample extends Config {
     public String myEncryptedPassword3();
 }
 ```
+##It works with another annotations...
+
+... so it is possible write code as:
+
+```java
+@Key("crypto.list")
+@EncryptedValue
+@Separator(",")
+@DefaultValue("Pfzoiet5E5zN2/7tfgrGLQ==")
+List<String> cryptoList();
+```
 
 ##Can you show me an implementation example about Decryptor?
 
