@@ -93,7 +93,7 @@ public interface Config extends Serializable {
 
     /**
      * When a value should be decrypted this annotation is needed.
-     * If value is not supplied it assumes that will be used the {@link Decryptor} setted in {@DecryptorClass}.
+     * If value is not supplied it assumes that will be used the {@link Decryptor} setted in {@link DecryptorClass}.
      * This overrides the {@link EncryptedValue} Descryptor defined for the class.
      */
     @Retention(RUNTIME)
@@ -106,7 +106,7 @@ public interface Config extends Serializable {
     /**
      * When a value should be decrypted this annotation is needed.
      * This is the class {@link Decryptor}, the default <code>Decryptor</code> used to decrypt a key when none is
-     * defined at {@EncryptedValue}. This allows share the same decryptor for all encrypted keys.
+     * defined at {@link EncryptedValue}. This allows share the same decryptor for all encrypted keys.
      */
     @Retention(RUNTIME)
     @Target(TYPE)
