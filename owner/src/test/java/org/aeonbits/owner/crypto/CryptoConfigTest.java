@@ -1,5 +1,8 @@
 package org.aeonbits.owner.crypto;
 
+import java.util.List;
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +44,12 @@ public class CryptoConfigTest {
         @EncryptedValue
         @DefaultValue("tzH7IKLCVc0AC72fh5DiZA==")
         String password();
+
+        @Key("crypto.list")
+        @EncryptedValue
+        @Separator(",")
+        @DefaultValue("Pfzoiet5E5zN2/7tfgrGLQ==")
+        List<String> cryptoList();
     }
 
 
@@ -64,6 +73,14 @@ public class CryptoConfigTest {
         String decryptedPassword = config.password();
         decryptedPassword = config.password();
         assertEquals( "May be property password was decrypted twice.", PASSWORD_EXPECTED, decryptedPassword );
+    }
+
+    @Test
+    public void listDecryptedTest() {
+        SampleConfig config = ConfigFactory.create( SampleConfig.class );
+        List<String> decryptedList = config.cryptoList();
+        List<String> expectedList = Arrays.asList( "1", "2", "3", "4");
+        assertEquals( "KKKK", expectedList, decryptedList );
     }
 
     /**
