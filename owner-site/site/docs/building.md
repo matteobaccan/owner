@@ -2,7 +2,7 @@
 layout: docs
 title: Building from sources
 prev_section: support
-next_section: crypto
+next_section: contributing
 permalink: /docs/building/
 ---
 

@@ -133,9 +133,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             hotReloadLogic = null;
         }
 
-        // We try to identify the DecryptorManagerClass annotation, to assign the Decryptor to this configuration.
+        // We try to identify the DecryptorClass annotation, to assign the Decryptor to this configuration.
         // If it isn't present then we assign the IdentityDecryptor.
-        DecryptorManagerClass decryptorManager = clazz.getAnnotation(DecryptorManagerClass.class);
+        DecryptorClass decryptorManager = clazz.getAnnotation(DecryptorClass.class);
         Class<? extends Decryptor> decryptorClazz;
         if ( decryptorManager != null && decryptorManager.value() != null ) {
             decryptorClazz = decryptorManager.value();

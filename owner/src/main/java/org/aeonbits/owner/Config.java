@@ -93,7 +93,7 @@ public interface Config extends Serializable {
 
     /**
      * When a value should be decrypted this annotation is needed.
-     * If value is not supplied it assumes that will be used the {@link Decryptor} setted in {@DecryptorManagerClass}.
+     * If value is not supplied it assumes that will be used the {@link Decryptor} setted in {@DecryptorClass}.
      * This overrides the {@link EncryptedValue} Descryptor defined for the class.
      */
     @Retention(RUNTIME)
@@ -111,7 +111,7 @@ public interface Config extends Serializable {
     @Retention(RUNTIME)
     @Target(TYPE)
     @Documented
-    @interface DecryptorManagerClass {
+    @interface DecryptorClass {
         Class<? extends Decryptor> value() default IdentityDecryptor.class;
     }
 

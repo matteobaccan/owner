@@ -16,7 +16,7 @@ public class CryptoConfigTest {
     public static final String PASSWORD_EXPECTED = "This is my key.";
     public static final String SALUTATION_EXPECTED = "Good Morning";
 
-    @DecryptorManagerClass(Decryptor1.class)
+    @DecryptorClass(Decryptor1.class)
     public interface SampleConfig extends Config {
         String hello(String param);
 
