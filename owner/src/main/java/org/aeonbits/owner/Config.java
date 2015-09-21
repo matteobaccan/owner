@@ -28,8 +28,8 @@ import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 
-import org.aeonbits.owner.crypto.Decrypter;
-import org.aeonbits.owner.crypto.IdentityDecrypter;
+import org.aeonbits.owner.crypto.Decryptor;
+import org.aeonbits.owner.crypto.IdentityDecryptor;
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p>
@@ -92,23 +92,27 @@ public interface Config extends Serializable {
     }
 
     /**
-     *
+     * When a value should be decrypted this annotation is needed.
+     * If value is not supplied it assumes that will be used the {@link Decryptor} setted in {@DecryptorManagerClass}.
+     * This overrides the {@link EncryptedValue} Descryptor defined for the class.
      */
     @Retention(RUNTIME)
     @Target(METHOD)
     @Documented
-    @interface EncryptedKey {
-
+    @interface EncryptedValue {
+        Class<? extends Decryptor> value() default IdentityDecryptor.class;
     }
 
     /**
-     *
+     * When a value should be decrypted this annotation is needed.
+     * This is the class {@link Decryptor}, the default <code>Decryptor</code> used to decrypt a key when none is
+     * defined at {@EncryptedValue}. This allows share the same decryptor for all encrypted keys.
      */
     @Retention(RUNTIME)
     @Target(TYPE)
     @Documented
-    @interface DecrypterManagerClass {
-        Class<? extends Decrypter> value() default IdentityDecrypter.class;
+    @interface DecryptorManagerClass {
+        Class<? extends Decryptor> value() default IdentityDecryptor.class;
     }
 
     /**

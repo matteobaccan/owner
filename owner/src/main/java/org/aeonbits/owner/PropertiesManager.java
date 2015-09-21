@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -54,9 +55,8 @@ import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
 
-import org.aeonbits.owner.crypto.AESEncryption;
-import org.aeonbits.owner.crypto.Decrypter;
-import org.aeonbits.owner.crypto.IdentityDecrypter;
+import org.aeonbits.owner.crypto.Decryptor;
+import org.aeonbits.owner.crypto.IdentityDecryptor;
 
 /**
  * Loads properties and manages access to properties handling concurrency.
@@ -64,7 +64,6 @@ import org.aeonbits.owner.crypto.IdentityDecrypter;
  * @author Luigi R. Viggiano
  */
 class PropertiesManager implements Reloadable, Accessible, Mutable {
-
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
     private final Properties properties;
@@ -83,17 +82,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private Object proxy;
     private final LoadersManager loaders;
 
-    /**
-     * Decrypter used in this configuration.
-     * Every configuration contains one and only one decrypter for all encrypted keys.
-     */
-    private final Decrypter decrypter;
 
     /**
-     * A cache of encryptedKeys.
+     * A cache of encryptedKeys with its decryptor.
+     * <p>
+     * This allows each key has its own decryptor.
      * Reflection is slow.
      */
-    private List<Method> encryptedKeys = new ArrayList<Method>();
+    private Map< Method, Decryptor > encryptedKeys = new HashMap< Method, Decryptor >();
 
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
@@ -137,38 +133,45 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             hotReloadLogic = null;
         }
 
-        // We try to identify the DecrypterManagerClass annotation, to assign the Decrypter to this configuration.
-        // If it isn't present then we assign the IdentityDecrypter.
-        DecrypterManagerClass decrypterManager = clazz.getAnnotation(DecrypterManagerClass.class);
-        Class<? extends Decrypter> decrypterClazz;
-        if ( decrypterManager != null && decrypterManager.value() != null ) {
-            decrypterClazz = decrypterManager.value();
+        // We try to identify the DecryptorManagerClass annotation, to assign the Decryptor to this configuration.
+        // If it isn't present then we assign the IdentityDecryptor.
+        DecryptorManagerClass decryptorManager = clazz.getAnnotation(DecryptorManagerClass.class);
+        Class<? extends Decryptor> decryptorClazz;
+        if ( decryptorManager != null && decryptorManager.value() != null ) {
+            decryptorClazz = decryptorManager.value();
         } else {
-            decrypterClazz = IdentityDecrypter.class;
+            decryptorClazz = IdentityDecryptor.class;
         }
-        this.decrypter = Util.newInstance( decrypterClazz );
+        Decryptor classDecryptor = Util.newInstance( decryptorClazz );
 
-        // Reflection is slow, so we will cache all methods with EncryptedKey annotation.
+        // Reflection is slow, so we will cache all methods with EncryptedValue annotation.
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            if ( PropertiesMapper.isEncryptedKey(method) ) {
-                encryptedKeys.add( method );
+            if ( PropertiesMapper.isEncryptedValue(method) ) {
+                EncryptedValue encriptedKey = method.getAnnotation( EncryptedValue.class );
+                decryptorClazz = encriptedKey.value();
+                if ( decryptorClazz != IdentityDecryptor.class ) {
+                    encryptedKeys.put( method, Util.newInstance( decryptorClazz ) );
+                } else {
+                    encryptedKeys.put( method, classDecryptor );
+                }
             }
         }
     }
 
     /**
-     * Decrypts the value with the DecrypterManagerClass if method contains the EncryptedKey annotation.
-     * @param method
-     * @param value the value to decrypt when the method contains the EncryptedKey annotation
+     * If method contains the EncryptedValue annotation it Decrypts the value with the associated {@link Decryptor}.
+     * @param method with the key definition.
+     * @param value the value to decrypt when the method contains the EncryptedValue annotation
      * @return
-     *      the <code>value</code> if the method doesn't contains the EncryptedKey annotation
+     *      the <code>value</code> if the method doesn't contains the EncryptedValue annotation
      *      or the <code>result of decrypt the value</code> if it does.
      */
     protected String decryptIfNecessary( Method method, String value ) {
         // Value can't be null, it has been checked previously in PropertiesInvocationHandler.resolveProperty
-        if ( this.encryptedKeys.contains( method) ) {
-            return this.decrypter.decrypt( value );
+        if ( this.encryptedKeys.containsKey( method ) ) {
+            Decryptor decryptor = this.encryptedKeys.get( method );
+            return decryptor.decrypt( value );
         }
         return value;
     }

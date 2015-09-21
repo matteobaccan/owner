@@ -16,7 +16,7 @@ public class CryptoConfigTest {
     public static final String PASSWORD_EXPECTED = "This is my key.";
     public static final String SALUTATION_EXPECTED = "Good Morning";
 
-    @DecrypterManagerClass(SampleDecrypter.class)
+    @DecryptorManagerClass(Decryptor1.class)
     public interface SampleConfig extends Config {
         String hello(String param);
 
@@ -38,32 +38,11 @@ public class CryptoConfigTest {
         void voidMethodWithoutValue();
 
         @Key("crypto.password")
-        @EncryptedKey
+        @EncryptedValue
         @DefaultValue("tzH7IKLCVc0AC72fh5DiZA==")
         String password();
     }
 
-    public static class SampleDecrypter implements Decrypter, Encrypter {
-        final AESEncryption encrypter = CryptoUtils.newEncryptionSilently( "AES", SECRET_KEY );
-
-        public String decrypt( String value ) {
-            try {
-                return this.encrypter.decrypt( value );
-            } catch ( Exception cause ) {
-                cause.printStackTrace();
-                return value;
-            }
-        }
-
-        public String encrypt( String value ) {
-            try {
-                return this.encrypter.encrypt( value );
-            } catch ( Exception cause ) {
-                cause.printStackTrace();
-                return value;
-            }
-        }
-    }
 
     /**
      * We test that the decrypt works as expected.
@@ -84,7 +63,7 @@ public class CryptoConfigTest {
         SampleConfig config = ConfigFactory.create( SampleConfig.class );
         String decryptedPassword = config.password();
         decryptedPassword = config.password();
-        assertEquals( "Property password wasn't decrypted second time.", PASSWORD_EXPECTED, decryptedPassword );
+        assertEquals( "May be property password was decrypted twice.", PASSWORD_EXPECTED, decryptedPassword );
     }
 
     /**
@@ -95,5 +74,17 @@ public class CryptoConfigTest {
         SampleConfig config = ConfigFactory.create( SampleConfig.class );
         String salutation = config.salutation();
         assertEquals( "Salutation value is not expected", SALUTATION_EXPECTED, salutation );
+    }
+
+    public static class Decryptor1 extends SampleDecryptor {
+        public Decryptor1() {
+            super( "AES", SECRET_KEY );
+        }
+    }
+
+    public static class Decryptor2 extends SampleDecryptor {
+        public Decryptor2() {
+            super( "AES", SECRET_KEY + SECRET_KEY );
+        }
     }
 }
