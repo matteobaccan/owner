@@ -9,6 +9,8 @@
 package org.aeonbits.owner.util;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Luigi R. Viggiano
@@ -63,6 +65,25 @@ public final class Reflection {
 
     public static Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
         return JAVA_8_SUPPORT.invokeDefaultMethod(proxy, method, args);
+    }
+
+    public static List<Class> getAllInterfaces(Class cls) {
+        List<Class> list = new ArrayList<Class>();
+        while (cls != null) {
+            for (Class anInterface : cls.getInterfaces()) {
+                if (!list.contains(anInterface)) {
+                    list.add(anInterface);
+                }
+                List<Class> superInterfaces = getAllInterfaces(anInterface);
+                for (Class superInterface : superInterfaces) {
+                    if (!list.contains(superInterface)) {
+                        list.add(superInterface);
+                    }
+                }
+            }
+            cls = cls.getSuperclass();
+        }
+        return list;
     }
 
 }
