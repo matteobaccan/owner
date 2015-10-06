@@ -29,76 +29,83 @@ import static org.aeonbits.owner.Util.now;
  */
 class HotReloadLogic implements Serializable {
 
-    private final PropertiesManager manager;
-    private final long interval;
-    private final HotReloadType type;
-    private volatile long lastCheckTime = now();
-    private final List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
+  private final PropertiesManager manager;
+  private final long interval;
+  private final HotReloadType type;
+  private volatile long lastCheckTime = now();
+  private final List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
 
-    private static class WatchableFile implements Serializable {
-        private final File file;
-        private long lastModifiedTime;
+  private static class WatchableFile implements Serializable {
+    private final File file;
+    private long lastModifiedTime;
 
-        WatchableFile(File file) {
-            this.file = file;
-            this.lastModifiedTime = file.lastModified();
+    WatchableFile(File file) {
+      this.file = file;
+      this.lastModifiedTime = file.lastModified();
+    }
+
+    public boolean isChanged() {
+      long lastModifiedTimeNow = file.lastModified();
+      boolean changed = lastModifiedTime != lastModifiedTimeNow;
+      if (changed) {
+        lastModifiedTime = lastModifiedTimeNow;
+      }
+      return changed;
+    }
+  }
+
+  public HotReloadLogic(HotReload hotReload, List<URI> uris, PropertiesManager manager) {
+    this.manager = manager;
+    type = hotReload.type();
+    interval = hotReload.unit().toMillis(hotReload.value());
+    setupWatchableResources(uris);
+  }
+
+  private void setupWatchableResources(List<URI> uris) {
+    Set<File> files = new LinkedHashSet<File>();
+    for (URI uri : uris) {
+      File file = fileFromURI(uri);
+      if (file != null) {
+        files.add(file);
+      }
+    }
+    for (File file : files)
+      watchableFiles.add(new WatchableFile(file));
+  }
+
+  synchronized void checkAndReload() {
+    if (needsReload()) {
+      manager.reload();
+    }
+  }
+
+  private boolean needsReload() {
+    if (manager.isLoading()) {
+      return false;
+    }
+
+    long now = now();
+    if (now < lastCheckTime + interval) {
+      return false;
+    }
+
+    try {
+      for (WatchableFile resource : watchableFiles)
+        if (resource.isChanged()) {
+          return true;
         }
-
-        public boolean isChanged() {
-            long lastModifiedTimeNow = file.lastModified();
-            boolean changed = lastModifiedTime != lastModifiedTimeNow;
-            if (changed)
-                lastModifiedTime = lastModifiedTimeNow;
-            return changed;
-        }
+      return false;
+    } finally {
+      lastCheckTime = now;
     }
+  }
 
-    public HotReloadLogic(HotReload hotReload, List<URI> uris, PropertiesManager manager) {
-        this.manager = manager;
-        type = hotReload.type();
-        interval = hotReload.unit().toMillis(hotReload.value());
-        setupWatchableResources(uris);
-    }
+  boolean isAsync() {
+    return type == ASYNC;
+  }
 
-    private void setupWatchableResources(List<URI> uris) {
-        Set<File> files = new LinkedHashSet<File>();
-        for (URI uri : uris) {
-            File file = fileFromURI(uri);
-            if (file != null)
-                files.add(file);
-        }
-        for (File file : files)
-            watchableFiles.add(new WatchableFile(file));
-    }
-
-    synchronized void checkAndReload() {
-        if (needsReload())
-            manager.reload();
-    }
-
-    private boolean needsReload() {
-        if (manager.isLoading()) return false;
-
-        long now = now();
-        if (now < lastCheckTime + interval)
-            return false;
-
-        try {
-            for (WatchableFile resource : watchableFiles)
-                if (resource.isChanged())
-                    return true;
-            return false;
-        } finally {
-            lastCheckTime = now;
-        }
-    }
-
-    boolean isAsync() {
-        return type == ASYNC;
-    }
-
-    boolean isSync() {
-        return type == SYNC;
-    }
+  boolean isSync() {
+    return type == SYNC;
+  }
 
 }
