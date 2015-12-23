@@ -47,9 +47,8 @@ class HotReloadLogic implements Serializable {
         public boolean isChanged() {
             long lastModifiedTimeNow = file.lastModified();
             boolean changed = lastModifiedTime != lastModifiedTimeNow;
-            if (changed) {
+            if (changed)
                 lastModifiedTime = lastModifiedTimeNow;
-            }
             return changed;
         }
     }
@@ -65,35 +64,29 @@ class HotReloadLogic implements Serializable {
         Set<File> files = new LinkedHashSet<File>();
         for (URI uri : uris) {
             File file = fileFromURI(uri);
-            if (file != null) {
+            if (file != null)
                 files.add(file);
-            }
         }
         for (File file : files)
             watchableFiles.add(new WatchableFile(file));
     }
 
     synchronized void checkAndReload() {
-        if (needsReload()) {
+        if (needsReload())
             manager.reload();
-        }
     }
 
     private boolean needsReload() {
-        if (manager.isLoading()) {
-            return false;
-        }
+        if (manager.isLoading()) return false;
 
         long now = now();
-        if (now < lastCheckTime + interval) {
+        if (now < lastCheckTime + interval)
             return false;
-        }
 
         try {
             for (WatchableFile resource : watchableFiles)
-                if (resource.isChanged()) {
+                if (resource.isChanged())
                     return true;
-                }
             return false;
         } finally {
             lastCheckTime = now;

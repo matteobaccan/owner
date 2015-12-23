@@ -53,55 +53,46 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {
         propertiesManager.syncReloadCheck();
 
-        if (isDefault(invokedMethod)) {
+        if (isDefault(invokedMethod))
             return invokeDefaultMethod(proxy, invokedMethod, args);
-        }
 
         DelegateMethodHandle delegate = getDelegateMethod(invokedMethod);
-        if (delegate != null) {
+        if (delegate != null)
             return delegate.invoke(args);
-        }
 
         return resolveProperty(invokedMethod, args);
     }
 
     private DelegateMethodHandle getDelegateMethod(Method invokedMethod) {
         for (DelegateMethodHandle delegate : delegates)
-            if (delegate.matches(invokedMethod)) {
+            if (delegate.matches(invokedMethod))
                 return delegate;
-            }
         return null;
     }
 
     private Object resolveProperty(Method method, Object... args) {
         String key = expandKey(method);
-
         Object result = propertiesManager.getValue(key, method, args);
-        if (result == NULL) {
-            return null;
-        }
+        if (result == NULL) return null;
         return result;
     }
 
     private String expandKey(Method method) {
         String key = key(method);
-        if (isFeatureDisabled(method, VARIABLE_EXPANSION)) {
+        if (isFeatureDisabled(method, VARIABLE_EXPANSION))
             return key;
-        }
         return propertiesManager.substitute(key);
     }
 
     private List<DelegateMethodHandle> findDelegates(Object... targets) {
         List<DelegateMethodHandle> result = new LinkedList<DelegateMethodHandle>();
         for (Object target : targets) {
-            if (target == null) {
+            if (target == null)
                 continue;
-            }
             Method[] methods = target.getClass().getMethods();
             for (Method m : methods)
-                if (m.getAnnotation(Delegate.class) != null) {
+                if (m.getAnnotation(Delegate.class) != null)
                     result.add(new DelegateMethodHandle(target, m));
-                }
         }
         return result;
     }
