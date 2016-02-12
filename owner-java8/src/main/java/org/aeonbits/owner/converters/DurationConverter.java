@@ -31,7 +31,7 @@ import java.time.temporal.ChronoUnit;
  *             <li>d / days</li>
  *         </ul>
  *         Note that the <code>time_unit</code> string is case sensitive.
- *         <br/>
+ *         <p>
  *         If no <code>time_unit</code> is specified, <code>milliseconds</code> is assumed.
  *     </li>
  * </ul>
