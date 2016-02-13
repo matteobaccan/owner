@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import static org.aeonbits.owner.Util.fixBackslashesToSlashes;
+import static org.aeonbits.owner.Util.fixSpacesToPercentTwenty;
 
 /**
  * @author Luigi R. Viggiano
@@ -20,6 +21,7 @@ import static org.aeonbits.owner.Util.fixBackslashesToSlashes;
 class ConfigURIFactory {
 
     private static final String CLASSPATH_PROTOCOL = "classpath:";
+    private static final String FILE_PROTOCOL = "file:";
     private final transient ClassLoader classLoader;
     private final VariablesExpander expander;
 
@@ -37,6 +39,9 @@ class ConfigURIFactory {
             if (url == null)
                 return null;
             return url.toURI();
+        } else if (fixed.startsWith(FILE_PROTOCOL)) {
+            String path = fixSpacesToPercentTwenty(fixed);
+            return new URI(path);
         } else {
             return new URI(fixed);
         }
