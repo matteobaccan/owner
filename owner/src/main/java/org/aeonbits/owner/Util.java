@@ -108,6 +108,10 @@ abstract class Util {
         return path.replace('\\', '/');
     }
 
+    public static String fixSpacesToPercentTwenty(String path) {
+        return path.replace(" ", "%20");
+    }
+
     static <T> T ignore() {
         // the ignore method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
         // complaining about empty catch methods.
