@@ -14,7 +14,10 @@ import java.time.temporal.ChronoUnit;
  * The class supports two formats for the duration string:
  * <ul>
  *     <li>
- *         The ISO-8601 based format that the {@link java.time.Duration#parse(CharSequence)} method supports.
+ *         The ISO-8601 based format that the {@link java.time.Duration#parse(CharSequence)} method supports
+ *         (<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-"
+ *         target="_blank">see the official Java 8 documentation</a>, although note that currently there is an
+ *         <a href="https://bugs.openjdk.java.net/browse/JDK-8146173" target="_blank">error in the documentation</a>).
  *         The implementation will check whether the input string starts with <code>P</code> with an optional plus/minus
  *         prefix and if so, will use this method for parsing.
  *     </li>
@@ -30,6 +33,7 @@ import java.time.temporal.ChronoUnit;
  *             <li>h / hours</li>
  *             <li>d / days</li>
  *         </ul>
+ *         <p>
  *         Note that the <code>time_unit</code> string is case sensitive.
  *         <p>
  *         If no <code>time_unit</code> is specified, <code>milliseconds</code> is assumed.

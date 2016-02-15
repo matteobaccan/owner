@@ -143,6 +143,22 @@ public class DurationTypesTest {
         @ConverterClass(DurationConverter.class)
         @DefaultValue("10 days")
         Duration daysSuffix();
+
+        @ConverterClass(DurationConverter.class)
+        @DefaultValue("PT15M")
+        Duration iso8601NoPrefix15Minutes();
+
+        @ConverterClass(DurationConverter.class)
+        @DefaultValue("-PT15M")
+        Duration iso8601MinusPrefix15Minutes();
+
+        @ConverterClass(DurationConverter.class)
+        @DefaultValue("+PT15M")
+        Duration iso8601PlusPrefix15Minutes();
+
+        @ConverterClass(DurationConverter.class)
+        @DefaultValue("-PT-6H+3M")
+        Duration iso8601Complex();
     }
 
     private static boolean allEqual(Duration compareTo, Collection<Duration> durations){
@@ -190,6 +206,15 @@ public class DurationTypesTest {
 
         allEqual(Duration.of(10, ChronoUnit.DAYS),
                 Arrays.asList(cfg.dSuffix(),cfg.daySuffix(),cfg.daysSuffix()));
+    }
+
+    @Test
+    public void testIso8601() {
+        DurationTypesConfig cfg = ConfigFactory.create(DurationTypesConfig.class);
+        assertEquals(Duration.of(15, ChronoUnit.MINUTES), cfg.iso8601NoPrefix15Minutes());
+        assertEquals(cfg.iso8601NoPrefix15Minutes(), cfg.iso8601PlusPrefix15Minutes());
+        assertEquals(Duration.of(-15, ChronoUnit.MINUTES), cfg.iso8601MinusPrefix15Minutes());
+        assertEquals(Duration.of(6, ChronoUnit.HOURS).minus(3, ChronoUnit.MINUTES), cfg.iso8601Complex());
     }
 
 }
