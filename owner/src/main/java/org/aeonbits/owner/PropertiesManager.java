@@ -26,11 +26,13 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -53,13 +55,15 @@ import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
 
+import org.aeonbits.owner.crypto.Decryptor;
+import org.aeonbits.owner.crypto.IdentityDecryptor;
+
 /**
  * Loads properties and manages access to properties handling concurrency.
  *
  * @author Luigi R. Viggiano
  */
 class PropertiesManager implements Reloadable, Accessible, Mutable {
-
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
     private final Properties properties;
@@ -77,6 +81,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private Object proxy;
     private final LoadersManager loaders;
+
+
+    /**
+     * A cache of encryptedKeys with its decryptor.
+     * <p>
+     * This allows each key has its own decryptor.
+     * Reflection is slow.
+     */
+    private Map< Method, Decryptor > encryptedKeys = new HashMap< Method, Decryptor >();
 
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
@@ -100,7 +113,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.properties = properties;
         this.loaders = loaders;
         this.imports = imports;
-
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
         uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
@@ -120,6 +132,48 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         } else {
             hotReloadLogic = null;
         }
+
+        // We try to identify the DecryptorClass annotation, to assign the Decryptor to this configuration.
+        // If it isn't present then we assign the IdentityDecryptor.
+        DecryptorClass decryptorManager = clazz.getAnnotation(DecryptorClass.class);
+        Class<? extends Decryptor> decryptorClazz;
+        if ( decryptorManager != null && decryptorManager.value() != null ) {
+            decryptorClazz = decryptorManager.value();
+        } else {
+            decryptorClazz = IdentityDecryptor.class;
+        }
+        Decryptor classDecryptor = Util.newInstance( decryptorClazz );
+
+        // Reflection is slow, so we will cache all methods with EncryptedValue annotation.
+        Method[] methods = clazz.getMethods();
+        for (Method method : methods) {
+            if ( PropertiesMapper.isEncryptedValue(method) ) {
+                EncryptedValue encriptedKey = method.getAnnotation( EncryptedValue.class );
+                decryptorClazz = encriptedKey.value();
+                if ( decryptorClazz != IdentityDecryptor.class ) {
+                    encryptedKeys.put( method, Util.newInstance( decryptorClazz ) );
+                } else {
+                    encryptedKeys.put( method, classDecryptor );
+                }
+            }
+        }
+    }
+
+    /**
+     * If method contains the EncryptedValue annotation it Decrypts the value with the associated {@link Decryptor}.
+     * @param method with the key definition.
+     * @param value the value to decrypt when the method contains the EncryptedValue annotation
+     * @return
+     *      the <code>value</code> if the method doesn't contains the EncryptedValue annotation
+     *      or the <code>result of decrypt the value</code> if it does.
+     */
+    protected String decryptIfNecessary( Method method, String value ) {
+        // Value can't be null, it has been checked previously in PropertiesInvocationHandler.resolveProperty
+        if ( this.encryptedKeys.containsKey( method ) ) {
+            Decryptor decryptor = this.encryptedKeys.get( method );
+            return decryptor.decrypt( value );
+        }
+        return value;
     }
 
     private List<URI> toURIs(Sources sources, ConfigURIFactory uriFactory) {

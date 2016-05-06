@@ -83,6 +83,9 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         }
         if (value == null)
             return null;
+        // Before processing the value, we decrypt it if necessary.
+        // It is a security hole store the decrypted value, so every time we need it it should be decrypted.
+        value = this.propertiesManager.decryptIfNecessary( method, value );
         value = preProcess(method, value);
         Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
         if (result == NULL) return null;
