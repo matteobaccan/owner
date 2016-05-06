@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -39,19 +40,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import static java.util.Collections.synchronizedList;
+import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
+import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.Converters.convert;
+import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.Util.asString;
 import static org.aeonbits.owner.Util.eq;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
 import static org.aeonbits.owner.Util.unsupported;
+import static org.aeonbits.owner.Util.isFeatureDisabled;
 
 /**
  * Loads properties and manages access to properties handling concurrency.
@@ -74,6 +82,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private volatile boolean loading = false;
 
     final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<ReloadListener>());
+
+    private final ConcurrentMap<String, Object> methodsCache = new ConcurrentHashMap<String, Object>();
+    private StrSubstitutor substitutor;
 
     private Object proxy;
     private final LoadersManager loaders;
@@ -150,7 +161,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     Properties load() {
         writeLock.lock();
         try {
-            return load(properties);
+            methodsCache.clear();
+            Properties properties = load(this.properties);
+            this.substitutor = new StrSubstitutor(properties);
+            return properties;
         } finally {
             writeLock.unlock();
         }
@@ -173,6 +187,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void reload() {
         writeLock.lock();
         try {
+            methodsCache.clear();
             Properties loaded = load(new Properties());
             List<PropertyChangeEvent> events =
                     fireBeforePropertyChangeEvents(keys(properties, loaded), properties, loaded);
@@ -213,6 +228,44 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         return reloadEvent;
     }
 
+    public Object getValue(String key, Method method, Object... args) {
+        Object result = methodsCache.get(key);
+        if (result == null) {
+            String value = this.getProperty(key);
+            if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) { // TODO: this if should go away! See #84 and #86
+                String unexpandedKey = PropertiesMapper.key(method);
+                value = this.getProperty(unexpandedKey);
+            }
+            if (value == null) return null;
+            value = preProcess(method, value);
+            Object newValue = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
+            Object oldValue = methodsCache.putIfAbsent(key, newValue);
+            return oldValue == null ? newValue : oldValue;
+        }
+        return result;
+    }
+
+    private String preProcess(Method method, String value) {
+        List<Preprocessor> preprocessors = resolvePreprocessors(method);
+        String result = value;
+        for (Preprocessor preprocessor : preprocessors)
+            result = preprocessor.process(result);
+        return result;
+    }
+
+    private String format(Method method, String format, Object... args) {
+        if (isFeatureDisabled(method, PARAMETER_FORMATTING)) return format;
+        return String.format(format, args);
+    }
+
+    private String expandVariables(Method method, String value) {
+        if (isFeatureDisabled(method, VARIABLE_EXPANSION)) return value;
+        return substitutor.replace(value);
+    }
+
+    private String getMethodCacheKey(Method method) {
+        return method.getName();
+    }
 
     @Delegate
     public void addReloadListener(ReloadListener listener) {
@@ -244,6 +297,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
         final boolean transactional = listener instanceof TransactionalPropertyChangeListener;
         propertyChangeListeners.add(new PropertyChangeListenerWrapper(propertyName, listener, transactional));
+    }
+
+    public String substitute(String key) {
+        return substitutor.replace(key);
     }
 
     private static class PropertyChangeListenerWrapper implements TransactionalPropertyChangeListener, Serializable {
@@ -305,9 +362,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    void syncReloadCheck() {
-        if (hotReloadLogic != null && hotReloadLogic.isSync())
+    boolean syncReloadCheck() {
+        if (hotReloadLogic != null && hotReloadLogic.isSync()) {
             hotReloadLogic.checkAndReload();
+            return true;
+        }
+        return false;
     }
 
     @Delegate
@@ -388,6 +448,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public String setProperty(String key, String newValue) {
         writeLock.lock();
         try {
+            methodsCache.remove(key);
             String oldValue = properties.getProperty(key);
             try {
                 if (eq(oldValue, newValue)) return oldValue;
@@ -415,6 +476,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public String removeProperty(String key) {
         writeLock.lock();
         try {
+            methodsCache.remove(key);
             String oldValue = properties.getProperty(key);
             String newValue = null;
             PropertyChangeEvent event = new PropertyChangeEvent(proxy, key, oldValue, newValue);
@@ -437,6 +499,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void clear() {
         writeLock.lock();
         try {
+            methodsCache.clear();
             List<PropertyChangeEvent> events =
                     fireBeforePropertyChangeEvents(keys(properties), properties, new Properties());
             applyPropertyChangeEvents(events);
@@ -452,6 +515,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void load(InputStream inStream) throws IOException {
         writeLock.lock();
         try {
+            methodsCache.clear();
             Properties loaded = new Properties();
             loaded.load(inStream);
             performLoad(keys(loaded), loaded);
@@ -472,6 +536,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void load(Reader reader) throws IOException {
         writeLock.lock();
         try {
+            methodsCache.clear();
             Properties loaded = new Properties();
             loaded.load(reader);
             performLoad(keys(loaded), loaded);
