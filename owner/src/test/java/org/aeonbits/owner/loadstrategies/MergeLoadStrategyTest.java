@@ -8,15 +8,15 @@
 
 package org.aeonbits.owner.loadstrategies;
 
+import static org.aeonbits.owner.Config.LoadType.MERGE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
-
-import static org.aeonbits.owner.Config.LoadType.MERGE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Luigi R. Viggiano

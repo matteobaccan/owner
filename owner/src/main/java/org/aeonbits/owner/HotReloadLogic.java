@@ -8,8 +8,10 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.HotReload;
-import org.aeonbits.owner.Config.HotReloadType;
+import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.aeonbits.owner.Config.HotReloadType.SYNC;
+import static org.aeonbits.owner.Util.fileFromURI;
+import static org.aeonbits.owner.Util.now;
 
 import java.io.File;
 import java.io.Serializable;
@@ -19,10 +21,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
-import static org.aeonbits.owner.Config.HotReloadType.SYNC;
-import static org.aeonbits.owner.Util.fileFromURI;
-import static org.aeonbits.owner.Util.now;
+import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.Config.HotReloadType;
 
 /**
  * @author Luigi R. Viggiano
@@ -33,9 +33,13 @@ class HotReloadLogic implements Serializable {
     private final long interval;
     private final HotReloadType type;
     private volatile long lastCheckTime = now();
-    private final List<WatchableFile> watchableFiles = new ArrayList<WatchableFile>();
+    private final List<WatchableResource> watchableResources = new ArrayList<WatchableResource>();
 
-    private static class WatchableFile implements Serializable {
+    private static interface WatchableResource extends Serializable {
+        boolean isChanged();
+    }
+
+    private static class WatchableFile implements WatchableResource {
         private final File file;
         private long lastModifiedTime;
 
@@ -53,6 +57,12 @@ class HotReloadLogic implements Serializable {
         }
     }
 
+    private static class WatchableSystemProperties implements WatchableResource {
+        public boolean isChanged() {
+            return true;
+        }
+    }
+
     public HotReloadLogic(HotReload hotReload, List<URI> uris, PropertiesManager manager) {
         this.manager = manager;
         type = hotReload.type();
@@ -63,12 +73,16 @@ class HotReloadLogic implements Serializable {
     private void setupWatchableResources(List<URI> uris) {
         Set<File> files = new LinkedHashSet<File>();
         for (URI uri : uris) {
-            File file = fileFromURI(uri);
-            if (file != null)
-                files.add(file);
+            if (uri.toString().equals("system:properties")) {
+                watchableResources.add(new WatchableSystemProperties());
+            } else {
+                File file = fileFromURI(uri);
+                if (file != null)
+                    files.add(file);
+            }
         }
         for (File file : files)
-            watchableFiles.add(new WatchableFile(file));
+            watchableResources.add(new WatchableFile(file));
     }
 
     synchronized void checkAndReload() {
@@ -84,7 +98,7 @@ class HotReloadLogic implements Serializable {
             return false;
 
         try {
-            for (WatchableFile resource : watchableFiles)
+            for (WatchableResource resource : watchableResources)
                 if (resource.isChanged())
                     return true;
             return false;

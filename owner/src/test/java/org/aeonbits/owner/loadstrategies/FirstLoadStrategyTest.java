@@ -8,6 +8,17 @@
 
 package org.aeonbits.owner.loadstrategies;
 
+import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
+import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
@@ -20,17 +31,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.io.IOException;
-import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-
-import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Luigi R. Viggiano
