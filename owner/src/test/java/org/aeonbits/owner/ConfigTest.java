@@ -8,6 +8,7 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.ConfigFactory.ValidationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -38,6 +39,8 @@ public class ConfigTest {
         String unspecifiedProperty();
 
         @Key("server.http.port")
+        @Description("The port to listen to")
+        @Required
         int httpPort();
 
         @Key("salutation.text")
@@ -52,8 +55,7 @@ public class ConfigTest {
 
     @Test
     public void shouldNotReturnNull() {
-        SampleConfig config = ConfigFactory.create(SampleConfig.class);
-        assertNotNull(config);
+        assertNotNull(ConfigFactory.create(SampleConfig.class));
     }
 
     @Test
@@ -72,6 +74,11 @@ public class ConfigTest {
     public void testVoidMethodWithoutValue() {
         SampleConfig cfg = ConfigFactory.create(SampleConfig.class);
         cfg.voidMethodWithoutValue();
+    }
+
+    @Test(expected = ValidationException.class)
+    public void shouldFailValidation() {
+        ConfigFactory.validate(SampleConfig.class);
     }
 
     static interface StringSubstitutionConfig extends Config {

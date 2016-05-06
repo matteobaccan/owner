@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.loaders.Loader;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
@@ -64,6 +65,68 @@ public final class ConfigFactory {
      */
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         return INSTANCE.create(clazz, imports);
+    }
+
+    /**
+     * Creates a {@link Config} instance from the specified interface
+     *
+     * @param clazz   the interface extending from {@link Config} that you want to instantiate.
+     * @param imports additional variables to be used to resolve the properties.
+     * @param <T>     type of the interface.
+     * @return an object implementing the given interface, which maps methods to property values.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Config> T validate(Class<? extends T> clazz, Map<?, ?>... imports) {
+        T config = create(clazz, imports);
+        for (Method method : clazz.getDeclaredMethods()) {
+            Object value = findValue(PropertiesMapper.key(method), imports);
+            if (value == null && PropertiesMapper.required(method)) {
+                usage(clazz.getDeclaredMethods(), imports);
+            }
+        }
+
+        return config;
+    }
+
+    private static void usage(final Method[] methods, final Map<?, ?>[] maps) {
+        StringBuilder usage = new StringBuilder("Missing keys were found:\n");
+        for (Method method : methods) {
+            usage.append(" - ").append(PropertiesMapper.key(method));
+            if(PropertiesMapper.required(method)) {
+                usage.append("*");
+            }
+            final Object description = PropertiesMapper.description(method);
+            if (description != null) {
+                usage.append("  --  ").append(description);
+            }
+            usage.append("\n");
+
+            final String defaultValue = PropertiesMapper.defaultValue(method);
+            if (defaultValue != null) {
+                usage.append("\t- Default:  ")
+                       .append(defaultValue)
+                       .append("\n");
+            }
+            Object value = findValue(PropertiesMapper.key(method), maps);
+            if (value != null) {
+                usage.append("\t- Current:  ")
+                       .append(value)
+                       .append("\n");
+            }
+        }
+        usage.append("( *  Required )");
+
+        throw new ValidationException(usage.toString());
+    }
+
+    private static Object findValue(final String key, final Map<?, ?>[] maps) {
+        for (Map<?, ?> map : maps) {
+            Object o = map.get(key);
+            if (o != null) {
+                return o;
+            }
+        }
+        return null;
     }
 
     /**
@@ -134,4 +197,10 @@ public final class ConfigFactory {
         INSTANCE.registerLoader(loader);
     }
 
+    public static class ValidationException extends RuntimeException {
+
+        public ValidationException(final String message) {
+            super(message);
+        }
+    }
 }

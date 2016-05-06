@@ -9,7 +9,9 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.DefaultValue;
+import org.aeonbits.owner.Config.Description;
 import org.aeonbits.owner.Config.Key;
+import org.aeonbits.owner.Config.Required;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -29,9 +31,19 @@ final class PropertiesMapper {
         return (key == null) ? method.getName() : key.value();
     }
 
+    static String description(Method method) {
+        Description desc = method.getAnnotation(Description.class);
+        return (desc == null) ? null : desc.value();
+    }
+
     static String defaultValue(Method method) {
         DefaultValue defaultValue = method.getAnnotation(DefaultValue.class);
         return defaultValue != null ? defaultValue.value() : null;
+    }
+
+    static boolean required(Method method) {
+        Required required = method.getAnnotation(Required.class);
+        return (required != null) && required.value();
     }
 
     static void defaults(Properties properties, Class<? extends Config> clazz) {

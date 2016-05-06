@@ -91,6 +91,27 @@ public interface Config extends Serializable {
     }
 
     /**
+     * The key used for lookup for the property.  If not present, the key will be generated based on the unqualified
+     * method name.
+     */
+    @Retention(RUNTIME)
+    @Target(METHOD)
+    @Documented
+    @interface Description {
+        String value();
+    }
+
+    /**
+     * The key is required to be present.
+     */
+    @Retention(RUNTIME)
+    @Target(METHOD)
+    @Documented
+    @interface Required {
+        boolean value() default true;
+    }
+
+    /**
      * Specifies the policy type to use to load the {@link org.aeonbits.owner.Config.Sources} files for properties.
      *
      * @since 1.0.2
