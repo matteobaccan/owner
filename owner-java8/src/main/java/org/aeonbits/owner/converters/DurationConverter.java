@@ -1,6 +1,7 @@
 package org.aeonbits.owner.converters;
 
 import org.aeonbits.owner.Converter;
+import org.aeonbits.owner.util.converters.ConverterUtil;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -64,16 +65,10 @@ public class DurationConverter implements Converter<Duration> {
      * @throws IllegalArgumentException if input is invalid
      */
     private static Duration parseDuration(String input) {
-        // ATTN: String.trim() may not trim all UTF-8 whitespace characters properly.
-        // The original implementation used its own unicodeTrim() method that I decided not to copy over until
-        // the need arises.
-        // For more information, see:
-        // https://github.com/typesafehub/config/blob/v1.3.0/config/src/main/java/com/typesafe/config/impl/ConfigImplUtil.java#L118-L164
-
-        String s = input.trim();
-        String originalUnitString = getUnits(s);
+        String[] parts = ConverterUtil.splitNumericAndChar(input);
+        String numberString = parts[0];
+        String originalUnitString = parts[1];
         String unitString = originalUnitString;
-        String numberString = s.substring(0, s.length() - unitString.length()).trim();
 
         if (numberString.length() == 0) {
             throw new IllegalArgumentException(String.format("No number in duration value '%s'", input));
