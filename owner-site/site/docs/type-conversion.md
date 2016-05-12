@@ -295,8 +295,7 @@ works with a single element.
 
 To see the complete test cases supported by owner see [ConverterClassTest] on GitHub.
 
-  [ConverterClassTest]: https://github.com/lviggiano/owner/blob/master/src/test/java/org/aeonbits/owner/converterclass/ConverterClassTest.java
-
+  [ConverterClassTest]: https://github.com/lviggiano/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/ConverterClassTest.java
 
 All the types supported by OWNER
 --------------------------------
@@ -331,3 +330,135 @@ See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you wan
   [propedit]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditor.html
   [propeditsupport]:http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorSupport.html
   [PropertyEditorTest]:https://github.com/lviggiano/owner/blob/master/src/test/java/org/aeonbits/owner/editor/PropertyEditorTest.java
+
+Converter classes shipped with OWNER
+------------------------------------
+
+Since specifying duration and byte size values in configuration files is very common, 
+OWNER ships with converter classes for these as well as some classes for the types themselves. 
+The code relies on Java 8 features and therefore, these classes are a part of the `owner-java8` 
+module. Also, you have to specify the `@ConverterClass` annotation explicitly for these converters, 
+they are not applied automatically as is the case for the primitive (and more) types as described 
+above.
+
+### Duration
+
+For duration, the `DurationConverter` class is provided which converts configuration strings to [`java.time.Duration`][duration].
+
+  [duration]: https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html
+
+Example:
+
+```java
+public class DurationConfig extends Config {
+
+  @ConverterClass(DurationConverter.class)
+  @DefaultValue("10 ms")
+  Duration getTenMilliseconds();
+
+  
+  @ConverterClass(DurationConverter.class)
+  @DefaultValue("10d")
+  Duration getTenDays();
+
+  // The DurationConverter class also supports
+  // ISO 8601 time format as described in the
+  // JavaDoc for java.time.Duration.
+  @ConverterClass(DurationConverter.class)
+  @DefaultValue("PT15M")
+  Duration iso8601FifteenMinutes();
+}
+```
+
+The suffixes supported by DurationConverter are:
+
+- `ns`, `nano`, `nanos`, `nanosecond`, `nanoseconds`
+- `us`, `µs`, `micro`, `micros`, `microsecond`, `microseconds`
+- `ms`, `milli`, `millis`, `millisecond`, `milliseconds`
+- `s`, `second`, `seconds`
+- `m`, `minute`, `minutes`
+- `h`, `hour`, `hours`
+- `d`, `day`, `days`
+
+### Byte Size
+
+The Java API does not provide any classes to represent data sizes. Therefore, 
+OWNER provides this functionality with a set of classes in the 
+`org.aeonbits.owner.util.bytesize` package: `ByteSize` and `ByteSizeUnit`.
+
+The usage of these classes is best explained with an example:
+
+```java
+import org.aeonbits.owner.util.bytesize.*;
+
+[...]
+
+ByteSize oneByte = new ByteSize(1, ByteSizeUnit.BYTES);
+ByteSize oneMegaByte = new ByteSize(1, ByteSizeUnit.MEGABYTES);
+
+// Units can be converted
+ByteSize mbAsGb = oneMegaByte.convertTo(ByteSizeUnit.GIGABYTES);
+
+// Both IEC and SI units are supported
+ByteSize mbAsGiB = oneMegaByte.convertTo(ByteSizeUnit.GIBIBYTES);
+
+// Get the number of bytes a ByteSize represents as a long
+long oneMegaByteAsLong = oneMegaByte.getBytesAsLong();
+```
+
+For converting configuration strings into the `ByteSize` type, the 
+`ByteSizeConverter` class is provided.
+
+Example:
+
+```java
+public interface ByteSizeConfig extends Config {
+  @ConverterClass(ByteSizeConverter.class)
+  @DefaultValue("10 byte")
+  ByteSize singular10byteWithSpace();
+
+  @ConverterClass(ByteSizeConverter.class)
+  @DefaultValue("10byte")
+  ByteSize singular10byteWithoutSpace();
+
+  @ConverterClass(ByteSizeConverter.class)
+  @DefaultValue("10 bytes")
+  ByteSize plural10byte();
+
+  @ConverterClass(ByteSizeConverter.class)
+  @DefaultValue("10m")
+  ByteSize short10mebibytes();
+
+  @ConverterClass(ByteSizeConverter.class)
+  @DefaultValue("10mi")
+  ByteSize medium10mebibytes();
+
+  @ConverterClass(ByteSizeConverter.class)
+  @DefaultValue("10mib")
+  ByteSize long10mebibytes();
+
+  @ConverterClass(ByteSizeConverter.class)
+  @DefaultValue("10 megabytes")
+  ByteSize full10megabytes();
+}
+```
+
+The suffixes supported by ByteSizeConverter are:
+
+- `byte`, `bytes`, `b`
+- `kilobyte`, `kilobytes`, `k`, `ki`, `kib`
+- `kibibyte`, `kibibytes`, `kb`
+- `megabyte`, `megabytes`, `m`, `mi`, `mib`
+- `mebibyte`, `mebibytes`, `mb`
+- `gigabyte`, `gigabytes`, `g`, `gi`, `gib`
+- `gibibyte`, `gibibytes`, `gb`
+- `terabyte`, `terabytes`, `t`, `ti`, `tib`
+- `tebibyte`, `tebibytes`, `tb`
+- `petabyte`, `petabytes`, `p`, `pi`, `pib`
+- `pebibyte`, `pebibytes`, `pb`
+- `exabyte`, `exabytes`, `e`, `ei`, `eib`
+- `exbibyte`, `exbibytes`, `eb`
+- `zettabyte`, `zettabytes`, `z`, `zi`, `zib`
+- `zebibyte`, `zebibytes`, `zb`
+- `yottabyte`, `yottabytes`, `y`, `yi`, `yib`
+- `yobibyte`, `yobibytes`, `yb`
