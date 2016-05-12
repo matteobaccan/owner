@@ -1,4 +1,4 @@
-package org.aeonbits.owner.typeconversion;
+package org.aeonbits.owner.converters;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
-public class DurationTypesTest {
+public class DurationConverterTest {
 
     public interface DurationTypesConfig extends Config {
         // empty suffix
