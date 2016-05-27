@@ -8,9 +8,18 @@
 
 package org.aeonbits.owner.loaders;
 
+import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.List;
+
 import org.aeonbits.owner.Config;
+import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.Factory;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.test.TestingServer;
@@ -18,15 +27,8 @@ import org.apache.curator.utils.ZKPaths;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import sun.net.www.protocol.zookeeper.NoRetryPolicy;
-
-import java.io.IOException;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.aeonbits.owner.Config.Sources;
-import static org.junit.Assert.*;
 
 /**
  * @author Koray Sariteke
@@ -34,7 +36,6 @@ import static org.junit.Assert.*;
  */
 public class ZooKeeperLoaderTest {
     private TestingServer server;
-    private Factory configFactory;
 
     @Sources("zookeeper://127.0.0.1:65403/test")
     public static interface ZooKeeperConfig extends Config {
@@ -52,7 +53,7 @@ public class ZooKeeperLoaderTest {
 
     @Test
     public void shouldLoadPropertiesFromZookeeperSource() throws Exception {
-        ZooKeeperConfig sample = configFactory.create(ZooKeeperConfig.class);
+        ZooKeeperConfig sample = ConfigFactory.create(ZooKeeperConfig.class);
         assertEquals("welcome", sample.thanks());
         assertTrue(sample.greetings().containsAll(asList("hi", "bonjour", "hiya", "hi!")));
         assertNull(sample.notAvailable());
@@ -60,7 +61,7 @@ public class ZooKeeperLoaderTest {
 
     @Test
     public void whenPathIsWrongEverythingIsNull() throws Exception {
-        ZooKeeperWrongPathConfig config = configFactory.create(ZooKeeperWrongPathConfig.class);
+        ZooKeeperWrongPathConfig config = ConfigFactory.create(ZooKeeperWrongPathConfig.class);
         assertNull(config.notAvailable());
         assertNull(config.greetings());
         assertNull(config.thanks());
@@ -84,8 +85,6 @@ public class ZooKeeperLoaderTest {
             client.close();
         }
 
-        configFactory = ConfigFactory.newInstance();
-        configFactory.registerLoader(new ZooKeeperLoader());
     }
 
     private void setDataInZookeperServer(CuratorFramework client,

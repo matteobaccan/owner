@@ -8,23 +8,42 @@
 
 package org.aeonbits.owner.loaders;
 
-import sun.net.www.protocol.zookeeper.Handler;
-import sun.net.www.protocol.zookeeper.ZooKeeperConnection;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 import java.util.Properties;
+
+import org.kohsuke.MetaInfServices;
+
+import sun.net.www.protocol.zookeeper.ZooKeeperURLConnection.ZooKeeperStream;
+import sun.net.www.protocol.zookeeper.ZooKeeperURLStreamHandler;
 
 /**
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
  */
+@SuppressWarnings("serial")
+@MetaInfServices(Loader.class)
 public class ZooKeeperLoader implements Loader {
 
+	static {
+		// Registering ZooKeeperURLHandler
+		URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+			
+			public URLStreamHandler createURLStreamHandler(String protocol) {
+		        if ( protocol.equalsIgnoreCase(ZooKeeperURLStreamHandler.PROTOCOL) ) 
+		            return new ZooKeeperURLStreamHandler(); 
+		        else 
+		            return null; 
+			}
+		});
+	}
 
     public boolean accept(URI uri) {
-        return uri.getScheme().equals(Handler.PROTOCOL);
+        return uri.getScheme().equals(ZooKeeperURLStreamHandler.PROTOCOL);
     }
 
     public void load(Properties result, URI uri) throws IOException {
@@ -37,8 +56,10 @@ public class ZooKeeperLoader implements Loader {
     }
 
     void load(Properties result, InputStream input) throws IOException {
-        ZooKeeperConnection.ZooKeeperStream zkStream = (ZooKeeperConnection.ZooKeeperStream) input;
-        result.putAll(zkStream.pairs());
+    	if (input instanceof ZooKeeperStream) {
+            ZooKeeperStream zkStream = (ZooKeeperStream) input;
+            result.putAll(zkStream.pairs());
+		}
     }
 
     public String defaultSpecFor(String urlPrefix) {

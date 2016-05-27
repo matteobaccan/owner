@@ -17,11 +17,11 @@ import java.net.URLStreamHandler;
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
  */
-public class Handler extends URLStreamHandler {
+public class ZooKeeperURLStreamHandler extends URLStreamHandler {
     public static final String PROTOCOL = "zookeeper";
 
     @Override
     protected URLConnection openConnection(URL url) throws IOException {
-        return new ZooKeeperConnection(url);
+        return new ZooKeeperURLConnection(url);
     }
 }

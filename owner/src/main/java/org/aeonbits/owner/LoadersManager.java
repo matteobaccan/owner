@@ -14,9 +14,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.aeonbits.owner.loaders.Loader;
@@ -32,15 +34,25 @@ import org.aeonbits.owner.loaders.XMLLoader;
  * @author Luigi R. Viggiano
  * @since 1.0.5
  */
+@SuppressWarnings("serial")
 class LoadersManager implements Serializable {
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final transient ServiceLoader<Loader> serviceLoader = ServiceLoader.load(Loader.class);
     private final List<Loader> loaders = new LinkedList<Loader>();
 
     LoadersManager() {
-        registerLoader(new PropertiesLoader());
+    	// Loading defaults loaders
+		registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
         registerLoader(new SystemLoader());
+    	
+        //Loading extra Loaders
+        Iterator<Loader> loaderIterator = serviceLoader.iterator();    	
+    	while (loaderIterator.hasNext()) {
+    		Loader l = (Loader) loaderIterator.next();
+			registerLoader(l);
+		}
     }
 
     void load(Properties result, URI uri) throws IOException {

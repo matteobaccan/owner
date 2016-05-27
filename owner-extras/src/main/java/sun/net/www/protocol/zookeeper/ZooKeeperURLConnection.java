@@ -28,7 +28,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
  */
-public class ZooKeeperConnection extends URLConnection {
+public class ZooKeeperURLConnection extends URLConnection {
     private final String basePath;
     private final CuratorFramework client;
 
@@ -39,7 +39,7 @@ public class ZooKeeperConnection extends URLConnection {
      * @param url the specified URL.
      * @throws java.net.MalformedURLException if the URL is malformed.j
      */
-    protected ZooKeeperConnection(URL url) throws MalformedURLException {
+    protected ZooKeeperURLConnection(URL url) throws MalformedURLException {
         super(url);
         String host = url.getHost();
         int port = url.getPort();
