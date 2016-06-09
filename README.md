@@ -60,7 +60,7 @@ public class MyApp {
 }
 ```
 
-But this is just the tip of the iceberg.
+But this is just the top of the iceberg.
 
 Continue reading here: [Basic usage](http://owner.aeonbits.org/docs/usage/).
 
