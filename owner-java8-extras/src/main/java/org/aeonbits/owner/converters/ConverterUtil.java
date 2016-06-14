@@ -1,11 +1,19 @@
-package org.aeonbits.owner.util.converters;
+/*
+ * Copyright (c) 2012-2016, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
+package org.aeonbits.owner.converters;
 
 /**
  * A utility class for converters.
  *
  * @author Stefan Freyr Stefansson
  */
-public class ConverterUtil {
+class ConverterUtil {
     /**
      * Splits a string into a numeric part and a character part. The input string should conform to the format
      * <code>[numeric_part][char_part]</code> with an optional whitespace between the two parts.
@@ -20,7 +28,7 @@ public class ConverterUtil {
      *
      * @return an array of two strings.
      */
-    public static String[] splitNumericAndChar(String input){
+    static String[] splitNumericAndChar(String input){
         // ATTN: String.trim() may not trim all UTF-8 whitespace characters properly.
         // The original implementation used its own unicodeTrim() method that I decided not to include until the need
         // arises. For more information, see:

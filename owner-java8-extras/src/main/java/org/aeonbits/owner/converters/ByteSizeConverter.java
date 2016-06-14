@@ -1,9 +1,16 @@
+/*
+ * Copyright (c) 2012-2016, Luigi R. Viggiano
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+
 package org.aeonbits.owner.converters;
 
 import org.aeonbits.owner.util.bytesize.ByteSize;
 import org.aeonbits.owner.util.bytesize.ByteSizeUnit;
 import org.aeonbits.owner.Converter;
-import org.aeonbits.owner.util.converters.ConverterUtil;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;

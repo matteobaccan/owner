@@ -334,16 +334,16 @@ See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you wan
 Converter classes shipped with OWNER
 ------------------------------------
 
-Since specifying duration and byte size values in configuration files is very common, 
+Since specifying duration and byte size values in configuration files is very common,
 OWNER ships with converter classes for these as well as some classes for the types themselves. 
-The code relies on Java 8 features and therefore, these classes are a part of the `owner-java8` 
-module. Also, you have to specify the `@ConverterClass` annotation explicitly for these converters, 
-they are not applied automatically as is the case for the primitive (and more) types as described 
-above.
+The code relies on Java 8 features and therefore, these classes are a part of the `owner-java8-extras`
+module. Also, you have to specify the `@ConverterClass` annotation explicitly for these converters, they are not
+applied automatically as is the case for the primitive (and more) types as described above.
 
 ### Duration
 
-For duration, the `DurationConverter` class is provided which converts configuration strings to [`java.time.Duration`][duration].
+For duration, the `DurationConverter` class is provided which converts configuration strings to
+[`java.time.Duration`][duration].
 
   [duration]: https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html
 

@@ -138,6 +138,7 @@
             </activation>
             <modules>
                 <module>owner-java8</module>
+                <module>owner-java8-extras</module>
             </modules>
         </profile>
         <profile>
