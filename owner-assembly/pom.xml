@@ -42,6 +42,8 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <finalName>owner-${project.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <outputDirectory>../target</outputDirectory>
                     <descriptors>
                         <descriptor>src/main/assemblies/bin.xml</descriptor>
                     </descriptors>
