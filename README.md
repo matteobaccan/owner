@@ -75,7 +75,7 @@ Make sure to have a look at the documentation on [project website][website]
 to learn how flexible and powerful OWNER is, and why you may need it!
 
 Chinese documentation is provided by [Yunfeng Cheng](https://github.com/cyfonly) via a GitHub independent project at
-[this address](chinese-docs)
+[this address][chinese-docs].
 
   [website]: http://owner.aeonbits.org
   [chinese-docs]: https://github.com/cyfonly/owner-doc
