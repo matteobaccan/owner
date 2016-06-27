@@ -10,11 +10,13 @@ jdk:
 
 os:
   - linux
-  - osx
   - windows
+# Looks there is some problem with Java and OSX on Travis.
+# See: https://github.com/travis-ci/travis-ci/issues/3477
+#  - osx
 
-  # Fix OpenJDK builds
-  # https://github.com/travis-ci/travis-ci/issues/5227
+# Fix OpenJDK builds
+# See: https://github.com/travis-ci/travis-ci/issues/5227
 sudo: false
 
 install: mvn install -DskipTests=true -B
