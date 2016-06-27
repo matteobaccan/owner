@@ -8,6 +8,11 @@ jdk:
   - openjdk6
 #  - openjdk5
 
+os:
+  - linux
+  - osx
+  - windows
+
   # Fix OpenJDK builds
   # https://github.com/travis-ci/travis-ci/issues/5227
 sudo: false
