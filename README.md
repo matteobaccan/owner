@@ -10,10 +10,16 @@ OWNER, an API to ease Java property files usage.
 Donate ([why?](https://github.com/lviggiano/owner/wiki/Why-to-donate%3F))
 ------------------------------------------------------------------------
 
-[![Donate with PayPal](https://www.paypalobjects.com/webstatic/en_US/i/btn/png/gold-rect-paypal-26px.png)](https://www.paypal.me/lviggiano)
+<a href="https://flattr.com/submit/auto?fid=pqvxnq&url=https%3A%2F%2Fgithub.com%2Flviggiano%2Fowner" target="_blank"><img src="//button.flattr.com/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0"></a>
+
+[![Flattr this](https://button.flattr.com/flattr-badge-large.png)](https://flattr.com/submit/auto?fid=pqvxnq&url=https%3A%2F%2Fgithub.com%2Flviggiano%2Fowner)
 
 ![Donate bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1](http://i.imgur.com/BC7sVAG.png)  
 bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1
+
+[![Donate with PayPal](https://www.paypalobjects.com/webstatic/en_US/i/btn/png/gold-rect-paypal-26px.png)](https://www.paypal.me/lviggiano)
+
+
 
 INTRODUCTION
 ------------
