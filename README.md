@@ -12,6 +12,9 @@ Donate ([why?](https://github.com/lviggiano/owner/wiki/Why-to-donate%3F))
 
 [![Donate with PayPal](https://www.paypalobjects.com/webstatic/en_US/i/btn/png/gold-rect-paypal-26px.png)](https://www.paypal.me/lviggiano)
 
+![Donate bitcoin](http://chart.googleapis.com/chart?cht=qr&chs=150x150&choe=UTF-8&chld=H&chl=bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1)  
+bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1
+
 INTRODUCTION
 ------------
 
