@@ -46,7 +46,7 @@ public class ConverterRegistryTest {
         }
     }
 
-        interface MyConfig extends Config {
+    interface MyConfig extends Config {
         @DefaultValue(LEET_SPEEK)
         String leetSpeek();
 
