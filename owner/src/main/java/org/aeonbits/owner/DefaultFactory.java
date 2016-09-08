@@ -76,6 +76,14 @@ class DefaultFactory implements Factory {
         loadersManager.registerLoader(loader);
     }
 
+    public void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter) {
+        Converters.setTypeConverter(type, converter);
+    }
+
+    public void removeTypeConverter(Class<?> type){
+        Converters.removeTypeConverter(type);
+    }
+
     public String getProperty(String key) {
         checkKey(key);
         return props.getProperty(key);
