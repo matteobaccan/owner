@@ -68,7 +68,7 @@ public class ConverterRegistryTest {
     @Test
     public void testConverterClassAnnotationOverride(){
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
-        assertEquals("Expected a response from the annotated converter class", FOOBAR_RESPONSE, cfg.leetSpeekWithConverterClassAnnotation());
+        assertEquals("Expected a response from the annotated converter class.", FOOBAR_RESPONSE, cfg.leetSpeekWithConverterClassAnnotation());
         ConfigFactory.setTypeConverter(String.class, LeetTranslatorConverter.class);
         assertEquals("Still expecting a response from the annotated converter class", FOOBAR_RESPONSE, cfg.leetSpeekWithConverterClassAnnotation());
         ConfigFactory.removeTypeConverter(String.class);
