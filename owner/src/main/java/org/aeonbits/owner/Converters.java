@@ -17,14 +17,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
@@ -128,19 +122,17 @@ enum Converters {
             if (annotation == null) return SKIP;
 
             Class<? extends Converter> converterClass = annotation.value();
-            Converter<?> converter;
-            try {
-                converter = converterClass.newInstance();
-            } catch (InstantiationException e) {
-                throw unsupported(e, "Converter class %s can't be instantiated: %s",
-                        converterClass.getCanonicalName(), e.getMessage());
-            } catch (IllegalAccessException e) {
-                throw unsupported(e, "Converter class %s can't be accessed: %s",
-                        converterClass.getCanonicalName(), e.getMessage());
-            }
-            Object result = converter.convert(targetMethod, text);
-            if (result == null) return NULL;
-            return result;
+            return convertWithConverterClass(targetMethod, text, converterClass);
+        }
+    },
+
+    METHOD_WITH_REGISTERED_CONVERTER {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (!converterRegistry.containsKey(targetType)) return SKIP;
+
+            Class<? extends Converter> converterClass = converterRegistry.get(targetType);
+            return convertWithConverterClass(targetMethod, text, converterClass);
         }
     },
 
@@ -257,7 +249,31 @@ enum Converters {
         }
     };
 
-    abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
+    private static Object convertWithConverterClass(Method targetMethod, String text, Class<? extends Converter> converterClass) {
+        Converter<?> converter;
+        try {
+            converter = converterClass.newInstance();
+        } catch (InstantiationException e) {
+            throw unsupported(e, "Converter class %s can't be instantiated: %s",
+                    converterClass.getCanonicalName(), e.getMessage());
+        } catch (IllegalAccessException e) {
+            throw unsupported(e, "Converter class %s can't be accessed: %s",
+                    converterClass.getCanonicalName(), e.getMessage());
+        }
+        Object result = converter.convert(targetMethod, text);
+        if (result == null) return NULL;
+        return result;
+    }
+
+    private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry = new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();    abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
+
+    static void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter){
+        converterRegistry.put(type, converter);
+    }
+
+    public static void removeTypeConverter(Class<?> type) {
+        converterRegistry.remove(type);
+    }
 
     static Object convert(Method targetMethod, Class<?> targetType, String text) {
         return doConvert(targetMethod, targetType, text).getConvertedValue();
@@ -311,5 +327,4 @@ enum Converters {
     }
 
     static final String CANNOT_CONVERT_MESSAGE = "Cannot convert '%s' to %s";
-
 }
