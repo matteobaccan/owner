@@ -116,10 +116,30 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
         uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
+        for (Class<?> inter: clazz.getInterfaces()){
+            this.uris.addAll(toURIs(inter.getAnnotation(Sources.class),urlFactory));
+        }
+
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
+        if (loadPolicy==null) {
+            for (Class<?> inter : clazz.getInterfaces()) {
+                loadPolicy = inter.getAnnotation(LoadPolicy.class);
+                if (loadPolicy != null){
+                    break;
+                }
+            }
+        }
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
+        if (hotReload == null){
+            for (Class<?> inter : clazz.getInterfaces()) {
+                hotReload = inter.getAnnotation(HotReload.class);
+                if (hotReload != null){
+                    break;
+                }
+            }
+        }
         if (hotReload != null) {
             hotReloadLogic = new HotReloadLogic(hotReload, uris, this);
 
