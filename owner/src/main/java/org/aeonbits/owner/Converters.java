@@ -9,6 +9,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.ConverterClass;
+import org.aeonbits.owner.util.Reflection;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
@@ -17,14 +18,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
@@ -144,8 +138,29 @@ enum Converters {
         }
     },
 
-    PROPERTY_EDITOR {
+    CLASS_IMPLEMENTING_CONFIG_INTERFACE {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (!Reflection.getAllInterfaces(targetType).contains(Config.class)) return SKIP;
+            try {
+                Map<String, String> imports = new HashMap<String, String>();
+                String namespace = ConfigFactory.getProperty("nested.config.prefix");
+                if (namespace == null) {
+                    namespace = "ns";
+                }
+                imports.put(namespace, text);
+                Object result = ConfigFactory.create((Class<? extends Config>) targetType, imports);
+                if (result == null) {
+                    return null;
+                }
+                return result;
+            } catch (Exception e) {
+                return SKIP;
+            }
+        }
+    },
 
+    PROPERTY_EDITOR {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (!canUsePropertyEditors())
@@ -180,7 +195,7 @@ enum Converters {
     PRIMITIVE {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (! targetType.isPrimitive()) return SKIP;
+            if (!targetType.isPrimitive()) return SKIP;
             if (targetType == Byte.TYPE) return Byte.parseByte(text);
             if (targetType == Short.TYPE) return Short.parseShort(text);
             if (targetType == Integer.TYPE) return Integer.parseInt(text);

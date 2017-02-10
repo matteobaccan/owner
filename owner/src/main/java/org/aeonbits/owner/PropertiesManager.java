@@ -15,6 +15,7 @@ import org.aeonbits.owner.event.RollbackException;
 import org.aeonbits.owner.event.RollbackOperationException;
 import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
 import org.aeonbits.owner.event.TransactionalReloadListener;
+import org.aeonbits.owner.util.Reflection;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -25,6 +26,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -114,7 +116,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.loaders = loaders;
         this.imports = imports;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
-        uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
+        uris = toURIs(getAnnotationFromSuperInterfaces(clazz, Sources.class), urlFactory);
 
         for (Class<?> inter: clazz.getInterfaces()){
             this.uris.addAll(toURIs(inter.getAnnotation(Sources.class),urlFactory));
@@ -194,6 +196,20 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             return decryptor.decrypt( value );
         }
         return value;
+    }
+
+    private <T extends Annotation> T getAnnotationFromSuperInterfaces(Class<? extends Config> clazz, Class<T> annotationClass) {
+        T annotation = (T) clazz.getAnnotation(annotationClass);
+        if (annotation == null) {
+            List<Class> allInterfaces = Reflection.getAllInterfaces(clazz);
+            for (Class anInterface : allInterfaces) {
+                if (anInterface.getAnnotation(annotationClass) != null) {
+                    annotation = (T) anInterface.getAnnotation(annotationClass);
+                    break;
+                }
+            }
+        }
+        return annotation;
     }
 
     private List<URI> toURIs(Sources sources, ConfigURIFactory uriFactory) {
