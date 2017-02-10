@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.jar.JarOutputStream;
+import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 
 import static java.io.File.createTempFile;
@@ -94,9 +95,9 @@ abstract class Util {
         if (text.equals("~"))
             return system.getProperty("user.home");
         if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0)
-            return text.replaceFirst("~/", fixBackslashForRegex(system.getProperty("user.home")) + "/");
+            return text.replaceFirst("~/", Matcher.quoteReplacement(system.getProperty("user.home")) + "/");
         if (text.indexOf("~\\") == 0 || text.indexOf("file:~\\") == 0 || text.indexOf("jar:file:~\\") == 0)
-            return text.replaceFirst("~\\\\", fixBackslashForRegex(system.getProperty("user.home")) + "\\\\");
+            return text.replaceFirst("~\\\\", Matcher.quoteReplacement(system.getProperty("user.home")) + "\\\\");
         return text;
     }
 

@@ -77,7 +77,7 @@ class StrSubstitutor implements Serializable {
             String var = m.group(1);
             String value = values.getProperty(var);
             String replacement = (value != null) ? replace(value) : "";
-            m.appendReplacement(sb, fixBackslashForRegex(replacement));
+            m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         m.appendTail(sb);
         return sb.toString();
