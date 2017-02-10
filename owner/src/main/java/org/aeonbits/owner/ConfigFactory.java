@@ -63,6 +63,13 @@ public final class ConfigFactory {
      * @return an object implementing the given interface, which maps methods to property values.
      */
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
+        for( Map<?, ?> map : imports ){
+            for( Object key : map.keySet() ){
+                if( key == null || map.get(key) == null){
+                    throw new IllegalArgumentException(String.format("An import contains a null value for key: '%s'", key));
+                }
+            }
+        }
         return INSTANCE.create(clazz, imports);
     }
 
