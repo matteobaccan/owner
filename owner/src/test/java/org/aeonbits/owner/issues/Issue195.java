@@ -6,24 +6,30 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class Issue195 {
 
+    private static final String KEY = "some.key";
+
     public interface MyConfig extends Config {
-        @Key("key.with.default")
+        @Key(KEY)
         @DefaultValue("1")
-        Integer getValueWithDefault();
+        Integer getSomeValue();
     }
 
     @Test
-    public void testConfigImportWithNonStringValue() throws Exception {
+    public void testConfigImportMapWithNonStringValue() throws Exception {
         HashMap<String, Integer> propsMapWithIntegerValue = new HashMap<String,Integer>();
-        propsMapWithIntegerValue.put("key.with.default", new Integer("42"));
+        propsMapWithIntegerValue.put(KEY, new Integer("42"));
 
-        MyConfig config = ConfigFactory.create(MyConfig.class, propsMapWithIntegerValue);
-
-        // Actual value here will be null
-        assertEquals(new Integer(42), config.getValueWithDefault());
+        try {
+            ConfigFactory.create(MyConfig.class, propsMapWithIntegerValue);
+            fail("A non-string value should result in an exception");
+        }
+        catch(IllegalArgumentException e){
+            assertTrue(e.getMessage().contains(KEY));
+        }
     }
 }
