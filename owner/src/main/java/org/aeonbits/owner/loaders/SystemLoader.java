@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
+@SuppressWarnings("serial")
 public class SystemLoader implements Loader {
 
     private static final String SYSTEM_PROPERTIES_URI = "system:properties";

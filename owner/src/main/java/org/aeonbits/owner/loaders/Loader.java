@@ -13,12 +13,15 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Properties;
 
+import org.kohsuke.MetaInfServices;
+
 /**
  * Defines the interface of a generic Properties loader.
  *
  * @author Luigi R. Viggiano
  * @since 1.0.5
  */
+@MetaInfServices
 public interface Loader extends Serializable {
 
     /**
