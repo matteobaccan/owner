@@ -12,8 +12,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
@@ -41,6 +43,7 @@ import static org.aeonbits.owner.util.Reflection.isDefault;
 class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
     private static final long serialVersionUID = 5432212884255718342L;
+    private static final Pattern formatPattern = Pattern.compile(",\\s*");
     private transient List<DelegateMethodHandle> delegates;
     private final Object jmxSupport;
     private final StrSubstitutor substitutor;
@@ -110,7 +113,45 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private String format(Method method, String format, Object... args) {
         if (isFeatureDisabled(method, PARAMETER_FORMATTING))
             return format;
-        return String.format(format, args);
+
+        int parametersLength = args.length;
+        if (parametersLength == 0) {
+            return format;
+        }
+
+        Template template = method.getAnnotation(Template.class);
+        // TODO Java 8+ API. How can we use parameter names only if language level allows?
+        Parameter[] parameters = method.getParameters();
+        String[] names = new String[parametersLength];
+        if (template == null) {
+            for (int i = 0; i < parametersLength; i++) {
+                Parameter parameter = parameters[i];
+                String name;
+                if (parameter.isNamePresent()) {
+                    name = parameter.getName();
+                } else {
+                    name = Integer.toString(i + 1);
+                }
+                names[i] = name;
+            }
+        } else {
+            String value = template.value();
+            String[] tokens = formatPattern.split(value);
+            int tokensLength = tokens.length;
+            if (tokensLength != names.length) {
+                throw new IllegalArgumentException(
+                        // TODO Can you improve this message?
+                        "Token count does not match actual parameter list");
+            }
+            System.arraycopy(tokens, 0, names, 0, tokensLength);
+        }
+
+        for (int i = 0; i < parametersLength; i++) {
+            String name = '{' + names[i].toUpperCase() + '}';
+            // TODO Should we use owner's conversion mechanism in place of toString()?
+            format = format.replace(name, args[i].toString());
+        }
+        return format;
     }
 
     private String expandVariables(Method method, String value) {
