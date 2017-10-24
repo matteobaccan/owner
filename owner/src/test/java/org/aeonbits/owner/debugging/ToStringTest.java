@@ -13,6 +13,7 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Luigi R. Viggiano
@@ -36,6 +37,11 @@ public class ToStringTest {
     @Test
     public void toStringTest() {
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
-        assertEquals("{default.name=untitled, max.folders=99, max.threads=25}", cfg.toString());
+        String toString = cfg.toString();
+        assertTrue(toString.startsWith("{"));
+        assertTrue(toString.endsWith("}"));
+        assertTrue(toString.contains("default.name=untitled"));
+        assertTrue(toString.contains("max.folders=99"));
+        assertTrue(toString.contains("max.threads=25"));
     }
 }
