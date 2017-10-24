@@ -1,16 +1,12 @@
 package org.aeonbits.owner.crypto;
 
-import java.io.UnsupportedEncodingException;
-import java.security.Key;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import org.aeonbits.owner.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-
 import javax.xml.bind.DatatypeConverter;
-
+import java.io.UnsupportedEncodingException;
+import java.security.Key;
 
 public class StandardEncryptor extends AbstractEncryptor {
     private final String algorithm;
@@ -52,7 +48,7 @@ public class StandardEncryptor extends AbstractEncryptor {
             Key key = generateKey();
             Cipher c = Cipher.getInstance( this.algorithm );
             c.init(Cipher.DECRYPT_MODE, key);
-            byte[] decodedValue = DatatypeConverter.parseBase64Binary( encryptedData );
+            byte[] decodedValue = Base64.decode(encryptedData);
             byte[] decValue = c.doFinal(decodedValue);
             String decryptedValue = new String(decValue, this.encoding );
             return decryptedValue;
@@ -72,4 +68,5 @@ public class StandardEncryptor extends AbstractEncryptor {
     public static final StandardEncryptor newInstance( String algorithm, String secretKey, String encoding, int secretKeySize ) {
         return new StandardEncryptor( algorithm, secretKey, encoding, secretKeySize );
     }
+
 }

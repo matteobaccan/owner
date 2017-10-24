@@ -20,11 +20,14 @@ public final class Reflection {
     }
 
     public static boolean isClassAvailable(String className) {
+        return forName(className) != null;
+    }
+
+    public static Class<?> forName(String className) {
         try {
-            Class.forName(className);
-            return true;
+            return Class.forName(className);
         } catch (ClassNotFoundException e) {
-            return false;
+            return null;
         }
     }
 
