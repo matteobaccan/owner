@@ -1,12 +1,25 @@
+# Fix OpenJDK builds
+# See: https://github.com/travis-ci/travis-ci/issues/5227
+# sudo: false
+
+sudo: required
+dist: precise
+group: edge
+
 language: java
 jdk:
+  - oraclejdk9
   - oraclejdk8
   - oraclejdk7
-#  - oraclejdk6
+  - oraclejdk6
+#  - openjdk7
+#  - openjdk6
 #  - oraclejdk5
-  - openjdk7
-  - openjdk6
 #  - openjdk5
+
+matrix:
+  allow_failures:
+    - jdk: oraclejdk9
 
 os:
   - linux
@@ -15,9 +28,6 @@ os:
 # See: https://github.com/travis-ci/travis-ci/issues/3477
 #  - osx
 
-# Fix OpenJDK builds
-# See: https://github.com/travis-ci/travis-ci/issues/5227
-sudo: false
 
 install: mvn install -DskipTests=true -B
 script: mvn test -B
