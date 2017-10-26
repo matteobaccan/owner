@@ -6,7 +6,8 @@
   ~ This software is distributable under the BSD license.
   ~ See the terms of the BSD license in the documentation provided with this software.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.aeonbits.owner</groupId>
@@ -101,6 +102,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <compiler-release>6</compiler-release>
     </properties>
 
     <profiles>
@@ -131,6 +133,25 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>java9</id>
+            <activation>
+                <jdk>[1.9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <release>${compiler-release}</release>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>java8</id>
             <activation>
@@ -189,10 +210,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.2</version>
+                    <version>3.6.2</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>${compiler-release}</source>
+                        <target>${compiler-release}</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -355,7 +376,7 @@
                         <format>html</format>
                     </formats>
                     <aggregate>true</aggregate>
-                    <check />
+                    <check/>
                 </configuration>
             </plugin>
         </plugins>
