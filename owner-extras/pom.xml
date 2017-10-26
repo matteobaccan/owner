@@ -6,7 +6,8 @@
   ~ This software is distributable under the BSD license.
   ~ See the terms of the BSD license in the documentation provided with this software.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -48,9 +49,10 @@
                                 <phase>compile</phase>
                                 <configuration>
                                     <target>
-                                        <mkdir dir="${java9.build.outputDirectory}" />
-                                        <javac srcdir="${java9.sourceDirectory}" destdir="${java9.build.outputDirectory}"
-                                               classpath="${project.build.outputDirectory}" includeantruntime="false" />
+                                        <mkdir dir="${java9.build.outputDirectory}"/>
+                                        <javac srcdir="${java9.sourceDirectory}"
+                                               destdir="${java9.build.outputDirectory}"
+                                               classpath="${project.build.outputDirectory}" includeantruntime="false"/>
                                     </target>
                                 </configuration>
                                 <goals>
@@ -70,7 +72,8 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
+                                    <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9
+                                    </outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>${java9.build.outputDirectory}</directory>
