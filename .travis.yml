@@ -34,3 +34,8 @@ script: mvn test -B
 
 after_success:
   - mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:cobertura
+
+addons:
+  apt:
+    packages:
+      - oracle-java9-installer
