@@ -2,7 +2,7 @@
 # See: https://github.com/travis-ci/travis-ci/issues/5227
 # sudo: false
 
-sudo: false
+sudo: required
 dist: trusty
 group: edge
 
@@ -26,7 +26,7 @@ os:
   - windows
 # Looks there is some problem with Java and OSX on Travis.
 # See: https://github.com/travis-ci/travis-ci/issues/3477
-  - osx
+#  - osx
 
 
 install: mvn install -DskipTests=true -B
