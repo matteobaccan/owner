@@ -18,21 +18,18 @@
     <artifactId>owner-examples</artifactId>
     <name>OWNER :: Examples</name>
     <packaging>pom</packaging>
+
     <modules>
         <module>owner-examples-hotreload</module>
         <module>owner-examples-common</module>
     </modules>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.6.0</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
-
 </project>
