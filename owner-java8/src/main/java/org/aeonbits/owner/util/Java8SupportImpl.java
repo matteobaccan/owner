@@ -26,6 +26,7 @@ class Java8SupportImpl implements Reflection.Java8Support {
     public Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
         final Class<?> declaringClass = method.getDeclaringClass();
 
+        // TODO: Fix for Java9 https://github.com/netflix/spectator/issues/425
         return Lookup.in(declaringClass)
                 .unreflectSpecial(method, declaringClass)
                 .bindTo(proxy)
