@@ -15,13 +15,13 @@ import org.aeonbits.owner.Config;
 public interface ConfigWithJava8Features extends Config {
 
     @DefaultValue("100")
-    public int oneHundred();
+    int oneHundred();
 
-    default public Integer sum(Integer a, Integer b) {
+    default Integer sum(Integer a, Integer b) {
         return Integer.sum(a, b);
     }
 
-    public static int min(int a, int b) {
+    static int min(int a, int b) {
         return Integer.min(a, b);
     }
 }

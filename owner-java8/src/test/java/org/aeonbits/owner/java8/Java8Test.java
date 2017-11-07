@@ -11,6 +11,7 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import static java.lang.Integer.valueOf;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -27,7 +28,7 @@ public class Java8Test {
 
     @Test
     public void defaultMethodsShouldWork() {
-        assertEquals(new Integer(8), cfg.sum(3, 5));
+        assertEquals(valueOf(8), cfg.sum(3, 5));
     }
 
 
