@@ -11,6 +11,8 @@ package org.aeonbits.owner.loaders;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Factory;
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.RetrySleeper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.test.TestingServer;
@@ -18,7 +20,6 @@ import org.apache.curator.utils.ZKPaths;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import sun.net.www.protocol.zookeeper.NoRetryPolicy;
 
 import java.io.IOException;
 import java.util.List;
@@ -73,7 +74,11 @@ public class ZooKeeperLoaderTest {
 
         String connectString = server.getConnectString();
 
-        CuratorFramework client = CuratorFrameworkFactory.newClient(connectString, 50, 50, new NoRetryPolicy());
+        CuratorFramework client = CuratorFrameworkFactory.newClient(connectString, 50, 50, new RetryPolicy() {
+            public boolean allowRetry(int retryCount, long elapsedTimeMs, RetrySleeper sleeper) {
+                return false;
+            }
+        });
         try {
             client.start();
             client.blockUntilConnected(30, SECONDS);

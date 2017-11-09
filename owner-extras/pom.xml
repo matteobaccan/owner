@@ -21,79 +21,6 @@
     <description>Extras for OWNER library</description>
     <packaging>jar</packaging>
 
-    <profiles>
-        <profile>
-            <id>java9</id>
-            <activation>
-                <jdk>[1.9,)</jdk>
-            </activation>
-            <properties>
-                <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
-                <java9.build.outputDirectory>${project.build.directory}/classes-java9</java9.build.outputDirectory>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>compile-java9</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>compile</goal>
-                                </goals>
-                                <configuration>
-                                    <release>9</release>
-                                    <compileSourceRoots>
-                                        <compileSourceRoot>${java9.sourceDirectory}</compileSourceRoot>
-                                    </compileSourceRoots>
-                                    <outputDirectory>${java9.build.outputDirectory}</outputDirectory>
-                                    <compilePath>${project.build.outputDirectory}</compilePath>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-resources</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>${java9.build.outputDirectory}</directory>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <configuration>
-                            <archive>
-                                <manifestEntries>
-                                    <Multi-Release>true</Multi-Release>
-                                </manifestEntries>
-                            </archive>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <additionalClasspathElements>${java9.build.outputDirectory}</additionalClasspathElements>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <dependencies>
         <dependency>
             <groupId>org.aeonbits.owner</groupId>
@@ -139,19 +66,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
             </plugin>
-                    <!--
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                       - This is a hack to make the project work on IntelliJ
-                       - The module language level is set to 9 but the "release" option
-                       - overrides the bytecode to java 6
-                    <release>${compiler-release}</release>
-                    <source>9</source>
-                    <target>9</target>
-                </configuration>
-            </plugin>
-                       -->
         </plugins>
     </build>
 </project>
