@@ -19,7 +19,7 @@
     <fileSets>
         <fileSet>
             <directory>${project.parent.basedir}</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
             <includes>
                 <include>README*</include>
                 <include>LICENSE*</include>
@@ -28,7 +28,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/owner/target</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
             <includes>
                 <include>*.jar</include>
             </includes>
@@ -39,28 +39,28 @@
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/owner-extras/target</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
             <includes>
                 <include>*.jar</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/owner-java8/target</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
             <includes>
                 <include>*.jar</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/owner-java8-extras/target</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
             <includes>
                 <include>*.jar</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/owner-examples</directory>
-            <outputDirectory>/examples</outputDirectory>
+            <outputDirectory>examples</outputDirectory>
             <includes>
                 <include>**/pom.xml</include>
                 <include>**/src/**/*</include>
