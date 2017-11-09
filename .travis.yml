@@ -10,7 +10,8 @@ language: java
 jdk:
   - oraclejdk9
   - oraclejdk8
-  - oraclejdk7
+  - openjdk7
+  - oraclejdk6
 
 os:
   - linux
@@ -27,3 +28,5 @@ addons:
     packages:
       - oracle-java9-installer
       - oracle-java8-installer
+      - oracle-java7-installer
+      - oracle-java6-installer
