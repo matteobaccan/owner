@@ -10,11 +10,7 @@ language: java
 jdk:
   - oraclejdk9
   - oraclejdk8
-  - openjdk7
-
-matrix:
-  allow_failures:
-    - jdk: oraclejdk9
+  - oraclejdk7
 
 os:
   - linux
