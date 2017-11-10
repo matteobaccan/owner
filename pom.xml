@@ -139,19 +139,6 @@
                 <jdk>[1.9,)</jdk>
             </activation>
             <build>
-                <!--
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <configuration>
-                                <additionalparam>--add-modules ALL-SYSTEM</additionalparam>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-                -->
                 <plugins>
                     <plugin>
                         <artifactId>maven-compiler-plugin</artifactId>
