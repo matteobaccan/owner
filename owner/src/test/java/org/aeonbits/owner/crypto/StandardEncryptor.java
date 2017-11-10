@@ -4,7 +4,6 @@ import org.aeonbits.owner.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 
@@ -29,14 +28,13 @@ public class StandardEncryptor extends AbstractEncryptor {
         return this.algorithm;
     }
 
-
     public String encrypt( String plainData ) {
         try {
             Key key = generateKey();
             Cipher c = Cipher.getInstance( this.algorithm );
             c.init(Cipher.ENCRYPT_MODE, key);
             byte[] encVal = c.doFinal( plainData.getBytes( this.encoding ) );
-            String encryptedValue = DatatypeConverter.printBase64Binary( encVal );
+            String encryptedValue = Base64.printBase64Binary( encVal );
             return encryptedValue;
         } catch ( Exception cause ) {
             throw new IllegalArgumentException( cause.getMessage(), cause );
@@ -61,11 +59,11 @@ public class StandardEncryptor extends AbstractEncryptor {
         return new SecretKeySpec( this.secretKey, this.getAlgorithm() );
     }
 
-    public static final StandardEncryptor newInstance( String algorithm, String secretKey ) {
+    public static StandardEncryptor newInstance(String algorithm, String secretKey ) {
         return newInstance( algorithm, secretKey, "UTF-8", secretKey.length() );
     }
 
-    public static final StandardEncryptor newInstance( String algorithm, String secretKey, String encoding, int secretKeySize ) {
+    public static StandardEncryptor newInstance(String algorithm, String secretKey, String encoding, int secretKeySize ) {
         return new StandardEncryptor( algorithm, secretKey, encoding, secretKeySize );
     }
 
