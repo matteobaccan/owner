@@ -14,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
-import static org.aeonbits.owner.Util.fixBackslashForRegex;
 
 /**
  * <p>

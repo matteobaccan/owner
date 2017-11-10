@@ -230,7 +230,7 @@ abstract class Util {
 
     private static void rename(File source, File target) throws IOException {
         if (!source.renameTo(target))
-            throw new IOException(String.format("Failed to overwrite %s to %s", source.toString(), target.toString()));
+            throw new IOException(format("Failed to overwrite %s to %s", source.toString(), target.toString()));
     }
 
     private static void storeJar(File target, String entryName, Properties props) throws IOException {

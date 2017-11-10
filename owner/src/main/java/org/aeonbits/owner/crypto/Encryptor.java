@@ -1,8 +1,5 @@
 package org.aeonbits.owner.crypto;
 
-import java.io.Serializable;
-
-
 /**
  * An encryptor is a class which is able to encrypt and decrypt a value.
  * <p>

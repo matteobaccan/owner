@@ -35,7 +35,7 @@ class HotReloadLogic implements Serializable {
     private volatile long lastCheckTime = now();
     private final List<WatchableResource> watchableResources = new ArrayList<WatchableResource>();
 
-    private static interface WatchableResource extends Serializable {
+    private interface WatchableResource extends Serializable {
         boolean isChanged();
     }
 
@@ -63,7 +63,7 @@ class HotReloadLogic implements Serializable {
         }
     }
 
-    public HotReloadLogic(HotReload hotReload, List<URI> uris, PropertiesManager manager) {
+    HotReloadLogic(HotReload hotReload, List<URI> uris, PropertiesManager manager) {
         this.manager = manager;
         type = hotReload.type();
         interval = hotReload.unit().toMillis(hotReload.value());
