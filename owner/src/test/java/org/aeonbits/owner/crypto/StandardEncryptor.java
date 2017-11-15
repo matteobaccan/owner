@@ -34,7 +34,7 @@ public class StandardEncryptor extends AbstractEncryptor {
             Cipher c = Cipher.getInstance( this.algorithm );
             c.init(Cipher.ENCRYPT_MODE, key);
             byte[] encVal = c.doFinal( plainData.getBytes( this.encoding ) );
-            String encryptedValue = Base64.printBase64Binary( encVal );
+            String encryptedValue = Base64.encode( encVal );
             return encryptedValue;
         } catch ( Exception cause ) {
             throw new IllegalArgumentException( cause.getMessage(), cause );
