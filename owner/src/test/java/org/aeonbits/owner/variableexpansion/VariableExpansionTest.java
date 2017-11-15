@@ -19,9 +19,9 @@ import static org.junit.Assert.assertEquals;
  * @author Luigi R. Viggiano
  */
 public class VariableExpansionTest {
-    @Sources({"file:${user.dir}/src/test/resources/test.properties"})
-    public static interface SampleConfigWithExpansion extends Config {
-        public String favoriteColor();
+    @Sources({"classpath:test.properties"})
+    public interface SampleConfigWithExpansion extends Config {
+        String favoriteColor();
     }
 
     @Test
