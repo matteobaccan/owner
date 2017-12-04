@@ -8,7 +8,9 @@
 
 package org.aeonbits.owner;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -26,7 +28,10 @@ import static org.junit.Assert.assertNull;
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigTest {
 
-    @Mock
+	@Rule
+	public ExpectedException expected = ExpectedException.none();
+
+	@Mock
     private ScheduledExecutorService scheduler;
 
     public interface SampleConfig extends Config {
@@ -83,6 +88,30 @@ public class ConfigTest {
     public void testDefaultStringValue() {
         StringSubstitutionConfig config = ConfigFactory.create(StringSubstitutionConfig.class);
         assertEquals("Hello Mr. Luigi!", config.helloMr("Luigi"));
+    }
+
+	static interface WithMandatoryPropertyConfig extends Config {
+		@Mandatory
+		String missingMandatoryProperty();
+
+        @Mandatory
+		@DefaultValue("I'm here")
+        String mandatory();
+    }
+
+    @Test
+    public void shouldThrowWhenMissingMandatoryProperty() {
+		expected.expect(MissingMandatoryPropertyException.class);
+		expected.expectMessage("Missing mandatory property: 'missingMandatoryProperty'");
+
+    	WithMandatoryPropertyConfig config = ConfigFactory.create(WithMandatoryPropertyConfig.class);
+		config.missingMandatoryProperty();
+    }
+
+	@Test
+	public void testMandatoryStringValue() {
+    	WithMandatoryPropertyConfig config = ConfigFactory.create(WithMandatoryPropertyConfig.class);
+        assertEquals("I'm here", config.mandatory());
     }
 
     @Test
