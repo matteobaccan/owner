@@ -49,11 +49,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
-import static org.aeonbits.owner.Util.asString;
-import static org.aeonbits.owner.Util.eq;
-import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.reverse;
-import static org.aeonbits.owner.Util.unsupported;
+import static org.aeonbits.owner.Util.*;
 
 import org.aeonbits.owner.crypto.Decryptor;
 import org.aeonbits.owner.crypto.IdentityDecryptor;
@@ -89,7 +85,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
      * This allows each key has its own decryptor.
      * Reflection is slow.
      */
-    private Map< Method, Decryptor > encryptedKeys = new HashMap< Method, Decryptor >();
+    private Map<Method, Decryptor> encryptedKeys = new HashMap<Method, Decryptor>();
 
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
@@ -116,15 +112,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
         uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
-        for (Class<?> inter: clazz.getInterfaces()){
-            this.uris.addAll(toURIs(inter.getAnnotation(Sources.class),urlFactory));
+        for (Class<?> inter : clazz.getInterfaces()) {
+            this.uris.addAll(toURIs(inter.getAnnotation(Sources.class), urlFactory));
         }
 
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
-        if (loadPolicy==null) {
+        if (loadPolicy == null) {
             for (Class<?> inter : clazz.getInterfaces()) {
                 loadPolicy = inter.getAnnotation(LoadPolicy.class);
-                if (loadPolicy != null){
+                if (loadPolicy != null) {
                     break;
                 }
             }
@@ -132,10 +128,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        if (hotReload == null){
+        if (hotReload == null) {
             for (Class<?> inter : clazz.getInterfaces()) {
                 hotReload = inter.getAnnotation(HotReload.class);
-                if (hotReload != null){
+                if (hotReload != null) {
                     break;
                 }
             }
@@ -157,23 +153,23 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         // If it isn't present then we assign the IdentityDecryptor.
         DecryptorClass decryptorManager = clazz.getAnnotation(DecryptorClass.class);
         Class<? extends Decryptor> decryptorClazz;
-        if ( decryptorManager != null && decryptorManager.value() != null ) {
+        if (decryptorManager != null) {
             decryptorClazz = decryptorManager.value();
         } else {
             decryptorClazz = IdentityDecryptor.class;
         }
-        Decryptor classDecryptor = Util.newInstance( decryptorClazz );
+        Decryptor classDecryptor = Util.newInstance(decryptorClazz);
 
         // Reflection is slow, so we will cache all methods with EncryptedValue annotation.
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            if ( PropertiesMapper.isEncryptedValue(method) ) {
-                EncryptedValue encriptedKey = method.getAnnotation( EncryptedValue.class );
+            if (PropertiesMapper.isEncryptedValue(method)) {
+                EncryptedValue encriptedKey = method.getAnnotation(EncryptedValue.class);
                 decryptorClazz = encriptedKey.value();
-                if ( decryptorClazz != IdentityDecryptor.class ) {
-                    encryptedKeys.put( method, Util.newInstance( decryptorClazz ) );
+                if (decryptorClazz != IdentityDecryptor.class) {
+                    encryptedKeys.put(method, Util.newInstance(decryptorClazz));
                 } else {
-                    encryptedKeys.put( method, classDecryptor );
+                    encryptedKeys.put(method, classDecryptor);
                 }
             }
         }
@@ -181,17 +177,18 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     /**
      * If method contains the EncryptedValue annotation it Decrypts the value with the associated {@link Decryptor}.
+     *
      * @param method with the key definition.
      * @param value the value to decrypt when the method contains the EncryptedValue annotation
      * @return
      *      the <code>value</code> if the method doesn't contains the EncryptedValue annotation
      *      or the <code>result of decrypt the value</code> if it does.
      */
-    protected String decryptIfNecessary( Method method, String value ) {
+    String decryptIfNecessary(Method method, String value) {
         // Value can't be null, it has been checked previously in PropertiesInvocationHandler.resolveProperty
-        if ( this.encryptedKeys.containsKey( method ) ) {
-            Decryptor decryptor = this.encryptedKeys.get( method );
-            return decryptor.decrypt( value );
+        if (this.encryptedKeys.containsKey(method)) {
+            Decryptor decryptor = this.encryptedKeys.get(method);
+            return decryptor.decrypt(value);
         }
         return value;
     }
@@ -326,8 +323,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         private final PropertyChangeListener listener;
         private final boolean transactional;
 
-        public PropertyChangeListenerWrapper(String propertyName, PropertyChangeListener listener,
-                                             boolean transactional) {
+        PropertyChangeListenerWrapper(String propertyName, PropertyChangeListener listener,
+                                      boolean transactional) {
             this.propertyName = propertyName;
             this.listener = listener;
             this.transactional = transactional;
@@ -360,7 +357,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         }
     }
 
-    Properties doLoad() {
+    private Properties doLoad() {
         return loadType.load(uris, loaders);
     }
 
@@ -490,8 +487,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         writeLock.lock();
         try {
             String oldValue = properties.getProperty(key);
-            String newValue = null;
-            PropertyChangeEvent event = new PropertyChangeEvent(proxy, key, oldValue, newValue);
+            PropertyChangeEvent event = new PropertyChangeEvent(proxy, key, oldValue, null);
             fireBeforePropertyChange(event);
             String result = performRemoveProperty(key);
             firePropertyChange(event);

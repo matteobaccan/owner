@@ -28,7 +28,7 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static org.aeonbits.owner.UtilTest.fileFromURI;
-import static org.aeonbits.owner.UtilTest.ignore;
+import static org.aeonbits.owner.UtilTest.ignoreAndReturnNull;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
 import static org.junit.Assert.assertEquals;
@@ -270,21 +270,21 @@ public class EventListenerOnReloadTest implements TestConstants {
             beforeEvent[0].getEvents().clear();
             fail("it should return an unmodifiable collection");
         } catch (UnsupportedOperationException x) {
-            ignore();
+            ignoreAndReturnNull();
         }
 
         try {
             beforeEvent[0].getOldProperties().clear();
             fail("it should return an unmodifiable collection");
         } catch (UnsupportedOperationException x) {
-            ignore();
+            ignoreAndReturnNull();
         }
 
         try {
             beforeEvent[0].getNewProperties().clear();
             fail("it should return an unmodifiable collection");
         } catch (UnsupportedOperationException x) {
-            ignore();
+            ignoreAndReturnNull();
         }
     }
 

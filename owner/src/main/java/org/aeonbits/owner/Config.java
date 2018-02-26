@@ -26,6 +26,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.Util.ignore;
+import static org.aeonbits.owner.Util.ignoreAndReturnNull;
 import static org.aeonbits.owner.Util.reverse;
 
 import org.aeonbits.owner.crypto.Decryptor;

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -55,9 +56,14 @@ public class UtilTest {
     }
 
     @Test
-    public void testIgnore() {
-        Object result = ignore();
+    public void testIgnoreAndReturnNull() {
+        Object result = ignoreAndReturnNull();
         assertNull(result);
+    }
+
+    @Test
+    public void testIgnore() {
+        ignore();
     }
 
     @Test
@@ -86,8 +92,8 @@ public class UtilTest {
             System.out.printf(format, args);
     }
 
-    public static <T> T  ignore() {
-        return Util.ignore();
+    public static <T> T ignoreAndReturnNull() {
+        return Util.ignoreAndReturnNull();
     }
 
     public static File fileFromURI(String spec) throws URISyntaxException {

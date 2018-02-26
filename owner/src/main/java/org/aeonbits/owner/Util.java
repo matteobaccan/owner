@@ -113,10 +113,16 @@ abstract class Util {
         return path.replace(" ", "%20");
     }
 
-    static <T> T ignore() {
-        // the ignore method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
+    static <T> T ignoreAndReturnNull() {
+        // the ignoreAndReturnNull method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
         // complaining about empty catch methods.
         return null;
+    }
+
+    /**
+     * no operation
+     */
+    static void ignore() {
     }
 
     static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
@@ -164,7 +170,7 @@ abstract class Util {
             try {
                 return fileFromURI(path.substring(0, path.indexOf('!')));
             } catch (URISyntaxException e) {
-                return ignore(/* non critical */);
+                return ignoreAndReturnNull(/* non critical */);
             }
         }
         return null;
