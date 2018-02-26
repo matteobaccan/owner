@@ -20,20 +20,19 @@ import static org.aeonbits.owner.UtilTest.eq;
  * @author Luigi R. Viggiano
  */
 class PropertyChangeMatcher {
-    static Matcher<PropertyChangeEvent> matches(final PropertyChangeEvent expectedEvent) {
+    static ArgumentMatcher<PropertyChangeEvent> matches(final PropertyChangeEvent expectedEvent) {
         return new ArgumentMatcher<PropertyChangeEvent>() {
             @Override
-            public boolean matches(Object argument) {
-                PropertyChangeEvent arg = (PropertyChangeEvent) argument;
-                return expectedEvent.getSource() == arg.getSource() &&
-                        eq(expectedEvent.getOldValue(), arg.getOldValue()) &&
-                        eq(expectedEvent.getNewValue(), arg.getNewValue()) &&
-                        eq(expectedEvent.getPropertyName(), arg.getPropertyName());
+            public boolean matches(PropertyChangeEvent argument) {
+                return expectedEvent.getSource() == argument.getSource() &&
+                        eq(expectedEvent.getOldValue(), argument.getOldValue()) &&
+                        eq(expectedEvent.getNewValue(), argument.getNewValue()) &&
+                        eq(expectedEvent.getPropertyName(), argument.getPropertyName());
             }
 
             @Override
-            public void describeTo(Description description) {
-                description.appendText(String.valueOf(expectedEvent));
+            public String toString() {
+                return String.valueOf(expectedEvent);
             }
         };
     }

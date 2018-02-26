@@ -17,14 +17,15 @@ import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.internal.hamcrest.HamcrestArgumentMatcher;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -33,7 +34,7 @@ import java.util.Properties;
 import static org.aeonbits.owner.UtilTest.fileFromURI;
 import static org.aeonbits.owner.UtilTest.save;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -124,17 +125,18 @@ public class ReloadTest implements TestConstants {
         verify(listener, times(2)).reloadPerformed(argThat(isReloadListnerWithSource(cfg)));
     }
 
-    private Matcher<ReloadEvent> isReloadListnerWithSource(final ReloadableConfig cfg) {
-        return new BaseMatcher<ReloadEvent>() {
-            public boolean matches(Object o) {
-                ReloadEvent given = (ReloadEvent) o;
-                return given.getSource() == cfg;
-            }
+    private ArgumentMatcher<ReloadEvent> isReloadListnerWithSource(final ReloadableConfig cfg) {
+        return new HamcrestArgumentMatcher<ReloadEvent>(
+                new BaseMatcher<ReloadEvent>() {
+                    public boolean matches(Object o) {
+                        ReloadEvent given = (ReloadEvent) o;
+                        return given.getSource() == cfg;
+                    }
 
-            public void describeTo(Description description) {
-                description.appendText("does not match");
-            }
-        };
+                    public void describeTo(Description description) {
+                        description.appendText("does not match");
+                    }
+                });
     }
 
 }

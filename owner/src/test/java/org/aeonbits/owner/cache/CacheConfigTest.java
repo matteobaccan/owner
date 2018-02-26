@@ -14,13 +14,13 @@ import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Factory;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -51,7 +51,7 @@ public class CacheConfigTest {
         MyConfig third = ConfigCache.getOrCreate(spy, MyConfig.class);
         assertSame(first, second);
         assertSame(second, third);
-        verify(spy, times(1)).create(eq(MyConfig.class), Matchers.<Map<?, ?>[]>anyVararg());
+        verify(spy, times(1)).create(eq(MyConfig.class), ArgumentMatchers.<Map<?, ?>[]>any());
     }
 
     @Test

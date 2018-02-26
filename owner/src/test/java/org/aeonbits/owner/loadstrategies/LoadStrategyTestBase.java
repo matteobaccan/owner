@@ -10,7 +10,8 @@ package org.aeonbits.owner.loadstrategies;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.mockito.ArgumentMatcher;
+import org.mockito.internal.hamcrest.HamcrestArgumentMatcher;
 
 import java.net.URI;
 
@@ -18,18 +19,19 @@ import java.net.URI;
  * @author Luigi R. Viggiano
  */
 public class LoadStrategyTestBase {
-    Matcher<URI> uriMatches(final String path) {
-        return new BaseMatcher<URI>(){
-            public URI uri;
+    ArgumentMatcher<URI> uriMatches(final String path) {
+        return new HamcrestArgumentMatcher<URI>(
+            new BaseMatcher<URI>(){
+                public URI uri;
 
-            public boolean matches(Object o) {
-                uri = (URI)o;
-                return uri.toString().endsWith(path);
-            }
+                public boolean matches(Object o) {
+                    uri = (URI)o;
+                    return uri.toString().endsWith(path);
+                }
 
-            public void describeTo(Description description) {
-                description.appendText("expected <" + (uri != null ? uri : "uri") + "> ending with " + path);
-            }
-        };
+                public void describeTo(Description description) {
+                    description.appendText("expected <" + (uri != null ? uri : "uri") + "> ending with " + path);
+                }
+            });
     }
 }

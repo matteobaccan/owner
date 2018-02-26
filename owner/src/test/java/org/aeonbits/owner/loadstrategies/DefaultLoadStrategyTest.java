@@ -8,16 +8,12 @@
 
 package org.aeonbits.owner.loadstrategies;
 
-import org.aeonbits.owner.Config;
-import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.LoadersManagerForTest;
-import org.aeonbits.owner.PropertiesManagerForTest;
-import org.aeonbits.owner.VariablesExpanderForTest;
+import org.aeonbits.owner.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,8 +22,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
