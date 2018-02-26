@@ -445,6 +445,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @SuppressWarnings("unchecked")
     public void fill(Map map) {
         readLock.lock();
         try {
