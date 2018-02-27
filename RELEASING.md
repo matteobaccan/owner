@@ -65,7 +65,7 @@ First you need to remove the `-SNAPSHOT` thing:
 
 ```
 $ mvn versions:set -DnewVersion=1.0.10
-$ git commit -m "releasing 1.0.10"
+$ git commit -am "prepare release owner 1.0.10"
 ```
 
 
