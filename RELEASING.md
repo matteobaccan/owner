@@ -71,4 +71,8 @@ $ git commit -am "prepare release owner 1.0.10"
 
 ```
 $ mvn clean deploy -P release-sign-artifacts
+$ git tag owner-1.0.10
+$ git push origin owner-1.0.10:owner-1.0.10
+$ mvn versions:set -DnewVersion=1.0.11-SNAPSHOT
+$ git commit -am "prepare for next development iteration"
 ```
