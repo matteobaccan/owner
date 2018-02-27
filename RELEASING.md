@@ -12,12 +12,12 @@ Today is 27th Feb 2018 and I am trying to release the new version, even though t
 not ready, and I am against releasing something that is undocumented: if some feature is not documented, how this can be
 used, when even documented features are not known enough well by users to raise questions?
 But there are bug fixes and improvements that poeople can benefit, and I will follow up on the users' requests with this
-release. And I hope to get back in development, if my life and my mood allows.
+release. And I hope to get back in development, if my life and my mood allows (and donations would help, thanks!).
 
 RESOURCES
 ---------
 
-Some links first:
+Some links first, from the very source of the information, Sonatype:
 
 - [OSSRH Guide][]
 - [Apache Maven][]
@@ -29,4 +29,12 @@ Some links first:
 SIGNING JARS
 ------------
 
-In order to sign artifact jars, you need GPG, as explained in the
+In order to sign artifact jars, you need GnuPG.
+
+So, from OS X:
+
+```bash
+$ sudo port selfupdate
+$ sudo port -p upgrade outdated
+$ sudo port install gnupg2
+```
