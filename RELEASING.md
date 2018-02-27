@@ -57,22 +57,13 @@ First you need to make sure all tests are passing and packages can be created wi
 
 
 ```
-$ mvn clean install
-```
-
-
-First you need to remove the `-SNAPSHOT` thing:
-
-```
-$ mvn versions:set -DnewVersion=1.0.10
+$ mvn clean install                               # Check that everything builds smoothly and tests pass
+$ mvn versions:set -DnewVersion=1.0.10            # First you need to remove the `-SNAPSHOT` thing
 $ git commit -am "prepare release owner 1.0.10"
-```
-
-
-```
-$ mvn clean deploy -P release-sign-artifacts
 $ git tag owner-1.0.10
 $ git push origin owner-1.0.10:owner-1.0.10
+$ mvn clean deploy -P release-sign-artifacts
 $ mvn versions:set -DnewVersion=1.0.11-SNAPSHOT
 $ git commit -am "prepare for next development iteration"
+$ git push
 ```
