@@ -5,6 +5,7 @@
 # Maven and Macs
 target/
 .DS_Store
+*.xml.versionsBackup
 
 # Eclipse IDE
 .classpath
