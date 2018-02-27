@@ -38,3 +38,37 @@ $ sudo port selfupdate
 $ sudo port -p upgrade outdated
 $ sudo port install gnupg2
 ```
+
+DEPLOY
+------
+
+This will upload snapshot artifacts to Sonatype.
+
+```
+$ mvn clean deploy
+```
+
+RELEASE
+-------
+
+This will upload release artifacts to Sonatype.
+
+First you need to make sure all tests are passing and packages can be created without errors.
+
+
+```
+$ mvn clean install
+```
+
+
+First you need to remove the `-SNAPSHOT` thing:
+
+```
+$ mvn versions:set -DnewVersion=1.0.10
+$ git commit -m "releasing 1.0.10"
+```
+
+
+```
+$ mvn clean deploy -P release-sign-artifacts
+```
