@@ -247,6 +247,16 @@
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
                     <version>3.6</version>
+                    <executions>
+                        <execution>
+                            <id>generate-site</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>site</goal>
+                                <goal>stage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
