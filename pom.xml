@@ -219,7 +219,7 @@
                     <executions>
                         <execution>
                             <id>attach-sources</id>
-                            <phase>package</phase>
+                            <phase>deploy</phase>
                             <goals>
                                 <goal>jar-no-fork</goal>
                             </goals>
@@ -232,7 +232,7 @@
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
-                            <phase>package</phase>
+                            <phase>deploy</phase>
                             <goals>
                                 <goal>javadoc</goal>
                                 <goal>jar</goal>
@@ -250,7 +250,7 @@
                     <executions>
                         <execution>
                             <id>generate-site</id>
-                            <phase>package</phase>
+                            <phase>deploy</phase>
                             <goals>
                                 <goal>site</goal>
                                 <goal>stage</goal>
