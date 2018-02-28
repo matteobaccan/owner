@@ -11,7 +11,7 @@
     <parent>
         <artifactId>owner-parent</artifactId>
         <groupId>org.aeonbits.owner</groupId>
-        <version>1.0.11-SNAPSHOT</version>
+        <version>1.0.10</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,7 +29,7 @@
                 <dependency>
                     <groupId>org.aeonbits.owner</groupId>
                     <artifactId>owner-java8-extras</artifactId>
-                    <version>1.0.11-SNAPSHOT</version>
+                    <version>1.0.10</version>
                 </dependency>
             </dependencies>
         </profile>
