@@ -37,6 +37,16 @@ assertEquals("lime", cfg.bar());
 assertEquals("orange", cfg.baz());
 ```
 
+<div class="note info">
+  <h5>Null keys and/or values are not supported</h5>
+  <p>A <tt>Properties</tt> instance can potentially have a <tt>null</tt> key or 
+  value defined. In previous OWNER versions, an error was thrown but the error
+  message was very unclear. In version 1.0.10 and later, an 
+  <tt>IllegalArgumentException</tt> is thrown when a <tt>Properties</tt> object
+  that contains such a <tt>null</tt> key or value is used. The exception message
+  also contains further information about the offending key if applicable.</p> 
+</div>
+
 You can specify multiple properties to import on the same line:
 
 ```java
