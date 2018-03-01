@@ -109,8 +109,9 @@ Bugs fixes
 Site Enhancements
 -----------------
  * Added [Crypto support](http://owner.aeonbits.org/docs/crypto/) documentation page.
- * Added [ByteSize Converter](http://owner.aeonbits.org/docs/type-conversion/#byte-size) converter documentation 
-   section.
+ * Added [ByteSize Converter](http://owner.aeonbits.org/docs/type-conversion/#byte-size) converter and
+   [Duration Converter](http://owner.aeonbits.org/docs/type-conversion/#duration) documentation section.
+   Thanks [@StFS](https://github.com/StFS). 
  * Chinese documentation has been contributed by [@cyfonly](https://github.com/cyfonly) and is available 
    [here](https://github.com/cyfonly/owner-doc). Sorry, I cannot check that everything is correct or update that! :-)  
    See [#172](https://github.com/lviggiano/owner/issues/172).
