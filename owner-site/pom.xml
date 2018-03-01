@@ -28,9 +28,9 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <tasks>
-                                <ant antfile="site/build.xml" target="run" />
-                            </tasks>
+                            <target>
+                                <ant antfile="build.xml" target="run" />
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>

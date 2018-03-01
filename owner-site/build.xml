@@ -6,7 +6,7 @@
   ~ See the terms of the BSD license in the documentation provided with this software.
   -->
 
-<project name="site" basedir=".." default="help">
+<project name="site" basedir="." default="help">
     <property environment="env"/>
     <property name="build.directory" value="${basedir}/target"/>
     <property name="site.directory" value="${basedir}/site"/>
@@ -27,7 +27,7 @@
 
     <target name="copy" depends="pull">
         <copy todir="${gh-pages.directory}" overwrite="true">
-            <fileset dir="${site.directory}" excludes="build.xml"/>
+            <fileset dir="${site.directory}" />
         </copy>
         <copy file="${site.directory}/.gitignore" todir="${gh-pages.directory}"/>
     </target>
