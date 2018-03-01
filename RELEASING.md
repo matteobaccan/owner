@@ -1,23 +1,16 @@
 RELEASING
 =========
 
-I'm writing this in order to keep some notes on how to release on maven central repository. Since this is for me, a real
-nightmare.
+I'm writing this in order to keep some notes on how to release on maven central repository.
 
 After some time I am not releasing this project, things have changed and I forgot the intricate mechanism to deploy jars
-on maven. Now I am trying again, and this time I will keep some notes for future releases here, hoping this will help
-me, or anyone willing to contribute and help with the project development.
-
-Today is 27th Feb 2018 and I am trying to release the new version, even though the documentation on the new features is
-not ready, and I am against releasing something that is undocumented: if some feature is not documented, how this can be
-used, when even documented features are not known enough well by users to raise questions?
-But there are bug fixes and improvements that poeople can benefit, and I will follow up on the users' requests with this
-release. And I hope to get back in development, if my life and my mood allows (and donations would help, thanks!).
+on Maven/Sonatype. Now I am trying again, and this time I will keep some notes for future releases here, hoping this 
+will help.
 
 RESOURCES
 ---------
 
-Some links first, from the very source of the information, Sonatype:
+Some links first:
 
 - [OSSRH Guide][]
 - [Apache Maven][]
@@ -39,17 +32,8 @@ $ sudo port -p upgrade outdated
 $ sudo port install gnupg2
 ```
 
-DEPLOY
-------
-
-This will upload snapshot artifacts to Sonatype.
-
-```
-$ mvn clean deploy
-```
-
-RELEASE
--------
+RELEASE PROCEDURE
+-----------------
 
 This will upload release artifacts to Sonatype.
 
@@ -57,13 +41,26 @@ First you need to make sure all tests are passing and packages can be created wi
 
 
 ```
-$ mvn clean install                               # Check that everything builds smoothly and tests pass
-$ mvn versions:set -DnewVersion=1.0.10            # First you need to remove the `-SNAPSHOT` thing
+# Check that everything builds smoothly and tests are all passing
+$ mvn clean install                               
+
+# First you need to remove the `-SNAPSHOT` thing and commit on git
+$ mvn versions:set -DnewVersion=1.0.10            
+$ mvn versions:commit
 $ git commit -am "prepare release owner 1.0.10"
 $ git tag owner-1.0.10
 $ git push origin owner-1.0.10:owner-1.0.10
+
+# Deploy the signed jars on Sonatype
 $ mvn clean deploy -P release-sign-artifacts
+
+# Prepare for next development iteration
 $ mvn versions:set -DnewVersion=1.0.11-SNAPSHOT
+$ mvn versions:commit
 $ git commit -am "prepare for next development iteration"
 $ git push
 ```
+
+That should do.
+
+Maybe I should script this, not urgent anyway since releasing is not a daily routine.
