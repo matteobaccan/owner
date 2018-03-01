@@ -1,9 +1,5 @@
 package org.aeonbits.owner.reload;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
-import static org.junit.Assert.assertEquals;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
@@ -13,9 +9,13 @@ import org.aeonbits.owner.event.ReloadListener;
 import org.junit.After;
 import org.junit.Test;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.junit.Assert.assertEquals;
+
 public class SystemPropertiesReloadTest extends AsyncReloadSupport {
 
-    private static final int DELAY = 1000;
+    private static final int DELAY = 10000;
 
     private SystemPropertiesHelper systemPropertiesHelper = new SystemPropertiesHelper();
 
