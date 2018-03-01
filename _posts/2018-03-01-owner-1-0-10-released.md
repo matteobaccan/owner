@@ -30,7 +30,7 @@ documented. If you think you can help, feel free to help: this website is a sub-
 handy and quick to learn; the structure is quite easy to follow. 
 [Jekyll](https://jekyllrb.com/) is used as site generator, which is written in Ruby and can be tricky for a Java dev 
 like me, but it works awesomely with github. So feel free to help there too.  
-There is also an [ant script](https://github.com/lviggiano/owner/blob/master/owner-site/site/build.xml) which allows 
+There is also an [ant script](https://github.com/lviggiano/owner/blob/master/owner-site/build.xml) which allows 
 you to launch Jekyll and live-preview the end result of your edits.
 
 I don't feel very comfortable in making promises, but I'd really like to give back life to this project and, for the 
