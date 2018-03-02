@@ -37,7 +37,7 @@ assertEquals("lime", cfg.bar());
 assertEquals("orange", cfg.baz());
 ```
 
-<div class="note warn">
+<div class="note warning">
   <h5>Null keys and Null values are invalid.</h5>
   
   <p>
