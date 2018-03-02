@@ -52,8 +52,8 @@ Many modern IDEs integrate well with maven, so after adding the above section
 in your pom file and refreshing your project in your IDE, you should be ready to
 use the library APIs.
 
-Java 8
-------
+Java 8 and superior
+-------------------
 
 Java 8 introduces some new language features, such as [`default` methods][def-methods] in interfaces.
 

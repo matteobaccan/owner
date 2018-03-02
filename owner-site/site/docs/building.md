@@ -12,10 +12,14 @@ the latest features still under development on GitHub master branch.
 Building OWNER requires following software being installed and configured in
 your system:
 
- - [JDK](http://docs.oracle.com/javase/7/docs/webnotes/install/) 1.5 or superior.
+ - [JDK](http://docs.oracle.com/javase/7/docs/webnotes/install/) 7 or superior. 
  - [Maven](http://maven.apache.org/download.cgi#Installation_Instructions) 3.0.5
    or superior (Maven 2 should also be ok).
  - [GIT](http://git-scm.com/book/en/Getting-Started-Installing-Git) any recent version should be ok.
+
+Java 5 and 6 are supported until OWNER 1.0.9. 
+With OWNER 1.0.10 we introduced Java 9 support and we dropped Java 5 and 6 support, so if you use JDK prior to 7 you
+need to use OWNER 1.0.9.
 
 Then follow these steps:
 
@@ -41,11 +45,11 @@ faster: git://github.com/lviggiano/owner.git.
 </div>
 
 
-Building with support for Java 8
---------------------------------
+Building with support for Java 8 and superior
+---------------------------------------------
 
-Since version 1.0.6 OWNER supports some language features introduced by Java 8, such as [`default` methods][def-methods]
-in interfaces.
+Since version 1.0.6 OWNER supports some language features introduced by Java 8 and superior, 
+such as [`default` methods][def-methods] in interfaces.
 
 The support classes for these features are encapsulated in the maven module called `owner-java8` that gets
 included into the build process only when maven is invoked from JDK 8.
