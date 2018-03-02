@@ -13,7 +13,7 @@ OWNER, you can refer to the following resources:
  - This [documentation web site](http://owner.aeonbits.org) 
  - The [GitHub issues](https://github.com/lviggiano/owner/issues) where you can
    post bug reports, request for features, questions, etc.
- - Telegram chat [OWNER API Users & Devs](https://t.me/ownerapi)
+ - Telegram chat [OWNER API Users & Devs](https://t.me/ownerapi).
    
 I suggest you to avoid writing to the project maintainer email address directly, 
 since your email may be of interest for other users. So if you prefer email 
