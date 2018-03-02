@@ -26,6 +26,6 @@ OWNER solves the problem providing an interface object that
    collections, many standard Java objects, and even the possibility to plug your own conversion logic.
  - it does not bring any transitive dependency to your project, so no conflicting jars, no dependency issues.
  - it is developed to work with any reasonably recent JDK. Each commit on OWNER repository is
-   [tested](https://travis-ci.org/lviggiano/owner) on Oracle JDK and Open JDK from version 5 to version 7.
+   [tested](https://travis-ci.org/lviggiano/owner) on Oracle JDK and Open JDK from version 7 to version 9.
 
 ...and more than everything, it's not an ugly, rigid, boring, repetitive list of methods doing all the same thing.
