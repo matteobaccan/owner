@@ -2,6 +2,7 @@
 layout: news_item
 title: "Telegram Chat for Users and Devs"
 author: lviggiano
+version: 1.0.10
 categories: [news]
 ---
 
