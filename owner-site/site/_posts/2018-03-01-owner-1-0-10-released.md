@@ -91,7 +91,7 @@ Enhancements
  * Added inheritance support for `@Sources`, `@LoadPolicy` and `@HotReload`.   
    Sources defined for all extended interfaces will be merged.
    LoadPolicy and HotReload can be inherited and override by the extended interface.
-   Thanks [chengmingwang](https://github.com/chengmingwang).
+   Thanks [@chengmingwang](https://github.com/chengmingwang).
 
 Bugs fixes
 ----------
