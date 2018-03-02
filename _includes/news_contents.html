@@ -11,9 +11,11 @@
     <h4>Recent Releases</h4>
     <ul>
       {% for post in site.posts limit:5 %}
-      <li class="{% if page.title == post.title %}current{% endif %}">
-        <a href="{{ post.url }}">Version {{ post.version }}</a>
-      </li>
+        {% if post.version %}
+        <li class="{% if page.title == post.title %}current{% endif %}">
+          <a href="{{ post.url }}">Version {{ post.version }}</a>
+        </li>
+        {% endif %}
       {% endfor %}
     </ul>
   </aside>
