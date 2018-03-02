@@ -65,7 +65,9 @@ Enhancements
    OWNER with the latest Java version. It was not trivial. If you want to use some specific feature like default 
    methods in interfaces introduced in Java8, you still need to add `owner-java8` dependency. I know... I didn't want to
    create a new sub-module for Java 9 and every newer versions, if it's not necessary.
- * Updated all dependencies (testing, and optional) and Maven plugins, in order to have it working with Java 9.
+   Also, I updated all the dependencies (testing, and optional) and Maven plugins, in order to have it working 
+   with Java 9.
+   A huge thank you to my friend [@sbordet](https://github.com/sbordet).
  * Added `list()` method to `ConfigCache`. ConfigCache is a great way to centralise configuration for various
    parts of an application. This commit adds a list() method to the ConfigCache class, which lists the keys for all 
    configurations present in the cache. This allows the entire application configuration to be inspected (e.g. for 
@@ -103,7 +105,7 @@ Bugs fixes
  * Maps with null values cause an unclear exception. See [#184](https://github.com/lviggiano/owner/issues/184).
    Thanks [@StFS](https://github.com/StFS). 
  * Set tar long file mode to posix in maven assembly plugin to avoid build errors. 
-   Thanks [gdenning](https://github.com/gdenning).
+   Thanks [@gdenning](https://github.com/gdenning).
 
 
 Site Enhancements
