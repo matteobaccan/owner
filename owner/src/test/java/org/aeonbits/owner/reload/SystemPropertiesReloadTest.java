@@ -5,6 +5,8 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
+import org.aeonbits.owner.util.SystemProviderForTest;
+import org.aeonbits.owner.util.UtilTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

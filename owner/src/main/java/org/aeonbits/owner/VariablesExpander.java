@@ -9,10 +9,12 @@
 package org.aeonbits.owner;
 
 
+import org.aeonbits.owner.util.Util;
+
 import java.io.Serializable;
 import java.util.Properties;
 
-import static org.aeonbits.owner.Util.expandUserHome;
+import static org.aeonbits.owner.util.Util.expandUserHome;
 
 /**
  * This class is used to expand variables in the format <tt>${variable}</tt>$, using values from

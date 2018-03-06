@@ -13,7 +13,7 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.TestConstants;
-import org.aeonbits.owner.TimeProviderForTest;
+import org.aeonbits.owner.util.TimeProviderForTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,9 +25,9 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.aeonbits.owner.UtilTest.fileFromURI;
-import static org.aeonbits.owner.UtilTest.save;
-import static org.aeonbits.owner.UtilTest.saveJar;
+import static org.aeonbits.owner.util.UtilTest.fileFromURI;
+import static org.aeonbits.owner.util.UtilTest.save;
+import static org.aeonbits.owner.util.UtilTest.saveJar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

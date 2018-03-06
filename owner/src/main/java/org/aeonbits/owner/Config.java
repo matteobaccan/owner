@@ -9,6 +9,9 @@
 package org.aeonbits.owner;
 
 
+import org.aeonbits.owner.crypto.Decryptor;
+import org.aeonbits.owner.crypto.IdentityDecryptor;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Documented;
@@ -25,12 +28,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.ignoreAndReturnNull;
-import static org.aeonbits.owner.Util.reverse;
-
-import org.aeonbits.owner.crypto.Decryptor;
-import org.aeonbits.owner.crypto.IdentityDecryptor;
+import static org.aeonbits.owner.util.Util.ignore;
+import static org.aeonbits.owner.util.Util.reverse;
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p>

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.aeonbits.owner.Util.unsupported;
+import static org.aeonbits.owner.util.Util.unsupported;
 
 
 /**
@@ -72,7 +72,7 @@ class LoadersManager implements Serializable {
 
     void clear() {
         lock.writeLock().lock();
-        try{
+        try {
             loaders.clear();
         } finally {
             lock.writeLock().unlock();

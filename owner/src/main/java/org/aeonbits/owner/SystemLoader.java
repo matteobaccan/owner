@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
-import static org.aeonbits.owner.Util.system;
+import static org.aeonbits.owner.util.Util.system;
 
 /**
  * This class accesses <tt>Util.system()</tt> which is package accessible; for this reason this class cannot be moved

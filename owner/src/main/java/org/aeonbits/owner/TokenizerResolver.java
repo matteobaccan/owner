@@ -13,8 +13,8 @@ import org.aeonbits.owner.Config.TokenizerClass;
 
 import java.lang.reflect.Method;
 
-import static org.aeonbits.owner.Util.newInstance;
-import static org.aeonbits.owner.Util.unsupported;
+import static org.aeonbits.owner.util.Util.newInstance;
+import static org.aeonbits.owner.util.Util.unsupported;
 
 /**
  * @author Luigi R. Viggiano

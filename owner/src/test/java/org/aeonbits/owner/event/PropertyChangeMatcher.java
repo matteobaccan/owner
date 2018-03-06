@@ -8,13 +8,11 @@
 
 package org.aeonbits.owner.event;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.mockito.ArgumentMatcher;
 
 import java.beans.PropertyChangeEvent;
 
-import static org.aeonbits.owner.UtilTest.eq;
+import static org.aeonbits.owner.util.UtilTest.eq;
 
 /**
  * @author Luigi R. Viggiano

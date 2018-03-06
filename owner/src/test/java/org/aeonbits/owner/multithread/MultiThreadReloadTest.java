@@ -22,9 +22,9 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
-import static org.aeonbits.owner.UtilTest.fileFromURI;
-import static org.aeonbits.owner.UtilTest.newArray;
-import static org.aeonbits.owner.UtilTest.save;
+import static org.aeonbits.owner.util.UtilTest.fileFromURI;
+import static org.aeonbits.owner.util.UtilTest.newArray;
+import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 

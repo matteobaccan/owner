@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2012-2015, Luigi R. Viggiano
+ * Copyright (c) 2012-2018, Luigi R. Viggiano
  * All rights reserved.
  *
  * This software is distributable under the BSD license.
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.util;
 
 import org.aeonbits.owner.Config.DisableFeature;
 import org.aeonbits.owner.Config.DisableableFeature;
@@ -41,13 +41,13 @@ import static java.util.Arrays.asList;
  *
  * @author Luigi R. Viggiano
  */
-abstract class Util {
+public abstract class Util {
 
-    interface TimeProvider {
+    public interface TimeProvider {
         long getTime();
     }
 
-    interface SystemProvider {
+    public interface SystemProvider {
         String getProperty(String key);
 
         Map<String, String> getenv();
@@ -78,20 +78,20 @@ abstract class Util {
     /** Don't let anyone instantiate this class */
     private Util() {}
 
-    static <T> List<T> reverse(List<T> src) {
+    public static <T> List<T> reverse(List<T> src) {
         List<T> copy = new ArrayList<T>(src);
         Collections.reverse(copy);
         return copy;
     }
 
     @SuppressWarnings("unchecked")
-    static <T> T[] reverse(T[] array) {
+    public static <T> T[] reverse(T[] array) {
         T[] copy = array.clone();
         Collections.reverse(asList(copy));
         return copy;
     }
 
-    static String expandUserHome(String text) {
+    public static String expandUserHome(String text) {
         if (text.equals("~"))
             return system.getProperty("user.home");
         if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0)
@@ -101,19 +101,15 @@ abstract class Util {
         return text;
     }
 
-    static String fixBackslashForRegex(String text) {
-        return text.replace("\\", "\\\\");
-    }
-
-    static String fixBackslashesToSlashes(String path) {
+    public static String fixBackslashesToSlashes(String path) {
         return path.replace('\\', '/');
     }
 
-    static String fixSpacesToPercentTwenty(String path) {
+    public static String fixSpacesToPercentTwenty(String path) {
         return path.replace(" ", "%20");
     }
 
-    static <T> T ignoreAndReturnNull() {
+    public static <T> T ignoreAndReturnNull() {
         // the ignoreAndReturnNull method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
         // complaining about empty catch methods.
         return null;
@@ -122,10 +118,10 @@ abstract class Util {
     /**
      * no operation
      */
-    static void ignore() {
+    public static void ignore() {
     }
 
-    static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
+    public static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
         Class<DisableFeature> annotation = DisableFeature.class;
         return isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
                 isFeatureDisabled(feature, method.getAnnotation(annotation));
@@ -135,28 +131,28 @@ abstract class Util {
         return annotation != null && asList(annotation.value()).contains(feature);
     }
 
-    static UnsupportedOperationException unsupported(Throwable cause, String msg, Object... args) {
+    public static UnsupportedOperationException unsupported(Throwable cause, String msg, Object... args) {
         return new UnsupportedOperationException(format(msg, args), cause);
     }
 
-    static UnsupportedOperationException unsupported(String msg, Object... args) {
+    public static UnsupportedOperationException unsupported(String msg, Object... args) {
         return new UnsupportedOperationException(format(msg, args));
     }
 
-    static <T> T unreachableButCompilerNeedsThis() {
+    public static <T> T unreachableButCompilerNeedsThis() {
         throw new AssertionError("this code should never be reached");
     }
 
-    static String asString(Object result) {
+    public static String asString(Object result) {
         if (result == null) return null;
         return String.valueOf(result);
     }
 
-    static long now() {
+    public static long now() {
         return timeProvider.getTime();
     }
 
-    static File fileFromURI(URI uri) {
+    public static File fileFromURI(URI uri) {
         if ("file".equalsIgnoreCase(uri.getScheme())) {
             String path = uri.getSchemeSpecificPart();
             try {
@@ -176,7 +172,7 @@ abstract class Util {
         return null;
     }
 
-    static File fileFromURI(String uriSpec) throws URISyntaxException {
+    public static File fileFromURI(String uriSpec) throws URISyntaxException {
         try {
             return fileFromURI(new URI(uriSpec));
         } catch (URISyntaxException e) {
@@ -186,15 +182,15 @@ abstract class Util {
         }
     }
 
-    static boolean eq(Object o1, Object o2) {
+    public static boolean eq(Object o1, Object o2) {
         return o1 == o2 || o1 != null && o1.equals(o2);
     }
 
-    static SystemProvider system() {
+    public static SystemProvider system() {
         return system;
     }
 
-    static void save(File target, Properties p) throws IOException {
+    public static void save(File target, Properties p) throws IOException {
         File parent = target.getParentFile();
         parent.mkdirs();
         if (isWindows()) {
@@ -211,7 +207,7 @@ abstract class Util {
         return system.getProperty("os.name").toLowerCase().contains("win");
     }
 
-    static void delete(File target) {
+    public static void delete(File target) {
         target.delete();
     }
 
@@ -228,7 +224,7 @@ abstract class Util {
         p.store(out, "saved for test");
     }
 
-    static void saveJar(File target, String entryName, Properties props) throws IOException {
+    public static void saveJar(File target, String entryName, Properties props) throws IOException {
         File parent = target.getParentFile();
         parent.mkdirs();
         storeJar(target, entryName, props);
