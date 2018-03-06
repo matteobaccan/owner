@@ -8,7 +8,9 @@
 
 package org.aeonbits.owner;
 
-import static org.aeonbits.owner.Util.unsupported;
+import org.aeonbits.owner.loaders.Loader;
+import org.aeonbits.owner.loaders.PropertiesLoader;
+import org.aeonbits.owner.loaders.XMLLoader;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -19,10 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.aeonbits.owner.loaders.Loader;
-import org.aeonbits.owner.loaders.PropertiesLoader;
-import org.aeonbits.owner.loaders.SystemLoader;
-import org.aeonbits.owner.loaders.XMLLoader;
+import static org.aeonbits.owner.Util.unsupported;
 
 
 /**

@@ -105,11 +105,11 @@ abstract class Util {
         return text.replace("\\", "\\\\");
     }
 
-    public static String fixBackslashesToSlashes(String path) {
+    static String fixBackslashesToSlashes(String path) {
         return path.replace('\\', '/');
     }
 
-    public static String fixSpacesToPercentTwenty(String path) {
+    static String fixSpacesToPercentTwenty(String path) {
         return path.replace(" ", "%20");
     }
 
@@ -208,7 +208,7 @@ abstract class Util {
     }
 
     private static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+        return system.getProperty("os.name").toLowerCase().contains("win");
     }
 
     static void delete(File target) {
@@ -268,7 +268,7 @@ abstract class Util {
 
     public static <T> T newInstance(Class<T> clazz) {
         try {
-            return clazz.newInstance();
+            return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw unsupported(e,
                     "Class '%s' cannot be instantiated; see the cause below in the stack trace",

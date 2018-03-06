@@ -8,21 +8,19 @@
 
 package org.aeonbits.owner;
 
-import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
-import static org.aeonbits.owner.Config.HotReloadType.SYNC;
-import static org.aeonbits.owner.Util.fileFromURI;
-import static org.aeonbits.owner.Util.now;
+import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.Config.HotReloadType;
 
 import java.io.File;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import org.aeonbits.owner.Config.HotReload;
-import org.aeonbits.owner.Config.HotReloadType;
+import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.aeonbits.owner.Config.HotReloadType.SYNC;
+import static org.aeonbits.owner.Util.fileFromURI;
+import static org.aeonbits.owner.Util.now;
+import static org.aeonbits.owner.Util.system;
 
 /**
  * @author Luigi R. Viggiano
@@ -58,8 +56,21 @@ class HotReloadLogic implements Serializable {
     }
 
     private static class WatchableSystemProperties implements WatchableResource {
+        private final Properties props;
+        private int lastHashCode;
+
+
+        WatchableSystemProperties() {
+            props = system().getProperties();
+            lastHashCode = props.hashCode();
+        }
+
         public boolean isChanged() {
-            return true;
+            int newHashCode = props.hashCode();
+            boolean changed = lastHashCode != newHashCode;
+            if (changed)
+                lastHashCode = newHashCode;
+            return changed;
         }
     }
 

@@ -37,4 +37,12 @@ public class SystemProviderForTest implements SystemProvider {
     public Properties getProperties() {
         return system;
     }
+
+    public void setProperty(String key, String value) {
+        system.setProperty(key, value);
+    }
+
+    public void remove(String key) {
+        system.remove(key);
+    }
 }

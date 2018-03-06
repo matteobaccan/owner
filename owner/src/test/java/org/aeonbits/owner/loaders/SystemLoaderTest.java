@@ -1,25 +1,24 @@
 package org.aeonbits.owner.loaders;
 
-import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.Config.LoadType.MERGE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.SystemPropertiesHelper;
-import org.junit.After;
+import org.aeonbits.owner.SystemProviderForTest;
+import org.aeonbits.owner.UtilTest;
 import org.junit.Test;
 
-public class SystemLoaderTest {
+import java.util.HashMap;
+import java.util.Properties;
 
-    private SystemPropertiesHelper systemPropertiesHelper = new SystemPropertiesHelper();
+import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.Config.LoadType.MERGE;
+import static org.junit.Assert.*;
+
+public class SystemLoaderTest {
 
     @Config.Sources({"system:properties",
             "system:env"})
     @Config.LoadPolicy(FIRST)
-    public static interface FirstConfig extends Config {
+    public interface FirstConfig extends Config {
         @DefaultValue("this should be ignored")
         String foo();
 
@@ -40,13 +39,24 @@ public class SystemLoaderTest {
 
     @Test
     public void first_loadSystemProperties() {
-        systemPropertiesHelper.setProperty("foo", "FOO");
-        systemPropertiesHelper.setProperty("bar", "BAR");
 
-        FirstConfig config = ConfigFactory.create(FirstConfig.class);
+        Object save = UtilTest.setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("foo", "FOO");
+                    setProperty("bar", "BAR");
+                }},
+                new HashMap<String, String>()
+        ));
 
-        assertEquals("FOO", config.foo());
-        assertEquals("BAR", config.bar());
+        try {
+            FirstConfig config = ConfigFactory.create(FirstConfig.class);
+
+            assertEquals("FOO", config.foo());
+            assertEquals("BAR", config.bar());
+
+        } finally {
+            UtilTest.setSystem(save);
+        }
     }
 
     @Test
@@ -64,7 +74,7 @@ public class SystemLoaderTest {
     @Config.Sources({"system:properties",
             "system:env"})
     @Config.LoadPolicy(MERGE)
-    public static interface MergeConfig extends Config {
+    public interface MergeConfig extends Config {
         @DefaultValue("this should be ignored")
         String foo();
 
@@ -85,13 +95,22 @@ public class SystemLoaderTest {
 
     @Test
     public void merge_loadSystemProperties() {
-        systemPropertiesHelper.setProperty("foo", "FOO");
-        systemPropertiesHelper.setProperty("bar", "BAR");
+        Object save = UtilTest.setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("foo", "FOO");
+                    setProperty("bar", "BAR");
+                }},
+                new HashMap<String, String>()
+        ));
 
-        MergeConfig config = ConfigFactory.create(MergeConfig.class);
+        try {
+            MergeConfig config = ConfigFactory.create(MergeConfig.class);
 
-        assertEquals("FOO", config.foo());
-        assertEquals("BAR", config.bar());
+            assertEquals("FOO", config.foo());
+            assertEquals("BAR", config.bar());
+        } finally {
+            UtilTest.setSystem(save);
+        }
     }
 
     @Test
@@ -118,8 +137,4 @@ public class SystemLoaderTest {
         assertNotNull(config.path());
     }
 
-    @After
-    public void cleanSystemProperties() {
-        systemPropertiesHelper.cleanNonDefaultSysProps();
-    }
 }
