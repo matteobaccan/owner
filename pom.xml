@@ -229,6 +229,9 @@
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.10.4</version>
+                    <configuration>
+                        <notimestamp>true</notimestamp>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -370,9 +373,6 @@
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.4</version>
-                <configuration>
-                    <notimestamp>true</notimestamp>
-                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
