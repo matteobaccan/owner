@@ -88,10 +88,13 @@
     <target name="help">
         <echo>
         ant clean                           - cleans up the target dir
-        ant build                           - generates the website in the _site dir
+        ant build                           - generates the website in the _site dir (it's not necessary to publish)
+        ant javadoc                         - generates javadocs
         ant publish                         - publish site to gh-pages
         ant run-drafts                      - run jekyll serve (with '-w --drafts' options)
         ant run                             - run jekyll serve (with '-w' option)
+
+        Use `ant javadoc publish`, to publish javadocs and the documentation website on http://owner.aeonbits.org
         </echo>
     </target>
 
