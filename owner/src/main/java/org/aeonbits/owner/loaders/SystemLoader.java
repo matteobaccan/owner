@@ -16,6 +16,10 @@ import static org.aeonbits.owner.util.Util.system;
 
 /**
  * Allows specifying <tt>system:properties</tt> and <tt>system:env</tt> with the <tt>@Sources</tt> annotation.
+ *
+ * @author Ting-Kuan Wu
+ * @author Luigi R. Viggiano
+ * @since 1.0.10
  */
 public class SystemLoader implements Loader {
 /*
