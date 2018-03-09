@@ -6,9 +6,7 @@
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
-
-import org.aeonbits.owner.loaders.Loader;
+package org.aeonbits.owner.loaders;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +21,7 @@ import static org.aeonbits.owner.util.Util.system;
  * I think this class should be splitted in two separate classes:
  * one for system:properties and one for system:env.
  */
-class SystemLoader implements Loader {
+public class SystemLoader implements Loader {
 
     private static final String SYSTEM_PROPERTIES_URI = "system:properties";
     private static final String ENVIRONMENT_VARIABLES_URI = "system:env";

@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.loaders.Loader;
 import org.aeonbits.owner.loaders.PropertiesLoader;
+import org.aeonbits.owner.loaders.SystemLoader;
 import org.aeonbits.owner.loaders.XMLLoader;
 
 import java.io.IOException;
