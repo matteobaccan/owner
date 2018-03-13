@@ -90,7 +90,7 @@ reload doing frequent heavy operations like these.
 You can still perform the reload programmatically, using the [Reloadable]
 interface, for these cases.
 
-  [Reloadable]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html
+  [Reloadable]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Reloadable.html
 
 While instead, monitoring the filesystem is not a big deal, also because
 filesystems implement 'last modification date' that can be checked to detect
@@ -121,7 +121,7 @@ enum HotReloadType {
 
 You can check the [latest javadocs] for further details.
 
-  [latest javadocs]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.HotReload.html
+  [latest javadocs]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.HotReload.html
 
 So you can specify also the interval for the hot reload, expressed by `value`
 and `unit`, and you can also specify the type of hot reload that you need.

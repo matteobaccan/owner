@@ -55,7 +55,7 @@ You can implement [Accessible][2] that defines the above methods,
 or just add them manually.
 
   [1]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
-  [2]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Accessible.html
+  [2]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Accessible.html
 
 You can use them to print the resolved properties (and eventual overrides that 
 may occur when using the `LoadType.MERGE`):

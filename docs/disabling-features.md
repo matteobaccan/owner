@@ -34,5 +34,5 @@ public interface SampleConfig extends Config {
 In the above example the method `String hello(String name)` will return the 
 String "Hello %s, welcome on ${planet}!", ignoring the parameter passed.
 
-  [dfe]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.DisableableFeature.html
-  [df]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.DisableFeature.html
+  [dfe]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.DisableableFeature.html
+  [df]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.DisableFeature.html
