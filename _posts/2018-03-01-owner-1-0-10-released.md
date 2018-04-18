@@ -38,7 +38,7 @@ future, avoid such a long wait for a release.
 
 Please notice that at the moment I am not professionally working, I closed my consultancy company years back, and
 in this moment I am writing from a nice [Coworking Space "ImpactHub" here in Torino](https://torino.impacthub.net/).  
-So, let me quickly say that [donations are very welcome](https://github.com/lviggiano/owner/#donate).  
+So, let me quickly say that [donations are very welcome](https://github.com/lviggiano/owner/#donations).   
 Or if you want, you can hire me for some custom development on OWNER, training, or to help implementing your 
 projects.  
 This would definitely help keeping OWNER alive.
