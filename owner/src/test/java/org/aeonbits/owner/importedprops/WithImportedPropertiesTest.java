@@ -10,8 +10,8 @@ package org.aeonbits.owner.importedprops;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.SystemProviderForTest;
-import org.aeonbits.owner.UtilTest;
+import org.aeonbits.owner.util.SystemProviderForTest;
+import org.aeonbits.owner.util.UtilTest;
 import org.junit.Test;
 
 import java.util.HashMap;

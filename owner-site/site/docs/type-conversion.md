@@ -123,9 +123,9 @@ more complex split logic, you can define your own tokenizer class via the
 [`@TokenizerClass`][tokenizerclass] annotation plus [`Tokenizer`][tokenizer]
 interface.
 
-  [separator]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.Separator.html
-  [tokenizerclass]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.TokenizerClass.html
-  [tokenizer]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.Tokenizer.html
+  [separator]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.Separator.html
+  [tokenizerclass]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.TokenizerClass.html
+  [tokenizer]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.Tokenizer.html
 
 Example:
 
@@ -247,9 +247,9 @@ The @ConverterClass annotation
 ------------------------------
 
 OWNER provides the
-[`@ConverterClass`](http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Config.ConverterClass.html)
+[`@ConverterClass`](http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.ConverterClass.html)
 annotation that allows the user to specify a customized conversion logic implementing the
-[`Converter`](http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Converter.html) interface.
+[`Converter`](http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Converter.html) interface.
 
 ```java
 interface MyConfig extends Config {

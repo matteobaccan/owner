@@ -88,7 +88,7 @@ how to work with tags.
 Running the tests
 -----------------
 
-OWNER codebase is very compact and [fully tested][].
+OWNER codebase is very compact and fully tested.
 
 To execute the tests, you need maven properly installed and configured in your
 system, then run the following command from the project root:
@@ -96,8 +96,6 @@ system, then run the following command from the project root:
 ```
 $ mvn test
 ```
-
-  [fully tested]: http://newinstance.it/owner/latest/cobertura/index.html
 
 
 Continuous Integration
@@ -107,11 +105,3 @@ You can access latest builds from
  [Jenkins](https://aeonbits.ci.cloudbees.com/job/owner-api/) and
  [Travis](https://travis-ci.org/lviggiano/owner) websites.
 
-
-Code quality reports
---------------------
-
-You can access latest code quality reports from
-[Sonar](http://dev.aeonbits.org:9000/dashboard/index/org.aeonbits.owner:owner)
-and [Maven](http://owner.newinstance.it/latest/project-reports.html)
-websites.

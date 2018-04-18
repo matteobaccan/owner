@@ -12,8 +12,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.aeonbits.owner.Util.fixBackslashesToSlashes;
-import static org.aeonbits.owner.Util.fixSpacesToPercentTwenty;
+import static org.aeonbits.owner.util.Util.fixBackslashesToSlashes;
+import static org.aeonbits.owner.util.Util.fixSpacesToPercentTwenty;
 
 /**
  * @author Luigi R. Viggiano

@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
-import static org.aeonbits.owner.UtilTest.fileFromURI;
-import static org.aeonbits.owner.UtilTest.save;
+import static org.aeonbits.owner.util.UtilTest.fileFromURI;
+import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 
 /**

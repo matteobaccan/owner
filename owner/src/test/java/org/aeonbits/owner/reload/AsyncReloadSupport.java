@@ -8,26 +8,23 @@
 
 package org.aeonbits.owner.reload;
 
-import static java.lang.Thread.sleep;
 
 /**
  * @author luigi
  */
-public class AsyncReloadSupport {
-    private Object reloadLock = new Object();
+class AsyncReloadSupport {
+    private final Object reloadLock = new Object();
 
     void waitForReload(final long timeout) throws InterruptedException {
-        sleep(300);
         synchronized (reloadLock) {
             reloadLock.wait(timeout);
         }
     }
 
-    void notifyReload() throws InterruptedException {
+    void notifyReload() {
         synchronized (reloadLock) {
             reloadLock.notifyAll();
         }
-        sleep(300);
     }
 
 }

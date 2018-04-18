@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2012-2015, Luigi R. Viggiano
+ * Copyright (c) 2012-2018, Luigi R. Viggiano
  * All rights reserved.
  *
  * This software is distributable under the BSD license.
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.util;
 
-import org.aeonbits.owner.Util.SystemProvider;
+import org.aeonbits.owner.util.Util.SystemProvider;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
+import static org.aeonbits.owner.util.Util.ignore;
+import static org.aeonbits.owner.util.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;

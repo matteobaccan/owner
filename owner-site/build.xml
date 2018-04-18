@@ -10,10 +10,19 @@
     <property environment="env"/>
     <property name="build.directory" value="${basedir}/target"/>
     <property name="site.directory" value="${basedir}/site"/>
+
     <property name="gh-pages.directory" value="${build.directory}/gh-pages"/>
+    <property name="gh-pages.javadoc.directory" value="${gh-pages.directory}/apidocs/latest"/>
+
+    <property name="parent.project.directory" value="${basedir}/.." />
+    <property name="parent.project.javadoc.directory" value="${parent.project.directory}/target/site/apidocs"/>
 
     <target name="test-gh-pages">
         <available file="${gh-pages.directory}" type="dir" property="gh-pages.available"/>
+    </target>
+
+    <target name="test-javadoc">
+        <available file="${parent.project.javadoc.directory}" type="dir" property="javadoc.available" />
     </target>
 
     <target name="clone" depends="test-gh-pages" unless="gh-pages.available">
@@ -25,10 +34,19 @@
         <git dir="${gh-pages.directory}" command="pull origin gh-pages"/>
     </target>
 
-    <target name="copy" depends="pull">
+    <target name="copy-site">
         <copy todir="${gh-pages.directory}" overwrite="true">
             <fileset dir="${site.directory}" />
         </copy>
+    </target>
+
+    <target name="copy-javadoc" depends="test-javadoc" if="javadoc.available">
+        <copy todir="${gh-pages.javadoc.directory}" overwrite="true">
+            <fileset dir="${parent.project.javadoc.directory}"/>
+        </copy>
+    </target>
+
+    <target name="copy" depends="pull,copy-site,copy-javadoc">
         <copy file="${site.directory}/.gitignore" todir="${gh-pages.directory}"/>
     </target>
 
@@ -55,6 +73,10 @@
     <target name="run">
         <jekyll-serve options="-w" />
     </target>
+
+    <target name="javadoc">
+        <mvn dir="${parent.project.directory}" command="javadoc:aggregate" />
+    </target>
     
     <target name="build">
         <property name="site.destination.directory" value="${build.directory}/www"/>
@@ -66,10 +88,13 @@
     <target name="help">
         <echo>
         ant clean                           - cleans up the target dir
-        ant build                           - generates the website in the _site dir
+        ant build                           - generates the website in the _site dir (it's not necessary to publish)
+        ant javadoc                         - generates javadocs
         ant publish                         - publish site to gh-pages
         ant run-drafts                      - run jekyll serve (with '-w --drafts' options)
         ant run                             - run jekyll serve (with '-w' option)
+
+        Use `ant javadoc publish`, to publish javadocs and the documentation website on http://owner.aeonbits.org
         </echo>
     </target>
 
@@ -111,6 +136,17 @@
         <sequential>
             <exec dir="@{dir}" executable="jekyll" taskname="jekyll">
                 <arg line="@{command} @{options} ${env.JEKYLL_OPTS}"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="mvn">
+        <attribute name="dir"/>
+        <attribute name="command"/>
+        <attribute name="options" default=""/>
+        <sequential>
+            <exec dir="@{dir}" executable="mvn" taskname="mvn">
+                <arg line="@{command} @{options}" />
             </exec>
         </sequential>
     </macrodef>

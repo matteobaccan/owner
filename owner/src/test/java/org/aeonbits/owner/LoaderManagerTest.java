@@ -24,7 +24,7 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.aeonbits.owner.UtilTest.fileFromURI;
+import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.junit.Assert.assertEquals;
 
 /**

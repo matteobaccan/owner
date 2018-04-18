@@ -25,8 +25,8 @@ import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
-import static org.aeonbits.owner.UtilTest.fileFromURI;
-import static org.aeonbits.owner.UtilTest.save;
+import static org.aeonbits.owner.util.UtilTest.fileFromURI;
+import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 
 /**

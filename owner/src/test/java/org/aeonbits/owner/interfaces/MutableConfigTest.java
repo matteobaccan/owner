@@ -11,7 +11,7 @@ package org.aeonbits.owner.interfaces;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
-import org.aeonbits.owner.UtilTest;
+import org.aeonbits.owner.util.UtilTest;
 import org.junit.Before;
 import org.junit.Test;
 

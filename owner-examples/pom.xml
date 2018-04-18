@@ -21,7 +21,6 @@
 
     <modules>
         <module>owner-examples-hotreload</module>
-        <module>owner-examples-common</module>
     </modules>
     <build>
         <pluginManagement>

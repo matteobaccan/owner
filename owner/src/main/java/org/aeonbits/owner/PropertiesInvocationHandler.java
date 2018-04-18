@@ -21,7 +21,7 @@ import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.convert;
 import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
 import static org.aeonbits.owner.PropertiesMapper.key;
-import static org.aeonbits.owner.Util.isFeatureDisabled;
+import static org.aeonbits.owner.util.Util.isFeatureDisabled;
 import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
 import static org.aeonbits.owner.util.Reflection.isDefault;
 
@@ -77,7 +77,9 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private Object resolveProperty(Method method, Object... args) {
         String key = expandKey(method);
         String value = propertiesManager.getProperty(key);
-        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) { // TODO: this if should go away! See #84 and #86
+
+        // TODO: this if should go away! See #84 and #86
+        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
             String unexpandedKey = key(method);
             value = propertiesManager.getProperty(unexpandedKey);
         }
@@ -85,7 +87,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
             return null;
         // Before processing the value, we decrypt it if necessary.
         // It is a security hole store the decrypted value, so every time we need it it should be decrypted.
-        value = this.propertiesManager.decryptIfNecessary( method, value );
+        value = this.propertiesManager.decryptIfNecessary(method, value);
         value = preProcess(method, value);
         Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
         if (result == NULL) return null;

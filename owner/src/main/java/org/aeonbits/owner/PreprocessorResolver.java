@@ -16,22 +16,26 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
-import static org.aeonbits.owner.Util.newInstance;
+import static org.aeonbits.owner.util.Util.newInstance;
 
 /**
  * @author Luigi R. Viggiano
  */
 final class PreprocessorResolver {
 
-    /** Don't let anyone instantiate this class */
-    private PreprocessorResolver() {}
+    /**
+     * Don't let anyone instantiate this class
+     */
+    private PreprocessorResolver() {
+    }
 
     public static List<Preprocessor> resolvePreprocessors(Method method) {
         List<Preprocessor> result = new ArrayList<Preprocessor>();
         List<Preprocessor> preprocessorsOnMethod = getPreprocessor(method.getAnnotation(PreprocessorClasses.class));
         result.addAll(preprocessorsOnMethod);
 
-        List<Preprocessor> preprocessorsOnClass = getPreprocessor(method.getDeclaringClass().getAnnotation(PreprocessorClasses.class));
+        List<Preprocessor> preprocessorsOnClass = getPreprocessor(method.getDeclaringClass()
+                .getAnnotation(PreprocessorClasses.class));
         result.addAll(preprocessorsOnClass);
 
         return result;

@@ -59,8 +59,8 @@ Bugs fixes
   [issue-15]: https://github.com/lviggiano/owner/issues/15
   [ffbit]: https://github.com/ffbit
   [ming13]: https://github.com/ming13
-  [accessible-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Accessible.html
-  [reloadable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Reloadable.html
-  [mutable-intf]: http://owner.newinstance.it/latest/apidocs/org/aeonbits/owner/Mutable.html
+  [accessible-intf]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Accessible.html
+  [reloadable-intf]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Reloadable.html
+  [mutable-intf]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Mutable.html
   [travis-ci]: https://travis-ci.org/lviggiano/owner
 

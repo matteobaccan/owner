@@ -23,9 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.SpecialValue.SKIP;
-import static org.aeonbits.owner.Util.expandUserHome;
-import static org.aeonbits.owner.Util.unreachableButCompilerNeedsThis;
-import static org.aeonbits.owner.Util.unsupported;
+import static org.aeonbits.owner.util.Util.expandUserHome;
+import static org.aeonbits.owner.util.Util.unreachableButCompilerNeedsThis;
+import static org.aeonbits.owner.util.Util.unsupported;
 import static org.aeonbits.owner.util.Reflection.isClassAvailable;
 
 /**
@@ -137,7 +137,6 @@ enum Converters {
     },
 
     PROPERTY_EDITOR {
-
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (!canUsePropertyEditors())
@@ -172,7 +171,7 @@ enum Converters {
     PRIMITIVE {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (! targetType.isPrimitive()) return SKIP;
+            if (!targetType.isPrimitive()) return SKIP;
             if (targetType == Byte.TYPE) return Byte.parseByte(text);
             if (targetType == Short.TYPE) return Short.parseShort(text);
             if (targetType == Integer.TYPE) return Integer.parseInt(text);
@@ -265,9 +264,11 @@ enum Converters {
         return result;
     }
 
-    private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry = new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();    abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
+    private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry = new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();
 
-    static void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter){
+    abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
+
+    static void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter) {
         converterRegistry.put(type, converter);
     }
 

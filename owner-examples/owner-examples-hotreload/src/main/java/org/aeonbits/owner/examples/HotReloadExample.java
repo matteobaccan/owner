@@ -12,10 +12,10 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.ExamplesBase;
 import org.aeonbits.owner.Reloadable;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
+import org.aeonbits.owner.util.Util;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,13 +26,13 @@ import java.util.Properties;
 /**
  * @author Luigi R. Viggiano
  */
-public class HotReloadExample extends ExamplesBase {
+public class HotReloadExample {
     private static final String CFG_FILE = "file:target/examples-generated-resources/HotReloadExample.properties";
     private static File target;
 
     static {
         try {
-            target = fileFromURI(CFG_FILE);
+            target = Util.fileFromURI(CFG_FILE);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -48,7 +48,7 @@ public class HotReloadExample extends ExamplesBase {
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.printf("\n\n HOT RELOAD EXAMPLE \n\n");
 
-        save(target, new Properties() {{
+        Util.save(target, new Properties() {{
             setProperty("someValue", "10");
         }});
 

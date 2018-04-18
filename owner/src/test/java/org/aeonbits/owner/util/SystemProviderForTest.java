@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2012-2015, Luigi R. Viggiano
+ * Copyright (c) 2012-2018, Luigi R. Viggiano
  * All rights reserved.
  *
  * This software is distributable under the BSD license.
  * See the terms of the BSD license in the documentation provided with this software.
  */
 
-package org.aeonbits.owner;
+package org.aeonbits.owner.util;
 
-import org.aeonbits.owner.Util.SystemProvider;
+import org.aeonbits.owner.util.Util.SystemProvider;
 
 import java.util.Map;
 import java.util.Properties;
@@ -36,5 +36,13 @@ public class SystemProviderForTest implements SystemProvider {
 
     public Properties getProperties() {
         return system;
+    }
+
+    public void setProperty(String key, String value) {
+        system.setProperty(key, value);
+    }
+
+    public void remove(String key) {
+        system.remove(key);
     }
 }

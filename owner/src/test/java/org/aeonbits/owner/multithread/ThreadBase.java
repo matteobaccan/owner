@@ -9,12 +9,12 @@
 package org.aeonbits.owner.multithread;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.UtilTest.MyCloneable;
+import org.aeonbits.owner.util.UtilTest.MyCloneable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.aeonbits.owner.UtilTest.debug;
+import static org.aeonbits.owner.util.UtilTest.debug;
 
 abstract class ThreadBase<T extends Config> extends Thread implements MyCloneable {
     private static long counter = 0;
