@@ -9,14 +9,18 @@ OWNER, an API to ease Java property files usage.
 [![stability status](https://www.meterian.com/badge/gh/lviggiano/owner/stability)](https://www.meterian.com/report/gh/lviggiano/owner)
 [![Built with Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
 
-Donate
-------------------------------------------------------------------------
+DONATIONS
+---------
+
+Your support, is the acknowledgment of the value of this work and helps it running and improving.
+Donations are welcome.
 
 ![Donate bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1](http://i.imgur.com/BC7sVAG.png)  
 bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1
 
 [![Donate with PayPal](https://www.paypalobjects.com/webstatic/en_US/i/btn/png/gold-rect-paypal-26px.png)](https://www.paypal.me/lviggiano)
 
+Thank you!
 
 
 INTRODUCTION
