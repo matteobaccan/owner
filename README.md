@@ -12,8 +12,6 @@ OWNER, an API to ease Java property files usage.
 Donate
 ------------------------------------------------------------------------
 
-[![Flattr this](https://button.flattr.com/flattr-badge-large.png)](https://flattr.com/submit/auto?fid=pqvxnq&url=https%3A%2F%2Fgithub.com%2Flviggiano%2Fowner%2F)
-
 ![Donate bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1](http://i.imgur.com/BC7sVAG.png)  
 bitcoin:1DARNDYjjKhNF8j2DFwT3zrtUsMQvV2am1
 
