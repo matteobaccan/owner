@@ -49,6 +49,8 @@ public class PropertiesFileCreator implements Creator {
      *
      * @param clazz class to parse
      * @param output output file path
+     * @param headerName
+     * @param projectName
      *
      * @return if the file was written correctly.
      * @throws Exception
@@ -184,6 +186,7 @@ public class PropertiesFileCreator implements Creator {
 
             if (found != null) {
                 currentLevel = found.subGroups;
+                lastFound = found;
             } else {
                 lastFound = new Group();
                 lastFound.title = groupName;
@@ -218,10 +221,13 @@ public class PropertiesFileCreator implements Creator {
         return result.toString();
     }
 
+
     /**
      * Generate header for the file.
-     *
-     * @return
+     * 
+     * @param headerName
+     * @param projectName
+     * @return 
      */
     private String generateFileHeader(String headerName, String projectName) {
         String headerAscii = "";
