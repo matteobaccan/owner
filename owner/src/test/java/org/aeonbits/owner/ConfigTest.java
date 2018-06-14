@@ -44,6 +44,10 @@ public class ConfigTest {
         @DefaultValue("Good Morning")
         String salutation();
 
+        @Key("password")
+        @DefaultValue("@#$%^&*()")
+        String password();
+
         @DefaultValue("foo")
         void voidMethodWithValue();
 
@@ -122,6 +126,19 @@ public class ConfigTest {
         SubstituteAndFormat cfg = ConfigFactory.create(SubstituteAndFormat.class);
         assertEquals("Hello Mr. Luigi", cfg.salutation("Luigi"));
         assertEquals("Mr. Luigi", cfg.mister("Luigi"));
+    }
+
+    /**
+     * When a property value contains a '%' character but is not a String format,
+     * we expect the property value to be returned as-is. Under the covers, the String.format
+     * method is used for property expansion. We want to verify a property value that
+     * contains a '%' character but is _not_ a format String is, indeed, supported.
+     */
+    @Test
+    public void whenPropertyValueIsNotValidFormatString_thenPropertyValueShouldRemainIntact() {
+        SampleConfig config = ConfigFactory.create(SampleConfig.class);
+
+        assertEquals ("@#$%^&*()", config.password());
     }
 
 }
