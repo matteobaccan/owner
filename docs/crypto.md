@@ -5,25 +5,31 @@ prev_section: singleton
 next_section: features
 permalink: /docs/crypto/
 ---
-## What is this feature?
 
-This is a experimental feature that adds crypto features support to OWNER.
+What is this feature?
+---------------------
 
-With Crypto support it is possible to declare with a simple annotation that a property contains an encrypted value
-( values which needed to be decrypted ). The `@DecryptorClass` can be specified for class or for every property.
-The `@EncryptedValue(@DecryptorClass)` overrides the `@DecryptorClass` in class.
+This is an experimental feature adding crypto support to OWNER.
 
-##Which crypto frameworks are supported?
+With Crypto it is possible to declare, with a simple annotation, that a property contains an encrypted value
+( a value which has to be decrypted ). A `@DecryptorClass` can be specified for a class or for each property.
+`@EncryptedValue(@DecryptorClass)` overrides a `@DecryptorClass` specified at class level.
 
-Crypto support allows the use of any framework to decrypt the values. You must to supply a class ( the decryptor )
-which implements the `Decryptor` interface, so it is possible to use every framework you want.
 
-##How can I use it?
+Which crypto frameworks are supported?
+--------------------------------------
 
-Suposse you will user the same `@DecryptorClass` to decrypt all values in your configuration:
+Crypto support allows the use of any framework to decrypt values. You must supply a class
+implementing the `Decryptor` interface, where you can use any framework you want in order to decrypt values.
+
+
+How can I use it?
+-----------------
+
+Suppose you will use the same `@DecryptorClass` to decrypt all values in your configuration:
 
 ```java
-@DecryptorManagerClass( MyDecryptor1.class )
+@DecryptorClass( MyDecryptor1.class )
 public interface Sample extends Config {
 
     @EncryptedValue  
@@ -47,10 +53,10 @@ public interface Sample extends Config {
 }
 ```
 
-Or if you plan to use the same `@DecryptorClass` for all `@EncryptedValue` except `myEncryptedPassword1`:
+Or if you plan to use the same `@DecryptorClass` for all `@EncryptedValue` properties except `myEncryptedPassword1`:
 
 ```java
-@DecryptorManagerClass( MyDecryptor2.class )
+@DecryptorClass( MyDecryptor2.class )
 public interface Sample extends Config {
 
     @EncryptedValue( MyDecryptor1.class )
@@ -63,9 +69,12 @@ public interface Sample extends Config {
     public String myEncryptedPassword3();
 }
 ```
-##It works with another annotations...
 
-... so it is possible write code as:
+
+It works with other annotations...
+----------------------------------
+
+... so you can write code like this:
 
 ```java
 @Key("crypto.list")
@@ -75,10 +84,11 @@ public interface Sample extends Config {
 List<String> cryptoList();
 ```
 
-##Can you show me an implementation example about Decryptor?
 
-This is the java code of `IdentityDecryptor.java`, a decryptor which returns the same value that receives for decrypting:
-It does nothing with the value to decrypt.
+Can you show me an example implementation of Decryptor?
+-------------------------------------------------------
+
+This is the source code of `IdentityDecryptor.java`, a no-op Decryptor returning the same value received for decrypting:
 
 ```java
 package org.aeonbits.owner.crypto;
@@ -92,10 +102,10 @@ extends AbstractDecryptor {
 }
 ```
 
-It extends the `AbstractDecryptor`, an abstract class that implements the `Decrypt` interface and implements one of its
-methods. We need implement the other method, the `decrypt( String value )` method to get our decryptor working.
+It extends `AbstractDecryptor`, an abstract class that already implements the `Decrypt` interface and one of its
+methods. To get our Decryptor working, we just have to implement the other method, `decrypt( String value )` .
 
-Another example is the `StandardDecryptor.java`, which uses the javax.crypto features available in JDK.
+Another example is `StandardDecryptor.java`, which uses the `javax.crypto` features available in JDK.
 
 ```java
 package org.aeonbits.owner.crypto;

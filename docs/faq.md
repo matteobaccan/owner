@@ -54,9 +54,11 @@ I have no idea. I implemented OWNER for a web application I was working on, then
 like [somebody][#32] is now using it. Including my friend [Bruno] who is a great guy and makes me proud of it.
 
 If you like us to know you are using OWNER, drop a comment [here][#32].
-Or maybe you just want to click here:
+Or maybe you just want to go [here](https://www.openhub.net/p/owner/users) and click on "I use this!".
 
-<script type="text/javascript" src="http://www.ohloh.net/p/629412/widgets/project_users.js?style=gray"></script>
+<span style="bgcolor:white">
+<script type='text/javascript' src='https://www.openhub.net/p/owner/widgets/project_factoids?format=js'></script>
+</span>
 
 The fact I am receiving feedback, request for features and changes, mails and questions, makes me think that this
 library is useful to some people around the world, and this encourages me to work and improve it.
