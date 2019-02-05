@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>Allows a <tt>Config</tt> object to access the contents of the properties, providing utility methods to perform
+ * <p>Allows a <code>Config</code> object to access the contents of the properties, providing utility methods to perform
  * consequent operations.</p>
  * <p>Example:</p>
  * <pre>
@@ -65,7 +65,7 @@ public interface Accessible extends Config {
      *
      * @param out      an output stream.
      * @param comments a description of the property list.
-     * @throws IOException if writing this property list to the specified output stream throws an <tt>IOException</tt>.
+     * @throws IOException if writing this property list to the specified output stream throws an <code>IOException</code>.
      * @see java.util.Properties#store(java.io.OutputStream, String)
      * @since 1.0.4
      */
@@ -115,15 +115,15 @@ public interface Accessible extends Config {
      * Emits an XML document representing all of the properties contained
      * in this table.
      *
-     * <p> An invocation of this method of the form <tt>props.storeToXML(os,
-     * comment)</tt> behaves in exactly the same way as the invocation
-     * <tt>props.storeToXML(os, comment, "UTF-8");</tt>.
+     * <p> An invocation of this method of the form <code>props.storeToXML(os,
+     * comment)</code> behaves in exactly the same way as the invocation
+     * <code>props.storeToXML(os, comment, "UTF-8");</code>.
      *
      * @param os the output stream on which to emit the XML document.
      * @param comment a description of the property list, or <code>null</code>
      *        if no comment is desired.
      * @throws IOException if writing to the specified output stream
-     *         results in an <tt>IOException</tt>.
+     *         results in an <code>IOException</code>.
      * @throws NullPointerException if <code>os</code> is null.
      * @throws ClassCastException  if this <code>Properties</code> object
      *         contains any keys or values that are not
@@ -138,8 +138,8 @@ public interface Accessible extends Config {
      * of the same name has not already been found from the main
      * properties list.
      * <p>
-     * The returned set is not backed by the <tt>Properties</tt> object.
-     * Changes to this <tt>Properties</tt> are not reflected in the set,
+     * The returned set is not backed by the <code>Properties</code> object.
+     * Changes to this <code>Properties</code> are not reflected in the set,
      * or vice versa.
      *
      * @return  a set of keys in this property list, including the keys in the

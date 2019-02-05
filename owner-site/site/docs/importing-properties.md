@@ -41,9 +41,9 @@ assertEquals("orange", cfg.baz());
   <h5>Null keys and Null values are invalid.</h5>
   
   <p>
-  A <tt>Properties</tt> or <tt>Map</tt> object accepts <tt>null</tt> key or 
-  <tt>null</tt> values, but that is obviously an error, 
-  so starting from version 1.0.10, an <tt>IllegalArgumentException</tt> is thrown.
+  A <code>Properties</code> or <code>Map</code> object accepts <code>null</code> key or 
+  <code>null</code> values, but that is obviously an error, 
+  so starting from version 1.0.10, an <code>IllegalArgumentException</code> is thrown.
   </p>
   
   <p>

@@ -15,7 +15,7 @@ import java.util.Properties;
 import static org.aeonbits.owner.util.Util.system;
 
 /**
- * Allows specifying <tt>system:properties</tt> and <tt>system:env</tt> with the <tt>@Sources</tt> annotation.
+ * Allows specifying <code>system:properties</code> and <code>system:env</code> with the <code>@Sources</code> annotation.
  *
  * @author Ting-Kuan Wu
  * @author Luigi R. Viggiano
@@ -23,7 +23,7 @@ import static org.aeonbits.owner.util.Util.system;
  */
 public class SystemLoader implements Loader {
 /*
- * This class accesses <tt>Util.system()</tt> which is package accessible; for this reason this class cannot be moved
+ * This class accesses <code>Util.system()</code> which is package accessible; for this reason this class cannot be moved
  * inside the package loaders.
  *
  * I think this class should be splitted in two separate classes:

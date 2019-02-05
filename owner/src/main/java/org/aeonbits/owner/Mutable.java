@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.io.Reader;
 
 /**
- * <p>Allows a <tt>Config</tt> object to change its property values at runtime.</p>
+ * <p>Allows a <code>Config</code> object to change its property values at runtime.</p>
  * <p>Example:</p>
  * <pre>
  *     public interface MyConfig extends Config, Mutable {
@@ -40,11 +40,11 @@ public interface Mutable extends Config {
     /**
      * <p>Sets a given property to the specified value.</p>
      * <p>Differently than {@link
-     * java.util.Properties#setProperty(String, String)}, if <tt>key</tt> is set to <tt>null</tt> then this call is
+     * java.util.Properties#setProperty(String, String)}, if <code>key</code> is set to <code>null</code> then this call is
      * equivalent to {@link #removeProperty(String)}.</p>
      *
      * @param key   the key to be placed into the property list.
-     * @param value the value corresponding to <tt>key</tt>, or <tt>null</tt> if the property must be removed.
+     * @param value the value corresponding to <code>key</code>, or <code>null</code> if the property must be removed.
      * @return the previous value of the specified key, or <code>null</code> if it did not have one.
      * @since 1.0.4
      */

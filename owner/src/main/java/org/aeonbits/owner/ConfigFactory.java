@@ -112,7 +112,7 @@ public final class ConfigFactory {
      * Returns the value for a given property.
      *
      * @param key the key for the property
-     * @return the value for the property, or <tt>null</tt> if the property is not set.
+     * @return the value for the property, or <code>null</code> if the property is not set.
      * @since 1.0.4
      */
     public static String getProperty(String key) {
@@ -123,7 +123,7 @@ public final class ConfigFactory {
      * Clears the value for the property having the given key. This means, that the given property is removed.
      *
      * @param key the key for the property to remove.
-     * @return the old value for the given key, or <tt>null</tt> if the property was not set.
+     * @return the old value for the given key, or <code>null</code> if the property was not set.
      * @since 1.0.4
      */
     public static String clearProperty(String key) {
@@ -134,7 +134,7 @@ public final class ConfigFactory {
      * Registers a loader to enables additional file formats.
      *
      * @param loader the loader to register.
-     * @throws NullPointerException if specified loader is <tt>null</tt>.
+     * @throws NullPointerException if specified loader is <code>null</code>.
      * @since 1.0.5
      */
     public static void registerLoader(Loader loader) {

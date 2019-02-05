@@ -96,7 +96,7 @@ public final class ConfigCache {
      *
      * @param key       the key object to be used to identify the instance in the cache.
      * @param <T>       type of the interface.
-     * @return          the {@link Config} object from the cache if exists, or <tt>null</tt> if it doesn't.
+     * @return          the {@link Config} object from the cache if exists, or <code>null</code> if it doesn't.
      */
     @SuppressWarnings("unchecked")
     public static <T extends Config> T get(Object key) {
@@ -110,7 +110,7 @@ public final class ConfigCache {
      * @param instance  the instance of the {@link Config} object to be stored into the cache.
      * @param <T>       type of the interface.
      * @return          the previous value associated with the specified key, or
-     *                  <tt>null</tt> if there was no mapping for the key.
+     *                  <code>null</code> if there was no mapping for the key.
      */
     @SuppressWarnings("unchecked")
     public static <T extends Config> T add(Object key, T instance) {
@@ -142,15 +142,15 @@ public final class ConfigCache {
      * Removes the cached instance for the given key if it is present.
      *
      * <p>Returns previous instance associated to the given key in the cache,
-     * or <tt>null</tt> if the cache contained no instance for the given key.
+     * or <code>null</code> if the cache contained no instance for the given key.
      *
      * <p>The cache will not contain the instance for the specified key once the
      * call returns.
      *
      * @param <T>   type of the interface.
      * @param key   key whose instance is to be removed from the cache.
-     * @return      the previous instance associated with <tt>key</tt>, or
-     *              <tt>null</tt> if there was no instance for <tt>key</tt>.
+     * @return      the previous instance associated with <code>key</code>, or
+     *              <code>null</code> if there was no instance for <code>key</code>.
      */
     @SuppressWarnings("unchecked")
     public static <T extends Config> T remove(Object key) {

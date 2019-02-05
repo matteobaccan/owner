@@ -11,7 +11,7 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.event.ReloadListener;
 
 /**
- * <p>Allows a <tt>Config</tt> object to implement the reloading of the properties at runtime.</p>
+ * <p>Allows a <code>Config</code> object to implement the reloading of the properties at runtime.</p>
  *
  * <p>Example:</p>
  *

@@ -168,9 +168,9 @@ java objects. But if we call the method `int port()` then a
   <h5>You don't want the NullPointerException?</h5>
   <p>
     If you don't want to get the NullPointerException, you can just define
-    a default value. For instance, you can set <tt>@DefaultValue("0")</tt> for
-    an <tt>int</tt> return type, or a <tt>@DefaultValue("false")</tt> for a 
-    <tt>boolean</tt> return type, and so on...
+    a default value. For instance, you can set <code>@DefaultValue("0")</code> for
+    an <code>int</code> return type, or a <code>@DefaultValue("false")</code> for a 
+    <code>boolean</code> return type, and so on...
   </p>
 </div>
 

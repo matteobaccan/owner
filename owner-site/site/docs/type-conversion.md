@@ -183,7 +183,7 @@ public interface ArrayExample extends Config {
 <div class="note warning">
   <h5>@Separator and @TokenizerClass don't go together!</h5>
     Notice that it is invalid to specify together on the same level both
-    <tt>@Separator</tt> and <tt>@TokenizerClass</tt> annotations:
+    <code>@Separator</code> and <code>@TokenizerClass</code> annotations:
     you cannot specify two different ways to do the same thing!
 </div>
 

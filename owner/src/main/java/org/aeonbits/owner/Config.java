@@ -59,7 +59,7 @@ public interface Config extends Serializable {
     /**
      * Specifies the source from which to load the properties file. It has to be specified in a URI string format.
      * By default, allowed protocols are the ones allowed by {@link java.net.URL} plus
-     * <tt>classpath:path/to/resource.properties</tt>, but user can specify his own additional protocols.
+     * <code>classpath:path/to/resource.properties</code>, but user can specify his own additional protocols.
      *
      * @since 1.0.2
      */
@@ -250,7 +250,7 @@ public interface Config extends Serializable {
      */
     enum HotReloadType {
         /**
-         * The hot reload will happen when one of the methods is invoked on the <tt>Config</tt> class.
+         * The hot reload will happen when one of the methods is invoked on the <code>Config</code> class.
          */
         SYNC,
 
@@ -286,7 +286,7 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies simple <tt>{@link String}</tt> as separator to tokenize properties values specified as a
+     * Specifies simple <code>{@link String}</code> as separator to tokenize properties values specified as a
      * single string value, into elements for vectors and collections.
      * The value specified is used as per {@link String#split(String, int)} with int=-1, every element is also
      * trimmed out from spaces using {@link String#trim()}.
@@ -317,7 +317,7 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies a <tt>{@link Tokenizer}</tt> class to allow the user to define a custom logic to split
+     * Specifies a <code>{@link Tokenizer}</code> class to allow the user to define a custom logic to split
      * the property value into tokens to be used as single elements for vectors and collections.
      *
      * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
@@ -343,7 +343,7 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies a <tt>{@link Converter}</tt> class to allow the user to define a custom conversion logic for the
+     * Specifies a <code>{@link Converter}</code> class to allow the user to define a custom conversion logic for the
      * type returned by the method. If the method returns a collection, the Converter is used to convert a single
      * element.
      */
@@ -355,7 +355,7 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies a <tt>{@link Preprocessor}</tt> class to allow the user to define a custom logic to pre-process
+     * Specifies a <code>{@link Preprocessor}</code> class to allow the user to define a custom logic to pre-process
      * the property value before being used by the library.
      *
      * @since 1.0.9

@@ -17,8 +17,8 @@ import java.util.Properties;
 import static org.aeonbits.owner.util.Util.expandUserHome;
 
 /**
- * This class is used to expand variables in the format <tt>${variable}</tt>$, using values from
- * {@link System#getenv()}, {@link System#getProperties()} and the <tt>Properties</tt> object specified in the
+ * This class is used to expand variables in the format <code>${variable}</code>$, using values from
+ * {@link System#getenv()}, {@link System#getProperties()} and the <code>Properties</code> object specified in the
  * constructor (in inverse order; first match is accepted).
  *
  * @author Luigi R. Viggiano

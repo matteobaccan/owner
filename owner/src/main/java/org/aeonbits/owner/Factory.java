@@ -36,7 +36,7 @@ public interface Factory {
      * Returns the value for a given property.
      *
      * @param key the key for the property
-     * @return the value for the property, or <tt>null</tt> if the property is not set.
+     * @return the value for the property, or <code>null</code> if the property is not set.
      * @since 1.0.5
      */
     String getProperty(String key);
@@ -56,7 +56,7 @@ public interface Factory {
      * Clears the value for the property having the given key. This means, that the given property is removed.
      *
      * @param key the key for the property to remove.
-     * @return the old value for the given key, or <tt>null</tt> if the property was not set.
+     * @return the old value for the given key, or <code>null</code> if the property was not set.
      * @since 1.0.5
      */
     String clearProperty(String key);
@@ -83,7 +83,7 @@ public interface Factory {
      * Registers a loader to enables additional file formats.
      *
      * @param loader the loader to register.
-     * @throws NullPointerException if specified loader is <tt>null</tt>.
+     * @throws NullPointerException if specified loader is <code>null</code>.
      * @since 1.0.5
      */
     void registerLoader(Loader loader);
