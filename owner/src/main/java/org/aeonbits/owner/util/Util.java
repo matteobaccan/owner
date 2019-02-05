@@ -71,7 +71,7 @@ public abstract class Util {
         }
 
         public Properties getProperties() {
-            return System.getProperties();
+            return (Properties) System.getProperties().clone();
         }
     };
 
