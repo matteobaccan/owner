@@ -56,7 +56,7 @@ like [somebody][#32] is now using it. Including my friend [Bruno] who is a great
 If you like us to know you are using OWNER, drop a comment [here][#32].
 Or maybe you just want to click here:
 
-<script type="text/javascript" src="http://www.ohloh.net/p/629412/widgets/project_users.js?style=gray"></script>
+<script type='text/javascript' src='https://www.openhub.net/p/owner/widgets/project_factoids_stats?format=js'></script>
 
 The fact I am receiving feedback, request for features and changes, mails and questions, makes me think that this
 library is useful to some people around the world, and this encourages me to work and improve it.
