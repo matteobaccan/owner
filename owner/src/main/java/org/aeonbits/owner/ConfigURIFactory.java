@@ -40,8 +40,15 @@ class ConfigURIFactory {
                 return null;
             return url.toURI();
         } else if (fixed.startsWith(FILE_PROTOCOL)) {
-            String path = fixSpacesToPercentTwenty(fixed);
-            return new URI(path);
+            // This check fixes the case where an environment variable has been
+            // specified for the path to the config file, but that environment
+            // variable is blank / undefined.
+            if ( fixed.equals(FILE_PROTOCOL) ) {
+                return new URI("");
+            } else {
+                String path = fixSpacesToPercentTwenty(fixed);
+                return new URI(path);
+            }
         } else {
             return new URI(fixed);
         }

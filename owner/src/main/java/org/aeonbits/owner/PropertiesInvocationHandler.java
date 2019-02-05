@@ -112,7 +112,24 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private String format(Method method, String format, Object... args) {
         if (isFeatureDisabled(method, PARAMETER_FORMATTING))
             return format;
-        return String.format(format, args);
+
+        // If there are no arguments to format, we can just return.
+        // This is also helpful when the {@code format} is a property value that contains a '%' character,
+        // such as '@#$%^&*()" (e.g., a clear-text password). In such cases, the '%' character is not
+        // a placeholder in a format string -- its just a random character in the property value.
+        if ( args == null || args.length == 0 )
+            return format;
+
+        try {
+            // Do this to achieve property expansion
+            return String.format(format, args);
+            }
+        catch ( Exception e ) {
+            // There's no guarantee that a property value from a config file
+            // is a legal format string. When formatting doesn't work, let's
+            // just return the original property value.
+            return format;
+            }
     }
 
     private String expandVariables(Method method, String value) {

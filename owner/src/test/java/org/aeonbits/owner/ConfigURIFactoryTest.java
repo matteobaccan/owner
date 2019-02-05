@@ -26,4 +26,11 @@ public class ConfigURIFactoryTest {
         URI uri = h.newURI("classpath:test.properties");
         assertNotNull(uri);
     }
+
+    @Test
+    public void shouldReturnAUriWithEmptyFilePath() throws URISyntaxException {
+        ConfigURIFactory h = new ConfigURIFactory(this.getClass().getClassLoader(), new VariablesExpander(new Properties()));
+        URI uri = h.newURI("file:");
+        assertNotNull(uri);
+    }
 }
