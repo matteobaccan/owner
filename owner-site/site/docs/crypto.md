@@ -5,7 +5,9 @@ prev_section: singleton
 next_section: features
 permalink: /docs/crypto/
 ---
-## What is this feature?
+
+What is this feature?
+---------------------
 
 This is an experimental feature adding crypto support to OWNER.
 
@@ -13,12 +15,16 @@ With Crypto it is possible to declare, with a simple annotation, that a property
 ( a value which has to be decrypted ). A `@DecryptorClass` can be specified for a class or for each property.
 `@EncryptedValue(@DecryptorClass)` overrides a `@DecryptorClass` specified at class level.
 
-##Which crypto frameworks are supported?
+
+Which crypto frameworks are supported?
+--------------------------------------
 
 Crypto support allows the use of any framework to decrypt values. You must supply a class
 implementing the `Decryptor` interface, where you can use any framework you want in order to decrypt values.
 
-##How can I use it?
+
+How can I use it?
+-----------------
 
 Suppose you will use the same `@DecryptorClass` to decrypt all values in your configuration:
 
@@ -63,7 +69,10 @@ public interface Sample extends Config {
     public String myEncryptedPassword3();
 }
 ```
-##It works with other annotations...
+
+
+It works with other annotations...
+----------------------------------
 
 ... so you can write code like this:
 
@@ -75,7 +84,9 @@ public interface Sample extends Config {
 List<String> cryptoList();
 ```
 
-##Can you show me an example implementation of Decryptor?
+
+Can you show me an example implementation of Decryptor?
+-------------------------------------------------------
 
 This is the source code of `IdentityDecryptor.java`, a no-op Decryptor returning the same value received for decrypting:
 
