@@ -49,6 +49,7 @@ public class ZooKeeperLoader implements Loader {
                 result.put(key, getValue(client, basePath, key));
 
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw (IOException) new InterruptedIOException().initCause(e);
         } catch (Exception e) {
             throw new IOException(e);
