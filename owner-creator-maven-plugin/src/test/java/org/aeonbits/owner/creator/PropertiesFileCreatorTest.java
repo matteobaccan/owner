@@ -8,23 +8,23 @@
 
 package org.aeonbits.owner.creator;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.GroupOrder;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
- *
  * @author Luca Taddeo
  */
 public class PropertiesFileCreatorTest {
 
-    @GroupOrder({"second", "first"})
     interface MyConfig extends Config {
 
-        @Group({"first"})
         @Key("valuekey")
         @DefaultValue("value")
         String value();
@@ -32,28 +32,28 @@ public class PropertiesFileCreatorTest {
         @DefaultValue("value2")
         String value2();
 
-        @Group({"second"})
         @DefaultValue("value3")
         String value3();
 
-        @Group({"second", "sub"})
         @DefaultValue("value4")
         String value4();
     }
-    
+
     /**
      * Test of parse method, of class PropertiesFileCreator.
      */
     @Test
-    public void testParse() {
+    public void testParse() throws Exception {
+        PropertiesFileCreator creator = new PropertiesFileCreator();
 
+        File file = new File("./target/text.properties");
+        file.getParentFile().mkdirs();
+
+        PrintWriter output = new PrintWriter(file);
         try {
-            PropertiesFileCreator creator = new PropertiesFileCreator();
-
-            assertTrue(creator.parse(MyConfig.class, "./text.properties", "test", "project test"));
-        } catch (Exception ex) {
-            Logger.getLogger(PropertiesFileCreatorTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
+            creator.parse(MyConfig.class, output, "test", "project test");
+        } finally {
+            output.close();
         }
     }
 

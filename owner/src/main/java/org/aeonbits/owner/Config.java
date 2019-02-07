@@ -116,56 +116,6 @@ public interface Config extends Serializable {
     }
 
     /**
-     * The description that appears in created property file.
-     */
-    @Retention(RUNTIME)
-    @Target(METHOD)
-    @Documented
-    @interface Description {
-        String value();
-    }
-    
-    /**
-     * If this annotation is put on a property, it will not write on property file.
-     */
-    @Retention(RUNTIME)
-    @Target(METHOD)
-    @Documented
-    @interface NoProperty {
-    }
-    
-    /**
-     * Value to assign to the property in the property file.
-     */
-    @Retention(RUNTIME)
-    @Target(METHOD)
-    @Documented
-    @interface ValorizedAs {
-        String value();
-    }
-    
-    /**
-     * Order to follow for groups in property file.
-     */
-    @Retention(RUNTIME)
-    @Target(TYPE)
-    @Documented
-    @interface GroupOrder {
-        String[] value();
-    }
-    
-    /**
-     * Group of a property.
-     * Can be more than one as group and subgroup.
-     */
-    @Retention(RUNTIME)
-    @Target(METHOD)
-    @Documented
-    @interface Group {
-        String[] value();
-    }
-    
-    /**
      * Specifies the policy type to use to load the {@link org.aeonbits.owner.Config.Sources} files for properties.
      *
      * @since 1.0.2

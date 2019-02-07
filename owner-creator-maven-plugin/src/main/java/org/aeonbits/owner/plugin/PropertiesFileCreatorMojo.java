@@ -9,6 +9,7 @@
 package org.aeonbits.owner.plugin;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -66,12 +67,12 @@ public class PropertiesFileCreatorMojo
     private MavenProject project;
     
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        try {
+    public void execute() throws MojoExecutionException {
 
-            List<URL> urls = new ArrayList();
-            
-            if(jarPath != null && !jarPath.isEmpty()) {
+        List<URL> urls = new ArrayList();
+
+        try {
+            if (jarPath != null && !jarPath.isEmpty()) {
                 System.out.println("Use passed jar [" + jarPath + "]");
                 File jar = new File(jarPath);
                 urls.add(jar.toURI().toURL());
@@ -83,17 +84,22 @@ public class PropertiesFileCreatorMojo
                     urls.add(jar.toURI().toURL());
                 }
             }
-            
+
             URLClassLoader jarPack = new URLClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
             Class classToLoad = jarPack.loadClass(packageClass);
-            
+
             // Parse class and create property file
             PropertiesFileCreator creator = new PropertiesFileCreator();
-            creator.parse(classToLoad, outputDirectory, projectName, projectDesription);
-            System.out.println("Conversion succeded, properties saved [" + outputDirectory + "]");
-        } catch (Throwable ex) {
-            throw new MojoExecutionException(ex.getMessage());
+            PrintWriter output = new PrintWriter(outputDirectory);
+            try {
+                creator.parse(classToLoad, output, projectName, projectDesription);
+            } finally {
+                output.close();
+            }
+        } catch (Exception ex){
+            throw new MojoExecutionException(ex.getMessage(), ex);
         }
+        System.out.println("Conversion succeded, properties saved [" + outputDirectory + "]");
     }
     
 }
