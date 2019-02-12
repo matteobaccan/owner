@@ -8,15 +8,12 @@ group: edge
 
 language: java
 jdk:
-  - oraclejdk11
-  - oraclejdk10
   - oraclejdk9
   - oraclejdk8
   - openjdk7
 
 os:
   - linux
-  - osx
 
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B
@@ -27,7 +24,5 @@ after_success:
 addons:
   apt:
     packages:
-      - oracle-java11-installer
-      - oracle-java10-installer
       - oracle-java9-installer
       - oracle-java8-installer
