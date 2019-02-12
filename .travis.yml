@@ -3,20 +3,24 @@
 # sudo: false
 
 sudo: required
-dist: trusty
+dist: xenial
 group: edge
 
 language: java
 jdk:
+  - oraclejdk11
   - oraclejdk9
   - oraclejdk8
   - openjdk7
+  - openjdk10
+#  - openjdk11
 
 os:
   - linux
+  - osx
 #  - windows
 
-install: mvn install -DskipTests=true -B
+install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B
 
 after_success:
