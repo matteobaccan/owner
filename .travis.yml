@@ -14,7 +14,7 @@ jdk:
 
 os:
   - linux
-  - windows
+#  - windows
 
 install: mvn install -DskipTests=true -B
 script: mvn test -B
