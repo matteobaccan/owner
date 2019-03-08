@@ -18,6 +18,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -352,6 +353,17 @@ public interface Config extends Serializable {
     @Documented
     @interface ConverterClass {
         Class<? extends Converter> value();
+    }
+
+    /**
+     * Specifies a <tt>{@link Converter}</tt> class to allow the user to define a custom conversion logic for the
+     * collection type returned by the method.
+     */
+    @Retention(RUNTIME)
+    @Target(METHOD)
+    @Documented
+    public @interface CollectionConverterClass {
+        Class<? extends Converter<? extends Collection<?>>> value();
     }
 
     /**
