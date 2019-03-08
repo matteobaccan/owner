@@ -356,8 +356,8 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies a <tt>{@link Converter}</tt> class to allow the user to define a custom conversion logic for the
-     * collection type returned by the method.
+     * Specifies a <code>{@link Converter}</code> class to allow the user to define a custom conversion logic for the
+     * collection type returned by the method. The converter is used once for the whole collection.
      */
     @Retention(RUNTIME)
     @Target(METHOD)

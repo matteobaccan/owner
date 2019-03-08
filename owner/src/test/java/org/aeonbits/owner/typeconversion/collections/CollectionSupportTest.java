@@ -81,8 +81,8 @@ public class CollectionSupportTest {
         @Override
         public CollectionWithoutDefaultConstructor<String> convert(Method method, String input) {
             final String[] inputs = input.split(",");
-            final CollectionWithoutDefaultConstructor collection =
-                    new CollectionWithoutDefaultConstructor(inputs.length);
+            final CollectionWithoutDefaultConstructor<String> collection =
+                    new CollectionWithoutDefaultConstructor<String>(inputs.length);
             for (String value : inputs) {
                 collection.add(value);
             }

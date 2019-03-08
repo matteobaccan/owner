@@ -100,6 +100,8 @@ public class CollectionConverterClassTest {
     }
 
     public static class UnmodifiableListConverter implements Converter<List<?>> {
+
+        @SuppressWarnings("unchecked")
         @Override
         public List<?> convert(Method targetMethod, String text) {
             String[] tokens;
@@ -107,9 +109,9 @@ public class CollectionConverterClassTest {
                     targetMethod.getAnnotation(TokenizerClass.class);
             if (tokenizer != null) {
                 try {
-                    Tokenizer t = tokenizer.value().newInstance();
+                    Tokenizer t = tokenizer.value().getDeclaredConstructor().newInstance();
                     tokens = t.tokens(text);
-                } catch (ReflectiveOperationException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             } else {
@@ -120,13 +122,13 @@ public class CollectionConverterClassTest {
             ConverterClass converter =
                     targetMethod.getAnnotation(ConverterClass.class);
             try {
-                Converter<?> c = converter.value().newInstance();
+                Converter<?> c = converter.value().getDeclaredConstructor().newInstance();
                 List list = new ArrayList(tokens.length);
                 for (String token : tokens) {
                     list.add(c.convert(targetMethod, token.trim()));
                 }
                 return Collections.unmodifiableList(list);
-            } catch (ReflectiveOperationException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
