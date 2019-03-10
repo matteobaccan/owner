@@ -65,7 +65,6 @@ public class PropertiesFileCreatorMojo
     private String projectName;
     
     /**
-     * TODO
      * Template for properties file.
      */
     @Parameter
@@ -74,6 +73,10 @@ public class PropertiesFileCreatorMojo
     @Parameter( defaultValue = "${project}", readonly = true )
     private MavenProject project;
     
+    /**
+     *
+     * @throws MojoExecutionException
+     */
     @Override
     public void execute() throws MojoExecutionException {
 
@@ -97,7 +100,7 @@ public class PropertiesFileCreatorMojo
                 }
             }
 
-            // If a classpath 
+            // If a libraries folder is valorized we load all classes
             if (librariesFolder != null && !librariesFolder.isEmpty()) {
                 logInfo("Use jars dependency folder [%s]", librariesFolder);
 

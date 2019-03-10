@@ -58,6 +58,7 @@ public class PropertiesFileCreatorTest {
 
     /**
      * Test of parse method, of class PropertiesFileCreator.
+     * @throws java.lang.Exception
      */
     @Test
     public void testParse() throws Exception {
