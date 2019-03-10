@@ -91,6 +91,9 @@ public class PropertiesFileCreator {
                 prop.name = method.getName();
             }
 
+            // We might replace description annotation with javadoc comment
+            // but a .java file is required, in .class file javadoc you can't find it.
+            // We should think to an alternative.
             if (method.isAnnotationPresent(Description.class)) {
                 Description annotation = method.getAnnotation(Description.class);
                 prop.description = annotation.value();

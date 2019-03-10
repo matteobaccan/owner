@@ -51,6 +51,7 @@ public class PropertiesFileCreatorTest {
         @DefaultValue("value5")
         String value5();
 
+        @Deprecated
         @DefaultValue("value6")
         String value6();
     }

@@ -17,8 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.aeonbits.owner.creator.PropertiesFileCreator;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -46,7 +44,7 @@ public class PropertiesFileCreatorMojo
      * Config class to parse.
      */
     @Parameter(required=true)
-    private String packageClass;
+    private String configurationClass;
     
     /**
      * Jar to include.
@@ -58,7 +56,7 @@ public class PropertiesFileCreatorMojo
      * External jars dependency folder.
      */
     @Parameter
-    public String jarsDependencyFolder;
+    public String librariesFolder;
     
     /**
      * Project Name.
@@ -83,7 +81,7 @@ public class PropertiesFileCreatorMojo
 
         try {
             if (jarPath != null && !jarPath.isEmpty()) {
-                System.out.println("Use passed jar [" + jarPath + "]");
+                logInfo("Use passed jar [" + jarPath + "]");
                 File jar = new File(jarPath);
                 if (jar.exists()) {
                     urls.add(jar.toURI().toURL());
@@ -91,7 +89,7 @@ public class PropertiesFileCreatorMojo
                     logError("Jar doesn't exist [%s]", null, jarPath);
                 }
             } else {
-                System.out.println("Use classpath");
+                logInfo("Use classpath");
                 // Loading project classpath to retrieve class
                 for (Object ele : project.getRuntimeClasspathElements()) {
                     File jar = new File(ele.toString());
@@ -100,10 +98,10 @@ public class PropertiesFileCreatorMojo
             }
 
             // If a classpath 
-            if (jarsDependencyFolder != null && !jarsDependencyFolder.isEmpty()) {
-                logInfo("Use jars dependency folder [%s]", jarsDependencyFolder);
+            if (librariesFolder != null && !librariesFolder.isEmpty()) {
+                logInfo("Use jars dependency folder [%s]", librariesFolder);
 
-                File path = new File(jarsDependencyFolder);
+                File path = new File(librariesFolder);
 
                 if (path.isDirectory()) {
                     File[] filteredJars = path.listFiles(
@@ -127,7 +125,7 @@ public class PropertiesFileCreatorMojo
             
             URLClassLoader jarPack = new URLClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
             try {
-                Class classToLoad = jarPack.loadClass(packageClass);
+                Class classToLoad = jarPack.loadClass(configurationClass);
 
                 // Parse class and create property file
                 PropertiesFileCreator creator = new PropertiesFileCreator();
@@ -149,20 +147,14 @@ public class PropertiesFileCreatorMojo
         } catch (Exception ex){
             throw new MojoExecutionException(ex.getMessage(), ex);
         }
-        System.out.println("Conversion succeded, properties saved [" + outputDirectory + "]");
-    }
-    
-    
-    // Log utils.
-    private Logger getLogger() {
-        return Logger.getLogger(PropertiesFileCreatorMojo.class.getName());
+        logInfo("Conversion succeded, properties saved [" + outputDirectory + "]");
     }
     
     private void logError(String error, Throwable ex, Object... args) {
-        getLogger().log(Level.SEVERE, String.format(error, args), ex);
+        System.out.println(String.format(error + "  [%s]", args, ex.getMessage()));
     }
 
     private void logInfo(String info, Object... args) {
-        getLogger().log(Level.INFO, String.format(info, args));
+        System.out.println(String.format(info, args));
     }
 }
