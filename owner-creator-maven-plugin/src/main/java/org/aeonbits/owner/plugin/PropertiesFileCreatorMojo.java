@@ -8,13 +8,14 @@
 
 package org.aeonbits.owner.plugin;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.aeonbits.owner.creator.PropertiesFileCreator;
@@ -122,8 +123,11 @@ public class PropertiesFileCreatorMojo
 
             String template = null;
             if (propertiesTemplate != null && !propertiesTemplate.isEmpty()) {
-                byte[] encoded = Files.readAllBytes(Paths.get(propertiesTemplate));
-                template = new String(encoded, "UTF-8");
+                if (new File(propertiesTemplate).isFile()) {
+                    template = readFileToString(propertiesTemplate);
+                } else {
+                    logError("PropertiesTemplate file not exists [{}], default template will be used", null, propertiesTemplate);
+                }
             }
             
             URLClassLoader jarPack = new URLClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
@@ -151,6 +155,26 @@ public class PropertiesFileCreatorMojo
             throw new MojoExecutionException(ex.getMessage(), ex);
         }
         logInfo("Conversion succeded, properties saved [" + outputDirectory + "]");
+    }
+    
+    private String readFileToString(String fileName) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(fileName));
+        String output = null;
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+            output = sb.toString();
+        } finally {
+            br.close();
+        }
+        
+        return output;
     }
     
     private void logError(String error, Throwable ex, Object... args) {
