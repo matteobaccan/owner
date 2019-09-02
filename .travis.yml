@@ -11,7 +11,6 @@ jdk:
   - oraclejdk9
   - oraclejdk8
   - openjdk7
-
 os:
   - linux
 
@@ -19,10 +18,15 @@ install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B
 
 after_success:
-  - mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:cobertura
+  - mvn -Pcoverage clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:cobertura sonar:sonar
 
 addons:
   apt:
     packages:
       - oracle-java9-installer
       - oracle-java8-installer
+  sonarcloud:
+    organization: "lviggiano-github"
+    token:
+      secure: "vVQbFTu1zeP+r4vZ/cDs5JAWIYEWJY0sLMuSJgZqsqZdk01aCevx2Qoyjf+LpSYLV8MO0R2ArehlIw4po2MOGk9fy6tUswlGSkm13nJesf8JK69id+8u1TH7jLB4miB0QSSz5Dy8puE9MojeKfJDDG//U+tbBKyRWO9FbFd3fVY="
+
