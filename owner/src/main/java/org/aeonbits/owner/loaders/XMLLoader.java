@@ -38,15 +38,11 @@ public class XMLLoader implements Loader {
     private static final long serialVersionUID = -894351666332018767L;
     private transient SAXParserFactory factory = null;
 
-    private SAXParserFactory factory() {
+    private synchronized SAXParserFactory factory() {
         if (factory == null) {
-            synchronized (this) {
-                if (factory == null) {
-                    factory = SAXParserFactory.newInstance();
-                    factory.setValidating(true);
-                    factory.setNamespaceAware(true);
-                }
-            }
+            factory = SAXParserFactory.newInstance();
+            factory.setValidating(true);
+            factory.setNamespaceAware(true);
         }
         return factory;
     }
