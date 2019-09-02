@@ -15,7 +15,9 @@ os:
   - linux
 
 install: mvn -B -V -DskipTests=true -Dmaven.javadoc.skip=true install
-script: mvn -B -V -Pcoverage clean verify sonar:sonar
+script: mvn -B -V test
+after_success: mvn -B -V -Pcoverage clean verify sonar:sonar
+  if: env(JAVA_HOME) =~ java-9
 
 addons:
   apt:
