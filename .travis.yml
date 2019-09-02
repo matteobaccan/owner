@@ -18,7 +18,8 @@ install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B
 
 after_success:
-  - mvn -Pcoverage clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:cobertura sonar:sonar
+  - mvn -Pcoverage clean sonar:sonar -Dsonar.projectKey=owner
+#   - mvn -Pcoverage clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:cobertura sonar:sonar
 
 addons:
   apt:
