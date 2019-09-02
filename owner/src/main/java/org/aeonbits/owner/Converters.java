@@ -142,7 +142,7 @@ enum Converters {
             if (!canUsePropertyEditors())
                 return SKIP;
 
-            PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
+            PropertyEditor editor = findEditor(targetType);
             if (editor == null) return SKIP;
             try {
                 editor.setAsText(text);
@@ -151,17 +151,19 @@ enum Converters {
                 throw unsupportedConversion(e, targetType, text);
             }
         }
+        
+        private PropertyEditor findEditor(Class<?> targetType) {
+			PropertyEditor editor = PROPERTY_BY_CLASS.get(targetType);
+			if (editor == null) {
+				editor = PropertyEditorManager.findEditor(targetType);
+				if (editor != null)
+					PROPERTY_BY_CLASS.put(targetType, editor);
+			}
+			return editor;
+        }
 
         private boolean canUsePropertyEditors() {
-            return isPropertyEditorAvailable() && !isPropertyEditorDisabled();
-        }
-
-        private boolean isPropertyEditorAvailable() {
-            return isClassAvailable("java.beans.PropertyEditorManager");
-        }
-
-        private boolean isPropertyEditorDisabled() {
-            return Boolean.getBoolean("org.aeonbits.owner.property.editor.disabled");
+            return isPropertyEditorAvailable && !isPropertyEditorDisabled;
         }
     },
 
@@ -265,6 +267,12 @@ enum Converters {
     }
 
     private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry = new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();
+    
+	private static final boolean isPropertyEditorAvailable = isClassAvailable("java.beans.PropertyEditorManager");
+	
+	private static final boolean isPropertyEditorDisabled = Boolean.getBoolean("org.aeonbits.owner.property.editor.disabled");
+	
+	private static final Map<Class<?>, PropertyEditor> PROPERTY_BY_CLASS = new WeakHashMap<Class<?>, PropertyEditor>();
 
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
