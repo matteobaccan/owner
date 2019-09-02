@@ -24,7 +24,6 @@
         <module>owner-site</module>
         <module>owner-extras</module>
         <module>owner-assembly</module>
-        <module>owner-creator-maven-plugin</module>
     </modules>
 
     <inceptionYear>2012</inceptionYear>
