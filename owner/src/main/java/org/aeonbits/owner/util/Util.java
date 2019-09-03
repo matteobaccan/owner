@@ -93,12 +93,16 @@ public abstract class Util {
 
     public static String expandUserHome(String text) {
         if (text.equals("~"))
-            return system.getProperty("user.home");
+            return getUserHome();
         if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0)
-            return text.replaceFirst("~/", Matcher.quoteReplacement(system.getProperty("user.home")) + "/");
+            return text.replaceFirst("~/", Matcher.quoteReplacement(getUserHome()) + "/");
         if (text.indexOf("~\\") == 0 || text.indexOf("file:~\\") == 0 || text.indexOf("jar:file:~\\") == 0)
-            return text.replaceFirst("~\\\\", Matcher.quoteReplacement(system.getProperty("user.home")) + "\\\\");
+            return text.replaceFirst("~\\\\", Matcher.quoteReplacement(getUserHome()) + "\\\\");
         return text;
+    }
+
+    private static String getUserHome() {
+        return system.getProperty("user.home");
     }
 
     public static String fixBackslashesToSlashes(String path) {
@@ -238,17 +242,25 @@ public abstract class Util {
     private static void storeJar(File target, String entryName, Properties props) throws IOException {
         byte[] bytes = toBytes(props);
         InputStream input = new ByteArrayInputStream(bytes);
-        JarOutputStream output = new JarOutputStream(new FileOutputStream(target));
         try {
-            ZipEntry entry = new ZipEntry(entryName);
-            output.putNextEntry(entry);
-            byte[] buffer = new byte[4096];
-            int size;
-            while ((size = input.read(buffer)) != -1)
-                output.write(buffer, 0, size);
+            FileOutputStream fileOutputStream = new FileOutputStream(target);
+            try {
+                JarOutputStream output = new JarOutputStream(fileOutputStream);
+                try {
+                    ZipEntry entry = new ZipEntry(entryName);
+                    output.putNextEntry(entry);
+                    byte[] buffer = new byte[4096];
+                    int size;
+                    while ((size = input.read(buffer)) != -1)
+                        output.write(buffer, 0, size);
+                } finally {
+                    output.close();
+                }
+            } finally {
+                fileOutputStream.close();
+            }
         } finally {
             input.close();
-            output.close();
         }
     }
 

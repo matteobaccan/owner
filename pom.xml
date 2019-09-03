@@ -29,7 +29,7 @@
     <inceptionYear>2012</inceptionYear>
     <organization>
         <name>Luigi R. Viggiano</name>
-        <url>http://en.newinstance.it</url>
+        <url>https://www.aeonbits.org/</url>
     </organization>
 
     <licenses>
@@ -46,8 +46,8 @@
             <name>Luigi R. Viggiano</name>
             <email>luigi.viggiano@gmail.com</email>
             <url>https://github.com/lviggiano/</url>
-            <organization>NewInstance Ltd.</organization>
-            <organizationUrl>http://en.newinstance.it</organizationUrl>
+            <organization>aeonbits.org</organization>
+            <organizationUrl>https://www.aeonbits.org/</organizationUrl>
             <timezone>+1</timezone>
             <roles>
                 <role>dev</role>
@@ -71,8 +71,8 @@
     </issueManagement>
 
     <ciManagement>
-        <system>jenkins</system>
-        <url>https://aeonbits.ci.cloudbees.com/job/owner-api/</url>
+        <system>travis</system>
+        <url>https://travis-ci.org/lviggiano/owner/</url>
     </ciManagement>
 
     <scm>
@@ -105,11 +105,11 @@
         <compiler-release>6</compiler-release>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
     </properties>
 
     <profiles>
+
         <profile>
             <id>release-sign-artifacts</id>
             <activation>
@@ -164,6 +164,7 @@
                 <module>owner-java8-extras</module>
             </modules>
         </profile>
+
         <profile>
             <id>examples</id>
             <activation>
@@ -175,6 +176,7 @@
                 <module>owner-examples</module>
             </modules>
         </profile>
+
         <profile>
             <id>coverage</id>
             <build>
@@ -184,10 +186,6 @@
                             <groupId>org.jacoco</groupId>
                             <artifactId>jacoco-maven-plugin</artifactId>
                             <version>0.8.4</version>
-                            <configuration>
-                                <destFile>${sonar.jacoco.reportPath}</destFile>
-                                <append>true</append>
-                            </configuration>
                             <executions>
                                 <execution>
                                     <id>prepare-agent</id>
@@ -207,6 +205,7 @@
                 </pluginManagement>
             </build>
         </profile>
+
     </profiles>
 
     <dependencyManagement>
@@ -323,20 +322,6 @@
                         </archive>
                     </configuration>
                 </plugin>
-                <!-- // doesn't work with java 9+
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>cobertura-maven-plugin</artifactId>
-                    <version>2.7</version>
-                    <configuration>
-                        <formats>
-                            <format>xml</format>
-                            <format>html</format>
-                        </formats>
-                        <aggregate>true</aggregate>
-                    </configuration>
-                </plugin>
-                -->
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
@@ -408,15 +393,15 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>2.22.1</version>
+                <version>2.22.2</version>
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.1</version>
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.12.0</version>
                 <configuration>
                     <linkXRef>true</linkXRef>
                     <sourceEncoding>utf-8</sourceEncoding>
@@ -432,21 +417,6 @@
                 <artifactId>maven-changelog-plugin</artifactId>
                 <version>2.3</version>
             </plugin>
-            <!-- it doesn't work with Java 9+
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
-                    <aggregate>true</aggregate>
-                    <check/>
-                </configuration>
-            </plugin>
-            -->
         </plugins>
     </reporting>
 </project>

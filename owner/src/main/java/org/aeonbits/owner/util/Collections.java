@@ -39,7 +39,7 @@ import static java.util.Arrays.asList;
  */
 public abstract class Collections {
 
-    // Suppresses default constructor, ensuring non-instantiability.
+    // Suppresses default constructor, ensuring no one instantiate this class.
     private Collections() {}
 
     private static final class EntryMap<K, V> extends AbstractMap<K, V> implements Serializable {
@@ -54,6 +54,24 @@ public abstract class Collections {
         @Override
         public Set<Entry<K, V>> entrySet() {
             return (Set) entries;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+
+            EntryMap<?, ?> entryMap = (EntryMap<?, ?>) o;
+
+            return entries.equals(entryMap.entries);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = super.hashCode();
+            result = 31 * result + entries.hashCode();
+            return result;
         }
     }
 

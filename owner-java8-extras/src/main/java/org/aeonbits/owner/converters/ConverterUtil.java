@@ -14,6 +14,10 @@ package org.aeonbits.owner.converters;
  * @author Stefan Freyr Stefansson
  */
 class ConverterUtil {
+
+    // Suppresses default constructor, ensuring no one instantiate this class.
+    private ConverterUtil() {}
+
     /**
      * Splits a string into a numeric part and a character part. The input string should conform to the format
      * <code>[numeric_part][char_part]</code> with an optional whitespace between the two parts.

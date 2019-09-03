@@ -128,15 +128,4 @@ public class DurationConverter implements Converter<Duration> {
 
         return Duration.of(Long.parseLong(numberString), units);
     }
-
-    private static String getUnits(String s) {
-        int i = s.length() - 1;
-        while (i >= 0) {
-            char c = s.charAt(i);
-            if (!Character.isLetter(c))
-                break;
-            i -= 1;
-        }
-        return s.substring(i + 1);
-    }
 }

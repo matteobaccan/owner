@@ -18,6 +18,9 @@ public class Base64 {
     private static Object decoderObject;
     private static Object encoderObject;
 
+    // Suppresses default constructor, ensuring no one instantiate this class.
+    private Base64() {}
+
     static {
         Class<?>[] decodeParameterTypes = { String.class };
         Class<?>[] encodeParameterTypes = { byte[].class };
