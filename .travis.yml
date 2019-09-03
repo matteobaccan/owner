@@ -18,7 +18,9 @@ os:
 
 install: mvn -B -V -DskipTests=true -Dmaven.javadoc.skip=true install
 script: mvn -B -V test
-after_success: if [[ $JAVA_HOME =~ java-9 ]] ; then mvn -B -V -Pcoverage clean verify sonar:sonar coveralls:report; fi
+after_success:
+  - if [[ $JAVA_HOME =~ java-9 ]] ; then mvn -B -V -Pcoverage clean verify sonar:sonar; fi
+  - if [[ $JAVA_HOME =~ java-8 ]] ; then mvn -B -V -Pcoverage clean verify coveralls:report; fi
 
 addons:
   apt:
