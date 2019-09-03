@@ -93,4 +93,16 @@ public class StrSubstitutorTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    public void testParametrization() {
+        Properties values = new Properties() {{
+            setProperty("foo", "fooValue");
+            setProperty("baz", "bazValue");
+        }};
+
+        StrSubstitutor sub = new StrSubstitutor(values);
+        assertEquals("foo1", sub.replace("foo%d", 1));
+        assertEquals("baz", sub.replace("baz"));
+        assertEquals("foo.1.sfx", sub.replace("foo.%d.%s", 1, "sfx"));
+    }
 }

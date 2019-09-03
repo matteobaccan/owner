@@ -75,7 +75,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     }
 
     private Object resolveProperty(Method method, Object... args) {
-        String key = expandKey(method);
+        String key = expandKey(method, args);
         String value = propertiesManager.getProperty(key);
 
         // TODO: this if should go away! See #84 and #86
@@ -102,11 +102,11 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         return result;
     }
 
-    private String expandKey(Method method) {
+    private String expandKey(Method method, Object... args) {
         String key = key(method);
         if (isFeatureDisabled(method, VARIABLE_EXPANSION))
             return key;
-        return substitutor.replace(key);
+        return substitutor.replace(key, args);
     }
 
     private String format(Method method, String format, Object... args) {
