@@ -83,37 +83,47 @@ assertEquals("lime", cfg.bar());
 assertEquals("blackberry", cfg.baz());
 ```
 
-This is pretty handy if you want to reference system properties or environment 
-variables:
+This is pretty handy if you want to load properties provided by other mechanisms which not accessible through any of the supported URI schemes listed under [Loading Strategies](loading-strategies.md)
+
+For instance, a Java EE (a.k.a. Jakarta EE) servlet running on a servlet container might load properties during initialization from a resource accessible through its respective [ServletContext](https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletContext.html):
 
 ```java
-interface SystemEnvProperties extends Config {
-    @Key("file.separator")
-    String fileSeparator();
-
-    @Key("java.home")
-    String javaHome();
-
-    @Key("HOME")
-    String home();
-
-    @Key("USER")
-    String user();
+interface ServletContextProperties extends Config {
+    /** JDBC name of a data source used by the servlet */
+    @Key("ds.name")
+    String dsName();
 
     void list(PrintStream out);
 }
 
-SystemEnvProperties cfg = ConfigFactory
-    .create(SystemEnvProperties.class, 
-            System.getProperties(), 
-            System.getenv());
-            
-assertEquals(File.separator, cfg.fileSeparator());
-assertEquals(System.getProperty("java.home"), cfg.javaHome());
-assertEquals(System.getenv().get("HOME"), cfg.home());
-assertEquals(System.getenv().get("USER"), cfg.user());
+...
+
+public class MyServlet extends HttpServlet {
+
+    protected void init() {
+        ServletContextProperties cfg = ConfigFactory
+            .create(ServletContextProperties.class, 
+                    getServletConfig().getServletContext().getResourceAsStream("/WEB-INF/myServlet.properties"));
+    }
+</div>
+}
 ```
 
+<div class="note info">
+Note that this way of proceeding yields the responsibility of proper usage to the client,
+whose code shall never 'forget' to include the <tt>import</tt> parameter when calling the <tt>ConfigFactory.create()</tt> ).
+</div>
+
+Thus, if you want to refer to properties provided by any of the mechanisms directly supported
+by the `@Source` annotation, you should rather use them, as explained in [Loading strategies](/docs/loading-strategies/).
+In particular, to refer to system properties or environment variables,
+you can use (since version 1.0.10) `system:properties` or `system:env` (respectively).
+
+Other typical usage of importing properties might involve loading them from other sources directly
+provided by the execution environment, e.g. [servlet context](https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletContext.html) attributes, [context or servlet initialization parameters](https://docs.oracle.com/cd/E19226-01/820-7627/bnaes/index.html), [JNDI](https://docs.oracle.com/javase/tutorial/jndi/index.html) application environment resources (i.e. entries under `java:comp/env/`), [Java preferences](https://docs.oracle.com/javase/8/docs/technotes/guides/preferences/index.html), or any other environment-dependent property sources. However, none of these sources direcly provide an API to access their contents as a `Map` object;
+hence the programmer would need in that case to implement first their own method to convert from lists of names
+plus individual values to `Map` object (therefore compatible with Owner API).
+</div>
 
 Interactions with loading strategies
 ------------------------------------
