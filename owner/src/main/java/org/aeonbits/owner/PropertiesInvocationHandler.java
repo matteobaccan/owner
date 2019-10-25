@@ -15,6 +15,8 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.aeonbits.owner.Config.Mandatory;
+
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
@@ -83,8 +85,10 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
             String unexpandedKey = key(method);
             value = propertiesManager.getProperty(unexpandedKey);
         }
-        if (value == null)
+        if (value == null) {
+            throwIfMandatoryProperty(method, key);
             return null;
+        }
         // Before processing the value, we decrypt it if necessary.
         // It is a security hole store the decrypted value, so every time we need it it should be decrypted.
         value = this.propertiesManager.decryptIfNecessary(method, value);
@@ -92,6 +96,14 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         Object result = convert(method, method.getReturnType(), format(method, expandVariables(method, value), args));
         if (result == NULL) return null;
         return result;
+    }
+
+    private void throwIfMandatoryProperty(Method method, String key) {
+        Mandatory mandatory = method.getAnnotation(Mandatory.class);
+        if (mandatory != null) {
+            String message = String.format("Missing mandatory property: '%s'", key);
+            throw new MissingMandatoryPropertyException(message);
+        }
     }
 
     private String preProcess(Method method, String value) {

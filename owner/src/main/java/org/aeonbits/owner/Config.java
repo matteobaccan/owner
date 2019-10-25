@@ -81,6 +81,16 @@ public interface Config extends Serializable {
     }
 
     /**
+	 * Indicates a mandatory property. If no property is found a {@link MissingMandatoryPropertyException} 
+	 * exception is thrown.
+	 */
+	@Retention(RUNTIME)
+	@Target(METHOD)
+	@Documented
+	@interface Mandatory {
+	}
+
+    /**
      * The key used for lookup for the property.  If not present, the key will be generated based on the unqualified
      * method name.
      */
