@@ -76,6 +76,9 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
     private Object resolveProperty(Method method, Object... args) {
         String key = expandKey(method, args);
+        // format key in case required
+        key = formatKey(key, args);
+        
         String value = propertiesManager.getProperty(key);
 
         // TODO: this if should go away! See #84 and #86
@@ -107,6 +110,19 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         if (isFeatureDisabled(method, VARIABLE_EXPANSION))
             return key;
         return substitutor.replace(key, args);
+    }
+    
+    /**
+     * Key with syntax '%s' will be formatted according to parameters
+     * @param key
+     * @param args
+     * @return formatted key
+     */
+    private String formatKey(String key, Object... args) {
+    	if (null == key) {
+    		return key;
+    	}
+        return String.format(key, args[0].toString());
     }
 
     private String format(Method method, String format, Object... args) {
