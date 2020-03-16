@@ -18,9 +18,7 @@ import java.util.*;
 
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
-import static org.aeonbits.owner.util.Util.fileFromURI;
-import static org.aeonbits.owner.util.Util.now;
-import static org.aeonbits.owner.util.Util.system;
+import static org.aeonbits.owner.util.Util.*;
 
 /**
  * @author Luigi R. Viggiano

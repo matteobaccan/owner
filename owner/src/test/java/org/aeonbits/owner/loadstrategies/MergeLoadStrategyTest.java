@@ -8,15 +8,15 @@
 
 package org.aeonbits.owner.loadstrategies;
 
-import static org.aeonbits.owner.Config.LoadType.MERGE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
+
+import static org.aeonbits.owner.Config.LoadType.MERGE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Luigi R. Viggiano
@@ -34,22 +34,26 @@ public class MergeLoadStrategyTest {
     }
 
     @Sources({"classpath:org/aeonbits/owner/first.properties",
-              "classpath:foo/bar/thisDoesntExists.properties",
-              "classpath:org/aeonbits/owner/second.properties",
-              "file:${user.dir}/src/test/resources/foo/bar/thisDoesntExists.properties",
-              "file:${user.dir}/src/test/resources/org/aeonbits/owner/third.properties"})
+            "classpath:foo/bar/thisDoesntExists.properties",
+            "classpath:org/aeonbits/owner/second.properties",
+            "file:${user.dir}/src/test/resources/foo/bar/thisDoesntExists.properties",
+            "file:${user.dir}/src/test/resources/org/aeonbits/owner/third.properties"})
     @LoadPolicy(MERGE)
     public static interface MergeConfig extends Config {
         @DefaultValue("this should be ignored")
         String foo();
+
         @DefaultValue("this should be ignored")
         String bar();
+
         @DefaultValue("this should be ignored")
         String baz();
+
         @DefaultValue("this should be ignored")
         String qux();
 
         String quux(); // this should return null;
+
         @DefaultValue("theDefaultValue")
         String fubar();
     }

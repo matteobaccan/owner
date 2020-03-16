@@ -19,13 +19,7 @@ import org.junit.Test;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 
 import static java.io.File.createTempFile;
 import static org.aeonbits.owner.util.Collections.map;
@@ -38,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 public class TestSerialization implements TestConstants {
     private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
 
-    private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
 
     private File target;
 
@@ -68,7 +62,7 @@ public class TestSerialization implements TestConstants {
     public void testSerialization() throws IOException, ClassNotFoundException {
         MyConfig cfg = ConfigFactory.create(MyConfig.class, map("foo", "bar"));
         assertEquals("someText", cfg.someText());
-        assertArrayEquals(new String[] {"some", "array"}, cfg.someArray());
+        assertArrayEquals(new String[]{"some", "array"}, cfg.someArray());
         cfg.addPropertyChangeListener("someText", new MyPropertyChangeListener());
 
         serialize(cfg, target);

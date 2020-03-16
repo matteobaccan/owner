@@ -21,17 +21,17 @@ import java.net.URI;
 public class LoadStrategyTestBase {
     ArgumentMatcher<URI> uriMatches(final String path) {
         return new HamcrestArgumentMatcher<URI>(
-            new BaseMatcher<URI>(){
-                public URI uri;
+                new BaseMatcher<URI>() {
+                    public URI uri;
 
-                public boolean matches(Object o) {
-                    uri = (URI)o;
-                    return uri.toString().endsWith(path);
-                }
+                    public boolean matches(Object o) {
+                        uri = (URI) o;
+                        return uri.toString().endsWith(path);
+                    }
 
-                public void describeTo(Description description) {
-                    description.appendText("expected <" + (uri != null ? uri : "uri") + "> ending with " + path);
-                }
-            });
+                    public void describeTo(Description description) {
+                        description.appendText("expected <" + (uri != null ? uri : "uri") + "> ending with " + path);
+                    }
+                });
     }
 }

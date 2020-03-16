@@ -19,11 +19,12 @@ public class Base64 {
     private static Object encoderObject;
 
     // Suppresses default constructor, ensuring no one instantiate this class.
-    private Base64() {}
+    private Base64() {
+    }
 
     static {
-        Class<?>[] decodeParameterTypes = { String.class };
-        Class<?>[] encodeParameterTypes = { byte[].class };
+        Class<?>[] decodeParameterTypes = {String.class};
+        Class<?>[] encodeParameterTypes = {byte[].class};
 
         // Java 8, Java 9
         Class<?> javaUtilBase64Class = forName("java.util.Base64");

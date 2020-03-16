@@ -25,7 +25,7 @@ public class ReflectionTest {
     }
 
     @Test
-    public void testAvailableWithExistentClass(){
+    public void testAvailableWithExistentClass() {
         boolean available = Reflection.isClassAvailable("java.lang.String");
         assertTrue(available);
     }

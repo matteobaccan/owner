@@ -63,7 +63,7 @@ public class HotReloadExample {
         System.out.println("The program is running. ");
 
         System.out.println("Now you can change the file located at: \n\n\t" + target.getAbsolutePath() +
-                           "\n\n ...and see the changes reflected below\n\n");
+                "\n\n ...and see the changes reflected below\n\n");
         int someValue = 0;
         while (someValue >= 0) {
             someValue = cfg.someValue();

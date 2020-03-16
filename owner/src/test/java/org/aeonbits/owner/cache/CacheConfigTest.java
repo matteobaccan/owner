@@ -28,7 +28,8 @@ import static org.mockito.Mockito.*;
  */
 public class CacheConfigTest {
 
-    static interface MyConfig extends Config {}
+    static interface MyConfig extends Config {
+    }
 
     @Before
     public void before() {

@@ -20,8 +20,9 @@ public class ConverterRegistryTest {
     private static final String FOOBAR_RESPONSE = "FooBar";
 
     public static class LeetTranslatorConverter implements Converter<String> {
-        Map<Character,Character> lookup = new HashMap<Character, Character>();
-        public LeetTranslatorConverter(){
+        Map<Character, Character> lookup = new HashMap<Character, Character>();
+
+        public LeetTranslatorConverter() {
             lookup.put('1', 'I');
             lookup.put('5', 's');
             lookup.put('0', 'o');
@@ -31,8 +32,8 @@ public class ConverterRegistryTest {
 
         public String convert(Method targetMethod, String text) {
             StringBuilder sb = new StringBuilder(text);
-            for( int i=0 ; i<text.length(); i++) {
-                if( lookup.containsKey(text.charAt(i))){
+            for (int i = 0; i < text.length(); i++) {
+                if (lookup.containsKey(text.charAt(i))) {
                     sb.setCharAt(i, lookup.get(text.charAt(i)));
                 }
             }
@@ -56,7 +57,7 @@ public class ConverterRegistryTest {
     }
 
     @Test
-    public void testBasicConverterRegistry(){
+    public void testBasicConverterRegistry() {
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
         assertEquals("Converter class has not been registered yet.", LEET_SPEEK, cfg.leetSpeek());
         ConfigFactory.setTypeConverter(String.class, LeetTranslatorConverter.class);
@@ -66,7 +67,7 @@ public class ConverterRegistryTest {
     }
 
     @Test
-    public void testConverterClassAnnotationOverride(){
+    public void testConverterClassAnnotationOverride() {
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
         assertEquals("Expected a response from the annotated converter class.", FOOBAR_RESPONSE, cfg.leetSpeekWithConverterClassAnnotation());
         ConfigFactory.setTypeConverter(String.class, LeetTranslatorConverter.class);

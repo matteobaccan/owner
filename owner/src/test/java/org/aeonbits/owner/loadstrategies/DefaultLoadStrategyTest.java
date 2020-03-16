@@ -44,11 +44,11 @@ public class DefaultLoadStrategyTest extends LoadStrategyTestBase {
 
     @Test
     public void shouldReturnTheResourceForAClass() throws IOException {
-        PropertiesManagerForTest manager = 
+        PropertiesManagerForTest manager =
                 new PropertiesManagerForTest(SampleConfig.class, new Properties(), scheduler, expander, loaders);
 
         manager.load();
-        
+
         verify(loaders, times(1)).findLoader(any(URI.class));
         verify(loaders, times(1)).findLoader(argThat(uriMatches(
                 "org/aeonbits/owner/loadstrategies/DefaultLoadStrategyTest$SampleConfig.properties")));
@@ -62,7 +62,7 @@ public class DefaultLoadStrategyTest extends LoadStrategyTestBase {
 
     @Test
     public void shouldReturnThePropertiesForTheClass() {
-        PropertiesManagerForTest manager = 
+        PropertiesManagerForTest manager =
                 new PropertiesManagerForTest(SampleConfig.class, new Properties(), scheduler, expander, loaders);
         Properties props = manager.load();
         assertNotNull(props);

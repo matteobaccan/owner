@@ -16,16 +16,14 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Luigi R. Viggiano
  */
 public class ConverterClassTest {
     private MyConfig cfg;
+
     static class Server {
         private final String name;
         private final Integer port;
@@ -147,7 +145,7 @@ public class ConverterClassTest {
 
     @Test
     public void testArrayObject() {
-        Server[] expected = new Server[] {
+        Server[] expected = new Server[]{
                 new Server("google.com", 80),
                 new Server("yahoo.com", 8080),
                 new Server("owner.aeonbits.org", 4000)

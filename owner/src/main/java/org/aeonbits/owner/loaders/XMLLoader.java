@@ -30,8 +30,8 @@ import java.util.Stack;
  * A {@link Loader loader} able to read properties from standard XML Java properties files, as well as user defined
  * XML properties files.
  *
- * @since 1.0.5
  * @author Luigi R. Viggiano
+ * @since 1.0.5
  */
 public class XMLLoader implements Loader {
 

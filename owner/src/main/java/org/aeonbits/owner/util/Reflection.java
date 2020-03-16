@@ -16,7 +16,8 @@ import java.lang.reflect.Method;
 public final class Reflection {
 
     // Suppresses default constructor, ensuring no one instantiate this class.
-    private Reflection() {}
+    private Reflection() {
+    }
 
     public static boolean isClassAvailable(String className) {
         return forName(className) != null;

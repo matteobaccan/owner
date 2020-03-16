@@ -1,18 +1,17 @@
 package org.aeonbits.owner.variableexpansion;
 
-import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
+import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 /**
  * @author aknopov
  */
-public class ParametrizedKeyTest
-{
+public class ParametrizedKeyTest {
     private static final String DEV_SETUP = "dev";
     private static final String UAT_SETUP = "uat";
 

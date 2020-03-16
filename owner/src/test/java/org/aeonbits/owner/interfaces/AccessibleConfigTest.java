@@ -8,34 +8,20 @@
 
 package org.aeonbits.owner.interfaces;
 
-import org.aeonbits.owner.Accessible;
-import org.aeonbits.owner.Config;
-import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.LoadersManagerForTest;
-import org.aeonbits.owner.PropertiesManagerForTest;
-import org.aeonbits.owner.VariablesExpanderForTest;
+import org.aeonbits.owner.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Luigi R. Viggiano

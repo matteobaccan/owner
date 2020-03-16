@@ -7,11 +7,11 @@ google_analytics_id: UA-462505-8
 exclude: ["CNAME", "owner.aeonbits.org.iml", "README", "bin", "build.xml"]
 permalink: /news/:year/:month/:day/:title
 
-author :
-  name : Luigi R. Viggiano
-  email : luigi.viggiano@gmail.com
-  github : lviggiano
-  twitter : lviggiano
+author:
+  name: Luigi R. Viggiano
+  email: luigi.viggiano@gmail.com
+  github: lviggiano
+  twitter: lviggiano
 
 project:
   name: OWNER

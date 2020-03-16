@@ -18,8 +18,6 @@ import java.util.List;
 
 import static org.aeonbits.owner.typeconversion.editor.PropertyEditorTestUtil.assumePropertyEditorIsEnabled;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Luigi R. Viggiano

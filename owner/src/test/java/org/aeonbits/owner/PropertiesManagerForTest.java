@@ -21,8 +21,8 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class PropertiesManagerForTest extends PropertiesManager {
     public PropertiesManagerForTest(Class<? extends Config> clazz, Properties properties,
-                             ScheduledExecutorService scheduler, VariablesExpander expander, LoadersManager loaders,
-                             Map<?, ?>... imports) {
+                                    ScheduledExecutorService scheduler, VariablesExpander expander, LoadersManager loaders,
+                                    Map<?, ?>... imports) {
         super(clazz, properties, scheduler, expander, loaders, imports);
     }
 

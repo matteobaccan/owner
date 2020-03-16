@@ -21,9 +21,9 @@ import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.convert;
 import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
 import static org.aeonbits.owner.PropertiesMapper.key;
-import static org.aeonbits.owner.util.Util.isFeatureDisabled;
 import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
 import static org.aeonbits.owner.util.Reflection.isDefault;
+import static org.aeonbits.owner.util.Util.isFeatureDisabled;
 
 /**
  * This {@link InvocationHandler} receives method calls from the delegate instantiated by {@link ConfigFactory} and maps
@@ -117,19 +117,18 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         // This is also helpful when the {@code format} is a property value that contains a '%' character,
         // such as '@#$%^&*()" (e.g., a clear-text password). In such cases, the '%' character is not
         // a placeholder in a format string -- its just a random character in the property value.
-        if ( args == null || args.length == 0 )
+        if (args == null || args.length == 0)
             return format;
 
         try {
             // Do this to achieve property expansion
             return String.format(format, args);
-            }
-        catch ( Exception e ) {
+        } catch (Exception e) {
             // There's no guarantee that a property value from a config file
             // is a legal format string. When formatting doesn't work, let's
             // just return the original property value.
             return format;
-            }
+        }
     }
 
     private String expandVariables(Method method, String value) {

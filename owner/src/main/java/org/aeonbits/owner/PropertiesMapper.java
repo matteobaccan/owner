@@ -22,11 +22,14 @@ import java.util.Properties;
  */
 final class PropertiesMapper {
 
-    /** Don't let anyone instantiate this class */
-    private PropertiesMapper() {}
+    /**
+     * Don't let anyone instantiate this class
+     */
+    private PropertiesMapper() {
+    }
 
-    static boolean isEncryptedValue( Method method ) {
-        return ( method.getAnnotation( EncryptedValue.class ) ) != null;
+    static boolean isEncryptedValue(Method method) {
+        return (method.getAnnotation(EncryptedValue.class)) != null;
     }
 
     static String key(Method method) {

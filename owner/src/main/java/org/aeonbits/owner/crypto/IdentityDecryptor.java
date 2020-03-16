@@ -5,9 +5,9 @@ package org.aeonbits.owner.crypto;
  * It is used as default value for {@link org.aeonbits.owner.Config.EncryptedValue} and {@link org.aeonbits.owner.Config.DecryptorClass}.
  */
 public final class IdentityDecryptor
-extends AbstractDecryptor {
+        extends AbstractDecryptor {
     @Override
-    public String decrypt( String value ) {
+    public String decrypt(String value) {
         return value;
     }
 }

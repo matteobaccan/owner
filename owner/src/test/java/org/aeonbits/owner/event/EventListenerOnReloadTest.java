@@ -27,26 +27,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
-import static org.aeonbits.owner.util.UtilTest.fileFromURI;
-import static org.aeonbits.owner.util.UtilTest.ignoreAndReturnNull;
-import static org.aeonbits.owner.util.UtilTest.save;
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.aeonbits.owner.util.UtilTest.*;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Luigi R. Viggiano
@@ -290,7 +276,7 @@ public class EventListenerOnReloadTest implements TestConstants {
 
     @Test
     public void testFullReloadCycle() throws IOException {
-        final boolean[] reloadPerformed = new boolean[] {false};
+        final boolean[] reloadPerformed = new boolean[]{false};
         cfg.addReloadListener(new TransactionalReloadListener() {
 
             public void beforeReload(ReloadEvent event) throws RollbackBatchException {
@@ -342,30 +328,30 @@ public class EventListenerOnReloadTest implements TestConstants {
 
     @Test
     public void testFullPropertyChangeCycleCycle() throws IOException {
-        final boolean[] reloadPerformed = new boolean[] {false};
+        final boolean[] reloadPerformed = new boolean[]{false};
 
         cfg.addPropertyChangeListener("someInteger",
                 new TransactionalPropertyChangeListener() {
-            public void beforePropertyChange(PropertyChangeEvent event)
-                    throws RollbackOperationException, RollbackBatchException {
-                String notAllowedValue = "88";
-                String makesEverythingToRollback = "42";
+                    public void beforePropertyChange(PropertyChangeEvent event)
+                            throws RollbackOperationException, RollbackBatchException {
+                        String notAllowedValue = "88";
+                        String makesEverythingToRollback = "42";
 
-                String newSomeInteger = (String)event.getNewValue();
-                if (notAllowedValue.equals(newSomeInteger))
-                    throw new RollbackOperationException("88 is not allowed for property 'someInteger', " +
-                            "the single property someInteger is rolled back");
+                        String newSomeInteger = (String) event.getNewValue();
+                        if (notAllowedValue.equals(newSomeInteger))
+                            throw new RollbackOperationException("88 is not allowed for property 'someInteger', " +
+                                    "the single property someInteger is rolled back");
 
-                if (makesEverythingToRollback.equals(newSomeInteger))
-                    throw new RollbackBatchException("42 is not allowed for property 'someInteger', " +
-                            "the whole event is rolled back");
+                        if (makesEverythingToRollback.equals(newSomeInteger))
+                            throw new RollbackBatchException("42 is not allowed for property 'someInteger', " +
+                                    "the whole event is rolled back");
 
-            }
+                    }
 
-            public void propertyChange(PropertyChangeEvent evt) {
-                reloadPerformed[0] = true;
-            }
-        });
+                    public void propertyChange(PropertyChangeEvent evt) {
+                        reloadPerformed[0] = true;
+                    }
+                });
 
         save(target, new Properties() {{
             setProperty("someInteger", "41");

@@ -14,7 +14,7 @@
     <property name="gh-pages.directory" value="${build.directory}/gh-pages"/>
     <property name="gh-pages.javadoc.directory" value="${gh-pages.directory}/apidocs/latest"/>
 
-    <property name="parent.project.directory" value="${basedir}/.." />
+    <property name="parent.project.directory" value="${basedir}/.."/>
     <property name="parent.project.javadoc.directory" value="${parent.project.directory}/target/site/apidocs"/>
 
     <target name="test-gh-pages">
@@ -22,7 +22,7 @@
     </target>
 
     <target name="test-javadoc">
-        <available file="${parent.project.javadoc.directory}" type="dir" property="javadoc.available" />
+        <available file="${parent.project.javadoc.directory}" type="dir" property="javadoc.available"/>
     </target>
 
     <target name="clone" depends="test-gh-pages" unless="gh-pages.available">
@@ -36,7 +36,7 @@
 
     <target name="copy-site">
         <copy todir="${gh-pages.directory}" overwrite="true">
-            <fileset dir="${site.directory}" />
+            <fileset dir="${site.directory}"/>
         </copy>
     </target>
 
@@ -67,34 +67,35 @@
     </target>
 
     <target name="run-drafts">
-        <jekyll-serve options="-w --drafts" />
+        <jekyll-serve options="-w --drafts"/>
     </target>
 
     <target name="run">
-        <jekyll-serve options="-w" />
+        <jekyll-serve options="-w"/>
     </target>
 
     <target name="javadoc">
-        <mvn dir="${parent.project.directory}" command="javadoc:aggregate" />
+        <mvn dir="${parent.project.directory}" command="javadoc:aggregate"/>
     </target>
-    
+
     <target name="build">
         <property name="site.destination.directory" value="${build.directory}/www"/>
         <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_build-" suffix=".yml" property="build.file"/>
         <echo file="${build.file}" message="url: file://${site.destination.directory}"/>
-        <jekyll dir="${site.directory}" command="build" options="--destination ${site.destination.directory} --config _config.yml,${build.file}" />
+        <jekyll dir="${site.directory}" command="build"
+                options="--destination ${site.destination.directory} --config _config.yml,${build.file}"/>
     </target>
 
     <target name="help">
         <echo>
-        ant clean                           - cleans up the target dir
-        ant build                           - generates the website in the _site dir (it's not necessary to publish)
-        ant javadoc                         - generates javadocs
-        ant publish                         - publish site to gh-pages
-        ant run-drafts                      - run jekyll serve (with '-w --drafts' options)
-        ant run                             - run jekyll serve (with '-w' option)
+            ant clean - cleans up the target dir
+            ant build - generates the website in the _site dir (it's not necessary to publish)
+            ant javadoc - generates javadocs
+            ant publish - publish site to gh-pages
+            ant run-drafts - run jekyll serve (with '-w --drafts' options)
+            ant run - run jekyll serve (with '-w' option)
 
-        Use `ant javadoc publish`, to publish javadocs and the documentation website on http://owner.aeonbits.org
+            Use `ant javadoc publish`, to publish javadocs and the documentation website on http://owner.aeonbits.org
         </echo>
     </target>
 
@@ -123,12 +124,13 @@
     <macrodef name="jekyll-serve">
         <attribute name="options"/>
         <sequential>
-            <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_serve-" suffix=".yml" property="serve.file"/>
+            <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_serve-" suffix=".yml"
+                      property="serve.file"/>
             <echo file="${serve.file}" message="url: http://localhost:4000"/>
             <jekyll dir="${site.directory}" command="serve" options="@{options} --config _config.yml,${serve.file}"/>
         </sequential>
     </macrodef>
-    
+
     <macrodef name="jekyll">
         <attribute name="dir"/>
         <attribute name="command"/>
@@ -146,7 +148,7 @@
         <attribute name="options" default=""/>
         <sequential>
             <exec dir="@{dir}" executable="mvn" taskname="mvn">
-                <arg line="@{command} @{options}" />
+                <arg line="@{command} @{options}"/>
             </exec>
         </sequential>
     </macrodef>

@@ -8,11 +8,7 @@
 
 package org.aeonbits.owner.event;
 
-import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.LoadersManagerForTest;
-import org.aeonbits.owner.Mutable;
-import org.aeonbits.owner.PropertiesManagerForTest;
-import org.aeonbits.owner.VariablesExpanderForTest;
+import org.aeonbits.owner.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,20 +27,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Luigi R. Viggiano

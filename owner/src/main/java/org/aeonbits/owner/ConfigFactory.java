@@ -28,14 +28,18 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
  * This is a singleton static class, to be used as convenience when only a single factory is needed inside an
  * application. It exposes the {@link #newInstance()} method to create new instances of {@link Factory} objects.
  * </p>
+ *
  * @author Luigi R. Viggiano
  */
 public final class ConfigFactory {
 
     static final Factory INSTANCE = newInstance();
 
-    /** Don't let anyone instantiate this class */
-    private ConfigFactory() {}
+    /**
+     * Don't let anyone instantiate this class
+     */
+    private ConfigFactory() {
+    }
 
     /**
      * Returns a new instance of a config Factory object.
@@ -63,9 +67,9 @@ public final class ConfigFactory {
      * @return an object implementing the given interface, which maps methods to property values.
      */
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
-        for( Map<?, ?> map : imports ){
-            for( Object key : map.keySet() ){
-                if( key == null || map.get(key) == null){
+        for (Map<?, ?> map : imports) {
+            for (Object key : map.keySet()) {
+                if (key == null || map.get(key) == null) {
                     throw new IllegalArgumentException(String.format("An import contains a null value for key: '%s'", key));
                 }
             }
@@ -145,7 +149,7 @@ public final class ConfigFactory {
      * Sets a converter for the given type. Setting a converter via this method will override any default converters
      * but not {@link Config.ConverterClass} annotations.
      *
-     * @param type the type for which to set a converter.
+     * @param type      the type for which to set a converter.
      * @param converter the converter class to use for the specified type.
      * @since 1.0.10
      */
@@ -155,10 +159,11 @@ public final class ConfigFactory {
 
     /**
      * Removes a converter for the given type.
+     *
      * @param type the type for which to remove the converter.
      * @since 1.0.10
      */
-    public static void removeTypeConverter(Class<?> type){
+    public static void removeTypeConverter(Class<?> type) {
         INSTANCE.removeTypeConverter(type);
     }
 }

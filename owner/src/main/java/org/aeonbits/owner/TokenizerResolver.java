@@ -21,8 +21,11 @@ import static org.aeonbits.owner.util.Util.unsupported;
  */
 final class TokenizerResolver {
 
-    /** Don't let anyone instantiate this class */
-    private TokenizerResolver() {}
+    /**
+     * Don't let anyone instantiate this class
+     */
+    private TokenizerResolver() {
+    }
 
     private static final Tokenizer DEFAULT_TOKENIZER = new SplitAndTrimTokenizer(",");
 

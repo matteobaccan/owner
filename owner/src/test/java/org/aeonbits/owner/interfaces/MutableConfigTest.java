@@ -34,6 +34,7 @@ public class MutableConfigTest {
     interface MutableConfig extends Config, Mutable {
         @DefaultValue("18")
         public Integer minAge();
+
         public Integer maxAge();
     }
 

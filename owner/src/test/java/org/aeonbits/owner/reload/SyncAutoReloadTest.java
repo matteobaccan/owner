@@ -25,9 +25,7 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.aeonbits.owner.util.UtilTest.fileFromURI;
-import static org.aeonbits.owner.util.UtilTest.save;
-import static org.aeonbits.owner.util.UtilTest.saveJar;
+import static org.aeonbits.owner.util.UtilTest.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -39,7 +37,7 @@ public class SyncAutoReloadTest implements TestConstants {
     private static final String PROPERTY_FILE_NAME = "SyncAutoReloadConfig.properties";
     private static final String JAR_FILE = RESOURCES_DIR + "/SyncAutoReloadTest.jar";
 
-    private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
     private static final String SPEC_JAR = "jar:file:" + JAR_FILE + "!/" + PROPERTY_FILE_NAME;
 
     private static File target;
@@ -142,7 +140,7 @@ public class SyncAutoReloadTest implements TestConstants {
 
         time.elapse(1, SECONDS);                             // another second is elapsed for the test.
         assertEquals(Integer.valueOf(5), cfg.someValue());   // the deleted file should be noted now,
-                                                             // the default value is returned.
+        // the default value is returned.
     }
 
     @HotReload(5)

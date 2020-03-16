@@ -16,10 +16,11 @@ import org.apache.commons.codec.binary.Base64;
 import java.lang.reflect.Method;
 
 /**
- *  To encrypt the password:
- *  <pre>
+ * To encrypt the password:
+ * <pre>
  *  System.out.println(Base64.encodeBase64String(xor("tiger".getBytes(), "secret".getBytes())));
  *  </pre>
+ *
  * @author Luigi R. Viggiano
  */
 public class EncryptedPropertiesExample {

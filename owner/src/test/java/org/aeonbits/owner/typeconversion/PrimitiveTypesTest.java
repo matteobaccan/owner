@@ -48,7 +48,7 @@ public class PrimitiveTypesTest {
     @Test
     public void testDefautDoubleValue() {
         PrimitiveTypesConfig config = ConfigFactory.create(PrimitiveTypesConfig.class);
-        assertEquals(3.141592653589793D, config.pi(), 0.000000000000001D) ;
+        assertEquals(3.141592653589793D, config.pi(), 0.000000000000001D);
     }
 
     @Test

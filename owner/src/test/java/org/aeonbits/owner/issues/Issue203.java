@@ -46,12 +46,10 @@ public class Issue203 {
             createConfigFuture.get();
             running.set(false);
             changeSystemPropertyFuture.get();
-        }
-        finally {
+        } finally {
             exe.shutdown();
         }
     }
-
 
 
 }

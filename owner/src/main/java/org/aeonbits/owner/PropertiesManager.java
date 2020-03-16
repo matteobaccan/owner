@@ -157,10 +157,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
      * If method contains the EncryptedValue annotation it Decrypts the value with the associated {@link Decryptor}.
      *
      * @param method with the key definition.
-     * @param value the value to decrypt when the method contains the EncryptedValue annotation
-     * @return
-     *      the <code>value</code> if the method doesn't contains the EncryptedValue annotation
-     *      or the <code>result of decrypt the value</code> if it does.
+     * @param value  the value to decrypt when the method contains the EncryptedValue annotation
+     * @return the <code>value</code> if the method doesn't contains the EncryptedValue annotation
+     * or the <code>result of decrypt the value</code> if it does.
      */
     String decryptIfNecessary(Method method, String value) {
         // Value can't be null, it has been checked previously in PropertiesInvocationHandler.resolveProperty

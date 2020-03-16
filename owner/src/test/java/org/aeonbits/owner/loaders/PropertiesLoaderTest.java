@@ -24,7 +24,7 @@ public class PropertiesLoaderTest {
     private PropertiesLoader loader = new PropertiesLoader();
 
     private static final String UTF_KEY = "цвет";
-    private static final String UTF_VALUE= "синий";
+    private static final String UTF_VALUE = "синий";
     private static final String UTF_KEY_VALUE = String.format("%s:%s", UTF_KEY, UTF_VALUE);
     private InputStream keyValueStream;
 

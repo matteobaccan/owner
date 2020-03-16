@@ -89,9 +89,9 @@ public interface Accessible extends Config {
      * and its defaults, recursively, are then checked. The method returns
      * <code>null</code> if the property is not found.
      *
-     * @param   key   the property key.
-     * @return  the value in this property list with the specified key value.
-     * @see     java.util.Properties#getProperty(String)
+     * @param key the property key.
+     * @return the value in this property list with the specified key value.
+     * @see java.util.Properties#getProperty(String)
      * @since 1.0.4
      */
     String getProperty(String key);
@@ -102,11 +102,10 @@ public interface Accessible extends Config {
      * and its defaults, recursively, are then checked. The method returns the
      * default value argument if the property is not found.
      *
-     * @param   key            the property key.
-     * @param   defaultValue   a default value.
-     * @return  the value in this property list with the specified key value.
+     * @param key          the property key.
+     * @param defaultValue a default value.
+     * @return the value in this property list with the specified key value.
      * @see java.util.Properties#getProperty(String, String)
-     *
      * @since 1.0.4
      */
     String getProperty(String key, String defaultValue);
@@ -119,15 +118,15 @@ public interface Accessible extends Config {
      * comment)</code> behaves in exactly the same way as the invocation
      * <code>props.storeToXML(os, comment, "UTF-8");</code>.
      *
-     * @param os the output stream on which to emit the XML document.
+     * @param os      the output stream on which to emit the XML document.
      * @param comment a description of the property list, or <code>null</code>
-     *        if no comment is desired.
-     * @throws IOException if writing to the specified output stream
-     *         results in an <code>IOException</code>.
+     *                if no comment is desired.
+     * @throws IOException          if writing to the specified output stream
+     *                              results in an <code>IOException</code>.
      * @throws NullPointerException if <code>os</code> is null.
-     * @throws ClassCastException  if this <code>Properties</code> object
-     *         contains any keys or values that are not
-     *         <code>Strings</code>.
+     * @throws ClassCastException   if this <code>Properties</code> object
+     *                              contains any keys or values that are not
+     *                              <code>Strings</code>.
      * @since 1.0.5
      */
     void storeToXML(OutputStream os, String comment) throws IOException;
@@ -142,14 +141,14 @@ public interface Accessible extends Config {
      * Changes to this <code>Properties</code> are not reflected in the set,
      * or vice versa.
      *
-     * @return  a set of keys in this property list, including the keys in the
-     *          default property list.
-     * @throws  ClassCastException if any key in this property list
-     *          is not a string.
-     * @see     java.util.Properties#defaults
-     * @see     java.util.Properties#stringPropertyNames()
-     * @see     java.util.Properties#propertyNames()
-     * @since   1.0.5
+     * @return a set of keys in this property list, including the keys in the
+     * default property list.
+     * @throws ClassCastException if any key in this property list
+     *                            is not a string.
+     * @see java.util.Properties#defaults
+     * @see java.util.Properties#stringPropertyNames()
+     * @see java.util.Properties#propertyNames()
+     * @since 1.0.5
      */
     Set<String> propertyNames();
 

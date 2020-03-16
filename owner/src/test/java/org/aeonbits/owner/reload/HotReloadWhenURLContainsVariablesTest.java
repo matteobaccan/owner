@@ -37,7 +37,7 @@ public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport im
     private static File target;
 
     @Sources(SPEC)
-    @HotReload(value=10, unit = MILLISECONDS, type = ASYNC)
+    @HotReload(value = 10, unit = MILLISECONDS, type = ASYNC)
     interface AutoReloadConfig extends Reloadable {
         @DefaultValue("5")
         Integer someValue();

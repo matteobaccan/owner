@@ -40,14 +40,18 @@ public class ZooKeeperLoaderTest {
     @Sources("zookeeper://127.0.0.1:65403/test")
     public static interface ZooKeeperConfig extends Config {
         String thanks();
+
         List<String> greetings();
+
         String notAvailable();
     }
 
     @Sources("zookeeper://127.0.0.1:65403/wrong")
     public static interface ZooKeeperWrongPathConfig extends Config {
         String thanks();
+
         List<String> greetings();
+
         String notAvailable();
     }
 

@@ -8,16 +8,7 @@
 
 package org.aeonbits.owner;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
-import javax.management.ReflectionException;
+import javax.management.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -94,11 +85,11 @@ class JMXSupport implements Serializable {
         MBeanParameterInfo key = new MBeanParameterInfo("key", "java.lang.String", "Key of the property");
         MBeanParameterInfo value = new MBeanParameterInfo("value", "java.lang.String", "Value of the property");
 
-        MBeanOperationInfo[] operations = new MBeanOperationInfo[] {
+        MBeanOperationInfo[] operations = new MBeanOperationInfo[]{
                 new MBeanOperationInfo("getProperty", "Gets value for a property",
-                        new MBeanParameterInfo[] { key }, "java.lang.String", MBeanOperationInfo.INFO),
+                        new MBeanParameterInfo[]{key}, "java.lang.String", MBeanOperationInfo.INFO),
                 new MBeanOperationInfo("setProperty", "Sets the value for a property",
-                        new MBeanParameterInfo[] { key, value }, "void", MBeanOperationInfo.ACTION),
+                        new MBeanParameterInfo[]{key, value}, "void", MBeanOperationInfo.ACTION),
                 new MBeanOperationInfo("reload", "Reload properties", null, "void", MBeanOperationInfo.ACTION)
         };
 

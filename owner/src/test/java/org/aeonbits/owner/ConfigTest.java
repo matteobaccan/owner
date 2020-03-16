@@ -16,9 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Luigi R. Viggiano
@@ -138,7 +136,7 @@ public class ConfigTest {
     public void whenPropertyValueIsNotValidFormatString_thenPropertyValueShouldRemainIntact() {
         SampleConfig config = ConfigFactory.create(SampleConfig.class);
 
-        assertEquals ("@#$%^&*()", config.password());
+        assertEquals("@#$%^&*()", config.password());
     }
 
 }

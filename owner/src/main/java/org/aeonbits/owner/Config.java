@@ -30,6 +30,7 @@ import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.util.Util.ignore;
 import static org.aeonbits.owner.util.Util.reverse;
+
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p>
@@ -149,7 +150,7 @@ public interface Config extends Serializable {
             @Override
             Properties load(List<URI> uris, LoadersManager loaders) {
                 Properties result = new Properties();
-                for (URI uri :  reverse(uris))
+                for (URI uri : reverse(uris))
                     try {
                         loaders.load(result, uri);
                     } catch (IOException ex) {
@@ -225,6 +226,7 @@ public interface Config extends Serializable {
          * So, it is a good idea to express the time unit in seconds or more, since higher time resolution
          * will probably not be supported by the underlying filesystem.
          * </p>
+         *
          * @return the time unit; default is SECONDS.
          */
         TimeUnit unit() default SECONDS;
@@ -290,7 +292,7 @@ public interface Config extends Serializable {
      * single string value, into elements for vectors and collections.
      * The value specified is used as per {@link String#split(String, int)} with int=-1, every element is also
      * trimmed out from spaces using {@link String#trim()}.
-     *
+     * <p>
      * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
      * together on the same level:
      * <ul>
@@ -319,7 +321,7 @@ public interface Config extends Serializable {
     /**
      * Specifies a <code>{@link Tokenizer}</code> class to allow the user to define a custom logic to split
      * the property value into tokens to be used as single elements for vectors and collections.
-     *
+     * <p>
      * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
      * together on the same level:
      * <ul>

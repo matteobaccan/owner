@@ -20,9 +20,9 @@ public interface Tokenizer {
     /**
      * Splits the given string, into tokens that identify single elements.
      *
-     * @since 1.0.4
      * @param values the string representation for the properties values
      * @return the items identifying single elements to convert.
+     * @since 1.0.4
      */
     String[] tokens(String values);
 

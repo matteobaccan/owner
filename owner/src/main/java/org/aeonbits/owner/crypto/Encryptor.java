@@ -9,9 +9,10 @@ package org.aeonbits.owner.crypto;
 public interface Encryptor extends Decryptor {
     /**
      * Encrypts a value.
+     *
      * @param value the value to encrypt.
      * @return the value encrypted
      * @throws IllegalArgumentException on any failure, with the message and the original exception.
      */
-    String encrypt( String value ) ;
+    String encrypt(String value);
 }

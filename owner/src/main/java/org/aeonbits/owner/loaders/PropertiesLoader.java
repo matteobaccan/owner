@@ -19,8 +19,8 @@ import java.util.Properties;
 /**
  * A {@link Loader loader} able to read properties from standard Java properties files.
  *
- * @since 1.0.5
  * @author Luigi R. Viggiano
+ * @since 1.0.5
  */
 public class PropertiesLoader implements Loader {
 

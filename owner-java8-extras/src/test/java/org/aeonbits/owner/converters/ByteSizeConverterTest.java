@@ -62,7 +62,7 @@ public class ByteSizeConverterTest {
     }
 
     @Test
-    public void testValidByteSizeConverter(){
+    public void testValidByteSizeConverter() {
         ByteSizeConfig cfg = ConfigFactory.create(ByteSizeConfig.class);
         ByteSize bs;
 
@@ -93,7 +93,7 @@ public class ByteSizeConverterTest {
                 bs = (ByteSize) m.invoke(cfg);
                 fail(String.format("Invalid byte size [%s] should have thrown an exception. Instead we parsed: %s", method, bs));
             } catch (InvocationTargetException e) {
-                if (!(e.getCause() instanceof IllegalArgumentException)){
+                if (!(e.getCause() instanceof IllegalArgumentException)) {
                     fail("Got an unexpected exception type when calling method: " + method);
                 }
             }

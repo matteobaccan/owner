@@ -420,7 +420,7 @@ input[type="reset"],
 input[type="submit"] {
     cursor: pointer; /* 1 */
     -webkit-appearance: button; /* 2 */
-    *overflow: visible;  /* 3 */
+    *overflow: visible; /* 3 */
 }
 
 /*

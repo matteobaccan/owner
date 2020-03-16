@@ -89,7 +89,7 @@ class StrSubstitutor implements Serializable {
      * Otherwise the return string is formatted by source and arguments as with {@link String#format(String, Object...)}
      *
      * @param source A source formatting format string. {@code null} returns {@code null}
-     * @param args Arguments referenced by the format specifiers in the source string.
+     * @param args   Arguments referenced by the format specifiers in the source string.
      * @return formatted string
      */
     String replace(String source, Object... args) {

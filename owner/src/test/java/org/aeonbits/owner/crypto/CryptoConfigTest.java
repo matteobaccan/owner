@@ -1,21 +1,17 @@
 package org.aeonbits.owner.crypto;
 
-import java.util.List;
-import java.util.Arrays;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
-import static org.aeonbits.owner.Config.*;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.aeonbits.owner.Config.DecryptorClass;
+import static org.junit.Assert.assertEquals;
 
 public class CryptoConfigTest {
-    public static final String SECRET_KEY =        "ABCDEFGH12345678";
+    public static final String SECRET_KEY = "ABCDEFGH12345678";
     public static final String PASSWORD_EXPECTED = "This is my key.";
     public static final String SALUTATION_EXPECTED = "Good Morning";
 
@@ -58,9 +54,9 @@ public class CryptoConfigTest {
      */
     @Test
     public void passwordDecryptedTest() {
-        SampleConfig config = ConfigFactory.create( SampleConfig.class );
+        SampleConfig config = ConfigFactory.create(SampleConfig.class);
         String decryptedPassword = config.password();
-        assertEquals( "Property password wasn't decrypted.", PASSWORD_EXPECTED, decryptedPassword );
+        assertEquals("Property password wasn't decrypted.", PASSWORD_EXPECTED, decryptedPassword);
     }
 
     /**
@@ -69,18 +65,18 @@ public class CryptoConfigTest {
      */
     @Test
     public void passwordDecryptedTwiceTest() {
-        SampleConfig config = ConfigFactory.create( SampleConfig.class );
+        SampleConfig config = ConfigFactory.create(SampleConfig.class);
         String decryptedPassword = config.password();
         decryptedPassword = config.password();
-        assertEquals( "May be property password was decrypted twice.", PASSWORD_EXPECTED, decryptedPassword );
+        assertEquals("May be property password was decrypted twice.", PASSWORD_EXPECTED, decryptedPassword);
     }
 
     @Test
     public void listDecryptedTest() {
-        SampleConfig config = ConfigFactory.create( SampleConfig.class );
+        SampleConfig config = ConfigFactory.create(SampleConfig.class);
         List<String> decryptedList = config.cryptoList();
-        List<String> expectedList = Arrays.asList( "1", "2", "3", "4");
-        assertEquals( "KKKK", expectedList, decryptedList );
+        List<String> expectedList = Arrays.asList("1", "2", "3", "4");
+        assertEquals("KKKK", expectedList, decryptedList);
     }
 
     /**
@@ -88,20 +84,20 @@ public class CryptoConfigTest {
      */
     @Test
     public void salutationNotDecryptedTest() {
-        SampleConfig config = ConfigFactory.create( SampleConfig.class );
+        SampleConfig config = ConfigFactory.create(SampleConfig.class);
         String salutation = config.salutation();
-        assertEquals( "Salutation value is not expected", SALUTATION_EXPECTED, salutation );
+        assertEquals("Salutation value is not expected", SALUTATION_EXPECTED, salutation);
     }
 
     public static class Decryptor1 extends SampleDecryptor {
         public Decryptor1() {
-            super( "AES", SECRET_KEY );
+            super("AES", SECRET_KEY);
         }
     }
 
     public static class Decryptor2 extends SampleDecryptor {
         public Decryptor2() {
-            super( "AES", SECRET_KEY + SECRET_KEY );
+            super("AES", SECRET_KEY + SECRET_KEY);
         }
     }
 }

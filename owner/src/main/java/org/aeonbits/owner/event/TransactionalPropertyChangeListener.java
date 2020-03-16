@@ -14,8 +14,8 @@ import java.beans.PropertyChangeListener;
 /**
  * A Listener that is aware of properties changes, with transactional capability.
  *
- * @since 1.0.5
  * @author Luigi R. Viggiano
+ * @since 1.0.5
  */
 public interface TransactionalPropertyChangeListener extends PropertyChangeListener {
 

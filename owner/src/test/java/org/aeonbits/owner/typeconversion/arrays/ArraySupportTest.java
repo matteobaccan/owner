@@ -31,8 +31,8 @@ public class ArraySupportTest {
     }
 
     /**
-     emptyProperty=
-     unsupported=dummy value: this is unsupported
+     * emptyProperty=
+     * unsupported=dummy value: this is unsupported
      */
     public static interface ArrayConfig extends Config {
         @DefaultValue("apple, pear, orange")
@@ -40,6 +40,7 @@ public class ArraySupportTest {
 
         @DefaultValue("")
         public String[] emptyProperty();
+
         public String[] missedProperty();
 
         @DefaultValue("1, 2, 3")
@@ -57,7 +58,8 @@ public class ArraySupportTest {
         @DefaultValue("dummy value: this is unsupported")
         public UnsupportedType[] unsupported();
 
-        public static class UnsupportedType {}
+        public static class UnsupportedType {
+        }
     }
 
     @Test

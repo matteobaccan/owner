@@ -26,7 +26,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
- *
  */
 public class ZooKeeperLoader implements Loader {
 

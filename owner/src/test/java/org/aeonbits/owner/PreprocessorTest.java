@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNull;
  */
 public class PreprocessorTest {
 
-    @PreprocessorClasses({ SkipInlineComments.class, Trim.class })
+    @PreprocessorClasses({SkipInlineComments.class, Trim.class})
     public interface ConfigWithPreprocessors extends Config {
         @DefaultValue("  300  ")
         Integer pollingPeriod();

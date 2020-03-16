@@ -61,6 +61,7 @@ public class DisableFeatureTest {
         @DisableFeature(PARAMETER_FORMATTING)
         @DefaultValue("Hello %s.")
         public String helloDisabled(String name);
+
         @DefaultValue("Hello %s.")
         public String helloEnabled(String name);
     }
@@ -76,6 +77,7 @@ public class DisableFeatureTest {
     public static interface ConfigWithDisabledFormattingOnClass extends Config {
         @DefaultValue("Hello %s.")
         public String helloDisabled(String name);
+
         @DefaultValue("Hello %s.")
         public String helloEnabled(String name);
     }

@@ -9,12 +9,14 @@
 package org.aeonbits.owner.util.bytesize;
 
 import org.junit.Test;
+
 import java.math.BigInteger;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class ByteSizeTest {
     @Test
-    public void testBasics(){
+    public void testBasics() {
         assertEquals(1, new ByteSize(1, ByteSizeUnit.BYTES).getBytesAsLong());
 
         BigInteger siBytes = BigInteger.valueOf(1000);
@@ -34,7 +36,7 @@ public class ByteSizeTest {
     }
 
     @Test
-    public void testConversion(){
+    public void testConversion() {
         assertEquals(new ByteSize(0.5, ByteSizeUnit.GIGABYTES), new ByteSize(500, ByteSizeUnit.MEGABYTES).convertTo(ByteSizeUnit.GIGABYTES));
         assertEquals(new ByteSize(9.765625, ByteSizeUnit.KIBIBYTES), new ByteSize(10, ByteSizeUnit.KILOBYTES).convertTo(ByteSizeUnit.KIBIBYTES));
         assertEquals(new ByteSize(10, ByteSizeUnit.MEGABYTES), new ByteSize(10, ByteSizeUnit.MEGABYTES).convertTo(ByteSizeUnit.MEGABYTES));
@@ -44,7 +46,7 @@ public class ByteSizeTest {
     }
 
     @Test
-    public void testEquality(){
+    public void testEquality() {
         assertEquals(new ByteSize(500, ByteSizeUnit.MEGABYTES), new ByteSize(0.5, ByteSizeUnit.GIGABYTES));
         assertEquals(new ByteSize(500, ByteSizeUnit.MEBIBYTES), new ByteSize("0.48828125", ByteSizeUnit.GIBIBYTES));
     }

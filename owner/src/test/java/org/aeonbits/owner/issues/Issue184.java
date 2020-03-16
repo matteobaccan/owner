@@ -22,28 +22,26 @@ public class Issue184 {
 
     @Test
     public void testConfigImportWithNullValue() throws Exception {
-        Map<String,String> propsMapWithNullValue = new HashMap<String,String>();
+        Map<String, String> propsMapWithNullValue = new HashMap<String, String>();
         propsMapWithNullValue.put(KEY, null);
 
         try {
             ConfigFactory.create(Issue184.MyConfig.class, propsMapWithNullValue);
             fail("A null value should result in an exception");
-        }
-        catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains(KEY));
         }
     }
 
     @Test
     public void testConfigImportWithNullKey() throws Exception {
-        Map<String,String> propsMapWithNullKey = new HashMap<String,String>();
+        Map<String, String> propsMapWithNullKey = new HashMap<String, String>();
         propsMapWithNullKey.put(null, "smurf");
 
         try {
             ConfigFactory.create(Issue184.MyConfig.class, propsMapWithNullKey);
             fail("A null key should result in an exception");
-        }
-        catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("null"));
         }
     }

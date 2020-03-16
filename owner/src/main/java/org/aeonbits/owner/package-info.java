@@ -7,26 +7,26 @@
  */
 
 /**
- *  <p>
- *  The goal of OWNER API is to minimize the code required to handle application configuration through Java properties
- *  files.
- *  </p>
+ * <p>
+ * The goal of OWNER API is to minimize the code required to handle application configuration through Java properties
+ * files.
+ * </p>
  *
- *  <p>
- *  The approach used by OWNER APIs, is to define a Java interface associated to a properties file.
- *  </p>
+ * <p>
+ * The approach used by OWNER APIs, is to define a Java interface associated to a properties file.
+ * </p>
+ * <p>
+ * Suppose your properties file is defined as ServerConfig.properties:
  *
- *  Suppose your properties file is defined as ServerConfig.properties:
- *
- *  <pre>
+ * <pre>
  *  port=80
  *  hostname=foobar.com
  *  maxThreads=100
  *  </pre>
+ * <p>
+ * To access this property you need to define a convenient Java interface in ServerConfig.java:
  *
- *  To access this property you need to define a convenient Java interface in ServerConfig.java:
- *
- *  <pre>
+ * <pre>
  *  public interface ServerConfig extends Config {
  *      int port();
  *      String hostname();

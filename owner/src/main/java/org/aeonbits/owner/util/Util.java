@@ -11,22 +11,12 @@ package org.aeonbits.owner.util;
 import org.aeonbits.owner.Config.DisableFeature;
 import org.aeonbits.owner.Config.DisableableFeature;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
@@ -75,8 +65,11 @@ public abstract class Util {
         }
     };
 
-    /** Don't let anyone instantiate this class */
-    private Util() {}
+    /**
+     * Don't let anyone instantiate this class
+     */
+    private Util() {
+    }
 
     public static <T> List<T> reverse(List<T> src) {
         List<T> copy = new ArrayList<T>(src);

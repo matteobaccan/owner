@@ -24,19 +24,19 @@ public interface Loader extends Serializable {
     /**
      * Indicates wether this Loader does accept the URL, guessing the content type from it.
      *
-     * @since 1.1.0
-     * @param uri   the URI
+     * @param uri the URI
      * @return true, if the loader is able to handle the content of the URI.
+     * @since 1.1.0
      */
     boolean accept(URI uri);
 
     /**
      * Loads the given {@link URI uri} into the given {@link Properties result}
      *
-     * @since 1.1.0
-     * @param result    the resulting properties where to load the {@link URI uri}
-     * @param uri     the {@link URI} from where to load the properties.
+     * @param result the resulting properties where to load the {@link URI uri}
+     * @param uri    the {@link URI} from where to load the properties.
      * @throws java.io.IOException if there is some I/O error during the load.
+     * @since 1.1.0
      */
     void load(Properties result, URI uri) throws IOException;
 

@@ -16,9 +16,9 @@ import java.time.temporal.ChronoUnit;
 
 /**
  * A duration converter for the OWNER configuration system.
- *
+ * <p>
  * This converter will convert various duration formatted strings over to {@link java.time.Duration} objects.
- *
+ * <p>
  * The class supports two formats for the duration string:
  * <ul>
  *     <li>
@@ -41,9 +41,9 @@ import java.time.temporal.ChronoUnit;
  *             <li>h / hours</li>
  *             <li>d / days</li>
  *         </ul>
- *         <p>
+ * <p>
  *         Note that the <code>time_unit</code> string is case sensitive.
- *         <p>
+ * <p>
  *         If no <code>time_unit</code> is specified, <code>milliseconds</code> is assumed.
  *     </li>
  * </ul>
@@ -63,7 +63,7 @@ public class DurationConverter implements Converter<Duration> {
     /**
      * Parses a duration string. If no units are specified in the string, it is
      * assumed to be in milliseconds.
-     *
+     * <p>
      * This implementation was blatantly stolen/adapted from the typesafe-config project:
      * https://github.com/typesafehub/config/blob/v1.3.0/config/src/main/java/com/typesafe/config/impl/SimpleConfig.java#L551-L624
      *

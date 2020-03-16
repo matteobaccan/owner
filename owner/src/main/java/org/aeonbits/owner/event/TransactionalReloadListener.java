@@ -11,8 +11,8 @@ package org.aeonbits.owner.event;
 /**
  * A Listener that is aware of properties reloads, with transactional capability.
  *
- * @since 1.0.5
  * @author Luigi R. Viggiano
+ * @since 1.0.5
  */
 public interface TransactionalReloadListener extends ReloadListener {
 
@@ -21,7 +21,7 @@ public interface TransactionalReloadListener extends ReloadListener {
      * changes are effective, since some listener can ask to roll back the change.
      *
      * @param event the {@link ReloadEvent event} of property reload.
-     * @throws RollbackBatchException     when the listener wants to rollback the entire reload.
+     * @throws RollbackBatchException when the listener wants to rollback the entire reload.
      */
     void beforeReload(ReloadEvent event) throws RollbackBatchException;
 

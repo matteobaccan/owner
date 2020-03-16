@@ -92,7 +92,7 @@ public interface Factory {
      * Sets a converter for the given type. Setting a converter via this method will override any default converters
      * but not {@link Config.ConverterClass} annotations.
      *
-     * @param type the type for which to set a converter.
+     * @param type      the type for which to set a converter.
      * @param converter the converter class to use for the specified type.
      * @since 1.0.10
      */
@@ -100,6 +100,7 @@ public interface Factory {
 
     /**
      * Removes a converter for the given type.
+     *
      * @param type the type for which to remove the converter.
      * @since 1.0.10
      */

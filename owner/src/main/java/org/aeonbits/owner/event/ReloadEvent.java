@@ -50,7 +50,7 @@ public class ReloadEvent extends Event {
      * reload.
      *
      * @return The {@link PropertyChangeEvent change events} regarding which properties have been modified during the
-     *         reload.
+     * reload.
      */
     public List<PropertyChangeEvent> getEvents() {
         return events;

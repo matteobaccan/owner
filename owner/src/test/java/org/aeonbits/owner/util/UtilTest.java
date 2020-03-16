@@ -22,9 +22,7 @@ import java.util.Properties;
 
 import static org.aeonbits.owner.util.Util.ignore;
 import static org.aeonbits.owner.util.Util.unreachableButCompilerNeedsThis;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * This class contains tests for the {@link Util} class as well utility methods used for test classes.
@@ -35,7 +33,7 @@ public class UtilTest {
 
     public static SystemProvider setSystem(Object system) {
         SystemProvider save = Util.system;
-        Util.system = (SystemProvider)system;
+        Util.system = (SystemProvider) system;
         return save;
     }
 
@@ -51,8 +49,8 @@ public class UtilTest {
     public void testReverse() {
         Integer[] i = {1, 2, 3, 4, 5};
         Integer[] result = Util.reverse(i);
-        assertTrue(Arrays.equals(new Integer[] {1, 2, 3, 4, 5}, i));
-        assertTrue(Arrays.equals(new Integer[] {5, 4, 3, 2, 1}, result));
+        assertTrue(Arrays.equals(new Integer[]{1, 2, 3, 4, 5}, i));
+        assertTrue(Arrays.equals(new Integer[]{5, 4, 3, 2, 1}, result));
     }
 
     @Test
@@ -135,7 +133,7 @@ public class UtilTest {
         SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
                 new Properties() {{
                     setProperty("user.home", "/home/john");
-                }},  new HashMap<String, String>()
+                }}, new HashMap<String, String>()
         ));
 
         try {

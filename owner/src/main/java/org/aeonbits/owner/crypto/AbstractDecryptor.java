@@ -5,12 +5,12 @@ package org.aeonbits.owner.crypto;
  * It implements the decrypt( String, String ).
  */
 public abstract class AbstractDecryptor
-implements Decryptor {
+        implements Decryptor {
     @Override
-    public String decrypt( String value, String defaultValue ) {
+    public String decrypt(String value, String defaultValue) {
         try {
-            return this.decrypt( value );
-        } catch ( IllegalArgumentException cause ) {
+            return this.decrypt(value);
+        } catch (IllegalArgumentException cause) {
             return defaultValue;
         }
     }

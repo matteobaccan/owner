@@ -16,10 +16,12 @@ import static org.junit.Assert.assertNull;
  * @author Luigi R. Viggiano
  */
 public class UndefinedPropertiesTest {
-    
+
     public interface Person extends Config {
         String name();
+
         int age();
+
         Double weight();
     }
 

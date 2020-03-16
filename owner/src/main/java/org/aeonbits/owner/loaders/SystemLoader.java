@@ -22,13 +22,13 @@ import static org.aeonbits.owner.util.Util.system;
  * @since 1.0.10
  */
 public class SystemLoader implements Loader {
-/*
- * This class accesses <code>Util.system()</code> which is package accessible; for this reason this class cannot be moved
- * inside the package loaders.
- *
- * I think this class should be splitted in two separate classes:
- * one for system:properties and one for system:env.
- */
+    /*
+     * This class accesses <code>Util.system()</code> which is package accessible; for this reason this class cannot be moved
+     * inside the package loaders.
+     *
+     * I think this class should be splitted in two separate classes:
+     * one for system:properties and one for system:env.
+     */
 
     private static final String SYSTEM_PROPERTIES_URI = "system:properties";
     private static final String ENVIRONMENT_VARIABLES_URI = "system:env";

@@ -28,13 +28,13 @@ public class SAXParserFactoryForTest extends SAXParserFactory {
     }
 
     @Override
-    public void setFeature(String name, boolean value) throws ParserConfigurationException, 
+    public void setFeature(String name, boolean value) throws ParserConfigurationException,
             SAXNotRecognizedException, SAXNotSupportedException {
         delegate.setFeature(name, value);
     }
 
     @Override
-    public boolean getFeature(String name) throws ParserConfigurationException, SAXNotRecognizedException, 
+    public boolean getFeature(String name) throws ParserConfigurationException, SAXNotRecognizedException,
             SAXNotSupportedException {
         return delegate.getFeature(name);
     }

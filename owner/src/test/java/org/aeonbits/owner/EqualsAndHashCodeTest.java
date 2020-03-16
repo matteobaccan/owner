@@ -26,6 +26,7 @@ public class EqualsAndHashCodeTest {
     interface MyConfig extends Config {
         @DefaultValue("foo")
         String foo();
+
         @DefaultValue("bar")
         String bar();
     }
@@ -36,6 +37,7 @@ public class EqualsAndHashCodeTest {
     interface UnrelatedConfig extends Config {
         @DefaultValue("foo")
         String foo();
+
         @DefaultValue("bar")
         String bar();
     }
@@ -88,11 +90,11 @@ public class EqualsAndHashCodeTest {
     public void testWhenTwoObjectsAreSimilarProxies() {
         MyConfig cfg1 = ConfigFactory.create(MyConfig.class);
         MyConfig cfg2 = (MyConfig) Proxy
-                .newProxyInstance(getClass().getClassLoader(), new Class[] { MyConfig.class }, new InvocationHandler() {
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                return null;
-            }
-        });
+                .newProxyInstance(getClass().getClassLoader(), new Class[]{MyConfig.class}, new InvocationHandler() {
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        return null;
+                    }
+                });
 
         assertNotEquals(cfg1, cfg2);
     }

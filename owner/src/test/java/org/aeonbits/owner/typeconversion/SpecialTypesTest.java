@@ -16,9 +16,7 @@ import java.io.File;
 import java.net.URL;
 import java.sql.Driver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Luigi R. Viggiano

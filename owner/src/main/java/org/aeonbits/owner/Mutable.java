@@ -111,7 +111,7 @@ public interface Mutable extends Config {
      * no exception is thrown and no action is taken.
      *
      * @param propertyName one of the property names listed above
-     * @param listener the property change listener to be added
+     * @param listener     the property change listener to be added
      */
     void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
 

@@ -80,7 +80,7 @@ class DefaultFactory implements Factory {
         Converters.setTypeConverter(type, converter);
     }
 
-    public void removeTypeConverter(Class<?> type){
+    public void removeTypeConverter(Class<?> type) {
         Converters.removeTypeConverter(type);
     }
 

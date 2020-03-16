@@ -10,7 +10,6 @@ package org.aeonbits.owner.converters;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.converters.DurationConverter;
 import org.junit.Test;
 
 import java.time.Duration;
@@ -169,9 +168,9 @@ public class DurationConverterTest {
         Duration iso8601Complex();
     }
 
-    private static boolean allEqual(Duration compareTo, Collection<Duration> durations){
+    private static boolean allEqual(Duration compareTo, Collection<Duration> durations) {
         for (Duration duration : durations) {
-            if( !compareTo.equals(duration) ){
+            if (!compareTo.equals(duration)) {
                 return false;
             }
         }
@@ -195,25 +194,25 @@ public class DurationConverterTest {
         DurationTypesConfig cfg = ConfigFactory.create(DurationTypesConfig.class);
 
         allEqual(Duration.of(10, ChronoUnit.NANOS),
-                Arrays.asList(cfg.nsSuffix(),cfg.nanoSuffix(),cfg.nanosSuffix(),cfg.nanosecondSuffix(),cfg.nanosecondsSuffix()));
+                Arrays.asList(cfg.nsSuffix(), cfg.nanoSuffix(), cfg.nanosSuffix(), cfg.nanosecondSuffix(), cfg.nanosecondsSuffix()));
 
         allEqual(Duration.of(10, ChronoUnit.MICROS),
-                Arrays.asList(cfg.usSuffix(),cfg.µsSuffix(),cfg.microSuffix(),cfg.microsSuffix(),cfg.microsecondSuffix(),cfg.microsecondsSuffix()));
+                Arrays.asList(cfg.usSuffix(), cfg.µsSuffix(), cfg.microSuffix(), cfg.microsSuffix(), cfg.microsecondSuffix(), cfg.microsecondsSuffix()));
 
         allEqual(Duration.of(10, ChronoUnit.MILLIS),
-                Arrays.asList(cfg.msSuffix(),cfg.milliSuffix(),cfg.millisSuffix(),cfg.millisecondSuffix(),cfg.millisecondsSuffix()));
+                Arrays.asList(cfg.msSuffix(), cfg.milliSuffix(), cfg.millisSuffix(), cfg.millisecondSuffix(), cfg.millisecondsSuffix()));
 
         allEqual(Duration.of(10, ChronoUnit.SECONDS),
-                Arrays.asList(cfg.sSuffix(),cfg.secondSuffix(),cfg.secondsSuffix()));
+                Arrays.asList(cfg.sSuffix(), cfg.secondSuffix(), cfg.secondsSuffix()));
 
         allEqual(Duration.of(10, ChronoUnit.MINUTES),
-                Arrays.asList(cfg.mSuffix(),cfg.minuteSuffix(),cfg.minutesSuffix()));
+                Arrays.asList(cfg.mSuffix(), cfg.minuteSuffix(), cfg.minutesSuffix()));
 
         allEqual(Duration.of(10, ChronoUnit.HOURS),
-                Arrays.asList(cfg.hSuffix(),cfg.hourSuffix(),cfg.hoursSuffix()));
+                Arrays.asList(cfg.hSuffix(), cfg.hourSuffix(), cfg.hoursSuffix()));
 
         allEqual(Duration.of(10, ChronoUnit.DAYS),
-                Arrays.asList(cfg.dSuffix(),cfg.daySuffix(),cfg.daysSuffix()));
+                Arrays.asList(cfg.dSuffix(), cfg.daySuffix(), cfg.daysSuffix()));
     }
 
     @Test

@@ -9,13 +9,9 @@
 package org.aeonbits.owner.util;
 
 import java.io.Serializable;
-import java.util.AbstractMap;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -40,7 +36,8 @@ import static java.util.Arrays.asList;
 public abstract class Collections {
 
     // Suppresses default constructor, ensuring no one instantiate this class.
-    private Collections() {}
+    private Collections() {
+    }
 
     private static final class EntryMap<K, V> extends AbstractMap<K, V> implements Serializable {
         private static final long serialVersionUID = -789853606407653214L;

@@ -12,8 +12,8 @@ package org.aeonbits.owner;
  * Tokenizer implementation based on {@link String#split(String, int)} and {@link String#trim()}.
  * This class is used to implement <code>tokenizer</code>s for the {@link Config.Separator} annotation.
  *
- * @since 1.0.4
  * @author Luigi R. Viggiano
+ * @since 1.0.4
  */
 class SplitAndTrimTokenizer implements Tokenizer {
 
@@ -25,7 +25,7 @@ class SplitAndTrimTokenizer implements Tokenizer {
 
     public String[] tokens(String values) {
         String[] chunks = values.split(regex, -1);
-        for(int i = 0; i < chunks.length; i++)
+        for (int i = 0; i < chunks.length; i++)
             chunks[i] = chunks[i].trim();
         return chunks;
     }

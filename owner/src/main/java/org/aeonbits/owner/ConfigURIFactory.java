@@ -43,7 +43,7 @@ class ConfigURIFactory {
             // This check fixes the case where an environment variable has been
             // specified for the path to the config file, but that environment
             // variable is blank / undefined.
-            if ( fixed.equals(FILE_PROTOCOL) ) {
+            if (fixed.equals(FILE_PROTOCOL)) {
                 return new URI("");
             } else {
                 String path = fixSpacesToPercentTwenty(fixed);

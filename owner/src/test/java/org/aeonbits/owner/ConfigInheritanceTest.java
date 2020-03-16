@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ConfigInheritanceTest {
     @Config.Sources(
-            {"classpath:test.properties","classpath:org/aeonbits/owner/first.properties"}
+            {"classpath:test.properties", "classpath:org/aeonbits/owner/first.properties"}
     )
     interface MyConfig extends Config {
         @DefaultValue("favoriteColor")

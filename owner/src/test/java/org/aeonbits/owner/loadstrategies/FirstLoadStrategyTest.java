@@ -8,29 +8,25 @@
 
 package org.aeonbits.owner.loadstrategies;
 
+import org.aeonbits.owner.*;
+import org.aeonbits.owner.Config.LoadPolicy;
+import org.aeonbits.owner.Config.Sources;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.io.IOException;
+import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
+
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import java.io.IOException;
-import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-
-import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.LoadPolicy;
-import org.aeonbits.owner.Config.Sources;
-import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.LoadersManagerForTest;
-import org.aeonbits.owner.PropertiesManagerForTest;
-import org.aeonbits.owner.VariablesExpanderForTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author Luigi R. Viggiano

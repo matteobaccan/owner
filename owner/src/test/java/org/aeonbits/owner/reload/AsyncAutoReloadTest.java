@@ -25,9 +25,7 @@ import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
-import static org.aeonbits.owner.util.UtilTest.delete;
-import static org.aeonbits.owner.util.UtilTest.fileFromURI;
-import static org.aeonbits.owner.util.UtilTest.save;
+import static org.aeonbits.owner.util.UtilTest.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -37,7 +35,7 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
     private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
     private static final int DELAY = 1000;
 
-    private static final String SPEC = "file:"+ RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
+    private static final String SPEC = "file:" + RESOURCES_DIR + "/" + PROPERTY_FILE_NAME;
 
     private static File target;
 
@@ -47,7 +45,7 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
     }
 
     @Sources(SPEC)
-    @HotReload(value=10, unit = MILLISECONDS, type = ASYNC)
+    @HotReload(value = 10, unit = MILLISECONDS, type = ASYNC)
     interface AsyncAutoReloadConfig extends Config, Reloadable {
         @DefaultValue("5")
         Integer someValue();
@@ -107,7 +105,7 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
         assertEquals(Integer.valueOf(30), cfg.someValue());
     }
 
-    @HotReload(value=10, unit = MILLISECONDS, type = ASYNC)
+    @HotReload(value = 10, unit = MILLISECONDS, type = ASYNC)
     interface OnlyHotReloadAnnotationIsSpecified extends Config, Reloadable {
         @DefaultValue("5")
         Integer someValue();
