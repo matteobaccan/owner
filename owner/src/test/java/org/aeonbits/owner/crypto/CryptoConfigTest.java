@@ -50,6 +50,15 @@ public class CryptoConfigTest {
         @Separator(",")
         @DefaultValue("Pfzoiet5E5zN2/7tfgrGLQ==")
         List<String> cryptoList();
+
+        @Key("encryptedValue")
+        @DefaultValue("tzH7IKLCVc0AC72fh5DiZA==")
+        String encryptedValue();
+
+        @Key("password.variable.expanded")
+        @EncryptedValue
+        @DefaultValue("${encryptedValue}")
+        String passwordVariableExpanded();
     }
 
 
@@ -91,6 +100,17 @@ public class CryptoConfigTest {
         SampleConfig config = ConfigFactory.create( SampleConfig.class );
         String salutation = config.salutation();
         assertEquals( "Salutation value is not expected", SALUTATION_EXPECTED, salutation );
+    }
+
+    /**
+     * This test checks that the decrypted value is not cached.
+     * So we recover it twice.
+     */
+    @Test
+    public void passwordDecryptedWhenVariableSubstitutionIsSet() {
+        SampleConfig config = ConfigFactory.create( SampleConfig.class );
+        String decryptedPassword = config.passwordVariableExpanded();
+        assertEquals( "May be property password was decrypted twice.", PASSWORD_EXPECTED, decryptedPassword );
     }
 
     public static class Decryptor1 extends SampleDecryptor {
