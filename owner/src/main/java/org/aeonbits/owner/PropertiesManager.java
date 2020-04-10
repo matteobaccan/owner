@@ -180,7 +180,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 if (uri != null)
                     result.add(uri);
             } catch (URISyntaxException e) {
-                throw unsupported(e, "Can't convert '%s' to a valid URI", spec);
+                e.printStackTrace();
             }
         }
         return result;
