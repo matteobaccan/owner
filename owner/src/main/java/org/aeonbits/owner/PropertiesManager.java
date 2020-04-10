@@ -26,6 +26,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
@@ -38,6 +40,7 @@ import static org.aeonbits.owner.util.Util.*;
  * @author Luigi R. Viggiano
  */
 class PropertiesManager implements Reloadable, Accessible, Mutable {
+    private static Logger logger = Logger.getLogger(PropertiesManager.class.getName());
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
     private final Properties properties;
@@ -180,7 +183,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 if (uri != null)
                     result.add(uri);
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, String.format("Can't convert '%s' to a valid URI", spec), e);
             }
         }
         return result;
