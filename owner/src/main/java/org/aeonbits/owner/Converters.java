@@ -20,6 +20,8 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.beans.PropertyEditorManager.findEditor;
+import static java.lang.Boolean.getBoolean;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.SpecialValue.SKIP;
@@ -151,16 +153,6 @@ enum Converters {
                 throw unsupportedConversion(e, targetType, text);
             }
         }
-        
-        private PropertyEditor findEditor(Class<?> targetType) {
-			PropertyEditor editor = PROPERTY_BY_CLASS.get(targetType);
-			if (editor == null) {
-				editor = PropertyEditorManager.findEditor(targetType);
-				if (editor != null)
-					PROPERTY_BY_CLASS.put(targetType, editor);
-			}
-			return editor;
-        }
 
         private boolean canUsePropertyEditors() {
             return isPropertyEditorAvailable && !isPropertyEditorDisabled;
@@ -266,13 +258,14 @@ enum Converters {
         return result;
     }
 
-    private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry = new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();
+    private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry =
+            new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();
     
-	private static final boolean isPropertyEditorAvailable = isClassAvailable("java.beans.PropertyEditorManager");
+	private static final boolean isPropertyEditorAvailable =
+            isClassAvailable("java.beans.PropertyEditorManager");
 	
-	private static final boolean isPropertyEditorDisabled = Boolean.getBoolean("org.aeonbits.owner.property.editor.disabled");
-	
-	private static final Map<Class<?>, PropertyEditor> PROPERTY_BY_CLASS = new WeakHashMap<Class<?>, PropertyEditor>();
+	private static final boolean isPropertyEditorDisabled =
+            getBoolean("org.aeonbits.owner.property.editor.disabled");
 
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
