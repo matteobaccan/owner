@@ -139,9 +139,17 @@ enum Converters {
     },
 
     PROPERTY_EDITOR {
+        private final boolean isPropertyEditorAvailable =
+                isClassAvailable("java.beans.PropertyEditorManager");
+
+        private final boolean isPropertyEditorDisabled =
+                getBoolean("org.aeonbits.owner.property.editor.disabled");
+
+        private final boolean canUsePropertyEditors = isPropertyEditorAvailable && !isPropertyEditorDisabled;
+
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            if (!canUsePropertyEditors())
+            if (!canUsePropertyEditors)
                 return SKIP;
 
             PropertyEditor editor = findEditor(targetType);
@@ -152,10 +160,6 @@ enum Converters {
             } catch (Exception e) {
                 throw unsupportedConversion(e, targetType, text);
             }
-        }
-
-        private boolean canUsePropertyEditors() {
-            return isPropertyEditorAvailable && !isPropertyEditorDisabled;
         }
     },
 
@@ -242,7 +246,8 @@ enum Converters {
         }
     };
 
-    private static Object convertWithConverterClass(Method targetMethod, String text, Class<? extends Converter> converterClass) {
+    private static Object convertWithConverterClass(
+            Method targetMethod, String text, Class<? extends Converter> converterClass) {
         Converter<?> converter;
         try {
             converter = converterClass.newInstance();
@@ -260,12 +265,6 @@ enum Converters {
 
     private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry =
             new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();
-    
-	private static final boolean isPropertyEditorAvailable =
-            isClassAvailable("java.beans.PropertyEditorManager");
-	
-	private static final boolean isPropertyEditorDisabled =
-            getBoolean("org.aeonbits.owner.property.editor.disabled");
 
     abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
 
@@ -290,7 +289,8 @@ enum Converters {
         return unreachableButCompilerNeedsThis();
     }
 
-    private static UnsupportedOperationException unsupportedConversion(Exception cause, Class<?> targetType, String text) {
+    private static UnsupportedOperationException unsupportedConversion(
+            Exception cause, Class<?> targetType, String text) {
         return unsupported(cause, CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName());
     }
 
