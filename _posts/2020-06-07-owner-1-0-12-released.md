@@ -54,7 +54,8 @@ Site Enhancements
  * [#247](https://github.com/lviggiano/owner/pull/247): Documentation for system:properties and system:env.
  * Fixed [Sonar](https://sonarcloud.io/dashboard?id=org.aeonbits.owner%3Aowner-parent) and 
    [Travis](https://travis-ci.org/github/lviggiano/owner); but still it looks that 
-   [Coveralls](https://coveralls.io/github/lviggiano/owner) has issue to lik source files, I have to look into it.
+   [Coveralls](https://coveralls.io/github/lviggiano/owner) has issue to link source files to github, I need to look 
+   more into it.
  * [#274](https://github.com/lviggiano/owner/pull/247): 
    Documentation for system:properties and system:env, Update importing-properties.md. 
  * [#246](https://github.com/lviggiano/owner/pull/246): Fixed doc typos & errors and improved readability.
