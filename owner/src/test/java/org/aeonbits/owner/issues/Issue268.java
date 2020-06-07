@@ -5,86 +5,91 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import static java.lang.Thread.sleep;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 
-// Issue #268
+/**
+ * See: https://github.com/lviggiano/owner/issues/268
+ */
 public class Issue268 {
+
     interface MyConfig extends Config {
         @DefaultValue("Pasha")
         String firstName();
+
         @DefaultValue("Bairov")
         String lastName();
+    }
+
+    // A starter flag 🏁 to make sure a group of threads start at the same time
+    static class Starter {
+        private final int players;
+        private volatile int count = 0;
+
+        Starter(int players) {
+            this.players = players;
+        }
+
+        synchronized void ready() {
+            try {
+                count++;
+                wait();
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        void set() throws InterruptedException {
+            while (count != players) {
+                sleep(20);
+            }
+        }
+
+        synchronized void go() {
+            notifyAll();
+        }
+
     }
 
     @Test
     public void testConcurrentAccess() throws InterruptedException {
         final MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
-        final Object semaphore = new Object();
+        final Starter starter = new Starter(2);
 
-        final boolean[] exit = {false};
-        final boolean[] nameMismatch = { false };
-        final boolean[] lastNameMismatch = { false };
-        final boolean[] interrupted = {false, false};
+        final boolean[] nameMismatch = {false};
+        final boolean[] lastNameMismatch = {false};
+        final int iterations = 1000;
 
         Thread t1 = new Thread() {
             @Override
             public void run() {
-                try {
-                    synchronized (semaphore) {
-                        semaphore.wait();
-                    }
-                    for (int i = 0; i < 1000 && ! exit[0]; i++) {
-                        String name = cfg.firstName();
-
-                        if (!name.equals("Pasha")) {
-                            System.out.println("name " + name);
-                            nameMismatch[0] = true;
-                            exit[0] = true;
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    interrupted[0] = true;
-                    throw new IllegalStateException();
-                }
+                starter.ready();
+                for (int i = 0; i < iterations && !nameMismatch[0] && !lastNameMismatch[0]; i++)
+                    if (!cfg.firstName().equals("Pasha"))
+                        nameMismatch[0] = true;
             }
         };
 
         Thread t2 = new Thread() {
             @Override
             public void run() {
-                try {
-                    synchronized (semaphore) {
-                        semaphore.wait();
-                    }
-                    for (int i = 0; i < 1000 &&! exit[0] ; i++) {
-                        String lastName = cfg.lastName();
-                        if (!lastName.equals("Bairov")) {
-                            System.out.println("lastName " + lastName);
-                            lastNameMismatch[0] = true;
-                            exit[0] = true;
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    interrupted[1] = true;
-                    throw new IllegalStateException();
-                }
+                starter.ready();
+                for (int i = 0; i < iterations && !nameMismatch[0] && !lastNameMismatch[0]; i++)
+                    if (!cfg.lastName().equals("Bairov"))
+                        lastNameMismatch[0] = true;
             }
         };
+
         t1.start();
         t2.start();
 
-        sleep(300);
-
-        synchronized (semaphore) {
-            semaphore.notifyAll();
-        }
+        starter.set();
+        starter.go();
 
         t1.join();
         t2.join();
+
         assertFalse("mismatch on name", nameMismatch[0]);
         assertFalse("mismatch on lastName", lastNameMismatch[0]);
-        assertArrayEquals(new boolean[] {false, false}, interrupted);
     }
 }
