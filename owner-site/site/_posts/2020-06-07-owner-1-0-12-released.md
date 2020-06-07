@@ -7,8 +7,8 @@ version: 1.0.12
 categories: [release]
 ---
 
-I just released version 1.0.12. The 1.0.11 was not announced, in fact it introduced a bug in multi threading, so if 
-you are using 1.0.11, please update to 1.0.12 asap, so that you should have the bug fixed.
+I just released version 1.0.12, it contains all the bug fixes included in 1.0.11 plus a fix to a 
+multi threading issue that appeared in 1.0.11.
 
 --Luigi.
      
@@ -35,9 +35,12 @@ Downloadable artifacts are published on [GitHub](https://github.com/lviggiano/ow
 on [Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.12/).
 
 
-OWNER v1.0.11 contains following enhancements and bug fixes. Please not that this version does have a concurrency 
-bug [#268](https://github.com/lviggiano/owner/issues/268), [#266](https://github.com/lviggiano/owner/issues/266).
-Please upgrade to v1.0.12.
+<div class="note info">
+  <h5>The 1.0.11 was not announced, in fact it introduced a bug in multi threading.</h5>
+  <p>if you are using 1.0.11, please update to 1.0.12 asap, so that you should have the bug fixed.</p>
+</div>
+
+OWNER v1.0.11 contains following enhancements and bug fixes. 
 
 Enhancements
 ------------
