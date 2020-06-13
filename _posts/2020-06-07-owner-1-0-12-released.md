@@ -47,7 +47,7 @@ Enhancements
  * [#234](https://github.com/lviggiano/owner/pull/234): Allowing to format Key value by method arguments as 
    with DefaultValue.
  * [#255](https://github.com/lviggiano/owner/pull/255): Solves the thread contention problem reported on Issue #254; 
-   Note this has partially been rolled backed in 1.0.12 due to bugs [#268](https://github.com/lviggiano/owner/issues/268) 
+   Note this has partially been rolled back in 1.0.12 due to bugs [#268](https://github.com/lviggiano/owner/issues/268) 
    and [#266](https://github.com/lviggiano/owner/issues/266).
  * [64a7c07](https://github.com/lviggiano/owner/commit/64a7c07bd79287b1d9debacfe60ad6e4e597cc39): 
    Updated dependencies to work with Java 11 LTS.
