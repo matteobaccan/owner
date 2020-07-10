@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: aeonbits.org
+Token: 14192ded5a07b34fcb82cdc7ded106371159f03e512fea92c4044ebb80357a78
