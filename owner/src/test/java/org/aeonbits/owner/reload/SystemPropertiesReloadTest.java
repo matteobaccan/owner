@@ -54,19 +54,19 @@ public class SystemPropertiesReloadTest extends AsyncReloadSupport {
 
         String propKey = "someValue";
         systemForTest.setProperty(propKey, "5");
-        waitForReload(10);
+        waitForReload(20);
         assertEquals(Integer.valueOf(5), cfg.someValue());
 
         systemForTest.setProperty(propKey, "20");
-        waitForReload(10);
+        waitForReload(20);
         assertEquals(Integer.valueOf(20), cfg.someValue());
 
         systemForTest.remove(propKey);
-        waitForReload(10);
+        waitForReload(20);
         assertEquals(Integer.valueOf(5), cfg.someValue());
 
         systemForTest.setProperty(propKey, "30");
-        waitForReload(10);
+        waitForReload(20);
         assertEquals(Integer.valueOf(30), cfg.someValue());
     }
 }
