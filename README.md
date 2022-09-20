@@ -1,6 +1,57 @@
 OWNER
 =====
 
+although converter class can do it, converter class essentially makes the standard optional rather than enforced.
+We would like enforced standards
+
+The purpose of this fork is to change the return type from bare type to Optional
+
+The forker thinks this would be problematic with respect to Java 8+, because of the following:
+
+1. It is against the Optional (link)
+2. We are forcing a standard that null should never be returned (link)
+
+We want to essentially have null check at _compile-time_ 
+
+We turn this
+
+```java
+import org.aeonbits.owner.Config;
+
+public interface ServerConfig extends Config {
+    
+    int port();
+    
+    String hostname();
+    
+    @DefaultValue("42")
+    int maxThreads();
+    
+    List<String> listProperty();
+}
+```
+
+into this
+
+```java
+import org.aeonbits.owner.Config;
+
+public interface ServerConfig extends Config {
+    
+    Optional<Integer> port();
+    
+    Optional<String> hostname();
+    
+    @DefaultValue("42")
+    Optional<Integer> maxThreads();
+
+    List<String> listProperty();
+}
+```
+
+Note that collection type stays the same in accordance with the standard described in Effective Java section X
+
+
 OWNER, an API to ease Java property files usage.
 
 [![Build Status](https://travis-ci.org/lviggiano/owner.png?branch=master)](https://travis-ci.org/lviggiano/owner)
@@ -77,12 +128,6 @@ DOCUMENTATION
 Make sure to have a look at the documentation on [project website][website]
 to learn how flexible and powerful OWNER is, and why you may need it!
 
-Chinese documentation is provided by [Yunfeng Cheng](https://github.com/cyfonly) via a GitHub independent project at
-[this address][chinese-docs].
-
-  [website]: http://owner.aeonbits.org
-  [chinese-docs]: https://github.com/cyfonly/owner-doc
-
 
 LICENSE
 -------
@@ -91,3 +136,6 @@ OWNER is released under the BSD license.
 See [LICENSE][] file included for the details.
 
   [LICENSE]: https://raw.github.com/lviggiano/owner/master/LICENSE
+
+
+[website]: http://owner.aeonbits.org

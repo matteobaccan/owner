@@ -242,7 +242,8 @@ enum Converters {
     UNSUPPORTED {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            throw unsupportedConversion(targetType, text);
+            // throw unsupportedConversion(targetType, text);
+            return text;
         }
     };
 

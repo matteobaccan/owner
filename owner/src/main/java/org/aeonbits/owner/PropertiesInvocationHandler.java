@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
@@ -84,14 +85,14 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
             value = propertiesManager.getProperty(unexpandedKey);
         }
         if (value == null)
-            return null;
+            return Optional.empty();
         value = preProcess(method, value);
         Object result = convert(method, method.getReturnType(),
                 format(method, propertiesManager
                     .decryptIfNecessary(method, expandVariables(method, value)),
                     args));
-        if (result == NULL) return null;
-        return result;
+
+        return Optional.ofNullable(result);
     }
 
     private String preProcess(Method method, String value) {

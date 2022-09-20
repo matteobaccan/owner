@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 
 import static org.aeonbits.owner.util.UtilTest.save;
@@ -32,7 +33,7 @@ public class ConfigFactoryTest implements TestConstants {
     @Sources("file:${mypath}/myconfig.properties")
     interface MyConfig extends Config {
         @DefaultValue("defaultValue")
-        String someValue();
+        Optional<String> someValue();
     }
 
     @Before
@@ -49,7 +50,7 @@ public class ConfigFactoryTest implements TestConstants {
 
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
-        assertEquals("foobar", cfg.someValue());
+        assertEquals("foobar", cfg.someValue().get());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -75,7 +76,7 @@ public class ConfigFactoryTest implements TestConstants {
 
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
-        assertEquals("foobar", cfg.someValue());
+        assertEquals("foobar", cfg.someValue().get());
     }
 
     @Test
@@ -86,7 +87,7 @@ public class ConfigFactoryTest implements TestConstants {
 
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
-        assertEquals("foobar", cfg.someValue());
+        assertEquals("foobar", cfg.someValue().get());
     }
 
     @Test
@@ -95,7 +96,7 @@ public class ConfigFactoryTest implements TestConstants {
 
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
-        assertEquals("defaultValue", cfg.someValue());
+        assertEquals("defaultValue", cfg.someValue().get());
     }
 
     @Test
@@ -134,7 +135,7 @@ public class ConfigFactoryTest implements TestConstants {
     @Sources("${myurl}")
     interface MyConfigWithoutProtocol extends Config, Accessible {
         @DefaultValue("defaultValue")
-        String someValue();
+        Optional<String> someValue();
     }
 
     @Test
@@ -144,7 +145,7 @@ public class ConfigFactoryTest implements TestConstants {
 
         MyConfigWithoutProtocol cfg = ConfigFactory.create(MyConfigWithoutProtocol.class);
 
-        assertEquals("foobar", cfg.someValue());
+        assertEquals("foobar", cfg.someValue().get());
     }
 
     @Test
@@ -154,7 +155,7 @@ public class ConfigFactoryTest implements TestConstants {
 
         MyConfigWithoutProtocol cfg = ConfigFactory.create(MyConfigWithoutProtocol.class);
 
-        assertEquals("defaultValue", cfg.someValue());
+        assertEquals("defaultValue", cfg.someValue().get());
         assertThat(cfg.propertyNames(), contains("someValue"));
         assertThat(cfg.propertyNames().size(), is(1));
     }
