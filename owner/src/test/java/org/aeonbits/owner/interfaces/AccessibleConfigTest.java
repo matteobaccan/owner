@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -88,7 +89,7 @@ public class AccessibleConfigTest {
     @Test
     public void testStore() throws IOException {
         AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
-        File tmp = File.createTempFile("owner-", ".tmp");
+        File tmp = Files.createTempFile("owner-", ".tmp").toFile();
         cfg.store(new FileOutputStream(tmp), "no comments");
         assertTrue(tmp.exists());
         assertTrue(tmp.length() > 0);
