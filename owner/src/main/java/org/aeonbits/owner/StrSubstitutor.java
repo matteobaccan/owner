@@ -48,7 +48,7 @@ import static java.util.regex.Pattern.compile;
 class StrSubstitutor implements Serializable {
 
     private final Properties values;
-    private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
+    private static final Pattern PATTERN = compile("\\$\\{((\\$\\{.+}|.)+?)}");
 
     /**
      * Creates a new instance and initializes it. Uses defaults for variable prefix and suffix and the escaping
@@ -75,7 +75,7 @@ class StrSubstitutor implements Serializable {
         while (m.find()) {
             String var = m.group(1);
             String value = values.getProperty(var);
-            String replacement = (value != null) ? replace(value) : "";
+            String replacement = (value != null) ? replace(value) : (var.matches(PATTERN.pattern())? replace(var): "");
             m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         m.appendTail(sb);
