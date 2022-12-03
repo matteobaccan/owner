@@ -82,6 +82,40 @@ public class StrSubstitutorTest {
     }
 
     @Test
+    public void testNestedRecursiveResolution() {
+        Properties values = new Properties();
+        values.setProperty("environment", "dev");
+        values.setProperty("environments.${environment}.browser", "chrome");
+        values.setProperty("template", "environments.${environment}.webdriver.${environments.${environment}.browser}.switches");
+        String templateString = "${template}";
+        StrSubstitutor sub = new StrSubstitutor(values);
+        String resolvedString = sub.replace(templateString);
+        assertEquals("environments.dev.webdriver.chrome.switches", resolvedString);
+    }
+    @Test
+    public void testNestedRecursiveResolutionDeepLevel() {
+        Properties values = new Properties();
+        values.setProperty("first", "1");
+        values.setProperty("${first}.foo", "2");
+        values.setProperty("${${${first}.foo}}.baz", "3");
+        values.setProperty("${${${${first}.foo}}.baz}.bar", "4");
+        String templateString = "${${${${${first}.foo}}.baz}.bar}";
+        StrSubstitutor sub = new StrSubstitutor(values);
+        String resolvedString = sub.replace(templateString);
+        assertEquals("4", resolvedString);
+    }
+
+    @Test
+    public void testMultipleNestedResolution() {
+        Properties values = new Properties();
+        values.setProperty("foo", "1");
+        String templateString = "${${${${${${${${foo}}}}}}}}";
+        StrSubstitutor sub = new StrSubstitutor(values);
+        String resolvedString = sub.replace(templateString);
+        assertEquals("1", resolvedString);
+    }
+
+    @Test
     public void testMissingPropertyIsReplacedWithEmptyString() {
         Properties values = new Properties() {{
             setProperty("foo", "fooValue");
