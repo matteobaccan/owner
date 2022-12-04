@@ -74,13 +74,13 @@ class StrSubstitutor implements Serializable {
             return null;
         StringBuilder sb = new StringBuilder();
         List<String> groups = getVariableExpansions(source);
-        if (groups.isEmpty()) return source;
+        String replacedSource = source;
         for (String group : groups) {
             String value = values.getProperty(group);
             String replacement = (value != null) ? replace(value) : (group.matches(PATTERN.pattern()) ? replace(group) : "");
-            source = source.replaceFirst(Pattern.quote(String.format("${%s}", group)), Matcher.quoteReplacement(replacement));
+            replacedSource = replacedSource.replaceFirst(Pattern.quote(String.format("${%s}", group)), Matcher.quoteReplacement(replacement));
         }
-        sb.append(source);
+        sb.append(replacedSource);
         return sb.toString();
     }
 
