@@ -74,7 +74,6 @@ class StrSubstitutor implements Serializable {
             return null;
         StringBuilder sb = new StringBuilder();
         List<String> groups = getVariableExpansions(source);
-        System.out.println(groups);
         if (groups.isEmpty()) return source;
         for (String group : groups) {
             String value = values.getProperty(group);
