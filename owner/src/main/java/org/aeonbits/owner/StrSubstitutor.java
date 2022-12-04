@@ -85,6 +85,23 @@ class StrSubstitutor implements Serializable {
     }
 
     /**
+     * Returns a string modified in according to supplied source and arguments.<br/>
+     * If the source string has pattern-replacement content like {@code "a.${var}.b"},
+     * the pattern is replaced property value of "var".<br/>
+     * Otherwise the return string is formatted by source and arguments as with {@link String#format(String, Object...)}
+     *
+     * @param source A source formatting format string. {@code null} returns {@code null}
+     * @param args   Arguments referenced by the format specifiers in the source string.
+     * @return formatted string
+     */
+    String replace(String source, Object... args) {
+        if (source == null)
+            return null;
+        Matcher m = PATTERN.matcher(source);
+        return m.find() ? replace(source) : String.format(source, args);
+    }
+
+    /**
      * Finds all top level variable expansion expressions and returns it as a list.
      * E.g.: foo.${bar.${baz}}.${biz} -> [bar.${baz}, biz]
      *
@@ -116,22 +133,5 @@ class StrSubstitutor implements Serializable {
             }
         }
         return variables;
-    }
-
-    /**
-     * Returns a string modified in according to supplied source and arguments.<br/>
-     * If the source string has pattern-replacement content like {@code "a.${var}.b"},
-     * the pattern is replaced property value of "var".<br/>
-     * Otherwise the return string is formatted by source and arguments as with {@link String#format(String, Object...)}
-     *
-     * @param source A source formatting format string. {@code null} returns {@code null}
-     * @param args   Arguments referenced by the format specifiers in the source string.
-     * @return formatted string
-     */
-    String replace(String source, Object... args) {
-        if (source == null)
-            return null;
-        Matcher m = PATTERN.matcher(source);
-        return m.find() ? replace(source) : String.format(source, args);
     }
 }
