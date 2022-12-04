@@ -9,6 +9,8 @@
 package org.aeonbits.owner;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +50,7 @@ import static java.util.regex.Pattern.compile;
 class StrSubstitutor implements Serializable {
 
     private final Properties values;
-    private static final Pattern PATTERN = compile("\\$\\{((\\$\\{.+}|.)+?)}");
+    private static final Pattern PATTERN = compile("\\$\\{(.+?)}");
 
     /**
      * Creates a new instance and initializes it. Uses defaults for variable prefix and suffix and the escaping
@@ -70,16 +72,50 @@ class StrSubstitutor implements Serializable {
     String replace(String source) {
         if (source == null)
             return null;
-        Matcher m = PATTERN.matcher(source);
-        StringBuffer sb = new StringBuffer();
-        while (m.find()) {
-            String var = m.group(1);
-            String value = values.getProperty(var);
-            String replacement = (value != null) ? replace(value) : (var.matches(PATTERN.pattern())? replace(var): "");
-            m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        StringBuilder sb = new StringBuilder();
+        List<String> groups = getVariableExpansions(source);
+        System.out.println(groups);
+        if (groups.isEmpty()) return source;
+        for (String group : groups) {
+            String value = values.getProperty(group);
+            String replacement = (value != null) ? replace(value) : (group.matches(PATTERN.pattern()) ? replace(group) : "");
+            source = source.replaceFirst(Pattern.quote(String.format("${%s}", group)), Matcher.quoteReplacement(replacement));
         }
-        m.appendTail(sb);
+        sb.append(source);
         return sb.toString();
+    }
+
+    /**
+     * Finds all top level variable expansion expressions and returns it as a list.
+     * E.g.: foo.${bar.${baz}}.${biz} -> [bar.${baz}, biz]
+     *
+     * @param expression the string for which variable expansion expressions are queried, null returns null
+     * @return list of top level variable expansion expressions
+     */
+    private List<String> getVariableExpansions(String expression) {
+        if (expression == null) return null;
+
+        List<String> variables = new ArrayList<String>();
+        int indexOfFirstVariableExpansion = expression.indexOf("${");
+        if (indexOfFirstVariableExpansion == -1) return variables;
+
+        int expressionLength = expression.length();
+        indexOfFirstVariableExpansion += 2;
+        int bracketCounter = 1;
+        int variableStartIndex = indexOfFirstVariableExpansion;
+
+        for (int index = indexOfFirstVariableExpansion; index < expressionLength; index++) {
+            if (expression.charAt(index) == '{') {
+                bracketCounter += 1;
+            }
+            if (expression.charAt(index) == '}') bracketCounter -= 1;
+            if (bracketCounter == 0) {
+                variables.add(expression.substring(variableStartIndex, index));
+                variables.addAll(getVariableExpansions(expression.substring(index + 1, expressionLength)));
+                break;
+            }
+        }
+        return variables;
     }
 
     /**
@@ -89,7 +125,7 @@ class StrSubstitutor implements Serializable {
      * Otherwise the return string is formatted by source and arguments as with {@link String#format(String, Object...)}
      *
      * @param source A source formatting format string. {@code null} returns {@code null}
-     * @param args Arguments referenced by the format specifiers in the source string.
+     * @param args   Arguments referenced by the format specifiers in the source string.
      * @return formatted string
      */
     String replace(String source, Object... args) {
