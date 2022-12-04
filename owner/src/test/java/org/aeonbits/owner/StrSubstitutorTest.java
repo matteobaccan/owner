@@ -86,12 +86,13 @@ public class StrSubstitutorTest {
         Properties values = new Properties();
         values.setProperty("environment", "dev");
         values.setProperty("environments.${environment}.browser", "chrome");
-        values.setProperty("template", "environments.${environment}.webdriver.${environments.${environment}.browser}.switches");
+        values.setProperty("template", "environments.${environment}.webdriver.${environments.${environment}.browser}.switches.${environment}");
         String templateString = "${template}";
         StrSubstitutor sub = new StrSubstitutor(values);
         String resolvedString = sub.replace(templateString);
-        assertEquals("environments.dev.webdriver.chrome.switches", resolvedString);
+        assertEquals("environments.dev.webdriver.chrome.switches.dev", resolvedString);
     }
+
     @Test
     public void testNestedRecursiveResolutionDeepLevel() {
         Properties values = new Properties();
@@ -103,6 +104,17 @@ public class StrSubstitutorTest {
         StrSubstitutor sub = new StrSubstitutor(values);
         String resolvedString = sub.replace(templateString);
         assertEquals("4", resolvedString);
+    }
+
+    @Test
+    public void testPropertyWithCurlyBracketsInName() {
+        Properties values = new Properties();
+        values.setProperty("{foo}", "bar");
+        values.setProperty("template", "foo.${{foo}}");
+        String templateString = "${template}";
+        StrSubstitutor sub = new StrSubstitutor(values);
+        String resolvedString = sub.replace(templateString);
+        assertEquals("foo.bar", resolvedString);
     }
 
     @Test
