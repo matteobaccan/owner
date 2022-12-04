@@ -94,14 +94,15 @@ class StrSubstitutor implements Serializable {
     private List<String> getVariableExpansions(String expression) {
         if (expression == null) return null;
 
-        List<String> variables = new ArrayList<String>();
-        int indexOfFirstVariableExpansion = expression.indexOf("${");
+        final List<String> variables = new ArrayList<String>();
+        final String variableExpressionBeginning = "${";
+        int indexOfFirstVariableExpansion = expression.indexOf(variableExpressionBeginning);
         if (indexOfFirstVariableExpansion == -1) return variables;
 
-        int expressionLength = expression.length();
-        indexOfFirstVariableExpansion += 2;
+        final int expressionLength = expression.length();
+        indexOfFirstVariableExpansion += variableExpressionBeginning.length();
+        final int variableStartIndex = indexOfFirstVariableExpansion;
         int bracketCounter = 1;
-        int variableStartIndex = indexOfFirstVariableExpansion;
 
         for (int index = indexOfFirstVariableExpansion; index < expressionLength; index++) {
             if (expression.charAt(index) == '{') {
