@@ -77,8 +77,16 @@ class StrSubstitutor implements Serializable {
         String replacedSource = source;
         for (String group : groups) {
             String value = values.getProperty(group);
-            String replacement = (value != null) ? replace(value) : (group.matches(PATTERN.pattern()) ? replace(group) : "");
-            replacedSource = replacedSource.replaceFirst(Pattern.quote(String.format("${%s}", group)), Matcher.quoteReplacement(replacement));
+            String replacement = isKeyExpansionExpression(group) ? replace(group) : (value != null) ? replace(value) : "";
+            String replacementValue = values.getProperty(replacement);
+            if (replacementValue == null) {
+                if (isKeyExpansionExpression(group)) {
+                    replacementValue = value != null ? value : "";
+                } else {
+                    replacementValue = replacement;
+                }
+            }
+            replacedSource = replacedSource.replaceFirst(Pattern.quote(String.format("${%s}", group)), Matcher.quoteReplacement(replacementValue));
         }
         sb.append(replacedSource);
         return sb.toString();
@@ -97,21 +105,20 @@ class StrSubstitutor implements Serializable {
     String replace(String source, Object... args) {
         if (source == null)
             return null;
-        Matcher m = PATTERN.matcher(source);
-        return m.find() ? replace(source) : String.format(source, args);
+        return isKeyExpansionExpression(source) ? replace(source) : String.format(source, args);
     }
 
     /**
      * Finds all top level variable expansion expressions and returns it as a list.
      * E.g.: foo.${bar.${baz}}.${biz} -> [bar.${baz}, biz]
      *
-     * @param expression the string for which variable expansion expressions are queried, null returns null
+     * @param expression the string for which variable expansion expressions are queried, null returns empty list
      * @return list of top level variable expansion expressions
      */
     private List<String> getVariableExpansions(String expression) {
-        if (expression == null) return null;
-
         final List<String> variables = new ArrayList<String>();
+        if (expression == null) return variables;
+
         final String variableExpressionBeginning = "${";
         int indexOfFirstVariableExpansion = expression.indexOf(variableExpressionBeginning);
         if (indexOfFirstVariableExpansion == -1) return variables;
@@ -133,5 +140,15 @@ class StrSubstitutor implements Serializable {
             }
         }
         return variables;
+    }
+
+    /**
+     * Checks if given expression matches PATTERN expression - regex for key expansion expression
+     * @param expression expression to be checked, null returns false
+     * @return true if expression matches PATTERN, false otherwise
+     */
+    private boolean isKeyExpansionExpression(String expression) {
+        if(expression == null) return false;
+        return PATTERN.matcher(expression).find();
     }
 }
