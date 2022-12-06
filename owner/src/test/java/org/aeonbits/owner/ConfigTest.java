@@ -52,6 +52,16 @@ public class ConfigTest {
         void voidMethodWithValue();
 
         void voidMethodWithoutValue();
+
+        @Key("environment")
+        String env();
+
+        @Key("environments.${environment}.browser")
+        @DefaultValue("chrome")
+        String usedBrowser();
+
+        @Key("environments.${environment}.webdriver.${environments.${environment}.browser}.switches")
+        String webDriverOptions();
     }
 
     @Test
@@ -141,4 +151,16 @@ public class ConfigTest {
         assertEquals ("@#$%^&*()", config.password());
     }
 
+    @Test
+    public void nestedKeyExpansion() {
+        Properties values = new Properties() {{
+            setProperty("environment", "dev");
+            setProperty("environments.dev.browser", "opera");
+            setProperty("environments.dev.webdriver.opera.switches", "foo bar");
+            setProperty("environments.dev.webdriver.chrome.switches", "foo baz");
+        }};
+
+        SampleConfig config = ConfigFactory.create(SampleConfig.class, values);
+        assertEquals("foo bar", config.webDriverOptions());
+    }
 }
