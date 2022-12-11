@@ -78,14 +78,7 @@ class StrSubstitutor implements Serializable {
         for (String group : groups) {
             String value = values.getProperty(group);
             String replacement = isKeyExpansionExpression(group) ? replace(group) : (value != null) ? replace(value) : "";
-            String replacementValue = values.getProperty(replacement);
-            if (replacementValue == null) {
-                if (isKeyExpansionExpression(group)) {
-                    replacementValue = value != null ? value : "";
-                } else {
-                    replacementValue = replacement;
-                }
-            }
+            String replacementValue = calculateReplacementValue(group, replacement);
             replacedSource = replacedSource.replaceFirst(Pattern.quote(String.format("${%s}", group)), Matcher.quoteReplacement(replacementValue));
         }
         sb.append(replacedSource);
@@ -144,11 +137,30 @@ class StrSubstitutor implements Serializable {
 
     /**
      * Checks if given expression matches PATTERN expression - regex for key expansion expression
+     *
      * @param expression expression to be checked, null returns false
      * @return true if expression matches PATTERN, false otherwise
      */
     private boolean isKeyExpansionExpression(String expression) {
-        if(expression == null) return false;
+        if (expression == null) return false;
         return PATTERN.matcher(expression).find();
+    }
+
+    /**
+     * calculates value of a replacement
+     *
+     * @param group       initial possible key expansion expression
+     * @param replacement evaluation of group.
+     * @return if replacement represents a property stored in Config, then the property value is returned.
+     * if group represents a key expansion expression, then if the key expansion represents a property, the property value is returned, otherwise key expansion expression is invalid and thus value should be an empty string.
+     * If neither replacement nor group represents a property value, then return replacement as a string value
+     */
+    private String calculateReplacementValue(String group, String replacement) {
+        String groupValue = values.getProperty(group);
+        String replacementValue = values.getProperty(replacement);
+        if (replacementValue != null) return replacementValue;
+        if (isKeyExpansionExpression(group)) return groupValue != null ? groupValue : "";
+        return replacement;
+
     }
 }
