@@ -446,19 +446,19 @@ public interface ByteSizeConfig extends Config {
 The suffixes supported by ByteSizeConverter are:
 
 - `byte`, `bytes`, `b`
-- `kilobyte`, `kilobytes`, `k`, `ki`, `kib`
-- `kibibyte`, `kibibytes`, `kb`
-- `megabyte`, `megabytes`, `m`, `mi`, `mib`
-- `mebibyte`, `mebibytes`, `mb`
-- `gigabyte`, `gigabytes`, `g`, `gi`, `gib`
-- `gibibyte`, `gibibytes`, `gb`
-- `terabyte`, `terabytes`, `t`, `ti`, `tib`
-- `tebibyte`, `tebibytes`, `tb`
-- `petabyte`, `petabytes`, `p`, `pi`, `pib`
-- `pebibyte`, `pebibytes`, `pb`
-- `exabyte`, `exabytes`, `e`, `ei`, `eib`
-- `exbibyte`, `exbibytes`, `eb`
-- `zettabyte`, `zettabytes`, `z`, `zi`, `zib`
-- `zebibyte`, `zebibytes`, `zb`
-- `yottabyte`, `yottabytes`, `y`, `yi`, `yib`
-- `yobibyte`, `yobibytes`, `yb`
+- `kibibyte`, `kibibytes`, `k`, `ki`, `kib`
+- `kilobyte`, `kilobytes`, `kb`
+- `mebibyte`, `mebibytes`, `m`, `mi`, `mib`
+- `megabyte`, `megabytes`, `mb`
+- `gibibyte`, `gibibytes`, `g`, `gi`, `gib`
+- `gigabyte`, `gigabytes`, `gb`
+- `tebibyte`, `tebibytes`, `t`, `ti`, `tib`
+- `terabyte`, `terabytes`, `tb`
+- `pebibyte`, `pebibytes`, `p`, `pi`, `pib`
+- `petabyte`, `petabytes`, `pb`
+- `exbibyte`, `exbibytes`, `e`, `ei`, `eib`
+- `exabyte`, `exabytes`, `eb`
+- `zebibyte`, `zebibytes`, `z`, `zi`, `zib`
+- `zettabyte`, `zettabytes`, `zb`
+- `yobibyte`, `yobibytes`, `y`, `yi`, `yib`
+- `yottabyte`, `yottabytes`, `yb`
