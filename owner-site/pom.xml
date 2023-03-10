@@ -20,6 +20,9 @@
     <description>OWNER's awesome website.</description>
     <packaging>pom</packaging>
 
+    <!-- Install RUBY -->
+    <!-- gem install jekyll bundler -->
+    <!-- ridk install -->
     <build>
         <plugins>
             <plugin>

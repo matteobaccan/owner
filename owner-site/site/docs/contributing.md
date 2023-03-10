@@ -81,7 +81,7 @@ We want the OWNER documentation to be the best it can be. We've
 open-sourced our docs and we welcome any pull requests if you find it
 lacking.
 
-You can find the documentation for owner.aeonbits.org in the
+You can find the documentation for matteobaccan.github.io/owner in the
 [site](https://github.com/lviggiano/owner/tree/master/site) folder of the
 master branch.
 
