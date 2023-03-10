@@ -16,7 +16,7 @@
     <packaging>pom</packaging>
 
     <name>OWNER :: Parent</name>
-    <url>http://owner.aeonbits.org</url>
+    <url>https://matteobaccan.github.io/owner</url>
     <description>OWNER Parent Project</description>
 
     <modules>

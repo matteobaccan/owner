@@ -77,7 +77,7 @@
     <target name="javadoc">
         <mvn dir="${parent.project.directory}" command="javadoc:aggregate" />
     </target>
-    
+
     <target name="build">
         <property name="site.destination.directory" value="${build.directory}/www"/>
         <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_build-" suffix=".yml" property="build.file"/>
@@ -94,7 +94,7 @@
         ant run-drafts                      - run jekyll serve (with '-w --drafts' options)
         ant run                             - run jekyll serve (with '-w' option)
 
-        Use `ant javadoc publish`, to publish javadocs and the documentation website on http://owner.aeonbits.org
+        Use `ant javadoc publish`, to publish javadocs and the documentation website on https://matteobaccan.github.io/owner
         </echo>
     </target>
 
@@ -128,7 +128,7 @@
             <jekyll dir="${site.directory}" command="serve" options="@{options} --config _config.yml,${serve.file}"/>
         </sequential>
     </macrodef>
-    
+
     <macrodef name="jekyll">
         <attribute name="dir"/>
         <attribute name="command"/>

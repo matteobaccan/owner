@@ -62,7 +62,7 @@ public class MyApp {
 
 But this is just the tip of the iceberg.
 
-Continue reading here: [Basic usage](http://owner.aeonbits.org/docs/usage/).
+Continue reading here: [Basic usage](https://matteobaccan.github.io/owner/docs/usage/).
 
 DOWNLOAD
 --------
@@ -80,7 +80,7 @@ to learn how flexible and powerful OWNER is, and why you may need it!
 Chinese documentation is provided by [Yunfeng Cheng](https://github.com/cyfonly) via a GitHub independent project at
 [this address][chinese-docs].
 
-  [website]: http://owner.aeonbits.org
+  [website]: https://matteobaccan.github.io/owner
   [chinese-docs]: https://github.com/cyfonly/owner-doc
 
 
