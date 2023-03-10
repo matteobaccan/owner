@@ -49,7 +49,7 @@ public interface SpecialTypes extends Config {
     @DefaultValue("foobar.txt")
     File sampleFile();
 
-    @DefaultValue("http://owner.aeonbits.org")
+    @DefaultValue("https://matteobaccan.github.io/owner")
     URL sampleURL();
 
     @DefaultValue("example")
@@ -123,9 +123,9 @@ more complex split logic, you can define your own tokenizer class via the
 [`@TokenizerClass`][tokenizerclass] annotation plus [`Tokenizer`][tokenizer]
 interface.
 
-  [separator]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.Separator.html
-  [tokenizerclass]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.TokenizerClass.html
-  [tokenizer]: http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.Tokenizer.html
+  [separator]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Config.Separator.html
+  [tokenizerclass]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Config.TokenizerClass.html
+  [tokenizer]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Config.Tokenizer.html
 
 Example:
 
@@ -247,9 +247,9 @@ The @ConverterClass annotation
 ------------------------------
 
 OWNER provides the
-[`@ConverterClass`](http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Config.ConverterClass.html)
+[`@ConverterClass`](https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Config.ConverterClass.html)
 annotation that allows the user to specify a customized conversion logic implementing the
-[`Converter`](http://owner.aeonbits.org/apidocs/latest/org/aeonbits/owner/Converter.html) interface.
+[`Converter`](https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Converter.html) interface.
 
 ```java
 interface MyConfig extends Config {
@@ -258,7 +258,7 @@ interface MyConfig extends Config {
     Server server();
 
     @DefaultValue(
-      "google.com, yahoo.com:8080, owner.aeonbits.org:4000")
+      "google.com, yahoo.com:8080, matteobaccan.github.io/owner:4000")
     @ConverterClass(ServerConverter.class)
     Server[] servers();
 }
@@ -335,7 +335,7 @@ Converter classes shipped with OWNER
 ------------------------------------
 
 Since specifying duration and byte size values in configuration files is very common,
-OWNER ships with converter classes for these as well as some classes for the types themselves. 
+OWNER ships with converter classes for these as well as some classes for the types themselves.
 The code relies on Java 8 features and therefore, these classes are a part of the `owner-java8-extras`
 module. Also, you have to specify the `@ConverterClass` annotation explicitly for these converters, they are not
 applied automatically as is the case for the primitive (and more) types as described above.
@@ -356,7 +356,7 @@ public class DurationConfig extends Config {
   @DefaultValue("10 ms")
   Duration getTenMilliseconds();
 
-  
+
   @ConverterClass(DurationConverter.class)
   @DefaultValue("10d")
   Duration getTenDays();
@@ -382,8 +382,8 @@ The suffixes supported by DurationConverter are:
 
 ### Byte Size
 
-The Java API does not provide any classes to represent data sizes. Therefore, 
-OWNER provides this functionality with a set of classes in the 
+The Java API does not provide any classes to represent data sizes. Therefore,
+OWNER provides this functionality with a set of classes in the
 `org.aeonbits.owner.util.bytesize` package: `ByteSize` and `ByteSizeUnit`.
 
 The usage of these classes is best explained with an example:
@@ -406,7 +406,7 @@ ByteSize mbAsGiB = oneMegaByte.convertTo(ByteSizeUnit.GIBIBYTES);
 long oneMegaByteAsLong = oneMegaByte.getBytesAsLong();
 ```
 
-For converting configuration strings into the `ByteSize` type, the 
+For converting configuration strings into the `ByteSize` type, the
 `ByteSizeConverter` class is provided.
 
 Example:
@@ -446,19 +446,19 @@ public interface ByteSizeConfig extends Config {
 The suffixes supported by ByteSizeConverter are:
 
 - `byte`, `bytes`, `b`
-- `kilobyte`, `kilobytes`, `k`, `ki`, `kib`
-- `kibibyte`, `kibibytes`, `kb`
-- `megabyte`, `megabytes`, `m`, `mi`, `mib`
-- `mebibyte`, `mebibytes`, `mb`
-- `gigabyte`, `gigabytes`, `g`, `gi`, `gib`
-- `gibibyte`, `gibibytes`, `gb`
-- `terabyte`, `terabytes`, `t`, `ti`, `tib`
-- `tebibyte`, `tebibytes`, `tb`
-- `petabyte`, `petabytes`, `p`, `pi`, `pib`
-- `pebibyte`, `pebibytes`, `pb`
-- `exabyte`, `exabytes`, `e`, `ei`, `eib`
-- `exbibyte`, `exbibytes`, `eb`
-- `zettabyte`, `zettabytes`, `z`, `zi`, `zib`
-- `zebibyte`, `zebibytes`, `zb`
-- `yottabyte`, `yottabytes`, `y`, `yi`, `yib`
-- `yobibyte`, `yobibytes`, `yb`
+- `kibibyte`, `kibibytes`, `k`, `ki`, `kib`
+- `kilobyte`, `kilobytes`, `kb`
+- `mebibyte`, `mebibytes`, `m`, `mi`, `mib`
+- `megabyte`, `megabytes`, `mb`
+- `gibibyte`, `gibibytes`, `g`, `gi`, `gib`
+- `gigabyte`, `gigabytes`, `gb`
+- `tebibyte`, `tebibytes`, `t`, `ti`, `tib`
+- `terabyte`, `terabytes`, `tb`
+- `pebibyte`, `pebibytes`, `p`, `pi`, `pib`
+- `petabyte`, `petabytes`, `pb`
+- `exbibyte`, `exbibytes`, `e`, `ei`, `eib`
+- `exabyte`, `exabytes`, `eb`
+- `zebibyte`, `zebibytes`, `z`, `zi`, `zib`
+- `zettabyte`, `zettabytes`, `zb`
+- `yobibyte`, `yobibytes`, `y`, `yi`, `yib`
+- `yottabyte`, `yottabytes`, `yb`

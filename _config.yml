@@ -1,10 +1,10 @@
 highlighter: rouge
 relative_permalinks: false
-url: http://owner.aeonbits.org
+url: https://matteobaccan.github.io/owner
 title: OWNER • Java™ properties reinvented.
 description: Get rid of the boilerplate code in properties based configuration.
 google_analytics_id: UA-462505-8
-exclude: ["CNAME", "owner.aeonbits.org.iml", "README", "bin", "build.xml"]
+exclude: ["CNAME", "matteobaccan.github.io/owner.iml", "README", "bin", "build.xml"]
 permalink: /news/:year/:month/:day/:title
 
 author :
