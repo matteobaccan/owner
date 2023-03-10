@@ -23,7 +23,7 @@ Site Enhancements
 -----------------
  * Dyndns dropped free service, so updated links for Sonar, from sheldon.dyndns.tv ->  dev.aeonbits.org
  * Documentation website minor style/layout, updates and improvements.
- * Added [SlideShare presentation](http://www.slideshare.net/LuigiViggiano/owner-31716769) in home page.
+ * Added [SlideShare presentation](https://www.slideshare.net/LuigiViggiano/owner-31716769) in home page.
  * Added [Coveralls](https://coveralls.io/r/lviggiano/owner). (See [#59](https://github.com/lviggiano/owner/issues/59))
 
 Bugs fixes
