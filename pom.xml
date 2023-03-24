@@ -380,7 +380,7 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ftp</artifactId>
-                <version>3.3.1</version>
+                <version>3.5.3</version>
             </extension>
         </extensions>
     </build>
