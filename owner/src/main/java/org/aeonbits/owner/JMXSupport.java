@@ -70,12 +70,14 @@ class JMXSupport implements Serializable {
     @Delegate
     public Object invoke(String actionName, Object[] params, String[] signature)
             throws MBeanException, ReflectionException {
+        boolean noParamsPassed = ( params!=null || params.length == 0);
+
         if (actionName.equals("getProperty") && params != null && params.length == 1) {
             return manager.getProperty((String) params[0]);
         } else if (actionName.equals("setProperty") && params != null && params.length == 2) {
             manager.setProperty((String) params[0], (String) params[1]);
             return null;
-        } else if (actionName.equals("reload") && (params == null || params.length == 0)) {
+        } else if (actionName.equals("reload") && noParamsPassed) {
             manager.reload();
             return null;
         }
