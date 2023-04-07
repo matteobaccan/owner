@@ -33,9 +33,12 @@ class DelegateMethodHandle {
     }
 
     public boolean matches(Method invokedMethod) {
-        return invokedMethod.getName().equals(method.getName())
+
+        boolean isMethodMatching = invokedMethod.getName().equals(method.getName())
                 && invokedMethod.getReturnType().equals(method.getReturnType())
                 && Arrays.equals(invokedMethod.getParameterTypes(), method.getParameterTypes());
-    }
+
+
+        return isMethodMatching;
 
 }

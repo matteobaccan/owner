@@ -41,8 +41,9 @@ public class PreprocessorTest {
 
     @Test
     public void shouldReturnTrimmedValue() {
+        int defaultPeriod = 300;
         ConfigWithPreprocessors cfg = ConfigFactory.create(ConfigWithPreprocessors.class);
-        assertEquals(new Integer(300), cfg.pollingPeriod());
+        assertEquals(defaultPeriod, cfg.pollingPeriod());
     }
 
     @Test
