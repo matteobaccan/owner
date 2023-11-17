@@ -18,7 +18,7 @@ public class ExceptionTests {
     @Test
     public void testRollbackBatchExceptionConstruction() {
         // just ensure all constructors are available on the class and the hierarchy is correct
-        RollbackException ex = new RollbackBatchException();
+        new RollbackBatchException();
         new RollbackBatchException("message");
         new RollbackBatchException(new Exception());
         new RollbackBatchException("message", new Exception());
@@ -27,7 +27,7 @@ public class ExceptionTests {
     @Test
     public void testRollbackOperationExceptionConstruction() {
         // just ensure all constructors are available on the class and the hierarchy is correct
-        RollbackException ex = new RollbackOperationException();
+        new RollbackOperationException();
         new RollbackOperationException("message");
         new RollbackOperationException(new Exception());
         new RollbackOperationException("message", new Exception());
