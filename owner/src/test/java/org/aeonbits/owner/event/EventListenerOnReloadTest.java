@@ -46,7 +46,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * @author Luigi R. Viggiano
@@ -136,7 +136,7 @@ public class EventListenerOnReloadTest implements TestConstants {
     @Test
     public void testPropertyChangeListenerOnReloadWhenNoChangesHaveBeenMade() throws Throwable {
         cfg.reload();
-        verifyZeroInteractions(propertyChangeListener);
+        verifyNoInteractions(propertyChangeListener);
     }
 
     @Test

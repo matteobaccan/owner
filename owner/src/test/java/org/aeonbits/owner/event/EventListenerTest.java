@@ -44,7 +44,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * @author Luigi R. Viggiano
@@ -101,7 +101,7 @@ public class EventListenerTest {
         cfg.setProperty("primeNumber", "13");
         assertEquals("13", cfg.primeNumber());
 
-        verifyZeroInteractions(propertyChangeListener);
+        verifyNoInteractions(propertyChangeListener);
     }
 
     @Test
@@ -404,7 +404,7 @@ public class EventListenerTest {
         cfg.setProperty("hostname", "google.com");
         cfg.setProperty("port", "22");
 
-        verifyZeroInteractions(propertyChangeListener);
+        verifyNoInteractions(propertyChangeListener);
     }
 
     @Before
