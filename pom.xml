@@ -389,7 +389,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-report-plugin</artifactId>
