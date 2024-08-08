@@ -1,5 +1,10 @@
 {
-  "extends": [
-    "config:base"
-  ]
+ "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+ "extends": ["config:recommended"],
+ "packageRules": [
+     {
+       "matchUpdateTypes": ["minor", "patch"],
+       "automerge": true
+  }
+ ]
 }
