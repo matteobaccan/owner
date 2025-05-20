@@ -10,6 +10,8 @@ package org.aeonbits.owner.util;
 
 import java.lang.reflect.Method;
 
+import org.aeonbits.owner.util.Reflection.Java8Support;
+
 /**
  * @author Luigi R. Viggiano
  */
@@ -24,7 +26,8 @@ public final class Reflection {
 
     public static Class<?> forName(String className) {
         try {
-            return Class.forName(className);
+          // Use a specific trusted class's classloader instead of the context classloader
+          return AES.class.getClassLoader().loadClass(className);
         } catch (ClassNotFoundException e) {
             return null;
         }
