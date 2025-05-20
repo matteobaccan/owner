@@ -8,12 +8,14 @@
 
 package org.aeonbits.owner.loaders;
 
+import org.aeonbits.owner.loaders.XMLLoader.XmlToPropsHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -41,8 +43,21 @@ public class XMLLoader implements Loader {
     private synchronized SAXParserFactory factory() {
         if (factory == null) {
             factory = SAXParserFactory.newInstance();
-            factory.setValidating(true);
+            try {
+            // Disable DOCTYPE declarations to prevent XXE attacks
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            
+            // Enable secure XML processing
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            
+            // These settings should come after security features
             factory.setNamespaceAware(true);
+
+            // Note: Removed setValidating(true) as it can enable XXE vulnerabilities
+            // If validation is required, use an alternative approach with a Schema object
+            } catch (ParserConfigurationException e) {
+                throw new IllegalStateException("Failed to configure secure XML parser", e);
+        }
         }
         return factory;
     }
