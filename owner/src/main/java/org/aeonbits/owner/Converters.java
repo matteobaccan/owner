@@ -64,13 +64,19 @@ enum Converters {
     },
 
     COLLECTION {
+        @SuppressWarnings("unchecked")
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (!Collection.class.isAssignableFrom(targetType)) return SKIP;
 
             Object[] array = convertToArray(targetMethod, text);
             Collection<Object> collection = Arrays.asList(array);
-            Collection<Object> result = instantiateCollection(targetType);
+            Collection<Object> result;
+            if (getGenericType(targetMethod).isEnum() && targetType.equals(EnumSet.class)) {
+                result = (Collection<Object>) instantiateEnumSet((Class<? extends Enum>) getGenericType(targetMethod));
+            } else {
+                result = instantiateCollection(targetType);
+            }
             result.addAll(collection);
             return result;
         }
@@ -102,6 +108,14 @@ enum Converters {
                 return (Collection<T>) targetType.newInstance();
             } catch (Exception e) {
                 throw unsupported(e, "Cannot instantiate collection of type '%s'", targetType.getCanonicalName());
+            }
+        }
+
+        private <E extends Enum<E>> Collection<?> instantiateEnumSet(Class<E> targetType) {
+            try {
+                return EnumSet.noneOf(targetType);
+            } catch (Exception e) {
+                throw unsupported(e, "Cannot instantiate enumset of type '%s'", targetType.getCanonicalName());
             }
         }
 
