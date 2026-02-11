@@ -9,6 +9,8 @@
 package org.aeonbits.owner;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +50,7 @@ import static java.util.regex.Pattern.compile;
 class StrSubstitutor implements Serializable {
 
     private final Properties values;
-    private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
+    private static final Pattern PATTERN = compile("\\$\\{(.+?)}");
 
     /**
      * Creates a new instance and initializes it. Uses defaults for variable prefix and suffix and the escaping
@@ -70,15 +72,16 @@ class StrSubstitutor implements Serializable {
     String replace(String source) {
         if (source == null)
             return null;
-        Matcher m = PATTERN.matcher(source);
-        StringBuffer sb = new StringBuffer();
-        while (m.find()) {
-            String var = m.group(1);
-            String value = values.getProperty(var);
-            String replacement = (value != null) ? replace(value) : "";
-            m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        StringBuilder sb = new StringBuilder();
+        List<String> groups = getVariableExpansions(source);
+        String replacedSource = source;
+        for (String group : groups) {
+            String value = values.getProperty(group);
+            String replacement = isKeyExpansionExpression(group) ? replace(group) : (value != null) ? replace(value) : "";
+            String replacementValue = calculateReplacementValue(group, replacement);
+            replacedSource = replacedSource.replaceFirst(Pattern.quote(String.format("${%s}", group)), Matcher.quoteReplacement(replacementValue));
         }
-        m.appendTail(sb);
+        sb.append(replacedSource);
         return sb.toString();
     }
 
@@ -89,13 +92,75 @@ class StrSubstitutor implements Serializable {
      * Otherwise the return string is formatted by source and arguments as with {@link String#format(String, Object...)}
      *
      * @param source A source formatting format string. {@code null} returns {@code null}
-     * @param args Arguments referenced by the format specifiers in the source string.
+     * @param args   Arguments referenced by the format specifiers in the source string.
      * @return formatted string
      */
     String replace(String source, Object... args) {
         if (source == null)
             return null;
-        Matcher m = PATTERN.matcher(source);
-        return m.find() ? replace(source) : String.format(source, args);
+        return isKeyExpansionExpression(source) ? replace(source) : String.format(source, args);
+    }
+
+    /**
+     * Finds all top level variable expansion expressions and returns it as a list.
+     * E.g.: foo.${bar.${baz}}.${biz} -> [bar.${baz}, biz]
+     *
+     * @param expression the string for which variable expansion expressions are queried, null returns empty list
+     * @return list of top level variable expansion expressions
+     */
+    private List<String> getVariableExpansions(String expression) {
+        final List<String> variables = new ArrayList<String>();
+        if (expression == null) return variables;
+
+        final String variableExpressionBeginning = "${";
+        int indexOfFirstVariableExpansion = expression.indexOf(variableExpressionBeginning);
+        if (indexOfFirstVariableExpansion == -1) return variables;
+
+        final int expressionLength = expression.length();
+        indexOfFirstVariableExpansion += variableExpressionBeginning.length();
+        final int variableStartIndex = indexOfFirstVariableExpansion;
+        int bracketCounter = 1;
+
+        for (int index = indexOfFirstVariableExpansion; index < expressionLength; index++) {
+            if (expression.charAt(index) == '{') {
+                bracketCounter += 1;
+            }
+            if (expression.charAt(index) == '}') bracketCounter -= 1;
+            if (bracketCounter == 0) {
+                variables.add(expression.substring(variableStartIndex, index));
+                variables.addAll(getVariableExpansions(expression.substring(index + 1, expressionLength)));
+                break;
+            }
+        }
+        return variables;
+    }
+
+    /**
+     * Checks if given expression matches PATTERN expression - regex for key expansion expression
+     *
+     * @param expression expression to be checked, null returns false
+     * @return true if expression matches PATTERN, false otherwise
+     */
+    private boolean isKeyExpansionExpression(String expression) {
+        if (expression == null) return false;
+        return PATTERN.matcher(expression).find();
+    }
+
+    /**
+     * calculates value of a replacement
+     *
+     * @param group       initial possible key expansion expression
+     * @param replacement evaluation of group.
+     * @return if replacement represents a property stored in Config, then the property value is returned.
+     * if group represents a key expansion expression, then if the key expansion represents a property, the property value is returned, otherwise key expansion expression is invalid and thus value should be an empty string.
+     * If neither replacement nor group represents a property value, then return replacement as a string value
+     */
+    private String calculateReplacementValue(String group, String replacement) {
+        String groupValue = values.getProperty(group);
+        String replacementValue = values.getProperty(replacement);
+        if (replacementValue != null) return replacementValue;
+        if (isKeyExpansionExpression(group)) return groupValue != null ? groupValue : "";
+        return replacement;
+
     }
 }
