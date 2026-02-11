@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -200,7 +201,7 @@ public abstract class Util {
         if (isWindows()) {
             store(target, p);
         } else {
-            File tempFile = createTempFile(target.getName(), ".temp", parent);
+            File tempFile = Files.createTempFile(parent.toPath(), target.getName(), ".temp").toFile();
             store(tempFile, p);
             rename(tempFile, target);
         }
