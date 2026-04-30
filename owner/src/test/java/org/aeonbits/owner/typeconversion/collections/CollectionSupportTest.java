@@ -13,20 +13,12 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmytro Chyzhykov
@@ -61,6 +53,13 @@ public class CollectionSupportTest {
 
         @DefaultValue(INTEGERS)
         CollectionWithoutDefaultConstructor<Integer> badCollection();
+
+        @DefaultValue("ONE")
+        EnumSet<EnumTest> enumSet();
+
+        enum EnumTest {
+            ONE, TWO, THREE
+        }
     }
 
     static class CollectionWithoutDefaultConstructor<E> extends ArrayList<E> {
@@ -114,6 +113,11 @@ public class CollectionSupportTest {
     @Test
     public void itShouldWorkWithRawCollectionAsWithCollectionOfStrings() throws Exception {
         assertEquals(Arrays.asList("1", "2", "3"), cfg.rawCollection());
+    }
+
+    @Test
+    public void enumSetCreated() throws Exception {
+        assertTrue(cfg.enumSet().contains(CollectionConfig.EnumTest.ONE));
     }
 
 }
