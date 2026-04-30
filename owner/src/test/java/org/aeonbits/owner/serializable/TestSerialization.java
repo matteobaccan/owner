@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
 
 import static java.io.File.createTempFile;
 import static org.aeonbits.owner.util.Collections.map;
@@ -56,7 +57,7 @@ public class TestSerialization implements TestConstants {
     public void before() throws IOException {
         File parent = new File(RESOURCES_DIR);
         parent.mkdirs();
-        target = createTempFile("TestSerialization", ".ser", parent);
+        target = Files.createTempFile(parent.toPath(), "TestSerialization", ".ser").toFile();
     }
 
     @After
