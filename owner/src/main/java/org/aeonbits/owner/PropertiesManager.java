@@ -242,7 +242,23 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             keys.addAll(map.keySet());
         return keys;
     }
+        private <T> T withReadLock(java.util.function.Supplier<T> action) {
+        readLock.lock();
+        try {
+            return action.get();
+        } finally {
+            readLock.unlock();
+        }
+    }
 
+    private void withReadLockVoid(Runnable action) {
+        readLock.lock();
+        try {
+            action.run();
+        } finally {
+            readLock.unlock();
+        }
+    }
     private void applyPropertyChangeEvents(List<PropertyChangeEvent> events) {
         for (PropertyChangeEvent event : events)
             performSetProperty(event.getPropertyName(), event.getNewValue());
@@ -383,10 +399,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public Set<String> propertyNames() {
         readLock.lock();
         try {
-            LinkedHashSet<String> result = new LinkedHashSet<String>();
-            for (Enumeration<?> propertyNames = properties.propertyNames(); propertyNames.hasMoreElements(); )
-                result.add((String) propertyNames.nextElement());
-            return result;
+            return properties.stringPropertyNames();
         } finally {
             readLock.unlock();
         }
@@ -394,24 +407,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     public void list(PrintStream out) {
-        readLock.lock();
-        try {
-            properties.list(out);
-        } finally {
-            readLock.unlock();
-        }
+        withReadLockVoid(() -> properties.list(out));
     }
 
     @Delegate
     public void list(PrintWriter out) {
-        readLock.lock();
-        try {
-            properties.list(out);
-        } finally {
-            readLock.unlock();
-        }
-    }
-
+        withReadLockVoid(() -> properties.list(out));
+    }   
+    
     @Delegate
     public void store(OutputStream out, String comments) throws IOException {
         readLock.lock();

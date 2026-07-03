@@ -8,14 +8,12 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.loaders.Loader;
-
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+import java.util.concurrent.ScheduledExecutorService;
+
+import org.aeonbits.owner.loaders.Loader;
 
 /**
  * A static factory class to instantiate {@link Config} instances.
@@ -42,17 +40,15 @@ public final class ConfigFactory {
      *
      * @return a new instance of a config Factory object.
      */
-    public static Factory newInstance() {
-        ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor(new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread result = new Thread(r);
-                result.setDaemon(true);
-                return result;
-            }
-        });
-        Properties props = new Properties();
-        return new DefaultFactory(scheduler, props);
-    }
+public static Factory newInstance() {
+    ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor(r -> {
+        Thread result = new Thread(r);
+        result.setDaemon(true);
+        return result;
+    });
+    Properties props = new Properties();
+    return new DefaultFactory(scheduler, props);
+}
 
     /**
      * Creates a {@link Config} instance from the specified interface

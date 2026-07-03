@@ -39,32 +39,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
-    <developers>
-        <developer>
-            <id>luigi</id>
-            <name>Luigi R. Viggiano</name>
-            <email>luigi.viggiano@gmail.com</email>
-            <url>https://github.com/lviggiano/</url>
-            <organization>aeonbits.org</organization>
-            <organizationUrl>https://www.aeonbits.org/</organizationUrl>
-            <timezone>+1</timezone>
-            <roles>
-                <role>dev</role>
-            </roles>
-        </developer>
-    </developers>
-
-    <mailingLists>
-        <mailingList>
-            <name>Users and Developers List</name>
-            <post>owner-api@googlegroups.com</post>
-            <subscribe>owner-api+subscribe@googlegroups.com</subscribe>
-            <unsubscribe>owner-api+unsubscribe@googlegroups.com</unsubscribe>
-            <archive>http://groups.google.com/group/owner-api</archive>
-        </mailingList>
-    </mailingLists>
-
     <issueManagement>
         <system>GitHub Issue Tracking</system>
         <url>https://github.com/lviggiano/owner/issues</url>
@@ -102,7 +76,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <compiler-release>6</compiler-release>
+        <compiler-release>8</compiler-release>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.language>java</sonar.language>

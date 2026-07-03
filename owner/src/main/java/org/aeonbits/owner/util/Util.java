@@ -156,19 +156,18 @@ public abstract class Util {
         return timeProvider.getTime();
     }
 
-    public static File fileFromURI(URI uri) {
-        if ("file".equalsIgnoreCase(uri.getScheme())) {
+public static File fileFromURI(URI uri) {
+        if (uri == null) {
+            return null;
+        }
+        
+        String scheme = uri.getScheme();
+        if ("file".equalsIgnoreCase(scheme)) {
+            return new File(uri);
+        } else if ("jar".equalsIgnoreCase(scheme)) {
             String path = uri.getSchemeSpecificPart();
             try {
-                path = decode(path, "utf-8");
-                return new File(path);
-            } catch (UnsupportedEncodingException e) {
-                return unreachableButCompilerNeedsThis(/* utf-8 is supported in jre libraries */);
-            }
-        } else if ("jar".equalsIgnoreCase(uri.getScheme())) {
-            String path = uri.getSchemeSpecificPart();
-            try {
-                return fileFromURI(path.substring(0, path.indexOf('!')));
+                return fileFromURI(new URI(path.substring(0, path.indexOf('!'))));
             } catch (URISyntaxException e) {
                 return ignoreAndReturnNull(/* non critical */);
             }
