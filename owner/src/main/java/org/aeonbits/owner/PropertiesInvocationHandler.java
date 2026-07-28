@@ -75,23 +75,32 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     }
 
     private Object resolveProperty(Method method, Object... args) {
-        String key = expandKey(method, args);
-        String value = propertiesManager.getProperty(key);
-
-        // TODO: this if should go away! See #84 and #86
-        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
-            String unexpandedKey = key(method);
-            value = propertiesManager.getProperty(unexpandedKey);
-        }
+        String value = getProperty(method, args);
         if (value == null)
             return null;
-        value = preProcess(method, value);
-        Object result = convert(method, method.getReturnType(),
-                format(method, propertiesManager
-                    .decryptIfNecessary(method, expandVariables(method, value)),
-                    args));
+        Object result = convertValue(method, prepareValue(method, value, args));
         if (result == NULL) return null;
         return result;
+    }
+
+    private String getProperty(Method method, Object... args) {
+        String value = propertiesManager.getProperty(expandKey(method, args));
+
+        // TODO: this if should go away! See #84 and #86
+        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION))
+            value = propertiesManager.getProperty(key(method));
+        return value;
+    }
+
+    private String prepareValue(Method method, String value, Object... args) {
+        value = preProcess(method, value);
+        value = expandVariables(method, value);
+        value = propertiesManager.decryptIfNecessary(method, value);
+        return format(method, value, args);
+    }
+
+    private Object convertValue(Method method, String value) {
+        return convert(method, method.getReturnType(), value);
     }
 
     private String preProcess(Method method, String value) {

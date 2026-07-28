@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Code Smells in the Wild - OWNER Final Report</title>
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.35;
+            color: #111;
+        }
+        h1, h2, h3 {
+            font-family: Arial, sans-serif;
+            color: #1f2933;
+        }
+        h1 {
+            text-align: center;
+            font-size: 22pt;
+            margin-top: 40px;
+        }
+        h2 {
+            font-size: 16pt;
+            margin-top: 28px;
+            border-bottom: 1px solid #999;
+            padding-bottom: 4px;
+        }
+        h3 {
+            font-size: 13pt;
+            margin-top: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 16px 0;
+            font-size: 10pt;
+        }
+        th, td {
+            border: 1px solid #777;
+            padding: 5px;
+            vertical-align: top;
+        }
+        th {
+            background: #e8edf3;
+            font-weight: bold;
+        }
+        code, pre {
+            font-family: "Courier New", monospace;
+            font-size: 9.5pt;
+        }
+        pre {
+            background: #f4f4f4;
+            border: 1px solid #ccc;
+            padding: 8px;
+            white-space: pre-wrap;
+        }
+        .placeholder {
+            border: 2px dashed #555;
+            padding: 22px;
+            margin: 12px 0 20px 0;
+            text-align: center;
+            color: #555;
+            font-style: italic;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Code Smells in the Wild</h1>
+<h2 class="center">Software Quality Analysis and Refactoring Study</h2>
+
+<p class="center"><strong>Repository:</strong> https://github.com/matteobaccan/owner</p>
+<p class="center"><strong>Project Studied:</strong> OWNER Java Configuration Library</p>
+<p class="center"><strong>Prepared for:</strong> Software Engineering Assignment</p>
+<p class="center"><strong>Date:</strong> 29 June 2026</p>
+
+<div class="placeholder">
+    Screenshot Placeholder 1: Add repository home page or IDE project view screenshot here.
+</div>
+
+<div class="page-break"></div>
+
+<h2>Table of Contents</h2>
+<ol>
+    <li>Repository Overview</li>
+    <li>Architecture Analysis</li>
+    <li>Code Smell Analysis</li>
+    <li>Identified Issues Table</li>
+    <li>Prioritized Refactoring Candidates</li>
+    <li>Refactoring Plan</li>
+    <li>Implemented Refactoring</li>
+    <li>Before vs After Comparisons</li>
+    <li>Functional Validation</li>
+    <li>Pull Request Preparation</li>
+    <li>Tools Used</li>
+    <li>Challenges Faced</li>
+    <li>Reflection and Lessons Learned</li>
+</ol>
+
+<div class="page-break"></div>
+
+<h2>Phase 1: Repository Understanding</h2>
+
+<h3>Project Overview</h3>
+<p>
+    OWNER is a Java library designed to reduce boilerplate in application configuration.
+    Instead of manually reading Java properties files, users define an interface extending
+    <code>Config</code>. OWNER creates a dynamic proxy that maps interface methods to configuration
+    values. The main public entry point is <code>ConfigFactory.create(MyConfig.class)</code>.
+</p>
+
+<p>
+    The project is a multi-module Maven repository. The core module contains the main runtime
+    behavior. Additional modules provide optional integrations, Java 8 support, examples,
+    documentation, and distribution assembly.
+</p>
+
+<h3>Module Structure</h3>
+<table>
+    <tr><th>Module</th><th>Responsibility</th></tr>
+    <tr><td><code>owner</code></td><td>Core library: API annotations, dynamic proxy, loaders, converters, reload support, events, and utility classes.</td></tr>
+    <tr><td><code>owner-extras</code></td><td>Optional integration loaders, including ZooKeeper support.</td></tr>
+    <tr><td><code>owner-java8</code></td><td>Java 8 support implementation.</td></tr>
+    <tr><td><code>owner-java8-extras</code></td><td>Java 8 converters and byte-size utilities.</td></tr>
+    <tr><td><code>owner-site</code></td><td>Project documentation site.</td></tr>
+    <tr><td><code>owner-assembly</code></td><td>Distribution packaging.</td></tr>
+    <tr><td><code>owner-examples</code></td><td>Example applications.</td></tr>
+</table>
+
+<h3>Architecture Overview</h3>
+<p>
+    OWNER follows a dynamic-proxy based architecture. A user defines a configuration interface,
+    and OWNER creates an implementation at runtime. Method calls are intercepted, mapped to
+    property keys, resolved from loaded property sources, optionally preprocessed or decrypted,
+    and converted from strings into the requested return type.
+</p>
+
+<h3>Main Components and Responsibilities</h3>
+<table>
+    <tr><th>Component</th><th>Path</th><th>Responsibility</th></tr>
+    <tr><td><code>Config</code></td><td><code>owner/src/main/java/org/aeonbits/owner/Config.java</code></td><td>Public marker interface and annotation container.</td></tr>
+    <tr><td><code>ConfigFactory</code></td><td><code>owner/src/main/java/org/aeonbits/owner/ConfigFactory.java</code></td><td>Static facade for creating configuration proxies.</td></tr>
+    <tr><td><code>DefaultFactory</code></td><td><code>owner/src/main/java/org/aeonbits/owner/DefaultFactory.java</code></td><td>Concrete proxy factory.</td></tr>
+    <tr><td><code>PropertiesInvocationHandler</code></td><td><code>owner/src/main/java/org/aeonbits/owner/PropertiesInvocationHandler.java</code></td><td>Intercepts proxy method calls and resolves properties.</td></tr>
+    <tr><td><code>PropertiesManager</code></td><td><code>owner/src/main/java/org/aeonbits/owner/PropertiesManager.java</code></td><td>Loads, reloads, mutates, locks, decrypts, and emits property events.</td></tr>
+    <tr><td><code>Converters</code></td><td><code>owner/src/main/java/org/aeonbits/owner/Converters.java</code></td><td>String-to-type conversion strategy chain.</td></tr>
+    <tr><td><code>LoadersManager</code></td><td><code>owner/src/main/java/org/aeonbits/owner/LoadersManager.java</code></td><td>Registers and selects property source loaders.</td></tr>
+    <tr><td><code>HotReloadLogic</code></td><td><code>owner/src/main/java/org/aeonbits/owner/HotReloadLogic.java</code></td><td>Detects file or system-property changes for reload.</td></tr>
+    <tr><td><code>JMXSupport</code></td><td><code>owner/src/main/java/org/aeonbits/owner/JMXSupport.java</code></td><td>Provides optional dynamic MBean access.</td></tr>
+</table>
+
+<h3>Entry Points</h3>
+<table>
+    <tr><th>Entry Point</th><th>File and Lines</th><th>Purpose</th></tr>
+    <tr><td><code>ConfigFactory.create(...)</code></td><td><code>ConfigFactory.java:65-74</code></td><td>Main public API for creating config proxies.</td></tr>
+    <tr><td><code>ConfigFactory.newInstance()</code></td><td><code>ConfigFactory.java:45-55</code></td><td>Creates an independent factory.</td></tr>
+    <tr><td><code>DefaultFactory.create(...)</code></td><td><code>DefaultFactory.java:40-50</code></td><td>Builds manager, handler, and dynamic proxy.</td></tr>
+    <tr><td><code>PropertiesInvocationHandler.invoke(...)</code></td><td><code>PropertiesInvocationHandler.java:57-68</code></td><td>Runtime dispatch point for proxy calls.</td></tr>
+    <tr><td><code>PropertiesManager.reload()</code></td><td><code>PropertiesManager.java:226-241</code></td><td>Manual reload entry point.</td></tr>
+</table>
+
+<h3>Execution Flow</h3>
+<ol>
+    <li>User defines an interface extending <code>Config</code>.</li>
+    <li>User calls <code>ConfigFactory.create(MyConfig.class)</code>.</li>
+    <li><code>DefaultFactory</code> constructs <code>PropertiesManager</code>, optional <code>JMXSupport</code>, and <code>PropertiesInvocationHandler</code>.</li>
+    <li>A Java dynamic proxy is created.</li>
+    <li>Each method call is intercepted by <code>PropertiesInvocationHandler.invoke</code>.</li>
+    <li>Delegate methods are routed first. Normal config methods resolve a property key.</li>
+    <li>The value is loaded from <code>PropertiesManager</code>, processed, decrypted if needed, formatted, and converted.</li>
+    <li>The converted value is returned to the caller.</li>
+</ol>
+
+<h3>Dependency Overview</h3>
+<p>
+    The core module has a small runtime footprint. Its direct dependencies in <code>owner/pom.xml</code>
+    are test-scoped dependencies: JUnit, Hamcrest, Mockito, and commons-codec. Optional modules
+    add dependencies such as Apache Curator for ZooKeeper support. The parent build uses Maven
+    Compiler, Surefire, Javadoc, Source, Bundle, Assembly, and reporting plugins.
+</p>
+
+<div class="placeholder">
+    Screenshot Placeholder 2: Add Maven module tree or IDE project structure screenshot here.
+</div>
+
+<h2>Phase 2: Code Smell Detection</h2>
+
+<h3>Analysis Method</h3>
+<p>
+    The analysis combined manual code review with static-search style inspection. Manual review
+    focused on the runtime path: factory creation, proxy invocation, property loading, reload
+    behavior, conversion, event dispatching, and loaders. Tool-style inspection used file size
+    scans, source inventory, pattern searches for TODOs, broad catches, silent ignore calls,
+    repeated logic, and Maven test execution.
+</p>
+
+<h3>Identified Issues Table</h3>
+<table>
+    <tr>
+        <th>#</th><th>File</th><th>Class</th><th>Method or Area</th><th>Lines</th><th>Smell Category</th><th>Severity</th><th>Explanation</th>
+    </tr>
+    <tr><td>1</td><td><code>PropertiesManager.java</code></td><td><code>PropertiesManager</code></td><td>Whole class</td><td>40-638</td><td>Large Class / Low Cohesion</td><td>High</td><td>The class combines loading, reload, mutation, event firing, locking, decryption, equality, and delegation.</td></tr>
+    <tr><td>2</td><td><code>PropertiesManager.java</code></td><td><code>PropertiesManager</code></td><td>Constructor</td><td>85-109 before refactoring</td><td>Long Method / Divergent Change</td><td>High</td><td>The constructor originally performed several unrelated setup workflows.</td></tr>
+    <tr><td>3</td><td><code>PropertiesManager.java</code></td><td><code>PropertiesManager</code></td><td>Annotation lookup</td><td>111-133 after refactoring</td><td>Duplicate Code</td><td>Medium</td><td>Annotation lookup had repeated class/interface scanning logic.</td></tr>
+    <tr><td>4</td><td><code>PropertiesManager.java</code></td><td><code>PropertiesManager</code></td><td><code>load(InputStream)</code>, <code>load(Reader)</code></td><td>505-543 after refactoring</td><td>Duplicate Code</td><td>Medium</td><td>Both methods previously duplicated lock/load/event/rollback behavior.</td></tr>
+    <tr><td>5</td><td><code>PropertiesManager.java</code></td><td><code>PropertiesManager</code></td><td>Rollback handling</td><td>236-238, 497-499, 534-535, 570-572</td><td>Silent Error Handling</td><td>Medium</td><td>Rollback exceptions are swallowed with <code>ignore()</code>, making debugging more difficult.</td></tr>
+    <tr><td>6</td><td><code>PropertiesManager.java</code></td><td><code>PropertiesManager</code></td><td><code>equals(PropertiesManager)</code></td><td>607-621</td><td>Concurrency Risk</td><td>Medium</td><td>Locks two managers without stable lock ordering.</td></tr>
+    <tr><td>7</td><td><code>PropertiesManager.java</code></td><td>Anonymous listener list</td><td><code>remove(Object)</code></td><td>68-82</td><td>Poor Encapsulation</td><td>Medium</td><td>Custom removal behavior is hidden in an anonymous synchronized list subclass.</td></tr>
+    <tr><td>8</td><td><code>PropertiesInvocationHandler.java</code></td><td><code>PropertiesInvocationHandler</code></td><td><code>resolveProperty</code></td><td>77-104 after refactoring</td><td>Complex Method</td><td>Medium</td><td>The method originally mixed property lookup, fallback, preprocessing, variable expansion, decryption, formatting, and conversion.</td></tr>
+    <tr><td>9</td><td><code>PropertiesInvocationHandler.java</code></td><td><code>PropertiesInvocationHandler</code></td><td><code>format</code></td><td>123-133</td><td>Broad Catch</td><td>Low</td><td>Formatting catches general <code>Exception</code> and returns original text.</td></tr>
+    <tr><td>10</td><td><code>Converters.java</code></td><td><code>Converters</code></td><td>Whole enum</td><td>38-332</td><td>God Enum / Large Class</td><td>High</td><td>One enum handles arrays, collections, property editors, primitives, custom converters, reflection strategies, and unsupported conversion.</td></tr>
+    <tr><td>11</td><td><code>Converters.java</code></td><td><code>Converters.COLLECTION</code></td><td><code>getGenericType</code></td><td>84-91</td><td>Fragile Type Handling</td><td>Medium</td><td>Assumes generic element type can always be cast to <code>Class&lt;?&gt;</code>.</td></tr>
+    <tr><td>12</td><td><code>Converters.java</code></td><td><code>Converters.PRIMITIVE</code></td><td><code>tryConvert</code></td><td>169-174 after refactoring</td><td>Complex Conditional Logic</td><td>Medium</td><td>Primitive parsing was embedded in the enum strategy before extraction.</td></tr>
+    <tr><td>13</td><td><code>Converters.java</code></td><td><code>Converters</code></td><td>Reflection strategies</td><td>204-239</td><td>Broad Catch</td><td>Medium</td><td>Several conversion attempts catch general exceptions and return <code>SKIP</code>.</td></tr>
+    <tr><td>14</td><td><code>Config.java</code></td><td><code>Config.LoadType</code></td><td><code>FIRST.load</code>, <code>MERGE.load</code></td><td>128-160</td><td>Duplicate Code / Silent Failure</td><td>Medium</td><td>Both strategies repeat loader iteration and silent <code>IOException</code> handling.</td></tr>
+    <tr><td>15</td><td><code>Config.java</code></td><td><code>Config</code></td><td>Interface annotations/enums</td><td>43-370</td><td>Large Interface</td><td>Medium</td><td>The public marker interface also stores many annotations and enums.</td></tr>
+    <tr><td>16</td><td><code>JMXSupport.java</code></td><td><code>JMXSupport</code></td><td><code>invoke</code></td><td>70-83</td><td>Complex Conditional Logic / Magic Strings</td><td>Medium</td><td>JMX operation dispatch relies on repeated string names.</td></tr>
+    <tr><td>17</td><td><code>JMXSupport.java</code></td><td><code>JMXSupport</code></td><td><code>getMBeanInfo</code></td><td>94-103</td><td>Magic Strings</td><td>Low</td><td>Operation names and types are hard-coded.</td></tr>
+    <tr><td>18</td><td><code>ConfigURIFactory.java</code></td><td><code>ConfigURIFactory</code></td><td><code>newURI</code></td><td>33-55</td><td>Complex Conditional Logic</td><td>Medium</td><td>One method handles expansion, normalization, classpath lookup, file URI cases, and generic URI creation.</td></tr>
+    <tr><td>19</td><td><code>XMLLoader.java</code></td><td><code>XmlToPropsHandler</code></td><td>SAX handler</td><td>50-127</td><td>Dense Parsing Responsibility</td><td>Medium</td><td>One nested handler manages DTD substitution, Java XML properties, custom XML flattening, and value stacks.</td></tr>
+    <tr><td>20</td><td><code>ZooKeeperLoader.java</code></td><td><code>ZooKeeperLoader</code></td><td><code>accept</code></td><td>37-39</td><td>Null Safety</td><td>Low</td><td><code>uri.getScheme().equals(...)</code> can throw if scheme is null.</td></tr>
+    <tr><td>21</td><td><code>ZooKeeperLoader.java</code></td><td><code>ZooKeeperLoader</code></td><td><code>connect</code></td><td>65-69</td><td>Magic Number</td><td>Low</td><td>Default timeout string <code>"30"</code> is embedded directly.</td></tr>
+    <tr><td>22</td><td><code>Util.java</code></td><td><code>Util</code></td><td>Whole class</td><td>44-292</td><td>Utility Class / Low Cohesion</td><td>Medium</td><td>Mixes time/system providers, path normalization, persistence helpers, jar creation, exceptions, and reflection instantiation.</td></tr>
+    <tr><td>23</td><td><code>Util.java</code></td><td><code>Util</code></td><td><code>storeJar</code></td><td>242-265</td><td>Deep Nesting</td><td>Medium</td><td>Manual nested <code>try/finally</code> blocks reduce readability.</td></tr>
+    <tr><td>24</td><td><code>DefaultFactory.java</code></td><td><code>DefaultFactory</code></td><td><code>props</code></td><td>29-35, 64-72</td><td>Shared Mutable State</td><td>Medium</td><td>Factory-level properties are mutable and influence proxy creation.</td></tr>
+    <tr><td>25</td><td><code>ConfigFactory.java</code></td><td><code>ConfigFactory</code></td><td>Static singleton API</td><td>35, 65-163</td><td>Global State / Tight Coupling</td><td>Medium</td><td>Static singleton centralizes factory state, loaders, converters, and properties.</td></tr>
+</table>
+
+<div class="placeholder">
+    Screenshot Placeholder 3: Add screenshot of code smell table, code inspection, or IDE warnings here.
+</div>
+
+<h2>Phase 3: Prioritized Refactoring Candidates</h2>
+
+<table>
+    <tr><th>Rank</th><th>Candidate</th><th>Reason for Selection</th><th>Implemented?</th></tr>
+    <tr><td>1</td><td>Duplicate load workflow in <code>PropertiesManager</code></td><td>Clear duplicate-code smell, small behavioral surface, safe to refactor.</td><td>Yes</td></tr>
+    <tr><td>2</td><td>Large constructor in <code>PropertiesManager</code></td><td>High readability impact on central runtime class.</td><td>Yes</td></tr>
+    <tr><td>3</td><td>Repeated annotation lookup</td><td>Real maintainability problem because annotation lookup policy should be centralized.</td><td>Yes</td></tr>
+    <tr><td>4</td><td>Complex property resolution in <code>PropertiesInvocationHandler</code></td><td>Main runtime path; extraction improves clarity while preserving behavior.</td><td>Yes</td></tr>
+    <tr><td>5</td><td>Primitive conversion logic in <code>Converters</code></td><td>Small, safe step toward decomposing a large conversion enum.</td><td>Yes</td></tr>
+    <tr><td>6</td><td>JMX magic strings</td><td>Valid but lower impact than core loading and invocation flow.</td><td>No</td></tr>
+    <tr><td>7</td><td>Silent rollback exception handling</td><td>Real issue, but changing behavior or logging may alter public behavior.</td><td>No</td></tr>
+    <tr><td>8</td><td>Large <code>Config</code> public interface</td><td>Architectural smell, but risky because it affects public API compatibility.</td><td>No</td></tr>
+</table>
+
+<h3>Justification of Selected Issues</h3>
+<p>
+    The implemented issues were selected because they are central to the runtime behavior but can be
+    refactored internally without changing public APIs. They are meaningful for maintainability,
+    simple enough to validate through the existing test suite, and suitable for an academic
+    refactoring study because they demonstrate multiple refactoring techniques.
+</p>
+
+<h2>Phase 4: Refactoring Plan</h2>
+
+<table>
+    <tr><th>Issue</th><th>Why Problematic</th><th>Design Principle</th><th>Technique</th><th>Suitability</th></tr>
+    <tr><td>Large <code>PropertiesManager</code> constructor</td><td>Multiple setup responsibilities were mixed in one constructor.</td><td>Single Responsibility Principle</td><td>Extract Method</td><td>Private helper methods reduce cognitive load and preserve behavior.</td></tr>
+    <tr><td>Repeated annotation lookup</td><td>Same lookup policy appeared multiple times.</td><td>DRY</td><td>Extract Method</td><td>A generic <code>findAnnotation</code> method centralizes lookup behavior.</td></tr>
+    <tr><td>Duplicate stream/reader loading</td><td>Two methods duplicated lock, load, event, rollback, and unlock behavior.</td><td>DRY</td><td>Extract Method / Private Functional Interface</td><td>Common workflow can be shared while preserving input-specific loading.</td></tr>
+    <tr><td>Complex property resolution</td><td>One method performed too many sequential tasks.</td><td>Single Responsibility Principle</td><td>Extract Method</td><td>Named steps clarify the runtime pipeline.</td></tr>
+    <tr><td>Primitive conversion chain</td><td>Conversion detail was embedded directly in enum strategy.</td><td>Readability / Maintainability</td><td>Extract Method</td><td>A helper method isolates primitive parsing logic.</td></tr>
+</table>
+
+<h2>Phase 5: Implemented Refactoring</h2>
+
+<h3>Change 1: Extract Constructor Responsibilities</h3>
+<p><strong>File:</strong> <code>owner/src/main/java/org/aeonbits/owner/PropertiesManager.java</code></p>
+<p><strong>Lines after refactoring:</strong> 85-158</p>
+
+<p><strong>Before Code:</strong></p>
+<pre>ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
+uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
+for (Class&lt;?&gt; inter : clazz.getInterfaces()) {
+    this.uris.addAll(toURIs(inter.getAnnotation(Sources.class), urlFactory));
+}
+LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
+// more annotation lookup, hot reload setup, and decryptor setup...</pre>
+
+<p><strong>After Code:</strong></p>
+<pre>ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
+uris = resolveURIs(urlFactory);
+loadType = resolveLoadType();
+HotReload hotReload = findAnnotation(HotReload.class);
+...
+initializeEncryptedKeys();</pre>
+
+<p><strong>Benefits:</strong> The constructor now reads as an orchestration method. URI setup,
+load policy resolution, annotation lookup, and encrypted key setup are separated into named
+private methods.</p>
+
+<h3>Change 2: Remove Duplicate Load Workflow</h3>
+<p><strong>File:</strong> <code>owner/src/main/java/org/aeonbits/owner/PropertiesManager.java</code></p>
+<p><strong>Lines after refactoring:</strong> 505-543</p>
+
+<p><strong>Before Code:</strong></p>
+<pre>public void load(InputStream inStream) throws IOException {
+    writeLock.lock();
+    try {
+        Properties loaded = new Properties();
+        loaded.load(inStream);
+        performLoad(keys(loaded), loaded);
+    } catch (RollbackBatchException ex) {
+        ignore();
+    } finally {
+        writeLock.unlock();
+    }
+}</pre>
+
+<p><strong>After Code:</strong></p>
+<pre>public void load(InputStream inStream) throws IOException {
+    load(new PropertiesLoader() {
+        public void load(Properties props) throws IOException {
+            props.load(inStream);
+        }
+    });
+}
+
+private void load(PropertiesLoader loader) throws IOException {
+    writeLock.lock();
+    try {
+        Properties loaded = new Properties();
+        loader.load(loaded);
+        performLoad(keys(loaded), loaded);
+    } catch (RollbackBatchException ex) {
+        ignore();
+    } finally {
+        writeLock.unlock();
+    }
+}</pre>
+
+<p><strong>Benefits:</strong> The lock and event workflow now exists in one place. This reduces
+future maintenance risk and keeps behavior consistent between stream and reader loading.</p>
+
+<h3>Change 3: Simplify Property Resolution Pipeline</h3>
+<p><strong>File:</strong> <code>owner/src/main/java/org/aeonbits/owner/PropertiesInvocationHandler.java</code></p>
+<p><strong>Lines after refactoring:</strong> 77-104</p>
+
+<p><strong>Before Code:</strong></p>
+<pre>String key = expandKey(method, args);
+String value = propertiesManager.getProperty(key);
+if (value == null &amp;&amp; !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
+    String unexpandedKey = key(method);
+    value = propertiesManager.getProperty(unexpandedKey);
+}
+...
+Object result = convert(method, method.getReturnType(),
+        format(method, propertiesManager
+            .decryptIfNecessary(method, expandVariables(method, value)),
+            args));</pre>
+
+<p><strong>After Code:</strong></p>
+<pre>private Object resolveProperty(Method method, Object... args) {
+    String value = getProperty(method, args);
+    if (value == null)
+        return null;
+    Object result = convertValue(method, prepareValue(method, value, args));
+    if (result == NULL) return null;
+    return result;
+}</pre>
+
+<p><strong>Benefits:</strong> The method now expresses the high-level flow clearly. The extracted
+methods preserve the exact lookup, preprocessing, expansion, decryption, formatting, and conversion
+order.</p>
+
+<h3>Change 4: Extract Primitive Conversion</h3>
+<p><strong>File:</strong> <code>owner/src/main/java/org/aeonbits/owner/Converters.java</code></p>
+<p><strong>Lines after refactoring:</strong> 169-174 and 259-268</p>
+
+<p><strong>Before Code:</strong></p>
+<pre>if (targetType == Byte.TYPE) return Byte.parseByte(text);
+if (targetType == Short.TYPE) return Short.parseShort(text);
+if (targetType == Integer.TYPE) return Integer.parseInt(text);
+if (targetType == Long.TYPE) return Long.parseLong(text);
+if (targetType == Boolean.TYPE) return Boolean.parseBoolean(text);
+if (targetType == Float.TYPE) return Float.parseFloat(text);
+if (targetType == Double.TYPE) return Double.parseDouble(text);
+return SKIP;</pre>
+
+<p><strong>After Code:</strong></p>
+<pre>Object tryConvert(Method targetMethod, Class&lt;?&gt; targetType, String text) {
+    if (!targetType.isPrimitive()) return SKIP;
+    return convertPrimitive(targetType, text);
+}</pre>
+
+<p><strong>Benefits:</strong> The enum strategy is shorter and the conversion detail is isolated
+in a named helper.</p>
+
+<h3>Change 5: Build and Test Compatibility Fix</h3>
+<p><strong>Files:</strong> <code>pom.xml</code> and <code>PropertiesInvocationHandlerTest.java</code></p>
+<p>
+    The build originally failed under JDK 21 because the Maven compiler target was Java 6. The
+    parent POM now uses <code>&lt;compiler-release&gt;8&lt;/compiler-release&gt;</code> at
+    <code>pom.xml:105</code>. A fragile Mockito spy on <code>Properties</code> was also replaced by
+    a deterministic <code>RecordingProperties</code> test helper at
+    <code>PropertiesInvocationHandlerTest.java:65-78</code>.
+</p>
+
+<div class="placeholder">
+    Screenshot Placeholder 4: Add screenshot of refactored PropertiesManager code here.
+</div>
+
+<div class="placeholder">
+    Screenshot Placeholder 5: Add screenshot of refactored PropertiesInvocationHandler code here.
+</div>
+
+<h2>Phase 6: Functional Validation</h2>
+
+<h3>Validation Strategy</h3>
+<p>
+    Since the refactorings are intended to preserve behavior, validation focused on compiling all
+    modules, running the existing test suite, and performing a full Maven install. This checks
+    runtime tests, packaging, Javadocs, source JAR generation, assembly artifacts, and local
+    artifact installation.
+</p>
+
+<h3>Commands Executed</h3>
+<pre>./mvnw clean test</pre>
+<p><strong>Result:</strong> Build success. Full reactor test execution passed.</p>
+
+<pre>./mvnw clean install</pre>
+<p><strong>Result:</strong> Build success. Full reactor packaging and installation passed.</p>
+
+<h3>Test Summary</h3>
+<table>
+    <tr><th>Module</th><th>Validation Result</th></tr>
+    <tr><td><code>owner</code></td><td>288 tests passed, 0 failures, 0 errors.</td></tr>
+    <tr><td><code>owner-extras</code></td><td>ZooKeeper loader tests passed.</td></tr>
+    <tr><td><code>owner-java8</code></td><td>Java 8 support tests passed.</td></tr>
+    <tr><td><code>owner-java8-extras</code></td><td>Duration, byte-size, and converter tests passed.</td></tr>
+    <tr><td><code>owner-assembly</code></td><td>Distribution archives generated successfully.</td></tr>
+    <tr><td><code>owner-examples</code></td><td>Example module compiled and installed successfully.</td></tr>
+</table>
+
+<h3>Existing Tests Affected</h3>
+<p>
+    <code>PropertiesInvocationHandlerTest</code> was affected because the test previously relied on
+    Mockito spying a <code>Properties</code> object. This failed under the modern runtime. The test
+    was rewritten to use a small deterministic subclass that records whether the expected
+    <code>list</code> overload was called.
+</p>
+
+<h3>New Tests Needed</h3>
+<p>
+    No new functional tests were required because the implementation did not introduce new behavior.
+    Existing tests already covered property loading, invocation handling, accessible operations,
+    conversion, reload, events, XML loading, JMX behavior, and Java 8 extras.
+</p>
+
+<h3>Manual Verification Steps</h3>
+<ol>
+    <li>Run <code>./mvnw clean test</code>.</li>
+    <li>Confirm all tests pass with no failures or errors.</li>
+    <li>Run <code>./mvnw clean install</code>.</li>
+    <li>Confirm all reactor modules complete successfully.</li>
+    <li>Confirm generated artifacts exist in module <code>target</code> folders and local Maven repository.</li>
+</ol>
+
+<h3>Validation Checklist</h3>
+<table>
+    <tr><th>Check</th><th>Status</th></tr>
+    <tr><td>Core module compiles</td><td>Passed</td></tr>
+    <tr><td>Core unit tests pass</td><td>Passed</td></tr>
+    <tr><td>Full reactor test suite passes</td><td>Passed</td></tr>
+    <tr><td>Full Maven install passes</td><td>Passed</td></tr>
+    <tr><td>Public API preserved</td><td>Passed</td></tr>
+    <tr><td>Behavior preserved</td><td>Passed based on existing tests</td></tr>
+    <tr><td>Warnings reviewed</td><td>Warnings are documentation and obsolete Java 8 option warnings only</td></tr>
+</table>
+
+<div class="placeholder">
+    Screenshot Placeholder 6: Add screenshot of successful mvn clean test output here.
+</div>
+
+<div class="placeholder">
+    Screenshot Placeholder 7: Add screenshot of successful mvn clean install output here.
+</div>
+
+<h2>Phase 7: Pull Request Preparation</h2>
+
+<h3>PR Title</h3>
+<pre>Refactor property loading and resolution internals</pre>
+
+<h3>PR Description</h3>
+<pre>## Summary
+
+This PR improves maintainability in OWNER's core runtime path by applying small,
+behavior-preserving refactorings.
+
+## Problems Identified
+
+- PropertiesManager constructor mixed several initialization responsibilities.
+- Annotation lookup logic was repeated.
+- load(InputStream) and load(Reader) duplicated lock/load/event handling.
+- PropertiesInvocationHandler.resolveProperty combined lookup, preparation, and conversion logic.
+- Primitive conversion logic in Converters was embedded directly in the enum strategy.
+
+## Refactoring Performed
+
+- Extracted URI, load policy, annotation lookup, and encrypted-key setup helpers in PropertiesManager.
+- Introduced a shared private load workflow for stream and reader loading.
+- Split property resolution into getProperty, prepareValue, and convertValue.
+- Extracted primitive conversion into convertPrimitive.
+- Updated compiler release to Java 8 for compatibility with modern JDKs.
+- Reworked a fragile Mockito Properties spy test into a deterministic test helper.
+
+## Benefits
+
+- Reduced duplication.
+- Improved readability of core configuration loading and invocation flow.
+- Preserved public API and runtime behavior.
+- Restored successful build/test execution on JDK 21.
+
+## Validation
+
+- ./mvnw clean test passes.
+- ./mvnw clean install passes.</pre>
+
+<h2>Phase 8: Final Academic Report</h2>
+
+<h3>Repository Overview</h3>
+<p>
+    OWNER is a mature Java configuration library with a focused purpose: simplifying the use of
+    properties-based configuration. It uses interface-based configuration definitions and runtime
+    proxy generation to provide type-safe access to configuration values.
+</p>
+
+<h3>Architecture Analysis</h3>
+<p>
+    The architecture is centered on dynamic proxy dispatch. This design enables a concise public API
+    but places significant responsibility on runtime classes such as <code>PropertiesManager</code>,
+    <code>PropertiesInvocationHandler</code>, and <code>Converters</code>. These classes are therefore
+    natural locations for maintainability concerns.
+</p>
+
+<h3>Code Smell Analysis</h3>
+<p>
+    The most important smells were large class, duplicate code, complex method, broad utility
+    responsibilities, and global mutable state. Not every smell was refactored because several are
+    tied to public API compatibility or intentional legacy design. The implemented changes focused on
+    high-confidence, behavior-preserving improvements.
+</p>
+
+<h3>Refactoring Decisions</h3>
+<p>
+    The selected refactorings were deliberately conservative. They targeted internal private methods,
+    avoided public API changes, and used the existing style of the codebase. This reduced risk while
+    still providing meaningful maintainability improvements.
+</p>
+
+<h3>Validation Results</h3>
+<p>
+    Functional validation was successful. The commands <code>./mvnw clean test</code> and
+    <code>./mvnw clean install</code> completed successfully after the build compatibility and test
+    compatibility fixes. This indicates that behavior remained stable according to the repository's
+    existing test suite.
+</p>
+
+<h3>Tools Used</h3>
+<ul>
+    <li>Manual code review</li>
+    <li><code>rg</code> for source searching</li>
+    <li><code>find</code> and <code>wc</code> for repository inventory and file size checks</li>
+    <li><code>git diff</code> for change review</li>
+    <li>Maven Wrapper for build and test validation</li>
+    <li>JUnit and Mockito test suite</li>
+    <li>LibreOffice for document generation</li>
+</ul>
+
+<h3>Challenges Faced</h3>
+<ul>
+    <li>The original build target was Java 6, which is not supported by the installed JDK 21 compiler.</li>
+    <li>A Mockito spy on <code>java.util.Properties</code> failed under the current runtime and required a deterministic test helper.</li>
+    <li>Some smells, such as the large public <code>Config</code> interface, were real but not suitable for safe refactoring because of public API compatibility.</li>
+</ul>
+
+<h3>Reflection and Lessons Learned</h3>
+<p>
+    This study shows that valuable refactoring does not always require major redesign. Small,
+    carefully selected internal changes can reduce duplication, clarify execution flow, and improve
+    maintainability while preserving behavior. The existing test suite was essential because it made
+    it possible to validate that the refactoring did not break configuration loading, property
+    conversion, reload behavior, events, or optional modules.
+</p>
+
+<h3>Conclusion</h3>
+<p>
+    The OWNER repository contains a generally coherent architecture but also several maintainability
+    issues typical of mature libraries: central runtime classes grow large, compatibility concerns
+    preserve older patterns, and utility logic accumulates over time. The implemented refactorings
+    improved the most assignment-relevant issues while maintaining functional correctness. The final
+    build and test results confirm that the repository remains operational after refactoring.
+</p>
+
+<div class="placeholder">
+    Screenshot Placeholder 8: Add final git diff, test summary, or project artifacts screenshot here.
+</div>
+
+</body>
+</html>

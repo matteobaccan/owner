@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.PrintStream;
@@ -20,15 +19,14 @@ import java.io.PrintWriter;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PropertiesInvocationHandlerTest {
-    @Spy private final Properties properties = new Properties();
+    private RecordingProperties properties;
     @Mock private PrintStream printStream;
     @Mock private PrintWriter printWriter;
     @Mock private Object proxy;
@@ -42,6 +40,7 @@ public class PropertiesInvocationHandlerTest {
 
     @Before
     public void before() {
+        properties = new RecordingProperties();
         PropertiesManager loader = new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders);
         handler = new PropertiesInvocationHandler(loader, null);
     }
@@ -49,18 +48,33 @@ public class PropertiesInvocationHandlerTest {
     @Test
     public void testListPrintStream() throws Throwable {
         handler.invoke(proxy, MyConfig.class.getDeclaredMethod("list", PrintStream.class), printStream);
-        verify(properties).list(eq(printStream));
+        assertSame(printStream, properties.printStream);
     }
 
     @Test
     public void testListPrintWriter() throws Throwable {
         handler.invoke(proxy, MyConfig.class.getDeclaredMethod("list", PrintWriter.class), printWriter);
-        verify(properties).list(eq(printWriter));
+        assertSame(printWriter, properties.printWriter);
     }
 
     public interface MyConfig extends Config, Accessible {
         void list(PrintStream out);
         void list(PrintWriter out);
+    }
+
+    private static class RecordingProperties extends Properties {
+        private PrintStream printStream;
+        private PrintWriter printWriter;
+
+        @Override
+        public void list(PrintStream out) {
+            printStream = out;
+        }
+
+        @Override
+        public void list(PrintWriter out) {
+            printWriter = out;
+        }
     }
 
 }

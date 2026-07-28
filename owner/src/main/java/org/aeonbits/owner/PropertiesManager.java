@@ -16,6 +16,7 @@ import org.aeonbits.owner.util.Util;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -88,32 +89,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.loaders = loaders;
         this.imports = imports;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
-        uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
-
-        for (Class<?> inter : clazz.getInterfaces()) {
-            this.uris.addAll(toURIs(inter.getAnnotation(Sources.class), urlFactory));
-        }
-
-        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
-        if (loadPolicy == null) {
-            for (Class<?> inter : clazz.getInterfaces()) {
-                loadPolicy = inter.getAnnotation(LoadPolicy.class);
-                if (loadPolicy != null) {
-                    break;
-                }
-            }
-        }
-        loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
-
-        HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        if (hotReload == null) {
-            for (Class<?> inter : clazz.getInterfaces()) {
-                hotReload = inter.getAnnotation(HotReload.class);
-                if (hotReload != null) {
-                    break;
-                }
-            }
-        }
+        uris = resolveURIs(urlFactory);
+        loadType = resolveLoadType();
+        HotReload hotReload = findAnnotation(HotReload.class);
         if (hotReload != null) {
             hotReloadLogic = new HotReloadLogic(hotReload, uris, this);
 
@@ -127,8 +105,34 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             hotReloadLogic = null;
         }
 
-        // We try to identify the DecryptorClass annotation, to assign the Decryptor to this configuration.
-        // If it isn't present then we assign the IdentityDecryptor.
+        initializeEncryptedKeys();
+    }
+
+    private List<URI> resolveURIs(ConfigURIFactory urlFactory) {
+        List<URI> result = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
+        for (Class<?> inter : clazz.getInterfaces())
+            result.addAll(toURIs(inter.getAnnotation(Sources.class), urlFactory));
+        return result;
+    }
+
+    private LoadType resolveLoadType() {
+        LoadPolicy loadPolicy = findAnnotation(LoadPolicy.class);
+        return (loadPolicy != null) ? loadPolicy.value() : FIRST;
+    }
+
+    private <T extends Annotation> T findAnnotation(Class<T> annotationClass) {
+        T annotation = clazz.getAnnotation(annotationClass);
+        if (annotation != null)
+            return annotation;
+        for (Class<?> inter : clazz.getInterfaces()) {
+            annotation = inter.getAnnotation(annotationClass);
+            if (annotation != null)
+                return annotation;
+        }
+        return null;
+    }
+
+    private void initializeEncryptedKeys() {
         DecryptorClass decryptorManager = clazz.getAnnotation(DecryptorClass.class);
         Class<? extends Decryptor> decryptorClazz;
         if (decryptorManager != null) {
@@ -499,16 +503,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     public void load(InputStream inStream) throws IOException {
-        writeLock.lock();
-        try {
-            Properties loaded = new Properties();
-            loaded.load(inStream);
-            performLoad(keys(loaded), loaded);
-        } catch (RollbackBatchException ex) {
-            ignore();
-        } finally {
-            writeLock.unlock();
-        }
+        load(new PropertiesLoader() {
+            public void load(Properties props) throws IOException {
+                props.load(inStream);
+            }
+        });
     }
 
     private void performLoad(Set keys, Properties props) throws RollbackBatchException {
@@ -519,16 +518,28 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     public void load(Reader reader) throws IOException {
+        load(new PropertiesLoader() {
+            public void load(Properties props) throws IOException {
+                props.load(reader);
+            }
+        });
+    }
+
+    private void load(PropertiesLoader loader) throws IOException {
         writeLock.lock();
         try {
             Properties loaded = new Properties();
-            loaded.load(reader);
+            loader.load(loaded);
             performLoad(keys(loaded), loaded);
         } catch (RollbackBatchException ex) {
             ignore();
         } finally {
             writeLock.unlock();
         }
+    }
+
+    private interface PropertiesLoader {
+        void load(Properties props) throws IOException;
     }
 
     void setProxy(Object proxy) {

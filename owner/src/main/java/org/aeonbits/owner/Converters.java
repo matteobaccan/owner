@@ -170,14 +170,7 @@ enum Converters {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (!targetType.isPrimitive()) return SKIP;
-            if (targetType == Byte.TYPE) return Byte.parseByte(text);
-            if (targetType == Short.TYPE) return Short.parseShort(text);
-            if (targetType == Integer.TYPE) return Integer.parseInt(text);
-            if (targetType == Long.TYPE) return Long.parseLong(text);
-            if (targetType == Boolean.TYPE) return Boolean.parseBoolean(text);
-            if (targetType == Float.TYPE) return Float.parseFloat(text);
-            if (targetType == Double.TYPE) return Double.parseDouble(text);
-            return SKIP;
+            return convertPrimitive(targetType, text);
         }
     },
 
@@ -261,6 +254,17 @@ enum Converters {
         Object result = converter.convert(targetMethod, text);
         if (result == null) return NULL;
         return result;
+    }
+
+    private static Object convertPrimitive(Class<?> targetType, String text) {
+        if (targetType == Byte.TYPE) return Byte.parseByte(text);
+        if (targetType == Short.TYPE) return Short.parseShort(text);
+        if (targetType == Integer.TYPE) return Integer.parseInt(text);
+        if (targetType == Long.TYPE) return Long.parseLong(text);
+        if (targetType == Boolean.TYPE) return Boolean.parseBoolean(text);
+        if (targetType == Float.TYPE) return Float.parseFloat(text);
+        if (targetType == Double.TYPE) return Double.parseDouble(text);
+        return SKIP;
     }
 
     private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry =
