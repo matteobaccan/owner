@@ -81,7 +81,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase implements TestCo
 
         @Override
         void execute() throws Throwable {
-            yield();
+            Thread.yield();
             Integer value = cfg.someValue();
             assertNotNull(value);
             assertTrue(value == 10 || value == 20);
@@ -107,7 +107,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase implements TestCo
 
                 cfg.reload();
             }
-            yield();
+            Thread.yield();
 
             synchronized (target) {
                 save(target, new Properties() {{
@@ -116,7 +116,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase implements TestCo
 
                 cfg.reload();
             }
-            yield();
+            Thread.yield();
         }
 
         @Override

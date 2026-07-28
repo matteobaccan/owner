@@ -53,7 +53,7 @@ abstract class ThreadBase<T extends Config> extends Thread implements MyCloneabl
                 debug("%s[%d] thrown an error in loop #%d.\n", getClass().getName(), uniqueThreadId, i);
                 errors.add(throwable);
             }
-            yield();
+            Thread.yield();
             debug("%s[%d] completed loop #%d.\n", getClass().getName(), uniqueThreadId, i);
         }
     }
