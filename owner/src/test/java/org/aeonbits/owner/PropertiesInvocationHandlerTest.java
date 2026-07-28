@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.PrintStream;
@@ -20,7 +19,9 @@ import java.io.PrintWriter;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -28,7 +29,10 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PropertiesInvocationHandlerTest {
-    @Spy private final Properties properties = new Properties();
+    // A @Spy on java.util.Properties breaks on JDK 16+: Mockito cannot copy the JDK-internal
+    // 'map' field (java.base is not open), leaving the spy's storage null. Delegating to a real
+    // instance avoids relying on the mock's internal state.
+    private final Properties properties = mock(Properties.class, delegatesTo(new Properties()));
     @Mock private PrintStream printStream;
     @Mock private PrintWriter printWriter;
     @Mock private Object proxy;
