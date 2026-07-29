@@ -16,6 +16,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,6 +62,19 @@ public class CollectionSupportTest {
 
         @DefaultValue(INTEGERS)
         CollectionWithoutDefaultConstructor<Integer> badCollection();
+
+        @DefaultValue("ONE")
+        EnumSet<EnumTest> enumSet();
+
+        @DefaultValue("ONE, TWO")
+        EnumSet<EnumTest> multiValueEnumSet();
+
+        @DefaultValue("ONE, ONE, TWO")
+        EnumSet<EnumTest> duplicateValuesEnumSet();
+
+        enum EnumTest {
+            ONE, TWO, THREE
+        }
     }
 
     static class CollectionWithoutDefaultConstructor<E> extends ArrayList<E> {
@@ -114,6 +128,25 @@ public class CollectionSupportTest {
     @Test
     public void itShouldWorkWithRawCollectionAsWithCollectionOfStrings() throws Exception {
         assertEquals(Arrays.asList("1", "2", "3"), cfg.rawCollection());
+    }
+
+    @Test
+    public void itShouldReadSingleValueEnumSet() throws Exception {
+        assertThat(cfg.enumSet(), instanceOf(EnumSet.class));
+        assertThat(cfg.enumSet(), contains(CollectionConfig.EnumTest.ONE));
+    }
+
+    @Test
+    public void itShouldReadMultiValueEnumSet() throws Exception {
+        assertThat(cfg.multiValueEnumSet(), instanceOf(EnumSet.class));
+        assertThat(cfg.multiValueEnumSet(),
+                containsInAnyOrder(CollectionConfig.EnumTest.ONE, CollectionConfig.EnumTest.TWO));
+    }
+
+    @Test
+    public void itShouldDiscardDuplicateValuesInEnumSet() throws Exception {
+        assertThat(cfg.duplicateValuesEnumSet(),
+                containsInAnyOrder(CollectionConfig.EnumTest.ONE, CollectionConfig.EnumTest.TWO));
     }
 
 }
