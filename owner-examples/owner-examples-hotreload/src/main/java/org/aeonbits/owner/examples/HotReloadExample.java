@@ -45,6 +45,13 @@ public class HotReloadExample {
         Integer someValue();
     }
 
+    /**
+     * Runs the hot reload example.
+     *
+     * @param args command line arguments (unused).
+     * @throws IOException          if the example properties file cannot be written.
+     * @throws InterruptedException if the polling loop is interrupted while sleeping.
+     */
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.printf("\n\n HOT RELOAD EXAMPLE \n\n");
 

@@ -18,18 +18,35 @@ package org.aeonbits.owner.event;
  */
 public class RollbackBatchException extends RollbackException {
 
+    /** Constructs a new exception with no detail message. */
     public RollbackBatchException() {
         super();
     }
 
+    /**
+     * Constructs a new exception with the given detail message.
+     *
+     * @param message the detail message.
+     */
     public RollbackBatchException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new exception with the given cause.
+     *
+     * @param cause the cause of this exception.
+     */
     public RollbackBatchException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs a new exception with the given detail message and cause.
+     *
+     * @param message the detail message.
+     * @param cause   the cause of this exception.
+     */
     public RollbackBatchException(String message, Throwable cause) {
         super(message, cause);
     }

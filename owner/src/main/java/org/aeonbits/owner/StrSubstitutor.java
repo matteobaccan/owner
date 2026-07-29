@@ -83,12 +83,12 @@ class StrSubstitutor implements Serializable {
     }
 
     /**
-     * Returns a string modified in according to supplied source and arguments.<br/>
+     * Returns a string modified according to the supplied source and arguments.<br/>
      * If the source string has pattern-replacement content like {@code "a.${var}.b"},
-     * the pattern is replaced property value of "var".<br/>
+     * the pattern is replaced with the property value of "var".<br/>
      * Otherwise the return string is formatted by source and arguments as with {@link String#format(String, Object...)}
      *
-     * @param source A source formatting format string. {@code null} returns {@code null}
+     * @param source A source format string. {@code null} returns {@code null}
      * @param args Arguments referenced by the format specifiers in the source string.
      * @return formatted string
      */

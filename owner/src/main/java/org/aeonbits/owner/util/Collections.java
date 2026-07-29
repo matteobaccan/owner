@@ -75,23 +75,63 @@ public abstract class Collections {
         }
     }
 
+    /**
+     * Creates a single map entry associating the given key with the given value.
+     *
+     * @param key   the entry key.
+     * @param value the entry value.
+     * @param <K>   the type of the key.
+     * @param <V>   the type of the value.
+     * @return a new {@link Entry} holding the given key and value.
+     */
     public static <K, V> Entry<K, V> entry(K key, V value) {
         return new SimpleEntry<K, V>(key, value);
     }
 
+    /**
+     * Creates a map containing a single entry associating the given key with the given value.
+     *
+     * @param key   the key.
+     * @param value the value.
+     * @param <K>   the type of the key.
+     * @param <V>   the type of the value.
+     * @return a new map holding the given key and value.
+     */
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> map(K key, V value) {
         return map(entry(key, value));
     }
 
+    /**
+     * Creates a map from the given entries.
+     *
+     * @param entries the entries to put in the map.
+     * @param <K>     the type of the keys.
+     * @param <V>     the type of the values.
+     * @return a new map holding the given entries.
+     */
     public static <K, V> Map<K, V> map(Map.Entry<? extends K, ? extends V>... entries) {
         return new EntryMap<K, V>(entries);
     }
 
+    /**
+     * Creates a set from the given elements, preserving their iteration order.
+     *
+     * @param elements the elements to put in the set.
+     * @param <E>      the type of the elements.
+     * @return a new set holding the given elements.
+     */
     public static <E> Set<E> set(E... elements) {
         return new LinkedHashSet<E>(list(elements));
     }
 
+    /**
+     * Creates a list from the given elements.
+     *
+     * @param elements the elements to put in the list.
+     * @param <E>      the type of the elements.
+     * @return a list holding the given elements.
+     */
     public static <E> List<E> list(E... elements) {
         return asList(elements);
     }

@@ -185,7 +185,7 @@ public enum ByteSizeUnit {
     /**
      * Gets the multiplication factor for this {@link ByteSizeUnit}.
      *
-     * Returns the result of raising the poweOf value of this units standard to the power specified in this unit.
+     * Returns the result of raising the powerOf value of this unit's standard to the power specified in this unit.
      *
      * @return the factor by which to multiply for this unit.
      */

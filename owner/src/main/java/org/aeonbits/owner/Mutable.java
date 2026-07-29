@@ -28,7 +28,7 @@ import java.io.Reader;
  *         int old = cfg.setProperty("minAge", "21"); // old = 18
  *         int after = cfg.minAge();                  // after = 21
  *         int old2 = cfg.removeProperty("minAge");   // old2 = 21
- *         int end = cfg.minAge();                    // end = null
+ *         int end = cfg.minAge();                    // end = 18 (falls back to the default value)
  *     }
  * </pre>
  *

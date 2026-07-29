@@ -16,5 +16,11 @@ package org.aeonbits.owner;
  * @since 1.0.9
  */
 public interface Preprocessor {
+    /**
+     * Pre-processes the given input string before it is used by the library.
+     *
+     * @param input the raw property value.
+     * @return the processed property value.
+     */
     String process(String input);
 }

@@ -12,6 +12,11 @@ import java.lang.reflect.Method;
 
 import static org.aeonbits.owner.util.Reflection.forName;
 
+/**
+ * Provides Base64 encoding and decoding relying on whatever implementation is available on the
+ * runtime classpath: <code>java.util.Base64</code> on Java 8 and later, falling back to
+ * <code>javax.xml.bind.DatatypeConverter</code> on Java 6 and 7.
+ */
 public class Base64 {
     private static Method decoderMethod;
     private static Method encoderMethod;
@@ -62,6 +67,13 @@ public class Base64 {
     }
 
 
+    /**
+     * Decodes a Base64 encoded string back into the original bytes.
+     *
+     * @param data the Base64 encoded string.
+     * @return the decoded bytes.
+     * @throws UnsupportedOperationException if no Base64 decoder is available on the classpath.
+     */
     public static byte[] decode(String data) {
         if (decoderMethod == null) throw new UnsupportedOperationException("Cannot find Base64 decoder.");
         try {
@@ -71,6 +83,13 @@ public class Base64 {
         }
     }
 
+    /**
+     * Encodes the given bytes into a Base64 string.
+     *
+     * @param data the bytes to encode.
+     * @return the Base64 encoded string.
+     * @throws UnsupportedOperationException if no Base64 encoder is available on the classpath.
+     */
     public static String encode(byte[] data) {
         if (encoderMethod == null) throw new UnsupportedOperationException("Cannot find Base64 encoder.");
         try {

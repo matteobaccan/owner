@@ -17,7 +17,7 @@ package org.aeonbits.owner.event;
 public interface TransactionalReloadListener extends ReloadListener {
 
     /**
-     * This method is invoked before the property are reloaded. When this method is invoked we cannot assume that the
+     * This method is invoked before the properties are reloaded. When this method is invoked we cannot assume that the
      * changes are effective, since some listener can ask to roll back the change.
      *
      * @param event the {@link ReloadEvent event} of property reload.

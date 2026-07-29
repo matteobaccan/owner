@@ -23,8 +23,11 @@ import static java.util.Collections.unmodifiableList;
  */
 public class ReloadEvent extends Event {
 
+    /** The change events describing which properties were modified during the reload. */
     private final List<PropertyChangeEvent> events;
+    /** The properties before the reload. */
     private final Properties oldProperties;
+    /** The properties after the reload. */
     private final Properties newProperties;
 
     /**

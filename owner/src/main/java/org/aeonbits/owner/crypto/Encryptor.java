@@ -3,8 +3,8 @@ package org.aeonbits.owner.crypto;
 /**
  * An encryptor is a class which is able to encrypt and decrypt a value.
  * <p>
- * This interface allows separation between API needed by OWNER at decription level and a implementation with a
- * decription library, as javax.crypto or others.
+ * This interface allows separation between the API needed by OWNER at encryption level and an implementation backed by
+ * an encryption library, such as javax.crypto or others.
  */
 public interface Encryptor extends Decryptor {
     /**

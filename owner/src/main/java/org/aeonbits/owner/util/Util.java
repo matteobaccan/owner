@@ -43,15 +43,38 @@ import static java.util.Arrays.asList;
  */
 public abstract class Util {
 
+    /** Abstraction over the source of the current time, to allow overriding it in tests. */
     public interface TimeProvider {
+        /**
+         * Returns the current time in milliseconds.
+         *
+         * @return the current time in milliseconds.
+         */
         long getTime();
     }
 
+    /** Abstraction over system properties and environment access, to allow overriding it in tests. */
     public interface SystemProvider {
+        /**
+         * Returns the system property for the given key.
+         *
+         * @param key the system property name.
+         * @return the property value, or <code>null</code> if not set.
+         */
         String getProperty(String key);
 
+        /**
+         * Returns the environment variables.
+         *
+         * @return a map of the environment variables.
+         */
         Map<String, String> getenv();
 
+        /**
+         * Returns a copy of the system properties.
+         *
+         * @return the system properties.
+         */
         Properties getProperties();
     }
 
@@ -78,12 +101,26 @@ public abstract class Util {
     /** Don't let anyone instantiate this class */
     private Util() {}
 
+    /**
+     * Returns a reversed copy of the given list, leaving the original untouched.
+     *
+     * @param src the list to reverse.
+     * @param <T> the type of the elements.
+     * @return a new list with the elements in reverse order.
+     */
     public static <T> List<T> reverse(List<T> src) {
         List<T> copy = new ArrayList<T>(src);
         Collections.reverse(copy);
         return copy;
     }
 
+    /**
+     * Returns a reversed copy of the given array, leaving the original untouched.
+     *
+     * @param array the array to reverse.
+     * @param <T>   the type of the elements.
+     * @return a new array with the elements in reverse order.
+     */
     @SuppressWarnings("unchecked")
     public static <T> T[] reverse(T[] array) {
         T[] copy = array.clone();
@@ -91,6 +128,13 @@ public abstract class Util {
         return copy;
     }
 
+    /**
+     * Expands a leading <code>~</code> in the given text to the user home directory, supporting
+     * plain, <code>file:</code> and <code>jar:file:</code> prefixes.
+     *
+     * @param text the text possibly starting with <code>~</code>.
+     * @return the text with the user home expanded, or the original text if no expansion applies.
+     */
     public static String expandUserHome(String text) {
         if (text.equals("~"))
             return getUserHome();
@@ -105,14 +149,33 @@ public abstract class Util {
         return system.getProperty("user.home");
     }
 
+    /**
+     * Replaces backslashes with forward slashes in the given path.
+     *
+     * @param path the path to fix.
+     * @return the path with backslashes replaced by forward slashes.
+     */
     public static String fixBackslashesToSlashes(String path) {
         return path.replace('\\', '/');
     }
 
+    /**
+     * Replaces spaces with <code>%20</code> in the given path.
+     *
+     * @param path the path to fix.
+     * @return the path with spaces replaced by <code>%20</code>.
+     */
     public static String fixSpacesToPercentTwenty(String path) {
         return path.replace(" ", "%20");
     }
 
+    /**
+     * Does nothing and returns <code>null</code>; used to silence reporting tools complaining about
+     * empty catch blocks while making the intent explicit.
+     *
+     * @param <T> the expected return type.
+     * @return always <code>null</code>.
+     */
     public static <T> T ignoreAndReturnNull() {
         // the ignoreAndReturnNull method does absolutely nothing, but it helps to shut up warnings by pmd and other reporting tools
         // complaining about empty catch methods.
@@ -125,6 +188,14 @@ public abstract class Util {
     public static void ignore() {
     }
 
+    /**
+     * Tells whether the given feature is disabled for the given method, considering both the method
+     * and its declaring class {@link DisableFeature} annotations.
+     *
+     * @param method  the method to inspect.
+     * @param feature the feature to check.
+     * @return <code>true</code> if the feature is disabled, <code>false</code> otherwise.
+     */
     public static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
         Class<DisableFeature> annotation = DisableFeature.class;
         return isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
@@ -135,27 +206,67 @@ public abstract class Util {
         return annotation != null && asList(annotation.value()).contains(feature);
     }
 
+    /**
+     * Builds an {@link UnsupportedOperationException} with a formatted message and a cause.
+     *
+     * @param cause the cause of the exception.
+     * @param msg   the message format, as per {@link String#format(String, Object...)}.
+     * @param args  the arguments for the message format.
+     * @return the built exception.
+     */
     public static UnsupportedOperationException unsupported(Throwable cause, String msg, Object... args) {
         return new UnsupportedOperationException(format(msg, args), cause);
     }
 
+    /**
+     * Builds an {@link UnsupportedOperationException} with a formatted message.
+     *
+     * @param msg  the message format, as per {@link String#format(String, Object...)}.
+     * @param args the arguments for the message format.
+     * @return the built exception.
+     */
     public static UnsupportedOperationException unsupported(String msg, Object... args) {
         return new UnsupportedOperationException(format(msg, args));
     }
 
+    /**
+     * Always throws an {@link AssertionError}; used to satisfy the compiler on branches that can
+     * never be reached.
+     *
+     * @param <T> the expected return type.
+     * @return never returns normally.
+     */
     public static <T> T unreachableButCompilerNeedsThis() {
         throw new AssertionError("this code should never be reached");
     }
 
+    /**
+     * Returns the string representation of the given object, or <code>null</code> if it is <code>null</code>.
+     *
+     * @param result the object to convert.
+     * @return the string representation, or <code>null</code>.
+     */
     public static String asString(Object result) {
         if (result == null) return null;
         return String.valueOf(result);
     }
 
+    /**
+     * Returns the current time in milliseconds, as provided by the configured {@link TimeProvider}.
+     *
+     * @return the current time in milliseconds.
+     */
     public static long now() {
         return timeProvider.getTime();
     }
 
+    /**
+     * Resolves a {@link File} from the given URI, supporting <code>file:</code> and <code>jar:</code>
+     * schemes.
+     *
+     * @param uri the URI to resolve.
+     * @return the resolved file, or <code>null</code> if the scheme is not supported.
+     */
     public static File fileFromURI(URI uri) {
         if ("file".equalsIgnoreCase(uri.getScheme())) {
             String path = uri.getSchemeSpecificPart();
@@ -176,6 +287,14 @@ public abstract class Util {
         return null;
     }
 
+    /**
+     * Resolves a {@link File} from the given URI string, retrying with backslashes converted to
+     * forward slashes if the initial parse fails.
+     *
+     * @param uriSpec the URI string to resolve.
+     * @return the resolved file, or <code>null</code> if the scheme is not supported.
+     * @throws URISyntaxException if the string cannot be parsed as a URI.
+     */
     public static File fileFromURI(String uriSpec) throws URISyntaxException {
         try {
             return fileFromURI(new URI(uriSpec));
@@ -186,14 +305,34 @@ public abstract class Util {
         }
     }
 
+    /**
+     * Null-safe equality check between two objects.
+     *
+     * @param o1 the first object.
+     * @param o2 the second object.
+     * @return <code>true</code> if both are the same reference or equal, <code>false</code> otherwise.
+     */
     public static boolean eq(Object o1, Object o2) {
         return o1 == o2 || o1 != null && o1.equals(o2);
     }
 
+    /**
+     * Returns the configured {@link SystemProvider}.
+     *
+     * @return the system provider.
+     */
     public static SystemProvider system() {
         return system;
     }
 
+    /**
+     * Saves the given properties to the target file, writing atomically (via a temp file and rename)
+     * on non-Windows platforms.
+     *
+     * @param target the destination file.
+     * @param p      the properties to save.
+     * @throws IOException if the file cannot be written.
+     */
     public static void save(File target, Properties p) throws IOException {
         File parent = target.getParentFile();
         parent.mkdirs();
@@ -211,6 +350,11 @@ public abstract class Util {
         return system.getProperty("os.name").toLowerCase().contains("win");
     }
 
+    /**
+     * Deletes the given file.
+     *
+     * @param target the file to delete.
+     */
     public static void delete(File target) {
         target.delete();
     }
@@ -228,6 +372,14 @@ public abstract class Util {
         p.store(out, "saved for test");
     }
 
+    /**
+     * Saves the given properties into a jar file as the given entry.
+     *
+     * @param target    the destination jar file.
+     * @param entryName the name of the entry to create inside the jar.
+     * @param props     the properties to save.
+     * @throws IOException if the jar cannot be written.
+     */
     public static void saveJar(File target, String entryName, Properties props) throws IOException {
         File parent = target.getParentFile();
         parent.mkdirs();
@@ -274,6 +426,14 @@ public abstract class Util {
         }
     }
 
+    /**
+     * Instantiates the given class using its no-argument constructor.
+     *
+     * @param clazz the class to instantiate.
+     * @param <T>   the type of the instance.
+     * @return a new instance of the given class.
+     * @throws UnsupportedOperationException if the class cannot be instantiated.
+     */
     public static <T> T newInstance(Class<T> clazz) {
         try {
             return clazz.getDeclaredConstructor().newInstance();
@@ -284,6 +444,14 @@ public abstract class Util {
         }
     }
 
+    /**
+     * Instantiates each of the given classes and appends the instances to the given list.
+     *
+     * @param classes the classes to instantiate.
+     * @param result  the list the new instances are added to.
+     * @param <T>     the common type of the instances.
+     * @return the same list passed as <code>result</code>, with the new instances appended.
+     */
     public static <T> List<T> newInstance(Class<? extends T>[] classes, List<T> result) {
         for (Class<? extends T> clazz : classes)
             result.add(newInstance(clazz));

@@ -22,7 +22,7 @@ import java.util.Properties;
 public interface Loader extends Serializable {
 
     /**
-     * Indicates wether this Loader does accept the URL, guessing the content type from it.
+     * Indicates whether this Loader accepts the URI, guessing the content type from it.
      *
      * @since 1.1.0
      * @param uri   the URI
@@ -41,10 +41,10 @@ public interface Loader extends Serializable {
     void load(Properties result, URI uri) throws IOException;
 
     /**
-     * Returns the default URI specification for a given url resource, that can be handled by this loader.
+     * Returns the default URI specification for a given URI resource, that can be handled by this loader.
      *
-     * @param uriPrefix the prefix identifying the url resource.
-     * @return the default URI specification for a given uri resource, that can be handled by this loader.
+     * @param uriPrefix the prefix identifying the URI resource.
+     * @return the default URI specification for a given URI resource, that can be handled by this loader.
      */
     String defaultSpecFor(String uriPrefix);
 }

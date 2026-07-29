@@ -53,6 +53,11 @@ public interface Config extends Serializable {
     @Target(TYPE)
     @Documented
     @interface LoadPolicy {
+        /**
+         * The policy used to load the properties files.
+         *
+         * @return the load policy; defaults to {@link LoadType#FIRST}.
+         */
         LoadType value() default FIRST;
     }
 
@@ -67,6 +72,11 @@ public interface Config extends Serializable {
     @Target(TYPE)
     @Documented
     @interface Sources {
+        /**
+         * The source URIs from which to load the properties, in URI string format.
+         *
+         * @return the source URIs.
+         */
         String[] value();
     }
 
@@ -77,6 +87,11 @@ public interface Config extends Serializable {
     @Target(METHOD)
     @Documented
     @interface DefaultValue {
+        /**
+         * The default value to be used when no property is found.
+         *
+         * @return the default value.
+         */
         String value();
     }
 
@@ -88,18 +103,29 @@ public interface Config extends Serializable {
     @Target(METHOD)
     @Documented
     @interface Key {
+        /**
+         * The key used to look up the property.
+         *
+         * @return the property key.
+         */
         String value();
     }
 
     /**
      * When a value should be decrypted this annotation is needed.
-     * If value is not supplied it assumes that will be used the {@link Decryptor} setted in {@link DecryptorClass}.
-     * This overrides the {@link EncryptedValue} Descryptor defined for the class.
+     * If value is not supplied it is assumed that the {@link Decryptor} set in {@link DecryptorClass} will be used.
+     * This overrides the {@link EncryptedValue} decryptor defined for the class.
      */
     @Retention(RUNTIME)
     @Target(METHOD)
     @Documented
     @interface EncryptedValue {
+        /**
+         * The decryptor to use for this value.
+         *
+         * @return the decryptor class; defaults to {@link IdentityDecryptor}, meaning the
+         *         decryptor defined by {@link DecryptorClass} is used.
+         */
         Class<? extends Decryptor> value() default IdentityDecryptor.class;
     }
 
@@ -112,6 +138,11 @@ public interface Config extends Serializable {
     @Target(TYPE)
     @Documented
     @interface DecryptorClass {
+        /**
+         * The default decryptor shared by all encrypted keys of the class.
+         *
+         * @return the decryptor class; defaults to {@link IdentityDecryptor}.
+         */
         Class<? extends Decryptor> value() default IdentityDecryptor.class;
     }
 
@@ -272,6 +303,11 @@ public interface Config extends Serializable {
     @Target({METHOD, TYPE})
     @Documented
     @interface DisableFeature {
+        /**
+         * The features to disable.
+         *
+         * @return the features to disable.
+         */
         DisableableFeature[] value();
     }
 
@@ -281,7 +317,9 @@ public interface Config extends Serializable {
      * @since 1.0.4
      */
     enum DisableableFeature {
+        /** Disables variable expansion, i.e. <code>${...}</code> substitution in property values. */
         VARIABLE_EXPANSION,
+        /** Disables parameter formatting, i.e. positional <code>{0}</code> argument substitution. */
         PARAMETER_FORMATTING
     }
 
@@ -339,6 +377,11 @@ public interface Config extends Serializable {
     @Target({METHOD, TYPE})
     @Documented
     @interface TokenizerClass {
+        /**
+         * The tokenizer used to split the property value into elements.
+         *
+         * @return the tokenizer class.
+         */
         Class<? extends Tokenizer> value();
     }
 
@@ -351,6 +394,11 @@ public interface Config extends Serializable {
     @Target(METHOD)
     @Documented
     @interface ConverterClass {
+        /**
+         * The converter used to convert the property value to the method return type.
+         *
+         * @return the converter class.
+         */
         Class<? extends Converter> value();
     }
 
@@ -364,6 +412,11 @@ public interface Config extends Serializable {
     @Target({METHOD, TYPE})
     @Documented
     @interface PreprocessorClasses {
+        /**
+         * The preprocessors applied, in order, to the property value.
+         *
+         * @return the preprocessor classes.
+         */
         Class<? extends Preprocessor>[] value();
     }
 

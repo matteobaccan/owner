@@ -16,18 +16,35 @@ package org.aeonbits.owner.event;
  */
 public class RollbackOperationException extends RollbackException {
 
+    /** Constructs a new exception with no detail message. */
     public RollbackOperationException() {
         super();
     }
 
+    /**
+     * Constructs a new exception with the given detail message.
+     *
+     * @param message the detail message.
+     */
     public RollbackOperationException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new exception with the given cause.
+     *
+     * @param cause the cause of this exception.
+     */
     public RollbackOperationException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs a new exception with the given detail message and cause.
+     *
+     * @param message the detail message.
+     * @param cause   the cause of this exception.
+     */
     public RollbackOperationException(String message, Throwable cause) {
         super(message, cause);
     }
