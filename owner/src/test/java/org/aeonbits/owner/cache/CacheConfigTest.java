@@ -51,7 +51,7 @@ public class CacheConfigTest {
         MyConfig third = ConfigCache.getOrCreate(spy, MyConfig.class);
         assertSame(first, second);
         assertSame(second, third);
-        verify(spy, times(1)).create(eq(MyConfig.class), ArgumentMatchers.<Map<?, ?>[]>any());
+        verify(spy, times(1)).create(eq(MyConfig.class), ArgumentMatchers.any(Map[].class));
     }
 
     @Test
