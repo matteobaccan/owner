@@ -103,6 +103,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compiler-release>8</compiler-release>
+        <maven-bundle-plugin.version>6.0.2</maven-bundle-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.language>java</sonar.language>
@@ -135,6 +136,18 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <!-- maven-bundle-plugin 6.x requires a Java 17+ runtime;
+                 fall back to the last Java 8/11 compatible release -->
+            <id>bundle-plugin-pre-17</id>
+            <activation>
+                <jdk>[,17)</jdk>
+            </activation>
+            <properties>
+                <maven-bundle-plugin.version>5.1.9</maven-bundle-plugin.version>
+            </properties>
         </profile>
 
         <profile>
@@ -325,7 +338,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>6.0.2</version>
+                    <version>${maven-bundle-plugin.version}</version>
                     <extensions>true</extensions>
                     <executions>
                         <execution>
