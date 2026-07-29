@@ -35,6 +35,20 @@
         </profile>
     </profiles>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- forces the netty version pulled transitively by curator/zookeeper,
+                 which lags behind the security patches (GHSA on netty-common < 4.1.118) -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.1.136.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.aeonbits.owner</groupId>
@@ -44,15 +58,23 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
-            <version>4.3.0</version>
+            <version>5.9.0</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
-            <version>4.3.0</version>
+            <version>5.9.0</version>
             <optional>true</optional>
             <scope>test</scope>
+            <exclusions>
+                <!-- curator-test brings an outdated JUnit 5 that makes surefire switch provider
+                     and breaks the JUnit 4 tests; only TestingServer is used here -->
+                <exclusion>
+                    <groupId>org.junit.jupiter</groupId>
+                    <artifactId>junit-jupiter-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
