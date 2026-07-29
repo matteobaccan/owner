@@ -104,9 +104,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compiler-release>8</compiler-release>
         <maven-bundle-plugin.version>6.0.2</maven-bundle-plugin.version>
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.language>java</sonar.language>
+        <sonar.projectKey>matteobaccan_owner</sonar.projectKey>
+        <sonar.organization>matteobaccan</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <profiles>

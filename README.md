@@ -4,11 +4,8 @@ OWNER
 OWNER, an API to ease Java property files usage.
 
 [![Owner build](https://github.com/matteobaccan/owner/actions/workflows/maven.yml/badge.svg)](https://github.com/matteobaccan/owner/actions/workflows/maven.yml)
-<!--
-[![Coverage Status](https://coveralls.io/repos/lviggiano/owner/badge.png)](https://coveralls.io/r/lviggiano/owner)
-[![security status](https://www.meterian.com/badge/gh/lviggiano/owner/security)](https://www.meterian.com/report/gh/lviggiano/owner)
-[![stability status](https://www.meterian.com/badge/gh/lviggiano/owner/stability)](https://www.meterian.com/report/gh/lviggiano/owner)
--->
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=matteobaccan_owner&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=matteobaccan_owner)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=matteobaccan_owner&metric=coverage)](https://sonarcloud.io/component_measures?id=matteobaccan_owner&metric=coverage)
 
 [![Built with Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
 
