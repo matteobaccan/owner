@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -43,8 +44,26 @@ public class XMLLoader implements Loader {
             factory = SAXParserFactory.newInstance();
             factory.setValidating(true);
             factory.setNamespaceAware(true);
+            // Hardening against XXE: the internal Java properties DTD still works
+            // (its DOCTYPE is intercepted by resolveEntity), but external DTDs and
+            // external entities are neutralized, and secure processing limits
+            // entity expansion (billion laughs).
+            setFeature("http://xml.org/sax/features/external-general-entities", false);
+            setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         }
         return factory;
+    }
+
+    private void setFeature(String feature, boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (ParserConfigurationException ignore) {
+            // feature not supported by this parser: skip it
+        } catch (SAXException ignore) {
+            // feature not recognized by this parser: skip it
+        }
     }
 
     static class XmlToPropsHandler extends DefaultHandler2 {
@@ -69,13 +88,15 @@ public class XMLLoader implements Loader {
         @Override
         public InputSource resolveEntity(String name, String publicId, String baseURI,
                                          String systemId) throws SAXException, IOException {
-            InputSource inputSource = null;
-            if (systemId.equals(PROPS_DTD_URI)) {
+            if (systemId != null && systemId.equals(PROPS_DTD_URI)) {
                 isJavaPropertiesFormat = true;
-                inputSource = new InputSource(new StringReader(PROPS_DTD));
+                InputSource inputSource = new InputSource(new StringReader(PROPS_DTD));
                 inputSource.setSystemId(PROPS_DTD_URI);
+                return inputSource;
             }
-            return inputSource;
+            // Any other external entity/DTD is neutralized by returning an empty
+            // source instead of null (which would let the parser fetch it).
+            return new InputSource(new StringReader(""));
         }
 
         public XmlToPropsHandler(Properties props) {

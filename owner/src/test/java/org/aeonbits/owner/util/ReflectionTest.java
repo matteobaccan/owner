@@ -11,6 +11,8 @@ package org.aeonbits.owner.util;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -28,6 +30,16 @@ public class ReflectionTest {
     public void testAvailableWithExistentClass(){
         boolean available = Reflection.isClassAvailable("java.lang.String");
         assertTrue(available);
+    }
+
+    @Test
+    public void testForNameWithExistentClass() {
+        assertSame(String.class, Reflection.forName("java.lang.String"));
+    }
+
+    @Test
+    public void testForNameWithNonExistentClass() {
+        assertNull(Reflection.forName("foo.bar.baz.FooBar"));
     }
 
 }
