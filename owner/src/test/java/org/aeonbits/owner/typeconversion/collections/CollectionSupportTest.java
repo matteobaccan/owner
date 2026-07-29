@@ -13,12 +13,21 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Dmytro Chyzhykov
@@ -56,6 +65,12 @@ public class CollectionSupportTest {
 
         @DefaultValue("ONE")
         EnumSet<EnumTest> enumSet();
+
+        @DefaultValue("ONE, TWO")
+        EnumSet<EnumTest> multiValueEnumSet();
+
+        @DefaultValue("ONE, ONE, TWO")
+        EnumSet<EnumTest> duplicateValuesEnumSet();
 
         enum EnumTest {
             ONE, TWO, THREE
@@ -116,8 +131,22 @@ public class CollectionSupportTest {
     }
 
     @Test
-    public void enumSetCreated() throws Exception {
-        assertTrue(cfg.enumSet().contains(CollectionConfig.EnumTest.ONE));
+    public void itShouldReadSingleValueEnumSet() throws Exception {
+        assertThat(cfg.enumSet(), instanceOf(EnumSet.class));
+        assertThat(cfg.enumSet(), contains(CollectionConfig.EnumTest.ONE));
+    }
+
+    @Test
+    public void itShouldReadMultiValueEnumSet() throws Exception {
+        assertThat(cfg.multiValueEnumSet(), instanceOf(EnumSet.class));
+        assertThat(cfg.multiValueEnumSet(),
+                containsInAnyOrder(CollectionConfig.EnumTest.ONE, CollectionConfig.EnumTest.TWO));
+    }
+
+    @Test
+    public void itShouldDiscardDuplicateValuesInEnumSet() throws Exception {
+        assertThat(cfg.duplicateValuesEnumSet(),
+                containsInAnyOrder(CollectionConfig.EnumTest.ONE, CollectionConfig.EnumTest.TWO));
     }
 
 }
