@@ -3,7 +3,7 @@ OWNER
 
 OWNER, an API to ease Java property files usage.
 
-[![Build Status](https://travis-ci.org/lviggiano/owner.png?branch=master)](https://travis-ci.org/lviggiano/owner)
+[![Owner build](https://github.com/matteobaccan/owner/actions/workflows/maven.yml/badge.svg)](https://github.com/matteobaccan/owner/actions/workflows/maven.yml)
 [![Coverage Status](https://coveralls.io/repos/lviggiano/owner/badge.png)](https://coveralls.io/r/lviggiano/owner)
 [![security status](https://www.meterian.com/badge/gh/lviggiano/owner/security)](https://www.meterian.com/report/gh/lviggiano/owner)
 [![stability status](https://www.meterian.com/badge/gh/lviggiano/owner/stability)](https://www.meterian.com/report/gh/lviggiano/owner)
@@ -67,7 +67,7 @@ Continue reading here: [Basic usage](https://matteobaccan.github.io/owner/docs/u
 DOWNLOAD
 --------
 
-Public Releases can be downloaded from [GitHub Releases](https://github.com/lviggiano/owner/releases) page or
+Public Releases can be downloaded from [GitHub Releases](https://github.com/matteobaccan/owner/releases) page or
 [Maven Central Repository](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22).
 
 
@@ -94,4 +94,4 @@ LICENSE
 OWNER is released under the BSD license.
 See [LICENSE][] file included for the details.
 
-  [LICENSE]: https://raw.github.com/lviggiano/owner/master/LICENSE
+  [LICENSE]: https://raw.github.com/matteobaccan/owner/master/LICENSE
