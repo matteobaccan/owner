@@ -21,10 +21,8 @@
 
     <modules>
         <module>owner</module>
-        <module>owner-java8</module>
         <module>owner-site</module>
         <module>owner-extras</module>
-        <module>owner-java8-extras</module>
         <module>owner-assembly</module>
     </modules>
 
