@@ -30,6 +30,8 @@ import java.util.Set;
  */
 class JMXSupport implements Serializable {
 
+    private static final String STRING_CLASS_NAME = "java.lang.String";
+
     private final Class<?> clazz;
     private final PropertiesManager manager;
 
@@ -87,16 +89,16 @@ class JMXSupport implements Serializable {
         List<MBeanAttributeInfo> attributesInfo = new ArrayList<MBeanAttributeInfo>();
         Set<String> propertyNames = manager.propertyNames();
         for (String name : propertyNames)
-            attributesInfo.add(new MBeanAttributeInfo(name, "java.lang.String", name, true, true, false));
+            attributesInfo.add(new MBeanAttributeInfo(name, STRING_CLASS_NAME, name, true, true, false));
 
         MBeanAttributeInfo[] attributes = attributesInfo.toArray(new MBeanAttributeInfo[propertyNames.size()]);
 
-        MBeanParameterInfo key = new MBeanParameterInfo("key", "java.lang.String", "Key of the property");
-        MBeanParameterInfo value = new MBeanParameterInfo("value", "java.lang.String", "Value of the property");
+        MBeanParameterInfo key = new MBeanParameterInfo("key", STRING_CLASS_NAME, "Key of the property");
+        MBeanParameterInfo value = new MBeanParameterInfo("value", STRING_CLASS_NAME, "Value of the property");
 
         MBeanOperationInfo[] operations = new MBeanOperationInfo[] {
                 new MBeanOperationInfo("getProperty", "Gets value for a property",
-                        new MBeanParameterInfo[] { key }, "java.lang.String", MBeanOperationInfo.INFO),
+                        new MBeanParameterInfo[] { key }, STRING_CLASS_NAME, MBeanOperationInfo.INFO),
                 new MBeanOperationInfo("setProperty", "Sets the value for a property",
                         new MBeanParameterInfo[] { key, value }, "void", MBeanOperationInfo.ACTION),
                 new MBeanOperationInfo("reload", "Reload properties", null, "void", MBeanOperationInfo.ACTION)

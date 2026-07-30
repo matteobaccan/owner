@@ -157,11 +157,8 @@ public class UtilTest {
 
     private static Properties loadProperties(File source) throws IOException {
         Properties loaded = new Properties();
-        InputStream in = new FileInputStream(source);
-        try {
+        try (InputStream in = new FileInputStream(source)) {
             loaded.load(in);
-        } finally {
-            in.close();
         }
         return loaded;
     }

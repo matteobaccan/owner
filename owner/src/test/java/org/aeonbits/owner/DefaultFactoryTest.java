@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
  * <p>
  * Since <code>javax.management</code> is part of the JDK, the "JMX not available" scenario is reproduced by
  * reloading the <code>org.aeonbits.owner</code> classes in a child-first classloader which pretends that
- * {@link DynamicMBean} cannot be loaded, so that <code>DefaultFactory.isJMXAvailable</code> is initialized to
+ * {@link DynamicMBean} cannot be loaded, so that <code>DefaultFactory.JMX_AVAILABLE</code> is initialized to
  * <code>false</code> in that isolated world.
  * </p>
  *
@@ -80,10 +80,10 @@ public class DefaultFactoryTest {
     public void testJmxIsDetectedAsUnavailableWhenDynamicMBeanCannotBeLoaded() throws Exception {
         Class<?> factoryClass = new JmxHidingClassLoader().loadClass(DefaultFactory.class.getName());
 
-        Field isJMXAvailable = factoryClass.getDeclaredField("isJMXAvailable");
-        isJMXAvailable.setAccessible(true);
+        Field jmxAvailable = factoryClass.getDeclaredField("JMX_AVAILABLE");
+        jmxAvailable.setAccessible(true);
 
-        assertFalse((Boolean) isJMXAvailable.get(null));
+        assertFalse((Boolean) jmxAvailable.get(null));
     }
 
     @Test
@@ -121,7 +121,7 @@ public class DefaultFactoryTest {
      * A child-first classloader that hides <code>javax.management.DynamicMBean</code> and redefines every
      * <code>org.aeonbits.owner</code> class from the original class files. In the world defined by this loader
      * {@link org.aeonbits.owner.util.Reflection#isClassAvailable(String)} cannot load {@link DynamicMBean},
-     * hence <code>DefaultFactory</code> initializes its <code>isJMXAvailable</code> flag to <code>false</code>.
+     * hence <code>DefaultFactory</code> initializes its <code>JMX_AVAILABLE</code> flag to <code>false</code>.
      */
     static class JmxHidingClassLoader extends ClassLoader {
 

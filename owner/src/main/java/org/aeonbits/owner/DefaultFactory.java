@@ -25,7 +25,7 @@ import static org.aeonbits.owner.util.Reflection.isClassAvailable;
  */
 class DefaultFactory implements Factory {
 
-    private static final boolean isJMXAvailable = isClassAvailable("javax.management.DynamicMBean");
+    private static final boolean JMX_AVAILABLE = isClassAvailable("javax.management.DynamicMBean");
     private final ScheduledExecutorService scheduler;
     private Properties props;
     final LoadersManager loadersManager;
@@ -96,13 +96,13 @@ class DefaultFactory implements Factory {
     }
 
     private Object getJMXSupport(Class<?> clazz, PropertiesManager manager) {
-        if (isJMXAvailable)
+        if (JMX_AVAILABLE)
             return new JMXSupport(clazz, manager);
         return null;
     }
 
     private <T extends Config> Class<?>[] interfaces(Class<? extends T> clazz) {
-        if (isJMXAvailable)
+        if (JMX_AVAILABLE)
             return new Class<?>[]{clazz, DynamicMBean.class};
         else
             return new Class<?>[]{clazz};

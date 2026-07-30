@@ -33,11 +33,8 @@ public class XMLLoaderTest {
     private static File writeTempFile(String prefix, String suffix, String content) throws IOException {
         File file = Files.createTempFile(prefix, suffix).toFile();
         file.deleteOnExit();
-        Writer writer = new FileWriter(file);
-        try {
+        try (Writer writer = new FileWriter(file)) {
             writer.write(content);
-        } finally {
-            writer.close();
         }
         return file;
     }

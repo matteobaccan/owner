@@ -79,31 +79,17 @@ public class TestSerialization implements TestConstants {
     }
 
     private MyConfig deserialize(File target) throws IOException, ClassNotFoundException {
-        FileInputStream fin = new FileInputStream(target);
-        try {
-            ObjectInputStream oin = new ObjectInputStream(fin);
-            try {
-                return (MyConfig) oin.readObject();
-            } finally {
-                oin.close();
-            }
-        } finally {
-            fin.close();
+        try (FileInputStream fin = new FileInputStream(target);
+             ObjectInputStream oin = new ObjectInputStream(fin)) {
+            return (MyConfig) oin.readObject();
         }
     }
 
     private void serialize(MyConfig cfg, File target) throws IOException {
-        FileOutputStream fout = new FileOutputStream(target);
-        try {
-            ObjectOutputStream oout = new ObjectOutputStream(fout);
-            try {
-                oout.writeObject(cfg);
-                oout.flush();
-            } finally {
-                oout.close();
-            }
-        } finally {
-            fout.close();
+        try (FileOutputStream fout = new FileOutputStream(target);
+             ObjectOutputStream oout = new ObjectOutputStream(fout)) {
+            oout.writeObject(cfg);
+            oout.flush();
         }
     }
 
