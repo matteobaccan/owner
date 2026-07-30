@@ -8,11 +8,9 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.util.IsolatedClassLoader;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -148,61 +146,29 @@ public class ConvertersTest {
         }
     }
 
-    private static Method method(String name) throws NoSuchMethodException {
-        return PrimitiveConfig.class.getMethod(name);
+    /**
+     * On exotic runtimes (e.g. some compact profiles) the JavaBeans property editors may not be
+     * on the classpath at all: conversions must keep working through the remaining converters.
+     * The scenario is simulated by hiding java.beans.PropertyEditorManager from the class loader.
+     */
+    @Test
+    public void testConversionsKeepWorkingWhenPropertyEditorsAreNotAvailable() throws Exception {
+        ClassLoader isolated = new IsolatedClassLoader(
+                Converters.class.getClassLoader(), "java.beans.PropertyEditorManager");
+        Class<?> converters = Class.forName("org.aeonbits.owner.Converters", true, isolated);
+        assertNotSame(Converters.class, converters);
+
+        Method convert = converters.getDeclaredMethod("convert", Method.class, Class.class, String.class);
+        convert.setAccessible(true);
+
+        // primitives are handled by the PRIMITIVE converter
+        assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3"));
+        // wrappers fall through to the CLASS_WITH_STRING_CONSTRUCTOR converter
+        assertEquals(Integer.valueOf(42), convert.invoke(null, method("anInteger"), Integer.class, "42"));
     }
 
-    /**
-     * A class loader that reloads the org.aeonbits.owner classes from their class files, so that
-     * the {@link Converters} static state can be re-initialized while the property editor disabling
-     * flag is set, without affecting the copy of the class used by the rest of the test suite.
-     */
-    private static class IsolatedClassLoader extends ClassLoader {
-
-        IsolatedClassLoader(ClassLoader parent) {
-            super(parent);
-        }
-
-        @Override
-        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-            if (name.startsWith("org.aeonbits.owner.")) {
-                synchronized (getClassLoadingLock(name)) {
-                    Class<?> loaded = findLoadedClass(name);
-                    if (loaded == null)
-                        loaded = defineFromResource(name);
-                    if (resolve)
-                        resolveClass(loaded);
-                    return loaded;
-                }
-            }
-            return super.loadClass(name, resolve);
-        }
-
-        private Class<?> defineFromResource(String name) throws ClassNotFoundException {
-            String path = name.replace('.', '/') + ".class";
-            InputStream in = getParent().getResourceAsStream(path);
-            if (in == null)
-                throw new ClassNotFoundException(name);
-            try {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                byte[] buffer = new byte[8192];
-                int count;
-                while ((count = in.read(buffer)) != -1)
-                    out.write(buffer, 0, count);
-                byte[] bytes = out.toByteArray();
-                // a non-null ProtectionDomain gives the class a code location, so JaCoCo instruments it
-                // and the coverage recorded in this classloader is merged into the main report
-                return defineClass(name, bytes, 0, bytes.length, ConvertersTest.class.getProtectionDomain());
-            } catch (IOException e) {
-                throw new ClassNotFoundException(name, e);
-            } finally {
-                try {
-                    in.close();
-                } catch (IOException ignored) {
-                    // nothing to do
-                }
-            }
-        }
+    private static Method method(String name) throws NoSuchMethodException {
+        return PrimitiveConfig.class.getMethod(name);
     }
 
 }

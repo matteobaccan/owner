@@ -107,6 +107,8 @@
         <sonar.projectKey>matteobaccan_owner</sonar.projectKey>
         <sonar.organization>matteobaccan</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <!-- demo main() programs and the SonaType release placeholder are not meant to be tested -->
+        <sonar.coverage.exclusions>**/examples/**,**/dummy/**</sonar.coverage.exclusions>
     </properties>
 
     <profiles>
@@ -245,6 +247,15 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>1.22.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!-- provides javax.xml.bind.DatatypeConverter on Java 11+,
+                     where the java.xml.bind module has been removed, so the
+                     Base64 fallback for Java 6/7 can be tested on any JDK -->
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

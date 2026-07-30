@@ -9,6 +9,7 @@
 package org.aeonbits.owner.util;
 
 import org.aeonbits.owner.util.Util.SystemProvider;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.File;
@@ -193,6 +194,35 @@ public class UtilTest {
             setSystem(save);
         }
         assertEquals("baz", loadProperties(target).getProperty("foo"));
+    }
+
+    /**
+     * When the target file already exists, the non-Windows code path must preserve its
+     * permissions by copying them onto the temporary file before the atomic rename.
+     * The test needs a real POSIX platform: on Windows, renaming over an existing file
+     * is not supported by the filesystem, regardless of the mocked os.name.
+     */
+    @Test
+    public void testSaveOnNonWindowsOverwritesExistingTarget() throws IOException {
+        Assume.assumeFalse(System.getProperty("os.name").toLowerCase().contains("win"));
+        SystemProvider save = setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("os.name", "Linux");
+                }}, new HashMap<String, String>()
+        ));
+        File target = new File("target/utiltest/UtilTest_saveOverExisting.properties");
+        delete(target);
+        try {
+            Util.save(target, new Properties() {{
+                setProperty("foo", "first");
+            }});
+            Util.save(target, new Properties() {{
+                setProperty("foo", "second");
+            }});
+        } finally {
+            setSystem(save);
+        }
+        assertEquals("second", loadProperties(target).getProperty("foo"));
     }
 
     @Test(expected = IOException.class)

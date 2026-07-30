@@ -11,11 +11,15 @@ package org.aeonbits.owner.util;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Random;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -94,5 +98,53 @@ public class Base64Test {
             for (int i = 0; i < fieldNames.length; i++)
                 fields[i].set(null, saved[i]);
         }
+    }
+
+    /**
+     * Simulates a Java 6/7 runtime, where java.util.Base64 does not exist: the class must fall
+     * back to javax.xml.bind.DatatypeConverter (provided here by the jaxb-api test dependency)
+     * and encoding/decoding must keep working.
+     */
+    @Test
+    public void testFallbackToDatatypeConverterWhenJavaUtilBase64IsNotAvailable() throws Exception {
+        Class<?> base64 = base64InIsolation("java.util.Base64");
+
+        Method encode = base64.getMethod("encode", byte[].class);
+        Method decode = base64.getMethod("decode", String.class);
+
+        assertEquals("SGVsbG8gV29ybGQh", encode.invoke(null, (Object) "Hello World!".getBytes()));
+        assertArrayEquals("Hello World!".getBytes(), (byte[]) decode.invoke(null, "SGVsbG8gV29ybGQh"));
+    }
+
+    /**
+     * Simulates a runtime where no Base64 implementation exists at class initialization time
+     * (neither java.util.Base64 nor javax.xml.bind.DatatypeConverter): encode and decode must
+     * fail fast with an explanatory message.
+     */
+    @Test
+    public void testClassInitializationWhenNoImplementationIsAvailable() throws Exception {
+        Class<?> base64 = base64InIsolation("java.util.Base64", "javax.xml.bind.DatatypeConverter");
+
+        try {
+            base64.getMethod("decode", String.class).invoke(null, "SGVsbG8gV29ybGQh");
+            fail("decode should fail when no decoder is available");
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause() instanceof UnsupportedOperationException);
+            assertEquals("Cannot find Base64 decoder.", e.getCause().getMessage());
+        }
+        try {
+            base64.getMethod("encode", byte[].class).invoke(null, (Object) "Hello World!".getBytes());
+            fail("encode should fail when no encoder is available");
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause() instanceof UnsupportedOperationException);
+            assertEquals("Cannot find Base64 encoder.", e.getCause().getMessage());
+        }
+    }
+
+    private static Class<?> base64InIsolation(String... hiddenClasses) throws ClassNotFoundException {
+        ClassLoader isolated = new IsolatedClassLoader(Base64Test.class.getClassLoader(), hiddenClasses);
+        Class<?> base64 = Class.forName("org.aeonbits.owner.util.Base64", true, isolated);
+        assertNotSame(Base64.class, base64);
+        return base64;
     }
 }
