@@ -19,7 +19,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author Luigi R. Viggiano
+ * @author Matteo Baccan
  */
 public class CollectionsTest {
 
