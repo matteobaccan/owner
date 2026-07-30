@@ -55,26 +55,12 @@ use the library APIs.
 Java 8 and superior
 -------------------
 
-Java 8 introduces some new language features, such as [`default` methods][def-methods] in interfaces.
+Java 8 language features, such as [`default` methods][def-methods] in interfaces, are fully
+supported by the `owner` artifact itself: no additional dependency is needed.
 
-In this case you should specify the `owner-java8` artifactId instead:
-
-To use it, you need to have JDK 8 installed properly in your system; then, you need to declare a maven
-dependency in your project `pom.xml`:
-
-```xml
-<dependencies>
-        <dependency>
-            <groupId>org.aeonbits.owner</groupId>
-            <artifactId>owner-java8</artifactId>
-            <version>1.0.12</version>
-        </dependency>
-</dependencies>
-```
-
-`owner-java8` artifact depends to the artifact `owner`, so you don't need to specify both in your
-maven dependencies.
-
+Older versions of the library shipped this support in a separate `owner-java8` artifact, since
+the core had to run on Java 6/7. That artifact is no longer needed nor published: if you have it
+in your dependencies, just replace it with `owner`.
 
   [def-methods]: http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html
 

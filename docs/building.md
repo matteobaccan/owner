@@ -49,15 +49,12 @@ git@github.com:matteobaccan/owner.git.
 </div>
 
 
-Building with support for Java 8 and superior
----------------------------------------------
+Support for Java 8 and superior
+-------------------------------
 
-Since version 1.0.6 OWNER supports some language features introduced by Java 8 and superior, 
-such as [`default` methods][def-methods] in interfaces.
-
-The support classes for these features are encapsulated in the maven module called `owner-java8` that gets
-included into the build process when maven is invoked from JDK 8 or superior (that is, always, with the
-current JDK requirements).
+OWNER supports the language features introduced by Java 8 and superior, such as
+[`default` methods][def-methods] in interfaces, directly in the core `owner` module: the library
+requires Java 8 as minimum runtime, so the separate `owner-java8` module of older versions is gone.
 
   [def-methods]: http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html
 

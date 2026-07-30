@@ -355,9 +355,10 @@ Converter classes shipped with OWNER
 
 Since specifying duration and byte size values in configuration files is very common,
 OWNER ships with converter classes for these as well as some classes for the types themselves.
-The code relies on Java 8 features and therefore, these classes are a part of the `owner-java8-extras`
-module. Also, you have to specify the `@ConverterClass` annotation explicitly for these converters, they are not
-applied automatically as is the case for the primitive (and more) types as described above.
+These classes are a part of the `owner-extras` module (they used to live in `owner-java8-extras`,
+which is gone now that the library requires Java 8). Also, you have to specify the `@ConverterClass`
+annotation explicitly for these converters, they are not applied automatically as is the case for
+the primitive (and more) types as described above.
 
 ### Duration
 
