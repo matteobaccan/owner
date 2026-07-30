@@ -115,11 +115,10 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-
-import javax.xml.bind.DatatypeConverter;
 
 
 public class StandardEncryptor extends AbstractEncryptor {
@@ -150,7 +149,7 @@ public class StandardEncryptor extends AbstractEncryptor {
             Cipher c = Cipher.getInstance( this.algorithm );
             c.init(Cipher.ENCRYPT_MODE, key);
             byte[] encVal = c.doFinal( plainData.getBytes( this.encoding ) );
-            String encryptedValue = DatatypeConverter.printBase64Binary( encVal );
+            String encryptedValue = Base64.getEncoder().encodeToString( encVal );
             return encryptedValue;
         } catch ( Exception cause ) {
             throw new IllegalArgumentException( cause.getMessage(), cause );
@@ -162,7 +161,7 @@ public class StandardEncryptor extends AbstractEncryptor {
             Key key = generateKey();
             Cipher c = Cipher.getInstance( this.algorithm );
             c.init(Cipher.DECRYPT_MODE, key);
-            byte[] decodedValue = DatatypeConverter.parseBase64Binary( encryptedData );
+            byte[] decodedValue = Base64.getDecoder().decode( encryptedData );
             byte[] decValue = c.doFinal(decodedValue);
             String decryptedValue = new String(decValue, this.encoding );
             return decryptedValue;

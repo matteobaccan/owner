@@ -12,15 +12,43 @@ categories: [release]
 
 Version 1.0.13 is the first release since the project maintenance moved from Luigi Viggiano to Matteo Baccan.
 It brings two new features, a security hardening pass, a fully modernized build infrastructure, and a long list
-of dependency updates accumulated since 1.0.12.
+of dependency updates accumulated since 1.0.12. Java 8 is now the minimum runtime, which allowed the removal
+of some compatibility leftovers dating back to Java 6/7: see the "Removals" section below for the (short)
+migration instructions.
 
 RELEASE NOTES
 =============
 
 OWNER v1.0.13 contains following enhancements and bug fixes.
 
+Removals
+--------
+Java 8 is the minimum runtime required by this release, and the machinery that existed only to support
+older JVMs is gone. If you are affected, migration is a one-liner in each case:
+
+ * The `owner-java8` artifact is gone. Its only feature, the support for
+   [`default` methods](http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html) in config
+   interfaces, is now built into the core: **replace the `owner-java8` dependency with `owner`** and
+   everything keeps working.
+ * The `owner-java8-extras` artifact is gone. The `DurationConverter`, `ByteSizeConverter` and the
+   `ByteSize`/`ByteSizeUnit` classes it contained moved, with unchanged package names, into `owner-extras`:
+   **replace the `owner-java8-extras` dependency with `owner-extras`**.
+ * The internal utility class `org.aeonbits.owner.util.Base64` is gone. It was a runtime-selection shim
+   between `java.util.Base64` (Java 8+) and `javax.xml.bind.DatatypeConverter` (Java 6/7), never used by the
+   library API itself. If you referenced it, **use [`java.util.Base64`](https://docs.oracle.com/javase/8/docs/api/java/util/Base64.html)
+   directly**: `Base64.encode(bytes)` becomes `Base64.getEncoder().encodeToString(bytes)` and
+   `Base64.decode(string)` becomes `Base64.getDecoder().decode(string)`.
+ * `org.aeonbits.owner.util.Util.eq(a, b)` is deprecated in favor of the standard
+   `java.util.Objects.equals(a, b)` and will be removed in a future release.
+
 Enhancements
 ------------
+ * `default` methods in config interfaces work out of the box with the core `owner` artifact: no extra
+   dependency is needed anymore (see Removals above).
+ * New `Accessible.store(Writer, String)` overload, mirroring `Properties.store(Writer, String)`; the old
+   javadoc note about it being unavailable dated back to the JDK 1.5 era.
+ * The single-method SPI interfaces (`Converter`, `Preprocessor`, `ReloadListener`) are now marked
+   `@FunctionalInterface`: converters, preprocessors and reload listeners can officially be written as lambdas.
  * New `@Mandatory` annotation: mark a property (or a whole interface) as required, and get a
    `MissingMandatoryPropertyException` listing all the unresolvable keys when the Config is created, as well as
    on access if a mandatory property disappears later (e.g. after a hot reload). See the
