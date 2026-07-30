@@ -53,7 +53,7 @@ public class HotReloadExample {
      * @throws InterruptedException if the polling loop is interrupted while sleeping.
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        System.out.printf("\n\n HOT RELOAD EXAMPLE \n\n");
+        System.out.printf("%n%n HOT RELOAD EXAMPLE %n%n");
 
         Util.save(target, new Properties() {{
             setProperty("someValue", "10");

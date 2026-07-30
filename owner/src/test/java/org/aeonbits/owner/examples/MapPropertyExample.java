@@ -48,7 +48,7 @@ public class MapPropertyExample {
         Map<String, String>[] authors = cfg.authors();
         for (Map<String,String> author : authors) {
             for (Map.Entry<String, String> entry : author.entrySet())
-                System.out.printf("%s:\t%s\n", entry.getKey(), entry.getValue());
+                System.out.printf("%s:\t%s%n", entry.getKey(), entry.getValue());
             System.out.println();
         }
     }
