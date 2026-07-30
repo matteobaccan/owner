@@ -35,7 +35,7 @@ public class ScheduledExecutorServiceSpike {
             int count = 0;
             public void run() {
                 if ( count++ % 2 == 0)
-                    System.out.printf("*");
+                    System.out.print("*");
             }
         }, 500, 500, TimeUnit.MILLISECONDS);
 
@@ -44,7 +44,7 @@ public class ScheduledExecutorServiceSpike {
             public void run() {
                 ++count;
                 if (count != 5 && count != 10)
-                System.out.printf(".");
+                System.out.print(".");
                 if (count == 10) count = 0;
             }
         }, 100, 100, TimeUnit.MILLISECONDS);
