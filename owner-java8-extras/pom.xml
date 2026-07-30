@@ -19,27 +19,12 @@
 
     <groupId>org.aeonbits.owner</groupId>
     <artifactId>owner-java8-extras</artifactId>
-    <name>OWNER :: Java 8 Extras</name>
+    <name>OWNER :: Java 8 Extras (deprecated)</name>
+    <description>Deprecated and empty: the Duration and ByteSize converters moved into the
+        owner-extras artifact, on which this artifact now depends so that existing dependency
+        declarations keep resolving. It will be removed in a future release.</description>
     <version>1.0.13-SNAPSHOT</version>
     <packaging>jar</packaging>
-
-    <properties>
-        <compiler-release>8</compiler-release>
-    </properties>
-
-    <profiles>
-        <profile>
-            <id>coverage</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <build>
         <plugins>
@@ -59,12 +44,8 @@
     <dependencies>
         <dependency>
             <groupId>org.aeonbits.owner</groupId>
-            <artifactId>owner-java8</artifactId>
+            <artifactId>owner-extras</artifactId>
             <version>1.0.13-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
 

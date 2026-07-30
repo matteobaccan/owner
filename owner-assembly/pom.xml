@@ -19,21 +19,14 @@
     <artifactId>owner-assembly</artifactId>
     <packaging>pom</packaging>
 
-    <profiles>
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.aeonbits.owner</groupId>
-                    <artifactId>owner-java8-extras</artifactId>
-                    <version>1.0.13-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+    <dependencies>
+        <!-- ensures the bundled modules are built before the assembly in the reactor -->
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner-extras</artifactId>
+            <version>1.0.13-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

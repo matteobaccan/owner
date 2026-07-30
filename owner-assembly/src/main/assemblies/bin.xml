@@ -45,20 +45,6 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>${project.parent.basedir}/owner-java8/target</directory>
-            <outputDirectory/>
-            <includes>
-                <include>*.jar</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/owner-java8-extras/target</directory>
-            <outputDirectory/>
-            <includes>
-                <include>*.jar</include>
-            </includes>
-        </fileSet>
-        <fileSet>
             <directory>${project.parent.basedir}/owner-examples</directory>
             <outputDirectory>examples</outputDirectory>
             <includes>
