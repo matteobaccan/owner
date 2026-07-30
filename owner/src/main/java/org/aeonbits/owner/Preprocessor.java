@@ -15,6 +15,7 @@ package org.aeonbits.owner;
  * @author Luigi R. Viggiano
  * @since 1.0.9
  */
+@FunctionalInterface
 public interface Preprocessor {
     /**
      * Pre-processes the given input string before it is used by the library.

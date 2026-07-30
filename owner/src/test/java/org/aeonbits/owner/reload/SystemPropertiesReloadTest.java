@@ -19,7 +19,7 @@ import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.junit.Assert.assertEquals;
 
 public class SystemPropertiesReloadTest extends AsyncReloadSupport {
-    private SystemProviderForTest systemForTest = new SystemProviderForTest(new Properties(), new HashMap<String, String>());
+    private SystemProviderForTest systemForTest = new SystemProviderForTest(new Properties(), new HashMap<>());
     private Object save;
 
     @Sources("system:properties")

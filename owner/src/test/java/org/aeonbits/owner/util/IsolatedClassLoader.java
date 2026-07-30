@@ -31,7 +31,7 @@ public class IsolatedClassLoader extends ClassLoader {
 
     public IsolatedClassLoader(ClassLoader parent, String... hiddenClasses) {
         super(parent);
-        this.hiddenClasses = new HashSet<String>(asList(hiddenClasses));
+        this.hiddenClasses = new HashSet<>(asList(hiddenClasses));
     }
 
     @Override

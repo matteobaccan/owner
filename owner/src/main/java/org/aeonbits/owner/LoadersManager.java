@@ -35,7 +35,7 @@ import static org.aeonbits.owner.util.Util.unsupported;
 class LoadersManager implements Serializable {
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final List<Loader> loaders = new LinkedList<Loader>();
+    private final List<Loader> loaders = new LinkedList<>();
 
     LoadersManager() {
         registerLoader(new PropertiesLoader());
@@ -83,7 +83,7 @@ class LoadersManager implements Serializable {
     String[] defaultSpecs(String prefix) {
         lock.readLock().lock();
         try {
-            List<String> defaultSpecs = new ArrayList<String>(loaders.size());
+            List<String> defaultSpecs = new ArrayList<>(loaders.size());
             for (Loader loader : loaders) {
                 String spec = loader.defaultSpecFor(prefix);
                 if (spec != null)

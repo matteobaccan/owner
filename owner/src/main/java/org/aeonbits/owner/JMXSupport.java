@@ -56,7 +56,7 @@ class JMXSupport implements Serializable {
 
     @Delegate
     public AttributeList getAttributes(String[] attributes) {
-        List<Attribute> attrList = new LinkedList<Attribute>();
+        List<Attribute> attrList = new LinkedList<>();
         for (String propertyName : attributes)
             attrList.add(new Attribute(propertyName, manager.getProperty(propertyName)));
         return new AttributeList(attrList);
@@ -86,7 +86,7 @@ class JMXSupport implements Serializable {
 
     @Delegate
     public MBeanInfo getMBeanInfo() {
-        List<MBeanAttributeInfo> attributesInfo = new ArrayList<MBeanAttributeInfo>();
+        List<MBeanAttributeInfo> attributesInfo = new ArrayList<>();
         Set<String> propertyNames = manager.propertyNames();
         for (String name : propertyNames)
             attributesInfo.add(new MBeanAttributeInfo(name, STRING_CLASS_NAME, name, true, true, false));

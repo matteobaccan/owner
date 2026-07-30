@@ -163,7 +163,7 @@ public class ConfigFactoryTest implements TestConstants {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateWithImportContainingNullKey() {
-        Map<String, String> imports = new HashMap<String, String>();
+        Map<String, String> imports = new HashMap<>();
         imports.put(null, "someValue");
 
         ConfigFactory.create(MyConfig.class, imports);
@@ -171,7 +171,7 @@ public class ConfigFactoryTest implements TestConstants {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateWithImportContainingNullValue() {
-        Map<String, String> imports = new HashMap<String, String>();
+        Map<String, String> imports = new HashMap<>();
         imports.put("someKey", null);
 
         ConfigFactory.create(MyConfig.class, imports);

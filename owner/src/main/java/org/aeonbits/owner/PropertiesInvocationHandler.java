@@ -115,7 +115,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
      * since their key may depend on the invocation arguments: they are checked on access instead.
      */
     void validateMandatoryProperties(Class<?> clazz) {
-        List<String> missingKeys = new LinkedList<String>();
+        List<String> missingKeys = new LinkedList<>();
         for (Method method : clazz.getMethods()) {
             if (!isMandatory(method)) continue;
             if (method.getParameterTypes().length > 0) continue;
@@ -174,7 +174,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     }
 
     private List<DelegateMethodHandle> findDelegates(Object... targets) {
-        List<DelegateMethodHandle> result = new LinkedList<DelegateMethodHandle>();
+        List<DelegateMethodHandle> result = new LinkedList<>();
         for (Object target : targets) {
             if (target == null)
                 continue;

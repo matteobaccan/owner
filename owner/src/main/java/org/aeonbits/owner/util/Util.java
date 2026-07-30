@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
@@ -44,6 +45,7 @@ import static java.util.Arrays.asList;
 public abstract class Util {
 
     /** Abstraction over the source of the current time, to allow overriding it in tests. */
+    @FunctionalInterface
     public interface TimeProvider {
         /**
          * Returns the current time in milliseconds.
@@ -105,7 +107,7 @@ public abstract class Util {
      * @return a new list with the elements in reverse order.
      */
     public static <T> List<T> reverse(List<T> src) {
-        List<T> copy = new ArrayList<T>(src);
+        List<T> copy = new ArrayList<>(src);
         Collections.reverse(copy);
         return copy;
     }
@@ -307,9 +309,12 @@ public abstract class Util {
      * @param o1 the first object.
      * @param o2 the second object.
      * @return <code>true</code> if both are the same reference or equal, <code>false</code> otherwise.
+     * @deprecated this method predates {@link java.util.Objects#equals(Object, Object)}, which the
+     * library now requires (Java 8): use that instead. This method will be removed in a future release.
      */
+    @Deprecated
     public static boolean eq(Object o1, Object o2) {
-        return o1 == o2 || o1 != null && o1.equals(o2);
+        return Objects.equals(o1, o2);
     }
 
     /**

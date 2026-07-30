@@ -11,8 +11,7 @@ package org.aeonbits.owner.event;
 import org.mockito.ArgumentMatcher;
 
 import java.beans.PropertyChangeEvent;
-
-import static org.aeonbits.owner.util.UtilTest.eq;
+import java.util.Objects;
 
 /**
  * @author Luigi R. Viggiano
@@ -23,9 +22,9 @@ class PropertyChangeMatcher {
             @Override
             public boolean matches(PropertyChangeEvent argument) {
                 return expectedEvent.getSource() == argument.getSource() &&
-                        eq(expectedEvent.getOldValue(), argument.getOldValue()) &&
-                        eq(expectedEvent.getNewValue(), argument.getNewValue()) &&
-                        eq(expectedEvent.getPropertyName(), argument.getPropertyName());
+                        Objects.equals(expectedEvent.getOldValue(), argument.getOldValue()) &&
+                        Objects.equals(expectedEvent.getNewValue(), argument.getNewValue()) &&
+                        Objects.equals(expectedEvent.getPropertyName(), argument.getPropertyName());
             }
 
             @Override

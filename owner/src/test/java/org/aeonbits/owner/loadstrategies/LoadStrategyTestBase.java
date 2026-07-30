@@ -20,7 +20,7 @@ import java.net.URI;
  */
 public class LoadStrategyTestBase {
     ArgumentMatcher<URI> uriMatches(final String path) {
-        return new HamcrestArgumentMatcher<URI>(
+        return new HamcrestArgumentMatcher<>(
             new BaseMatcher<URI>(){
                 public URI uri;
 

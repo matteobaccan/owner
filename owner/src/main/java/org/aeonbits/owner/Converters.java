@@ -120,12 +120,12 @@ enum Converters {
 
         private <T> Collection<T> instantiateCollectionFromInterface(Class<? extends T> targetType) {
             if (List.class.isAssignableFrom(targetType))
-                return new ArrayList<T>();
+                return new ArrayList<>();
             else if (SortedSet.class.isAssignableFrom(targetType))
-                return new TreeSet<T>();
+                return new TreeSet<>();
             else if (Set.class.isAssignableFrom(targetType))
-                return new LinkedHashSet<T>();
-            return new ArrayList<T>();
+                return new LinkedHashSet<>();
+            return new ArrayList<>();
         }
 
     },

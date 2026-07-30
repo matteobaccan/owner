@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
  * @since 1.0.6
  */
 public final class ConfigCache {
-    private static final ConcurrentMap<Object, Config> CACHE = new ConcurrentHashMap<Object, Config>();
+    private static final ConcurrentMap<Object, Config> CACHE = new ConcurrentHashMap<>();
 
     /** Don't let anyone instantiate this class */
     private ConfigCache() {}

@@ -45,8 +45,8 @@ public class MandatoryTest {
             ConfigFactory.create(WithMandatoryMethods.class);
             fail("MissingMandatoryPropertyException is expected");
         } catch (MissingMandatoryPropertyException e) {
-            assertEquals(new HashSet<String>(asList("required", "also.required")),
-                    new HashSet<String>(e.getKeys()));
+            assertEquals(new HashSet<>(asList("required", "also.required")),
+                    new HashSet<>(e.getKeys()));
             assertTrue(e.getMessage().startsWith("Missing mandatory properties: "));
             assertTrue(e.getMessage().contains("'required'"));
             assertTrue(e.getMessage().contains("'also.required'"));
@@ -89,7 +89,7 @@ public class MandatoryTest {
             ConfigFactory.create(AllMandatory.class);
             fail("MissingMandatoryPropertyException is expected");
         } catch (MissingMandatoryPropertyException e) {
-            assertEquals(new HashSet<String>(asList("first", "second")), new HashSet<String>(e.getKeys()));
+            assertEquals(new HashSet<>(asList("first", "second")), new HashSet<>(e.getKeys()));
         }
     }
 
@@ -112,7 +112,7 @@ public class MandatoryTest {
             ConfigFactory.create(SubOfAllMandatory.class);
             fail("MissingMandatoryPropertyException is expected");
         } catch (MissingMandatoryPropertyException e) {
-            assertEquals(new HashSet<String>(asList("first", "second")), new HashSet<String>(e.getKeys()));
+            assertEquals(new HashSet<>(asList("first", "second")), new HashSet<>(e.getKeys()));
         }
     }
 

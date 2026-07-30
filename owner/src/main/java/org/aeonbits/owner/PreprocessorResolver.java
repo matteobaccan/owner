@@ -30,7 +30,7 @@ final class PreprocessorResolver {
     }
 
     public static List<Preprocessor> resolvePreprocessors(Method method) {
-        List<Preprocessor> result = new ArrayList<Preprocessor>();
+        List<Preprocessor> result = new ArrayList<>();
         List<Preprocessor> preprocessorsOnMethod = getPreprocessor(method.getAnnotation(PreprocessorClasses.class));
         result.addAll(preprocessorsOnMethod);
 
@@ -45,7 +45,7 @@ final class PreprocessorResolver {
         if (preprocessorClassesAnnotation == null) return emptyList();
         Class<? extends Preprocessor>[] preprocessorClasses = preprocessorClassesAnnotation.value();
         if (preprocessorClasses == null) return emptyList();
-        List<Preprocessor> result = new LinkedList<Preprocessor>();
+        List<Preprocessor> result = new LinkedList<>();
         return newInstance(preprocessorClassesAnnotation.value(), result);
     }
 

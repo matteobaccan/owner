@@ -31,7 +31,7 @@ class HotReloadLogic implements Serializable {
     private final long interval;
     private final HotReloadType type;
     private volatile long lastCheckTime = now();
-    private final List<WatchableResource> watchableResources = new ArrayList<WatchableResource>();
+    private final List<WatchableResource> watchableResources = new ArrayList<>();
 
     private interface WatchableResource extends Serializable {
         boolean isChanged();
@@ -82,7 +82,7 @@ class HotReloadLogic implements Serializable {
     }
 
     private void setupWatchableResources(List<URI> uris) {
-        Set<File> files = new LinkedHashSet<File>();
+        Set<File> files = new LinkedHashSet<>();
         for (URI uri : uris) {
             if (uri.toString().equals("system:properties")) {
                 watchableResources.add(new WatchableSystemProperties());

@@ -20,7 +20,7 @@ public class ConverterRegistryTest {
     private static final String FOOBAR_RESPONSE = "FooBar";
 
     public static class LeetTranslatorConverter implements Converter<String> {
-        Map<Character,Character> lookup = new HashMap<Character, Character>();
+        Map<Character,Character> lookup = new HashMap<>();
         public LeetTranslatorConverter(){
             lookup.put('1', 'I');
             lookup.put('5', 's');

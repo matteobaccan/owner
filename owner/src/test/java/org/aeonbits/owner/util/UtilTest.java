@@ -27,6 +27,7 @@ import java.util.Properties;
 import static org.aeonbits.owner.util.Util.ignore;
 import static org.aeonbits.owner.util.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -130,8 +131,13 @@ public class UtilTest {
         return (T[]) array;
     }
 
-    public static boolean eq(Object o1, Object o2) {
-        return Util.eq(o1, o2);
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testDeprecatedEqDelegatesToObjectsEquals() {
+        assertTrue(Util.eq(null, null));
+        assertTrue(Util.eq("a", "a"));
+        assertFalse(Util.eq("a", "b"));
+        assertFalse(Util.eq(null, "b"));
     }
 
     @Test
@@ -168,7 +174,7 @@ public class UtilTest {
         SystemProvider save = setSystem(new SystemProviderForTest(
                 new Properties() {{
                     setProperty("os.name", "Linux");
-                }}, new HashMap<String, String>()
+                }}, new HashMap<>()
         ));
         File target = new File("target/utiltest/UtilTest_saveOnNonWindows.properties");
         delete(target);
@@ -187,7 +193,7 @@ public class UtilTest {
         SystemProvider save = setSystem(new SystemProviderForTest(
                 new Properties() {{
                     setProperty("os.name", "Windows 11");
-                }}, new HashMap<String, String>()
+                }}, new HashMap<>()
         ));
         File target = new File("target/utiltest/UtilTest_saveOnWindows.properties");
         delete(target);
@@ -213,7 +219,7 @@ public class UtilTest {
         SystemProvider save = setSystem(new SystemProviderForTest(
                 new Properties() {{
                     setProperty("os.name", "Linux");
-                }}, new HashMap<String, String>()
+                }}, new HashMap<>()
         ));
         File target = new File("target/utiltest/UtilTest_saveOverExisting.properties");
         delete(target);
@@ -235,7 +241,7 @@ public class UtilTest {
         SystemProvider save = setSystem(new SystemProviderForTest(
                 new Properties() {{
                     setProperty("os.name", "Linux");
-                }}, new HashMap<String, String>()
+                }}, new HashMap<>()
         ));
         try {
             // renaming a file over an existing non-empty directory fails on every platform
@@ -253,7 +259,7 @@ public class UtilTest {
         SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
                 new Properties() {{
                     setProperty("user.home", "/home/john");
-                }},  new HashMap<String, String>()
+                }},  new HashMap<>()
         ));
 
         try {
@@ -275,7 +281,7 @@ public class UtilTest {
         SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
                 new Properties() {{
                     setProperty("user.home", "C:\\Users\\John");
-                }}, new HashMap<String, String>()
+                }}, new HashMap<>()
         ));
         try {
             assertEquals("C:\\Users\\John", Util.expandUserHome("~"));

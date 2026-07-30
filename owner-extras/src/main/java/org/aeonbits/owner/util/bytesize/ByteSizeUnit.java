@@ -108,7 +108,7 @@ public enum ByteSizeUnit {
     }
 
     private static Map<String, ByteSizeUnit> makeUnitsMap() {
-        Map<String, ByteSizeUnit> map = new HashMap<String, ByteSizeUnit>();
+        Map<String, ByteSizeUnit> map = new HashMap<>();
         for (ByteSizeUnit unit : ByteSizeUnit.values()) {
             map.put(unit.prefix + "byte", unit);
             map.put(unit.prefix + "bytes", unit);

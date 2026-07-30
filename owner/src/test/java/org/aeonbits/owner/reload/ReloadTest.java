@@ -126,7 +126,7 @@ public class ReloadTest implements TestConstants {
     }
 
     private ArgumentMatcher<ReloadEvent> isReloadListnerWithSource(final ReloadableConfig cfg) {
-        return new HamcrestArgumentMatcher<ReloadEvent>(
+        return new HamcrestArgumentMatcher<>(
                 new BaseMatcher<ReloadEvent>() {
                     public boolean matches(Object o) {
                         ReloadEvent given = (ReloadEvent) o;

@@ -38,7 +38,7 @@ public class Issue123 {
             setProperty("user.home", "c:\\user\\home");
         }};
 
-        Map<String, String> dummySystemEnv = new HashMap<String, String>();
+        Map<String, String> dummySystemEnv = new HashMap<>();
 
         SystemProviderForTest dummySystemForTest = new SystemProviderForTest(dummySystemProperties, dummySystemEnv);
 

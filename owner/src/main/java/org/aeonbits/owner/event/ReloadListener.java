@@ -20,6 +20,7 @@ import java.util.EventListener;
  * @see ReloadEvent
  * @since 1.0.4
  */
+@FunctionalInterface
 public interface ReloadListener extends EventListener {
 
     /**

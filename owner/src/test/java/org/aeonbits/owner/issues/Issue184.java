@@ -22,7 +22,7 @@ public class Issue184 {
 
     @Test
     public void testConfigImportWithNullValue() throws Exception {
-        Map<String,String> propsMapWithNullValue = new HashMap<String,String>();
+        Map<String,String> propsMapWithNullValue = new HashMap<>();
         propsMapWithNullValue.put(KEY, null);
 
         try {
@@ -36,7 +36,7 @@ public class Issue184 {
 
     @Test
     public void testConfigImportWithNullKey() throws Exception {
-        Map<String,String> propsMapWithNullKey = new HashMap<String,String>();
+        Map<String,String> propsMapWithNullKey = new HashMap<>();
         propsMapWithNullKey.put(null, "smurf");
 
         try {

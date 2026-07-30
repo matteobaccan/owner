@@ -82,8 +82,8 @@ public class XMLLoader implements Loader {
 
         private boolean isJavaPropertiesFormat = false;
         private final Properties props;
-        private final Stack<String> paths = new Stack<String>();
-        private final Stack<StringBuilder> value = new Stack<StringBuilder>();
+        private final Stack<String> paths = new Stack<>();
+        private final Stack<StringBuilder> value = new Stack<>();
 
         @Override
         public InputSource resolveEntity(String name, String publicId, String baseURI,

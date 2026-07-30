@@ -44,7 +44,7 @@ public class Issue405 {
     public void fillExportsEveryLoadedPropertyIncludingUndeclaredOnes() {
         MyProperties cfg = ConfigFactory.create(MyProperties.class, importedProperties());
 
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         cfg.fill(map);
 
         assertEquals(3, map.size());
@@ -71,7 +71,7 @@ public class Issue405 {
      * annotation is absent.
      */
     private static Map<String, String> fillDeclaredOnly(Class<?> configInterface, Accessible config) {
-        Map<String, String> map = new LinkedHashMap<String, String>();
+        Map<String, String> map = new LinkedHashMap<>();
         for (Method method : configInterface.getDeclaredMethods()) {
             Config.Key key = method.getAnnotation(Config.Key.class);
             String name = (key != null) ? key.value() : method.getName();

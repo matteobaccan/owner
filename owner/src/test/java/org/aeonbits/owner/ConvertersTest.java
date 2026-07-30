@@ -90,7 +90,7 @@ public class ConvertersTest {
         Set<String> result = cfg.stringSet();
 
         assertTrue(result instanceof LinkedHashSet);
-        assertEquals(new LinkedHashSet<String>(Arrays.asList("pink", "black")), result);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("pink", "black")), result);
     }
 
     @Test

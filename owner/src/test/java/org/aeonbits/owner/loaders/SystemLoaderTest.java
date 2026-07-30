@@ -45,7 +45,7 @@ public class SystemLoaderTest {
                     setProperty("foo", "FOO");
                     setProperty("bar", "BAR");
                 }},
-                new HashMap<String, String>()
+                new HashMap<>()
         ));
 
         try {
@@ -100,7 +100,7 @@ public class SystemLoaderTest {
                     setProperty("foo", "FOO");
                     setProperty("bar", "BAR");
                 }},
-                new HashMap<String, String>()
+                new HashMap<>()
         ));
 
         try {

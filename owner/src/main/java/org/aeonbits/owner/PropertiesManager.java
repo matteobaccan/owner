@@ -51,7 +51,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private volatile boolean loading = false;
 
-    final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<ReloadListener>());
+    final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<>());
 
     private Object proxy;
     private final LoadersManager loaders;
@@ -63,7 +63,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
      * This allows each key has its own decryptor.
      * Reflection is slow.
      */
-    private Map<Method, Decryptor> encryptedKeys = new HashMap<Method, Decryptor>();
+    private Map<Method, Decryptor> encryptedKeys = new HashMap<>();
 
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
@@ -170,7 +170,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private List<URI> toURIs(Sources sources, ConfigURIFactory uriFactory) {
         String[] specs = specs(sources, uriFactory);
-        List<URI> result = new ArrayList<URI>();
+        List<URI> result = new ArrayList<>();
         for (String spec : specs) {
             try {
                 URI uri = uriFactory.newURI(spec);
@@ -234,7 +234,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private Set<?> keys(Map<?, ?>... maps) {
-        Set<Object> keys = new HashSet<Object>();
+        Set<Object> keys = new HashSet<>();
         for (Map<?, ?> map : maps)
             keys.addAll(map.keySet());
         return keys;
@@ -380,7 +380,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public Set<String> propertyNames() {
         readLock.lock();
         try {
-            LinkedHashSet<String> result = new LinkedHashSet<String>();
+            LinkedHashSet<String> result = new LinkedHashSet<>();
             for (Enumeration<?> propertyNames = properties.propertyNames(); propertyNames.hasMoreElements(); )
                 result.add((String) propertyNames.nextElement());
             return result;
@@ -447,7 +447,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             String oldValue = properties.getProperty(key);
             try {
-                if (eq(oldValue, newValue)) return oldValue;
+                if (Objects.equals(oldValue, newValue)) return oldValue;
 
                 PropertyChangeEvent event = new PropertyChangeEvent(proxy, key, oldValue, newValue);
                 fireBeforePropertyChange(event);
@@ -559,12 +559,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private List<PropertyChangeEvent> fireBeforePropertyChangeEvents(
             Set keys, Properties oldValues, Properties newValues) throws RollbackBatchException {
-        List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
+        List<PropertyChangeEvent> events = new ArrayList<>();
         for (Object keyObject : keys) {
             String key = (String) keyObject;
             String oldValue = oldValues.getProperty(key);
             String newValue = newValues.getProperty(key);
-            if (!eq(oldValue, newValue)) {
+            if (!Objects.equals(oldValue, newValue)) {
                 PropertyChangeEvent event =
                         new PropertyChangeEvent(proxy, key, oldValue, newValue);
                 try {

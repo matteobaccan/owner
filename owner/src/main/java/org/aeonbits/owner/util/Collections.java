@@ -85,7 +85,7 @@ public abstract class Collections {
      * @return a new {@link Entry} holding the given key and value.
      */
     public static <K, V> Entry<K, V> entry(K key, V value) {
-        return new SimpleEntry<K, V>(key, value);
+        return new SimpleEntry<>(key, value);
     }
 
     /**
@@ -111,7 +111,7 @@ public abstract class Collections {
      * @return a new map holding the given entries.
      */
     public static <K, V> Map<K, V> map(Map.Entry<? extends K, ? extends V>... entries) {
-        return new EntryMap<K, V>(entries);
+        return new EntryMap<>(entries);
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class Collections {
      * @return a new set holding the given elements.
      */
     public static <E> Set<E> set(E... elements) {
-        return new LinkedHashSet<E>(list(elements));
+        return new LinkedHashSet<>(list(elements));
     }
 
     /**

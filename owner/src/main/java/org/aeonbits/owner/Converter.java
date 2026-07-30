@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
  * @author Luigi R. Viggiano
  * @since 1.0.4
  */
+@FunctionalInterface
 public interface Converter<T> {
 
     /**

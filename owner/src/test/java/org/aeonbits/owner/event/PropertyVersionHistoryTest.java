@@ -49,7 +49,7 @@ public class PropertyVersionHistoryTest {
     public void propertyChangeListenerCanRecordTheHistoryOfAKey() {
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
-        final List<String> history = new ArrayList<String>();
+        final List<String> history = new ArrayList<>();
         cfg.addPropertyChangeListener("fruit", new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent event) {
                 history.add((String) event.getOldValue());
