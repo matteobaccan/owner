@@ -78,10 +78,9 @@ public class IsolatedClassLoader extends ClassLoader {
 
     private byte[] readClassResource(String name) throws ClassNotFoundException {
         String path = name.replace('.', '/') + ".class";
-        InputStream in = getParent().getResourceAsStream(path);
-        if (in == null)
-            throw new ClassNotFoundException(name);
-        try {
+        try (InputStream in = getParent().getResourceAsStream(path)) {
+            if (in == null)
+                throw new ClassNotFoundException(name);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[8192];
             int count;
@@ -90,12 +89,6 @@ public class IsolatedClassLoader extends ClassLoader {
             return out.toByteArray();
         } catch (IOException e) {
             throw new ClassNotFoundException(name, e);
-        } finally {
-            try {
-                in.close();
-            } catch (IOException ignored) {
-                // nothing to do
-            }
         }
     }
 }

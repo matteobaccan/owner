@@ -66,7 +66,7 @@ public class PrimitiveTypesTest {
     @Test
     public void testDefaultIntegerValue() {
         PrimitiveTypesConfig config = ConfigFactory.create(PrimitiveTypesConfig.class);
-        assertEquals(new Integer(7), config.daysInWeek());
+        assertEquals(Integer.valueOf(7), config.daysInWeek());
     }
 
     @Test(expected = UnsupportedOperationException.class)

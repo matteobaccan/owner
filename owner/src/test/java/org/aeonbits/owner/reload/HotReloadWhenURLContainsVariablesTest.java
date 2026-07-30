@@ -69,7 +69,7 @@ public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport im
             }
         });
 
-        assertEquals(new Integer(10), cfg.someValue());
+        assertEquals(Integer.valueOf(10), cfg.someValue());
 
         save(target, new Properties() {{
             setProperty("someValue", "20");
@@ -77,7 +77,7 @@ public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport im
 
         waitForReload(1000);
 
-        assertEquals(new Integer(20), cfg.someValue());
+        assertEquals(Integer.valueOf(20), cfg.someValue());
 
     }
 

@@ -41,13 +41,13 @@ public class ParametrizedKeyTest
 
         assertEquals("DEV", cfg.name(DEV_SETUP));
         assertEquals("devhost", cfg.hostname(DEV_SETUP));
-        assertEquals(new Integer(6000), cfg.port(DEV_SETUP));
+        assertEquals(Integer.valueOf(6000), cfg.port(DEV_SETUP));
         assertEquals("myuser1", cfg.user(DEV_SETUP));
         assertNull(cfg.password(DEV_SETUP)); // expansion is disabled on method level
 
         assertEquals("UAT", cfg.name(UAT_SETUP));
         assertEquals("uathost", cfg.hostname(UAT_SETUP));
-        assertEquals(new Integer(60020), cfg.port(UAT_SETUP));
+        assertEquals(Integer.valueOf(60020), cfg.port(UAT_SETUP));
         assertEquals("myuser2", cfg.user(UAT_SETUP));
         assertNull(cfg.password(UAT_SETUP)); // expansion is disabled on method level
     }

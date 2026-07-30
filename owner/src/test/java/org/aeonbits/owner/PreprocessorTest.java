@@ -42,7 +42,7 @@ public class PreprocessorTest {
     @Test
     public void shouldReturnTrimmedValue() {
         ConfigWithPreprocessors cfg = ConfigFactory.create(ConfigWithPreprocessors.class);
-        assertEquals(new Integer(300), cfg.pollingPeriod());
+        assertEquals(Integer.valueOf(300), cfg.pollingPeriod());
     }
 
     @Test

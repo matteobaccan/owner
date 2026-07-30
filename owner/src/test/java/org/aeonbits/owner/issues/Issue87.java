@@ -39,7 +39,7 @@ public class Issue87 {
         private final Integer value;
 
         public MyInteger(String value) {
-            this.value = new Integer(value);
+            this.value = Integer.valueOf(value);
         }
     }
 

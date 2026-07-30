@@ -50,7 +50,7 @@ public class KeyExpansionTest {
 
         assertEquals("DEV", cfg.name());
         assertEquals("devhost", cfg.hostname());
-        assertEquals(new Integer(6000), cfg.port());
+        assertEquals(Integer.valueOf(6000), cfg.port());
         assertEquals("myuser1", cfg.user());
         assertNull(cfg.password()); // expansion is disabled on method level
     }
@@ -115,7 +115,7 @@ public class KeyExpansionTest {
 
         assertEquals("DEV", cfg.name());
         assertEquals("devhost", cfg.hostname());
-        assertEquals(new Integer(6000), cfg.port());
+        assertEquals(Integer.valueOf(6000), cfg.port());
         assertEquals("myuser1", cfg.user());
         assertNull(cfg.password()); // expansion is disabled on method level
     }
@@ -126,7 +126,7 @@ public class KeyExpansionTest {
 
         assertEquals("UAT", cfg.name());
         assertEquals("uathost", cfg.hostname());
-        assertEquals(new Integer(60020), cfg.port());
+        assertEquals(Integer.valueOf(60020), cfg.port());
         assertEquals("myuser2", cfg.user());
         assertNull("mypass2", cfg.password()); // expansion is disabled on method level
     }
