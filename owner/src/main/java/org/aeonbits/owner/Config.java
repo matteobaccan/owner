@@ -96,6 +96,32 @@ public interface Config extends Serializable {
     }
 
     /**
+     * Marks a property as mandatory.
+     * <p>
+     * Mandatory properties are validated when the Config object is created: if any of them cannot be resolved
+     * (from the sources, the imports or a {@link DefaultValue}), a {@link MissingMandatoryPropertyException}
+     * is thrown listing all the missing keys.
+     * </p>
+     * <p>
+     * The check is also enforced on every access: if a mandatory property becomes unavailable later — for
+     * instance after a {@link HotReload hot reload} or a {@link Mutable#removeProperty(String)} — reading it
+     * throws a {@link MissingMandatoryPropertyException} instead of returning <code>null</code>.
+     * </p>
+     * <p>
+     * When applied to an interface, all the properties declared in that interface are mandatory.
+     * Methods taking parameters cannot be validated at creation time, since the property key may depend on the
+     * invocation arguments; for those the check happens on access only.
+     * </p>
+     *
+     * @since 1.0.13
+     */
+    @Retention(RUNTIME)
+    @Target({METHOD, TYPE})
+    @Documented
+    @interface Mandatory {
+    }
+
+    /**
      * The key used for lookup for the property.  If not present, the key will be generated based on the unqualified
      * method name.
      */

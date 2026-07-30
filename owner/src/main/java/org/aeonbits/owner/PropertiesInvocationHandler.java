@@ -8,6 +8,8 @@
 
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.Mandatory;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
@@ -76,15 +78,12 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
     private Object resolveProperty(Method method, Object... args) {
         String key = expandKey(method, args);
-        String value = propertiesManager.getProperty(key);
-
-        // TODO: this if should go away! See #84 and #86
-        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
-            String unexpandedKey = key(method);
-            value = propertiesManager.getProperty(unexpandedKey);
-        }
-        if (value == null)
+        String value = lookupValue(method, key);
+        if (value == null) {
+            if (isMandatory(method))
+                throw new MissingMandatoryPropertyException(key);
             return null;
+        }
         value = preProcess(method, value);
         Object result = convert(method, method.getReturnType(),
                 format(method, propertiesManager
@@ -92,6 +91,42 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                     args));
         if (result == NULL) return null;
         return result;
+    }
+
+    private String lookupValue(Method method, String key) {
+        String value = propertiesManager.getProperty(key);
+
+        // TODO: this if should go away! See #84 and #86
+        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
+            String unexpandedKey = key(method);
+            value = propertiesManager.getProperty(unexpandedKey);
+        }
+        return value;
+    }
+
+    private static boolean isMandatory(Method method) {
+        return method.getAnnotation(Mandatory.class) != null
+                || method.getDeclaringClass().getAnnotation(Mandatory.class) != null;
+    }
+
+    /**
+     * Verifies that every mandatory property of the given config interface can be resolved, collecting all the
+     * missing ones in a single {@link MissingMandatoryPropertyException}. Methods taking parameters are skipped,
+     * since their key may depend on the invocation arguments: they are checked on access instead.
+     */
+    void validateMandatoryProperties(Class<?> clazz) {
+        List<String> missingKeys = new LinkedList<String>();
+        for (Method method : clazz.getMethods()) {
+            if (!isMandatory(method)) continue;
+            if (method.getParameterTypes().length > 0) continue;
+            if (isDefault(method)) continue;
+            if (getDelegateMethod(method) != null) continue;
+            String key = expandKey(method);
+            if (lookupValue(method, key) == null)
+                missingKeys.add(key);
+        }
+        if (!missingKeys.isEmpty())
+            throw new MissingMandatoryPropertyException(missingKeys);
     }
 
     private String preProcess(Method method, String value) {
