@@ -8,12 +8,20 @@
 
 package org.aeonbits.owner.util;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
  * @author Luigi R. Viggiano
  */
 public final class Reflection {
+
+    private static final boolean IS_JAVA_8 =
+            ManagementFactory.getRuntimeMXBean().getSpecVersion().startsWith("1.8");
 
     // Suppresses default constructor, ensuring no one instantiate this class.
     private Reflection() {}
@@ -42,48 +50,19 @@ public final class Reflection {
         }
     }
 
-    interface Java8Support {
-        boolean isDefault(Method method);
-
-        Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable;
-    }
-
-    private static final Java8Support JAVA_8_SUPPORT = getJava8Support();
-
-    private static Java8Support getJava8Support() {
-        try {
-            return (Java8Support) Class.forName("org.aeonbits.owner.util.Java8SupportImpl").newInstance();
-        } catch (Exception e) {
-            return java8NotSupported();
-        }
-    }
-
-    private static Java8Support java8NotSupported() {
-        return new Java8Support() {
-            public boolean isDefault(Method method) {
-                return false;
-            }
-
-            public Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
-                return null;
-            }
-        };
-    }
-
-
     /**
-     * Tells whether the given method is a Java 8 <code>default</code> method.
+     * Tells whether the given method is an interface <code>default</code> method.
      *
      * @param method the method to inspect.
-     * @return <code>true</code> if the method is a default method; <code>false</code> otherwise, or when
-     *         running on a JVM without default method support.
+     * @return <code>true</code> if the method is a default method; <code>false</code> otherwise.
      */
     public static boolean isDefault(Method method) {
-        return JAVA_8_SUPPORT.isDefault(method);
+        return method.isDefault();
     }
 
     /**
-     * Invokes a Java 8 <code>default</code> method on the given proxy.
+     * Invokes a <code>default</code> method on the given proxy, dispatching to the interface
+     * implementation instead of going through the proxy invocation handler.
      *
      * @param proxy  the proxy instance the method is invoked on.
      * @param method the default method to invoke.
@@ -92,7 +71,49 @@ public final class Reflection {
      * @throws Throwable anything thrown by the invoked method.
      */
     public static Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
-        return JAVA_8_SUPPORT.invokeDefaultMethod(proxy, method, args);
+        return invokeDefaultMethod(proxy, method, args, IS_JAVA_8);
+    }
+
+    // package-private so tests can exercise both invocation strategies on any JVM
+    static Object invokeDefaultMethod(Object proxy, Method method, Object[] args, boolean isJava8)
+            throws Throwable {
+        final Class<?> declaringClass = method.getDeclaringClass();
+
+        if (isJava8) {
+            // on Java 8 findSpecial() rejects a special caller different from the lookup class,
+            // so a private-access Lookup on the declaring interface must be created via the
+            // private Lookup(Class, int) constructor
+            return Lookup.in(declaringClass)
+                    .unreflectSpecial(method, declaringClass)
+                    .bindTo(proxy)
+                    .invokeWithArguments(args);
+        } else {
+            MethodType rt = MethodType.methodType(method.getReturnType(), method.getParameterTypes());
+            return MethodHandles.lookup()
+                    .findSpecial(declaringClass, method.getName(), rt, declaringClass)
+                    .bindTo(proxy)
+                    .invokeWithArguments(args);
+        }
+    }
+
+    private static class Lookup {
+        private static final Constructor<MethodHandles.Lookup> LOOKUP_CONSTRUCTOR = lookupConstructor();
+
+        private static Constructor<MethodHandles.Lookup> lookupConstructor() {
+            try {
+                Constructor<MethodHandles.Lookup> ctor =
+                        MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+                ctor.setAccessible(true);
+                return ctor;
+            } catch (NoSuchMethodException e) {
+                return null;
+            }
+        }
+
+        private static MethodHandles.Lookup in(Class<?> requestedLookupClass)
+                throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            return LOOKUP_CONSTRUCTOR.newInstance(requestedLookupClass, MethodHandles.Lookup.PRIVATE);
+        }
     }
 
 }

@@ -19,6 +19,11 @@ package org.aeonbits.owner.dummy;
  * <p>This class is useless; please just ignore it.</p>
  * <p>It is just needed to allow the release on SonaType, since validation is failing for missing javadocs.</p>
  *
+ * <p>Note: the whole <code>owner-java8</code> artifact is deprecated and empty. The interface
+ * default-method support it used to provide (<code>Java8SupportImpl</code>) moved into the core
+ * <code>owner</code> artifact, which requires Java 8. This artifact is kept only so that existing
+ * dependency declarations keep resolving, and will be removed in a future release.</p>
+ *
  * @author Luigi R. Viggiano
  */
 public class DummyJava8Readme {

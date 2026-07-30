@@ -67,9 +67,8 @@ public class PropertiesInvocationHandlerTest {
         verify(properties).list(eq(printWriter));
     }
 
-    // The owner-java8 module (providing Java8SupportImpl) is not on this module's test classpath, so
-    // Reflection.isDefault() always returns false here: the only way to exercise the default-method
-    // paths of PropertiesInvocationHandler deterministically is to stub the Reflection static methods.
+    // Stubbing the Reflection static methods keeps this test focused on the dispatching logic of
+    // PropertiesInvocationHandler, independently of the actual default-method invocation machinery.
     @Test
     public void testInvokeDelegatesDefaultMethodsToJava8Support() throws Throwable {
         Method method = MyConfig.class.getDeclaredMethod("list", PrintStream.class);

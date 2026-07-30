@@ -21,6 +21,7 @@
 
     <modules>
         <module>owner</module>
+        <module>owner-java8</module>
         <module>owner-site</module>
         <module>owner-extras</module>
         <module>owner-assembly</module>
@@ -175,7 +176,6 @@
                 <jdk>[1.8,)</jdk>
             </activation>
             <modules>
-                <module>owner-java8</module>
                 <module>owner-java8-extras</module>
             </modules>
         </profile>

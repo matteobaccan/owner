@@ -11,9 +11,7 @@ package org.aeonbits.owner.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
@@ -21,35 +19,19 @@ import static java.util.Arrays.asList;
 /**
  * A class loader that reloads the org.aeonbits.owner classes from their class files, so that
  * their static state can be re-initialized in a controlled environment without affecting the
- * copy of the classes used by the rest of the test suite.
- * <p>
- * The environment can be altered in two ways:
- * <ul>
- *     <li>classes listed as <em>hidden</em> are reported as non-existent, simulating a runtime
- *     where they are not on the classpath (e.g. {@code java.util.Base64} on Java 6/7);</li>
- *     <li>classes registered via {@link #addClass(String, byte[])} are defined from the given
- *     bytecode, simulating a runtime where they are available (e.g. {@code Java8SupportImpl},
- *     which lives in the owner-java8 module).</li>
- * </ul>
+ * copy of the classes used by the rest of the test suite. Classes listed as <em>hidden</em> are
+ * reported as non-existent, simulating a runtime where they are not on the classpath (e.g.
+ * {@code java.beans.PropertyEditorManager} on a JRE without the java.desktop module).
  *
  * @author Matteo Baccan
  */
 public class IsolatedClassLoader extends ClassLoader {
 
     private final Set<String> hiddenClasses;
-    private final Map<String, byte[]> extraClasses = new HashMap<String, byte[]>();
 
     public IsolatedClassLoader(ClassLoader parent, String... hiddenClasses) {
         super(parent);
         this.hiddenClasses = new HashSet<String>(asList(hiddenClasses));
-    }
-
-    /**
-     * Registers a class, unavailable on the parent classpath, to be defined by this loader
-     * from the given bytecode.
-     */
-    public void addClass(String name, byte[] bytecode) {
-        extraClasses.put(name, bytecode);
     }
 
     @Override
@@ -70,7 +52,7 @@ public class IsolatedClassLoader extends ClassLoader {
     }
 
     private Class<?> defineIsolatedClass(String name) throws ClassNotFoundException {
-        byte[] bytes = extraClasses.containsKey(name) ? extraClasses.get(name) : readClassResource(name);
+        byte[] bytes = readClassResource(name);
         // a non-null ProtectionDomain gives the class a code location, so JaCoCo instruments it
         // and the coverage recorded in this classloader is merged into the main report
         return defineClass(name, bytes, 0, bytes.length, IsolatedClassLoader.class.getProtectionDomain());
