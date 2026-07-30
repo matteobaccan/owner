@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -83,7 +84,7 @@ public class MutableConfigTest {
 
     @Test
     public void testLoadInputStream() throws IOException {
-        File temp = File.createTempFile("MutableConfigTest", ".properties");
+        File temp = Files.createTempFile("MutableConfigTest", ".properties").toFile();
         UtilTest.save(temp, new Properties() {{
             setProperty("minAge", "19");
             setProperty("maxAge", "99");
@@ -97,7 +98,7 @@ public class MutableConfigTest {
 
     @Test
     public void testLoadReader() throws IOException {
-        File temp = File.createTempFile("MutableConfigTest", ".properties");
+        File temp = Files.createTempFile("MutableConfigTest", ".properties").toFile();
         UtilTest.save(temp, new Properties() {{
             setProperty("minAge", "19");
             setProperty("maxAge", "99");
