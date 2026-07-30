@@ -42,6 +42,12 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    `java.util.Objects` and did exactly what the standard
    [`Objects.equals(a, b)`](https://docs.oracle.com/javase/8/docs/api/java/util/Objects.html#equals-java.lang.Object-java.lang.Object-)
    does — **use that instead**.
+ * The test-support methods `Util.save(File, Properties)`, `Util.saveJar(File, String, Properties)`
+   and `Util.delete(File)` are gone from the public API: they were never used by the library itself
+   and now live in the test suite. If you relied on them, the standard
+   [`Properties.store`](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#store-java.io.OutputStream-java.lang.String-),
+   `java.util.jar.JarOutputStream` and [`java.nio.file.Files`](https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html)
+   APIs cover the same ground.
 
 Enhancements
 ------------

@@ -11,26 +11,17 @@ package org.aeonbits.owner.util;
 import org.aeonbits.owner.Config.DisableFeature;
 import org.aeonbits.owner.Config.DisableableFeature;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
-import java.util.zip.ZipEntry;
 
 import static java.lang.String.format;
 import static java.net.URLDecoder.decode;
@@ -309,101 +300,6 @@ public abstract class Util {
      */
     public static SystemProvider system() {
         return system;
-    }
-
-    /**
-     * Saves the given properties to the target file, writing atomically (via a temp file and rename)
-     * on non-Windows platforms.
-     * <p>
-     * If the target file already exists, its permissions are preserved; a newly created file is
-     * readable and writable only by the owner.
-     *
-     * @param target the destination file.
-     * @param p      the properties to save.
-     * @throws IOException if the file cannot be written.
-     */
-    public static void save(File target, Properties p) throws IOException {
-        File parent = target.getParentFile();
-        parent.mkdirs();
-        if (isWindows()) {
-            store(target, p);
-        } else {
-            File tempFile = Files.createTempFile(parent.toPath(), target.getName(), ".temp").toFile();
-            store(tempFile, p);
-            if (target.exists()) {
-                try {
-                    Files.setPosixFilePermissions(tempFile.toPath(),
-                            Files.getPosixFilePermissions(target.toPath()));
-                } catch (UnsupportedOperationException ignored) {
-                    // non-POSIX filesystem: keep the restrictive defaults
-                }
-            }
-            rename(tempFile, target);
-        }
-
-    }
-
-    private static boolean isWindows() {
-        return system.getProperty("os.name").toLowerCase().contains("win");
-    }
-
-    /**
-     * Deletes the given file.
-     *
-     * @param target the file to delete.
-     */
-    public static void delete(File target) {
-        target.delete();
-    }
-
-    private static void store(File target, Properties p) throws IOException {
-        try (OutputStream out = new FileOutputStream(target)) {
-            store(out, p);
-        }
-    }
-
-    private static void store(OutputStream out, Properties p) throws IOException {
-        p.store(out, "saved for test");
-    }
-
-    /**
-     * Saves the given properties into a jar file as the given entry.
-     *
-     * @param target    the destination jar file.
-     * @param entryName the name of the entry to create inside the jar.
-     * @param props     the properties to save.
-     * @throws IOException if the jar cannot be written.
-     */
-    public static void saveJar(File target, String entryName, Properties props) throws IOException {
-        File parent = target.getParentFile();
-        parent.mkdirs();
-        storeJar(target, entryName, props);
-    }
-
-    private static void rename(File source, File target) throws IOException {
-        if (!source.renameTo(target))
-            throw new IOException(format("Failed to overwrite %s to %s", source.toString(), target.toString()));
-    }
-
-    private static void storeJar(File target, String entryName, Properties props) throws IOException {
-        byte[] bytes = toBytes(props);
-        try (InputStream input = new ByteArrayInputStream(bytes);
-             FileOutputStream fileOutputStream = new FileOutputStream(target);
-             JarOutputStream output = new JarOutputStream(fileOutputStream)) {
-            ZipEntry entry = new ZipEntry(entryName);
-            output.putNextEntry(entry);
-            byte[] buffer = new byte[4096];
-            int size;
-            while ((size = input.read(buffer)) != -1)
-                output.write(buffer, 0, size);
-        }
-    }
-
-    private static byte[] toBytes(Properties props) throws IOException {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            store(out, props);
-            return out.toByteArray();
-        }
     }
 
     /**

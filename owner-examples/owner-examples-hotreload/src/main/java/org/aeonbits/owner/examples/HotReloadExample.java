@@ -16,7 +16,9 @@ import org.aeonbits.owner.Reloadable;
 import org.aeonbits.owner.util.Util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Properties;
@@ -53,7 +55,7 @@ public class HotReloadExample {
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.printf("%n%n HOT RELOAD EXAMPLE %n%n");
 
-        Util.save(target, new Properties() {{
+        save(target, new Properties() {{
             setProperty("someValue", "10");
         }});
 
@@ -71,6 +73,13 @@ public class HotReloadExample {
             someValue = cfg.someValue();
             System.out.print("\rsomeValue is: " + someValue + "\t\t\t\t");
             Thread.sleep(500);
+        }
+    }
+
+    private static void save(File target, Properties props) throws IOException {
+        target.getParentFile().mkdirs();
+        try (OutputStream out = new FileOutputStream(target)) {
+            props.store(out, "example configuration");
         }
     }
 }

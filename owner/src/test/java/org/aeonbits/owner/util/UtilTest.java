@@ -12,18 +12,26 @@ import org.aeonbits.owner.util.Util.SystemProvider;
 import org.junit.Assume;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
 
+import static java.lang.String.format;
 import static org.aeonbits.owner.util.Util.ignore;
 import static org.aeonbits.owner.util.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
@@ -79,16 +87,80 @@ public class UtilTest {
         }
     }
 
+    /**
+     * Saves the given properties to the target file, writing atomically (via a temp file and rename)
+     * on non-POSIX platforms; if the target file already exists, its permissions are preserved.
+     * This and the other file helpers below used to live in {@link Util}, but the library itself
+     * never needed them: they are test support code.
+     */
     public static void save(File target, Properties p) throws IOException {
-        Util.save(target, p);
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        if (isWindows()) {
+            store(target, p);
+        } else {
+            File tempFile = Files.createTempFile(parent.toPath(), target.getName(), ".temp").toFile();
+            store(tempFile, p);
+            if (target.exists()) {
+                try {
+                    Files.setPosixFilePermissions(tempFile.toPath(),
+                            Files.getPosixFilePermissions(target.toPath()));
+                } catch (UnsupportedOperationException ignored) {
+                    // non-POSIX filesystem: keep the restrictive defaults
+                }
+            }
+            rename(tempFile, target);
+        }
+    }
+
+    private static boolean isWindows() {
+        return Util.system().getProperty("os.name").toLowerCase().contains("win");
     }
 
     public static void delete(File target) {
-        Util.delete(target);
+        target.delete();
     }
 
     public static void saveJar(File target, String entryName, Properties props) throws IOException {
-        Util.saveJar(target, entryName, props);
+        File parent = target.getParentFile();
+        parent.mkdirs();
+        storeJar(target, entryName, props);
+    }
+
+    private static void rename(File source, File target) throws IOException {
+        if (!source.renameTo(target))
+            throw new IOException(format("Failed to overwrite %s to %s", source.toString(), target.toString()));
+    }
+
+    private static void store(File target, Properties p) throws IOException {
+        try (OutputStream out = new FileOutputStream(target)) {
+            store(out, p);
+        }
+    }
+
+    private static void store(OutputStream out, Properties p) throws IOException {
+        p.store(out, "saved for test");
+    }
+
+    private static void storeJar(File target, String entryName, Properties props) throws IOException {
+        byte[] bytes = toBytes(props);
+        try (InputStream input = new ByteArrayInputStream(bytes);
+             FileOutputStream fileOutputStream = new FileOutputStream(target);
+             JarOutputStream output = new JarOutputStream(fileOutputStream)) {
+            ZipEntry entry = new ZipEntry(entryName);
+            output.putNextEntry(entry);
+            byte[] buffer = new byte[4096];
+            int size;
+            while ((size = input.read(buffer)) != -1)
+                output.write(buffer, 0, size);
+        }
+    }
+
+    private static byte[] toBytes(Properties props) throws IOException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            store(out, props);
+            return out.toByteArray();
+        }
     }
 
     public static void debug(String format, Object... args) {
@@ -169,7 +241,7 @@ public class UtilTest {
         File target = new File("target/utiltest/UtilTest_saveOnNonWindows.properties");
         delete(target);
         try {
-            Util.save(target, new Properties() {{
+            save(target, new Properties() {{
                 setProperty("foo", "bar");
             }});
         } finally {
@@ -188,7 +260,7 @@ public class UtilTest {
         File target = new File("target/utiltest/UtilTest_saveOnWindows.properties");
         delete(target);
         try {
-            Util.save(target, new Properties() {{
+            save(target, new Properties() {{
                 setProperty("foo", "baz");
             }});
         } finally {
@@ -214,10 +286,10 @@ public class UtilTest {
         File target = new File("target/utiltest/UtilTest_saveOverExisting.properties");
         delete(target);
         try {
-            Util.save(target, new Properties() {{
+            save(target, new Properties() {{
                 setProperty("foo", "first");
             }});
-            Util.save(target, new Properties() {{
+            save(target, new Properties() {{
                 setProperty("foo", "second");
             }});
         } finally {
@@ -238,7 +310,7 @@ public class UtilTest {
             File target = new File("target/utiltest/UtilTest_renameFail.dir");
             target.mkdirs();
             new File(target, "obstacle.txt").createNewFile();
-            Util.save(target, new Properties());
+            save(target, new Properties());
         } finally {
             setSystem(save);
         }
