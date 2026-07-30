@@ -65,7 +65,9 @@ public class EqualsAndHashCodeTest {
 
     @Test
     public void testWhenObjectsAreNotRelated() {
-        MyConfig cfg1 = ConfigFactory.create(MyConfig.class);
+        // the references are declared as Object because the equals contract under test is
+        // defined against Object, and the assertion arguments must have comparable types
+        Object cfg1 = ConfigFactory.create(MyConfig.class);
         Object unrelated = new Object();
 
         assertNotEquals(cfg1, unrelated);
@@ -74,8 +76,8 @@ public class EqualsAndHashCodeTest {
 
     @Test
     public void testWhenConfigsAreNotRelated() {
-        MyConfig cfg1 = ConfigFactory.create(MyConfig.class);
-        UnrelatedConfig cfg2 = ConfigFactory.create(UnrelatedConfig.class);
+        Object cfg1 = ConfigFactory.create(MyConfig.class);
+        Object cfg2 = ConfigFactory.create(UnrelatedConfig.class);
 
         assertNotEquals(cfg1, cfg2);
         assertNotEquals(cfg2, cfg1);
