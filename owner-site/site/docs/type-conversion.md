@@ -112,6 +112,24 @@ a default no-arg constructor.
   [Stack]: http://docs.oracle.com/javase/7/docs/api/java/util/Stack.html
   [LinkedList]: http://docs.oracle.com/javase/7/docs/api/java/util/LinkedList.html
 
+Since version 1.0.13, [`EnumSet`][EnumSet] is also supported for enum types:
+
+```java
+public interface MyConfig extends Config {
+
+    enum Fruit {
+        APPLE, PEAR, ORANGE
+    }
+
+    // returns EnumSet.of(Fruit.APPLE, Fruit.ORANGE);
+    // duplicate values are discarded, as you would expect from a Set
+    @DefaultValue("APPLE, ORANGE")
+    EnumSet<Fruit> favoriteFruit();
+}
+```
+
+  [EnumSet]: https://docs.oracle.com/javase/8/docs/api/java/util/EnumSet.html
+
 The [`Map`][Map] interface and sub-interfaces are not supported.
 
   [Map]: http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
@@ -316,8 +334,9 @@ But there is more. OWNER API supports automatic conversion for:
       (See [PropertyEditorTest] as an example).
   11. Any array having above types as elements.
   12. Any object that can be instantiated via `@ConverterClass` annotation explained before.
-  13. Any Java Collections of all above types: Set, List, SortedSet or concrete implementations like LinkedHashSet or user
-      defined collections having a default no-arg constructor. [`Map`][Map] and sub-interfaces are not supported.
+  13. Any Java Collections of all above types: Set, List, SortedSet, EnumSet (since 1.0.13) or concrete
+      implementations like LinkedHashSet or user defined collections having a default no-arg constructor.
+      [`Map`][Map] and sub-interfaces are not supported.
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
 with some meaningful description to identify the problem as quickly as possible.
