@@ -96,6 +96,16 @@ public class AccessibleConfigTest {
     }
 
     @Test
+    public void testStoreToWriter() throws IOException {
+        AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
+        StringWriter writer = new StringWriter();
+        cfg.store(writer, "no comments");
+        String stored = writer.toString();
+        assertTrue(stored.contains("#no comments"));
+        assertTrue(stored.contains("favoriteSong=Bohemian Rapsody - Queen"));
+    }
+
+    @Test
     public void testGetProperty() throws IOException {
         AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
         assertEquals("Good Morning", cfg.getProperty("salutation.text"));

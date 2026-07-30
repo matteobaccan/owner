@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,9 +60,6 @@ public interface Accessible extends Config {
 
     /**
      * Stores the underlying properties into an {@link java.io.OutputStream}.
-     * <p>
-     * Notice that method {@link java.util.Properties#store(java.io.Writer, String)} is not implemented since it's not
-     * available in JDK 1.5 (while the target of this library is Java 1.5+).
      *
      * @param out      an output stream.
      * @param comments a description of the property list.
@@ -70,6 +68,17 @@ public interface Accessible extends Config {
      * @since 1.0.4
      */
     void store(OutputStream out, String comments) throws IOException;
+
+    /**
+     * Stores the underlying properties into a {@link java.io.Writer}.
+     *
+     * @param out      an output character stream.
+     * @param comments a description of the property list.
+     * @throws IOException if writing this property list to the specified writer throws an <code>IOException</code>.
+     * @see java.util.Properties#store(java.io.Writer, String)
+     * @since 1.0.13
+     */
+    void store(Writer out, String comments) throws IOException;
 
     /**
      * Fills the given {@link java.util.Map} with the properties contained by this object. <br>

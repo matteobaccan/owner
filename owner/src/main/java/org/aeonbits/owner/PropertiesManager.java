@@ -423,6 +423,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    public void store(Writer out, String comments) throws IOException {
+        readLock.lock();
+        try {
+            properties.store(out, comments);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Delegate
     @SuppressWarnings("unchecked")
     public void fill(Map map) {
         readLock.lock();
