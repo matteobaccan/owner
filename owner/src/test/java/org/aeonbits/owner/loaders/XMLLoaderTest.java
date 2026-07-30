@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
@@ -30,7 +31,7 @@ public class XMLLoaderTest {
     private static final String SECRET = "TOP_SECRET_XXE_VALUE";
 
     private static File writeTempFile(String prefix, String suffix, String content) throws IOException {
-        File file = File.createTempFile(prefix, suffix);
+        File file = Files.createTempFile(prefix, suffix).toFile();
         file.deleteOnExit();
         Writer writer = new FileWriter(file);
         try {

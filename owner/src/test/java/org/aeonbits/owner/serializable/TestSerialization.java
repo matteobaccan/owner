@@ -28,7 +28,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
 
-import static java.io.File.createTempFile;
 import static org.aeonbits.owner.util.Collections.map;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

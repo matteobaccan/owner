@@ -32,7 +32,6 @@ import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 
-import static java.io.File.createTempFile;
 import static java.lang.String.format;
 import static java.net.URLDecoder.decode;
 import static java.util.Arrays.asList;
@@ -329,6 +328,9 @@ public abstract class Util {
     /**
      * Saves the given properties to the target file, writing atomically (via a temp file and rename)
      * on non-Windows platforms.
+     * <p>
+     * If the target file already exists, its permissions are preserved; a newly created file is
+     * readable and writable only by the owner.
      *
      * @param target the destination file.
      * @param p      the properties to save.
@@ -342,6 +344,14 @@ public abstract class Util {
         } else {
             File tempFile = Files.createTempFile(parent.toPath(), target.getName(), ".temp").toFile();
             store(tempFile, p);
+            if (target.exists()) {
+                try {
+                    Files.setPosixFilePermissions(tempFile.toPath(),
+                            Files.getPosixFilePermissions(target.toPath()));
+                } catch (UnsupportedOperationException ignored) {
+                    // non-POSIX filesystem: keep the restrictive defaults
+                }
+            }
             rename(tempFile, target);
         }
 
