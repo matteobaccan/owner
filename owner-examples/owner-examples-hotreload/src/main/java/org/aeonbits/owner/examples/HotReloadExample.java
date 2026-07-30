@@ -55,9 +55,9 @@ public class HotReloadExample {
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.printf("%n%n HOT RELOAD EXAMPLE %n%n");
 
-        save(target, new Properties() {{
-            setProperty("someValue", "10");
-        }});
+        Properties props = new Properties();
+        props.setProperty("someValue", "10");
+        save(target, props);
 
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
 
