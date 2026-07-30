@@ -113,6 +113,41 @@ public class CryptoConfigTest {
         assertEquals( "May be property password was decrypted twice.", PASSWORD_EXPECTED, decryptedPassword );
     }
 
+    public interface NoDecryptorClassConfig extends Config {
+        @Key("crypto.password")
+        @EncryptedValue
+        @DefaultValue("tzH7IKLCVc0AC72fh5DiZA==")
+        String password();
+    }
+
+    /**
+     * Without a DecryptorClass annotation the IdentityDecryptor applies,
+     * so the encrypted value must be returned as is.
+     */
+    @Test
+    public void encryptedValueWithoutDecryptorClassIsReturnedAsIs() {
+        NoDecryptorClassConfig config = ConfigFactory.create( NoDecryptorClassConfig.class );
+        assertEquals( "The value should pass through the IdentityDecryptor unchanged.",
+                "tzH7IKLCVc0AC72fh5DiZA==", config.password() );
+    }
+
+    @Test
+    public void decryptWithDefaultReturnsDecryptedValueWhenDecryptionSucceeds() {
+        Decryptor identity = new IdentityDecryptor();
+        assertEquals( "value", identity.decrypt( "value", "default" ) );
+    }
+
+    @Test
+    public void decryptWithDefaultReturnsDefaultValueWhenDecryptionFails() {
+        Decryptor failing = new AbstractDecryptor() {
+            @Override
+            public String decrypt( String value ) {
+                throw new IllegalArgumentException( "cannot decrypt" );
+            }
+        };
+        assertEquals( "default", failing.decrypt( "value", "default" ) );
+    }
+
     public static class Decryptor1 extends SampleDecryptor {
         public Decryptor1() {
             super( "AES", SECRET_KEY );

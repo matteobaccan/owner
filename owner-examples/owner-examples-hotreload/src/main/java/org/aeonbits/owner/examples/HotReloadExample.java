@@ -34,7 +34,7 @@ public class HotReloadExample {
         try {
             target = Util.fileFromURI(CFG_FILE);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            throw new ExceptionInInitializerError(e);
         }
     }
 
