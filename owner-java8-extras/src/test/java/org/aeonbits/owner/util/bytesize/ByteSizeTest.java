@@ -48,4 +48,51 @@ public class ByteSizeTest {
         assertEquals(new ByteSize(500, ByteSizeUnit.MEGABYTES), new ByteSize(0.5, ByteSizeUnit.GIGABYTES));
         assertEquals(new ByteSize(500, ByteSizeUnit.MEBIBYTES), new ByteSize("0.48828125", ByteSizeUnit.GIBIBYTES));
     }
+
+    @Test
+    public void testLongConstructor(){
+        ByteSize bs = new ByteSize(1024L);
+        assertEquals(1024L, bs.getBytesAsLong());
+        assertEquals(new ByteSize(1, ByteSizeUnit.KIBIBYTES), bs);
+    }
+
+    @Test
+    public void testGetBytesAsInt(){
+        assertEquals(2048, new ByteSize(2, ByteSizeUnit.KIBIBYTES).getBytesAsInt());
+        assertEquals(42, new ByteSize(42L).getBytesAsInt());
+    }
+
+    @Test
+    public void testGetBytesAsIntOverflow(){
+        try {
+            new ByteSize(1, ByteSizeUnit.TERABYTES).getBytesAsInt();
+            fail("expected ArithmeticException");
+        } catch (ArithmeticException expected) {
+            // a terabyte does not fit in an int
+        }
+    }
+
+    @Test
+    public void testToString(){
+        assertEquals("10 B", new ByteSize(10L).toString());
+        assertEquals("1.5 MB", new ByteSize(1.5, ByteSizeUnit.MEGABYTES).toString());
+        assertEquals("512 KiB", new ByteSize("512", ByteSizeUnit.KIBIBYTES).toString());
+    }
+
+    @Test
+    public void testEqualsSpecialCases(){
+        ByteSize bs = new ByteSize(1, ByteSizeUnit.MEGABYTES);
+        assertEquals(bs, bs);
+        assertNotEquals(bs, null);
+        assertNotEquals(bs, "1 MB");
+        assertNotEquals(bs, new ByteSize(2, ByteSizeUnit.MEGABYTES));
+    }
+
+    @Test
+    public void testHashCode(){
+        ByteSize first = new ByteSize(1, ByteSizeUnit.MEGABYTES);
+        ByteSize second = new ByteSize(1, ByteSizeUnit.MEGABYTES);
+        assertEquals(first.hashCode(), second.hashCode());
+        assertEquals(first.hashCode(), first.hashCode());
+    }
 }

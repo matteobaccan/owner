@@ -94,6 +94,13 @@ public class StrSubstitutorTest {
     }
 
     @Test
+    public void shouldReturnNullWhenNullIsProvidedWithParameters() {
+        Properties props = new Properties();
+        StrSubstitutor substitutor = new StrSubstitutor(props);
+        assertNull(substitutor.replace(null, 1, "sfx"));
+    }
+
+    @Test
     public void testParametrization() {
         Properties values = new Properties() {{
             setProperty("foo", "fooValue");

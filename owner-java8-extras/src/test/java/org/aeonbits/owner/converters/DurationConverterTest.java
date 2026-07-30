@@ -12,12 +12,15 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class DurationConverterTest {
 
@@ -166,6 +169,16 @@ public class DurationConverterTest {
         @ConverterClass(DurationConverter.class)
         @DefaultValue("-PT-6H+3M")
         Duration iso8601Complex();
+
+        // invalid: no number in the duration value
+        @ConverterClass(DurationConverter.class)
+        @DefaultValue("minutes")
+        Duration invalidNoNumber();
+
+        // invalid: unknown time unit
+        @ConverterClass(DurationConverter.class)
+        @DefaultValue("10 sillyunits")
+        Duration invalidUnit();
     }
 
     private static boolean allEqual(Duration compareTo, Collection<Duration> durations){
@@ -222,6 +235,23 @@ public class DurationConverterTest {
         assertEquals(cfg.iso8601NoPrefix15Minutes(), cfg.iso8601PlusPrefix15Minutes());
         assertEquals(Duration.of(-15, ChronoUnit.MINUTES), cfg.iso8601MinusPrefix15Minutes());
         assertEquals(Duration.of(6, ChronoUnit.HOURS).minus(3, ChronoUnit.MINUTES), cfg.iso8601Complex());
+    }
+
+    @Test
+    public void testInvalid() throws NoSuchMethodException, IllegalAccessException {
+        DurationTypesConfig cfg = ConfigFactory.create(DurationTypesConfig.class);
+        Duration duration;
+        for (String method : new String[]{"invalidNoNumber", "invalidUnit"}) {
+            Method m = DurationTypesConfig.class.getDeclaredMethod(method);
+            try {
+                duration = (Duration) m.invoke(cfg);
+                fail(String.format("Invalid duration [%s] should have thrown an exception. Instead we parsed: %s", method, duration));
+            } catch (InvocationTargetException e) {
+                if (!(e.getCause() instanceof IllegalArgumentException)) {
+                    fail("Got an unexpected exception type when calling method: " + method);
+                }
+            }
+        }
     }
 
 }
