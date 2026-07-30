@@ -15,6 +15,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.aeonbits.owner.util.UtilTest.save;
@@ -157,6 +159,22 @@ public class ConfigFactoryTest implements TestConstants {
         assertEquals("defaultValue", cfg.someValue());
         assertThat(cfg.propertyNames(), contains("someValue"));
         assertThat(cfg.propertyNames().size(), is(1));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateWithImportContainingNullKey() {
+        Map<String, String> imports = new HashMap<String, String>();
+        imports.put(null, "someValue");
+
+        ConfigFactory.create(MyConfig.class, imports);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateWithImportContainingNullValue() {
+        Map<String, String> imports = new HashMap<String, String>();
+        imports.put("someKey", null);
+
+        ConfigFactory.create(MyConfig.class, imports);
     }
 
     @After
