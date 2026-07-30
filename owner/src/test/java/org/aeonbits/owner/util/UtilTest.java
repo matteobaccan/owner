@@ -27,7 +27,6 @@ import java.util.Properties;
 import static org.aeonbits.owner.util.Util.ignore;
 import static org.aeonbits.owner.util.Util.unreachableButCompilerNeedsThis;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -129,15 +128,6 @@ public class UtilTest {
         for (int i = 1; i < size; i++)
             Array.set(array, i, cloneable.clone());
         return (T[]) array;
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testDeprecatedEqDelegatesToObjectsEquals() {
-        assertTrue(Util.eq(null, null));
-        assertTrue(Util.eq("a", "a"));
-        assertFalse(Util.eq("a", "b"));
-        assertFalse(Util.eq(null, "b"));
     }
 
     @Test

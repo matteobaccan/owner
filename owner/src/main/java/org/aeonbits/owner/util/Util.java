@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
@@ -301,20 +300,6 @@ public abstract class Util {
             uriSpec = uriSpec.replace('\\', '/');
             return fileFromURI(new URI(uriSpec));
         }
-    }
-
-    /**
-     * Null-safe equality check between two objects.
-     *
-     * @param o1 the first object.
-     * @param o2 the second object.
-     * @return <code>true</code> if both are the same reference or equal, <code>false</code> otherwise.
-     * @deprecated this method predates {@link java.util.Objects#equals(Object, Object)}, which the
-     * library now requires (Java 8): use that instead. This method will be removed in a future release.
-     */
-    @Deprecated
-    public static boolean eq(Object o1, Object o2) {
-        return Objects.equals(o1, o2);
     }
 
     /**
