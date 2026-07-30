@@ -26,15 +26,18 @@ philosophy is to keep always backward compatibility (unless not possible).
 ## What happens if some property is not set to any value?
 
 See: [Undefined properties]({{ site.url }}/docs/usage/#toc_3) in [Basic usage]({{ site.url }}/docs/usage/) chapter.
+If a property is required and has no sensible default, you can annotate it with `@Mandatory` to fail fast with a
+meaningful exception: see [Mandatory properties]({{ site.url }}/docs/usage/#toc_4).
 
 ## How about the security of storing password in properties? Does OWNER support encryptable properties like in [Jasypt](http://www.jasypt.org/encrypting-configuration.html) ?
 
-At the current stage (version 1.0.5) OWNER doesn't allow you to specify that a configuration property is encrypted,
-but OWNER APIs are flexible enough to let the user implement that. An example is [here][enc-props].
+Yes. Since version 1.0.12 OWNER supports encrypted properties out of the box through the `@EncryptedValue` and
+`@DecryptorClass` annotations: see the [Encrypted properties]({{ site.url }}/docs/crypto/) chapter
+(this was tracked in [#49](https://github.com/lviggiano/owner/issues/49)).
 
-Encrypted properties are in the list of goals for the next versions (See [#49](https://github.com/lviggiano/owner/issues/49)).
+Before 1.0.12, OWNER APIs were flexible enough to let the user implement that: an example is [here][enc-props].
 
-  [enc-props]: https://github.com/lviggiano/owner/blob/master/src/test/java/org/aeonbits/owner/examples/EncryptedPropertiesExample.java
+  [enc-props]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/examples/EncryptedPropertiesExample.java
 
 ## Why OWNER API doesn't implement this ${pretty.neat.feature} ?
 
@@ -46,7 +49,7 @@ The idea is to keep things minimal and code clean and easy. And for every new fe
 verify all cases.
 
   [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
-  [issues]: https://github.com/lviggiano/owner/issues
+  [issues]: https://github.com/matteobaccan/owner/issues
 
 ## Who is using OWNER?
 

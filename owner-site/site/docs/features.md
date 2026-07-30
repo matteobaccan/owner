@@ -24,5 +24,5 @@ The design of the new features is intended not to make existing things more comp
 ignore what you don't need. Backward compatibility between versions is also in our goals.
 
 If you need something special that is missing in OWNER, feel free to open a
-[request](https://github.com/lviggiano/owner/issues) for it.
+[request](https://github.com/matteobaccan/owner/issues) for it.
 We'll do our best to make OWNER do what you need.

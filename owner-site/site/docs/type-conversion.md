@@ -295,7 +295,7 @@ works with a single element.
 
 To see the complete test cases supported by owner see [ConverterClassTest] on GitHub.
 
-  [ConverterClassTest]: https://github.com/lviggiano/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/ConverterClassTest.java
+  [ConverterClassTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/ConverterClassTest.java
 
 All the types supported by OWNER
 --------------------------------
@@ -329,7 +329,7 @@ See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you wan
   [propeditmanager]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorManager.html#registerEditor
   [propedit]: http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditor.html
   [propeditsupport]:http://docs.oracle.com/javase/7/docs/api/java/beans/PropertyEditorSupport.html
-  [PropertyEditorTest]:https://github.com/lviggiano/owner/blob/master/src/test/java/org/aeonbits/owner/editor/PropertyEditorTest.java
+  [PropertyEditorTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/editor/PropertyEditorTest.java
 
 Converter classes shipped with OWNER
 ------------------------------------

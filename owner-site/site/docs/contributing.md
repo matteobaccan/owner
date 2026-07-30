@@ -25,7 +25,7 @@ There are many ways to help improving OWNER:
    See [Updating Documentation](#toc_1).
 
   [fork]: https://help.github.com/articles/fork-a-repo
-  [issues]: https://github.com/lviggiano/owner/issues
+  [issues]: https://github.com/matteobaccan/owner/issues
   [collaborating]: https://help.github.com/categories/63/articles
 
 
@@ -71,7 +71,7 @@ git checkout -b my_awesome_feature
 git push origin my_awesome_feature
 {% endhighlight %}
 
-* Create a pull request against lviggiano/owner and describe what your change
+* Create a pull request against matteobaccan/owner and describe what your change
   does and the why you think it should be merged.
 
 Updating Documentation
@@ -82,12 +82,12 @@ open-sourced our docs and we welcome any pull requests if you find it
 lacking.
 
 You can find the documentation for matteobaccan.github.io/owner in the
-[site](https://github.com/lviggiano/owner/tree/master/site) folder of the
+[owner-site/site](https://github.com/matteobaccan/owner/tree/master/owner-site/site) folder of the
 master branch.
 
 All documentation pull requests should be directed at `master`.  Pull
 requests directed at another branch will not be accepted.
 
-The [OWNER wiki](https://github.com/lviggiano/owner/wiki) on GitHub
+The [OWNER wiki](https://github.com/matteobaccan/owner/wiki) on GitHub
 can be freely updated without a pull request as all GitHub users have
 read and write access.

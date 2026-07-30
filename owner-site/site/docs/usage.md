@@ -174,6 +174,59 @@ java objects. But if we call the method `int port()` then a
   </p>
 </div>
 
+Mandatory properties
+--------------------
+
+Sometimes a configuration property is required and there is no sensible default
+for it: think of a database URL or an API key. Since version 1.0.13 you can mark
+such properties with the `@Mandatory` annotation:
+
+```java
+public interface ServerConfig extends Config {
+    @Mandatory
+    String hostname();
+
+    @DefaultValue("8080")
+    int port();
+}
+```
+
+When the `Config` object is created, OWNER verifies that every mandatory
+property can be resolved (from the loaded sources, the imports or a
+`@DefaultValue`): if any of them is missing, `ConfigFactory.create()` throws a
+`MissingMandatoryPropertyException` listing *all* the missing keys, so you can
+fix your configuration in a single pass. The exception also exposes the missing
+keys programmatically via `getKeys()`.
+
+The check is enforced on every access too: if a mandatory property becomes
+unavailable later — for instance after a [hot reload]({{ site.url }}/docs/reload/)
+or a `removeProperty()` on a [Mutable]({{ site.url }}/docs/accessible-mutable/)
+config — reading it throws `MissingMandatoryPropertyException` instead of
+returning null.
+
+`@Mandatory` can also be applied to the interface, making all the properties
+declared in that interface mandatory:
+
+```java
+@Mandatory
+public interface DatabaseConfig extends Config {
+    String url();      // mandatory
+    String username(); // mandatory
+
+    @DefaultValue("10")
+    int poolSize();    // mandatory, but satisfied by the default value
+}
+```
+
+<div class="note">
+  <h5>Methods taking parameters</h5>
+  <p>
+    Properties whose method takes parameters cannot be validated at creation
+    time, since the property key may depend on the invocation arguments: for
+    those, the check happens when the method is invoked.
+  </p>
+</div>
+
 Conclusions
 -----------
 
