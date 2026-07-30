@@ -61,5 +61,5 @@ hazardous. Here’s what to look out for.
 
 If you come across anything along the way that we haven’t covered, or if you
 know of a tip you think others would find handy, please [file an
-issue](https://github.com/lviggiano/owner/issues/new) and we’ll see about
+issue](https://github.com/matteobaccan/owner/issues/new) and we’ll see about
 including it in this guide.

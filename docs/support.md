@@ -11,7 +11,7 @@ If you need help, you have a question, or you need further details on how to use
 OWNER, you can refer to the following resources:
 
  - This [documentation web site](https://matteobaccan.github.io/owner)
- - The [GitHub issues](https://github.com/lviggiano/owner/issues) where you can
+ - The [GitHub issues](https://github.com/matteobaccan/owner/issues) where you can
    post bug reports, request for features, questions, etc.
  - Telegram chat [OWNER API Users & Devs](https://t.me/ownerapi).
 

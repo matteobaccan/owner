@@ -12,20 +12,24 @@ the latest features still under development on GitHub master branch.
 Building OWNER requires following software being installed and configured in
 your system:
 
- - [JDK](http://docs.oracle.com/javase/7/docs/webnotes/install/) 7 or superior. 
- - [Maven](http://maven.apache.org/download.cgi#Installation_Instructions) 3.0.5
-   or superior (Maven 2 should also be ok).
+ - [JDK](https://adoptium.net/) 11 or superior.
+ - [Maven](http://maven.apache.org/download.cgi#Installation_Instructions) 3.6.3
+   or superior (enforced by the build).
  - [GIT](http://git-scm.com/book/en/Getting-Started-Installing-Git) any recent version should be ok.
 
-Java 5 and 6 are supported until OWNER 1.0.9. 
-With OWNER 1.0.10 we introduced Java 9 support and we dropped Java 5 and 6 support, so if you use JDK prior to 7 you
-need to use OWNER 1.0.9.
+The produced bytecode remains compatible with Java 8 at runtime, but a JDK 11 or
+superior is required to compile the project. The build is continuously tested on
+JDK 11, 17, 21 and 25.
+
+Runtime compatibility in older releases: Java 5 and 6 are supported until OWNER
+1.0.9; with OWNER 1.0.10 Java 9 support was introduced and Java 5 and 6 support
+was dropped.
 
 Then follow these steps:
 
 ```bash
 # Download the sources
-$ git clone https://github.com/lviggiano/owner.git owner
+$ git clone https://github.com/matteobaccan/owner.git owner
 $ cd owner
 # Compile, execute test, and generate the artifacts
 $ mvn install
@@ -39,8 +43,8 @@ At the end of the process, you should find the generated artifacts in the
   <h5>GIT URLs</h5>
   <p>
 The above examples uses the https url to clone the GIT repository, alternatively
-- if your firewall allows - you can use the GIT native URL that may be
-faster: git://github.com/lviggiano/owner.git.
+- if you have an SSH key configured on GitHub - you can use the SSH URL:
+git@github.com:matteobaccan/owner.git.
   </p>
 </div>
 
@@ -52,7 +56,8 @@ Since version 1.0.6 OWNER supports some language features introduced by Java 8 a
 such as [`default` methods][def-methods] in interfaces.
 
 The support classes for these features are encapsulated in the maven module called `owner-java8` that gets
-included into the build process only when maven is invoked from JDK 8.
+included into the build process when maven is invoked from JDK 8 or superior (that is, always, with the
+current JDK requirements).
 
   [def-methods]: http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html
 
@@ -66,8 +71,8 @@ on your local computer. That also contains tags for the released versions.
 For instance, if I want to build the version 1.0.2
 
 ```bash
-# as example, this time we use the git:// URL
-$ git clone git://github.com/lviggiano/owner.git owner
+# as example, this time we use the SSH URL
+$ git clone git@github.com:matteobaccan/owner.git owner
 $ cd owner
 # show all available tags
 $ git tag -l
@@ -101,7 +106,9 @@ $ mvn test
 Continuous Integration
 ----------------------
 
-You can access latest builds from
- [Jenkins](https://aeonbits.ci.cloudbees.com/job/owner-api/) and
- [Travis](https://travis-ci.org/lviggiano/owner) websites.
+Every push and pull request is built by
+[GitHub Actions](https://github.com/matteobaccan/owner/actions) on all the
+supported LTS JDKs (11, 17, 21 and 25), and the code is analyzed by
+[SonarCloud](https://sonarcloud.io/project/overview?id=matteobaccan_owner)
+for quality and test coverage.
 
