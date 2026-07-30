@@ -38,8 +38,10 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    library API itself. If you referenced it, **use [`java.util.Base64`](https://docs.oracle.com/javase/8/docs/api/java/util/Base64.html)
    directly**: `Base64.encode(bytes)` becomes `Base64.getEncoder().encodeToString(bytes)` and
    `Base64.decode(string)` becomes `Base64.getDecoder().decode(string)`.
- * `org.aeonbits.owner.util.Util.eq(a, b)` is deprecated in favor of the standard
-   `java.util.Objects.equals(a, b)` and will be removed in a future release.
+ * The internal utility method `org.aeonbits.owner.util.Util.eq(a, b)` is gone: it predated
+   `java.util.Objects` and did exactly what the standard
+   [`Objects.equals(a, b)`](https://docs.oracle.com/javase/8/docs/api/java/util/Objects.html#equals-java.lang.Object-java.lang.Object-)
+   does — **use that instead**.
 
 Enhancements
 ------------
