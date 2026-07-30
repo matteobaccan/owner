@@ -41,12 +41,12 @@ abstract class MultiThreadTestBase {
             int errorCount = thread.errors.size();
 
             if (errorCount > 0)
-                System.err.printf("There are %d exception collected by %s#%d\n", errorCount,
+                System.err.printf("There are %d exception collected by %s#%d%n", errorCount,
                         thread.getClass().getName(), i);
 
             List<Throwable> errors = thread.errors;
             for (Throwable error : errors) {
-                System.err.printf("%s#%d thrown an exception: %s\n", thread.getClass().getName(), i,
+                System.err.printf("%s#%d thrown an exception: %s%n", thread.getClass().getName(), i,
                         error.getMessage());
                 error.printStackTrace(System.err);
                 throw error;

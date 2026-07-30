@@ -16,6 +16,7 @@ import java.lang.reflect.Proxy;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
 /**
@@ -68,8 +69,8 @@ public class EqualsAndHashCodeTest {
         MyConfig cfg1 = ConfigFactory.create(MyConfig.class);
         Object unrelated = new Object();
 
-        assertNotEquals(cfg1, unrelated);
-        assertNotEquals(unrelated, cfg1);
+        assertFalse(cfg1.equals(unrelated));
+        assertFalse(unrelated.equals(cfg1));
     }
 
     @Test
@@ -77,8 +78,8 @@ public class EqualsAndHashCodeTest {
         MyConfig cfg1 = ConfigFactory.create(MyConfig.class);
         UnrelatedConfig cfg2 = ConfigFactory.create(UnrelatedConfig.class);
 
-        assertNotEquals(cfg1, cfg2);
-        assertNotEquals(cfg2, cfg1);
+        assertFalse(cfg1.equals(cfg2));
+        assertFalse(cfg2.equals(cfg1));
 
         // hashCodes equality doesn't imply objects equality
         assertEquals(cfg1.hashCode(), cfg2.hashCode());
