@@ -112,7 +112,7 @@ public enum ByteSizeUnit {
         for (ByteSizeUnit unit : ByteSizeUnit.values()) {
             map.put(unit.prefix + "byte", unit);
             map.put(unit.prefix + "bytes", unit);
-            if (unit.prefix.length() == 0) {
+            if (unit.prefix.isEmpty()) {
                 map.put("b", unit);
                 map.put("", unit); // no unit specified means bytes
             } else {

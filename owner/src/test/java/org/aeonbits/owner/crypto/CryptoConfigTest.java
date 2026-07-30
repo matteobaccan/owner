@@ -3,12 +3,9 @@ package org.aeonbits.owner.crypto;
 import java.util.List;
 import java.util.Arrays;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;

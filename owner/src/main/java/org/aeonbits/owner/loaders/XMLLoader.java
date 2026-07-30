@@ -114,7 +114,7 @@ public class XMLLoader implements Loader {
                 else
                     paths.push(qName);
             } else {
-                String path = (paths.size() == 0) ? qName : paths.peek() + "." + qName;
+                String path = paths.isEmpty() ? qName : paths.peek() + "." + qName;
                 paths.push(path);
                 for (int i = 0; i < attributes.getLength(); i++) {
                     String attrName = attributes.getQName(i);

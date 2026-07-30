@@ -10,7 +10,6 @@ package org.aeonbits.owner.converters;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.converters.DurationConverter;
 import org.junit.Test;
 
 import java.time.Duration;
