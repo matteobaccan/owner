@@ -49,8 +49,9 @@ abstract class MultiThreadTestBase {
                 System.err.printf("%s#%d thrown an exception: %s%n", thread.getClass().getName(), i,
                         error.getMessage());
                 error.printStackTrace(System.err);
-                throw error;
             }
+            if (!errors.isEmpty())
+                throw errors.get(0);
         }
     }
 
