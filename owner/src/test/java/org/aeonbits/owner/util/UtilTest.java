@@ -140,6 +140,14 @@ public class UtilTest {
     }
 
     @Test
+    public void testFileFromURIWithBackslashes() throws URISyntaxException {
+        // backslashes are illegal in URIs: the first parse fails and fileFromURI must retry
+        // with the backslashes converted to slashes, as it happens with Windows paths
+        File result = Util.fileFromURI("file:/foo\\bar\\baz.properties");
+        assertEquals(new File("/foo/bar/baz.properties"), result);
+    }
+
+    @Test
     public void testFileFromURIWithJarURIHavingUnparsableInnerPath() throws URISyntaxException {
         // '^' is illegal in URIs: the inner path extracted from the jar URI cannot be
         // parsed, and fileFromURI must give up returning null
