@@ -27,7 +27,7 @@
 
     <target name="clone" depends="test-gh-pages" unless="gh-pages.available">
         <mkdir dir="${build.directory}"/>
-        <git dir="${build.directory}" command="clone git@github.com:lviggiano/owner --branch gh-pages gh-pages"/>
+        <git dir="${build.directory}" command="clone git@github.com:matteobaccan/owner --branch gh-pages gh-pages"/>
     </target>
 
     <target name="pull" depends="clone" if="gh-pages.available">
