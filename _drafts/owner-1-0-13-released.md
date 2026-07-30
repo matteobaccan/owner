@@ -30,6 +30,9 @@ Enhancements
    conversion (thanks to @dexman545).
  * Security hardening of the `XMLLoader` against XXE attacks: external DTDs and entities are neutralized, secure
    processing limits entity expansion; the standard Java properties XML format keeps working as before.
+ * [#325](https://github.com/matteobaccan/owner/pull/325): temporary files are now created with owner-only
+   permissions via `Files.createTempFile` (thanks to @JLLeitschuh); when storing a Config to an existing file,
+   the file permissions are preserved.
  * Bytecode is still compatible with Java 8 at runtime, while the project is built with modern JDKs
    (`compiler-release=8`); a JDK 11 or superior is required to build from sources.
  * Javadoc completed and improved across the codebase.
