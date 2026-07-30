@@ -78,11 +78,7 @@ public abstract class Util {
         Properties getProperties();
     }
 
-    static TimeProvider timeProvider = new TimeProvider() {
-        public long getTime() {
-            return System.currentTimeMillis();
-        }
-    };
+    static TimeProvider timeProvider = System::currentTimeMillis;
 
     static SystemProvider system = new SystemProvider() {
         public String getProperty(String key) {

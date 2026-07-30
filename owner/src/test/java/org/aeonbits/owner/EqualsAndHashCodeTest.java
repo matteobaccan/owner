@@ -10,8 +10,6 @@ package org.aeonbits.owner;
 
 import org.junit.Test;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Properties;
 
@@ -89,12 +87,8 @@ public class EqualsAndHashCodeTest {
     @Test
     public void testWhenTwoObjectsAreSimilarProxies() {
         MyConfig cfg1 = ConfigFactory.create(MyConfig.class);
-        MyConfig cfg2 = (MyConfig) Proxy
-                .newProxyInstance(getClass().getClassLoader(), new Class[] { MyConfig.class }, new InvocationHandler() {
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                return null;
-            }
-        });
+        MyConfig cfg2 = (MyConfig) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class[] { MyConfig.class }, (proxy, method, args) -> null);
 
         assertNotEquals(cfg1, cfg2);
     }

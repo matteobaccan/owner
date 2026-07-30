@@ -13,8 +13,6 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.event.ReloadEvent;
-import org.aeonbits.owner.event.ReloadListener;
 import org.aeonbits.owner.util.Util;
 
 import java.io.File;
@@ -61,11 +59,8 @@ public class HotReloadExample {
 
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
 
-        cfg.addReloadListener(new ReloadListener() {
-            public void reloadPerformed(ReloadEvent event) {
-                System.out.print("\rReload intercepted at " + new Date() + " \n");
-            }
-        });
+        cfg.addReloadListener(event ->
+                System.out.print("\rReload intercepted at " + new Date() + " \n"));
 
         System.out.println("The program is running. ");
 

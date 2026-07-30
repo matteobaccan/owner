@@ -118,11 +118,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             hotReloadLogic = new HotReloadLogic(hotReload, uris, this);
 
             if (hotReloadLogic.isAsync())
-                scheduler.scheduleAtFixedRate(new Runnable() {
-                    public void run() {
-                        hotReloadLogic.checkAndReload();
-                    }
-                }, hotReload.value(), hotReload.value(), hotReload.unit());
+                scheduler.scheduleAtFixedRate(() -> hotReloadLogic.checkAndReload(),
+                        hotReload.value(), hotReload.value(), hotReload.unit());
         } else {
             hotReloadLogic = null;
         }

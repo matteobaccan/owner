@@ -19,15 +19,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class ScheduledExecutorServiceSpike {
     public static void main(String[] args) throws InterruptedException {
-        ThreadFactory tf = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                try {
-                    Thread result =  new Thread(r);
-                    result.setDaemon(true);
-                    return result;
-                } finally {
-                    System.out.println("new thread created");
-                }
+        ThreadFactory tf = r -> {
+            try {
+                Thread result =  new Thread(r);
+                result.setDaemon(true);
+                return result;
+            } finally {
+                System.out.println("new thread created");
             }
         };
         ScheduledExecutorService stp = Executors.newSingleThreadScheduledExecutor(tf);

@@ -12,7 +12,6 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
@@ -123,11 +122,9 @@ public class ReflectionTest {
         return (Sample) Proxy.newProxyInstance(
                 ReflectionTest.class.getClassLoader(),
                 new Class<?>[] {Sample.class},
-                new InvocationHandler() {
-                    public Object invoke(Object proxy, Method method, Object[] args) {
-                        throw new UnsupportedOperationException(
-                                "default methods must not be dispatched to the proxy handler: " + method);
-                    }
+                (proxy, method, args) -> {
+                    throw new UnsupportedOperationException(
+                            "default methods must not be dispatched to the proxy handler: " + method);
                 });
     }
 

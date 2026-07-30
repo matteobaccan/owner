@@ -8,8 +8,6 @@
 
 package org.aeonbits.owner.loaders;
 
-import org.apache.curator.RetryPolicy;
-import org.apache.curator.RetrySleeper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.utils.ZKPaths;
@@ -73,11 +71,8 @@ public class ZooKeeperLoader implements Loader {
         int port = uri.getPort();
 
         String connectString = (port == -1) ? host : host + ":" + port;
-        return CuratorFrameworkFactory.newClient(connectString, new RetryPolicy() {
-            public boolean allowRetry(int retryCount, long elapsedTimeMs, RetrySleeper sleeper) {
-                return false;
-            }
-        });
+        return CuratorFrameworkFactory.newClient(connectString,
+                (retryCount, elapsedTimeMs, sleeper) -> false);
     }
 
     public String defaultSpecFor(String urlPrefix) {
