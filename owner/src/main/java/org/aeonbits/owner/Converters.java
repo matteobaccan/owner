@@ -11,7 +11,6 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.ConverterClass;
 
 import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;

@@ -77,7 +77,7 @@ public class DurationConverter implements Converter<Duration> {
         String originalUnitString = parts[1];
         String unitString = originalUnitString;
 
-        if (numberString.length() == 0) {
+        if (numberString.isEmpty()) {
             throw new IllegalArgumentException(String.format("No number in duration value '%s'", input));
         }
 
