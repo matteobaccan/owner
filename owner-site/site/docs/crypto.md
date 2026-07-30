@@ -2,7 +2,7 @@
 layout: docs
 title: Crypto support
 prev_section: singleton
-next_section: features
+next_section: preprocessors
 permalink: /docs/crypto/
 ---
 

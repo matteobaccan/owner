@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Features
-prev_section: singleton
+prev_section: jmx
 next_section: why
 permalink: /docs/features/
 ---
