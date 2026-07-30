@@ -88,7 +88,7 @@ public class XMLLoader implements Loader {
         @Override
         public InputSource resolveEntity(String name, String publicId, String baseURI,
                                          String systemId) throws SAXException, IOException {
-            if (systemId != null && systemId.equals(PROPS_DTD_URI)) {
+            if (PROPS_DTD_URI.equals(systemId)) {
                 isJavaPropertiesFormat = true;
                 InputSource inputSource = new InputSource(new StringReader(PROPS_DTD));
                 inputSource.setSystemId(PROPS_DTD_URI);

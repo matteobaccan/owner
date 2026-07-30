@@ -12,8 +12,11 @@ import org.aeonbits.owner.util.Util.SystemProvider;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -128,6 +131,86 @@ public class UtilTest {
 
     public static boolean eq(Object o1, Object o2) {
         return Util.eq(o1, o2);
+    }
+
+    @Test
+    public void testFileFromURIWithUnsupportedScheme() throws URISyntaxException {
+        assertNull(Util.fileFromURI("http://example.com/foo.properties"));
+    }
+
+    @Test
+    public void testFileFromURIWithJarURIHavingUnparsableInnerPath() throws URISyntaxException {
+        // '^' is illegal in URIs: the inner path extracted from the jar URI cannot be
+        // parsed, and fileFromURI must give up returning null
+        URI uri = new URI("jar", "file:/foo^bar.jar!/baz.properties", null);
+        assertNull(Util.fileFromURI(uri));
+    }
+
+    private static Properties loadProperties(File source) throws IOException {
+        Properties loaded = new Properties();
+        InputStream in = new FileInputStream(source);
+        try {
+            loaded.load(in);
+        } finally {
+            in.close();
+        }
+        return loaded;
+    }
+
+    @Test
+    public void testSaveOnNonWindows() throws IOException {
+        SystemProvider save = setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("os.name", "Linux");
+                }}, new HashMap<String, String>()
+        ));
+        File target = new File("target/utiltest/UtilTest_saveOnNonWindows.properties");
+        delete(target);
+        try {
+            Util.save(target, new Properties() {{
+                setProperty("foo", "bar");
+            }});
+        } finally {
+            setSystem(save);
+        }
+        assertEquals("bar", loadProperties(target).getProperty("foo"));
+    }
+
+    @Test
+    public void testSaveOnWindows() throws IOException {
+        SystemProvider save = setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("os.name", "Windows 11");
+                }}, new HashMap<String, String>()
+        ));
+        File target = new File("target/utiltest/UtilTest_saveOnWindows.properties");
+        delete(target);
+        try {
+            Util.save(target, new Properties() {{
+                setProperty("foo", "baz");
+            }});
+        } finally {
+            setSystem(save);
+        }
+        assertEquals("baz", loadProperties(target).getProperty("foo"));
+    }
+
+    @Test(expected = IOException.class)
+    public void testSaveFailsWhenTempFileCannotBeRenamed() throws IOException {
+        SystemProvider save = setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("os.name", "Linux");
+                }}, new HashMap<String, String>()
+        ));
+        try {
+            // renaming a file over an existing non-empty directory fails on every platform
+            File target = new File("target/utiltest/UtilTest_renameFail.dir");
+            target.mkdirs();
+            new File(target, "obstacle.txt").createNewFile();
+            Util.save(target, new Properties());
+        } finally {
+            setSystem(save);
+        }
     }
 
     @Test

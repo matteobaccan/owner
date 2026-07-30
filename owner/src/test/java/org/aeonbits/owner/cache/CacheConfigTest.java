@@ -15,6 +15,8 @@ import org.aeonbits.owner.Factory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +54,26 @@ public class CacheConfigTest {
         assertSame(first, second);
         assertSame(second, third);
         verify(spy, times(1)).create(eq(MyConfig.class), ArgumentMatchers.any(Map[].class));
+    }
+
+    /**
+     * When another thread caches an instance for the same key between the initial
+     * lookup and the putIfAbsent performed by getOrCreate, the instance that won
+     * the race must be returned.
+     */
+    @Test
+    public void testGetOrCreateWhenARaceOccursDuringCreation() {
+        final MyConfig winner = ConfigFactory.create(MyConfig.class);
+        Factory spy = spy(ConfigFactory.newInstance());
+        doAnswer(new Answer<MyConfig>() {
+            public MyConfig answer(InvocationOnMock invocation) throws Throwable {
+                ConfigCache.add("raced", winner);
+                return (MyConfig) invocation.callRealMethod();
+            }
+        }).when(spy).create(eq(MyConfig.class), ArgumentMatchers.any(Map[].class));
+
+        MyConfig result = ConfigCache.getOrCreate(spy, "raced", MyConfig.class);
+        assertSame(winner, result);
     }
 
     @Test

@@ -10,6 +10,8 @@ package org.aeonbits.owner.util;
 
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -40,6 +42,16 @@ public class ReflectionTest {
     @Test
     public void testForNameWithNonExistentClass() {
         assertNull(Reflection.forName("foo.bar.baz.FooBar"));
+    }
+
+    /**
+     * In this module Java8SupportImpl is not on the classpath (it lives in the
+     * owner-java8 module), so the no-op fallback applies and must return null.
+     */
+    @Test
+    public void testInvokeDefaultMethodWithoutJava8Support() throws Throwable {
+        Method method = Runnable.class.getMethod("run");
+        assertNull(Reflection.invokeDefaultMethod(new Object(), method, new Object[0]));
     }
 
 }

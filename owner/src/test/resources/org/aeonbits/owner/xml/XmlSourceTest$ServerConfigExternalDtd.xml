@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2012-2015, Luigi R. Viggiano
+  ~ All rights reserved.
+  ~
+  ~ This software is distributable under the BSD license.
+  ~ See the terms of the BSD license in the documentation provided with this software.
+  -->
+<!DOCTYPE server SYSTEM "http://localhost/nonexistent-external.dtd">
+
+<server>
+    <http port="80">
+        <hostname>localhost</hostname>
+    </http>
+    <ssh port="22">
+        <address>127.0.0.1</address>
+        <alive interval="60"/>
+        <user>admin</user>
+    </ssh>
+</server>

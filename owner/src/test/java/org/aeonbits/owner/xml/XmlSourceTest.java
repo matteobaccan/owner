@@ -15,9 +15,12 @@ import org.aeonbits.owner.TestConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileInputStream;
@@ -114,6 +117,62 @@ public class XmlSourceTest implements TestConstants {
         System.setProperty("javax.xml.parsers.SAXParserFactory", "foo.bar.baz");
         try {
             factory.create(ServerConfigJavaFormat.class);
+        } finally {
+            System.getProperties().remove("javax.xml.parsers.SAXParserFactory");
+        }
+    }
+
+    static interface ServerConfigExternalDtd extends ServerConfig {
+    }
+
+    /**
+     * A DOCTYPE pointing to an external DTD other than the Java properties one must be
+     * neutralized (resolved to an empty source) and the document parsed as generic XML.
+     */
+    @Test
+    public void testXmlReadingWithExternalDtdNeutralized() {
+        ServerConfigExternalDtd cfg = factory.create(ServerConfigExternalDtd.class);
+        assertEquals(80, cfg.httpPort());
+        assertEquals("localhost", cfg.httpHostname());
+        assertEquals("admin", cfg.sshUser());
+    }
+
+    /**
+     * Features not supported or not recognized by the SAX parser must be skipped
+     * without preventing the load.
+     */
+    @Test
+    public void testSetFeatureNotSupportedByParserIsSkipped() throws Exception {
+        final SAXParserFactory real = SAXParserFactory.newInstance();
+        real.setValidating(true);
+        real.setNamespaceAware(true);
+        SAXParserFactoryForTest.setDelegate(new SAXParserFactory() {
+            @Override
+            public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
+                return real.newSAXParser();
+            }
+
+            @Override
+            public void setFeature(String name, boolean value) throws ParserConfigurationException,
+                    SAXNotRecognizedException, SAXNotSupportedException {
+                if ("http://xml.org/sax/features/external-general-entities".equals(name))
+                    throw new ParserConfigurationException("feature not supported");
+                if ("http://xml.org/sax/features/external-parameter-entities".equals(name))
+                    throw new SAXNotRecognizedException("feature not recognized");
+                real.setFeature(name, value);
+            }
+
+            @Override
+            public boolean getFeature(String name) throws ParserConfigurationException,
+                    SAXNotRecognizedException, SAXNotSupportedException {
+                return real.getFeature(name);
+            }
+        });
+
+        System.setProperty("javax.xml.parsers.SAXParserFactory", SAXParserFactoryForTest.class.getName());
+        try {
+            ServerConfigJavaFormat cfg = factory.create(ServerConfigJavaFormat.class);
+            assertEquals(8080, cfg.httpPort());
         } finally {
             System.getProperties().remove("javax.xml.parsers.SAXParserFactory");
         }
