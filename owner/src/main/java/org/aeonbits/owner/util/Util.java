@@ -371,11 +371,8 @@ public abstract class Util {
     }
 
     private static void store(File target, Properties p) throws IOException {
-        OutputStream out = new FileOutputStream(target);
-        try {
+        try (OutputStream out = new FileOutputStream(target)) {
             store(out, p);
-        } finally {
-            out.close();
         }
     }
 
@@ -404,36 +401,22 @@ public abstract class Util {
 
     private static void storeJar(File target, String entryName, Properties props) throws IOException {
         byte[] bytes = toBytes(props);
-        InputStream input = new ByteArrayInputStream(bytes);
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(target);
-            try {
-                JarOutputStream output = new JarOutputStream(fileOutputStream);
-                try {
-                    ZipEntry entry = new ZipEntry(entryName);
-                    output.putNextEntry(entry);
-                    byte[] buffer = new byte[4096];
-                    int size;
-                    while ((size = input.read(buffer)) != -1)
-                        output.write(buffer, 0, size);
-                } finally {
-                    output.close();
-                }
-            } finally {
-                fileOutputStream.close();
-            }
-        } finally {
-            input.close();
+        try (InputStream input = new ByteArrayInputStream(bytes);
+             FileOutputStream fileOutputStream = new FileOutputStream(target);
+             JarOutputStream output = new JarOutputStream(fileOutputStream)) {
+            ZipEntry entry = new ZipEntry(entryName);
+            output.putNextEntry(entry);
+            byte[] buffer = new byte[4096];
+            int size;
+            while ((size = input.read(buffer)) != -1)
+                output.write(buffer, 0, size);
         }
     }
 
     private static byte[] toBytes(Properties props) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             store(out, props);
             return out.toByteArray();
-        } finally {
-            out.close();
         }
     }
 
