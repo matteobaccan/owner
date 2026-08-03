@@ -84,8 +84,11 @@ Site Enhancements
    never documented).
  * New documentation for the [JMX support]({{ site.url }}/docs/jmx/) (available since 1.0.10, never documented).
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
+ * [Crypto support]({{ site.url }}/docs/crypto/) is no longer labelled as experimental: the `@EncryptedValue` and
+   `@DecryptorClass` annotations have shipped unchanged since 1.0.10 and are part of the stable API.
  * Documentation refreshed to the current state of the project: installation instructions, build requirements,
-   FAQ (encrypted properties are supported since 1.0.12), links and navigation updated to the maintained
+   FAQ (encrypted properties are supported since 1.0.10, not 1.0.12 as previously stated;
+   [#229](https://github.com/matteobaccan/owner/issues/229)), links and navigation updated to the maintained
    repository and to the current CI services.
 
 Infrastructure

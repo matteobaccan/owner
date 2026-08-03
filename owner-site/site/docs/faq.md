@@ -31,11 +31,11 @@ meaningful exception: see [Mandatory properties]({{ site.url }}/docs/usage/#toc_
 
 ## How about the security of storing password in properties? Does OWNER support encryptable properties like in [Jasypt](http://www.jasypt.org/encrypting-configuration.html) ?
 
-Yes. Since version 1.0.12 OWNER supports encrypted properties out of the box through the `@EncryptedValue` and
+Yes. Since version 1.0.10 OWNER supports encrypted properties out of the box through the `@EncryptedValue` and
 `@DecryptorClass` annotations: see the [Encrypted properties]({{ site.url }}/docs/crypto/) chapter
 (this was tracked in [#49](https://github.com/lviggiano/owner/issues/49)).
 
-Before 1.0.12, OWNER APIs were flexible enough to let the user implement that: an example is [here][enc-props].
+Before 1.0.10, OWNER APIs were flexible enough to let the user implement that: an example is [here][enc-props].
 
   [enc-props]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/examples/EncryptedPropertiesExample.java
 

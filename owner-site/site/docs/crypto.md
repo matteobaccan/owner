@@ -9,7 +9,7 @@ permalink: /docs/crypto/
 What is this feature?
 ---------------------
 
-This is an experimental feature adding crypto support to OWNER.
+Crypto support is available since version 1.0.10 and is part of the stable API.
 
 With Crypto it is possible to declare, with a simple annotation, that a property contains an encrypted value
 ( a value which has to be decrypted ). A `@DecryptorClass` can be specified for a class or for each property.
