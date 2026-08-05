@@ -129,7 +129,7 @@ public class EventListenerOnReloadTest {
 
         assertEquals(Integer.valueOf(5), cfg.someInteger());
         assertEquals("foobar", cfg.someString());
-        assertEquals(Double.valueOf("2.718"), cfg.someDouble());
+        assertEquals(Double.valueOf(2.718), cfg.someDouble());
         assertEquals("NotNullNow", cfg.nullsByDefault());
     }
 
@@ -214,7 +214,7 @@ public class EventListenerOnReloadTest {
 
         assertEquals(Integer.valueOf(5), cfg.someInteger());
         assertEquals("bazbar", cfg.someString());
-        assertEquals(Double.valueOf("2.718"), cfg.someDouble());
+        assertEquals(Double.valueOf(2.718), cfg.someDouble());
         assertEquals("NotNullNow", cfg.nullsByDefault());
 
     }
@@ -322,7 +322,7 @@ public class EventListenerOnReloadTest {
         assertTrue(reloadPerformed[0]);
         assertEquals(Integer.valueOf(41), cfg.someInteger());
         assertEquals("bazbar", cfg.someString());
-        assertEquals(Double.valueOf("2.718"), cfg.someDouble());
+        assertEquals(Double.valueOf(2.718), cfg.someDouble());
         assertNotNull(cfg.nullsByDefault());
 
         reloadPerformed[0] = false;
@@ -338,7 +338,7 @@ public class EventListenerOnReloadTest {
         assertFalse(reloadPerformed[0]);
         assertEquals(Integer.valueOf(41), cfg.someInteger());
         assertEquals("bazbar", cfg.someString());
-        assertEquals(Double.valueOf("2.718"), cfg.someDouble());
+        assertEquals(Double.valueOf(2.718), cfg.someDouble());
         assertNotNull(cfg.nullsByDefault());
 
     }
@@ -385,7 +385,7 @@ public class EventListenerOnReloadTest {
         assertTrue(reloadPerformed[0]);
         assertEquals(Integer.valueOf(41), cfg.someInteger());
         assertEquals("bazbar", cfg.someString());
-        assertEquals(Double.valueOf("2.718"), cfg.someDouble());
+        assertEquals(Double.valueOf(2.718), cfg.someDouble());
         assertNotNull(cfg.nullsByDefault());
 
         reloadPerformed[0] = false;
@@ -415,7 +415,7 @@ public class EventListenerOnReloadTest {
         assertFalse(reloadPerformed[0]);
         assertEquals(Integer.valueOf(55), cfg.someInteger());
         assertEquals("bazbar", cfg.someString());
-        assertEquals(Double.valueOf("2.718"), cfg.someDouble());
+        assertEquals(Double.valueOf(2.718), cfg.someDouble());
         assertNotNull(cfg.nullsByDefault());
 
 
@@ -433,7 +433,7 @@ public class EventListenerOnReloadTest {
         // only someInteger=88 is rolled back
         assertEquals(Integer.valueOf(55), cfg.someInteger());
         assertEquals("this is not rolled back", cfg.someString());
-        assertEquals(Double.valueOf("1.2345"), cfg.someDouble());
+        assertEquals(Double.valueOf(1.2345), cfg.someDouble());
         assertNull(cfg.nullsByDefault());
 
     }

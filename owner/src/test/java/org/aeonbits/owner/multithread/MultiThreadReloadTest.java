@@ -74,7 +74,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase {
         assertNoErrors(writers);
     }
 
-    private class ReaderThread extends ThreadBase<ReloadableConfig> {
+    private static class ReaderThread extends ThreadBase<ReloadableConfig> {
         ReaderThread(ReloadableConfig cfg, Object lock, int loops) {
             super(cfg, lock, loops);
         }
@@ -93,7 +93,7 @@ public class MultiThreadReloadTest extends MultiThreadTestBase {
         }
     }
 
-    private class WriterThread extends ThreadBase<ReloadableConfig> {
+    private static class WriterThread extends ThreadBase<ReloadableConfig> {
         public WriterThread(ReloadableConfig cfg, Object lock, int loops) {
             super(cfg, lock, loops);
         }

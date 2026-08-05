@@ -85,10 +85,14 @@ public class XmlSourceTest {
         ServerConfig cfg = factory.create(ServerConfig.class);
         File target = new File(RESOURCES_DIR + "/XmlSourceTest$ServerConfig.properties.xml");
         target.getParentFile().mkdirs();
-        cfg.storeToXML(new FileOutputStream(target), "this is an example");
+        try (FileOutputStream out = new FileOutputStream(target)) {
+            cfg.storeToXML(out, "this is an example");
+        }
 
         Properties props = new Properties();
-        props.loadFromXML(new FileInputStream(target));
+        try (FileInputStream in = new FileInputStream(target)) {
+            props.loadFromXML(in);
+        }
 
         assertEquals(String.valueOf(cfg.httpPort()), props.getProperty("server.http.port"));
         assertEquals(cfg.httpHostname(), props.getProperty("server.http.hostname"));

@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -49,6 +50,11 @@ public class ConverterClassTest {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(name, port);
+        }
+
+        @Override
         public String toString() {
             return name + ":" + port;
         }
@@ -61,7 +67,12 @@ public class ConverterClassTest {
             String name = split[0];
             Integer port = 80;
             if (split.length >= 2)
-                port = Integer.valueOf(split[1]);
+                try {
+                    port = Integer.valueOf(split[1]);
+                } catch (NumberFormatException e) {
+                    throw new UnsupportedOperationException(
+                            String.format("Cannot convert %s to %s", text, Server.class), e);
+                }
             return new Server(name, port);
         }
     }

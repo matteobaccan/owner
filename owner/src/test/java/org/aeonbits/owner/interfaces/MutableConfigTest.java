@@ -90,7 +90,9 @@ public class MutableConfigTest {
             setProperty("maxAge", "99");
         }});
 
-        cfg.load(new FileInputStream(temp));
+        try (FileInputStream in = new FileInputStream(temp)) {
+            cfg.load(in);
+        }
 
         assertEquals(Integer.valueOf(19), cfg.minAge());
         assertEquals(Integer.valueOf(99), cfg.maxAge());
@@ -104,7 +106,9 @@ public class MutableConfigTest {
             setProperty("maxAge", "99");
         }});
 
-        cfg.load(new FileReader(temp));
+        try (FileReader reader = new FileReader(temp)) {
+            cfg.load(reader);
+        }
 
         assertEquals(Integer.valueOf(19), cfg.minAge());
         assertEquals(Integer.valueOf(99), cfg.maxAge());

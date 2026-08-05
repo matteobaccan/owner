@@ -309,7 +309,10 @@ public class UtilTest {
             // renaming a file over an existing non-empty directory fails on every platform
             File target = new File("target/utiltest/UtilTest_renameFail.dir");
             target.mkdirs();
-            new File(target, "obstacle.txt").createNewFile();
+            File obstacle = new File(target, "obstacle.txt");
+            // the directory must be non-empty for the rename to fail: it may already be, if a
+            // previous run left it behind (the test target directory was not cleaned)
+            assertTrue(obstacle.createNewFile() || obstacle.isFile());
             save(target, new Properties());
         } finally {
             setSystem(save);

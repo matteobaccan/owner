@@ -4,7 +4,7 @@ public class SampleDecryptor extends AbstractEncryptor {
     private final StandardEncryptor encrypter;
 
     public SampleDecryptor( String algorithm, String secretKey ) {
-        this.encrypter = StandardEncryptor.newInstance( "AES", secretKey );
+        this.encrypter = StandardEncryptor.newInstance( algorithm, secretKey );
     }
 
     @Override

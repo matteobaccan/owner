@@ -93,7 +93,7 @@ public class HotReloadLogicTest {
         HotReloadLogic logic = new HotReloadLogic(hotReload, singletonList(watched.toURI()), manager);
 
         // the file changes and the hot reload interval of 5 seconds expires...
-        watched.setLastModified(watched.lastModified() + 10000);
+        assertTrue(watched.setLastModified(watched.lastModified() + 10000));
         time.elapse(10, SECONDS);
 
         // ...but no reload happens while a load is already in progress

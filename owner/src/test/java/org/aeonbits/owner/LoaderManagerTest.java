@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Luigi R. Viggiano
@@ -51,7 +52,8 @@ public class LoaderManagerTest {
     public void before() throws URISyntaxException, IOException {
         target = fileFromURI(SPEC);
         target.getParentFile().mkdirs();
-        target.createNewFile();
+        // @After deletes it, but a previous interrupted run may have left it behind
+        assertTrue(target.createNewFile() || target.isFile());
     }
 
     @After

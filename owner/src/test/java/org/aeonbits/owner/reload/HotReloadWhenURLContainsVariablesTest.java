@@ -28,6 +28,7 @@ import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Luigi R. Viggiano
@@ -55,7 +56,7 @@ public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport {
         }});
 
         // 1-Jan-1970 (so, the file it's old enough to need reload
-        target.setLastModified(0);
+        assertTrue(target.setLastModified(0));
     }
 
     @Test

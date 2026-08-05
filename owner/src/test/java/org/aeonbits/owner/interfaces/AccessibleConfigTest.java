@@ -90,7 +90,9 @@ public class AccessibleConfigTest {
     public void testStore() throws IOException {
         AccessibleConfig cfg = ConfigFactory.create(AccessibleConfig.class);
         File tmp = Files.createTempFile("owner-", ".tmp").toFile();
-        cfg.store(new FileOutputStream(tmp), "no comments");
+        try (FileOutputStream out = new FileOutputStream(tmp)) {
+            cfg.store(out, "no comments");
+        }
         assertTrue(tmp.exists());
         assertTrue(tmp.length() > 0);
     }

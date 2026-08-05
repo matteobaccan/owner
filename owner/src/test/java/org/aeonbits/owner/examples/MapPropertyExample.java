@@ -23,7 +23,7 @@ public class MapPropertyExample {
     interface MyConfig extends Config {
         @Separator(";")
         @DefaultValue(
-                "name : Dante Alighieri,    book : Divine Comedy, birth_year: 1265, death_year: 1321;" +
+                "name : Dante Alighieri,    book : Divine Comedy, birth_year: 1265, death_year: 1321; " +
                 "name : Alessandro Manzoni, book : The Betrothed, birth_year: 1785, death_year: 1873")
         @ConverterClass(MapPropertyConverter.class)
         Map<String, String>[] authors();
