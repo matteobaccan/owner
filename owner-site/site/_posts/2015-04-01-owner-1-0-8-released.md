@@ -25,8 +25,8 @@ Site Enhancements
 
 Bugs fixes
 ----------
- * No `owner-parent` pom in Maven Central Repository. See [#121](https://github.com/lviggiano/owner/issues/121),
+ * No `owner-parent` pom in Maven Central Repository. See [#121](https://github.com/matteobaccan/owner/issues/121),
  thanks [@rajatvig](https://github.com/rajatvig) for quickly spotting the issue.
 
-Downloadable artifacts are published on [GitHub](https://github.com/lviggiano/owner/releases/tag/owner-parent-1.0.8) and
+Downloadable artifacts are published on [GitHub](https://github.com/matteobaccan/owner/releases/tag/owner-parent-1.0.8) and
 on [Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.8/).

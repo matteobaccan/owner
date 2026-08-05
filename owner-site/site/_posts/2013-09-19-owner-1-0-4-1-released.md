@@ -13,6 +13,6 @@ Bugs fixes
 ----------
 
  * Fixed some multi-threaded tests that were failing sometimes randomly during continuous integration.
- * Fixed bug [#50](https://github.com/lviggiano/owner/issues/50), regarding hot reload not working
+ * Fixed bug [#50](https://github.com/matteobaccan/owner/issues/50), regarding hot reload not working
    when file name needs to be expanded.
 

@@ -9,7 +9,7 @@ categories: [release]
 
 v1.0.3.1 contains some key enhancements and bug fixes:
 
- * Fixed bug [#35](https://github.com/lviggiano/owner/issues/35)
+ * Fixed bug [#35](https://github.com/matteobaccan/owner/issues/35)
 
 See the [announcement] for more information on this release.
 

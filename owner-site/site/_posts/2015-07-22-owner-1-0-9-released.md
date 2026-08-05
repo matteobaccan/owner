@@ -12,7 +12,7 @@ v1.0.9 contains following enhancements and bug fixes.
 Enhancements
 ------------
  * Added `fill(java.util.Map)` method to the `Accessible` interface.
- * Added pre-processing feature. See [#120](https://github.com/lviggiano/owner/issues/120), thanks
+ * Added pre-processing feature. See [#120](https://github.com/matteobaccan/owner/issues/120), thanks
    [@a1730](https://github.com/a1730) for the feedback.
 
 Site Enhancements
@@ -22,8 +22,8 @@ Site Enhancements
 Bugs fixes
 ----------
  * Config.Sources with ~ doesn't create a valid URI on Windows.
-   See [#123](https://github.com/lviggiano/owner/issues/123), thanks [@outofrange](https://github.com/outofrange) for
+   See [#123](https://github.com/matteobaccan/owner/issues/123), thanks [@outofrange](https://github.com/outofrange) for
    spotting this bug.
 
-Downloadable artifacts are published on [GitHub](https://github.com/lviggiano/owner/releases/tag/owner-parent-1.0.9) and
+Downloadable artifacts are published on [GitHub](https://github.com/matteobaccan/owner/releases/tag/owner-parent-1.0.9) and
 on [Maven Central Repository](http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.9/).

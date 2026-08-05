@@ -47,16 +47,16 @@ Bugs fixes
  * Fixed bug [#40][issue-40] about tilde expansion.
  * Fixed bug [#17][issue-17] Substitution and format not working as expected when used together.
 
-  [issue-21]: https://github.com/lviggiano/owner/issues/21
-  [issue-22]: https://github.com/lviggiano/owner/issues/22
-  [issue-24]: https://github.com/lviggiano/owner/issues/24
-  [issue-40]: https://github.com/lviggiano/owner/issues/40
-  [issue-38]: https://github.com/lviggiano/owner/issues/38
-  [issue-33]: https://github.com/lviggiano/owner/issues/33
-  [issue-17]: https://github.com/lviggiano/owner/issues/17
-  [issue-20]: https://github.com/lviggiano/owner/issues/20
-  [issue-31]: https://github.com/lviggiano/owner/issues/31
-  [issue-15]: https://github.com/lviggiano/owner/issues/15
+  [issue-21]: https://github.com/matteobaccan/owner/issues/21
+  [issue-22]: https://github.com/matteobaccan/owner/issues/22
+  [issue-24]: https://github.com/matteobaccan/owner/issues/24
+  [issue-40]: https://github.com/matteobaccan/owner/issues/40
+  [issue-38]: https://github.com/matteobaccan/owner/issues/38
+  [issue-33]: https://github.com/matteobaccan/owner/issues/33
+  [issue-17]: https://github.com/matteobaccan/owner/issues/17
+  [issue-20]: https://github.com/matteobaccan/owner/issues/20
+  [issue-31]: https://github.com/matteobaccan/owner/issues/31
+  [issue-15]: https://github.com/matteobaccan/owner/issues/15
   [ffbit]: https://github.com/ffbit
   [ming13]: https://github.com/ming13
   [accessible-intf]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Accessible.html
