@@ -13,7 +13,6 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 import org.junit.BeforeClass;
@@ -25,6 +24,7 @@ import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.delete;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.save;
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Luigi R. Viggiano
  */
-public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConstants {
+public class AsyncAutoReloadTest extends AsyncReloadSupport {
     private static final String PROPERTY_FILE_NAME = "AsyncAutoReloadConfig.properties";
     private static final int DELAY = 1000;
 

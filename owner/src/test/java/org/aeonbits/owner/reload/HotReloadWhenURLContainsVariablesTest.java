@@ -12,7 +12,6 @@ import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.VariablesExpanderForTest;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
@@ -25,6 +24,7 @@ import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertEquals;
@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Luigi R. Viggiano
  */
-public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport implements TestConstants {
+public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport {
     private static final String SPEC = "file:${user.dir}/" + RESOURCES_DIR + "/AutoReloadExample.properties";
     private static File target;
 

@@ -12,7 +12,6 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.TestConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +26,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
+import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.ignoreAndReturnNull;
 import static org.aeonbits.owner.util.UtilTest.save;
-import static org.aeonbits.owner.event.PropertyChangeMatcher.matches;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -45,14 +45,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
-public class EventListenerOnReloadTest implements TestConstants {
+public class EventListenerOnReloadTest {
     private static final String SPEC = "file:" + RESOURCES_DIR + "/EventListenerOnReloadTest.properties";
     private File target;
     @Mock

@@ -11,6 +11,9 @@ package org.aeonbits.owner;
 /**
  * @author luigi
  */
-public interface TestConstants {
-    String RESOURCES_DIR = "target/test-generated-resources";
+public final class TestConstants {
+    public static final String RESOURCES_DIR = "target/test-generated-resources";
+
+    /** Don't let anyone instantiate this class */
+    private TestConstants() {}
 }

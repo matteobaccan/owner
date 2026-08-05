@@ -24,13 +24,14 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Luigi R. Viggiano
  */
-public class LoaderManagerTest implements TestConstants {
+public class LoaderManagerTest {
     private static final String SPEC = "file:" + RESOURCES_DIR + "/LoaderManagerTest.properties";
 
     @Mock

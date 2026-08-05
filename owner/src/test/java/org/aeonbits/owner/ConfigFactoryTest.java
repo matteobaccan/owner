@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.save;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -29,7 +30,7 @@ import static org.junit.Assert.assertNull;
 /**
  * @author Luigi R. Viggiano
  */
-public class ConfigFactoryTest implements TestConstants {
+public class ConfigFactoryTest {
 
     @Sources("file:${mypath}/myconfig.properties")
     interface MyConfig extends Config {

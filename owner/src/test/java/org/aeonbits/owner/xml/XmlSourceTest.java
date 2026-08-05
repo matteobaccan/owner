@@ -11,7 +11,6 @@ package org.aeonbits.owner.xml;
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Factory;
-import org.aeonbits.owner.TestConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -29,6 +28,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static org.aeonbits.owner.ConfigFactory.newInstance;
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Luigi R. Viggiano
  */
-public class XmlSourceTest implements TestConstants {
+public class XmlSourceTest {
 
     private Factory factory;
 

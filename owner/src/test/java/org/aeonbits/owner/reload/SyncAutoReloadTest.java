@@ -12,7 +12,6 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.util.TimeProviderForTest;
 import org.junit.After;
 import org.junit.Before;
@@ -25,6 +24,7 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.save;
 import static org.aeonbits.owner.util.UtilTest.saveJar;
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Luigi R. Viggiano
  */
-public class SyncAutoReloadTest implements TestConstants {
+public class SyncAutoReloadTest {
 
     private static final String PROPERTY_FILE_NAME = "SyncAutoReloadConfig.properties";
     private static final String JAR_FILE = RESOURCES_DIR + "/SyncAutoReloadTest.jar";

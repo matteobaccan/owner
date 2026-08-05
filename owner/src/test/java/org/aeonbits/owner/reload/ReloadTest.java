@@ -12,7 +12,6 @@ import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.TestConstants;
 import org.aeonbits.owner.event.ReloadEvent;
 import org.aeonbits.owner.event.ReloadListener;
 import org.hamcrest.BaseMatcher;
@@ -31,6 +30,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertEquals;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
  * @author Luigi R. Viggiano
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ReloadTest implements TestConstants {
+public class ReloadTest {
     private static final String SPEC = "file:" + RESOURCES_DIR + "/ReloadableConfig.properties";
     private static File target;
     @Mock

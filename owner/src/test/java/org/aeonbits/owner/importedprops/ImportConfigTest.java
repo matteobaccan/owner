@@ -11,7 +11,6 @@ package org.aeonbits.owner.importedprops;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
-import org.aeonbits.owner.TestConstants;
 import org.junit.Test;
 
 import java.io.File;
@@ -19,6 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Luigi R. Viggiano
  */
-public class ImportConfigTest implements TestConstants {
+public class ImportConfigTest {
     private static final String SPEC = "file:" + RESOURCES_DIR + "/ImportConfig.properties";
 
     @Sources(SPEC)
