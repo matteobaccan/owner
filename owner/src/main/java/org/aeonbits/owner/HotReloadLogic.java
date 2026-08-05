@@ -46,6 +46,7 @@ class HotReloadLogic implements Serializable {
             this.lastModifiedTime = file.lastModified();
         }
 
+        @Override
         public boolean isChanged() {
             long lastModifiedTimeNow = file.lastModified();
             boolean changed = lastModifiedTime != lastModifiedTimeNow;
@@ -65,6 +66,7 @@ class HotReloadLogic implements Serializable {
             lastHashCode = props.hashCode();
         }
 
+        @Override
         public boolean isChanged() {
             int newHashCode = props.hashCode();
             boolean changed = lastHashCode != newHashCode;

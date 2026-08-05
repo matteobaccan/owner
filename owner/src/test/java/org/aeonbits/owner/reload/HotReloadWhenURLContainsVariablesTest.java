@@ -64,6 +64,7 @@ public class HotReloadWhenURLContainsVariablesTest extends AsyncReloadSupport im
 
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
         cfg.addReloadListener(new ReloadListener() {
+            @Override
             public void reloadPerformed(ReloadEvent event) {
                 notifyReload();
             }

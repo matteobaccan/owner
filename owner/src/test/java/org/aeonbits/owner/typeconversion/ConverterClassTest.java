@@ -55,6 +55,7 @@ public class ConverterClassTest {
     }
 
     public static class ServerConverter implements Converter<Server> {
+        @Override
         public Server convert(Method targetMethod, String text) {
             String[] split = text.split(":", -1);
             String name = split[0];
@@ -66,30 +67,35 @@ public class ConverterClassTest {
     }
 
     public static class ReturningNullConverter implements Converter<Server> {
+        @Override
         public Server convert(Method method, String input) {
             return null;
         }
     }
 
     public static class ReturningUnsupportedOperationException implements Converter<Server> {
+        @Override
         public Server convert(Method method, String input) {
             throw new UnsupportedOperationException(String.format("Cannot convert %s to %s", input, Server.class));
         }
     }
 
     public static class ReturningNullPointerException implements Converter<Server> {
+        @Override
         public Server convert(Method method, String input) {
             throw new NullPointerException();
         }
     }
 
     public abstract static class CantBeInstantiated implements Converter<Server> { // abstract
+        @Override
         public Server convert(Method method, String input) {
             return null;
         }
     }
 
     private static class CantBeAccessed implements Converter<Server> { // private
+        @Override
         public Server convert(Method method, String input) {
             return null;
         }
@@ -191,6 +197,7 @@ public class ConverterClassTest {
     }
 
     public static class OverridesIntegerConversion implements Converter {
+        @Override
         public Object convert(Method method, String input) {
             return 42;
         }

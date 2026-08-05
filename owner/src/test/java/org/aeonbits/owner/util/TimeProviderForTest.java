@@ -29,6 +29,7 @@ public class TimeProviderForTest implements TimeProvider {
         time += unit.toMillis(interval);
     }
 
+    @Override
     public long getTime() {
         return time;
     }

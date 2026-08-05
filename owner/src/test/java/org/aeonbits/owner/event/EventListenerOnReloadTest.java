@@ -251,10 +251,12 @@ public class EventListenerOnReloadTest implements TestConstants {
         final ReloadEvent[] afterEvent = new ReloadEvent[1];
 
         cfg.addReloadListener(new TransactionalReloadListener() {
+            @Override
             public void beforeReload(ReloadEvent event) throws RollbackBatchException {
                 beforeEvent[0] = event;
             }
 
+            @Override
             public void reloadPerformed(ReloadEvent event) {
                 afterEvent[0] = event;
             }
@@ -293,6 +295,7 @@ public class EventListenerOnReloadTest implements TestConstants {
         final boolean[] reloadPerformed = new boolean[] {false};
         cfg.addReloadListener(new TransactionalReloadListener() {
 
+            @Override
             public void beforeReload(ReloadEvent event) throws RollbackBatchException {
                 String notAllowedValue = "42";
                 String newSomeInteger = event.getNewProperties().getProperty("someInteger");
@@ -300,6 +303,7 @@ public class EventListenerOnReloadTest implements TestConstants {
                     throw new RollbackBatchException("42 is not allowed for property 'someInteger'");
             }
 
+            @Override
             public void reloadPerformed(ReloadEvent event) {
                 reloadPerformed[0] = true;
             }
@@ -346,6 +350,7 @@ public class EventListenerOnReloadTest implements TestConstants {
 
         cfg.addPropertyChangeListener("someInteger",
                 new TransactionalPropertyChangeListener() {
+            @Override
             public void beforePropertyChange(PropertyChangeEvent event)
                     throws RollbackOperationException, RollbackBatchException {
                 String notAllowedValue = "88";
@@ -362,6 +367,7 @@ public class EventListenerOnReloadTest implements TestConstants {
 
             }
 
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 reloadPerformed[0] = true;
             }

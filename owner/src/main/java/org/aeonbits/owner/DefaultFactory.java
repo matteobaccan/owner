@@ -37,6 +37,7 @@ class DefaultFactory implements Factory {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         Class<?>[] interfaces = interfaces(clazz);
         VariablesExpander expander = new VariablesExpander(props);
@@ -50,6 +51,7 @@ class DefaultFactory implements Factory {
         return proxy;
     }
 
+    @Override
     public String setProperty(String key, String value) {
         checkKey(key);
         return (String) props.setProperty(key, value);
@@ -62,10 +64,12 @@ class DefaultFactory implements Factory {
             throw new IllegalArgumentException("key can't be empty");
     }
 
+    @Override
     public Properties getProperties() {
         return props;
     }
 
+    @Override
     public void setProperties(Properties properties) {
         if (properties == null)
             props = new Properties();
@@ -73,23 +77,28 @@ class DefaultFactory implements Factory {
             props = properties;
     }
 
+    @Override
     public void registerLoader(Loader loader) {
         loadersManager.registerLoader(loader);
     }
 
+    @Override
     public void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter) {
         Converters.setTypeConverter(type, converter);
     }
 
+    @Override
     public void removeTypeConverter(Class<?> type){
         Converters.removeTypeConverter(type);
     }
 
+    @Override
     public String getProperty(String key) {
         checkKey(key);
         return props.getProperty(key);
     }
 
+    @Override
     public String clearProperty(String key) {
         checkKey(key);
         return (String) props.remove(key);

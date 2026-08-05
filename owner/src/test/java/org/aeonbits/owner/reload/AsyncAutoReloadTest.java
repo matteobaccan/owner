@@ -63,11 +63,13 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
         AsyncAutoReloadConfig cfg = ConfigFactory.create(AsyncAutoReloadConfig.class);
         final int[] reloadCount = {0};
         cfg.addReloadListener(new ReloadListener() {
+            @Override
             public void reloadPerformed(ReloadEvent event) {
                 reloadCount[0]++;
             }
         });
         cfg.addReloadListener(new ReloadListener() {
+            @Override
             public void reloadPerformed(ReloadEvent event) {
                 notifyReload();
             }

@@ -26,12 +26,14 @@ public class PreprocessorResolverTest {
     // support classes
 
     public static class Upper implements Preprocessor {
+        @Override
         public String process(String input) {
             return input.toUpperCase();
         }
     }
 
     public static class Lower implements Preprocessor {
+        @Override
         public String process(String input) {
             return input.toLowerCase();
         }
@@ -54,10 +56,12 @@ public class PreprocessorResolverTest {
      * annotations can never do that, since the JVM guarantees non-null results for annotation members.
      */
     private static class NullValuePreprocessorClasses implements PreprocessorClasses {
+        @Override
         public Class<? extends Preprocessor>[] value() {
             return null;
         }
 
+        @Override
         public Class<? extends Annotation> annotationType() {
             return PreprocessorClasses.class;
         }

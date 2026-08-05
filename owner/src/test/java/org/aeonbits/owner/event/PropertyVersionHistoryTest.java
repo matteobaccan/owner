@@ -51,6 +51,7 @@ public class PropertyVersionHistoryTest {
 
         final List<String> history = new ArrayList<>();
         cfg.addPropertyChangeListener("fruit", new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent event) {
                 history.add((String) event.getOldValue());
             }

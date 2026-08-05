@@ -31,6 +31,7 @@ public class EncryptedPropertiesExample {
     }
 
     public static class DecryptConverter implements Converter {
+        @Override
         public Object convert(Method method, String input) {
             String key = System.getProperty("example.encryption.key");
             return new String(xor(Base64.decodeBase64(input), key.getBytes()));

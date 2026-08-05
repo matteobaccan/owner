@@ -20,6 +20,7 @@ import java.math.BigDecimal;
  */
 public class ByteSizeConverter implements Converter<ByteSize> {
 
+    @Override
     public ByteSize convert(Method method, String input) {
         return parse(input);
     }

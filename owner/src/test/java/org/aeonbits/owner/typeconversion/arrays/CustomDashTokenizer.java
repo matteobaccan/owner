@@ -14,6 +14,7 @@ import org.aeonbits.owner.Tokenizer;
  * @author Luigi R. Viggiano
  */
 public class CustomDashTokenizer implements Tokenizer {
+    @Override
     public String[] tokens(String values) {
         return values.split("-", -1);
     }

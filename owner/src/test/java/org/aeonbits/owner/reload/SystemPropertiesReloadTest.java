@@ -45,6 +45,7 @@ public class SystemPropertiesReloadTest extends AsyncReloadSupport {
         AsyncAutoReloadConfig cfg = ConfigFactory.create(AsyncAutoReloadConfig.class);
 
         cfg.addReloadListener(new ReloadListener() {
+            @Override
             public void reloadPerformed(ReloadEvent event) {
                 notifyReload();
             }

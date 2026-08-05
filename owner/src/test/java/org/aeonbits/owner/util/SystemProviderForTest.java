@@ -26,14 +26,17 @@ public class SystemProviderForTest implements SystemProvider {
         this.env = env;
     }
 
+    @Override
     public String getProperty(String key) {
         return system.getProperty(key);
     }
 
+    @Override
     public Map<String, String> getenv() {
         return env;
     }
 
+    @Override
     public Properties getProperties() {
         return system;
     }

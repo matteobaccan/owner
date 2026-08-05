@@ -147,6 +147,7 @@ public class XMLLoader implements Loader {
         }
     }
 
+    @Override
     public boolean accept(URI uri) {
         try {
             URL url = uri.toURL();
@@ -156,6 +157,7 @@ public class XMLLoader implements Loader {
         }
     }
 
+    @Override
     public void load(Properties result, URI uri) throws IOException {
         InputStream input = uri.toURL().openStream();
         try {
@@ -172,6 +174,7 @@ public class XMLLoader implements Loader {
         }
     }
 
+    @Override
     public String defaultSpecFor(String urlPrefix) {
         return urlPrefix + ".xml";
     }

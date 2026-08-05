@@ -67,18 +67,21 @@ public class PreprocessorTest {
     // preprocessors implementation
 
     public static class Trim implements Preprocessor {
+        @Override
         public String process(String input) {
             return input.trim();
         }
     }
 
     public static class ToLowerCase implements Preprocessor {
+        @Override
         public String process(String input) {
             return input.toLowerCase();
         }
     }
 
     public static class SkipInlineComments implements Preprocessor {
+        @Override
         public String process(String input) {
             int hashTagIndex = input.indexOf('#');
             int exclamationMarkIndex = input.indexOf("!");

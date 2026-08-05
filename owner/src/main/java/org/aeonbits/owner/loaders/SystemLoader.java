@@ -34,11 +34,13 @@ public class SystemLoader implements Loader {
     private static final String ENVIRONMENT_VARIABLES_URI = "system:env";
 
 
+    @Override
     public boolean accept(URI uri) {
         String path = uri.toString();
         return SYSTEM_PROPERTIES_URI.equals(path) || ENVIRONMENT_VARIABLES_URI.equals(path);
     }
 
+    @Override
     public void load(Properties result, URI uri) throws IOException {
         String path = uri.toString();
         if (SYSTEM_PROPERTIES_URI.equals(path))
@@ -47,6 +49,7 @@ public class SystemLoader implements Loader {
             result.putAll(system().getenv());
     }
 
+    @Override
     public String defaultSpecFor(String uriPrefix) {
         return null;
     }

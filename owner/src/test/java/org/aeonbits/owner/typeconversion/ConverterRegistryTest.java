@@ -29,6 +29,7 @@ public class ConverterRegistryTest {
             lookup.put('7', 't');
         }
 
+        @Override
         public String convert(Method targetMethod, String text) {
             StringBuilder sb = new StringBuilder(text);
             for( int i=0 ; i<text.length(); i++) {
@@ -41,6 +42,7 @@ public class ConverterRegistryTest {
     }
 
     public static class FooBarConverter implements Converter<String> {
+        @Override
         public String convert(Method method, String input) {
             return FOOBAR_RESPONSE;
         }

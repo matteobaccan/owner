@@ -128,13 +128,16 @@ public class LoaderManagerTest implements TestConstants {
     }
 
     public static class LoaderThatDoesNothing implements Loader {
+        @Override
         public boolean accept(URI uri) {
             return false;
         }
 
+        @Override
         public void load(Properties result, URI uri) throws IOException {
         }
 
+        @Override
         public String defaultSpecFor(String urlPrefix) {
             return null;
         }

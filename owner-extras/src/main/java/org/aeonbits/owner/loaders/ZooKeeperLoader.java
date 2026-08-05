@@ -32,10 +32,12 @@ public class ZooKeeperLoader implements Loader {
     private static final String ZOOKEEPER_CONNECTION_TIMEOUT_SECONDS = "owner.zookeeper.connection.timeout.seconds";
 
 
+    @Override
     public boolean accept(URI uri) {
         return uri.getScheme().equals(SCHEME);
     }
 
+    @Override
     public void load(Properties result, URI uri) throws IOException {
         CuratorFramework client = getClient(uri);
         try {
@@ -75,6 +77,7 @@ public class ZooKeeperLoader implements Loader {
                 (retryCount, elapsedTimeMs, sleeper) -> false);
     }
 
+    @Override
     public String defaultSpecFor(String urlPrefix) {
         return null;
     }

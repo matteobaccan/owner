@@ -94,6 +94,7 @@ public class TestSerialization implements TestConstants {
     }
 
     private static class MyPropertyChangeListener implements PropertyChangeListener, Serializable {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
         }
     }

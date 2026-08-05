@@ -169,6 +169,7 @@ public class MandatoryTest {
 
     @Mandatory
     interface MandatoryRedeclaringDelegate extends Config, Reloadable {
+        @Override
         void reload(); // redeclared from Reloadable: delegated methods are not properties
 
         @DefaultValue("present")

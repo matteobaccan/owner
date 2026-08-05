@@ -85,10 +85,12 @@ public class PropertiesManagerTest {
     }
 
     public static class ReverseDecryptor implements Decryptor {
+        @Override
         public String decrypt(String value) {
             return new StringBuilder(value).reverse().toString();
         }
 
+        @Override
         public String decrypt(String value, String defaultValue) {
             try {
                 return decrypt(value);

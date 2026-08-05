@@ -73,14 +73,17 @@ public abstract class Util {
     static TimeProvider timeProvider = System::currentTimeMillis;
 
     static SystemProvider system = new SystemProvider() {
+        @Override
         public String getProperty(String key) {
             return System.getProperty(key);
         }
 
+        @Override
         public Map<String, String> getenv() {
             return System.getenv();
         }
 
+        @Override
         public Properties getProperties() {
             return (Properties) System.getProperties().clone();
         }

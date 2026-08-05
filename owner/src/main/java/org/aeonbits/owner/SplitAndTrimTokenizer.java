@@ -23,6 +23,7 @@ class SplitAndTrimTokenizer implements Tokenizer {
         this.regex = regex;
     }
 
+    @Override
     public String[] tokens(String values) {
         String[] chunks = values.split(regex, -1);
         for(int i = 0; i < chunks.length; i++)

@@ -56,6 +56,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         this.substitutor = new StrSubstitutor(manager.load());
     }
 
+    @Override
     public Object invoke(Object proxy, Method invokedMethod, Object... args) throws Throwable {
         propertiesManager.syncReloadCheck();
 

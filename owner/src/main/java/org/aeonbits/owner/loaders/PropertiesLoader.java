@@ -27,6 +27,7 @@ public class PropertiesLoader implements Loader {
     private static final long serialVersionUID = -1781643040589572341L;
     private static final String DEFAULT_ENCODING = "UTF-8";
 
+    @Override
     public boolean accept(URI uri) {
         try {
             uri.toURL();
@@ -36,6 +37,7 @@ public class PropertiesLoader implements Loader {
         }
     }
 
+    @Override
     public void load(Properties result, URI uri) throws IOException {
         URL url = uri.toURL();
         InputStream input = url.openStream();
@@ -50,6 +52,7 @@ public class PropertiesLoader implements Loader {
         result.load(new InputStreamReader(input, DEFAULT_ENCODING));
     }
 
+    @Override
     public String defaultSpecFor(String uriPrefix) {
         return uriPrefix + ".properties";
     }

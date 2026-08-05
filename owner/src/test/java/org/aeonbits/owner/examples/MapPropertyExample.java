@@ -30,6 +30,7 @@ public class MapPropertyExample {
     }
 
     public static class MapPropertyConverter implements Converter<Map<String,String>> {
+        @Override
         public Map<String, String> convert(Method method, String input) {
             Map<String, String> result = new LinkedHashMap<>();
             String[] chunks = input.split(",", -1);

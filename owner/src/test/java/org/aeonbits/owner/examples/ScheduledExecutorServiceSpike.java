@@ -31,6 +31,7 @@ public class ScheduledExecutorServiceSpike {
         ScheduledExecutorService stp = Executors.newSingleThreadScheduledExecutor(tf);
         stp.scheduleAtFixedRate(new Runnable() {
             int count = 0;
+            @Override
             public void run() {
                 if ( count++ % 2 == 0)
                     System.out.print("*");
@@ -39,6 +40,7 @@ public class ScheduledExecutorServiceSpike {
 
         stp.scheduleAtFixedRate(new Runnable() {
             int count = 0;
+            @Override
             public void run() {
                 ++count;
                 if (count != 5 && count != 10)
@@ -48,6 +50,7 @@ public class ScheduledExecutorServiceSpike {
         }, 100, 100, TimeUnit.MILLISECONDS);
         stp.scheduleAtFixedRate(new Runnable() {
             int count = 0;
+            @Override
             public void run() {
                 System.out.print(++count);
             }

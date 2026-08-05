@@ -216,6 +216,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void reload() {
         writeLock.lock();
         try {
@@ -261,30 +262,35 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
 
     @Delegate
+    @Override
     public void addReloadListener(ReloadListener listener) {
         if (listener != null)
             reloadListeners.add(listener);
     }
 
     @Delegate
+    @Override
     public void removeReloadListener(ReloadListener listener) {
         if (listener != null)
             reloadListeners.remove(listener);
     }
 
     @Delegate
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         if (listener != null)
             propertyChangeListeners.add(listener);
     }
 
     @Delegate
+    @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         if (listener != null)
             propertyChangeListeners.remove(listener);
     }
 
     @Delegate
+    @Override
     public void addPropertyChangeListener(final String propertyName, final PropertyChangeListener listener) {
         if (propertyName == null || listener == null) return;
 
@@ -306,6 +312,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
         }
 
+        @Override
         public void beforePropertyChange(PropertyChangeEvent event) throws RollbackOperationException,
                 RollbackBatchException {
             if (transactional && propertyNameMatches(event))
@@ -316,6 +323,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             return propertyName.equals(event.getPropertyName());
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent event) {
             if (propertyNameMatches(event))
                 listener.propertyChange(event);
@@ -342,6 +350,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public String getProperty(String key) {
         readLock.lock();
         try {
@@ -357,6 +366,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public String getProperty(String key, String defaultValue) {
         readLock.lock();
         try {
@@ -367,6 +377,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void storeToXML(OutputStream os, String comment) throws IOException {
         readLock.lock();
         try {
@@ -377,6 +388,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public Set<String> propertyNames() {
         readLock.lock();
         try {
@@ -390,6 +402,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void list(PrintStream out) {
         readLock.lock();
         try {
@@ -400,6 +413,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void list(PrintWriter out) {
         readLock.lock();
         try {
@@ -410,6 +424,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void store(OutputStream out, String comments) throws IOException {
         readLock.lock();
         try {
@@ -420,6 +435,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void store(Writer out, String comments) throws IOException {
         readLock.lock();
         try {
@@ -431,6 +447,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     @Delegate
     @SuppressWarnings("unchecked")
+    @Override
     public void fill(Map map) {
         readLock.lock();
         try {
@@ -442,6 +459,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public String setProperty(String key, String newValue) {
         writeLock.lock();
         try {
@@ -469,6 +487,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public String removeProperty(String key) {
         writeLock.lock();
         try {
@@ -490,6 +509,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void clear() {
         writeLock.lock();
         try {
@@ -505,6 +525,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void load(InputStream inStream) throws IOException {
         writeLock.lock();
         try {
@@ -525,6 +546,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     @Delegate
+    @Override
     public void load(Reader reader) throws IOException {
         writeLock.lock();
         try {

@@ -47,12 +47,14 @@ public class JMXExample {
         MyConfig cfg = ConfigFactory.create(MyConfig.class);
 
         cfg.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.printf("prop change event [%s = %s -> %s]%n", evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
             }
         });
 
         cfg.addReloadListener(new ReloadListener() {
+            @Override
             public void reloadPerformed(ReloadEvent event) {
                 System.out.printf("reload event detected%n");
             }

@@ -26,6 +26,7 @@ public class StandardEncryptor extends AbstractEncryptor {
         return this.algorithm;
     }
 
+    @Override
     public String encrypt( String plainData ) {
         try {
             Key key = generateKey();
@@ -39,6 +40,7 @@ public class StandardEncryptor extends AbstractEncryptor {
         }
     }
 
+    @Override
     public String decrypt(String encryptedData) throws IllegalArgumentException {
         try {
             Key key = generateKey();

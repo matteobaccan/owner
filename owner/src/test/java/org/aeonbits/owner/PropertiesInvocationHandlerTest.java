@@ -129,7 +129,9 @@ public class PropertiesInvocationHandlerTest {
     }
 
     public interface MyConfig extends Config, Accessible {
+        @Override
         void list(PrintStream out);
+        @Override
         void list(PrintWriter out);
     }
 
