@@ -315,6 +315,62 @@ To see the complete test cases supported by owner see [ConverterClassTest] on Gi
 
   [ConverterClassTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/ConverterClassTest.java
 
+The @CollectionConverterClass annotation
+----------------------------------------
+
+`@ConverterClass` converts *one element at a time*: OWNER splits the property value first, then calls the
+converter on each piece. When you need to take over the whole value instead, use
+[`@CollectionConverterClass`](https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Config.CollectionConverterClass.html),
+available since version 1.0.13. The raw value is handed to the converter untouched, and the collection it
+returns is the one the method gives back.
+
+This is what you want when:
+
+ * the property holds a single indivisible document — a JSON array, for instance — that the built-in
+   tokenization would tear apart before the converter ever saw it;
+ * the collection has to be of a type OWNER cannot instantiate on its own, such as an implementation without a
+   no-argument constructor, or an immutable one;
+ * you want to keep the concrete collection type out of the interface signature.
+
+```java
+interface MyConfig extends Config {
+    @DefaultValue("google.com, yahoo.com:8080, owner.aeonbits.org:4000")
+    @CollectionConverterClass(CollectionServerConverter.class)
+    List<Server> servers();
+}
+
+public class CollectionServerConverter implements Converter<List<Server>> {
+    public List<Server> convert(Method targetMethod, String text) {
+        String[] split = text.split(",", -1);
+        ServerConverter converter = new ServerConverter();
+        List<Server> list = new ArrayList<Server>(split.length);
+        for (String server : split) {
+            list.add(converter.convert(targetMethod, server.trim()));
+        }
+        return Collections.unmodifiableList(list);
+    }
+}
+
+MyConfig cfg = ConfigFactory.create(MyConfig.class);
+List<Server> ss = cfg.servers(); // the immutable list built by the converter
+```
+
+The converter is fully responsible for the whole process. In particular, `@Separator`, `@TokenizerClass` and
+`@ConverterClass` are *not* applied for you: if you want to honour them, read them off the `Method` you receive,
+as [CollectionConverterClassTest] does.
+
+<div class="note warning">
+  <h5>Only on methods returning a Collection.</h5>
+  <p>
+  The annotated method must return a <code>java.util.Collection</code>. Arrays are not collections, so
+  <code>@CollectionConverterClass</code> on an array — or on any other type — raises an
+  <code>UnsupportedOperationException</code> naming the method, instead of failing later with an obscure
+  <code>ClassCastException</code>. Use <code>@ConverterClass</code> for those cases.
+  </p>
+</div>
+
+  [CollectionConverterClassTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/collections/CollectionConverterClassTest.java
+
 All the types supported by OWNER
 --------------------------------
 
