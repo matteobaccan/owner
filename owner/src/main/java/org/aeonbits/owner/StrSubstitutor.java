@@ -48,6 +48,7 @@ class StrSubstitutor implements Serializable {
 
     private final Properties values;
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
+    private static final char DEFAULT_VALUE_SEPARATOR = ':';
 
     /**
      * Creates a new instance and initializes it. Uses defaults for variable prefix and suffix and the escaping
@@ -72,14 +73,36 @@ class StrSubstitutor implements Serializable {
         Matcher m = PATTERN.matcher(source);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
-            String[] var = m.group(1).split(":");
-            String value = values.getProperty(var[0]);
-            String replacement = (value != null) ? replace(value) :
-                    var.length > 1 ? var[1] : ""; // Otherwise try to extract a default value
+            String replacement = resolve(m.group(1));
             m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         m.appendTail(sb);
         return sb.toString();
+    }
+
+    /**
+     * Resolves the content of a single <code>${...}</code> expression.
+     * <p>
+     * The expression is looked up as a property key first, in its entirety: a key that happens to contain a
+     * <code>:</code> therefore keeps resolving as it always did. Only when that lookup fails is the first
+     * <code>:</code> read as the separator introducing a default value, so that <code>${key:default}</code> falls
+     * back to <code>default</code> instead of to the empty string. Everything after that first colon is the
+     * default, colons included, which keeps URLs, Windows paths and <code>host:port</code> pairs intact.</p>
+     *
+     * @param expression the text between <code>${</code> and <code>}</code>.
+     * @return the replacement text; the empty string when nothing can be resolved and no default is given.
+     */
+    private String resolve(String expression) {
+        String value = values.getProperty(expression);
+        if (value != null)
+            return replace(value);
+
+        int separator = expression.indexOf(DEFAULT_VALUE_SEPARATOR);
+        if (separator == -1)
+            return "";
+
+        value = values.getProperty(expression.substring(0, separator));
+        return (value != null) ? replace(value) : expression.substring(separator + 1);
     }
 
     /**

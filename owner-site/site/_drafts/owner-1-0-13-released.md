@@ -71,6 +71,15 @@ Enhancements
    [#216](https://github.com/matteobaccan/owner/pull/216).
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
+ * Variables can now carry a default value: `${db.host:localhost}` resolves to `localhost` when `db.host` is
+   defined nowhere, instead of to the empty string. Everything after the first colon is the default, colons
+   included, so URLs, Windows paths and `host:port` pairs survive intact. Existing configurations are unaffected:
+   the text inside `${...}` is looked up as a property key in its entirety first, and only if there is no such
+   property is the colon read as a separator — so a key like `jdbc:url` keeps resolving as before. The one
+   behaviour that changes is a variable that used to resolve to nothing: `${a:b}`, with neither `a:b` nor `a`
+   defined, yielded the empty string up to 1.0.12 and yields `b` from now on. See the
+   [documentation]({{ site.url }}/docs/variables-expansion/). Proposed by Ilya Koshaleu in
+   [#256](https://github.com/matteobaccan/owner/pull/256).
  * New `@CollectionConverterClass` annotation: hands the raw property value to a single converter instead of
    splitting it first and converting one element at a time, as `@ConverterClass` does. It is the way to opt out of
    the built-in tokenization — for a property holding a single JSON document, say — or to return a collection type

@@ -58,6 +58,67 @@ public class StrSubstitutorTest {
     }
 
     @Test
+    public void shouldApplyAnEmptyDefaultValue() {
+        StrSubstitutor sub = new StrSubstitutor(new Properties());
+        assertEquals("[]", sub.replace("[${missing:}]"));
+    }
+
+    /**
+     * Everything past the first colon is the default value, so values that contain colons themselves - URLs,
+     * Windows paths, host:port pairs - are not truncated.
+     */
+    @Test
+    public void shouldKeepColonsInsideTheDefaultValue() {
+        StrSubstitutor sub = new StrSubstitutor(new Properties());
+        assertEquals("http://example.com/x", sub.replace("${missing:http://example.com/x}"));
+        assertEquals("C:\\temp", sub.replace("${missing:C:\\temp}"));
+        assertEquals("localhost:8080", sub.replace("${missing:localhost:8080}"));
+    }
+
+    /**
+     * A property key may legitimately contain a colon, so the whole expression is looked up as a key before the
+     * colon is read as a separator. This keeps configurations written before default values existed working.
+     */
+    @Test
+    public void shouldPreferAKeyContainingAColonOverTheDefaultValueSyntax() {
+        Properties values = new Properties();
+        values.setProperty("jdbc:url", "jdbc:mysql://localhost/test");
+        assertEquals("jdbc:mysql://localhost/test", new StrSubstitutor(values).replace("${jdbc:url}"));
+
+        Properties twoColons = new Properties();
+        twoColons.setProperty("a:b:c", "abc");
+        assertEquals("abc", new StrSubstitutor(twoColons).replace("${a:b:c}"));
+    }
+
+    @Test
+    public void shouldPreferTheWholeKeyOverItsPrefix() {
+        Properties values = new Properties();
+        values.setProperty("a:b", "the whole key");
+        values.setProperty("a", "just the prefix");
+        assertEquals("the whole key", new StrSubstitutor(values).replace("${a:b}"));
+    }
+
+    @Test
+    public void shouldFallBackToThePrefixKeyWhenTheWholeKeyIsMissing() {
+        Properties values = new Properties();
+        values.setProperty("a", "just the prefix");
+        assertEquals("just the prefix", new StrSubstitutor(values).replace("${a:b}"));
+    }
+
+    @Test
+    public void shouldStillResolveToEmptyStringWithoutADefaultValue() {
+        assertEquals("[]", new StrSubstitutor(new Properties()).replace("[${missing}]"));
+    }
+
+    @Test
+    public void shouldExpandVariablesFoundInsideAResolvedDefault() {
+        Properties values = new Properties();
+        values.setProperty("a", "${b}");
+        values.setProperty("b", "final");
+        assertEquals("final", new StrSubstitutor(values).replace("${a:unused}"));
+    }
+
+    @Test
     public void shouldReplaceVariablesHavingBackslashes() {
         Properties values = new Properties();
         values.setProperty("animal", "quick\\brown\\fox");
