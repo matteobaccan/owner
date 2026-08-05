@@ -103,6 +103,15 @@ Infrastructure
 
 Bugs fixes
 ----------
+ * Fixed the conversion of arrays and collections when a single element cannot be converted. The converter is
+   chosen once from the first element, so the remaining ones could still fail: their internal "skip" marker
+   ended up being stored into the resulting array, surfacing as an
+   `IllegalArgumentException: array element type mismatch` instead of the documented
+   [`UnsupportedOperationException`](https://docs.oracle.com/javase/8/docs/api/java/lang/UnsupportedOperationException.html).
+   A property like `@DefaultValue("1, 2, foo, 4")` mapped to a custom type now reports
+   `Cannot convert 'foo' to MyType`, consistently with what already happened for a non-array property. For the
+   same reason, a `@ConverterClass` returning `null` for an element now yields a `null` element instead of
+   failing the whole conversion.
  * Fixed a `NullPointerException` masking the real error in the hot reload example when the configuration URI is
    invalid.
  * Test suite stability fixes (thread handling in multi-threading tests, wait times).
