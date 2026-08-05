@@ -1,0 +1,6 @@
+# Maven wrapper: the POSIX launcher and its properties must keep LF, otherwise
+# core.autocrlf=true rewrites them to CRLF and the trailing \r makes mvnw reject
+# distributionUrl ("must match *-bin.zip"). The Windows batch launcher needs CRLF.
+mvnw                                   text eol=lf
+mvnw.cmd                               text eol=crlf
+.mvn/wrapper/maven-wrapper.properties  text eol=lf
