@@ -24,11 +24,13 @@ public class LoadStrategyTestBase {
             new BaseMatcher<URI>(){
                 public URI uri;
 
+                @Override
                 public boolean matches(Object o) {
                     uri = (URI)o;
                     return uri.toString().endsWith(path);
                 }
 
+                @Override
                 public void describeTo(Description description) {
                     description.appendText("expected <" + (uri != null ? uri : "uri") + "> ending with " + path);
                 }

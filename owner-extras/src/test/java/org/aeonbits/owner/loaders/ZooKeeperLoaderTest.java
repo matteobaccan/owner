@@ -122,6 +122,7 @@ public class ZooKeeperLoaderTest {
         String connectString = server.getConnectString();
 
         CuratorFramework client = CuratorFrameworkFactory.newClient(connectString, 50, 50, new RetryPolicy() {
+            @Override
             public boolean allowRetry(int retryCount, long elapsedTimeMs, RetrySleeper sleeper) {
                 return false;
             }

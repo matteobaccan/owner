@@ -128,11 +128,13 @@ public class ReloadTest {
     private ArgumentMatcher<ReloadEvent> isReloadListnerWithSource(final ReloadableConfig cfg) {
         return new HamcrestArgumentMatcher<>(
                 new BaseMatcher<ReloadEvent>() {
+                    @Override
                     public boolean matches(Object o) {
                         ReloadEvent given = (ReloadEvent) o;
                         return given.getSource() == cfg;
                     }
 
+                    @Override
                     public void describeTo(Description description) {
                         description.appendText("does not match");
                     }
