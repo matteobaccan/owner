@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author Luigi R. Viggiano
  */
-public class Issue87 {
+public class Issue87Test {
 
     public interface MyConfig extends Config {
 

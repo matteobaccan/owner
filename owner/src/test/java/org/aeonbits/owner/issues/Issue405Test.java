@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Matteo Baccan
  */
-public class Issue405 {
+public class Issue405Test {
 
     interface MyProperties extends Config, Accessible {
         @Key("declared.key")

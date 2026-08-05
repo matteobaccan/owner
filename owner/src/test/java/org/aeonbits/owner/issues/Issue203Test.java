@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Issue203 {
+public class Issue203Test {
     interface SomeConfig extends Config {
         //
     }

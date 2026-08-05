@@ -24,7 +24,7 @@ import java.util.Properties;
 /**
  * @author Luigi R. Viggiano
  */
-public class Issue123 {
+public class Issue123Test {
 
     private Object save;
 

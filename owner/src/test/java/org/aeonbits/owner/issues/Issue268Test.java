@@ -10,7 +10,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * See: https://github.com/lviggiano/owner/issues/268
  */
-public class Issue268 {
+public class Issue268Test {
 
     interface MyConfig extends Config {
         @DefaultValue("Pasha")

@@ -10,7 +10,7 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class Issue184 {
+public class Issue184Test {
 
     private static final String KEY = "a.key";
 
@@ -26,7 +26,7 @@ public class Issue184 {
         propsMapWithNullValue.put(KEY, null);
 
         try {
-            ConfigFactory.create(Issue184.MyConfig.class, propsMapWithNullValue);
+            ConfigFactory.create(Issue184Test.MyConfig.class, propsMapWithNullValue);
             fail("A null value should result in an exception");
         }
         catch(IllegalArgumentException e){
@@ -40,7 +40,7 @@ public class Issue184 {
         propsMapWithNullKey.put(null, "smurf");
 
         try {
-            ConfigFactory.create(Issue184.MyConfig.class, propsMapWithNullKey);
+            ConfigFactory.create(Issue184Test.MyConfig.class, propsMapWithNullKey);
             fail("A null key should result in an exception");
         }
         catch(IllegalArgumentException e){
