@@ -16,6 +16,13 @@ of dependency updates accumulated since 1.0.12. Java 8 is now the minimum runtim
 of some compatibility leftovers dating back to Java 6/7: see the "Removals" section below for the (short)
 migration instructions.
 
+Beyond the individual changes, this release has an explicit goal: to bring the test coverage as high as it can
+practically go, and to bring the number of warnings reported by the static analysers down to zero. A library
+that other projects depend on for their configuration has to be trustworthy first and featureful second, and
+after several years without a release the most valuable thing to do was to verify — line by line — that the
+existing behaviour is the intended one. The "Code quality and test coverage" section below explains what this
+means in practice, and what it turned up.
+
 RELEASE NOTES
 =============
 
@@ -72,11 +79,36 @@ Enhancements
  * Bytecode is still compatible with Java 8 at runtime, while the project is built with modern JDKs
    (`compiler-release=8`); a JDK 11 or superior is required to build from sources.
  * Javadoc completed and improved across the codebase.
- * Test coverage extended (crypto, loaders, util, ConfigCache packages at or near 100%), with fixes to all the
-   issues reported by static analysis.
  * Dependencies updated across the board, including security-driven pins: JUnit 4.13.2, Mockito 5.x, SLF4J 2.x,
    commons-codec 1.22, Curator with ZooKeeper forced to 3.9.5 and Netty aligned via BOM to address published
    vulnerabilities.
+
+Code quality and test coverage
+------------------------------
+A large part of the work that went into 1.0.13 is not visible in the API. The objective was to raise the test
+coverage as far as it reasonably goes and to leave no warning unexamined, so that future changes start from a
+codebase that says what it does.
+
+ * **Test coverage extended**, with the crypto, loaders, util and ConfigCache packages at or near 100%. The
+   tests were written to pin down actual behaviour, not to move a percentage: several of them document
+   decisions that were previously only implicit in the code.
+ * **Every warning triaged, one by one.** The project is analysed on each push by
+   [CodeQL](https://github.com/matteobaccan/owner/security/code-scanning) with the `security-and-quality`
+   query pack, by [SonarCloud](https://sonarcloud.io/project/overview?id=matteobaccan_owner), and by the
+   inspections built into the IDEs used for development. Every finding was either fixed, or dismissed with a
+   written technical justification explaining why the construct is correct as it stands — an analyser being
+   wrong is a legitimate outcome, an unread warning is not.
+ * **The exercise was not cosmetic.** Chasing warnings that looked like style issues surfaced genuine defects
+   that had gone unnoticed for years. The array and collection conversion bug listed under "Bugs fixes" was
+   found exactly this way: a CodeQL note about an inner class that could be made `static` turned out to be
+   hiding a test that passed for the wrong reason, and behind it a real failure affecting any user converting
+   a list of custom objects.
+ * **Tests that passed for the wrong reason were corrected.** A green test suite is only meaningful if each
+   test fails when the behaviour it describes breaks. Where a test was found to be satisfied by an accident of
+   its fixtures rather than by the behaviour under test, the fixture was fixed and the assertion re-verified.
+
+The intention is to keep this state: warnings are not allowed to accumulate between releases, and a finding is
+closed only when it has been understood.
 
 Site Enhancements
 -----------------
