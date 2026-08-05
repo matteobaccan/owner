@@ -23,11 +23,16 @@ public interface Factory {
 
     /**
      * Creates a {@link Config} instance from the specified interface
+     * <p>
+     * Imports are merged into a {@link java.util.Properties} instance, whose contract only admits {@link String}
+     * keys and values. Entries with a null or non-String key or value are therefore rejected, rather than being
+     * accepted and then silently ignored when the properties are read.</p>
      *
      * @param clazz   the interface extending from {@link Config} that you want to instantiate.
      * @param imports additional variables to be used to resolve the properties.
      * @param <T>     type of the interface.
      * @return an object implementing the given interface, which maps methods to property values.
+     * @throws IllegalArgumentException if any of the imports contains a null or non-String key or value.
      * @since 1.0.5
      */
     <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports);

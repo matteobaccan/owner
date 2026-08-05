@@ -53,22 +53,17 @@ public final class ConfigFactory {
 
     /**
      * Creates a {@link Config} instance from the specified interface
+     * <p>
+     * Every entry of the given imports must have a non-null {@link String} key and a non-null {@link String} value:
+     * see {@link Factory#create(Class, Map[])} for the rationale.</p>
      *
      * @param clazz   the interface extending from {@link Config} that you want to instantiate.
      * @param imports additional variables to be used to resolve the properties.
      * @param <T>     type of the interface.
      * @return an object implementing the given interface, which maps methods to property values.
+     * @throws IllegalArgumentException if any of the imports contains a null or non-String key or value.
      */
     public static <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
-        for( Map<?, ?> map : imports ){
-            for( Object key : map.keySet() ){
-                if( key == null || map.get(key) == null){
-                    throw new IllegalArgumentException(String.format("An import contains a null value for key: '%s'", key));
-                } else if (!(map.get(key) instanceof String)){
-                    throw new IllegalArgumentException(String.format("An import contains a non-string value for key: '%s'", key));
-                }
-            }
-        }
         return INSTANCE.create(clazz, imports);
     }
 

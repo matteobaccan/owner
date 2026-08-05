@@ -39,6 +39,7 @@ class DefaultFactory implements Factory {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
+        validateImports(imports);
         Class<?>[] interfaces = interfaces(clazz);
         VariablesExpander expander = new VariablesExpander(props);
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
@@ -49,6 +50,39 @@ class DefaultFactory implements Factory {
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
         return proxy;
+    }
+
+    /**
+     * Rejects imports that {@link Properties} cannot represent.
+     * <p>
+     * Imports are merged into a {@link Properties} instance, whose contract only admits {@link String} keys and
+     * values. Since {@link Properties} extends {@code Hashtable<Object, Object>}, entries of any other type are
+     * accepted by {@code putAll} but become invisible to {@code getProperty}: a non-String value makes the property
+     * resolve to {@code null} - shadowing any {@link Config.DefaultValue} - and a non-String key is silently
+     * ignored. Failing here turns both silent misbehaviours into an immediate, explicit error.</p>
+     *
+     * @param imports the imports to validate, may be empty.
+     * @throws IllegalArgumentException if any entry has a null or non-String key or value.
+     */
+    private static void validateImports(Map<?, ?>... imports) {
+        for (Map<?, ?> map : imports) {
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+                if (key == null)
+                    throw new IllegalArgumentException("An import contains a null key");
+                if (!(key instanceof String))
+                    throw new IllegalArgumentException(String.format(
+                            "An import contains a non-string key: '%s' of type %s", key, key.getClass().getName()));
+                if (value == null)
+                    throw new IllegalArgumentException(String.format(
+                            "An import contains a null value for key: '%s'", key));
+                if (!(value instanceof String))
+                    throw new IllegalArgumentException(String.format(
+                            "An import contains a non-string value for key: '%s' of type %s",
+                            key, value.getClass().getName()));
+            }
+        }
     }
 
     @Override

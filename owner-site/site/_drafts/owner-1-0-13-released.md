@@ -135,6 +135,40 @@ Infrastructure
 
 Bugs fixes
 ----------
+ * [#195](https://github.com/matteobaccan/owner/issues/195): imported `Map` entries whose key or value is not a
+   `String` are now rejected with an `IllegalArgumentException` naming the offending key, instead of being accepted
+   and then silently misbehaving. Originally reported and fixed by Stefán Freyr Stefánsson in
+   [#197](https://github.com/matteobaccan/owner/pull/197), extended here to cover keys as well as values.
+
+   Imports are merged into a `java.util.Properties`, whose contract only admits `String` keys and values, but
+   which extends `Hashtable<Object, Object>` and therefore accepts anything through `putAll`. The entry then
+   became invisible to `getProperty`, in two different ways:
+
+   ```java
+   public interface MyConfig extends Config {
+       @Key("some.key")
+       @DefaultValue("1")
+       Integer someValue();
+   }
+   ```
+
+   | Import | Up to 1.0.12 | Since 1.0.13 |
+   |---|---|---|
+   | `imports.put("some.key", 42)` | `someValue()` returns `null`, *shadowing* `@DefaultValue("1")` | `IllegalArgumentException` at `create()` |
+   | `imports.put(42, "42")` | the entry is dropped, `someValue()` returns the default `1` | `IllegalArgumentException` at `create()` |
+   | `imports.put("some.key", new StringBuilder("42"))` | `someValue()` returns `null` | `IllegalArgumentException` at `create()` |
+   | `imports.put("some.key", "42")` | `someValue()` returns `42` | unchanged, returns `42` |
+
+   **Compatibility.** Code that imported only `String` keys and values is unaffected. Code that imported anything
+   else was already getting a wrong value, or none, so no working behaviour is lost — but a heterogeneous `Map`
+   that happened to be read only through its `String` entries will now fail fast at `create()` time rather than
+   half-working. Note that a `CharSequence` is not sufficient, as `Properties` compares against `String`
+   specifically: call `toString()` on `StringBuilder`/`StringBuffer` values before importing them. See the
+   [documentation]({{ site.url }}/docs/importing-properties/).
+
+   The validation lives in the factory, so it applies uniformly to `ConfigFactory.create()`, to a `Factory`
+   obtained from `ConfigFactory.newInstance()`, and to `ConfigCache.getOrCreate()`; previously the equivalent
+   check on null keys and values only covered the first of the three.
  * Fixed the conversion of arrays and collections when a single element cannot be converted. The converter is
    chosen once from the first element, so the remaining ones could still fail: their internal "skip" marker
    ended up being stored into the resulting array, surfacing as an
