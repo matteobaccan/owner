@@ -55,7 +55,11 @@ enum Converters {
             for (int i = 0; i < chunks.length; i++) {
                 String chunk = chunks[i];
                 Object value = converter.tryConvert(targetMethod, type, chunk);
-                Array.set(result, i, value);
+                // the converter is chosen once from the first chunk: the remaining ones may still
+                // fail, and their special values must not end up as elements of the resulting array
+                if (value == SKIP)
+                    throw unsupportedConversion(type, chunk);
+                Array.set(result, i, value == NULL ? null : value);
             }
 
             return result;

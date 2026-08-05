@@ -35,7 +35,7 @@ public class Issue87 {
         public List<MyInteger> myIntegerInvalidValueList();
     }
 
-    public class MyInteger {
+    public static class MyInteger {
         private final Integer value;
 
         public MyInteger(String value) {
