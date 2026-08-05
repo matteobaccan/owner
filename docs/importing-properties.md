@@ -38,19 +38,73 @@ assertEquals("orange", cfg.baz());
 ```
 
 <div class="note warning">
-  <h5>Null keys and Null values are invalid.</h5>
-  
+  <h5>Imported keys and values must be non-null Strings.</h5>
+
   <p>
   A <code>Properties</code> or <code>Map</code> object accepts <code>null</code> key or 
   <code>null</code> values, but that is obviously an error, 
   so starting from version 1.0.10, an <code>IllegalArgumentException</code> is thrown.
   </p>
-  
+
   <p>
-  The exception message also contains further information about the offending key,
-  if applicable.
+  Starting from version 1.0.13, the same applies to keys and values that are not
+  <code>String</code>. The exception message also contains further information about the
+  offending key, and its type when applicable.
   </p> 
 </div>
+
+The reason is that imports are merged into a `java.util.Properties`, and even though its
+contract only admits `String` keys and values, it extends `Hashtable<Object, Object>`:
+anything else is accepted by `putAll` and then becomes invisible to `getProperty`.
+Before 1.0.13 such an entry was taken without complaint and then quietly misbehaved when read:
+
+```java
+public interface MyConfig extends Config {
+    @Key("some.key")
+    @DefaultValue("1")
+    Integer someValue();
+}
+
+Map<String, Object> imports = new HashMap<>();
+imports.put("some.key", 42);          // an Integer, not a String
+
+MyConfig cfg = ConfigFactory.create(MyConfig.class, imports);
+
+// before 1.0.13: null - the unusable entry also shadowed @DefaultValue
+// since  1.0.13: IllegalArgumentException at create() time
+cfg.someValue();
+```
+
+A non-`String` **key** failed in a different way: the entry was simply ignored, and the
+property silently fell back to its default, as if the import had never been passed.
+
+```java
+Map<Object, String> imports = new HashMap<>();
+imports.put(42, "value");             // an Integer key
+
+// before 1.0.13: the entry is dropped without any notice
+// since  1.0.13: IllegalArgumentException at create() time
+ConfigFactory.create(MyConfig.class, imports);
+```
+
+Note that a `CharSequence` is not enough, since `Properties` compares against `String`
+specifically: `new StringBuilder("some.key")` and `new StringBuffer("42")` are rejected too.
+Convert them with `toString()` before importing.
+
+Passing a `String` key with a `String` value keeps working exactly as before, so code
+that was already correct is unaffected:
+
+```java
+Map<String, String> imports = new HashMap<>();
+imports.put("some.key", "42");
+
+assertEquals(Integer.valueOf(42),
+    ConfigFactory.create(MyConfig.class, imports).someValue());
+```
+
+The check runs for every entry point that builds a Config from imports, so
+`ConfigFactory.create()`, a `Factory` instance obtained from `ConfigFactory.newInstance()`
+and `ConfigCache.getOrCreate()` all behave the same way.
 
 You can specify multiple properties to import on the same line:
 
