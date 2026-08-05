@@ -70,6 +70,9 @@ public class ParametrizedKeyTest
     }
 
     private static Properties properties(String... keysAndValues) {
+        if (keysAndValues.length % 2 != 0)
+            throw new IllegalArgumentException(
+                    "keys and values must come in pairs, got " + keysAndValues.length + " arguments");
         Properties props = new Properties();
         for (int i = 0; i < keysAndValues.length; i += 2)
             props.setProperty(keysAndValues[i], keysAndValues[i + 1]);
