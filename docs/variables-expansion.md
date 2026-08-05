@@ -235,3 +235,47 @@ and/or the environment variables if you prefer) and have the above interface map
 to the appropriate section.
 In the above example I selected "uat" as value for the `${env}` variables, so the "user acceptance test" configuration
 would be selected.
+
+Default values
+--------------
+
+Since version 1.0.13, a variable can carry a default value, to be used when the property it refers to cannot be
+resolved. Write it after a colon:
+
+```java
+public interface ServerConfig extends Config {
+
+    @DefaultValue("${db.host:localhost}")
+    String host();
+
+    @DefaultValue("${db.port:5432}")
+    int port();
+}
+```
+
+If `db.host` is defined anywhere — in a source, in an import, in a system property — its value is used. If it is
+not, `host()` returns `localhost` instead of the empty string that an unresolved variable produces on its own.
+
+Everything after the *first* colon is the default, colons included, so values that contain one are not truncated:
+
+```java
+@DefaultValue("${service.url:http://localhost:8080/api}")
+String serviceUrl();     // http://localhost:8080/api when service.url is not set
+
+@DefaultValue("${cache.dir:C:\temp}")
+String cacheDir();       // C:\temp on a machine where cache.dir is not set
+```
+
+<div class="note info">
+  <h5>Keys containing a colon keep working.</h5>
+  <p>
+  The text inside <code>${...}</code> is looked up as a property key <em>in its entirety</em> first, and only if
+  no such property exists is the colon read as the separator introducing a default. A configuration that relies on
+  a key such as <code>jdbc:url</code> therefore behaves exactly as it did before default values existed.
+  </p>
+  <p>
+  The one case that changes is a variable that used to resolve to nothing: <code>${a:b}</code>, with neither
+  <code>a:b</code> nor <code>a</code> defined, yielded the empty string up to 1.0.12 and yields <code>b</code>
+  from 1.0.13 on.
+  </p>
+</div>
