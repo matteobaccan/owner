@@ -36,6 +36,24 @@ import static org.aeonbits.owner.util.Reflection.isClassAvailable;
  */
 enum Converters {
 
+    /**
+     * Must come first: the converter takes over the raw property value before {@link #ARRAY} or
+     * {@link #COLLECTION} get a chance to tokenize it, which is the whole point of the annotation.
+     */
+    METHOD_WITH_COLLECTION_CONVERTER_CLASS_ANNOTATION {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            CollectionConverterClass annotation = targetMethod.getAnnotation(CollectionConverterClass.class);
+            if (annotation == null) return SKIP;
+            if (!Collection.class.isAssignableFrom(targetType))
+                throw unsupported(
+                        "@CollectionConverterClass can only be used on a method returning a Collection, but '%s' "
+                                + "returns %s; use @ConverterClass instead",
+                        targetMethod.getName(), targetType.getName());
+            return convertWithConverterClass(targetMethod, text, annotation.value());
+        }
+    },
+
     ARRAY {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
@@ -63,17 +81,6 @@ enum Converters {
             }
 
             return result;
-        }
-    },
-
-    METHOD_WITH_COLLECTION_CONVERTER_CLASS_ANNOTATION {
-        @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            CollectionConverterClass annotation = targetMethod.getAnnotation(CollectionConverterClass.class);
-            if (annotation == null) return SKIP;
-
-            Class<? extends Converter> converterClass = annotation.value();
-            return convertWithConverterClass(targetMethod, text, converterClass);
         }
     },
 

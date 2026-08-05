@@ -429,13 +429,29 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies a <code>{@link Converter}</code> class to allow the user to define a custom conversion logic for the
-     * collection type returned by the method. The converter is used once for the whole collection.
+     * Specifies a <code>{@link Converter}</code> class to convert the property value into the {@link Collection}
+     * returned by the method, in a single step.
+     * <p>
+     * This differs from {@link ConverterClass}, which converts one element at a time after OWNER has split the
+     * property value: here the raw value is handed over untouched and the converter is responsible for the whole
+     * process, including honouring {@link Separator} and {@link TokenizerClass} if it wants to. It is therefore the
+     * way to opt out of the built-in tokenization, for instance when the property holds a single indivisible
+     * document such as JSON, or when the collection must be of a type OWNER cannot instantiate on its own.</p>
+     * <p>
+     * The annotated method must return a {@link Collection}; using it on any other return type raises an
+     * {@link UnsupportedOperationException} when the property is read.</p>
+     *
+     * @since 1.0.13
      */
     @Retention(RUNTIME)
     @Target(METHOD)
     @Documented
-    public @interface CollectionConverterClass {
+    @interface CollectionConverterClass {
+        /**
+         * The converter used to convert the property value to the collection returned by the method.
+         *
+         * @return the converter class.
+         */
         Class<? extends Converter<? extends Collection<?>>> value();
     }
 

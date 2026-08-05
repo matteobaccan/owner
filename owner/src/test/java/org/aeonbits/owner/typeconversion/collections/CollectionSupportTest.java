@@ -7,14 +7,14 @@
  */
 package org.aeonbits.owner.typeconversion.collections;
 
-import java.lang.reflect.Method;
-import org.aeonbits.owner.Config.CollectionConverterClass;
 import org.aeonbits.owner.Config;
+import org.aeonbits.owner.Config.CollectionConverterClass;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Converter;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -78,30 +78,32 @@ public class CollectionSupportTest {
             ONE, TWO, THREE
         }
 
-        @CollectionConverterClass(CollectionWithoutDefaultConstructorConverter.class)
+        /**
+         * Same collection type as {@link #badCollection()}, which OWNER cannot instantiate on its own: with a
+         * collection converter the user supplies the instance, so it works.
+         */
         @DefaultValue(COLORS)
+        @CollectionConverterClass(CollectionWithoutDefaultConstructorConverter.class)
         CollectionWithoutDefaultConstructor<String> collectionConverterClassCollection();
     }
 
-    static public class CollectionWithoutDefaultConstructor<E> extends ArrayList<E> {
+    public static class CollectionWithoutDefaultConstructor<E> extends ArrayList<E> {
         public CollectionWithoutDefaultConstructor(int size) {
             super(size);
         }
     }
 
-    static public class CollectionWithoutDefaultConstructorConverter implements Converter<CollectionWithoutDefaultConstructor<String>> {
-
+    public static class CollectionWithoutDefaultConstructorConverter
+            implements Converter<CollectionWithoutDefaultConstructor<String>> {
         @Override
         public CollectionWithoutDefaultConstructor<String> convert(Method method, String input) {
-            final String[] inputs = input.split(",");
-            final CollectionWithoutDefaultConstructor<String> collection =
-                    new CollectionWithoutDefaultConstructor<String>(inputs.length);
-            for (String value : inputs) {
-                collection.add(value);
-            }
+            String[] inputs = input.split(",");
+            CollectionWithoutDefaultConstructor<String> collection =
+                    new CollectionWithoutDefaultConstructor<>(inputs.length);
+            for (String value : inputs)
+                collection.add(value.trim());
             return collection;
         }
-
     }
 
     @Before
@@ -172,7 +174,9 @@ public class CollectionSupportTest {
 
     @Test
     public void itShouldWorkWithCollectionConverterClass() throws Exception {
+        assertThat(cfg.collectionConverterClassCollection(), instanceOf(CollectionWithoutDefaultConstructor.class));
         assertEquals(Arrays.asList("pink", "black"), cfg.collectionConverterClassCollection());
     }
+
 }
 

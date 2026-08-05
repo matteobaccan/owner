@@ -71,6 +71,15 @@ Enhancements
    [#216](https://github.com/matteobaccan/owner/pull/216).
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
+ * New `@CollectionConverterClass` annotation: hands the raw property value to a single converter instead of
+   splitting it first and converting one element at a time, as `@ConverterClass` does. It is the way to opt out of
+   the built-in tokenization — for a property holding a single JSON document, say — or to return a collection type
+   OWNER cannot instantiate itself, such as an immutable one or an implementation without a no-argument
+   constructor. Using it on a method that does not return a `Collection` reports which method is at fault instead
+   of failing later with a `ClassCastException`. See the
+   [documentation]({{ site.url }}/docs/type-conversion/). Contributed by Adam Huječek in
+   [#248](https://github.com/matteobaccan/owner/pull/248), closing
+   [#206](https://github.com/matteobaccan/owner/issues/206).
  * Security hardening of the `XMLLoader` against XXE attacks: external DTDs and entities are neutralized, secure
    processing limits entity expansion; the standard Java properties XML format keeps working as before.
  * [#325](https://github.com/matteobaccan/owner/pull/325): temporary files are now created with owner-only
