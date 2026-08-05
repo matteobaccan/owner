@@ -1,56 +1,61 @@
 <div class="docs-nav-mobile unit whole show-on-mobiles">
-    <select>
+    <details>
+        <summary>Navigate the docs…</summary>
+        <div class="docs-nav-mobile-list">
 
-        <option value="">Navigate the docs…</option>
+            <h4>Getting started</h4>
+            <ul>
+                <li><a href="{{ site.url }}/docs/welcome/">Welcome</a></li>
+                <li><a href="{{ site.url }}/docs/installation/">Installation</a></li>
+                <li><a href="{{ site.url }}/docs/usage/">Basic usage</a></li>
+            </ul>
 
-        <optgroup label="Getting started">
-            <option value="{{ site.url }}/docs/welcome/">Welcome</option>
-            <option value="{{ site.url }}/docs/installation/">Installation
-            </option>
-            <option value="{{ site.url }}/docs/usage/">Basic usage</option>
-        </optgroup>
+            <h4>More features</h4>
+            <ul>
+                <li><a href="{{ site.url }}/docs/loading-strategies/">Loading strategies</a></li>
+                <li><a href="{{ site.url }}/docs/importing-properties/">Importing properties</a></li>
+                <li><a href="{{ site.url }}/docs/parametrized-properties/">Parametrized properties</a></li>
+                <li><a href="{{ site.url }}/docs/type-conversion/">Type conversion</a></li>
+                <li><a href="{{ site.url }}/docs/variables-expansion/">Variables expansion</a></li>
+                <li><a href="{{ site.url }}/docs/reload/">Reload and Hot Reload</a></li>
+                <li><a href="{{ site.url }}/docs/accessible-mutable/">Accessible and Mutable</a></li>
+                <li><a href="{{ site.url }}/docs/debugging/">Debugging</a></li>
+                <li><a href="{{ site.url }}/docs/disabling-features/">Disabling features</a></li>
+                <li><a href="{{ site.url }}/docs/configuring/">Metaconfiguring</a></li>
+                <li><a href="{{ site.url }}/docs/xml-support/">XML support</a></li>
+                <li><a href="{{ site.url }}/docs/event-support/">Event support</a></li>
+                <li><a href="{{ site.url }}/docs/singleton/">Singleton</a></li>
+                <li><a href="{{ site.url }}/docs/crypto/">Crypto support</a></li>
+                <li><a href="{{ site.url }}/docs/preprocessors/">Preprocessors</a></li>
+                <li><a href="{{ site.url }}/docs/jmx/">JMX support</a></li>
+            </ul>
 
-        <optgroup label="More Features">
-            <option value="{{ site.url }}/docs/loading-strategies/">Loading strategies</option>
-            <option value="{{ site.url }}/docs/importing-properties/">Importing properties</option>
-            <option value="{{ site.url }}/docs/parametrized-properties/">Parametrized properties</option>
-            <option value="{{ site.url }}/docs/type-conversion/">Type conversion</option>
-            <option value="{{ site.url }}/docs/variables-expansion/">Variables expansion</option>
-            <option value="{{ site.url }}/docs/reload/">Reload and Hot Reload</option>
-            <option value="{{ site.url }}/docs/accessible-mutable/">Accessible and Mutable</option>
-            <option value="{{ site.url }}/docs/debugging/">Debugging</option>
-            <option value="{{ site.url }}/docs/disabling-features/">Disabling features</option>
-            <option value="{{ site.url }}/docs/configuring/">Metaconfiguring</option>
-            <option value="{{ site.url }}/docs/xml-support/">XML support</option>
-            <option value="{{ site.url }}/docs/event-support/">Event support</option>
-            <option value="{{ site.url }}/docs/singleton/">Singleton</option>
-            <option value="{{ site.url }}/docs/crypto/">Crypto Support</option>
-            <option value="{{ site.url }}/docs/preprocessors/">Preprocessors</option>
-            <option value="{{ site.url }}/docs/jmx/">JMX support</option>
-        </optgroup>
+            <h4>Miscellaneous</h4>
+            <ul>
+                <li><a href="{{ site.url }}/docs/features/">Features</a></li>
+                <li><a href="{{ site.url }}/docs/why/">Why OWNER?</a></li>
+                <li><a href="{{ site.url }}/docs/faq/">FAQ</a></li>
+                <li><a href="{{ site.url }}/docs/support/">Getting support</a></li>
+            </ul>
 
-        <optgroup label="Miscellaneous">
-            <option value="{{ site.url }}/docs/features/">Features</option>
-            <option value="{{ site.url }}/docs/why/">Why OWNER?</option>
-            <option value="{{ site.url }}/docs/faq/">FAQ</option>
-            <option value="{{ site.url }}/docs/support/">Getting support</option>
-        </optgroup>
+            <h4>Meta</h4>
+            <ul>
+                <li><a href="{{ site.url }}/docs/building/">Building from sources</a></li>
+                <li><a href="{{ site.url }}/docs/contributing/">Contributing</a></li>
+                <li><a href="{{ site.url }}/docs/license/">License</a></li>
+            </ul>
 
-        <optgroup label="Meta">
-            <option value="{{ site.url }}/docs/building/">Building from sources</option>
-            <option value="{{ site.url }}/docs/contributing/">Contributing</option>
-            <option value="{{ site.url }}/docs/license/">License</option>
-        </optgroup>
+            <h4>Other stuff</h4>
+            <ul>
+                <li><a href="{{ site.url }}/news/releases/">History</a></li>
+                <li><a href="{{ site.url }}/apidocs/latest/">Javadoc</a></li>
+                <li><a href="https://central.sonatype.com/artifact/org.aeonbits.owner/owner">Downloads</a></li>
+                <li><a href="https://github.com/{{ site.author.github }}/{{ site.project.github }}/releases">Releases</a></li>
+                <li><a href="https://t.me/ownerapi">Telegram Chat</a></li>
+                <li><a href="https://github.com/{{ site.author.github }}/{{ site.project.github }}/actions">CI reports</a></li>
+                <li><a href="https://sonarcloud.io/project/overview?id=matteobaccan_owner">Sonar reports</a></li>
+            </ul>
 
-        <optgroup label="Other stuff">
-            <option value="{{ site.url }}/news/releases/">History</option>
-            <option value="{{ site.url }}/apidocs/latest/">Javadoc</option>
-            <option value="https://central.sonatype.com/artifact/org.aeonbits.owner/owner">Downloads</option>
-            <option value="https://github.com/matteobaccan/owner/releases">Releases</option>
-            <option value="https://t.me/ownerapi">Telegram Chat</option>
-            <option value="https://github.com/matteobaccan/owner/actions">CI reports</option>
-            <option value="https://sonarcloud.io/project/overview?id=matteobaccan_owner">Sonar reports</option>
-        </optgroup>
-
-    </select>
+        </div>
+    </details>
 </div>

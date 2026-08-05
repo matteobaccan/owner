@@ -33,7 +33,7 @@ meaningful exception: see [Mandatory properties]({{ site.url }}/docs/usage/#toc_
 
 Yes. Since version 1.0.10 OWNER supports encrypted properties out of the box through the `@EncryptedValue` and
 `@DecryptorClass` annotations: see the [Encrypted properties]({{ site.url }}/docs/crypto/) chapter
-(this was tracked in [#49](https://github.com/lviggiano/owner/issues/49)).
+(this was tracked in [#49](https://github.com/matteobaccan/owner/issues/49)).
 
 Before 1.0.10, OWNER APIs were flexible enough to let the user implement that: an example is [here][enc-props].
 
@@ -67,5 +67,5 @@ The fact I am receiving feedback, request for features and changes, mails and qu
 library is useful to some people around the world, and this encourages me to work and improve it.
 So, don't be shy to introduce yourself.
 
-  [#32]: https://github.com/lviggiano/owner/issues/32
-  [Bruno]: https://github.com/lviggiano/owner/issues/32#issuecomment-19466459
+  [#32]: https://github.com/matteobaccan/owner/issues/32
+  [Bruno]: https://github.com/matteobaccan/owner/issues/32#issuecomment-19466459

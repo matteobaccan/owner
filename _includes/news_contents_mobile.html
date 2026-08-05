@@ -1,11 +1,17 @@
 <div class="docs-nav-mobile unit whole show-on-mobiles">
-  <select>
-    <option value="">Navigate the blog…</option>
-    <option value="/news/">Home</option>
-    <optgroup label="v1.x">
-      {% for post in site.posts %}
-      <option value="{{ post.url }}">{{ post.title }}</option>
-      {% endfor %}
-    </optgroup>
-  </select>
+  <details>
+    <summary>Navigate the blog…</summary>
+    <div class="docs-nav-mobile-list">
+      <ul>
+        <li><a href="{{ site.url }}/news/">Home</a></li>
+      </ul>
+
+      <h4>v1.x</h4>
+      <ul>
+        {% for post in site.posts %}
+        <li><a href="{{ post.url }}">{{ post.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </details>
 </div>

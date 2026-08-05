@@ -11,7 +11,7 @@ There isn't much to configure in OWNER since most of the things are done via ann
 Still somebody recently asked: I need to decide the sources locations at runtime, is it possible to pass them
 explicitly? (Issue [#36] on GitHub).
 
-  [#36]: https://github.com/lviggiano/owner/issues/36
+  [#36]: https://github.com/matteobaccan/owner/issues/36
 
 The short answer was no, even though there was some options to work around this limit.
 

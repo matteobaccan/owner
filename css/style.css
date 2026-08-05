@@ -531,8 +531,71 @@ aside li.current a:before {
   cursor: default;
 }
 
-.docs-nav-mobile select {
-  width: 100%;
+/* Mobile navigation.
+   A native <details> disclosure wrapping plain links: the browser navigates on its own,
+   so this menu needs no JavaScript, works with scripting disabled, and offers nothing for
+   a Content-Security-Policy to trip over. */
+
+.docs-nav-mobile details {
+  background: #444;
+  border-radius: 5px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.1);
+}
+
+.docs-nav-mobile summary {
+  padding: 12px 15px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fc0;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* the default disclosure triangle is replaced by the caret below */
+.docs-nav-mobile summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs-nav-mobile summary:after {
+  content: "\25BE";
+  float: right;
+}
+
+.docs-nav-mobile details[open] summary:after {
+  content: "\25B4";
+}
+
+.docs-nav-mobile details[open] summary {
+  border-bottom: 1px solid #555;
+}
+
+/* the docs menu holds more than thirty entries: keep it scrollable instead of letting it
+   push the article off the screen */
+.docs-nav-mobile-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 5px 15px 15px;
+}
+
+.docs-nav-mobile-list h4 {
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-block;
+  margin: 18px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #c00;
+}
+
+.docs-nav-mobile-list ul {
+  margin: 0;
+  padding-left: 0;
+}
+
+.docs-nav-mobile-list li {
+  list-style-type: none;
+  padding: 5px 0;
+  font-size: 16px;
 }
 
 /* News */
@@ -992,7 +1055,49 @@ code.option, code.flag, code.filter, code.output {
   }
 }
 
-/* GitHub ribbon display rules */
+/* GitHub ribbon
+   Drawn in CSS rather than loaded as an image: the original banner pointed at
+   s3.amazonaws.com/github/ribbons/, an asset GitHub retired, and the link had been
+   dead ever since. The wrapper clips the rotated banner so that it cannot widen the
+   page, and only the banner itself is clickable. */
+
+.ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 149px;
+    height: 149px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.ribbon a {
+    position: absolute;
+    top: 35px;
+    right: -34px;
+    width: 160px;
+    padding: 5px 0;
+    background-color: #ff7600;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .25);
+    border-top: 1px solid rgba(255, 255, 255, .4);
+    border-bottom: 1px solid rgba(0, 0, 0, .15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+    pointer-events: auto;
+    -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+}
+
+.ribbon a:hover {
+    background-color: #e56a00;
+}
 
 @media (max-width: 800px){
     .ribbon {
@@ -1002,6 +1107,6 @@ code.option, code.flag, code.filter, code.output {
 
 @media (min-width: 800px){
     .ribbon {
-        display: inline;
+        display: block;
     }
 }
