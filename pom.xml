@@ -377,6 +377,44 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                Enforces the BSD license header on every Java source file.
+                Run `mvn license:format` to add or fix the header, `mvn license:check` to verify it;
+                the check below also runs as part of `mvn verify`, so a missing header breaks the build.
+            -->
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.6</version>
+                <configuration>
+                    <licenseSets>
+                        <licenseSet>
+                            <inlineHeader><![CDATA[Copyright (c) 2012-2026, Luigi R. Viggiano, Matteo Baccan
+All rights reserved.
+
+This software is distributable under the BSD license.
+See the terms of the BSD license in the documentation provided with this software.
+]]></inlineHeader>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <excludes>
+                                <!-- Third party file, shipped by the Maven wrapper under Apache 2.0 -->
+                                <exclude>.mvn/**</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-license-headers</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <extensions>
             <extension>

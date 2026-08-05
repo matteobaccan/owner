@@ -1,11 +1,10 @@
 /*
- * Copyright (c) 2012-2015, Luigi R. Viggiano
+ * Copyright (c) 2012-2026, Luigi R. Viggiano, Matteo Baccan
  * All rights reserved.
  *
  * This software is distributable under the BSD license.
  * See the terms of the BSD license in the documentation provided with this software.
  */
-
 /**
  *  <p>
  *  The goal of OWNER API is to minimize the code required to handle application configuration through Java properties

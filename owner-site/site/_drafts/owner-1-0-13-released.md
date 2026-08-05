@@ -132,6 +132,11 @@ Infrastructure
    security scanning via CodeQL and Dependabot; dependencies kept current by Renovate.
  * Maven wrapper added; Maven Enforcer requires Maven 3.6.3+; Travis, Coveralls and WhiteSource/Mend leftovers
    removed.
+ * The BSD license header is now enforced on every Java source file by the
+   [license-maven-plugin](https://oss.carbou.me/license-maven-plugin/): `mvn license:format` adds or fixes it,
+   and `mvn license:check` — bound to the `verify` phase, so it also runs in CI — fails the build when a file is
+   missing it. Nineteen files had drifted without one over the years, and the copyright line existed in three
+   different variants; both are now uniform. The Maven wrapper sources are excluded, as they ship under Apache 2.0.
 
 Bugs fixes
 ----------

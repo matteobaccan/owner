@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, Luigi R. Viggiano
+ * Copyright (c) 2012-2026, Luigi R. Viggiano, Matteo Baccan
  * All rights reserved.
  *
  * This software is distributable under the BSD license.
