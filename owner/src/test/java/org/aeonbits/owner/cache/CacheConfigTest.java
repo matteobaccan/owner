@@ -66,6 +66,7 @@ public class CacheConfigTest {
         final MyConfig winner = ConfigFactory.create(MyConfig.class);
         Factory spy = spy(ConfigFactory.newInstance());
         doAnswer(new Answer<MyConfig>() {
+            @Override
             public MyConfig answer(InvocationOnMock invocation) throws Throwable {
                 ConfigCache.add("raced", winner);
                 return (MyConfig) invocation.callRealMethod();

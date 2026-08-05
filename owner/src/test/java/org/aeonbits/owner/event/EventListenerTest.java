@@ -281,6 +281,7 @@ public class EventListenerTest {
         Server server = ConfigFactory.create(Server.class);
 
         doAnswer(new Answer() {
+            @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 PropertyChangeEvent evt = (PropertyChangeEvent) invocation.getArguments()[0];
                 if (evt.getPropertyName().equals("port"))
