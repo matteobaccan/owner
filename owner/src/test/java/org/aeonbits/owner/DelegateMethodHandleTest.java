@@ -39,16 +39,20 @@ public class DelegateMethodHandleTest {
         }
     }
 
-    public static class Other {
+    public static class DifferentName {
+        public String salute(String name) {
+            return null;
+        }
+    }
+
+    public static class DifferentReturnType {
         public Object greet(String name) {
             return null;
         }
+    }
 
+    public static class DifferentParameterTypes {
         public String greet(CharSequence name) {
-            return null;
-        }
-
-        public String salute(String name) {
             return null;
         }
     }
@@ -84,19 +88,19 @@ public class DelegateMethodHandleTest {
     @Test
     public void testDoesNotMatchWhenNameDiffers() throws Throwable {
         DelegateMethodHandle handle = new DelegateMethodHandle(new Target(), method(Target.class, "greet", String.class));
-        assertFalse(handle.matches(method(Other.class, "salute", String.class)));
+        assertFalse(handle.matches(method(DifferentName.class, "salute", String.class)));
     }
 
     @Test
     public void testDoesNotMatchWhenReturnTypeDiffers() throws Throwable {
         DelegateMethodHandle handle = new DelegateMethodHandle(new Target(), method(Target.class, "greet", String.class));
-        assertFalse(handle.matches(method(Other.class, "greet", String.class)));
+        assertFalse(handle.matches(method(DifferentReturnType.class, "greet", String.class)));
     }
 
     @Test
     public void testDoesNotMatchWhenParameterTypesDiffer() throws Throwable {
         DelegateMethodHandle handle = new DelegateMethodHandle(new Target(), method(Target.class, "greet", String.class));
-        assertFalse(handle.matches(method(Other.class, "greet", CharSequence.class)));
+        assertFalse(handle.matches(method(DifferentParameterTypes.class, "greet", CharSequence.class)));
     }
 
 }
