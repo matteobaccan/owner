@@ -283,3 +283,102 @@ String cacheDir();       // C:\temp on a machine where cache.dir is not set
   from 1.0.13 on.
   </p>
 </div>
+
+Nested variables
+----------------
+
+The environment selection shown above stops working as soon as the *name* of
+the key you want to read is itself configurable. Take a configuration where
+the browser to drive depends on the environment, and the options to pass
+depend on the browser:
+
+```properties
+environment=dev
+
+environments.dev.browser=opera
+environments.dev.webdriver.opera.switches=--headless
+environments.dev.webdriver.chrome.switches=--incognito
+```
+
+Reading `switches` means resolving `${environment}` first, then reading
+`environments.dev.browser` to find out which browser is selected, and only
+then building the key to look up. Since version 1.0.13 a variable can be
+nested inside another one, which says exactly that:
+
+```java
+public interface WebDriverConfig extends Config {
+
+    @Key("environment")
+    @DefaultValue("global")
+    String env();
+
+    @Key("environments.${environment}.browser")
+    @DefaultValue("chrome")
+    String usedBrowser();
+
+    @Key("environments.${environment}.webdriver.${environments.${environment}.browser}.switches")
+    String webDriverOptions();
+}
+```
+
+`webDriverOptions()` returns `--headless`, and switching `environment` to a
+different value moves all three methods to the other section at once.
+
+The expression inside `${...}` is expanded first, and the result is then
+looked up as a key. Nesting is allowed at any depth, in the `@Key` as well as
+in a property value, and in the [`@Sources`]({{ site.url }}/docs/configuring/)
+specification:
+
+```properties
+servers.dev.url=http://devhost
+env=dev
+
+story=connecting to ${servers.${env}.url}
+```
+
+It also combines with the default values described above, since the default
+applies to the key that the expansion produces:
+
+```java
+@DefaultValue("${servers.${env}.url:http://localhost}")
+String url();
+```
+
+<div class="note info">
+  <h5>A variable names a property, not a method.</h5>
+  <p>
+    In the example above the inner expression is <code>environments.${environment}.browser</code> — the key
+    that <code>usedBrowser()</code> reads — and not <code>usedBrowser</code>, the name of the method reading
+    it. Variables are resolved against the properties, so <code>${usedBrowser}</code> would look for a property
+    literally called <code>usedBrowser</code>.
+  </p>
+</div>
+
+Text that only looks like a variable is left where it stands, exactly as
+before: `${}` is not a variable, an unbalanced `${` is not one either, and a
+lone brace inside an expression is ordinary text, so a key such as `a{b` keeps
+resolving. Only the `${` sequence opens a nesting level.
+
+Disabling nested variables
+--------------------------
+
+Nesting changes how a `${` is matched with its `}`: up to 1.0.12 the first `}`
+closed the expression, from 1.0.13 it is the one that matches. Configurations
+that use nothing but plain variables are unaffected — that is what the whole
+test suite of the project verifies — but a value built out of braces in some
+unforeseen way could read differently.
+
+For that case the new behaviour can be switched off for the entire JVM, with a
+system property:
+
+```
+-Downer.nested.variable.expansion=false
+```
+
+With that set, OWNER runs the substitution of the previous releases,
+unchanged, and a nested expression goes back to producing what it produced
+before. Any other value, or no value at all, leaves nesting enabled.
+
+The switch is read when the `Config` object is created, so it has to be set
+before that — on the command line, or with `System.setProperty` early enough
+in the application startup.
