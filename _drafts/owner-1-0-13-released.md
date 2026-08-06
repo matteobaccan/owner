@@ -105,6 +105,14 @@ Enhancements
    plain variables is therefore unaffected. Should some unforeseen combination of braces read differently, the
    whole behaviour can be switched off for the JVM with `-Downer.nested.variable.expansion=false`, which runs the
    substitution of the previous releases unchanged.
+ * A circular variable reference is now reported instead of being followed. A property whose value leads back to
+   the property itself cannot be resolved, and an `IllegalArgumentException` names the chain that closes the
+   loop — `Circular variable reference: ${a} -> ${b} -> ${a}` — where up to 1.0.12 the same configuration
+   exhausted the stack with a `StackOverflowError`. A default value does not rescue it: `db.host=${db.host:localhost}`
+   is the shell idiom for "keep it if set, otherwise use this", but it relies on the substitution happening once
+   at assignment, while OWNER expands variables when a property is read, and inside values. That line therefore
+   describes a loop rather than a fallback, and it is reported as one — what was meant is `db.host=localhost`.
+   See the [documentation]({{ site.url }}/docs/variables-expansion/#toc_5).
  * New `@CollectionConverterClass` annotation: hands the raw property value to a single converter instead of
    splitting it first and converting one element at a time, as `@ConverterClass` does. It is the way to opt out of
    the built-in tokenization — for a property holding a single JSON document, say — or to return a collection type
