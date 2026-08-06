@@ -288,11 +288,15 @@ public class PropertiesAggregatorTest {
      */
     @Test
     public void aWildcardTypeArgumentFallsBackToString() {
-        Map<String, ? extends Number> map = ConfigFactory.create(WildcardConfig.class, new Properties() {{
+        Map<String, ?> map = ConfigFactory.create(WildcardConfig.class, new Properties() {{
             setProperty("group.a", "1");
         }}).group();
 
-        assertEquals("1", map.get("a"));
+        // the declared ? extends Number is not what ends up in the map: erasure lets the String through,
+        // which is the point of the fallback and the reason to assert the runtime class as well
+        Object value = map.get("a");
+        assertEquals(String.class, value.getClass());
+        assertEquals("1", value);
     }
 
     interface NotInstantiableConfig extends Config {
