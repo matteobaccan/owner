@@ -166,25 +166,41 @@ honoured — a `SortedMap` comes back as a `TreeMap`, a plain `Map` as a
 instantiated as it is. `@DefaultValue` is refused on such a method: a default
 belongs to the individual properties, not to the group.
 
-<div class="note info">
-  <h5>The other shape: one property holding the pairs.</h5>
-  <p>
-    Sometimes the pairs live inside a single property value, rather than being properties of their own. That
-    form has no canonical syntax — comma or space, equals or colon — so OWNER does not guess one: hand the value
-    to a <a href="#toc_1"><code>@ConverterClass</code></a>, which receives it whole and returns whatever map it
-    likes. The presence of the converter is what tells the two shapes apart, and it takes precedence over the
-    grouping described above.
-  </p>
-</div>
+The other shape: one property holding the pairs
+-----------------------------------------------
+
+Sometimes the pairs do not live in properties of their own: they are written
+inside a single property value. That is the same configuration said
+differently, and OWNER reads it into the same map — but you have to say *how*
+that value is written, because there is no canonical syntax for it: comma or
+space, equals or colon.
+
+Here is one map, `{host=localhost, port=8080}`, obtained both ways.
+
+**As properties of their own**, which needs nothing declared:
 
 ```properties
-settings=host=localhost, port=8080, mode=debug
+server.host=localhost
+server.port=8080
+```
+
+```java
+public interface MyConfig extends Config {
+    Map<String, String> server();
+}
+```
+
+**As a single value**, which needs a [`@ConverterClass`](#toc_2) saying how to
+split it:
+
+```properties
+server=host=localhost, port=8080
 ```
 
 ```java
 public interface MyConfig extends Config {
     @ConverterClass(PairsConverter.class)
-    Map<String, String> settings();
+    Map<String, String> server();
 }
 
 public class PairsConverter implements Converter<Map<String, String>> {
@@ -198,6 +214,11 @@ public class PairsConverter implements Converter<Map<String, String>> {
     }
 }
 ```
+
+The two interfaces differ by one annotation, and that annotation is what tells
+the shapes apart: declaring how to parse a value says that there is a value to
+parse, so the converter takes precedence and the properties below `server.`
+are left alone. The equality of the two results is checked by a test.
 
 The converter decides both sides of the entry, so the values are not limited
 to strings — a `Map<String, Integer>` is a matter of calling `Integer.valueOf`
