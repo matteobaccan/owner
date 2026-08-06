@@ -46,6 +46,13 @@ public interface Config extends Serializable {
      * by {@link Sources} will be loaded, see {@link LoadType#FIRST}. User can also specify that the load policy is
      * {@link LoadType#MERGE} to have the properties files merged: properties are loaded in order from the first file to
      * the last, if there are conflicts in properties names the earlier files loaded prevail.
+     * <p>
+     * Being a single setting, this annotation is not accumulated across a hierarchy of interfaces: the first one
+     * found wins, that is the one declared on the mapping interface if it has one, otherwise the one declared on
+     * the first super-interface that has it, in declaration order. Note that the lookup only reaches the
+     * <b>direct</b> super-interfaces: an annotation two levels up is silently ignored. That is a known
+     * limitation, and it differs from {@link Prefix}, which counts at any depth.
+     * </p>
      *
      * @since 1.0.2
      */
@@ -65,6 +72,14 @@ public interface Config extends Serializable {
      * Specifies the source from which to load the properties file. It has to be specified in a URI string format.
      * By default, allowed protocols are the ones allowed by {@link java.net.URL} plus
      * <code>classpath:path/to/resource.properties</code>, but user can specify his own additional protocols.
+     * <p>
+     * Unlike {@link LoadPolicy} and {@link HotReload}, this annotation describes a set rather than a single
+     * setting, and across a hierarchy of interfaces it <b>accumulates</b>, by design: the URIs declared here come
+     * first, followed by those declared on each super-interface, and the resulting list is the one the load
+     * policy is applied to. Note that only the <b>direct</b> super-interfaces are read: the sources declared two
+     * levels up are silently left out. That is a known limitation, and it differs from {@link Prefix}, which
+     * counts at any depth.
+     * </p>
      *
      * @since 1.0.2
      */
@@ -297,6 +312,10 @@ public interface Config extends Serializable {
      *
      * <p>
      * To intercept the {@link org.aeonbits.owner.event.ReloadEvent} see {@link Reloadable#addReloadListener(org.aeonbits.owner.event.ReloadListener)}.
+     * <p>
+     * Being a single setting, this annotation follows the same rule as {@link LoadPolicy} across a hierarchy of
+     * interfaces: the first one found wins, and the lookup only reaches the <b>direct</b> super-interfaces, so an
+     * annotation two levels up is silently ignored and no reloading takes place.
      *
      * @since 1.0.4
      */
