@@ -2,7 +2,7 @@
 layout: docs
 title: Basic usage
 prev_section: installation
-next_section: loading-strategies
+next_section: key-prefix
 permalink: /docs/usage/
 ---
 
@@ -130,6 +130,11 @@ public interface ServerConfig extends Config {
 
 The `@DefaultValue` and `@Key` annotations are the basics to start using the
 OWNER API.
+
+Notice that the three keys above share the same `server.` prefix, as it
+commonly happens. Since version 1.0.13 you can state that prefix once, on the
+interface, instead of repeating it on every method: see
+[Key prefix]({{ site.url }}/docs/key-prefix/).
 
 <div class="note">
   <h5>You can leave the properties file away during development!</h5>

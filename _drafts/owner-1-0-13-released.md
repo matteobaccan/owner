@@ -69,6 +69,16 @@ Enhancements
    on access if a mandatory property disappears later (e.g. after a hot reload). See the
    [documentation]({{ site.url }}/docs/usage/#toc_4). Originally proposed by Alexander Poulikakos in
    [#216](https://github.com/matteobaccan/owner/pull/216).
+ * New `@Prefix` annotation: declare the common prefix of a group of keys once, on the interface, instead of
+   repeating it in the `@Key` of every method. `@Prefix("server.")` makes `String hostname()` resolve to
+   `server.hostname`, and it is prepended to the `@Key` value as well. The prefix belongs to the interface that
+   *declares* the method, so it never leaks onto the methods a sub-interface inherits, at any depth of the
+   hierarchy; it is expanded like the rest of the key, so `@Prefix("servers.${env}.")` selects a section at
+   runtime; and it can be switched off per method or per interface with
+   `@DisableFeature(PREFIX)`, a new value of `DisableableFeature`. Nothing changes for existing configurations:
+   an interface without `@Prefix` resolves its keys exactly as before. See the
+   [documentation]({{ site.url }}/docs/key-prefix/). Originally proposed by Gmugra in
+   [#273](https://github.com/matteobaccan/owner/pull/273).
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
  * Variables can now carry a default value: `${db.host:localhost}` resolves to `localhost` when `db.host` is
@@ -133,6 +143,9 @@ Site Enhancements
  * New documentation for the [Preprocessors]({{ site.url }}/docs/preprocessors/) feature (available since 1.0.9,
    never documented).
  * New documentation for the [JMX support]({{ site.url }}/docs/jmx/) (available since 1.0.10, never documented).
+ * New chapter on the [Key prefix]({{ site.url }}/docs/key-prefix/) feature, and the list of the
+   [disableable features]({{ site.url }}/docs/disabling-features/) is now spelled out, with the version each
+   one appeared in.
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
  * [Crypto support]({{ site.url }}/docs/crypto/) is no longer labelled as experimental: the `@EncryptedValue` and
    `@DecryptorClass` annotations have shipped unchanged since 1.0.10 and are part of the stable API.
