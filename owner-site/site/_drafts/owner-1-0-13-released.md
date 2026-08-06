@@ -90,6 +90,21 @@ Enhancements
    defined, yielded the empty string up to 1.0.12 and yields `b` from now on. See the
    [documentation]({{ site.url }}/docs/variables-expansion/). Proposed by Ilya Koshaleu in
    [#256](https://github.com/matteobaccan/owner/pull/256).
+ * Variables can now be nested: the expression inside `${...}` is expanded first, and the result is then looked
+   up as a key, so `${servers.${env}.url}` reads the key named by the value of `env`. It works at any depth, in
+   the `@Key`, in a property value and in the `@Sources` specification, and it combines with the default values
+   above — `${servers.${env}.url:http://localhost}`. This is what makes a key depend on a key that itself
+   depends on another one, the case that produced silently wrong lookups before. See the
+   [documentation]({{ site.url }}/docs/variables-expansion/#toc_3). Proposed by Tomek in
+   [#326](https://github.com/matteobaccan/owner/pull/326).
+
+   **Compatibility.** This is the one change in this release that touches an existing parsing rule: up to 1.0.12
+   a `${` was closed by the first `}` that followed it, now it is closed by the one that matches it. Only the
+   `${` sequence opens a nesting level, so a lone brace inside an expression remains ordinary text and a key such
+   as `a{b` keeps resolving; `${}` and an unbalanced `${` are left alone as before. A configuration that uses
+   plain variables is therefore unaffected. Should some unforeseen combination of braces read differently, the
+   whole behaviour can be switched off for the JVM with `-Downer.nested.variable.expansion=false`, which runs the
+   substitution of the previous releases unchanged.
  * New `@CollectionConverterClass` annotation: hands the raw property value to a single converter instead of
    splitting it first and converting one element at a time, as `@ConverterClass` does. It is the way to opt out of
    the built-in tokenization — for a property holding a single JSON document, say — or to return a collection type
@@ -146,6 +161,8 @@ Site Enhancements
  * New chapter on the [Key prefix]({{ site.url }}/docs/key-prefix/) feature, and the list of the
    [disableable features]({{ site.url }}/docs/disabling-features/) is now spelled out, with the version each
    one appeared in.
+ * New sections on [nested variables]({{ site.url }}/docs/variables-expansion/#toc_3) and on
+   [how to switch them off]({{ site.url }}/docs/variables-expansion/#toc_4) in Variables expansion.
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
  * [Crypto support]({{ site.url }}/docs/crypto/) is no longer labelled as experimental: the `@EncryptedValue` and
    `@DecryptorClass` annotations have shipped unchanged since 1.0.10 and are part of the stable API.
