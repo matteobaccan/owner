@@ -78,6 +78,12 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
     private Object resolveProperty(Method method, Object... args) {
         String key = expandKey(method, args);
+
+        if (PropertiesAggregator.aggregates(method))
+            return PropertiesAggregator.aggregate(method, key, propertiesManager,
+                    entry -> propertiesManager.decryptIfNecessary(method,
+                            expandVariables(method, preProcess(method, entry))));
+
         String value = lookupValue(method, key);
         if (value == null) {
             if (isMandatory(method))

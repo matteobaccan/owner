@@ -105,6 +105,28 @@ Enhancements
    plain variables is therefore unaffected. Should some unforeseen combination of braces read differently, the
    whole behaviour can be switched off for the JVM with `-Downer.nested.variable.expansion=false`, which runs the
    substitution of the previous releases unchanged.
+ * A `Map` return type now reads the **group of properties below the key of the method**, closing a request open
+   since 2013 ([#41](https://github.com/matteobaccan/owner/issues/41)):
+
+   ```properties
+   something.foo=1
+   something.bar=2
+   ```
+
+   ```java
+   Map<String, Integer> something();     // {foo=1, bar=2}
+   ```
+
+   Both sides of the entry go through the regular type conversion, so `Map<Integer, String>` and
+   `Map<Colour, String>` work as well; the group is named like any other key, so `@Key`, `@Prefix` and variable
+   expansion all apply — `@Key("servers.${env}")` picks the section at runtime. A name with further dots keeps
+   them, so `something.a.b` becomes the entry `a.b`; no match gives an empty map rather than `null`; the
+   declared map type is honoured, a `SortedMap` coming back as a `TreeMap`; and `@DefaultValue` is refused on
+   such a method, since a default belongs to the individual properties. A `@ConverterClass` still takes
+   precedence, which is how the other shape of the request — one property whose value holds the pairs, as asked
+   in [#286](https://github.com/matteobaccan/owner/issues/286) — keeps working. Nothing can break: a `Map`
+   return type used to throw on every access, so no working configuration relied on it. See the
+   [documentation]({{ site.url }}/docs/type-conversion/).
  * A circular variable reference is now reported instead of being followed. A property whose value leads back to
    the property itself cannot be resolved, and an `IllegalArgumentException` names the chain that closes the
    loop — `Circular variable reference: ${a} -> ${b} -> ${a}` — where up to 1.0.12 the same configuration
@@ -178,11 +200,11 @@ Site Enhancements
    the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
    unchanged in 1.0.13 and is now covered by tests, so that changing it will be a deliberate step.
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
- * [Type conversion]({{ site.url }}/docs/type-conversion/) no longer stops at "`Map` is not supported", which
-   reads as "cannot be done" and has been sending people away since at least
-   [#41](https://github.com/matteobaccan/owner/issues/41). There is no *automatic* conversion, because there is
-   no single obvious way to write a map in a properties file, but a `@ConverterClass` reads one in a few lines
-   and the chapter now shows how, arrays of maps included.
+ * [Type conversion]({{ site.url }}/docs/type-conversion/) no longer stops at "`Map` is not supported", a
+   sentence that read as "cannot be done" and had been sending people away since at least
+   [#41](https://github.com/matteobaccan/owner/issues/41). The chapter now describes the grouping above, and
+   keeps the `@ConverterClass` recipe for the case where a single property value holds the pairs — arrays of
+   maps included.
  * New section on [overriding a property in a sub-interface]({{ site.url }}/docs/usage/#toc_5), answering
    [#421](https://github.com/matteobaccan/owner/issues/421): an override redirects a property instead of adding
    one, since there is one method and therefore one key. Both of the things usually wanted there — keeping the

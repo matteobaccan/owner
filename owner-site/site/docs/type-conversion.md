@@ -130,11 +130,52 @@ public interface MyConfig extends Config {
 
   [EnumSet]: https://docs.oracle.com/javase/8/docs/api/java/util/EnumSet.html
 
-The [`Map`][Map] interface and sub-interfaces have no automatic conversion:
-there is no single obvious way to write a map in a properties file, so OWNER
-does not guess one. A property holding name/value pairs is read into a map
-with a [`@ConverterClass`](#toc_1), which receives the whole value and returns
-whatever it likes:
+A [`Map`][Map] return type reads a **group of properties**: the ones whose
+name starts with the key of the method, followed by a dot. The rest of the
+name becomes the entry key.
+
+```properties
+something.foo=1
+something.bar=2
+something.baz=3
+```
+
+```java
+public interface MyConfig extends Config {
+    Map<String, Integer> something();     // {foo=1, bar=2, baz=3}
+}
+```
+
+Both sides of the entry go through the regular type conversion, so neither is
+limited to strings: `Map<Integer, String>` and `Map<Colour, String>` work as
+you would expect, and so does anything else OWNER can convert. The group is
+named like any other key, which means [`@Key`]({{ site.url }}/docs/usage/) and
+[`@Prefix`]({{ site.url }}/docs/key-prefix/) select it, and a variable can
+pick it at runtime:
+
+```java
+@Key("servers.${env}")
+Map<String, String> servers();      // servers.dev.* when env is dev
+```
+
+A name with further dots in it keeps them: `something.a.b=2` becomes the entry
+`a.b`, so nothing is dropped and nothing has to be escaped. When no property
+matches, the result is an empty map, never `null`. The declared type is
+honoured — a `SortedMap` comes back as a `TreeMap`, a plain `Map` as a
+`LinkedHashMap`, and a concrete class with a no-argument constructor is
+instantiated as it is. `@DefaultValue` is refused on such a method: a default
+belongs to the individual properties, not to the group.
+
+<div class="note info">
+  <h5>The other shape: one property holding the pairs.</h5>
+  <p>
+    Sometimes the pairs live inside a single property value, rather than being properties of their own. That
+    form has no canonical syntax — comma or space, equals or colon — so OWNER does not guess one: hand the value
+    to a <a href="#toc_1"><code>@ConverterClass</code></a>, which receives it whole and returns whatever map it
+    likes. The presence of the converter is what tells the two shapes apart, and it takes precedence over the
+    grouping described above.
+  </p>
+</div>
 
 ```properties
 settings=host=localhost, port=8080, mode=debug
@@ -173,9 +214,6 @@ the converter is handed one chunk at a time.
               "name=Alessandro Manzoni, book=The Betrothed")
 Map<String, String>[] authors();
 ```
-
-Without a converter, a `Map` return type fails with an
-`UnsupportedOperationException` naming the type it could not convert to.
 
   [Map]: http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
 
@@ -437,8 +475,8 @@ But there is more. OWNER API supports automatic conversion for:
   12. Any object that can be instantiated via `@ConverterClass` annotation explained before.
   13. Any Java Collections of all above types: Set, List, SortedSet, EnumSet (since 1.0.13) or concrete
       implementations like LinkedHashSet or user defined collections having a default no-arg constructor.
-      [`Map`][Map] and sub-interfaces have no automatic conversion, but are read through a
-      [`@ConverterClass`](#toc_1) as shown above.
+  14. [`Map`][Map] and sub-interfaces (since 1.0.13), reading the group of properties below the key of the
+      method, with both the keys and the values converted to the declared types.
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
 with some meaningful description to identify the problem as quickly as possible.

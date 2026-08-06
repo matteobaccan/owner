@@ -15,19 +15,18 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * See: https://github.com/lviggiano/owner/issues/286
  * <p>
- * There is no automatic conversion to {@link Map} — that is the long standing request in
- * <a href="https://github.com/matteobaccan/owner/issues/41">#41</a> — but a name/value property is read into a
- * Map with a {@code @ConverterClass}, which receives the whole value and returns whatever it likes. The
- * documentation used to say only that Maps are not supported, which reads as "cannot be done": these tests pin
- * the recipe it now shows.
+ * The question here is one property whose <em>value</em> holds the name/value pairs, which is a different shape
+ * from the group of properties sharing a prefix asked for in
+ * <a href="https://github.com/matteobaccan/owner/issues/41">#41</a> and read by
+ * {@link org.aeonbits.owner.PropertiesAggregatorTest}. A {@code @ConverterClass} answers this one: it receives
+ * the whole value and returns whatever map it likes, and its presence is what tells the two shapes apart.
  */
 public class Issue286Test {
 
@@ -117,19 +116,23 @@ public class Issue286Test {
     }
 
     interface NoConverterConfig extends Config {
-        @DefaultValue("host=localhost, port=8080")
         Map<String, String> settings();
     }
 
-    /** Without a converter the failure names the type, rather than leaving the reader guessing. */
+    /**
+     * Without a converter the method reads the group of properties under its key, which is the other shape of
+     * the same question and is covered by {@link org.aeonbits.owner.PropertiesAggregatorTest}. The converter is
+     * therefore what distinguishes "this one property holds the pairs" from "the pairs are properties of their
+     * own".
+     */
     @Test
-    public void withoutAConverterTheErrorSaysSo() {
-        try {
-            ConfigFactory.create(NoConverterConfig.class).settings();
-            fail("UnsupportedOperationException is expected");
-        } catch (UnsupportedOperationException e) {
-            assertTrue("unexpected message: " + e.getMessage(),
-                    e.getMessage().contains("Cannot convert") && e.getMessage().contains("java.util.Map"));
-        }
+    public void withoutAConverterTheGroupBelowTheKeyIsRead() {
+        Map<String, String> settings = ConfigFactory.create(NoConverterConfig.class, new Properties() {{
+            setProperty("settings.host", "localhost");
+            setProperty("settings.port", "8080");
+        }}).settings();
+
+        assertEquals(2, settings.size());
+        assertEquals("localhost", settings.get("host"));
     }
 }
