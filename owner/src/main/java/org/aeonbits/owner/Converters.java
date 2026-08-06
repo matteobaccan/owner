@@ -77,10 +77,33 @@ enum Converters {
                 // fail, and their special values must not end up as elements of the resulting array
                 if (value == SKIP)
                     throw unsupportedConversion(type, chunk);
-                Array.set(result, i, value == NULL ? null : value);
+                set(targetMethod, result, i, type, value == NULL ? null : value);
             }
 
             return result;
+        }
+
+        /**
+         * Stores one converted element, turning the {@link IllegalArgumentException} thrown by
+         * {@link Array#set} into something that says what to do about it. It means the converter produced
+         * something that is not an element of the collection, which is what happens when a
+         * {@link ConverterClass} meant to build the whole collection is used on a method returning one:
+         * that annotation converts one element at a time.
+         */
+        private void set(Method targetMethod, Object array, int index, Class<?> type, Object value) {
+            try {
+                Array.set(array, index, value);
+            } catch (IllegalArgumentException e) {
+                if (targetMethod.getAnnotation(ConverterClass.class) == null)
+                    throw e;
+                throw unsupported(e,
+                        "The @ConverterClass of '%s' returned a %s, which is not an element of type %s: "
+                                + "@ConverterClass converts one element at a time, so it has to return one. "
+                                + "Use @CollectionConverterClass to convert the whole value at once instead",
+                        targetMethod.getName(),
+                        value == null ? "null" : value.getClass().getName(),
+                        type.getName());
+            }
         }
     },
 
