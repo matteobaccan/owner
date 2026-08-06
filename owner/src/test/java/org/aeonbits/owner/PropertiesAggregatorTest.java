@@ -232,6 +232,41 @@ public class PropertiesAggregatorTest {
         }
     }
 
+    // -- the same map, written in two ways -------------------------------------------------------------
+
+    /** The pairs are properties of their own: nothing to declare, the group below the key is read. */
+    interface AsSeparatePropertiesConfig extends Config {
+        Map<String, String> server();
+    }
+
+    /** The pairs live inside one property value: the converter says how that value is written. */
+    interface AsSingleValueConfig extends Config {
+        @ConverterClass(PairsConverter.class)
+        Map<String, String> server();
+    }
+
+    /**
+     * The two readings are two ways of writing the same configuration, and they produce the same map. What
+     * decides which one applies is the shape of the properties file, and the converter that goes with it.
+     */
+    @Test
+    public void theSameMapCanBeWrittenInTwoWays() {
+        Map<String, String> asProperties = ConfigFactory.create(AsSeparatePropertiesConfig.class,
+                new Properties() {{
+                    setProperty("server.host", "localhost");
+                    setProperty("server.port", "8080");
+                }}).server();
+
+        Map<String, String> asOneValue = ConfigFactory.create(AsSingleValueConfig.class,
+                new Properties() {{
+                    setProperty("server", "host=localhost, port=8080");
+                }}).server();
+
+        assertEquals(asProperties, asOneValue);
+        assertEquals("localhost", asProperties.get("host"));
+        assertEquals("8080", asProperties.get("port"));
+    }
+
     // -- an explicit converter still wins --------------------------------------------------------------
 
     public static class PairsConverter implements Converter<Map<String, String>> {

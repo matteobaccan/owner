@@ -13,7 +13,7 @@ Enhancements
 ------------
 
  * New `@ConverterClass` annotation.
-   See [The @ConverterClass annotation]({{ site.url }}/docs/type-conversion/#toc_1), [#38][issue-38].
+   See [The @ConverterClass annotation]({{ site.url }}/docs/type-conversion/#toc_2), [#38][issue-38].
  * Hot reload for file based sources.
    See [Automatic "hot reload"]({{ site.url }}/docs/reload/#toc_1), [#15][issue-15].
  * toString() method can be invoked on the Config object to get some useful text for debugging.
