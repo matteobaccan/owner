@@ -16,6 +16,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -244,6 +246,15 @@ enum Converters {
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
             if (targetType != File.class) return SKIP;
             return new File(expandUserHome(text));
+        }
+    },
+
+    /** Same treatment as {@link #FILE}, so that the two ways of naming a path behave alike. */
+    PATH {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+            if (targetType != Path.class) return SKIP;
+            return Paths.get(expandUserHome(text));
         }
     },
 
