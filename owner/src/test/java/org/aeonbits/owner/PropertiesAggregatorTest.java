@@ -7,12 +7,17 @@
  */
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.Config.DecryptorClass;
 import org.aeonbits.owner.Config.DefaultValue;
+import org.aeonbits.owner.Config.EncryptedValue;
 import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.Prefix;
+import org.aeonbits.owner.Config.PreprocessorClasses;
+import org.aeonbits.owner.crypto.Decryptor;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -212,6 +217,97 @@ public class PropertiesAggregatorTest {
         }}).group();
 
         assertEquals("http://devhost/api", map.get("url"));
+    }
+
+    public static class Unwrap implements Preprocessor {
+        @Override
+        public String process(String input) {
+            return input.replace("[", "").replace("]", "");
+        }
+    }
+
+    @PreprocessorClasses(Unwrap.class)
+    interface PreprocessedConfig extends Config {
+        Map<String, String> group();
+    }
+
+    /** Every value of the group goes through the preprocessors of the method, one entry at a time. */
+    @Test
+    public void theValuesArePreprocessed() {
+        Map<String, String> map = ConfigFactory.create(PreprocessedConfig.class, new Properties() {{
+            setProperty("group.a", "[one]");
+            setProperty("group.b", "[two]");
+        }}).group();
+
+        assertEquals("one", map.get("a"));
+        assertEquals("two", map.get("b"));
+    }
+
+    public static class Unscramble implements Decryptor {
+        @Override
+        public String decrypt(String value) {
+            return new StringBuilder(value).reverse().toString();
+        }
+
+        @Override
+        public String decrypt(String value, String defaultValue) {
+            return value == null ? defaultValue : decrypt(value);
+        }
+    }
+
+    @DecryptorClass(Unscramble.class)
+    interface EncryptedGroupConfig extends Config {
+        @EncryptedValue
+        Map<String, String> group();
+    }
+
+    /** {@code @EncryptedValue} applies to the group as well, decrypting each value on its own. */
+    @Test
+    public void theValuesAreDecrypted() {
+        Map<String, String> map = ConfigFactory.create(EncryptedGroupConfig.class, new Properties() {{
+            setProperty("group.a", "tsohlacol");
+            setProperty("group.b", "0808");
+        }}).group();
+
+        assertEquals("localhost", map.get("a"));
+        assertEquals("8080", map.get("b"));
+    }
+
+    // -- the edges of the declared type ----------------------------------------------------------------
+
+    interface WildcardConfig extends Config {
+        Map<String, ? extends Number> group();
+    }
+
+    /**
+     * A type argument that is not a plain class - a wildcard here, a type variable elsewhere - cannot name a
+     * conversion target, so it falls back to String, exactly as a raw Map does.
+     */
+    @Test
+    public void aWildcardTypeArgumentFallsBackToString() {
+        Map<String, ? extends Number> map = ConfigFactory.create(WildcardConfig.class, new Properties() {{
+            setProperty("group.a", "1");
+        }}).group();
+
+        assertEquals("1", map.get("a"));
+    }
+
+    interface NotInstantiableConfig extends Config {
+        EnumMap<Colour, String> group();
+    }
+
+    /** A concrete map type with no no-argument constructor is reported, rather than failing obscurely. */
+    @Test
+    public void aMapTypeThatCannotBeInstantiatedIsReported() {
+        try {
+            ConfigFactory.create(NotInstantiableConfig.class, new Properties() {{
+                setProperty("group.GREEN", "jms/QueueA");
+            }}).group();
+            fail("UnsupportedOperationException is expected");
+        } catch (UnsupportedOperationException e) {
+            assertTrue("unexpected message: " + e.getMessage(),
+                    e.getMessage().contains("Cannot instantiate map of type 'java.util.EnumMap'"));
+        }
     }
 
     // -- what is refused ------------------------------------------------------------------------------
