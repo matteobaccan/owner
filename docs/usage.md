@@ -232,6 +232,71 @@ public interface DatabaseConfig extends Config {
   </p>
 </div>
 
+Overriding a property in a sub-interface
+---------------------------------------
+
+A *mapping interface* can extend another one and re-declare one of its
+methods, to give it a different key or a different default value:
+
+```java
+public interface BaseConfig extends Config {
+    @Key("feature.default.setting")
+    @DefaultValue("-1")
+    long setting();
+}
+
+public interface FeatureConfig extends BaseConfig {
+    @Key("feature.concrete.setting")
+    @DefaultValue("42")
+    @Override
+    long setting();
+}
+```
+
+An override **redirects** the property rather than adding one: `setting()`
+reads `feature.concrete.setting`, and `feature.default.setting` is no longer
+part of this configuration — `getProperty()` returns `null` for it, and its
+`@DefaultValue` is not registered. There is one method, so there is one key.
+That follows from Java itself: an overriding declaration hides the one it
+overrides, and OWNER sees a single `setting()` method.
+
+Two things are commonly wanted here, and both are written down explicitly
+rather than inferred from the override.
+
+**To keep reading the base key as well**, declare an accessor for it instead
+of relying on the overridden declaration:
+
+```java
+public interface FeatureConfig extends BaseConfig {
+    @Key("feature.concrete.setting")
+    @DefaultValue("42")
+    @Override
+    long setting();
+
+    @Key("feature.default.setting")
+    @DefaultValue("-1")
+    long baseSetting();
+}
+```
+
+**To make the concrete setting fall back to the base one** — an overlay,
+rather than a replacement — say so with a
+[variable]({{ site.url }}/docs/variables-expansion/):
+
+```java
+@Key("feature.concrete.setting")
+@DefaultValue("${feature.default.setting:-1}")
+@Override
+long setting();
+```
+
+`setting()` now returns `feature.concrete.setting` when it is defined,
+otherwise `feature.default.setting`, otherwise `-1`. Note that this is a
+chain of three and that the fallback works on the *properties* too, not only
+on the default values: setting `feature.default.setting` in a properties file
+changes the answer, which is not something an inherited `@DefaultValue` could
+ever do.
+
 Conclusions
 -----------
 

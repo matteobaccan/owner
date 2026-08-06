@@ -178,6 +178,11 @@ Site Enhancements
    the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
    unchanged in 1.0.13 and is now covered by tests, so that changing it will be a deliberate step.
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
+ * New section on [overriding a property in a sub-interface]({{ site.url }}/docs/usage/#toc_5), answering
+   [#421](https://github.com/matteobaccan/owner/issues/421): an override redirects a property instead of adding
+   one, since there is one method and therefore one key. Both of the things usually wanted there — keeping the
+   base key readable, and making the concrete setting fall back to the base one — are shown written down
+   explicitly, the second one as a three-level chain built with a variable.
  * [Crypto support]({{ site.url }}/docs/crypto/) is no longer labelled as experimental: the `@EncryptedValue` and
    `@DecryptorClass` annotations have shipped unchanged since 1.0.10 and are part of the stable API.
  * Documentation refreshed to the current state of the project: installation instructions, build requirements,
