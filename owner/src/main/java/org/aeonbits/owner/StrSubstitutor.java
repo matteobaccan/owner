@@ -8,7 +8,9 @@
 package org.aeonbits.owner;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,7 +90,15 @@ class StrSubstitutor implements Serializable {
     String replace(String source) {
         if (source == null)
             return null;
-        return nested ? replaceNested(source) : replaceFlat(source);
+        return replace(source, new LinkedHashSet<String>());
+    }
+
+    /**
+     * @param resolving the expressions being resolved further up the recursion, in order, used to detect a
+     *                  circular reference before it exhausts the stack.
+     */
+    private String replace(String source, Set<String> resolving) {
+        return nested ? replaceNested(source, resolving) : replaceFlat(source, resolving);
     }
 
     /**
@@ -96,11 +106,11 @@ class StrSubstitutor implements Serializable {
      * expression is whatever sits between <code>${</code> and the first <code>}</code> that follows it, and it
      * is looked up as it is written.
      */
-    private String replaceFlat(String source) {
+    private String replaceFlat(String source, Set<String> resolving) {
         Matcher m = PATTERN.matcher(source);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
-            String replacement = resolve(m.group(1));
+            String replacement = resolve(m.group(1), resolving);
             m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         m.appendTail(sb);
@@ -116,7 +126,7 @@ class StrSubstitutor implements Serializable {
      * Only the <code>${</code> sequence opens a nesting level: a lone brace inside an expression is ordinary
      * text, exactly as it was before, so a key such as <code>a{b</code> keeps resolving.</p>
      */
-    private String replaceNested(String source) {
+    private String replaceNested(String source, Set<String> resolving) {
         StringBuilder sb = new StringBuilder();
         int index = 0;
         while (index < source.length()) {
@@ -131,7 +141,8 @@ class StrSubstitutor implements Serializable {
                 continue;
             }
             sb.append(source, index, start);
-            sb.append(resolve(replace(source.substring(start + VARIABLE_START.length(), end))));
+            String expression = replace(source.substring(start + VARIABLE_START.length(), end), resolving);
+            sb.append(resolve(expression, resolving));
             index = end + 1;
         }
         sb.append(source, index, source.length());
@@ -167,21 +178,46 @@ class StrSubstitutor implements Serializable {
      * <code>:</code> read as the separator introducing a default value, so that <code>${key:default}</code> falls
      * back to <code>default</code> instead of to the empty string. Everything after that first colon is the
      * default, colons included, which keeps URLs, Windows paths and <code>host:port</code> pairs intact.</p>
+     * <p>
+     * A property whose value leads back to the property itself cannot be resolved, and is reported as the
+     * configuration error it is rather than being followed until the stack runs out. A default value does not
+     * make the reference resolvable, so it does not rescue it either: <code>db.host=${db.host:localhost}</code>
+     * is circular, and writing <code>db.host=localhost</code> is what was meant.</p>
      *
      * @param expression the text between <code>${</code> and <code>}</code>.
+     * @param resolving  the expressions being resolved further up the recursion, in order.
      * @return the replacement text; the empty string when nothing can be resolved and no default is given.
+     * @throws IllegalArgumentException if the expression is already being resolved further up the recursion.
      */
-    private String resolve(String expression) {
-        String value = values.getProperty(expression);
-        if (value != null)
-            return replace(value);
+    private String resolve(String expression, Set<String> resolving) {
+        if (!resolving.add(expression))
+            throw circularReference(expression, resolving);
+        try {
+            String value = values.getProperty(expression);
+            if (value != null)
+                return replace(value, resolving);
 
-        int separator = expression.indexOf(DEFAULT_VALUE_SEPARATOR);
-        if (separator == -1)
-            return "";
+            int separator = expression.indexOf(DEFAULT_VALUE_SEPARATOR);
+            if (separator == -1)
+                return "";
 
-        value = values.getProperty(expression.substring(0, separator));
-        return (value != null) ? replace(value) : expression.substring(separator + 1);
+            value = values.getProperty(expression.substring(0, separator));
+            return (value != null) ? replace(value, resolving) : expression.substring(separator + 1);
+        } finally {
+            resolving.remove(expression);
+        }
+    }
+
+    private static IllegalArgumentException circularReference(String expression, Set<String> resolving) {
+        StringBuilder chain = new StringBuilder();
+        boolean started = false;
+        for (String step : resolving) {
+            started |= step.equals(expression);
+            if (started)
+                chain.append("${").append(step).append("} -> ");
+        }
+        chain.append("${").append(expression).append('}');
+        return new IllegalArgumentException("Circular variable reference: " + chain);
     }
 
     /**

@@ -375,10 +375,47 @@ system property:
 -Downer.nested.variable.expansion=false
 ```
 
-With that set, OWNER runs the substitution of the previous releases,
-unchanged, and a nested expression goes back to producing what it produced
-before. Any other value, or no value at all, leaves nesting enabled.
+With that set, OWNER matches braces the way the previous releases did — the
+first `}` closes the expression — and a nested expression goes back to
+producing what it produced before. Any other value, or no value at all, leaves
+nesting enabled. The detection of circular references described below applies
+either way.
 
 The switch is read when the `Config` object is created, so it has to be set
 before that — on the command line, or with `System.setProperty` early enough
 in the application startup.
+
+Circular references
+-------------------
+
+A property whose value leads back to the property itself cannot be resolved.
+Since version 1.0.13 that is reported as the configuration error it is, with
+an `IllegalArgumentException` naming the chain that closes the loop:
+
+```properties
+a=${b}
+b=${a}
+```
+
+```
+Circular variable reference: ${a} -> ${b} -> ${a}
+```
+
+It applies to a property referring to itself directly, to a loop of any
+length, and to a key built by [nesting](#toc_3).
+
+<div class="note warning">
+  <h5>A default value does not make a circular reference resolvable.</h5>
+  <p>
+    Shells and some frameworks use <code>db.host=${db.host:localhost}</code> to mean "keep the value if it is
+    already set, otherwise use this one". That idiom relies on the substitution being performed once, when the
+    value is assigned. OWNER expands variables when a property is <em>read</em>, and expands them inside values,
+    so the same line describes a property whose value asks for the property itself — a loop, not a fallback,
+    and one that a default value cannot break.
+  </p>
+  <p>
+    It is reported rather than quietly resolved to <code>localhost</code>, because what was meant is simply
+    <code>db.host=localhost</code>, and a configuration that says something else should say so out loud. Up to
+    1.0.12 the same line produced an empty string, and in the 1.0.13 development cycle it exhausted the stack.
+  </p>
+</div>
