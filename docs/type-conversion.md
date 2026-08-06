@@ -130,7 +130,52 @@ public interface MyConfig extends Config {
 
   [EnumSet]: https://docs.oracle.com/javase/8/docs/api/java/util/EnumSet.html
 
-The [`Map`][Map] interface and sub-interfaces are not supported.
+The [`Map`][Map] interface and sub-interfaces have no automatic conversion:
+there is no single obvious way to write a map in a properties file, so OWNER
+does not guess one. A property holding name/value pairs is read into a map
+with a [`@ConverterClass`](#toc_1), which receives the whole value and returns
+whatever it likes:
+
+```properties
+settings=host=localhost, port=8080, mode=debug
+```
+
+```java
+public interface MyConfig extends Config {
+    @ConverterClass(PairsConverter.class)
+    Map<String, String> settings();
+}
+
+public class PairsConverter implements Converter<Map<String, String>> {
+    public Map<String, String> convert(Method method, String input) {
+        Map<String, String> result = new LinkedHashMap<String, String>();
+        for (String pair : input.split(",", -1)) {
+            String[] entry = pair.split("=", 2);
+            result.put(entry[0].trim(), entry[1].trim());
+        }
+        return result;
+    }
+}
+```
+
+The converter decides both sides of the entry, so the values are not limited
+to strings — a `Map<String, Integer>` is a matter of calling `Integer.valueOf`
+in the loop above — and the map it returns is the one you get back, so the
+implementation and its iteration order are yours to choose.
+
+An array of maps works as well: the value is split by the separator first and
+the converter is handed one chunk at a time.
+
+```java
+@Separator(";")
+@ConverterClass(PairsConverter.class)
+@DefaultValue("name=Dante Alighieri, book=Divine Comedy;" +
+              "name=Alessandro Manzoni, book=The Betrothed")
+Map<String, String>[] authors();
+```
+
+Without a converter, a `Map` return type fails with an
+`UnsupportedOperationException` naming the type it could not convert to.
 
   [Map]: http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
 
@@ -392,7 +437,8 @@ But there is more. OWNER API supports automatic conversion for:
   12. Any object that can be instantiated via `@ConverterClass` annotation explained before.
   13. Any Java Collections of all above types: Set, List, SortedSet, EnumSet (since 1.0.13) or concrete
       implementations like LinkedHashSet or user defined collections having a default no-arg constructor.
-      [`Map`][Map] and sub-interfaces are not supported.
+      [`Map`][Map] and sub-interfaces have no automatic conversion, but are read through a
+      [`@ConverterClass`](#toc_1) as shown above.
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
 with some meaningful description to identify the problem as quickly as possible.
