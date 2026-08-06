@@ -178,6 +178,11 @@ Site Enhancements
    the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
    unchanged in 1.0.13 and is now covered by tests, so that changing it will be a deliberate step.
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
+ * [Type conversion]({{ site.url }}/docs/type-conversion/) no longer stops at "`Map` is not supported", which
+   reads as "cannot be done" and has been sending people away since at least
+   [#41](https://github.com/matteobaccan/owner/issues/41). There is no *automatic* conversion, because there is
+   no single obvious way to write a map in a properties file, but a `@ConverterClass` reads one in a few lines
+   and the chapter now shows how, arrays of maps included.
  * New section on [overriding a property in a sub-interface]({{ site.url }}/docs/usage/#toc_5), answering
    [#421](https://github.com/matteobaccan/owner/issues/421): an override redirects a property instead of adding
    one, since there is one method and therefore one key. Both of the things usually wanted there — keeping the
