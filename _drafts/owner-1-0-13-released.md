@@ -163,6 +163,12 @@ Site Enhancements
    one appeared in.
  * New sections on [nested variables]({{ site.url }}/docs/variables-expansion/#toc_3) and on
    [how to switch them off]({{ site.url }}/docs/variables-expansion/#toc_4) in Variables expansion.
+ * New section on [Sources and interface inheritance]({{ site.url }}/docs/loading-strategies/#toc_1), writing down
+   what was until now only implicit in the code: `@Sources` accumulates across the interfaces a mapping interface
+   extends — by design, since it describes a set and not a single setting — while `@LoadPolicy` and `@HotReload`
+   take the first annotation found. The section also documents the limitation the three of them share, that only
+   the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
+   unchanged in 1.0.13 and is now covered by tests, so that changing it will be a deliberate step.
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
  * [Crypto support]({{ site.url }}/docs/crypto/) is no longer labelled as experimental: the `@EncryptedValue` and
    `@DecryptorClass` annotations have shipped unchanged since 1.0.10 and are part of the stable API.

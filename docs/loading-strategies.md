@@ -89,3 +89,53 @@ The `@Sources` annotation considers system properties and/or environment variabl
 `file:${user.home}/.myapp.config` (this gets resolved by 'user.home' system property) or `file:${HOME}/.myapp.config`
 (this gets resolved by the$HOME environment variable). The `~` used in the previous example is another example of
 variable expansion, and it is equivalent to `${user.home}`.
+
+Sources and interface inheritance
+---------------------------------
+
+When a *mapping interface* extends other interfaces, `@Sources` behaves
+differently from the other interface-level annotations, **and that is
+deliberate**: it does not pick one annotation and ignore the rest, it
+**accumulates**. The URIs declared on the interface come first, followed by
+those declared on each of its super-interfaces, and the resulting list is the
+one the load policy is applied to.
+
+```java
+@Sources("classpath:common.properties")
+public interface CommonConfig extends Config {
+    String applicationName();
+}
+
+@Sources("classpath:server.properties")
+@LoadPolicy(LoadType.MERGE)
+public interface ServerConfig extends CommonConfig {
+    int port();
+}
+```
+
+`ServerConfig` reads `server.properties` *and* `common.properties`, in that
+order, so a property defined in both is taken from `server.properties`. This
+is what makes it possible to describe a shared set of defaults once and let
+each configuration override the part it cares about, which is the whole point
+of extending a mapping interface.
+
+Contrast this with `@LoadPolicy` and `@HotReload`, which describe a single
+setting and therefore cannot be accumulated: for those, the first annotation
+found wins — the one on the interface if it has one, otherwise the one on the
+first super-interface that declares it, in declaration order.
+
+<div class="note warning">
+  <h5>Only the direct super-interfaces are considered.</h5>
+  <p>
+    All three annotations — <code>@Sources</code>, <code>@LoadPolicy</code> and <code>@HotReload</code> — are
+    looked up on the mapping interface and on the interfaces it extends <em>directly</em>. An annotation sitting
+    two levels up, on the parent of a parent, is silently ignored: its sources are not loaded, and its policy
+    or reload interval does not apply.
+  </p>
+  <p>
+    This is a known limitation rather than a design decision, and it differs from
+    <a href="{{ site.url }}/docs/key-prefix/"><code>@Prefix</code></a>, which counts at any depth of the
+    hierarchy. Until it is addressed, declare these annotations on the interface you pass to the
+    <code>ConfigFactory</code>, or on one it extends directly.
+  </p>
+</div>
