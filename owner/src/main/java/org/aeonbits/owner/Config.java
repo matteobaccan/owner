@@ -138,6 +138,50 @@ public interface Config extends Serializable {
     }
 
     /**
+     * Specifies a prefix that is prepended to the keys of all the properties declared in the annotated
+     * interface.
+     * <p>
+     * The prefix applies to the key derived from the method name as well as to the one specified with
+     * {@link Key}: given <code>@Prefix("server.")</code>, the method <code>String name();</code> is
+     * looked up as <code>server.name</code>, and <code>@Key("host.name") String host();</code> is looked
+     * up as <code>server.host.name</code>.
+     * </p>
+     * <p>
+     * The prefix is not inherited by sub-interfaces: <b>every method takes the prefix of the interface
+     * where it is declared</b>, so the prefix of a sub-interface does not leak onto the methods it
+     * inherits, and the methods declared in a super-interface keep the prefix of that super-interface at
+     * any depth of the hierarchy.
+     * </p>
+     * <p>
+     * The prefix is subject to {@link DisableableFeature#VARIABLE_EXPANSION variable expansion} just like
+     * the rest of the key, so <code>@Prefix("servers.${env}.")</code> is a valid prefix.
+     * </p>
+     * <p>
+     * The prefix is concatenated to the key literally, and no separator is added in between: ending it
+     * with the separator you want to use, typically a dot, is the recommended way to write it, but a
+     * prefix that does not end with one is a valid naming scheme rather than an error, and is left
+     * alone.
+     * </p>
+     * <p>
+     * The prefix can be switched off for a single method or for a whole interface with
+     * <code>@DisableFeature(DisableableFeature.PREFIX)</code>.
+     * </p>
+     *
+     * @since 1.0.13
+     */
+    @Retention(RUNTIME)
+    @Target(TYPE)
+    @Documented
+    @interface Prefix {
+        /**
+         * The prefix prepended to the keys of the properties declared in the annotated interface.
+         *
+         * @return the property key prefix.
+         */
+        String value();
+    }
+
+    /**
      * When a value should be decrypted this annotation is needed.
      * If value is not supplied it is assumed that the {@link Decryptor} set in {@link DecryptorClass} will be used.
      * This overrides the {@link EncryptedValue} decryptor defined for the class.
@@ -346,7 +390,14 @@ public interface Config extends Serializable {
         /** Disables variable expansion, i.e. <code>${...}</code> substitution in property values. */
         VARIABLE_EXPANSION,
         /** Disables parameter formatting, i.e. positional <code>{0}</code> argument substitution. */
-        PARAMETER_FORMATTING
+        PARAMETER_FORMATTING,
+        /**
+         * Disables the {@link Prefix} declared on the interface, so that the annotated method — or every
+         * method of the annotated interface — is looked up with its bare key.
+         *
+         * @since 1.0.13
+         */
+        PREFIX
     }
 
     /**

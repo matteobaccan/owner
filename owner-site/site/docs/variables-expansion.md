@@ -236,6 +236,10 @@ to the appropriate section.
 In the above example I selected "uat" as value for the `${env}` variables, so the "user acceptance test" configuration
 would be selected.
 
+Since version 1.0.13 the repeated `servers.${env}.` part can be declared once
+on the interface with the `@Prefix` annotation, which is expanded exactly like
+the `@Key`: see [Key prefix]({{ site.url }}/docs/key-prefix/).
+
 Default values
 --------------
 

@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Loading strategies
-prev_section: usage
+prev_section: key-prefix
 next_section: importing-properties
 permalink: /docs/loading-strategies/
 ---
