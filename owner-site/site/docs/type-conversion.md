@@ -112,7 +112,7 @@ a default no-arg constructor.
   [Stack]: http://docs.oracle.com/javase/7/docs/api/java/util/Stack.html
   [LinkedList]: http://docs.oracle.com/javase/7/docs/api/java/util/LinkedList.html
 
-Since version 1.0.13, [`EnumSet`][EnumSet] is also supported for enum types:
+Since version 2.0.0, [`EnumSet`][EnumSet] is also supported for enum types:
 
 ```java
 public interface MyConfig extends Config {
@@ -404,7 +404,7 @@ The @CollectionConverterClass annotation
 `@ConverterClass` converts *one element at a time*: OWNER splits the property value first, then calls the
 converter on each piece. When you need to take over the whole value instead, use
 [`@CollectionConverterClass`](https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Config.CollectionConverterClass.html),
-available since version 1.0.13. The raw value is handed to the converter untouched, and the collection it
+available since version 2.0.0. The raw value is handed to the converter untouched, and the collection it
 returns is the one the method gives back.
 
 This is what you want when:
@@ -473,9 +473,9 @@ But there is more. OWNER API supports automatic conversion for:
       (See [PropertyEditorTest] as an example).
   11. Any array having above types as elements.
   12. Any object that can be instantiated via `@ConverterClass` annotation explained before.
-  13. Any Java Collections of all above types: Set, List, SortedSet, EnumSet (since 1.0.13) or concrete
+  13. Any Java Collections of all above types: Set, List, SortedSet, EnumSet (since 2.0.0) or concrete
       implementations like LinkedHashSet or user defined collections having a default no-arg constructor.
-  14. [`Map`][Map] and sub-interfaces (since 1.0.13), reading the group of properties below the key of the
+  14. [`Map`][Map] and sub-interfaces (since 2.0.0), reading the group of properties below the key of the
       method, with both the keys and the values converted to the declared types.
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]

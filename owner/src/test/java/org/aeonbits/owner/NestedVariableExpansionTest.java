@@ -310,7 +310,7 @@ public class NestedVariableExpansionTest {
 
         System.setProperty(NESTED_VARIABLE_EXPANSION, "false");
 
-        // the pre-1.0.13 substitution: the first } closes the expression, so the key looked up is
+        // the pre-2.0.0 substitution: the first } closes the expression, so the key looked up is
         // "servers.${env" - which resolves to nothing - and ".url}" is left as it stands
         assertEquals(".url}", new StrSubstitutor(values).replace("${servers.${env}.url}"));
     }

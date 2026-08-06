@@ -9,5 +9,5 @@ WEBSITE
 
 - [x] Write documentation for pre processing feature (see [Preprocessors](https://matteobaccan.github.io/owner/docs/preprocessors/))
 - [x] Write documentation for JMX support (see [JMX support](https://matteobaccan.github.io/owner/docs/jmx/))
-- [ ] Update the release note: a draft for 1.0.13 is ready in `owner-site/site/_drafts/owner-1-0-13-released.md`,
-      to be moved into `_posts/` (with the release date in the file name and front matter) when 1.0.13 is published.
+- [ ] Update the release note: a draft for 2.0.0 is ready in `owner-site/site/_drafts/owner-2-0-0-released.md`,
+      to be moved into `_posts/` (with the release date in the file name and front matter) when 2.0.0 is published.

@@ -132,7 +132,7 @@ The `@DefaultValue` and `@Key` annotations are the basics to start using the
 OWNER API.
 
 Notice that the three keys above share the same `server.` prefix, as it
-commonly happens. Since version 1.0.13 you can state that prefix once, on the
+commonly happens. Since version 2.0.0 you can state that prefix once, on the
 interface, instead of repeating it on every method: see
 [Key prefix]({{ site.url }}/docs/key-prefix/).
 
@@ -183,7 +183,7 @@ Mandatory properties
 --------------------
 
 Sometimes a configuration property is required and there is no sensible default
-for it: think of a database URL or an API key. Since version 1.0.13 you can mark
+for it: think of a database URL or an API key. Since version 2.0.0 you can mark
 such properties with the `@Mandatory` annotation:
 
 ```java

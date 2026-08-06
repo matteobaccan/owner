@@ -75,7 +75,7 @@ public interface Accessible extends Config {
      * @param comments a description of the property list.
      * @throws IOException if writing this property list to the specified writer throws an <code>IOException</code>.
      * @see java.util.Properties#store(java.io.Writer, String)
-     * @since 1.0.13
+     * @since 2.0.0
      */
     void store(Writer out, String comments) throws IOException;
 

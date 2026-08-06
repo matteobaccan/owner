@@ -236,14 +236,14 @@ to the appropriate section.
 In the above example I selected "uat" as value for the `${env}` variables, so the "user acceptance test" configuration
 would be selected.
 
-Since version 1.0.13 the repeated `servers.${env}.` part can be declared once
+Since version 2.0.0 the repeated `servers.${env}.` part can be declared once
 on the interface with the `@Prefix` annotation, which is expanded exactly like
 the `@Key`: see [Key prefix]({{ site.url }}/docs/key-prefix/).
 
 Default values
 --------------
 
-Since version 1.0.13, a variable can carry a default value, to be used when the property it refers to cannot be
+Since version 2.0.0, a variable can carry a default value, to be used when the property it refers to cannot be
 resolved. Write it after a colon:
 
 ```java
@@ -280,7 +280,7 @@ String cacheDir();       // C:\temp on a machine where cache.dir is not set
   <p>
   The one case that changes is a variable that used to resolve to nothing: <code>${a:b}</code>, with neither
   <code>a:b</code> nor <code>a</code> defined, yielded the empty string up to 1.0.12 and yields <code>b</code>
-  from 1.0.13 on.
+  from 2.0.0 on.
   </p>
 </div>
 
@@ -302,7 +302,7 @@ environments.dev.webdriver.chrome.switches=--incognito
 
 Reading `switches` means resolving `${environment}` first, then reading
 `environments.dev.browser` to find out which browser is selected, and only
-then building the key to look up. Since version 1.0.13 a variable can be
+then building the key to look up. Since version 2.0.0 a variable can be
 nested inside another one, which says exactly that:
 
 ```java
@@ -363,7 +363,7 @@ Disabling nested variables
 --------------------------
 
 Nesting changes how a `${` is matched with its `}`: up to 1.0.12 the first `}`
-closed the expression, from 1.0.13 it is the one that matches. Configurations
+closed the expression, from 2.0.0 it is the one that matches. Configurations
 that use nothing but plain variables are unaffected — that is what the whole
 test suite of the project verifies — but a value built out of braces in some
 unforeseen way could read differently.
@@ -389,7 +389,7 @@ Circular references
 -------------------
 
 A property whose value leads back to the property itself cannot be resolved.
-Since version 1.0.13 that is reported as the configuration error it is, with
+Since version 2.0.0 that is reported as the configuration error it is, with
 an `IllegalArgumentException` naming the chain that closes the loop:
 
 ```properties
@@ -416,6 +416,6 @@ length, and to a key built by [nesting](#toc_3).
   <p>
     It is reported rather than quietly resolved to <code>localhost</code>, because what was meant is simply
     <code>db.host=localhost</code>, and a configuration that says something else should say so out loud. Up to
-    1.0.12 the same line produced an empty string, and in the 1.0.13 development cycle it exhausted the stack.
+    1.0.12 the same line produced an empty string, and in the 2.0.0 development cycle it exhausted the stack.
   </p>
 </div>

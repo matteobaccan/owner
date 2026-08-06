@@ -17,7 +17,7 @@ import static java.util.Collections.unmodifiableList;
  * the missing keys, or at access time when the property has become unavailable.
  *
  * @author Matteo Baccan
- * @since 1.0.13
+ * @since 2.0.0
  */
 public class MissingMandatoryPropertyException extends RuntimeException {
 

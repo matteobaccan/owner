@@ -34,7 +34,7 @@ public interface ServerConfig extends Config {
 }
 ```
 
-Since version 1.0.13, the `@Prefix` annotation lets you state the common part
+Since version 2.0.0, the `@Prefix` annotation lets you state the common part
 once, on the interface:
 
 ```java

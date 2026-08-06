@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  * <p>
  * The reporter's properties file selects the Hibernate dialect through the name of the database, which means
  * building the key to read out of the value of another key. Up to 1.0.12 that produced
- * <code>.hibernate.dialect}</code>, since the first <code>}</code> closed the expression; since 1.0.13 the
+ * <code>.hibernate.dialect}</code>, since the first <code>}</code> closed the expression; since 2.0.0 the
  * expression inside <code>${...}</code> is expanded before being looked up.
  */
 public class Issue151Test {

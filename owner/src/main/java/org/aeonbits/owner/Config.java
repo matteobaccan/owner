@@ -128,7 +128,7 @@ public interface Config extends Serializable {
      * invocation arguments; for those the check happens on access only.
      * </p>
      *
-     * @since 1.0.13
+     * @since 2.0.0
      */
     @Retention(RUNTIME)
     @Target({METHOD, TYPE})
@@ -182,7 +182,7 @@ public interface Config extends Serializable {
      * <code>@DisableFeature(DisableableFeature.PREFIX)</code>.
      * </p>
      *
-     * @since 1.0.13
+     * @since 2.0.0
      */
     @Retention(RUNTIME)
     @Target(TYPE)
@@ -414,7 +414,7 @@ public interface Config extends Serializable {
          * Disables the {@link Prefix} declared on the interface, so that the annotated method — or every
          * method of the annotated interface — is looked up with its bare key.
          *
-         * @since 1.0.13
+         * @since 2.0.0
          */
         PREFIX
     }
@@ -511,7 +511,7 @@ public interface Config extends Serializable {
      * The annotated method must return a {@link Collection}; using it on any other return type raises an
      * {@link UnsupportedOperationException} when the property is read.</p>
      *
-     * @since 1.0.13
+     * @since 2.0.0
      */
     @Retention(RUNTIME)
     @Target(METHOD)

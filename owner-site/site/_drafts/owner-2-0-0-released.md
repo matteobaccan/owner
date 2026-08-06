@@ -1,20 +1,40 @@
 ---
 layout: news_item
-title: "Owner 1.0.13 Released"
+title: "Owner 2.0.0 Released"
 date: "2026-01-01 00:00:00 +0200"
 author: matteobaccan
-version: 1.0.13
+version: 2.0.0
 categories: [release]
 ---
 
-<!-- DRAFT: move this file to _posts/ renaming it to YYYY-MM-DD-owner-1-0-13-released.md
+<!-- DRAFT: move this file to _posts/ renaming it to YYYY-MM-DD-owner-2-0-0-released.md
      and update the date above when the release is published. -->
 
-Version 1.0.13 is the first release since the project maintenance moved from Luigi Viggiano to Matteo Baccan.
-It brings two new features, a security hardening pass, a fully modernized build infrastructure, and a long list
-of dependency updates accumulated since 1.0.12. Java 8 is now the minimum runtime, which allowed the removal
-of some compatibility leftovers dating back to Java 6/7: see the "Removals" section below for the (short)
-migration instructions.
+Version 2.0.0 is the first release since the project maintenance moved from Luigi Viggiano to Matteo Baccan.
+It brings a set of new features, a security hardening pass, a fully modernized build infrastructure, and a long
+list of dependency updates accumulated since 1.0.12. Java 8 is now the minimum runtime, which allowed the
+removal of some compatibility leftovers dating back to Java 6/7: see the "Removals" section below for the
+(short) migration instructions.
+
+Why 2.0.0
+---------
+This release was prepared as 1.0.13 and renumbered before publication, because two of its changes alter the
+result of a configuration that used to work, and a patch number would have been a quiet place to put them.
+Neither is expected to affect a real configuration — the whole test suite of the project passes unchanged, and
+each is described in full below — but the number should say so rather than the changelog alone:
+
+ * **Braces are matched, not counted from the left.** Up to 1.0.12 a `${` was closed by the first `}` that
+   followed it; now it is closed by the one that matches it, which is what makes nested variables possible.
+   Only the `${` sequence opens a level, so a lone brace inside an expression is still ordinary text. Should
+   an unforeseen combination of braces read differently, `-Downer.nested.variable.expansion=false` restores
+   the previous behaviour for the whole JVM, by running the previous implementation unchanged.
+ * **A circular variable reference is an error.** A property whose value leads back to itself used to exhaust
+   the stack, or — for the shape `a=${a:default}` — to produce an empty string. It now throws an
+   `IllegalArgumentException` naming the chain. No cycle ever produced a useful value, but a configuration
+   that quietly resolved to the empty string will now fail loudly, which is the point.
+
+Everything else is additive. In particular, a `Map` return type used to throw on every access, so the new
+grouping behaviour described below cannot change the result of any configuration that worked.
 
 Beyond the individual changes, this release has an explicit goal: to bring the test coverage as high as it can
 practically go, and to bring the number of warnings reported by the static analysers down to zero. A library
@@ -26,7 +46,7 @@ means in practice, and what it turned up.
 RELEASE NOTES
 =============
 
-OWNER v1.0.13 contains following enhancements and bug fixes.
+OWNER v2.0.0 contains following enhancements and bug fixes.
 
 Removals
 --------
@@ -158,7 +178,7 @@ Enhancements
 
 Code quality and test coverage
 ------------------------------
-A large part of the work that went into 1.0.13 is not visible in the API. The objective was to raise the test
+A large part of the work that went into 2.0.0 is not visible in the API. The objective was to raise the test
 coverage as far as it reasonably goes and to leave no warning unexamined, so that future changes start from a
 codebase that says what it does.
 
@@ -198,7 +218,7 @@ Site Enhancements
    extends — by design, since it describes a set and not a single setting — while `@LoadPolicy` and `@HotReload`
    take the first annotation found. The section also documents the limitation the three of them share, that only
    the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
-   unchanged in 1.0.13 and is now covered by tests, so that changing it will be a deliberate step.
+   unchanged in 2.0.0 and is now covered by tests, so that changing it will be a deliberate step.
  * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
  * [Type conversion]({{ site.url }}/docs/type-conversion/) no longer stops at "`Map` is not supported", a
    sentence that read as "cannot be done" and had been sending people away since at least
@@ -251,7 +271,7 @@ Bugs fixes
    }
    ```
 
-   | Import | Up to 1.0.12 | Since 1.0.13 |
+   | Import | Up to 1.0.12 | Since 2.0.0 |
    |---|---|---|
    | `imports.put("some.key", 42)` | `someValue()` returns `null`, *shadowing* `@DefaultValue("1")` | `IllegalArgumentException` at `create()` |
    | `imports.put(42, "42")` | the entry is dropped, `someValue()` returns the default `1` | `IllegalArgumentException` at `create()` |
@@ -282,5 +302,5 @@ Bugs fixes
  * Test suite stability fixes (thread handling in multi-threading tests, wait times).
 
 Downloadable artifacts are published on
-[GitHub](https://github.com/matteobaccan/owner/releases/tag/owner-1.0.13) and on
-[Maven Central Repository](https://central.sonatype.com/artifact/org.aeonbits.owner/owner/1.0.13).
+[GitHub](https://github.com/matteobaccan/owner/releases/tag/owner-2.0.0) and on
+[Maven Central Repository](https://central.sonatype.com/artifact/org.aeonbits.owner/owner/2.0.0).

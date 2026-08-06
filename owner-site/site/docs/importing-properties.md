@@ -47,7 +47,7 @@ assertEquals("orange", cfg.baz());
   </p>
 
   <p>
-  Starting from version 1.0.13, the same applies to keys and values that are not
+  Starting from version 2.0.0, the same applies to keys and values that are not
   <code>String</code>. The exception message also contains further information about the
   offending key, and its type when applicable.
   </p> 
@@ -56,7 +56,7 @@ assertEquals("orange", cfg.baz());
 The reason is that imports are merged into a `java.util.Properties`, and even though its
 contract only admits `String` keys and values, it extends `Hashtable<Object, Object>`:
 anything else is accepted by `putAll` and then becomes invisible to `getProperty`.
-Before 1.0.13 such an entry was taken without complaint and then quietly misbehaved when read:
+Before 2.0.0 such an entry was taken without complaint and then quietly misbehaved when read:
 
 ```java
 public interface MyConfig extends Config {
@@ -70,8 +70,8 @@ imports.put("some.key", 42);          // an Integer, not a String
 
 MyConfig cfg = ConfigFactory.create(MyConfig.class, imports);
 
-// before 1.0.13: null - the unusable entry also shadowed @DefaultValue
-// since  1.0.13: IllegalArgumentException at create() time
+// before 2.0.0: null - the unusable entry also shadowed @DefaultValue
+// since  2.0.0: IllegalArgumentException at create() time
 cfg.someValue();
 ```
 
@@ -82,8 +82,8 @@ property silently fell back to its default, as if the import had never been pass
 Map<Object, String> imports = new HashMap<>();
 imports.put(42, "value");             // an Integer key
 
-// before 1.0.13: the entry is dropped without any notice
-// since  1.0.13: IllegalArgumentException at create() time
+// before 2.0.0: the entry is dropped without any notice
+// since  2.0.0: IllegalArgumentException at create() time
 ConfigFactory.create(MyConfig.class, imports);
 ```
 

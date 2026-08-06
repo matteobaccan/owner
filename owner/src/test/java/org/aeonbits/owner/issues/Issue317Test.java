@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNull;
 /**
  * See: https://github.com/lviggiano/owner/issues/317
  * <p>
- * A variable used in {@link Sources} can carry a default value since 1.0.13, so the source to load can be
+ * A variable used in {@link Sources} can carry a default value since 2.0.0, so the source to load can be
  * selected at runtime and fall back to a fixed one. The syntax is <code>${env:develop}</code>: everything after
  * the <em>first</em> colon is the default, colons included, which is what keeps URLs and Windows paths usable as
  * defaults — and which is why the shell form <code>${env:-develop}</code> is not recognised, its dash being read
