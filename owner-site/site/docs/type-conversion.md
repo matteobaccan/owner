@@ -22,7 +22,7 @@ double pi();
 
 // enum values are case sensitive!
 // java.util.concurrent.TimeUnit is an enum
-@DefaultValue("NANOSECONDS");
+@DefaultValue("NANOSECONDS")
 TimeUnit timeUnit();
 ```
 

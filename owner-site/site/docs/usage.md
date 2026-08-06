@@ -122,7 +122,7 @@ public interface ServerConfig extends Config {
     @Key("server.host.name")
     String hostname();
 
-    @Key("server.max.threads");
+    @Key("server.max.threads")
     @DefaultValue("42")
     int maxThreads();
 }

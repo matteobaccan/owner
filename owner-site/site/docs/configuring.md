@@ -21,7 +21,7 @@ Let's take this as example:
 
 ```java
 // notice ${mypath} here
-@Sources("file:${mypath}/myconfig.properties");
+@Sources("file:${mypath}/myconfig.properties")
 interface MyConfig extends Config { ... }
 
 MyConfig cfg = ConfigFactory.create(MyConfig.class);
@@ -35,7 +35,7 @@ So OWNER does have some context properties associated to the ConfigFactory itsel
 
 ```java
 // notice ${mypath} here
-@Sources("file:${mypath}/myconfig.properties");
+@Sources("file:${mypath}/myconfig.properties")
 interface MyConfig extends Config { ... }
 
 // notice ${mypath} here
@@ -55,7 +55,7 @@ Nothing prevents you to do something like:
 
 ```java
 // notice ${myurl} here
-@Sources("${myurl}");
+@Sources("${myurl}")
 interface MyConfig extends Config { ... }
 
 // notice ${myurl} here
