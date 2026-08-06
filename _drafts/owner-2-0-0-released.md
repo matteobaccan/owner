@@ -101,6 +101,10 @@ Enhancements
    [#273](https://github.com/matteobaccan/owner/pull/273).
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
+ * [#187](https://github.com/matteobaccan/owner/issues/187): `java.nio.file.Path` is converted, with a leading
+   `~` expanded to the user home exactly as `java.io.File` already was — the two ways of naming a path no
+   longer disagree. Arrays and collections of `Path` follow. The reporter asked in 2016 whether this belonged
+   in a separate module for Java 7; the question no longer arises, since Java 8 is the minimum runtime.
  * Variables can now carry a default value: `${db.host:localhost}` resolves to `localhost` when `db.host` is
    defined nowhere, instead of to the empty string. Everything after the first colon is the default, colons
    included, so URLs, Windows paths and `host:port` pairs survive intact. Existing configurations are unaffected:

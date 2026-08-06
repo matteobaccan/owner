@@ -497,7 +497,8 @@ But there is more. OWNER API supports automatic conversion for:
   2. Enums (notice that the conversion is case sensitive, so FOO != foo or Foo).
   3. java.lang.String, of course (no conversion is needed).
   4. java.net.URL, java.net.URI.
-  5. java.io.File (the character `~` will be expanded to `user.home` System Property).
+  5. java.io.File and java.nio.file.Path (since 2.0.0), both expanding a leading `~` to the `user.home`
+     System Property.
   6. java.lang.Class (this can be useful, for instance, if you want to load the jdbc driver, or similar cases).
   7. Any instantiable class declaring a public constructor with a single argument of type `java.lang.String`.
   8. Any instantiable class declaring a public constructor with a single argument of type `java.lang.Object`.

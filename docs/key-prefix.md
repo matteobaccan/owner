@@ -231,6 +231,22 @@ Notice the `@DisableFeature(PREFIX)` on `env()`: the variable that *selects*
 the section is not itself part of the section, so it has to opt out of the
 prefix — see the next paragraph.
 
+The same mechanism makes a prefix *optional*, which is what you want when one
+deployment namespaces everything and another does not:
+
+```java
+@Prefix("${env.prefix:}")
+public interface ServerConfig extends Config {
+    String host();
+    int port();
+}
+```
+
+With `env.prefix` undefined the keys are `host` and `port`; setting it to
+`FOO_` — as a system property, an environment variable, or an import — moves
+every method of the interface onto `FOO_host` and `FOO_port` at once. The
+empty default is what makes the prefix disappear when nothing is set.
+
 If the only reason for that method is to give `${env}` a fallback, a
 [default value]({{ site.url }}/docs/variables-expansion/#toc_2) in the prefix
 itself says the same thing in one line, and the interface goes back to
