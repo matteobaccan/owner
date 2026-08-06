@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -184,9 +185,11 @@ public class PropertiesAggregatorTest {
             setProperty("group.a", "1");
         }};
 
-        assertTrue(ConfigFactory.create(FlatConfig.class, values).group() instanceof LinkedHashMap);
-        assertTrue(ConfigFactory.create(SortedConfig.class, values).group() instanceof java.util.TreeMap);
-        assertTrue(ConfigFactory.create(ConcreteConfig.class, values).group() instanceof HashMap);
+        // the exact class, not instanceof: LinkedHashMap is a HashMap, so an instanceof test would pass
+        // even if the declared concrete type were quietly replaced by the default one
+        assertEquals(LinkedHashMap.class, ConfigFactory.create(FlatConfig.class, values).group().getClass());
+        assertEquals(TreeMap.class, ConfigFactory.create(SortedConfig.class, values).group().getClass());
+        assertEquals(HashMap.class, ConfigFactory.create(ConcreteConfig.class, values).group().getClass());
 
         assertEquals("[a, b]", ConfigFactory.create(SortedConfig.class, values).group().keySet().toString());
     }
