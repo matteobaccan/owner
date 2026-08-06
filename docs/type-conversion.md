@@ -160,11 +160,24 @@ Map<String, String> servers();      // servers.dev.* when env is dev
 
 A name with further dots in it keeps them: `something.a.b=2` becomes the entry
 `a.b`, so nothing is dropped and nothing has to be escaped. When no property
-matches, the result is an empty map, never `null`. The declared type is
-honoured — a `SortedMap` comes back as a `TreeMap`, a plain `Map` as a
-`LinkedHashMap`, and a concrete class with a no-argument constructor is
-instantiated as it is. `@DefaultValue` is refused on such a method: a default
-belongs to the individual properties, not to the group.
+matches, the result is an empty map, never `null`. `@DefaultValue` is refused
+on such a method: a default belongs to the individual properties, not to the
+group.
+
+Each value is read exactly as it would be if the property were mapped to a
+method of its own — [preprocessors]({{ site.url }}/docs/preprocessors/) run on
+it, `${...}` variables are expanded, and an `@EncryptedValue` group is
+decrypted entry by entry:
+
+```properties
+group.url=http://${host}/api
+```
+
+The map that comes back is the one you declared: a `SortedMap` is a
+`TreeMap`, a plain `Map` is a `LinkedHashMap`, and a concrete class is
+instantiated as it is, provided it has a no-argument constructor — an
+`EnumMap` does not, and says so. A raw `Map`, and any type argument that is
+not a plain class such as a wildcard, is read as `String`.
 
 The other shape: one property holding the pairs
 -----------------------------------------------
