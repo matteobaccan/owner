@@ -526,6 +526,35 @@ property with an [`UnsupportedOperationException`][unsupported-ex] naming the of
 A `@ConverterClass` is free to return `null` for an element, which produces a `null` in the resulting array or
 collection.
 
+An empty value
+--------------
+
+A property that is present but empty, `server.port=`, is a value like any other: the `@DefaultValue` is not
+used in its place, and whether the conversion succeeds depends on whether the declared type can represent an
+empty text. What follows is the whole picture, with `useOnEmpty` being the opt-in described in
+[Using @DefaultValue]({{ site.url }}/docs/usage/) that makes the empty value fall back on the default.
+
+| Declared type | `prop=` (empty) | `prop=abc` (not convertible) | `prop=` with `useOnEmpty = true` |
+|---|---|---|---|
+| `int`, `long`, `double`, `Integer`, ... | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
+| `boolean`, `Boolean` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
+| `char` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
+| `enum` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
+| `BigDecimal`, and any class built from a `String` constructor that rejects it | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
+| `Class` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
+| `URL` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
+| `String` | `""` | `"abc"` | the default value |
+| `File`, `Path`, `URI` | an empty path | accepted | the default value |
+| arrays and collections | an empty array or collection | `UnsupportedOperationException` on the element | the default value |
+
+Two rows deserve a word. `File`, `Path` and `URI` accept an empty value because any text is a valid path or
+URI, so nothing is there to fail. Arrays and collections read an empty value as an empty collection, which is
+the same choice the MicroProfile Config specification makes, and it is why an empty value fails on a number
+but not on a list of numbers.
+
+Notice that on the last three rows `useOnEmpty` replaces a result that works today, which is one of the
+reasons why it is opt-in: without it, nothing of what is described above changes.
+
 You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your business objects
 using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].
 See also [`PropertyEditorSupport`][propeditsupport], it may be useful if you want to implement a `PropertyEditor`.
