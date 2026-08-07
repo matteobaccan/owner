@@ -108,6 +108,35 @@ public interface Config extends Serializable {
          * @return the default value.
          */
         String value();
+
+        /**
+         * Whether a property that is found but <b>empty</b> is to be treated as if it were missing, and the
+         * default used in its place.
+         * <p>
+         * A property that is set is normally kept as it is, and the default only covers the case of a property
+         * that is not there at all: <code>port=</code> is a value like any other, and an empty value on a type
+         * that cannot represent it fails the conversion. That is the same distinction other configuration
+         * libraries draw, and it is what keeps a typo like <code>port=8O80</code>, written with the letter O,
+         * from silently becoming the default.
+         * </p>
+         * <p>
+         * There is a case where the distinction is not useful though, and this is what this flag is for: a value
+         * left empty by a template, as in <code>port=${PORT}</code> with <code>PORT</code> unset, carries no
+         * information, and falling back on the default is more useful than failing. Since it changes what a
+         * property means, it is opt-in and applies to the annotated method only. A value made of whitespace
+         * counts as empty, consistently with the rule that already makes it an empty collection.
+         * </p>
+         * <p>
+         * The default value goes through preprocessing, variable expansion, decryption and parameter formatting
+         * exactly as the value it replaces, so the result is the same as if the property had not been there.
+         * Note that the substitution happens on the value returned by the method: {@link Accessible#getProperty}
+         * and the other methods reading the properties directly keep returning the empty value.
+         * </p>
+         *
+         * @return <code>true</code> if an empty value is to be replaced by the default value.
+         * @since 2.0.0
+         */
+        boolean useOnEmpty() default false;
     }
 
     /**

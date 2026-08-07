@@ -21,6 +21,7 @@ import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.convert;
 import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
+import static org.aeonbits.owner.PropertiesMapper.defaultValueOnEmpty;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.util.Util.isFeatureDisabled;
 import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
@@ -90,13 +91,36 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                 throw new MissingMandatoryPropertyException(key);
             return null;
         }
-        value = preProcess(method, value);
-        Object result = convert(method, method.getReturnType(),
-                format(method, propertiesManager
-                    .decryptIfNecessary(method, expandVariables(method, value)),
-                    args));
+        String text = process(method, value, args);
+
+        // an empty value is a value like any other, unless the method explicitly asked for the default to
+        // cover it too: see Config.DefaultValue#useOnEmpty
+        if (isEmpty(text)) {
+            String onEmpty = defaultValueOnEmpty(method);
+            if (onEmpty != null)
+                text = process(method, onEmpty, args);
+        }
+
+        Object result = convert(method, method.getReturnType(), text);
         if (result == NULL) return null;
         return result;
+    }
+
+    /**
+     * Applies to a raw value everything that happens between reading it from the properties and converting it
+     * to the return type: the preprocessors, the variable expansion, the decryption and the formatting of the
+     * arguments. Running the default value through the very same steps is what makes it indistinguishable from
+     * a property that was not there, since a missing property is already resolved to its registered default.
+     */
+    private String process(Method method, String value, Object... args) {
+        return format(method,
+                propertiesManager.decryptIfNecessary(method,
+                        expandVariables(method, preProcess(method, value))),
+                args);
+    }
+
+    private static boolean isEmpty(String value) {
+        return value != null && value.trim().isEmpty();
     }
 
     private String lookupValue(Method method, String key) {

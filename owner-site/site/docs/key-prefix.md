@@ -94,7 +94,7 @@ cfg.getProperty("max.threads");           // null
 ```
 
 For the same reason, a missing
-[mandatory property]({{ site.url }}/docs/usage/#toc_4) is reported by its
+[mandatory property]({{ site.url }}/docs/usage/#toc_5) is reported by its
 prefixed key, which is the one that could not be resolved.
 
 

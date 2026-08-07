@@ -56,6 +56,15 @@ final class PropertiesMapper {
         return defaultValue != null ? defaultValue.value() : null;
     }
 
+    /**
+     * Returns the default value to use in place of an empty one, or <code>null</code> when the method did not
+     * ask for it with {@link DefaultValue#useOnEmpty()}, which is the case by default.
+     */
+    static String defaultValueOnEmpty(Method method) {
+        DefaultValue defaultValue = method.getAnnotation(DefaultValue.class);
+        return defaultValue != null && defaultValue.useOnEmpty() ? defaultValue.value() : null;
+    }
+
     static void defaults(Properties properties, Class<? extends Config> clazz) {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
