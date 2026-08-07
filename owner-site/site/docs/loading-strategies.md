@@ -139,3 +139,88 @@ first super-interface that declares it, in declaration order.
     <code>ConfigFactory</code>, or on one it extends directly.
   </p>
 </div>
+
+Where the properties come from
+------------------------------
+
+A `@Sources` entry is a URI, and the loader that reads it is the first one that declares it accepts it.
+Three are available out of the box, and they are consulted in this order:
+
+| Loader | Accepts |
+|---|---|
+| `SystemLoader` | the `system:properties` and `system:env` pseudo-URIs, and nothing else |
+| `XMLLoader` | a URI whose path ends in `.xml` — see [XML support]({{ site.url }}/docs/xml-support/) |
+| `PropertiesLoader` | anything that is a valid URL, in the [standard properties format][props] |
+
+`PropertiesLoader` comes last because it accepts everything the other two turned down: it is the
+fallback, not a candidate among equals.
+
+A loader you register yourself goes in **front of all of these**, so it takes precedence over the
+built-in ones and can be used to take over a URI that one of them would otherwise have accepted.
+
+  [props]: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-
+
+Reading from ZooKeeper
+----------------------
+
+The `owner-extras` artifact ships a further loader, `ZooKeeperLoader`, which reads the properties from
+the children of a ZooKeeper node. It is not registered by default, since it needs
+[Apache Curator][curator] on the classpath: declare that dependency, register the loader on a factory of
+your own, and address the source with the `zookeeper` scheme.
+
+```xml
+<dependency>
+    <groupId>org.aeonbits.owner</groupId>
+    <artifactId>owner-extras</artifactId>
+    <version>2.0.0</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-framework</artifactId>
+    <version>5.9.0</version>
+</dependency>
+```
+
+```java
+@Sources("zookeeper://zookeeper.example.com:2181/config/myapp")
+public interface ServerConfig extends Config {
+    int port();
+    String hostname();
+}
+```
+
+```java
+Factory factory = ConfigFactory.newInstance();
+factory.registerLoader(new ZooKeeperLoader());
+
+ServerConfig cfg = factory.create(ServerConfig.class);
+```
+
+Each child of the node named by the path becomes a property: the name of the child is the key and its
+data, read as a string, is the value. The port may be omitted, in which case the default of the client is
+used. Connecting is given thirty seconds before it gives up, which the
+`owner.zookeeper.connection.timeout.seconds` System Property changes; a failure to connect surfaces as an
+`IOException`, so it behaves like any other unreachable source and
+[`@LoadPolicy(MERGE)`]({{ site.url }}/docs/loading-strategies/) can fall back on another one.
+
+  [curator]: https://curator.apache.org
+
+<div class="note warning">
+  <h5>The class moved in 2.0.0</h5>
+  <p>
+    <code>ZooKeeperLoader</code> is now in <code>org.aeonbits.owner.extras.loaders</code>, where it used to
+    be in <code>org.aeonbits.owner.loaders</code>. Only the import changes. The old package belongs to the
+    core artifact, and a package cannot live in two modules, which kept the two jars from being placed on
+    the module path together.
+  </p>
+</div>
+
+Writing your own loader
+-----------------------
+
+A loader is an implementation of [`Loader`][loader], which answers three questions: whether it accepts a
+given URI, how to read one into a `java.util.Properties`, and what default file name to look for when the
+configuration declares no `@Sources` at all. Register it on a factory as shown above, and it takes part in
+the resolution like the built-in ones.
+
+  [loader]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/loaders/Loader.html
