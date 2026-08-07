@@ -87,7 +87,7 @@ Enhancements
  * New `@Mandatory` annotation: mark a property (or a whole interface) as required, and get a
    `MissingMandatoryPropertyException` listing all the unresolvable keys when the Config is created, as well as
    on access if a mandatory property disappears later (e.g. after a hot reload). See the
-   [documentation]({{ site.url }}/docs/usage/#toc_4). Originally proposed by Alexander Poulikakos in
+   [documentation]({{ site.url }}/docs/usage/#toc_5). Originally proposed by Alexander Poulikakos in
    [#216](https://github.com/matteobaccan/owner/pull/216).
  * New `@Prefix` annotation: declare the common prefix of a group of keys once, on the interface, instead of
    repeating it in the `@Key` of every method. `@Prefix("server.")` makes `String hostname()` resolve to
@@ -99,6 +99,17 @@ Enhancements
    an interface without `@Prefix` resolves its keys exactly as before. See the
    [documentation]({{ site.url }}/docs/key-prefix/). Originally proposed by Gmugra in
    [#273](https://github.com/matteobaccan/owner/pull/273).
+ * New `@DefaultValue(useOnEmpty = true)` flag: a property that is present but **empty** is normally a value
+   like any other — `port=` is not a missing property, and on a numeric type it fails the conversion — which is
+   the distinction MicroProfile Config, Quarkus and Spring Boot all draw, and what keeps a typo like
+   `port=8O80`, written with the letter O, from silently becoming the default. The flag covers the one case
+   where the distinction gets in the way: a value left empty by a template, as in `port=${PORT}` with `PORT`
+   unset. With it, an empty value — whitespace included, and after the variables are expanded — falls back on
+   the default as if the property were missing, while a value that is *wrong* rather than empty keeps failing.
+   It is opt-in and per method, so nothing changes for existing configurations. See the
+   [documentation]({{ site.url }}/docs/usage/#toc_3) and the
+   [table of what an empty value does on each type]({{ site.url }}/docs/type-conversion/). Partially answers
+   [#191](https://github.com/matteobaccan/owner/issues/191).
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
  * [#187](https://github.com/matteobaccan/owner/issues/187): `java.nio.file.Path` is converted, with a leading
@@ -223,13 +234,13 @@ Site Enhancements
    take the first annotation found. The section also documents the limitation the three of them share, that only
    the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
    unchanged in 2.0.0 and is now covered by tests, so that changing it will be a deliberate step.
- * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_4) in Basic usage.
+ * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_5) in Basic usage.
  * [Type conversion]({{ site.url }}/docs/type-conversion/) no longer stops at "`Map` is not supported", a
    sentence that read as "cannot be done" and had been sending people away since at least
    [#41](https://github.com/matteobaccan/owner/issues/41). The chapter now describes the grouping above, and
    keeps the `@ConverterClass` recipe for the case where a single property value holds the pairs — arrays of
    maps included.
- * New section on [overriding a property in a sub-interface]({{ site.url }}/docs/usage/#toc_5), answering
+ * New section on [overriding a property in a sub-interface]({{ site.url }}/docs/usage/#toc_6), answering
    [#421](https://github.com/matteobaccan/owner/issues/421): an override redirects a property instead of adding
    one, since there is one method and therefore one key. Both of the things usually wanted there — keeping the
    base key readable, and making the concrete setting fall back to the base one — are shown written down
@@ -301,6 +312,11 @@ Bugs fixes
    `Cannot convert 'foo' to MyType`, consistently with what already happened for a non-array property. For the
    same reason, a `@ConverterClass` returning `null` for an element now yields a `null` element instead of
    failing the whole conversion.
+ * Conversion errors now name the property they come from: `Cannot convert 'abc' to int` became
+   `Cannot convert 'abc' to int for property 'server.port'`. The message used to say what could not be converted
+   but not where to go and fix it, which in a file with fifty properties left the search to be done by hand. The
+   key named is the one the property is read with, `@Key` and `@Prefix` included
+   ([#191](https://github.com/matteobaccan/owner/issues/191)).
  * Fixed a `NullPointerException` masking the real error in the hot reload example when the configuration URI is
    invalid.
  * Test suite stability fixes (thread handling in multi-threading tests, wait times).

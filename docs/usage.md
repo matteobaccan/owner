@@ -145,6 +145,51 @@ interface, instead of repeating it on every method: see
   </p>
 </div>
 
+A property that is set, but empty
+---------------------------------
+
+The default covers a property that is **missing**. A property that is there but empty is a value like any
+other:
+
+```properties
+server.max.threads=
+```
+
+`@DefaultValue("42")` is not used here, and since an empty text is not a number the conversion fails with
+`Cannot convert '' to int for property 'server.max.threads'`. That is deliberate, and it is the same
+distinction drawn by [MicroProfile Config](https://download.eclipse.org/microprofile/microprofile-config-2.0/microprofile-config-spec-2.0.html),
+by [Quarkus](https://quarkus.io/guides/config-reference) and by Spring Boot: leaving a property empty is a
+way of saying *this is not set here*, which with a
+[MERGE load policy]({{ site.url }}/docs/loading-strategies/) is how a value coming from another file is
+overridden. Falling back on the default whenever a conversion fails would also turn a typo like
+`server.max.threads=4O` — written with the letter O — into a silent 42, which is exactly the kind of quiet
+wrongness a default is not there to produce.
+
+There is one case where the distinction gets in the way, though: a value left empty by a template that
+nobody filled in.
+
+```properties
+server.max.threads=${MAX_THREADS}
+```
+
+Since version 2.0.0 a single method can opt into having the default cover that case too:
+
+```java
+@Key("server.max.threads")
+@DefaultValue(value = "42", useOnEmpty = true)
+int maxThreads();
+```
+
+With `useOnEmpty = true` an empty value — including one made of whitespace only, and one that becomes empty
+after the variables are expanded — is treated as if the property were not there at all, and the default is
+used in its place. A value that is *wrong* rather than empty still fails: `useOnEmpty` is about the absence
+of information, not about recovering from a mistake. Use `@Mandatory` when a property must be set.
+
+The flag applies to the annotated method only, and it does not change what is stored: `getProperty()` and
+the other [Accessible]({{ site.url }}/docs/accessible-mutable/) methods keep returning the empty value. The
+default replacing an empty value goes through variable expansion, preprocessing, decryption and parameter
+formatting exactly as the value it replaces, so the result is the same as if the property had been missing.
+
 Undefined properties
 --------------------
 

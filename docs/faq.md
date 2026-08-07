@@ -25,9 +25,9 @@ philosophy is to keep always backward compatibility (unless not possible).
 
 ## What happens if some property is not set to any value?
 
-See: [Undefined properties]({{ site.url }}/docs/usage/#toc_3) in [Basic usage]({{ site.url }}/docs/usage/) chapter.
+See: [Undefined properties]({{ site.url }}/docs/usage/#toc_4) in [Basic usage]({{ site.url }}/docs/usage/) chapter.
 If a property is required and has no sensible default, you can annotate it with `@Mandatory` to fail fast with a
-meaningful exception: see [Mandatory properties]({{ site.url }}/docs/usage/#toc_4).
+meaningful exception: see [Mandatory properties]({{ site.url }}/docs/usage/#toc_5).
 
 ## How about the security of storing password in properties? Does OWNER support encryptable properties like in [Jasypt](http://www.jasypt.org/encrypting-configuration.html) ?
 
