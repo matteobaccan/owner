@@ -176,6 +176,22 @@ public class OptionalTest {
      * A raw <code>Optional</code> carries no type to convert to, and falls back on String: the same default a
      * raw collection takes.
      */
+    interface WithWildcardOptional extends Config {
+        Optional<?> wildcard();
+    }
+
+    /**
+     * A wildcard names no type to convert to, any more than a raw <code>Optional</code> does, and takes the
+     * same default.
+     */
+    @Test
+    public void aWildcardOptionalHoldsAString() {
+        WithWildcardOptional cfg = ConfigFactory.create(WithWildcardOptional.class, new Properties() {{
+            setProperty("wildcard", "42");
+        }});
+        assertEquals(Optional.of("42"), cfg.wildcard());
+    }
+
     @Test
     @SuppressWarnings("rawtypes")
     public void aRawOptionalHoldsAString() {

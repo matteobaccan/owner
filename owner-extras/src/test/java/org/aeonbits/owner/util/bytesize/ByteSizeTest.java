@@ -188,9 +188,13 @@ public class ByteSizeTest {
 
     @Test
     public void everyFieldIsFinal(){
-        for (Field field : ByteSize.class.getDeclaredFields())
+        for (Field field : ByteSize.class.getDeclaredFields()) {
+            // a coverage agent adds a field of its own to every class it instruments, and it is not
+            // ours to make any statement about
+            if (field.isSynthetic()) continue;
             assertTrue("the field '" + field.getName() + "' is not final",
                     Modifier.isFinal(field.getModifiers()));
+        }
     }
 
     @Test
