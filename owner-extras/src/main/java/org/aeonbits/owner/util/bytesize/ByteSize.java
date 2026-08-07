@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A unit of byte size, such as "512 kilobytes".
  *
@@ -19,9 +21,14 @@ import java.math.RoundingMode;
  *
  * This class supports converting to another {@link ByteSizeUnit}.
  *
+ * <p>
+ * Instances are immutable, and the class is <code>final</code>: {@link #equals(Object)} compares the number
+ * of bytes across units, a statement that a subclass adding a field of its own could not honour.
+ * </p>
+ *
  * @author Stefan Freyr Stefansson
  */
-public class ByteSize {
+public final class ByteSize {
     private final BigDecimal value;
     private final ByteSizeUnit unit;
 
@@ -30,10 +37,13 @@ public class ByteSize {
      *
      * @param value the value part of this byte size.
      * @param unit the unit part of this byte size.
+     * @throws NullPointerException if either part is <code>null</code>.
      */
     public ByteSize(BigDecimal value, ByteSizeUnit unit){
-        this.value = value;
-        this.unit = unit;
+        // rejected here rather than at the first arithmetic, so that the exception points at the line
+        // where the missing part was written
+        this.value = requireNonNull(value, "the value of a ByteSize cannot be null");
+        this.unit = requireNonNull(unit, "the unit of a ByteSize cannot be null");
     }
 
     /**
@@ -52,9 +62,11 @@ public class ByteSize {
      *
      * @param value the value part of this byte size
      * @param unit the unit part of this byte size
+     * @throws NullPointerException if either part is <code>null</code>.
      */
     public ByteSize(String value, ByteSizeUnit unit){
-        this(new BigDecimal(value), unit);
+        // checked before BigDecimal gets it, so the message is the same one on every JVM
+        this(new BigDecimal(requireNonNull(value, "the value of a ByteSize cannot be null")), unit);
     }
 
     /**
@@ -147,10 +159,14 @@ public class ByteSize {
         return getBytes().equals(byteSize.getBytes());
     }
 
+    /**
+     * Derived from the same number of bytes {@link #equals(Object)} compares, and from nothing else: two
+     * sizes that are equal because they are the same amount written in different units, or with a different
+     * number of decimals, have to agree on the hash code as well, or the type does not work as a key of a
+     * {@link java.util.HashMap} nor as an element of a {@link java.util.HashSet}.
+     */
     @Override
     public int hashCode() {
-        int result = value.hashCode();
-        result = 31 * result + unit.hashCode();
-        return result;
+        return getBytes().hashCode();
     }
 }

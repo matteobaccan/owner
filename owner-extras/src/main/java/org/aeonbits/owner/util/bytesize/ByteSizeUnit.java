@@ -8,9 +8,12 @@
 package org.aeonbits.owner.util.bytesize;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNull;
 import static org.aeonbits.owner.util.bytesize.ByteSizeStandard.*;
 
 /**
@@ -94,10 +97,10 @@ public enum ByteSizeUnit {
      */
     YOBIBYTES  ("yobi",  "YiB", IEC, 8);
 
-    final String prefix;
-    final String shortLabel;
-    final ByteSizeStandard standard;
-    final int power;
+    private final String prefix;
+    private final String shortLabel;
+    private final ByteSizeStandard standard;
+    private final int power;
 
     ByteSizeUnit(String prefix, String shortLabel, ByteSizeStandard standard, int power) {
         this.prefix = prefix;
@@ -130,7 +133,13 @@ public enum ByteSizeUnit {
         return map;
     }
 
-    private static Map<String, ByteSizeUnit> unitsMap = makeUnitsMap();
+    /**
+     * The lookup {@link #parse(String)} reads. Built once, never handed out and never written to after
+     * that: a mutable static map behind a public static method is the sort of thing that stays correct
+     * only for as long as nobody notices it is there.
+     */
+    private static final Map<String, ByteSizeUnit> unitsMap =
+            Collections.unmodifiableMap(makeUnitsMap());
 
     /**
      * Parses a string representation of a byte size unit and returns the corresponding {@link ByteSizeUnit}.
@@ -160,7 +169,8 @@ public enum ByteSizeUnit {
      *          not be translated into a known unit.
      */
     public static ByteSizeUnit parse(String unit) {
-        return unitsMap.get(unit.toLowerCase());
+        requireNonNull(unit, "the unit to parse cannot be null");
+        return unitsMap.get(unit.toLowerCase(Locale.ROOT));
     }
 
     /**

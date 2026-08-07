@@ -363,6 +363,16 @@ Bugs fixes
    key named is the one the property is read with, `@Key` and `@Prefix` included
    ([#191](https://github.com/matteobaccan/owner/issues/191)). When the value comes from a group of
    properties read as a `Map`, the key named is the individual entry — `group.second`, not `group`.
+ * `ByteSizeUnit.parse` no longer depends on the default locale of the JVM. It lowercased the text without
+   saying in which language, and in Turkish a capital `I` lowercases to the dotless `ı`: `512 KIB` was
+   therefore rejected as an invalid unit on a Turkish JVM and accepted everywhere else. Every IEC unit
+   written in capitals was affected, since all of them carry an `i`.
+ * `ByteSize` honours the `equals`/`hashCode` contract. `equals` compares the number of bytes, so `1 MB` and
+   `1000000 B` are equal, while the hash code was derived from the value and the unit as they were written:
+   the two were equal with different hash codes, which made the type unusable as a key of a `HashMap` or as
+   an element of a `HashSet` — a set could hold the same size twice, and a lookup could miss. The class is
+   now `final`, and both parts are rejected at construction when null, instead of failing later at the first
+   arithmetic with no indication of where the missing part was written.
  * Fixed a `NullPointerException` masking the real error in the hot reload example when the configuration URI is
    invalid.
  * Test suite stability fixes (thread handling in multi-threading tests, wait times).
