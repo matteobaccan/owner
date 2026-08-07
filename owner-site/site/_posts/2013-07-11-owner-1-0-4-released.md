@@ -13,21 +13,21 @@ Enhancements
 ------------
 
  * New `@ConverterClass` annotation.
-   See [The @ConverterClass annotation]({{ site.url }}/docs/type-conversion/#toc_2), [#38][issue-38].
+   See [The @ConverterClass annotation]({{ site.url }}/docs/type-conversion/#the-converterclass-annotation), [#38][issue-38].
  * Hot reload for file based sources.
-   See [Automatic "hot reload"]({{ site.url }}/docs/reload/#toc_1), [#15][issue-15].
+   See [Automatic "hot reload"]({{ site.url }}/docs/reload/#automatic-hot-reload), [#15][issue-15].
  * toString() method can be invoked on the Config object to get some useful text for debugging.
-   See [The toString() method]({{ site.url }}/docs/debugging/#toc_0), [#33][issue-33].
+   See [The toString() method]({{ site.url }}/docs/debugging/#the-tostring-method), [#33][issue-33].
  * Added [`Mutable`][mutable-intf] interface for the methods giving *write* access to the underlying properties structure:
    setProperty, removeProperty, clear.
-   See [The Mutable interface]({{ site.url }}/docs/accessible-mutable/#toc_0), [#31][issue-31].
+   See [The Mutable interface]({{ site.url }}/docs/accessible-mutable/#the-mutable-interface), [#31][issue-31].
  * Added [`Accessible`][accessible-intf] interface for the `list()` methods used to aid debugging, and other methods
    giving read access to the underlying properties structure.
-   See [The Accessible interface]({{ site.url }}/docs/accessible-mutable/#toc_1).
+   See [The Accessible interface]({{ site.url }}/docs/accessible-mutable/#the-accessible-interface).
  * Added the `reload()` method that can be exposed implementing the interface [`Reloadable`][reloadable-intf].
-   See [Programmatic reload]({{ site.url }}/docs/reload/#toc_0).
+   See [Programmatic reload]({{ site.url }}/docs/reload/#programmatic-reload).
  * Fist class Java Arrays and Collections support in type conversion. Thanks [ffbit][].
-   See [Arrays and Collections]({{ site.url }}/docs/type-conversion/#toc_0), [#21][issue-21], [#22][issue-22] and [#24][issue-24].
+   See [Arrays and Collections]({{ site.url }}/docs/type-conversion/#arrays-and-collections), [#21][issue-21], [#22][issue-22] and [#24][issue-24].
  * Implemented `@DisableFeature` annotation to provide the possibility to disable variable expansion and parametrized
    formatting.
    See [Disabling Features]({{ site.url }}/docs/disabling-features/), [#20][issue-20].

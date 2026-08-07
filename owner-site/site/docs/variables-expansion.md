@@ -402,7 +402,7 @@ Circular variable reference: ${a} -> ${b} -> ${a}
 ```
 
 It applies to a property referring to itself directly, to a loop of any
-length, and to a key built by [nesting](#toc_3).
+length, and to a key built by [nesting](#nested-variables).
 
 <div class="note warning">
   <h5>A default value does not make a circular reference resolvable.</h5>
