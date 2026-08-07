@@ -317,6 +317,27 @@ public class PropertiesAggregatorTest {
         }
     }
 
+    interface NumericValuesConfig extends Config {
+        Map<String, Integer> group();
+    }
+
+    /**
+     * The entry that fails to convert names itself, not the group: with a group of fifty properties, being
+     * told that 'group' failed leaves the offending line to be found by hand.
+     */
+    @Test
+    public void anEntryThatCannotBeConvertedNamesItself() {
+        try {
+            ConfigFactory.create(NumericValuesConfig.class, new Properties() {{
+                setProperty("group.first", "1");
+                setProperty("group.second", "8O80");
+            }}).group();
+            fail("UnsupportedOperationException is expected");
+        } catch (UnsupportedOperationException e) {
+            assertEquals("Cannot convert '8O80' to java.lang.Integer for property 'group.second'", e.getMessage());
+        }
+    }
+
     // -- what is refused ------------------------------------------------------------------------------
 
     interface WithDefaultValueConfig extends Config {

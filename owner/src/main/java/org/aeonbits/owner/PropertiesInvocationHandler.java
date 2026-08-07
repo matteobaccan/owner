@@ -101,7 +101,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                 text = process(method, onEmpty, args);
         }
 
-        Object result = convert(method, method.getReturnType(), text);
+        Object result = convert(method, method.getReturnType(), text, key);
         if (result == NULL) return null;
         return result;
     }
@@ -128,7 +128,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
         // TODO: this if should go away! See #84 and #86
         if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
-            String unexpandedKey = key(method);
+            String unexpandedKey = key(method, propertiesManager.keyPrefix());
             value = propertiesManager.getProperty(unexpandedKey);
         }
         return value;
@@ -168,7 +168,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     }
 
     private String expandKey(Method method, Object... args) {
-        String key = key(method);
+        String key = key(method, propertiesManager.keyPrefix());
         if (isFeatureDisabled(method, VARIABLE_EXPANSION))
             return key;
         return substitutor.replace(key, args);

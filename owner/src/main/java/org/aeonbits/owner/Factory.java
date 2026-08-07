@@ -48,6 +48,18 @@ public interface Factory {
     /**
      * Set a property in the ConfigFactory. Those properties will be used to expand variables specified in the `@Source`
      * annotation, or by the ConfigFactory to configure its own behavior.
+     * <p>
+     * The properties understood by the factory itself are, all of them since 2.0.0:
+     * </p>
+     * <ul>
+     *     <li><code>owner.key.prefix</code>: a literal prepended to the key of every property, for the
+     *     interfaces that do not declare a {@link Config.Prefix} of their own.</li>
+     *     <li><code>owner.key.prefix.from.package</code>: <code>true</code> derives that prefix from the
+     *     package of the interface declaring the method, followed by a dot.</li>
+     * </ul>
+     * <p>
+     * They are read when a Config object is created, and the object keeps them for the rest of its life.
+     * </p>
      *
      * @param key   the key for the property.
      * @param value the value for the property.

@@ -41,8 +41,9 @@ class DefaultFactory implements Factory {
         validateImports(imports);
         Class<?>[] interfaces = interfaces(clazz);
         VariablesExpander expander = new VariablesExpander(props);
+        // read once, here: from now on the Config object keeps the prefix it was born with
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
-                imports);
+                KeyPrefix.from(props), imports);
         Object jmxSupport = getJMXSupport(clazz, manager);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager, jmxSupport);
         handler.validateMandatoryProperties(clazz);

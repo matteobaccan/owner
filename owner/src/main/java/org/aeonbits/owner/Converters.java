@@ -44,7 +44,7 @@ enum Converters {
      */
     METHOD_WITH_COLLECTION_CONVERTER_CLASS_ANNOTATION {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             CollectionConverterClass annotation = targetMethod.getAnnotation(CollectionConverterClass.class);
             if (annotation == null) return SKIP;
             if (!Collection.class.isAssignableFrom(targetType))
@@ -58,7 +58,7 @@ enum Converters {
 
     ARRAY {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (!targetType.isArray()) return SKIP;
 
             Class<?> type = targetType.getComponentType();
@@ -69,16 +69,16 @@ enum Converters {
             Tokenizer tokenizer = TokenizerResolver.resolveTokenizer(targetMethod);
             String[] chunks = tokenizer.tokens(text);
 
-            Converters converter = doConvert(targetMethod, type, chunks[0]).getConverter();
+            Converters converter = doConvert(targetMethod, type, chunks[0], key).getConverter();
             Object result = Array.newInstance(type, chunks.length);
 
             for (int i = 0; i < chunks.length; i++) {
                 String chunk = chunks[i];
-                Object value = converter.tryConvert(targetMethod, type, chunk);
+                Object value = converter.tryConvert(targetMethod, type, chunk, key);
                 // the converter is chosen once from the first chunk: the remaining ones may still
                 // fail, and their special values must not end up as elements of the resulting array
                 if (value == SKIP)
-                    throw unsupportedConversion(targetMethod, type, chunk);
+                    throw unsupportedConversion(key, type, chunk);
                 set(targetMethod, result, i, type, value == NULL ? null : value);
             }
 
@@ -112,10 +112,10 @@ enum Converters {
     COLLECTION {
         @SuppressWarnings("unchecked")
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (!Collection.class.isAssignableFrom(targetType)) return SKIP;
 
-            Object[] array = convertToArray(targetMethod, text);
+            Object[] array = convertToArray(targetMethod, text, key);
             Collection<Object> collection = Arrays.asList(array);
             Collection<Object> result;
             if (getGenericType(targetMethod).isEnum() && targetType.equals(EnumSet.class)) {
@@ -127,10 +127,10 @@ enum Converters {
             return result;
         }
 
-        private Object[] convertToArray(Method targetMethod, String text) {
+        private Object[] convertToArray(Method targetMethod, String text, String key) {
             Class<?> type = getGenericType(targetMethod);
             Object stub = Array.newInstance(type, 0);
-            return (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text);
+            return (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text, key);
         }
 
         private Class<?> getGenericType(Method targetMethod) {
@@ -179,7 +179,7 @@ enum Converters {
 
     METHOD_WITH_CONVERTER_CLASS_ANNOTATION {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             ConverterClass annotation = targetMethod.getAnnotation(ConverterClass.class);
             if (annotation == null) return SKIP;
 
@@ -190,7 +190,7 @@ enum Converters {
 
     METHOD_WITH_REGISTERED_CONVERTER {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (!converterRegistry.containsKey(targetType)) return SKIP;
 
             Class<? extends Converter> converterClass = converterRegistry.get(targetType);
@@ -208,7 +208,7 @@ enum Converters {
         private final boolean canUsePropertyEditors = isPropertyEditorAvailable && !isPropertyEditorDisabled;
 
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (!canUsePropertyEditors)
                 return SKIP;
 
@@ -218,7 +218,7 @@ enum Converters {
                 editor.setAsText(text);
                 return editor.getValue();
             } catch (Exception e) {
-                throw unsupportedConversion(e, targetMethod, targetType, text);
+                throw unsupportedConversion(e, key, targetType, text);
             }
         }
     },
@@ -228,7 +228,7 @@ enum Converters {
      */
     PRIMITIVE {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (!targetType.isPrimitive()) return SKIP;
             if (targetType == Byte.TYPE) return Byte.parseByte(text);
             if (targetType == Short.TYPE) return Short.parseShort(text);
@@ -243,7 +243,7 @@ enum Converters {
 
     FILE {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (targetType != File.class) return SKIP;
             return new File(expandUserHome(text));
         }
@@ -252,7 +252,7 @@ enum Converters {
     /** Same treatment as {@link #FILE}, so that the two ways of naming a path behave alike. */
     PATH {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (targetType != Path.class) return SKIP;
             return Paths.get(expandUserHome(text));
         }
@@ -260,19 +260,19 @@ enum Converters {
 
     CLASS {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (targetType != Class.class) return SKIP;
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException ex) {
-                throw unsupportedConversion(ex, targetMethod, targetType, text);
+                throw unsupportedConversion(ex, key, targetType, text);
             }
         }
     },
 
     CLASS_WITH_STRING_CONSTRUCTOR {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(String.class);
                 return constructor.newInstance(text);
@@ -284,7 +284,7 @@ enum Converters {
 
     CLASS_WITH_VALUE_OF_METHOD {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             try {
                 Method method = targetType.getMethod("valueOf", String.class);
                 if (isStatic(method.getModifiers()))
@@ -298,7 +298,7 @@ enum Converters {
 
     CLASS_WITH_OBJECT_CONSTRUCTOR {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             try {
                 Constructor<?> constructor = targetType.getConstructor(Object.class);
                 return constructor.newInstance(text);
@@ -310,8 +310,8 @@ enum Converters {
 
     UNSUPPORTED {
         @Override
-        Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            throw unsupportedConversion(targetMethod, targetType, text);
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
+            throw unsupportedConversion(key, targetType, text);
         }
     };
 
@@ -335,7 +335,16 @@ enum Converters {
     private static final Map<Class<?>, Class<? extends Converter<?>>> converterRegistry =
             new ConcurrentHashMap<Class<?>, Class<? extends Converter<?>>>();
 
-    abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text);
+    /**
+     * @param targetMethod the method being resolved.
+     * @param targetType   the type to convert to.
+     * @param text         the value to convert.
+     * @param key          the key the value comes from, used to say which property is at fault when the
+     *                     conversion fails. It is handed down rather than derived from the method, since the
+     *                     key depends on the factory that created the Config object: see {@link KeyPrefix}.
+     * @return the converted value, or {@link SpecialValue#SKIP} to leave the conversion to the next converter.
+     */
+    abstract Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key);
 
     static void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter) {
         converterRegistry.put(type, converter);
@@ -345,13 +354,14 @@ enum Converters {
         converterRegistry.remove(type);
     }
 
-    static Object convert(Method targetMethod, Class<?> targetType, String text) {
-        return doConvert(targetMethod, targetType, text).getConvertedValue();
+    static Object convert(Method targetMethod, Class<?> targetType, String text, String key) {
+        return doConvert(targetMethod, targetType, text, key).getConvertedValue();
     }
 
-    private static ConversionResult doConvert(Method targetMethod, Class<?> targetType, String text) {
+    private static ConversionResult doConvert(
+            Method targetMethod, Class<?> targetType, String text, String key) {
         for (Converters converter : values()) {
-            Object convertedValue = converter.tryConvert(targetMethod, targetType, text);
+            Object convertedValue = converter.tryConvert(targetMethod, targetType, text, key);
             if (convertedValue != SKIP)
                 return new ConversionResult(converter, convertedValue);
         }
@@ -359,15 +369,13 @@ enum Converters {
     }
 
     private static UnsupportedOperationException unsupportedConversion(
-            Exception cause, Method targetMethod, Class<?> targetType, String text) {
-        return unsupported(cause, CANNOT_CONVERT_MESSAGE,
-                text, targetType.getCanonicalName(), PropertiesMapper.key(targetMethod));
+            Exception cause, String key, Class<?> targetType, String text) {
+        return unsupported(cause, CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName(), key);
     }
 
     private static UnsupportedOperationException unsupportedConversion(
-            Method targetMethod, Class<?> targetType, String text) {
-        return unsupported(CANNOT_CONVERT_MESSAGE,
-                text, targetType.getCanonicalName(), PropertiesMapper.key(targetMethod));
+            String key, Class<?> targetType, String text) {
+        return unsupported(CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName(), key);
     }
 
     private static class ConversionResult {

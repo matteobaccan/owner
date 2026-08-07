@@ -55,6 +55,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private Object proxy;
     private final LoadersManager loaders;
 
+    /**
+     * The prefix configured on the factory, captured when this object is created rather than looked up later:
+     * that is what keeps the keys of a live Config object from moving when the factory is reconfigured, keeps
+     * a reload resolving the same keys, and lets the mapping travel with the object when it is serialized.
+     */
+    private final KeyPrefix keyPrefix;
+
 
     /**
      * A cache of encryptedKeys with its decryptor.
@@ -81,11 +88,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             });
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
-                      VariablesExpander expander, LoadersManager loaders, Map<?, ?>... imports) {
+                      VariablesExpander expander, LoadersManager loaders, KeyPrefix keyPrefix,
+                      Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.loaders = loaders;
         this.imports = imports;
+        this.keyPrefix = keyPrefix;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
         uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
@@ -150,6 +159,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     /**
+     * Returns the prefix this Config object resolves its keys with, so that whoever needs a key asks for it
+     * instead of deriving it from the method alone.
+     *
+     * @return the prefix; {@link KeyPrefix#NONE} when the factory declares none.
+     */
+    KeyPrefix keyPrefix() {
+        return keyPrefix;
+    }
+
+    /**
      * If method contains the EncryptedValue annotation it Decrypts the value with the associated {@link Decryptor}.
      *
      * @param method with the key definition.
@@ -204,7 +223,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private Properties load(Properties props) {
         try {
             loading = true;
-            defaults(props, clazz);
+            defaults(props, clazz, keyPrefix);
             Properties loadedFromFile = doLoad();
             merge(props, loadedFromFile);
             merge(props, reverse(imports));

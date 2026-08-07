@@ -124,19 +124,21 @@ public class ConvertersTest {
             Class<?> converters = Class.forName("org.aeonbits.owner.Converters", true, isolated);
             assertNotSame(Converters.class, converters);
 
-            Method convert = converters.getDeclaredMethod("convert", Method.class, Class.class, String.class);
+            Method convert = converters.getDeclaredMethod(
+                    "convert", Method.class, Class.class, String.class, String.class);
             convert.setAccessible(true);
 
-            assertEquals(Byte.valueOf((byte) 1), convert.invoke(null, method("aByte"), Byte.TYPE, "1"));
-            assertEquals(Short.valueOf((short) 2), convert.invoke(null, method("aShort"), Short.TYPE, "2"));
-            assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3"));
-            assertEquals(Long.valueOf(4L), convert.invoke(null, method("aLong"), Long.TYPE, "4"));
-            assertEquals(Boolean.TRUE, convert.invoke(null, method("aBoolean"), Boolean.TYPE, "true"));
-            assertEquals(Float.valueOf(1.5f), convert.invoke(null, method("aFloat"), Float.TYPE, "1.5"));
-            assertEquals(Double.valueOf(2.5d), convert.invoke(null, method("aDouble"), Double.TYPE, "2.5"));
+            assertEquals(Byte.valueOf((byte) 1), convert.invoke(null, method("aByte"), Byte.TYPE, "1", "aByte"));
+            assertEquals(Short.valueOf((short) 2), convert.invoke(null, method("aShort"), Short.TYPE, "2", "aShort"));
+            assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3", "anInt"));
+            assertEquals(Long.valueOf(4L), convert.invoke(null, method("aLong"), Long.TYPE, "4", "aLong"));
+            assertEquals(Boolean.TRUE, convert.invoke(null, method("aBoolean"), Boolean.TYPE, "true", "aBoolean"));
+            assertEquals(Float.valueOf(1.5f), convert.invoke(null, method("aFloat"), Float.TYPE, "1.5", "aFloat"));
+            assertEquals(Double.valueOf(2.5d), convert.invoke(null, method("aDouble"), Double.TYPE, "2.5", "aDouble"));
 
             // non primitive types skip the PRIMITIVE converter and fall through to the next one
-            assertEquals(Integer.valueOf(42), convert.invoke(null, method("anInteger"), Integer.class, "42"));
+            assertEquals(Integer.valueOf(42),
+                    convert.invoke(null, method("anInteger"), Integer.class, "42", "anInteger"));
         } finally {
             if (oldValue == null)
                 System.clearProperty(PROPERTY_EDITOR_DISABLED_PROPERTY);
@@ -157,13 +159,14 @@ public class ConvertersTest {
         Class<?> converters = Class.forName("org.aeonbits.owner.Converters", true, isolated);
         assertNotSame(Converters.class, converters);
 
-        Method convert = converters.getDeclaredMethod("convert", Method.class, Class.class, String.class);
+        Method convert = converters.getDeclaredMethod(
+                "convert", Method.class, Class.class, String.class, String.class);
         convert.setAccessible(true);
 
         // primitives are handled by the PRIMITIVE converter
-        assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3"));
+        assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3", "anInt"));
         // wrappers fall through to the CLASS_WITH_STRING_CONSTRUCTOR converter
-        assertEquals(Integer.valueOf(42), convert.invoke(null, method("anInteger"), Integer.class, "42"));
+        assertEquals(Integer.valueOf(42), convert.invoke(null, method("anInteger"), Integer.class, "42", "anInteger"));
     }
 
     private static Method method(String name) throws NoSuchMethodException {

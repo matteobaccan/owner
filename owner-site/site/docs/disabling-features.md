@@ -40,7 +40,7 @@ The features that can be disabled are:
 |---|---|---|
 | `VARIABLE_EXPANSION` | `${...}` variables are left untouched, both in the property values and in the keys. See [Variables expansion]({{ site.url }}/docs/variables-expansion/). | 1.0.4 |
 | `PARAMETER_FORMATTING` | The property value is returned as it is, instead of being used as a format for the method arguments. See [Parametrized properties]({{ site.url }}/docs/parametrized-properties/). | 1.0.4 |
-| `PREFIX` | The `@Prefix` declared on the interface is ignored and the property is looked up with its bare key. See [Key prefix]({{ site.url }}/docs/key-prefix/). | 2.0.0 |
+| `PREFIX` | Every prefix is ignored and the property is looked up with its bare key: the `@Prefix` declared on the interface and the one configured on the factory alike. See [Key prefix]({{ site.url }}/docs/key-prefix/). | 2.0.0 |
 
 Not everything that can be switched off is a `DisableableFeature`. The
 expansion of [nested variables]({{ site.url }}/docs/variables-expansion/#toc_3),

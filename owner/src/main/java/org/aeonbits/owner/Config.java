@@ -210,6 +210,12 @@ public interface Config extends Serializable {
      * The prefix can be switched off for a single method or for a whole interface with
      * <code>@DisableFeature(DisableableFeature.PREFIX)</code>.
      * </p>
+     * <p>
+     * A prefix can also be configured on the {@link Factory} through the <code>owner.key.prefix</code> and
+     * <code>owner.key.prefix.from.package</code> properties, for the interfaces that do not declare one of
+     * their own. This annotation, being the explicit statement of the two, <b>wins</b> over it rather than
+     * being appended to it, while <code>@DisableFeature(PREFIX)</code> switches off both.
+     * </p>
      *
      * @since 2.0.0
      */

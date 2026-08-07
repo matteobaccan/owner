@@ -86,8 +86,10 @@ final class PropertiesAggregator {
             if (!name.startsWith(start) || name.length() == start.length())
                 continue;
             String entryKey = name.substring(start.length());
-            result.put(convert(method, keyType, entryKey),
-                    convert(method, valueType, value.apply(manager.getProperty(name))));
+            // the key to report is the property the entry comes from, not the group: telling somebody that
+            // 'servers' failed to convert leaves them looking through the whole group by hand
+            result.put(convert(method, keyType, entryKey, name),
+                    convert(method, valueType, value.apply(manager.getProperty(name)), name));
         }
         return result;
     }

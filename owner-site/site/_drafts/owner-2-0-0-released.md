@@ -99,6 +99,19 @@ Enhancements
    an interface without `@Prefix` resolves its keys exactly as before. See the
    [documentation]({{ site.url }}/docs/key-prefix/). Originally proposed by Gmugra in
    [#273](https://github.com/matteobaccan/owner/pull/273).
+ * A prefix can also be configured **on the factory**, for the interfaces that do not declare a `@Prefix` of
+   their own: `owner.key.prefix` prepends a literal to every key, and `owner.key.prefix.from.package` derives
+   it from the package of the interface declaring the method, so `com.example.ServerConfig.port()` reads
+   `com.example.port`. Being derived rather than typed, the second form follows the class when it is moved to
+   another package — and it extends to the keys the convention OWNER already applies to the name of the
+   default properties file. It is set through the factory properties, so no method is added to the `Factory`
+   interface, and it belongs to the factory rather than to the JVM: two factories do not interfere, and a
+   library can create its own and be unaffected by what the application does. `@Prefix` wins over it,
+   `@DisableFeature(PREFIX)` switches off both, and the prefix is read when the Config object is created and
+   kept for its whole life — so reconfiguring the factory cannot rename the keys of what already exists, a
+   reload resolves the same keys, and the mapping survives serialization. See the
+   [documentation]({{ site.url }}/docs/key-prefix/). Answers the request in
+   [#259](https://github.com/matteobaccan/owner/issues/259).
  * New `@DefaultValue(useOnEmpty = true)` flag: a property that is present but **empty** is normally a value
    like any other — `port=` is not a missing property, and on a numeric type it fails the conversion — which is
    the distinction MicroProfile Config, Quarkus and Spring Boot all draw, and what keeps a typo like
@@ -316,7 +329,8 @@ Bugs fixes
    `Cannot convert 'abc' to int for property 'server.port'`. The message used to say what could not be converted
    but not where to go and fix it, which in a file with fifty properties left the search to be done by hand. The
    key named is the one the property is read with, `@Key` and `@Prefix` included
-   ([#191](https://github.com/matteobaccan/owner/issues/191)).
+   ([#191](https://github.com/matteobaccan/owner/issues/191)). When the value comes from a group of
+   properties read as a `Map`, the key named is the individual entry — `group.second`, not `group`.
  * Fixed a `NullPointerException` masking the real error in the hot reload example when the configuration URI is
    invalid.
  * Test suite stability fixes (thread handling in multi-threading tests, wait times).

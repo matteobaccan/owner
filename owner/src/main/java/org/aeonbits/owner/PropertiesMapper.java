@@ -32,10 +32,21 @@ final class PropertiesMapper {
         return ( method.getAnnotation( EncryptedValue.class ) ) != null;
     }
 
-    static String key(Method method) {
+    /**
+     * Returns the key the given method resolves to.
+     * <p>
+     * The key is never derived anywhere else: whoever needs one receives it, since it depends on the
+     * {@link KeyPrefix} of the factory that created the Config object and not on the method alone.
+     * </p>
+     *
+     * @param method       the method to resolve.
+     * @param globalPrefix the prefix configured on the factory, {@link KeyPrefix#NONE} when there is none.
+     * @return the key.
+     */
+    static String key(Method method, KeyPrefix globalPrefix) {
         Key key = method.getAnnotation(Key.class);
         String name = (key == null) ? method.getName() : key.value();
-        return prefix(method) + name;
+        return prefix(method, globalPrefix) + name;
     }
 
     /**
@@ -43,12 +54,19 @@ final class PropertiesMapper {
      * interface where the method is declared. Since {@link Method#getDeclaringClass()} already points to
      * that interface, the prefix of a sub-interface never leaks onto the methods it inherits, and a
      * super-interface keeps its own prefix at any depth of the hierarchy.
+     * <p>
+     * A {@link Prefix} written on the interface wins over the one configured on the factory: it is the
+     * explicit statement of the two, and letting them concatenate would push the keys of everybody who
+     * already uses the annotation one level deeper. {@code @DisableFeature(PREFIX)} switches off both.
+     * </p>
      */
-    private static String prefix(Method method) {
+    private static String prefix(Method method, KeyPrefix globalPrefix) {
         if (isFeatureDisabled(method, PREFIX))
             return "";
         Prefix prefix = method.getDeclaringClass().getAnnotation(Prefix.class);
-        return (prefix == null) ? "" : prefix.value();
+        if (prefix != null)
+            return prefix.value();
+        return globalPrefix.of(method.getDeclaringClass());
     }
 
     static String defaultValue(Method method) {
@@ -65,10 +83,10 @@ final class PropertiesMapper {
         return defaultValue != null && defaultValue.useOnEmpty() ? defaultValue.value() : null;
     }
 
-    static void defaults(Properties properties, Class<? extends Config> clazz) {
+    static void defaults(Properties properties, Class<? extends Config> clazz, KeyPrefix globalPrefix) {
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            String key = key(method);
+            String key = key(method, globalPrefix);
             String value = defaultValue(method);
             if (value != null)
                 properties.put(key, value);

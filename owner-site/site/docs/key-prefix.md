@@ -304,3 +304,147 @@ public interface PoolConfig extends DataSourceConfig {
     int maxSize();                // maxSize, the pool. prefix is off
 }
 ```
+
+
+A prefix for the whole factory
+------------------------------
+
+`@Prefix` states the prefix in the source code, one interface at a time. Since
+version 2.0.0 a prefix can also be configured on the
+[factory]({{ site.url }}/docs/singleton/), for the interfaces that do not
+declare one of their own. It is set through the factory properties, which are
+the place where the factory itself is configured, so there is no new method to
+learn:
+
+```java
+Factory factory = ConfigFactory.newInstance();
+factory.setProperty("owner.key.prefix.from.package", "true");
+
+ServerConfig cfg = factory.create(ServerConfig.class);
+```
+
+Two forms are available, and they compose — the literal one comes first:
+
+| property | effect |
+|---|---|
+| `owner.key.prefix` | a literal, prepended to every key |
+| `owner.key.prefix.from.package` | the package of the interface **declaring** the method, followed by a dot |
+
+With `owner.key.prefix.from.package` set to `true`, an interface written like
+this:
+
+```java
+package com.example;
+
+public interface ServerConfig extends Config {
+    @DefaultValue("8080")
+    int port();
+}
+```
+
+reads:
+
+```properties
+com.example.port=80
+```
+
+which is the point of the derived form: the prefix is not a string somebody
+typed, so moving the interface to another package moves its keys with it,
+instead of leaving a literal behind. Setting both properties nests one inside
+the other: `owner.key.prefix=myapp.` together with the derived form gives
+`myapp.com.example.port`.
+
+This is less of a new idea than it looks. OWNER already derives the name of the
+[default properties file]({{ site.url }}/docs/loading-strategies/) from the
+package and name of the interface — it was only the *keys* that were left out
+of that convention.
+
+<div class="note">
+  <h5>The literal form belongs to an application, not to a library.</h5>
+  <p>
+    <code>owner.key.prefix</code> moves the keys of every interface created by that factory, including
+    the ones you did not write. The derived form does not have that problem: it puts each interface
+    under its own package, so a configuration interface shipped by a library stays consistent with
+    itself. If you are writing a library, prefer <code>@Prefix</code> or the derived form.
+  </p>
+</div>
+
+### Which prefix wins
+
+An interface declaring `@Prefix` keeps it: the annotation is the explicit
+statement of the two, and it is not appended to the one of the factory.
+`@DisableFeature(PREFIX)` switches off both, so a method or an interface that
+opts out resolves to its bare key whatever the factory says.
+
+### One factory, one mapping
+
+The prefix belongs to the factory, not to the JVM, so two factories do not
+interfere:
+
+```java
+Factory prefixed = ConfigFactory.newInstance();
+prefixed.setProperty("owner.key.prefix.from.package", "true");
+
+Factory plain = ConfigFactory.newInstance();
+
+prefixed.create(ServerConfig.class).port();   // reads com.example.port
+plain.create(ServerConfig.class).port();      // reads port
+```
+
+The static `ConfigFactory` is a factory like any other: setting the property
+through `ConfigFactory.setProperty()` applies to what `ConfigFactory.create()`
+builds from that moment on, and leaves the factories you created yourself
+alone.
+
+The prefix is read **when the Config object is created**, and the object keeps
+it for the rest of its life. Reconfiguring the factory afterwards cannot rename
+the keys of an object that already exists, a
+[reload]({{ site.url }}/docs/reload/) resolves the same keys it resolved the
+first time, and the mapping travels with the object when it is serialized. For
+the same reason, an instance taken from
+[`ConfigCache`]({{ site.url }}/docs/singleton/) keeps the mapping it was born
+with: the cache returns the object created the first time, prefix included.
+
+### What else it reaches
+
+Being a prefix like the one of the annotation, it applies wherever a key is
+built:
+
+* a [parametrized key]({{ site.url }}/docs/parametrized-properties/) keeps it
+  in front of the key it completes at call time;
+* a [`Map` return type]({{ site.url }}/docs/type-conversion/) reads its group
+  of properties below the prefixed key;
+* a missing [mandatory property]({{ site.url }}/docs/usage/#toc_5) is reported
+  by its prefixed key, and so is a value that fails to convert;
+* an interface in the **default package** has no package name to build a
+  prefix out of, so the derived form leaves its keys alone rather than
+  prefixing them with a bare dot.
+
+### The properties keep their names
+
+The prefix says where a *method* looks; it does not rename the properties. The
+file, the imports and the
+[`Accessible`]({{ site.url }}/docs/accessible-mutable/) methods all use the full
+key:
+
+```java
+factory.create(ServerConfig.class, map("com.example.port", "80"));   // found
+factory.create(ServerConfig.class, map("port", "80"));               // not found
+```
+
+<div class="note info">
+  <h5>Why isn't the prefix applied to the imports too?</h5>
+  <p>
+    Because the prefix belongs to the interface, while the properties are shared. The same imported
+    map, the same file and the same <code>System</code> properties are read by every interface, and
+    each of them can have a different prefix — so a rule that depends on <i>who is reading</i> can
+    only be applied where the reading happens, never to the store itself.
+  </p>
+  <p>
+    Applying it to the store would also break what a key is: <code>getProperty("com.example.port")</code>
+    would stop matching the property it just wrote with <code>store()</code>, and
+    <code>${com.example.port}</code> in a variable would point at something else again. This is not a
+    rule the factory prefix introduces: <code>@Prefix("server.")</code> has always needed
+    <code>server.port</code> in the file, and this is the same rule with the prefix stated elsewhere.
+  </p>
+</div>
