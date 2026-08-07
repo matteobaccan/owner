@@ -8,6 +8,7 @@
 package org.aeonbits.owner.event;
 
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -42,7 +43,9 @@ public class ReloadEvent extends Event {
     public ReloadEvent(Object source, List<PropertyChangeEvent> events, Properties oldProperties,
                        Properties newProperties) {
         super(source);
-        this.events = unmodifiableList(events);
+        // copied like the two Properties below are: an event describes a reload that already happened, so
+        // what the listener reads cannot depend on what the caller does with its list afterwards
+        this.events = unmodifiableList(new ArrayList<PropertyChangeEvent>(events));
         this.oldProperties = new UnmodifiableProperties(oldProperties);
         this.newProperties = new UnmodifiableProperties(newProperties);
     }

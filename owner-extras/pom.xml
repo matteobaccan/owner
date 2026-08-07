@@ -18,7 +18,7 @@
 
     <name>OWNER :: Extras</name>
     <artifactId>owner-extras</artifactId>
-    <description>Extras for OWNER library</description>
+    <description>Additions to the OWNER library that require a third party library on the classpath, and are therefore kept out of the dependency-free core.</description>
     <packaging>jar</packaging>
 
     <profiles>
@@ -105,6 +105,14 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <!-- See the same instruction in the core module. This artifact shares no package
+                             with the core one, which is what lets the two sit together on the module
+                             path; SplitPackageTest is there to keep it that way. -->
+                        <Automatic-Module-Name>org.aeonbits.owner.extras</Automatic-Module-Name>
+                    </instructions>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>

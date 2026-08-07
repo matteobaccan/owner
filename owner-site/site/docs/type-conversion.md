@@ -250,6 +250,7 @@ Map<String, String>[] authors();
 ```
 
   [Map]: http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
+  [Optional]: https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html
 
 By default OWNER uses the comma `","` character to tokenize values for the
 arrays and collections, but you can specify different characters (and regexp)
@@ -488,6 +489,60 @@ as [CollectionConverterClassTest] does.
 
   [CollectionConverterClassTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/collections/CollectionConverterClassTest.java
 
+Optional values
+---------------
+
+*Since 2.0.0.*
+
+A property that is not defined anywhere, and has no `@DefaultValue` to fall back on, is read as `null`. When
+the caller has something to do about it, saying so in the signature is clearer than leaving a `null` to be
+remembered:
+
+```java
+public interface ServerConfig extends Config {
+    Optional<Integer> port();
+}
+```
+
+```java
+int port = cfg.port().orElse(8080);
+cfg.port().ifPresent(this::bind);
+```
+
+The wrapper says what happens when the property is **absent**; it changes nothing about how the value is
+read. `Optional<Integer>` converts its value to an `Integer` exactly like `Integer` does, so `@Key`,
+`@Prefix`, the preprocessors, the variable expansion and the decryption all apply as usual, and so does
+everything in this chapter: `Optional<List<String>>` is tokenized and converted element by element, and a
+`@ConverterClass` is used if there is one. A `@ConverterClass` that returns `null` yields an empty
+`Optional`, since that is what "this value could not be turned into anything" means.
+
+Two cases are deliberately *not* absences:
+
+  * **A value that is there but wrong.** `port=8O80`, written with the letter O, keeps failing with an
+    `UnsupportedOperationException` instead of coming back empty. Turning it into an empty `Optional` would
+    make a typo indistinguishable from a property nobody ever set, which is the opposite of the point.
+  * **A value that is there but empty.** `port=` is a value like any other here as everywhere else, so
+    `Optional<String>` holds the empty string rather than being absent. Use
+    [`@DefaultValue(useOnEmpty = true)`]({{ site.url }}/docs/usage/#a-property-that-is-set-but-empty) when an
+    empty value should be treated as a missing one.
+
+A `@DefaultValue` combines with an `Optional`, but the result is never empty, since the default always
+resolves. And a raw `Optional`, or one holding a wildcard, carries no type to convert to and is read as
+`String`, the same default a raw collection takes.
+
+<div class="note info">
+  <h5>Optional and @Mandatory</h5>
+  <p>
+  The two say the opposite of each other, and writing both <b>on the same method</b> is reported when the
+  Config object is created. A <code>@Mandatory</code> written <b>on the interface</b> is a different matter:
+  it is the way of saying "these are all required", and a method returning an <code>Optional</code> is the
+  exception being made, so it is left alone rather than rejected.
+  </p>
+</div>
+
+There is no `Optional<Map<...>>`: a `Map` return type reads a *group* of properties and already comes back
+empty when nothing matches it, so there is no absence for an `Optional` to describe.
+
 All the types supported by OWNER
 --------------------------------
 
@@ -512,6 +567,10 @@ But there is more. OWNER API supports automatic conversion for:
       implementations like LinkedHashSet or user defined collections having a default no-arg constructor.
   14. [`Map`][Map] and sub-interfaces (since 2.0.0), reading the group of properties below the key of the
       method, with both the keys and the values converted to the declared types.
+  15. [`Optional`][Optional] (since 2.0.0) of any of the above, empty when the property is not defined
+      anywhere.
+  16. [`java.time.Duration`][duration] (since 2.0.0), written with an explicit time unit — `10 s`,
+      `500 ms` — or as an ISO-8601 duration. See [below](#duration).
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
 with some meaningful description to identify the problem as quickly as possible. The message names the value, the
@@ -545,6 +604,7 @@ empty text. What follows is the whole picture, with `useOnEmpty` being the opt-i
 | `URL` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
 | `String` | `""` | `"abc"` | the default value |
 | `File`, `Path`, `URI` | an empty path | accepted | the default value |
+| `Duration` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
 | arrays and collections | an empty array or collection | `UnsupportedOperationException` on the element | the default value |
 
 Two rows deserve a word. `File`, `Path` and `URI` accept an empty value because any text is a valid path or
@@ -568,41 +628,80 @@ Converter classes shipped with OWNER
 ------------------------------------
 
 Since specifying duration and byte size values in configuration files is very common,
-OWNER ships with converter classes for these as well as some classes for the types themselves.
-These classes are a part of the `owner-extras` module (they used to live in `owner-java8-extras`,
-which is gone now that the library requires Java 8). Also, you have to specify the `@ConverterClass`
-annotation explicitly for these converters, they are not applied automatically as is the case for
-the primitive (and more) types as described above.
+OWNER ships with converter classes for these as well as some classes for the types themselves. A
+duration is converted automatically since 2.0.0; a byte size still asks for its converter to be named,
+since `ByteSize` is a type of ours and not one of the JDK's.
+
+Since 2.0.0 they are part of the core `owner` artifact, and no extra dependency is needed: they used
+to be shipped separately only because the core had to run on Java 6 and could not name
+`java.time.Duration`, which stopped being true when Java 8 became the minimum. Their package names
+are unchanged, so an existing `import` keeps working — if you depended on `owner-java8-extras` for
+them, replace that dependency with `owner`.
 
 ### Duration
 
-For duration, the `DurationConverter` class is provided which converts configuration strings to
-[`java.time.Duration`][duration].
+*Automatic since 2.0.0.*
+
+A [`java.time.Duration`][duration] is converted out of the box, like a `File` or a `URL`: a timeout is
+the commonest typed setting there is after a number and a string, so no annotation is needed.
 
   [duration]: https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html
 
-Example:
-
 ```java
-public class DurationConfig extends Config {
+public interface ServerConfig extends Config {
 
-  @ConverterClass(DurationConverter.class)
-  @DefaultValue("10 ms")
-  Duration getTenMilliseconds();
+  @DefaultValue("10 s")
+  Duration connectTimeout();
 
+  @DefaultValue("500 ms")
+  Duration readTimeout();
 
-  @ConverterClass(DurationConverter.class)
-  @DefaultValue("10d")
-  Duration getTenDays();
-
-  // The DurationConverter class also supports
-  // ISO 8601 time format as described in the
-  // JavaDoc for java.time.Duration.
-  @ConverterClass(DurationConverter.class)
+  // the ISO-8601 form that java.time.Duration.parse reads is accepted as well
   @DefaultValue("PT15M")
-  Duration iso8601FifteenMinutes();
+  Duration sessionExpiry();
 }
 ```
+
+The suffix may be written attached or separated — `10s` and `10 s` are the same — and collections,
+arrays and `Optional` work as they do for any other type: `List<Duration> retries()` reading
+`10 s, 30 s, 1 m` gives three durations.
+
+<div class="note warning">
+  <h5>The time unit is required</h5>
+  <p>
+  <code>timeout=30</code> is <b>refused</b>, with a message saying what to write instead. A bare number
+  would be read as milliseconds, and whoever writes 30 means seconds far more often than milliseconds —
+  a service that gives up thirty milliseconds in, with nothing said, is not a failure worth being
+  clever about. Write the unit, or an ISO-8601 duration.
+  </p>
+</div>
+
+The suffix is **case sensitive**: `10 s` is ten seconds and `10 S` is an error. Note that this differs
+from the byte size units below, which are case insensitive.
+
+#### Asking for the converter explicitly
+
+`DurationConverter` is still there and can still be named on a method, which is what you want when the
+value is not the automatic form:
+
+```java
+  @ConverterClass(DurationConverter.class)
+  @DefaultValue("30")
+  Duration legacyMillis();   // 30 milliseconds
+```
+
+**Named explicitly, the converter accepts a bare number and reads it as milliseconds.** That is the
+behaviour it has always had, and it is left alone: a configuration written before 2.0.0 keeps working
+exactly as it did. The rule is simply which of the two you get:
+
+| | A bare number, `30` | `30 s`, `PT30S` |
+|---|---|---|
+| automatic, no annotation | refused, with a message | 30 seconds |
+| `@ConverterClass(DurationConverter.class)` | 30 milliseconds | 30 seconds |
+
+A `@ConverterClass` naming any other converter, or one
+[registered]({{ site.url }}/docs/configuring/) for `Duration`, also takes precedence over the automatic
+conversion: the default never gets in the way of an explicit choice.
 
 The suffixes supported by DurationConverter are:
 
@@ -638,7 +737,31 @@ ByteSize mbAsGiB = oneMegaByte.convertTo(ByteSizeUnit.GIBIBYTES);
 
 // Get the number of bytes a ByteSize represents as a long
 long oneMegaByteAsLong = oneMegaByte.getBytesAsLong();
+
+// Sizes are compared by the amount of data, whatever unit they are written in
+boolean mebibyteIsLarger = oneMegaByte.compareTo(new ByteSize(1, ByteSizeUnit.MEBIBYTES)) < 0; // true
+
+// When the unit that suits a size is not known in advance, ask for the family instead:
+// in() picks the largest unit of that standard in which the value does not fall below one
+ByteSize sum = new ByteSize(2048576, ByteSizeUnit.BYTES);
+sum.in(ByteSizeStandard.SI);   // 2.048576 MB
+sum.in(ByteSizeStandard.IEC);  // 1.95367431640625 MiB
 ```
+
+`convertTo` needs to be told the unit; `in` needs only the family to pick from, which is usually
+what one has when a size read from a configuration file has to be logged or shown. Its answer is
+canonical — it depends on the size and never on the unit it happened to be written in, so `1 MB` and
+`1000000 B` both read as `1 MB` in SI — and it is exact, since every factor is a power of 1000 or of
+1024 and no division by one of those can fail to terminate. Zero, and anything below one byte, reads
+in bytes; a negative size keeps its sign and takes the unit its magnitude asks for.
+
+`ByteSize` is immutable and `final`. Two instances are equal when they represent the same number of
+bytes, so `1 MB` equals `1000000 B`, and since 2.0.0 it implements
+[`Comparable`][comparable] with an ordering consistent with that equality: a `TreeSet` of byte sizes
+agrees with a `HashSet` on which of them are duplicates. It is also `Serializable`, and the unit
+survives the round trip along with the value: a size written as `1 MB` comes back reading as `1 MB`.
+
+  [comparable]: https://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html
 
 For converting configuration strings into the `ByteSize` type, the
 `ByteSizeConverter` class is provided.

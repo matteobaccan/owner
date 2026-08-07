@@ -10,11 +10,14 @@ package org.aeonbits.owner.util.bytesize;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link ByteSizeUnit}.
@@ -134,5 +137,59 @@ public class ByteSizeUnitTest {
         assertEquals("KiB", ByteSizeUnit.KIBIBYTES.toStringShortForm());
         assertEquals("MB", ByteSizeUnit.MEGABYTES.toStringShortForm());
         assertEquals("YiB", ByteSizeUnit.YOBIBYTES.toStringShortForm());
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // parsing does not depend on where the JVM thinks it is running
+    // -------------------------------------------------------------------------------------------------
+
+    /**
+     * Lowercasing without saying in which language is the one mistake that turns a working configuration
+     * into a broken one depending on the machine it runs on. In Turkish the capital <code>I</code>
+     * lowercases to the dotless <code>ı</code>, so <code>"KIB"</code> became <code>"kıb"</code>, matched no
+     * unit, and a legitimate <code>512 KIB</code> was rejected as an invalid unit — on a Turkish JVM only.
+     * Every IEC unit written in capitals was affected, since all of them carry an <code>i</code>.
+     */
+    @Test
+    public void parseIsNotAffectedByTheDefaultLocale() {
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(new Locale("tr", "TR"));
+
+            assertEquals(ByteSizeUnit.KIBIBYTES, ByteSizeUnit.parse("KIB"));
+            assertEquals(ByteSizeUnit.MEBIBYTES, ByteSizeUnit.parse("MIB"));
+            assertEquals(ByteSizeUnit.GIBIBYTES, ByteSizeUnit.parse("GIB"));
+            assertEquals(ByteSizeUnit.KIBIBYTES, ByteSizeUnit.parse("KIBIBYTES"));
+            assertEquals(ByteSizeUnit.MEBIBYTES, ByteSizeUnit.parse("MEBIBYTE"));
+
+            // the SI units carry no i, but they are the control group
+            assertEquals(ByteSizeUnit.KILOBYTES, ByteSizeUnit.parse("KB"));
+            assertEquals(ByteSizeUnit.BYTES, ByteSizeUnit.parse("B"));
+        } finally {
+            Locale.setDefault(previous);
+        }
+    }
+
+    @Test
+    public void aByteSizeIsReadTheSameWayInAnyLocale() {
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(new Locale("tr", "TR"));
+            assertEquals(new ByteSize(512, ByteSizeUnit.KIBIBYTES),
+                    new ByteSize(512, ByteSizeUnit.parse("KIB")));
+        } finally {
+            Locale.setDefault(previous);
+        }
+    }
+
+    @Test
+    public void parseRejectsNullSayingSo() {
+        try {
+            ByteSizeUnit.parse(null);
+            fail("NullPointerException is expected");
+        } catch (NullPointerException e) {
+            assertNotNull("the message should say what was null", e.getMessage());
+            assertTrue(e.getMessage().toLowerCase().contains("unit"));
+        }
     }
 }
