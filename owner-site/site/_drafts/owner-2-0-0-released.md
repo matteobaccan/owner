@@ -58,8 +58,12 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    interfaces, is now built into the core: **replace the `owner-java8` dependency with `owner`** and
    everything keeps working.
  * The `owner-java8-extras` artifact is gone. The `DurationConverter`, `ByteSizeConverter` and the
-   `ByteSize`/`ByteSizeUnit` classes it contained moved, with unchanged package names, into `owner-extras`:
-   **replace the `owner-java8-extras` dependency with `owner-extras`**.
+   `ByteSize`/`ByteSizeUnit`/`ByteSizeStandard` classes it contained are now part of the core `owner`
+   artifact, with unchanged package names: **replace the `owner-java8-extras` dependency with `owner`**,
+   and no `import` changes. They were shipped apart only because the core had to run on Java 6 and could
+   not so much as name `java.time.Duration`; with Java 8 as the minimum that reason is gone, and neither
+   the converters nor the byte size classes bring a dependency of their own. `owner-extras` is left with
+   what actually needs a third party library on the classpath — the ZooKeeper loader.
  * `ZooKeeperLoader` moved from `org.aeonbits.owner.loaders` to **`org.aeonbits.owner.extras.loaders`**:
    **change the import**, nothing else. It was the one class of `owner-extras` sitting under a package the
    core artifact also owns, and a package cannot live in two modules: as long as it did, the two jars could

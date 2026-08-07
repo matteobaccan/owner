@@ -18,7 +18,7 @@
 
     <name>OWNER :: Extras</name>
     <artifactId>owner-extras</artifactId>
-    <description>Extras for OWNER library</description>
+    <description>Additions to the OWNER library that require a third party library on the classpath, and are therefore kept out of the dependency-free core.</description>
     <packaging>jar</packaging>
 
     <profiles>

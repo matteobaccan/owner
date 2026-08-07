@@ -626,10 +626,15 @@ Converter classes shipped with OWNER
 
 Since specifying duration and byte size values in configuration files is very common,
 OWNER ships with converter classes for these as well as some classes for the types themselves.
-These classes are a part of the `owner-extras` module (they used to live in `owner-java8-extras`,
-which is gone now that the library requires Java 8). Also, you have to specify the `@ConverterClass`
-annotation explicitly for these converters, they are not applied automatically as is the case for
-the primitive (and more) types as described above.
+
+Since 2.0.0 they are part of the core `owner` artifact, and no extra dependency is needed: they used
+to be shipped separately only because the core had to run on Java 6 and could not name
+`java.time.Duration`, which stopped being true when Java 8 became the minimum. Their package names
+are unchanged, so an existing `import` keeps working — if you depended on `owner-java8-extras` for
+them, replace that dependency with `owner`.
+
+You still have to name the converter with the `@ConverterClass` annotation: unlike the primitive and
+the other types described above, these are not applied automatically.
 
 ### Duration
 
