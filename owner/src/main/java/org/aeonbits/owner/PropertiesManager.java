@@ -685,10 +685,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             return false;
         PropertiesInvocationHandler propsInvocationHandler = (PropertiesInvocationHandler) handler;
         PropertiesManager that = propsInvocationHandler.propertiesManager;
-        return this.equals(that);
+        return this.hasSamePropertiesAs(that);
     }
 
-    private boolean equals(PropertiesManager that) {
+    /**
+     * Not an {@code equals} overload: which of the two would be called depends on the static type of the
+     * argument, and one of them is this class' real {@link #equals(Object)} contract.
+     */
+    private boolean hasSamePropertiesAs(PropertiesManager that) {
         if (!this.isAssignationCompatibleWith(that))
             return false;
         this.readLock.lock();
