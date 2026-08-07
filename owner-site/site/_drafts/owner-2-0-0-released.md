@@ -151,6 +151,9 @@ Enhancements
    [documentation]({{ site.url }}/docs/usage/#a-property-that-is-set-but-empty) and the
    [table of what an empty value does on each type]({{ site.url }}/docs/type-conversion/). Partially answers
    [#191](https://github.com/matteobaccan/owner/issues/191).
+ * `ByteSize` implements `Comparable`, ordering sizes by the amount of data they represent whatever unit
+   they are written in, so `1 MB` sorts before `1 MiB`. The ordering is consistent with equality, which is
+   what makes a `TreeSet` of byte sizes agree with a `HashSet` on which of them are duplicates.
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
  * [#187](https://github.com/matteobaccan/owner/issues/187): `java.nio.file.Path` is converted, with a leading

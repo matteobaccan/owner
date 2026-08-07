@@ -695,7 +695,17 @@ ByteSize mbAsGiB = oneMegaByte.convertTo(ByteSizeUnit.GIBIBYTES);
 
 // Get the number of bytes a ByteSize represents as a long
 long oneMegaByteAsLong = oneMegaByte.getBytesAsLong();
+
+// Sizes are compared by the amount of data, whatever unit they are written in
+boolean mebibyteIsLarger = oneMegaByte.compareTo(new ByteSize(1, ByteSizeUnit.MEBIBYTES)) < 0; // true
 ```
+
+`ByteSize` is immutable and `final`. Two instances are equal when they represent the same number of
+bytes, so `1 MB` equals `1000000 B`, and since 2.0.0 it implements
+[`Comparable`][comparable] with an ordering consistent with that equality: a `TreeSet` of byte sizes
+agrees with a `HashSet` on which of them are duplicates.
+
+  [comparable]: https://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html
 
 For converting configuration strings into the `ByteSize` type, the
 `ByteSizeConverter` class is provided.

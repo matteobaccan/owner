@@ -25,10 +25,13 @@ import static java.util.Objects.requireNonNull;
  * Instances are immutable, and the class is <code>final</code>: {@link #equals(Object)} compares the number
  * of bytes across units, a statement that a subclass adding a field of its own could not honour.
  * </p>
+ * <p>
+ * Instances are ordered by the number of bytes they represent, consistently with {@link #equals(Object)}.
+ * </p>
  *
  * @author Stefan Freyr Stefansson
  */
-public final class ByteSize {
+public final class ByteSize implements Comparable<ByteSize> {
     private final BigDecimal value;
     private final ByteSizeUnit unit;
 
@@ -142,6 +145,27 @@ public final class ByteSize {
     public ByteSize convertTo(ByteSizeUnit unit){
         BigDecimal bytes = this.value.multiply(this.unit.getFactor()).setScale(0, RoundingMode.CEILING);
         return new ByteSize(bytes.divide(unit.getFactor()), unit);
+    }
+
+    /**
+     * Compares two byte sizes by the amount of data they represent, so that <code>1 MiB</code> comes after
+     * <code>1 MB</code> and the unit each of them is written in does not enter into it.
+     * <p>
+     * The ordering is <b>consistent with equals</b>: this method returns zero exactly when
+     * {@link #equals(Object)} returns <code>true</code>. That is what makes a {@link java.util.TreeSet} of
+     * byte sizes agree with a {@link java.util.HashSet} of the same sizes on which of them are duplicates.
+     * </p>
+     *
+     * @param other the byte size to compare this one with.
+     * @return a negative integer, zero, or a positive integer as this size is smaller than, equal to, or
+     *         larger than the given one.
+     * @throws NullPointerException if the given byte size is <code>null</code>.
+     * @since 2.0.0
+     */
+    @Override
+    public int compareTo(ByteSize other) {
+        requireNonNull(other, "cannot compare a ByteSize with null");
+        return getBytes().compareTo(other.getBytes());
     }
 
     @Override

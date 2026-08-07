@@ -13,11 +13,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 public class ByteSizeTest {
@@ -258,5 +263,89 @@ public class ByteSizeTest {
     public void aNegativeSizeIsCurrentlyAccepted(){
         assertEquals(-5, new ByteSize(-5L, ByteSizeUnit.BYTES).getBytesAsLong());
         assertEquals(BigInteger.valueOf(-1), new ByteSize("-1.5", ByteSizeUnit.BYTES).getBytes());
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // ordering
+    // -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void sizesAreOrderedByTheAmountOfDataRegardlessOfTheUnit(){
+        // a mebibyte is 1048576 bytes, a megabyte is 1000000
+        assertTrue(new ByteSize(1, ByteSizeUnit.MEGABYTES)
+                .compareTo(new ByteSize(1, ByteSizeUnit.MEBIBYTES)) < 0);
+        assertTrue(new ByteSize(1, ByteSizeUnit.MEBIBYTES)
+                .compareTo(new ByteSize(1, ByteSizeUnit.MEGABYTES)) > 0);
+        assertTrue(new ByteSize(1, ByteSizeUnit.KILOBYTES)
+                .compareTo(new ByteSize(999L, ByteSizeUnit.BYTES)) > 0);
+    }
+
+    /**
+     * Returning zero exactly when {@link ByteSize#equals} is true is what makes a sorted collection agree
+     * with a hashed one on which sizes are duplicates.
+     */
+    @Test
+    public void theOrderingIsConsistentWithEquals(){
+        List<ByteSize> sizes = asList(
+                new ByteSize(1, ByteSizeUnit.MEGABYTES),
+                new ByteSize(1000000L, ByteSizeUnit.BYTES),
+                new ByteSize("1000.0", ByteSizeUnit.KILOBYTES),
+                new ByteSize(1, ByteSizeUnit.MEBIBYTES),
+                new ByteSize(0L, ByteSizeUnit.BYTES),
+                new ByteSize(-1L, ByteSizeUnit.BYTES));
+
+        for (ByteSize a : sizes)
+            for (ByteSize b : sizes)
+                assertEquals("compareTo and equals disagree on " + a + " and " + b,
+                        a.equals(b), a.compareTo(b) == 0);
+    }
+
+    @Test
+    public void aTreeSetHoldsOneEntryPerSizeJustAsAHashSetDoes(){
+        List<ByteSize> sizes = asList(
+                new ByteSize(1, ByteSizeUnit.MEGABYTES),
+                new ByteSize(1000000L, ByteSizeUnit.BYTES),
+                new ByteSize("1000.0", ByteSizeUnit.KILOBYTES),
+                new ByteSize(1, ByteSizeUnit.MEBIBYTES));
+
+        assertEquals(new HashSet<>(sizes).size(), new TreeSet<>(sizes).size());
+        assertEquals(2, new TreeSet<>(sizes).size());
+    }
+
+    @Test
+    public void sizesCanBeSorted(){
+        List<ByteSize> sizes = new ArrayList<>(asList(
+                new ByteSize(1, ByteSizeUnit.GIGABYTES),
+                new ByteSize(512L, ByteSizeUnit.BYTES),
+                new ByteSize(1, ByteSizeUnit.MEBIBYTES),
+                new ByteSize(1, ByteSizeUnit.MEGABYTES)));
+        Collections.sort(sizes);
+
+        assertEquals(asList(
+                new ByteSize(512L, ByteSizeUnit.BYTES),
+                new ByteSize(1, ByteSizeUnit.MEGABYTES),
+                new ByteSize(1, ByteSizeUnit.MEBIBYTES),
+                new ByteSize(1, ByteSizeUnit.GIGABYTES)), sizes);
+    }
+
+    @Test
+    public void theOrderingIsAntisymmetricAndTransitive(){
+        ByteSize small = new ByteSize(512L, ByteSizeUnit.BYTES);
+        ByteSize medium = new ByteSize(1, ByteSizeUnit.KIBIBYTES);
+        ByteSize large = new ByteSize(1, ByteSizeUnit.MEBIBYTES);
+
+        assertEquals(Integer.signum(small.compareTo(medium)), -Integer.signum(medium.compareTo(small)));
+        assertTrue(small.compareTo(medium) < 0 && medium.compareTo(large) < 0);
+        assertTrue("transitivity", small.compareTo(large) < 0);
+    }
+
+    @Test
+    public void comparingWithNullIsRejected(){
+        try {
+            new ByteSize(1L, ByteSizeUnit.BYTES).compareTo(null);
+            fail("NullPointerException is expected");
+        } catch (NullPointerException e) {
+            assertNotNull(e.getMessage());
+        }
     }
 }
