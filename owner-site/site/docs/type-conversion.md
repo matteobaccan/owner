@@ -698,7 +698,20 @@ long oneMegaByteAsLong = oneMegaByte.getBytesAsLong();
 
 // Sizes are compared by the amount of data, whatever unit they are written in
 boolean mebibyteIsLarger = oneMegaByte.compareTo(new ByteSize(1, ByteSizeUnit.MEBIBYTES)) < 0; // true
+
+// When the unit that suits a size is not known in advance, ask for the family instead:
+// in() picks the largest unit of that standard in which the value does not fall below one
+ByteSize sum = new ByteSize(2048576, ByteSizeUnit.BYTES);
+sum.in(ByteSizeStandard.SI);   // 2.048576 MB
+sum.in(ByteSizeStandard.IEC);  // 1.95367431640625 MiB
 ```
+
+`convertTo` needs to be told the unit; `in` needs only the family to pick from, which is usually
+what one has when a size read from a configuration file has to be logged or shown. Its answer is
+canonical — it depends on the size and never on the unit it happened to be written in, so `1 MB` and
+`1000000 B` both read as `1 MB` in SI — and it is exact, since every factor is a power of 1000 or of
+1024 and no division by one of those can fail to terminate. Zero, and anything below one byte, reads
+in bytes; a negative size keeps its sign and takes the unit its magnitude asks for.
 
 `ByteSize` is immutable and `final`. Two instances are equal when they represent the same number of
 bytes, so `1 MB` equals `1000000 B`, and since 2.0.0 it implements

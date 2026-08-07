@@ -159,6 +159,59 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
     }
 
     /**
+     * Returns the same byte size expressed in the unit of the given standard that makes it readable: the
+     * largest one in which the value does not fall below one, so that 2048576 bytes read as
+     * <code>2.048576 MB</code> in {@link ByteSizeStandard#SI} and as <code>1.95367431640625 MiB</code> in
+     * {@link ByteSizeStandard#IEC}.
+     * <p>
+     * Where {@link #convertTo(ByteSizeUnit)} needs to be told the unit, this method needs only the family
+     * of units to pick from, which is what one usually has: a size read from a configuration file is to be
+     * logged or shown, and the unit that suits it depends on how large it turned out to be.
+     * </p>
+     * <p>
+     * The result is <b>canonical</b>: two sizes that are equal give the same answer, whatever unit each of
+     * them was written in, so <code>1 MB</code> and <code>1000000 B</code> both read as <code>1 MB</code>
+     * in SI. That is what makes this the natural way to display the outcome of a calculation, where the
+     * unit of the operands is an accident of how they were written.
+     * </p>
+     * <p>
+     * The conversion is exact: every factor is a power of 1000 or of 1024, neither of which has a prime
+     * factor beyond 2 and 5, so no division involved here can fail to terminate. A size below one byte, or
+     * zero, reads in bytes, there being no larger unit that fits; a negative size keeps its sign and takes
+     * the unit its magnitude asks for.
+     * </p>
+     *
+     * @param standard the family of units to express this size in.
+     * @return an equal byte size, written in the unit of that standard that suits it.
+     * @throws NullPointerException if the standard is <code>null</code>.
+     * @since 2.0.0
+     */
+    public ByteSize in(ByteSizeStandard standard) {
+        requireNonNull(standard, "the standard to express a ByteSize in cannot be null");
+        return convertTo(unitFor(getBytes().abs(), standard));
+    }
+
+    /**
+     * The largest unit of the given standard whose factor does not exceed the given number of bytes.
+     * {@link ByteSizeUnit#BYTES} is the starting point rather than a candidate, since it is the answer
+     * whenever no larger unit fits, and it belongs to both families however it is labelled.
+     */
+    private static ByteSizeUnit unitFor(BigInteger bytes, ByteSizeStandard standard) {
+        ByteSizeUnit result = ByteSizeUnit.BYTES;
+        for (ByteSizeUnit candidate : ByteSizeUnit.values()) {
+            if (candidate == ByteSizeUnit.BYTES || !belongsTo(candidate, standard))
+                continue;
+            if (candidate.getFactor().toBigInteger().compareTo(bytes) <= 0)
+                result = candidate;
+        }
+        return result;
+    }
+
+    private static boolean belongsTo(ByteSizeUnit unit, ByteSizeStandard standard) {
+        return standard == ByteSizeStandard.SI ? unit.isSI() : unit.isIEC();
+    }
+
+    /**
      * Compares two byte sizes by the amount of data they represent, so that <code>1 MiB</code> comes after
      * <code>1 MB</code> and the unit each of them is written in does not enter into it.
      * <p>

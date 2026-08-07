@@ -154,6 +154,12 @@ Enhancements
  * `ByteSize` implements `Comparable`, ordering sizes by the amount of data they represent whatever unit
    they are written in, so `1 MB` sorts before `1 MiB`. The ordering is consistent with equality, which is
    what makes a `TreeSet` of byte sizes agree with a `HashSet` on which of them are duplicates.
+ * New `ByteSize.in(ByteSizeStandard)`: the same size written in the unit of that family that suits it — the
+   largest one in which the value does not fall below one — so 2048576 bytes read as `2.048576 MB` in SI and
+   as `1.95367431640625 MiB` in IEC. Where `convertTo` has to be told the unit, this needs only the family to
+   choose from, which is what one usually has when a configured size is to be logged or shown. The answer is
+   canonical, depending on the size and never on the unit it happened to be written in, and exact, every
+   factor being a power of 1000 or of 1024.
  * `ByteSize` is `Serializable`, which a `Config` object already was. The unit is preserved along with the
    value, so a size written as `1 MB` comes back reading as `1 MB` and not as `1000000 B`, and the stream is
    validated on the way in: deserialization runs no constructor, so a stream that does not describe a byte

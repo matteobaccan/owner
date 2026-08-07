@@ -9,6 +9,9 @@ package org.aeonbits.owner.util.bytesize;
 
 import org.junit.Test;
 
+import static org.aeonbits.owner.util.bytesize.ByteSizeStandard.IEC;
+import static org.aeonbits.owner.util.bytesize.ByteSizeStandard.SI;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -351,6 +354,100 @@ public class ByteSizeTest {
     public void comparingWithNullIsRejected(){
         try {
             new ByteSize(1L, ByteSizeUnit.BYTES).compareTo(null);
+            fail("NullPointerException is expected");
+        } catch (NullPointerException e) {
+            assertNotNull(e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // in(ByteSizeStandard): the same size, written in the unit that suits it
+    // -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void inPicksTheLargestUnitThatDoesNotTakeTheValueBelowOne(){
+        assertEquals("1 KB", new ByteSize(1000L, ByteSizeUnit.BYTES).in(SI).toString());
+        assertEquals("999 B", new ByteSize(999L, ByteSizeUnit.BYTES).in(SI).toString());
+        assertEquals("1 KiB", new ByteSize(1024L, ByteSizeUnit.BYTES).in(IEC).toString());
+        assertEquals("1023 B", new ByteSize(1023L, ByteSizeUnit.BYTES).in(IEC).toString());
+    }
+
+    /**
+     * The worked example: the sum of a megabyte and a mebibyte, which has no natural unit of its own.
+     */
+    @Test
+    public void inExpressesTheSameSizeInEitherFamily(){
+        ByteSize sum = new ByteSize(2048576L, ByteSizeUnit.BYTES);
+
+        assertEquals("2.048576 MB", sum.in(SI).toString());
+        assertEquals("1.95367431640625 MiB", sum.in(IEC).toString());
+    }
+
+    /**
+     * The property the method exists for: the answer depends on the size, never on the unit it happened to
+     * be written in. Without it the outcome of a calculation would read differently depending on the order
+     * of the operands.
+     */
+    @Test
+    public void inIsCanonicalAcrossTheUnitsASizeMayBeWrittenIn(){
+        List<ByteSize> sameSize = asList(
+                new ByteSize(1, ByteSizeUnit.MEGABYTES),
+                new ByteSize(1000000L, ByteSizeUnit.BYTES),
+                new ByteSize("1000.0", ByteSizeUnit.KILOBYTES),
+                new ByteSize(0.001, ByteSizeUnit.GIGABYTES));
+
+        for (ByteSize size : sameSize) {
+            assertEquals("1 MB", size.in(SI).toString());
+            assertEquals(sameSize.get(0).in(IEC).toString(), size.in(IEC).toString());
+        }
+    }
+
+    @Test
+    public void inNeverChangesTheSize(){
+        for (ByteSizeUnit unit : ByteSizeUnit.values()) {
+            ByteSize original = new ByteSize("1.5", unit);
+            assertEquals(original, original.in(SI));
+            assertEquals(original, original.in(IEC));
+            assertEquals(original.getBytes(), original.in(SI).getBytes());
+            assertEquals(original.getBytes(), original.in(IEC).getBytes());
+        }
+    }
+
+    @Test
+    public void oneOfEachUnitComesBackInThatSameUnit(){
+        for (ByteSizeUnit unit : ByteSizeUnit.values()) {
+            ByteSize one = new ByteSize(1, unit);
+            ByteSizeStandard standard = unit.isIEC() ? IEC : SI;
+            assertEquals("1 " + unit.toStringShortForm(), one.in(standard).toString());
+        }
+    }
+
+    @Test
+    public void zeroAndSubByteSizesReadInBytes(){
+        assertEquals("0 B", new ByteSize(0L, ByteSizeUnit.BYTES).in(SI).toString());
+        assertEquals("0 B", new ByteSize(0L, ByteSizeUnit.BYTES).in(IEC).toString());
+        // half a byte is already rounded up to one by getBytes(), and reads as such
+        assertEquals("1 B", new ByteSize("0.5", ByteSizeUnit.BYTES).in(SI).toString());
+    }
+
+    @Test
+    public void aNegativeSizeKeepsItsSignAndTakesTheUnitOfItsMagnitude(){
+        assertEquals("-2.048576 MB", new ByteSize(-2048576L, ByteSizeUnit.BYTES).in(SI).toString());
+        assertEquals("-1 KiB", new ByteSize(-1024L, ByteSizeUnit.BYTES).in(IEC).toString());
+    }
+
+    @Test
+    public void aSizeBeyondTheLargestUnitStaysInTheLargestUnit(){
+        ByteSize huge = new ByteSize(1000L, ByteSizeUnit.YOTTABYTES);
+        assertEquals("1000 YB", huge.in(SI).toString());
+        assertEquals(ByteSizeUnit.YOBIBYTES.toStringShortForm(),
+                huge.in(IEC).toString().replaceAll("^\\S+ ", ""));
+    }
+
+    @Test
+    public void inRejectsANullStandard(){
+        try {
+            new ByteSize(1L, ByteSizeUnit.BYTES).in(null);
             fail("NullPointerException is expected");
         } catch (NullPointerException e) {
             assertNotNull(e.getMessage());
