@@ -94,7 +94,7 @@ cfg.getProperty("max.threads");           // null
 ```
 
 For the same reason, a missing
-[mandatory property]({{ site.url }}/docs/usage/#toc_5) is reported by its
+[mandatory property]({{ site.url }}/docs/usage/#mandatory-properties) is reported by its
 prefixed key, which is the one that could not be resolved.
 
 
@@ -180,7 +180,7 @@ Variables in the prefix
 -----------------------
 
 The prefix is part of the key, so it goes through
-[variables expansion]({{ site.url }}/docs/variables-expansion/#toc_1) like the
+[variables expansion]({{ site.url }}/docs/variables-expansion/#variable-expansion-for-the-key) like the
 rest of it. Given the multi-environment properties file used in that chapter:
 
 ```properties
@@ -248,7 +248,7 @@ every method of the interface onto `FOO_host` and `FOO_port` at once. The
 empty default is what makes the prefix disappear when nothing is set.
 
 If the only reason for that method is to give `${env}` a fallback, a
-[default value]({{ site.url }}/docs/variables-expansion/#toc_2) in the prefix
+[default value]({{ site.url }}/docs/variables-expansion/#default-values) in the prefix
 itself says the same thing in one line, and the interface goes back to
 describing nothing but the section:
 
@@ -414,7 +414,7 @@ built:
   in front of the key it completes at call time;
 * a [`Map` return type]({{ site.url }}/docs/type-conversion/) reads its group
   of properties below the prefixed key;
-* a missing [mandatory property]({{ site.url }}/docs/usage/#toc_5) is reported
+* a missing [mandatory property]({{ site.url }}/docs/usage/#mandatory-properties) is reported
   by its prefixed key, and so is a value that fails to convert;
 * an interface in the **default package** has no package name to build a
   prefix out of, so the derived form leaves its keys alone rather than

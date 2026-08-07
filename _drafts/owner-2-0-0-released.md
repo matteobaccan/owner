@@ -87,7 +87,7 @@ Enhancements
  * New `@Mandatory` annotation: mark a property (or a whole interface) as required, and get a
    `MissingMandatoryPropertyException` listing all the unresolvable keys when the Config is created, as well as
    on access if a mandatory property disappears later (e.g. after a hot reload). See the
-   [documentation]({{ site.url }}/docs/usage/#toc_5). Originally proposed by Alexander Poulikakos in
+   [documentation]({{ site.url }}/docs/usage/#mandatory-properties). Originally proposed by Alexander Poulikakos in
    [#216](https://github.com/matteobaccan/owner/pull/216).
  * New `@Prefix` annotation: declare the common prefix of a group of keys once, on the interface, instead of
    repeating it in the `@Key` of every method. `@Prefix("server.")` makes `String hostname()` resolve to
@@ -120,7 +120,7 @@ Enhancements
    unset. With it, an empty value — whitespace included, and after the variables are expanded — falls back on
    the default as if the property were missing, while a value that is *wrong* rather than empty keeps failing.
    It is opt-in and per method, so nothing changes for existing configurations. See the
-   [documentation]({{ site.url }}/docs/usage/#toc_3) and the
+   [documentation]({{ site.url }}/docs/usage/#a-property-that-is-set-but-empty) and the
    [table of what an empty value does on each type]({{ site.url }}/docs/type-conversion/). Partially answers
    [#191](https://github.com/matteobaccan/owner/issues/191).
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
@@ -143,7 +143,7 @@ Enhancements
    the `@Key`, in a property value and in the `@Sources` specification, and it combines with the default values
    above — `${servers.${env}.url:http://localhost}`. This is what makes a key depend on a key that itself
    depends on another one, the case that produced silently wrong lookups before. See the
-   [documentation]({{ site.url }}/docs/variables-expansion/#toc_3). Proposed by Tomek in
+   [documentation]({{ site.url }}/docs/variables-expansion/#nested-variables). Proposed by Tomek in
    [#326](https://github.com/matteobaccan/owner/pull/326).
 
    **Compatibility.** This is the one change in this release that touches an existing parsing rule: up to 1.0.12
@@ -182,7 +182,7 @@ Enhancements
    is the shell idiom for "keep it if set, otherwise use this", but it relies on the substitution happening once
    at assignment, while OWNER expands variables when a property is read, and inside values. That line therefore
    describes a loop rather than a fallback, and it is reported as one — what was meant is `db.host=localhost`.
-   See the [documentation]({{ site.url }}/docs/variables-expansion/#toc_5).
+   See the [documentation]({{ site.url }}/docs/variables-expansion/#circular-references).
  * New `@CollectionConverterClass` annotation: hands the raw property value to a single converter instead of
    splitting it first and converting one element at a time, as `@ConverterClass` does. It is the way to opt out of
    the built-in tokenization — for a property holding a single JSON document, say — or to return a collection type
@@ -239,21 +239,21 @@ Site Enhancements
  * New chapter on the [Key prefix]({{ site.url }}/docs/key-prefix/) feature, and the list of the
    [disableable features]({{ site.url }}/docs/disabling-features/) is now spelled out, with the version each
    one appeared in.
- * New sections on [nested variables]({{ site.url }}/docs/variables-expansion/#toc_3) and on
-   [how to switch them off]({{ site.url }}/docs/variables-expansion/#toc_4) in Variables expansion.
- * New section on [Sources and interface inheritance]({{ site.url }}/docs/loading-strategies/#toc_1), writing down
+ * New sections on [nested variables]({{ site.url }}/docs/variables-expansion/#nested-variables) and on
+   [how to switch them off]({{ site.url }}/docs/variables-expansion/#disabling-nested-variables) in Variables expansion.
+ * New section on [Sources and interface inheritance]({{ site.url }}/docs/loading-strategies/#sources-and-interface-inheritance), writing down
    what was until now only implicit in the code: `@Sources` accumulates across the interfaces a mapping interface
    extends — by design, since it describes a set and not a single setting — while `@LoadPolicy` and `@HotReload`
    take the first annotation found. The section also documents the limitation the three of them share, that only
    the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
    unchanged in 2.0.0 and is now covered by tests, so that changing it will be a deliberate step.
- * New section on [Mandatory properties]({{ site.url }}/docs/usage/#toc_5) in Basic usage.
+ * New section on [Mandatory properties]({{ site.url }}/docs/usage/#mandatory-properties) in Basic usage.
  * [Type conversion]({{ site.url }}/docs/type-conversion/) no longer stops at "`Map` is not supported", a
    sentence that read as "cannot be done" and had been sending people away since at least
    [#41](https://github.com/matteobaccan/owner/issues/41). The chapter now describes the grouping above, and
    keeps the `@ConverterClass` recipe for the case where a single property value holds the pairs — arrays of
    maps included.
- * New section on [overriding a property in a sub-interface]({{ site.url }}/docs/usage/#toc_6), answering
+ * New section on [overriding a property in a sub-interface]({{ site.url }}/docs/usage/#overriding-a-property-in-a-sub-interface), answering
    [#421](https://github.com/matteobaccan/owner/issues/421): an override redirects a property instead of adding
    one, since there is one method and therefore one key. Both of the things usually wanted there — keeping the
    base key readable, and making the concrete setting fall back to the base one — are shown written down

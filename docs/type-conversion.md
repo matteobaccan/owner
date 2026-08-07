@@ -203,7 +203,7 @@ public interface MyConfig extends Config {
 }
 ```
 
-**As a single value**, which needs a [`@ConverterClass`](#toc_2) saying how to
+**As a single value**, which needs a [`@ConverterClass`](#the-converterclass-annotation) saying how to
 split it:
 
 ```properties

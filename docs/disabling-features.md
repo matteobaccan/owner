@@ -43,7 +43,7 @@ The features that can be disabled are:
 | `PREFIX` | Every prefix is ignored and the property is looked up with its bare key: the `@Prefix` declared on the interface and the one configured on the factory alike. See [Key prefix]({{ site.url }}/docs/key-prefix/). | 2.0.0 |
 
 Not everything that can be switched off is a `DisableableFeature`. The
-expansion of [nested variables]({{ site.url }}/docs/variables-expansion/#toc_3),
+expansion of [nested variables]({{ site.url }}/docs/variables-expansion/#nested-variables),
 introduced in 2.0.0, is turned off for the whole JVM with the
 `-Downer.nested.variable.expansion=false` system property rather than per
 method, since it exists to restore the substitution of the previous releases

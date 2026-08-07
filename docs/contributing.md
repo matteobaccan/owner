@@ -13,16 +13,16 @@ There are many ways to help improving OWNER:
 
 1. If you want to implement some change, you can
    [fork the project on GitHub][fork] then send me a pull request.
-   See the [workflow](#toc_0).
+   See the [workflow](#workflow).
 2. If you have some idea, you can submit it as change request on
    [GitHub issues][issues].
 3. If you've found some defect, you can submit the bug on
    [GitHub issues][issues].
 4. If you want to help the development, you can pick a
    [bug or an enhancement][issues] then contribute your patches following
-   the [workflow](#toc_0).
+   the [workflow](#workflow).
 5. Also you can contribute on improving the documentation.
-   See [Updating Documentation](#toc_1).
+   See [Updating Documentation](#updating-documentation).
 
   [fork]: https://help.github.com/articles/fork-a-repo
   [issues]: https://github.com/matteobaccan/owner/issues
