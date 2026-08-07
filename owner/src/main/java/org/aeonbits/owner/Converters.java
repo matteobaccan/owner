@@ -232,13 +232,20 @@ enum Converters {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (!targetType.isPrimitive()) return SKIP;
-            if (targetType == Byte.TYPE) return Byte.parseByte(text);
-            if (targetType == Short.TYPE) return Short.parseShort(text);
-            if (targetType == Integer.TYPE) return Integer.parseInt(text);
-            if (targetType == Long.TYPE) return Long.parseLong(text);
-            if (targetType == Boolean.TYPE) return Boolean.parseBoolean(text);
-            if (targetType == Float.TYPE) return Float.parseFloat(text);
-            if (targetType == Double.TYPE) return Double.parseDouble(text);
+            // a value that does not parse must fail the same way here as it does through a PropertyEditor:
+            // this converter only runs where the editors are missing or disabled, and the caller should not
+            // have to tell the two situations apart from the exception it gets
+            try {
+                if (targetType == Byte.TYPE) return Byte.parseByte(text);
+                if (targetType == Short.TYPE) return Short.parseShort(text);
+                if (targetType == Integer.TYPE) return Integer.parseInt(text);
+                if (targetType == Long.TYPE) return Long.parseLong(text);
+                if (targetType == Boolean.TYPE) return Boolean.parseBoolean(text);
+                if (targetType == Float.TYPE) return Float.parseFloat(text);
+                if (targetType == Double.TYPE) return Double.parseDouble(text);
+            } catch (NumberFormatException e) {
+                throw unsupportedConversion(e, key, targetType, text);
+            }
             return SKIP;
         }
     },

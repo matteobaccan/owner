@@ -169,6 +169,31 @@ public class ConvertersTest {
         assertEquals(Integer.valueOf(42), convert.invoke(null, method("anInteger"), Integer.class, "42", "anInteger"));
     }
 
+    /**
+     * Without the property editors the parsing falls to the PRIMITIVE converter, whose
+     * {@code NumberFormatException} says nothing about where the bad value came from. It has to fail the
+     * way the editor path fails, naming the value, the type and the key.
+     */
+    @Test
+    public void testUnparsablePrimitiveNamesThePropertyWhenPropertyEditorsAreNotAvailable() throws Exception {
+        ClassLoader isolated = new IsolatedClassLoader(
+                Converters.class.getClassLoader(), "java.beans.PropertyEditorManager");
+        Class<?> converters = Class.forName("org.aeonbits.owner.Converters", true, isolated);
+
+        Method convert = converters.getDeclaredMethod(
+                "convert", Method.class, Class.class, String.class, String.class);
+        convert.setAccessible(true);
+
+        try {
+            convert.invoke(null, method("anInt"), Integer.TYPE, "abc", "server.port");
+            fail("an UnsupportedOperationException was expected");
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause() instanceof UnsupportedOperationException);
+            assertEquals("Cannot convert 'abc' to int for property 'server.port'", e.getCause().getMessage());
+            assertTrue(e.getCause().getCause() instanceof NumberFormatException);
+        }
+    }
+
     private static Method method(String name) throws NoSuchMethodException {
         return PrimitiveConfig.class.getMethod(name);
     }
