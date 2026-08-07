@@ -73,8 +73,10 @@ public class GlobalKeyPrefixTest {
     }
 
     private static Factory factoryWith(String... keysAndValues) {
+        if (keysAndValues.length % 2 != 0)
+            throw new IllegalArgumentException("keys and values come in pairs");
         Factory factory = ConfigFactory.newInstance();
-        for (int i = 0; i < keysAndValues.length; i += 2)
+        for (int i = 0; i + 1 < keysAndValues.length; i += 2)
             factory.setProperty(keysAndValues[i], keysAndValues[i + 1]);
         return factory;
     }
