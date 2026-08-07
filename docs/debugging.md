@@ -86,3 +86,54 @@ public interface SampleConfig extends Accessible {
 ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
 cfg.list(System.out); // list() is defined in Accessible interface
 ```
+
+Keeping a property out of the output
+------------------------------------
+
+*Since 2.0.0.*
+
+The debugging facilities on this page print the configuration as it is, passwords included: a
+`cfg.list(System.out)` written while chasing a problem, and then forgotten in the code, is how a
+credential ends up in a log file. Mark the property with `@Sensitive` and its value is replaced by
+`********`:
+
+```java
+public interface DbConfig extends Accessible {
+    String url();
+
+    String username();
+
+    @Sensitive
+    String password();
+}
+```
+
+```java
+cfg.list(System.out);
+// -- listing properties --
+// url=jdbc:postgresql://localhost/app
+// username=app
+// password=********
+```
+
+The annotation can also be written on the interface, and then every property declared in it is masked.
+
+**Only the output meant to be read by a human is masked** — `list()` and `toString()`. The method itself,
+`getProperty()`, `fill()`, `store()`, `storeToXML()` and the JMX attributes keep returning the real value:
+those are how a configuration is read and written back, and masking them would replace the password with
+`********` in the file the next time it is saved.
+
+<div class="note warning">
+  <h5>Masking is not encryption</h5>
+  <p>
+  <code>@Sensitive</code> keeps a value from being printed by accident; it does nothing to protect the value
+  where it is stored, and anyone who can read the properties file can read the password. To keep the value
+  itself unreadable use <a href="{{ site.url }}/docs/crypto/"><code>@EncryptedValue</code></a>, which stores
+  it encrypted and decrypts it on access — and note that an encrypted property is already printed as its
+  ciphertext, so it does not need this annotation, unless even the ciphertext should stay out of the log.
+  </p>
+</div>
+
+The keys to mask are worked out when the Config object is created, from the methods that take no parameters.
+A key that depends on the invocation arguments is not known in advance, so a
+[parametrized property]({{ site.url }}/docs/parametrized-properties/) cannot be masked.

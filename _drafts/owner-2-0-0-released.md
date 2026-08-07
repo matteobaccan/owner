@@ -58,8 +58,19 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    interfaces, is now built into the core: **replace the `owner-java8` dependency with `owner`** and
    everything keeps working.
  * The `owner-java8-extras` artifact is gone. The `DurationConverter`, `ByteSizeConverter` and the
-   `ByteSize`/`ByteSizeUnit` classes it contained moved, with unchanged package names, into `owner-extras`:
-   **replace the `owner-java8-extras` dependency with `owner-extras`**.
+   `ByteSize`/`ByteSizeUnit`/`ByteSizeStandard` classes it contained are now part of the core `owner`
+   artifact, with unchanged package names: **replace the `owner-java8-extras` dependency with `owner`**,
+   and no `import` changes. They were shipped apart only because the core had to run on Java 6 and could
+   not so much as name `java.time.Duration`; with Java 8 as the minimum that reason is gone, and neither
+   the converters nor the byte size classes bring a dependency of their own. `owner-extras` is left with
+   what actually needs a third party library on the classpath — the ZooKeeper loader.
+ * `ZooKeeperLoader` moved from `org.aeonbits.owner.loaders` to **`org.aeonbits.owner.extras.loaders`**:
+   **change the import**, nothing else. It was the one class of `owner-extras` sitting under a package the
+   core artifact also owns, and a package cannot live in two modules: as long as it did, the two jars could
+   never both be put on the module path, whatever name they declare. The class itself is unchanged, it never
+   used anything package-private, and the `Loader` interface it implements stays exactly where it is — a
+   custom loader of your own is unaffected, since it lives in a package of yours and only imports
+   `org.aeonbits.owner.loaders.Loader`.
  * The internal utility class `org.aeonbits.owner.util.Base64` is gone. It was a runtime-selection shim
    between `java.util.Base64` (Java 8+) and `javax.xml.bind.DatatypeConverter` (Java 6/7), never used by the
    library API itself. If you referenced it, **use [`java.util.Base64`](https://docs.oracle.com/javase/8/docs/api/java/util/Base64.html)
@@ -84,6 +95,27 @@ Enhancements
    javadoc note about it being unavailable dated back to the JDK 1.5 era.
  * The single-method SPI interfaces (`Converter`, `Preprocessor`, `ReloadListener`) are now marked
    `@FunctionalInterface`: converters, preprocessors and reload listeners can officially be written as lambdas.
+ * A method can return an **`Optional`** of any supported type, which comes back empty when the property is
+   defined nowhere and has no default, instead of returning `null`: `Optional<Integer> port()` reads the same
+   value `Integer port()` does, and says in the signature that the caller has to deal with its absence. The
+   wrapper only describes the absence, so everything else applies unchanged — `@Key`, `@Prefix`, the
+   preprocessors, the variable expansion, the decryption, the tokenization of `Optional<List<String>>` — and a
+   value that is *wrong* rather than missing keeps failing, so a typo does not silently become an empty
+   `Optional`. An empty value stays a value, as it does everywhere else. `@Mandatory` and `Optional` written on
+   the same method contradict each other and are reported when the Config object is created, while a
+   `@Mandatory` written on the interface leaves an `Optional` method alone, being the exception it declares.
+   See the [documentation]({{ site.url }}/docs/type-conversion/#optional-values).
+ * New `@Sensitive` annotation: the value of the annotated property (or of every property of the annotated
+   interface) is printed as `********` by `Accessible.list()` and by `toString()`. A password written in clear
+   in a properties file is a value like any other to this library, and a `cfg.list(System.out)` added while
+   debugging and then forgotten is how one ends up in a log. Only the output meant to be read by a human is
+   masked: the method itself, `getProperty`, `fill`, `store`, `storeToXML` and the JMX attributes keep
+   returning the real value, since those are how a configuration is read and written back and masking them
+   would replace the password with the mask in the file at the next save. Masking is not encryption — see
+   `@EncryptedValue` for that, whose values are already printed as ciphertext — it only keeps a value from
+   being printed by accident. The keys to mask are resolved when the Config object is created, so a
+   parametrized property, whose key depends on the arguments, is left alone. See the
+   [documentation]({{ site.url }}/docs/debugging/#keeping-a-property-out-of-the-output).
  * New `@Mandatory` annotation: mark a property (or a whole interface) as required, and get a
    `MissingMandatoryPropertyException` listing all the unresolvable keys when the Config is created, as well as
    on access if a mandatory property disappears later (e.g. after a hot reload). See the
@@ -123,8 +155,31 @@ Enhancements
    [documentation]({{ site.url }}/docs/usage/#a-property-that-is-set-but-empty) and the
    [table of what an empty value does on each type]({{ site.url }}/docs/type-conversion/). Partially answers
    [#191](https://github.com/matteobaccan/owner/issues/191).
+ * `ByteSize` implements `Comparable`, ordering sizes by the amount of data they represent whatever unit
+   they are written in, so `1 MB` sorts before `1 MiB`. The ordering is consistent with equality, which is
+   what makes a `TreeSet` of byte sizes agree with a `HashSet` on which of them are duplicates.
+ * New `ByteSize.in(ByteSizeStandard)`: the same size written in the unit of that family that suits it — the
+   largest one in which the value does not fall below one — so 2048576 bytes read as `2.048576 MB` in SI and
+   as `1.95367431640625 MiB` in IEC. Where `convertTo` has to be told the unit, this needs only the family to
+   choose from, which is what one usually has when a configured size is to be logged or shown. The answer is
+   canonical, depending on the size and never on the unit it happened to be written in, and exact, every
+   factor being a power of 1000 or of 1024.
+ * `ByteSize` is `Serializable`, which a `Config` object already was. The unit is preserved along with the
+   value, so a size written as `1 MB` comes back reading as `1 MB` and not as `1000000 B`, and the stream is
+   validated on the way in: deserialization runs no constructor, so a stream that does not describe a byte
+   size is refused with an `InvalidObjectException` instead of producing an object that fails later.
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
+ * **`java.time.Duration` is converted out of the box**, like a `File` or a `URL`, instead of asking for
+   `@ConverterClass(DurationConverter.class)` on every method that returns one: a timeout is the commonest
+   typed setting after a number and a string, and the JDK has a type for it. `10 s`, `500 ms`, `1 d` and the
+   ISO-8601 form `PT15M` are all read, in collections, arrays and `Optional` like any other type.
+   **The time unit is required on this path**: `timeout=30` is refused with a message saying what to write,
+   because a bare number would be read as milliseconds and whoever writes 30 means seconds far more often
+   than that. The converter named explicitly keeps its previous behaviour, bare number included, so no
+   configuration written before this release changes meaning; a converter registered for `Duration`, or named
+   with `@ConverterClass`, still takes precedence over the automatic conversion. See the
+   [documentation]({{ site.url }}/docs/type-conversion/#duration).
  * [#187](https://github.com/matteobaccan/owner/issues/187): `java.nio.file.Path` is converted, with a leading
    `~` expanded to the user home exactly as `java.io.File` already was — the two ways of naming a path no
    longer disagree. Arrays and collections of `Path` follow. The reporter asked in 2016 whether this belonged
@@ -197,6 +252,10 @@ Enhancements
  * [#325](https://github.com/matteobaccan/owner/pull/325): temporary files are now created with owner-only
    permissions via `Files.createTempFile` (thanks to @JLLeitschuh); when storing a Config to an existing file,
    the file permissions are preserved.
+ * The jars declare an `Automatic-Module-Name` — `org.aeonbits.owner` and `org.aeonbits.owner.extras` — so a
+   `requires` written against them keeps resolving across releases, instead of depending on a module name
+   derived from the file name and therefore from the version. The two artifacts no longer share a package
+   either (see the `ZooKeeperLoader` move under Removals), so they can both sit on the module path.
  * Bytecode is still compatible with Java 8 at runtime, while the project is built with modern JDKs
    (`compiler-release=8`); a JDK 11 or superior is required to build from sources.
  * Javadoc completed and improved across the codebase.
@@ -331,6 +390,16 @@ Bugs fixes
    key named is the one the property is read with, `@Key` and `@Prefix` included
    ([#191](https://github.com/matteobaccan/owner/issues/191)). When the value comes from a group of
    properties read as a `Map`, the key named is the individual entry — `group.second`, not `group`.
+ * `ByteSizeUnit.parse` no longer depends on the default locale of the JVM. It lowercased the text without
+   saying in which language, and in Turkish a capital `I` lowercases to the dotless `ı`: `512 KIB` was
+   therefore rejected as an invalid unit on a Turkish JVM and accepted everywhere else. Every IEC unit
+   written in capitals was affected, since all of them carry an `i`.
+ * `ByteSize` honours the `equals`/`hashCode` contract. `equals` compares the number of bytes, so `1 MB` and
+   `1000000 B` are equal, while the hash code was derived from the value and the unit as they were written:
+   the two were equal with different hash codes, which made the type unusable as a key of a `HashMap` or as
+   an element of a `HashSet` — a set could hold the same size twice, and a lookup could miss. The class is
+   now `final`, and both parts are rejected at construction when null, instead of failing later at the first
+   arithmetic with no indication of where the missing part was written.
  * Fixed a `NullPointerException` masking the real error in the hot reload example when the configuration URI is
    invalid.
  * Test suite stability fixes (thread handling in multi-threading tests, wait times).

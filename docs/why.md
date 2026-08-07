@@ -30,3 +30,48 @@ OWNER solves the problem providing an interface object that
    while the produced bytecode remains compatible with Java 8 at runtime.
 
 ...and more than everything, it's not an ugly, rigid, boring, repetitive list of methods doing all the same thing.
+
+What you will not find easily elsewhere
+---------------------------------------
+
+The Java ecosystem has no shortage of configuration libraries, and several of them read a value out of a
+file perfectly well. What follows is not a comparison — those age badly, and the ones written about OWNER
+still recommend projects that stopped being maintained years ago — but the short list of things this
+library does that turn out to be genuinely rare, each of them documented in the chapter it belongs to.
+
+**A reload you can refuse.** A
+[`TransactionalReloadListener`]({{ site.url }}/docs/event-support/) is consulted *before* a reload is
+applied and can reject it, rolling the configuration back to the state it had. Plenty of libraries reload
+and then notify you; being able to say "no, this configuration is not valid, keep the previous one" is
+another matter, and it is the difference between a bad file taking down a running service and being
+refused at the door.
+
+**Reading is only half of it.** A configuration object can be
+[`Mutable`]({{ site.url }}/docs/accessible-mutable/): set and remove properties, and store the result back
+to a file or a stream. Most configuration libraries are a one-way street from the file into your program.
+
+**Nothing comes with it.** The `owner` artifact has no runtime dependency at all — not a logging facade,
+not a collections library, nothing — so it cannot conflict with anything you already use. The optional
+extras that do need a third party library are in a separate artifact, and even there the dependency is
+declared optional.
+
+**It runs where your code runs.** Java 8 is the minimum, and it is a deliberate position rather than
+neglect: the build runs on the current LTS releases and the bytecode stays compatible with 8, so a project
+that has not moved yet is not left without an option.
+
+**Kilobytes and kibibytes are not the same thing.** The
+[byte size support]({{ site.url }}/docs/type-conversion/) distinguishes the SI and the IEC families, so
+`KB` is a thousand bytes and `KiB` is 1024, each named for what it is. It is a small thing until the day
+the size in your configuration file and the size your monitoring reports disagree by 2.4%.
+
+**The things you would otherwise write by hand.** Values that are
+[encrypted]({{ site.url }}/docs/crypto/) at rest and decrypted on access; properties
+[required]({{ site.url }}/docs/usage/#mandatory-properties) to be present, checked when the object is
+created rather than when it is first read; passwords
+[kept out of your logs]({{ site.url }}/docs/debugging/); a configuration
+[exposed over JMX]({{ site.url }}/docs/jmx/) and editable at runtime; keys and values
+[computed from other keys]({{ site.url }}/docs/variables-expansion/), at any depth.
+
+None of this is compulsory. The chapter on [features]({{ site.url }}/docs/features/) exists because you
+can pick what you need and ignore the rest: the two line example at the top of this site is still the
+whole of what most projects ever use.
