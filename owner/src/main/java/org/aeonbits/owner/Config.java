@@ -267,6 +267,43 @@ public interface Config extends Serializable {
     }
 
     /**
+     * Marks a property as sensitive, so that its value is replaced by {@link Sensitive#MASK} in the output
+     * meant to be read by a human: {@link Accessible#list(java.io.PrintStream)},
+     * {@link Accessible#list(java.io.PrintWriter)} and <code>toString()</code>.
+     * <p>
+     * A password written in clear in a properties file is a value like any other to this library, and
+     * <code>cfg.list(System.out)</code> is a line people write while debugging and forget in the code. This
+     * annotation is how a property says that it should not end up in a log.
+     * </p>
+     * <p>
+     * <b>Only the human-readable output is masked.</b> {@link Accessible#getProperty(String)},
+     * {@link Accessible#fill(java.util.Map)}, {@link Accessible#store(java.io.OutputStream, String)},
+     * {@link Accessible#storeToXML(java.io.OutputStream, String)}, the JMX attributes and of course the
+     * method itself keep returning the real value: those are how a configuration is read and written back,
+     * and masking them would replace the value in the file the next time it is saved. Masking is not
+     * encryption — see {@link EncryptedValue} for that — it only keeps a value from being printed by
+     * accident.
+     * </p>
+     * <p>
+     * When applied to an interface, all the properties declared in that interface are masked.
+     * </p>
+     * <p>
+     * The keys to mask are worked out when the Config object is created, from the methods that take no
+     * parameters: a key that depends on the invocation arguments, or on a variable expanded at access time,
+     * is not known in advance and is left alone.
+     * </p>
+     *
+     * @since 2.0.0
+     */
+    @Retention(RUNTIME)
+    @Target({METHOD, TYPE})
+    @Documented
+    @interface Sensitive {
+        /** The text printed in place of the value of a sensitive property. */
+        String MASK = "********";
+    }
+
+    /**
      * Specifies the policy type to use to load the {@link org.aeonbits.owner.Config.Sources} files for properties.
      *
      * @since 1.0.2

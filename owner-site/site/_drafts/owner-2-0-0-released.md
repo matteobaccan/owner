@@ -94,6 +94,17 @@ Enhancements
    the same method contradict each other and are reported when the Config object is created, while a
    `@Mandatory` written on the interface leaves an `Optional` method alone, being the exception it declares.
    See the [documentation]({{ site.url }}/docs/type-conversion/#optional-values).
+ * New `@Sensitive` annotation: the value of the annotated property (or of every property of the annotated
+   interface) is printed as `********` by `Accessible.list()` and by `toString()`. A password written in clear
+   in a properties file is a value like any other to this library, and a `cfg.list(System.out)` added while
+   debugging and then forgotten is how one ends up in a log. Only the output meant to be read by a human is
+   masked: the method itself, `getProperty`, `fill`, `store`, `storeToXML` and the JMX attributes keep
+   returning the real value, since those are how a configuration is read and written back and masking them
+   would replace the password with the mask in the file at the next save. Masking is not encryption — see
+   `@EncryptedValue` for that, whose values are already printed as ciphertext — it only keeps a value from
+   being printed by accident. The keys to mask are resolved when the Config object is created, so a
+   parametrized property, whose key depends on the arguments, is left alone. See the
+   [documentation]({{ site.url }}/docs/debugging/#keeping-a-property-out-of-the-output).
  * New `@Mandatory` annotation: mark a property (or a whole interface) as required, and get a
    `MissingMandatoryPropertyException` listing all the unresolvable keys when the Config is created, as well as
    on access if a mandatory property disappears later (e.g. after a hot reload). See the

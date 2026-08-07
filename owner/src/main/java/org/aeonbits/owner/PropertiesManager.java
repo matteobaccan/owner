@@ -71,6 +71,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
      */
     private Map<Method, Decryptor> encryptedKeys = new HashMap<>();
 
+    /**
+     * The keys whose value is replaced by {@link Sensitive#MASK} in the human-readable output. Worked out
+     * once when this object is created: the annotation is on the method, and reflection is slow.
+     */
+    private final Set<String> sensitiveKeys = new HashSet<>();
+
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
                 @Override
@@ -146,6 +152,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         // Reflection is slow, so we will cache all methods with EncryptedValue annotation.
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
+            // a key that depends on the invocation arguments is not known in advance: those methods
+            // are skipped rather than masked under a key that would never match
+            if (isSensitive(method) && method.getParameterTypes().length == 0)
+                sensitiveKeys.add(PropertiesMapper.key(method, keyPrefix));
+
             if (PropertiesMapper.isEncryptedValue(method)) {
                 EncryptedValue encriptedKey = method.getAnnotation(EncryptedValue.class);
                 decryptorClazz = encriptedKey.value();
@@ -166,6 +177,36 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
      */
     KeyPrefix keyPrefix() {
         return keyPrefix;
+    }
+
+    private static boolean isSensitive(Method method) {
+        return method.getAnnotation(Sensitive.class) != null
+                || method.getDeclaringClass().getAnnotation(Sensitive.class) != null;
+    }
+
+    /**
+     * Returns the properties as they are to be shown to a human: the value of every {@link Sensitive} key
+     * replaced by {@link Sensitive#MASK}, everything else untouched.
+     * <p>
+     * The original object is handed back when there is nothing to mask, which is the common case, so a
+     * configuration that declares no sensitive property pays nothing for this.
+     * </p>
+     */
+    private Properties masked() {
+        readLock.lock();
+        try {
+            if (sensitiveKeys.isEmpty())
+                return properties;
+            Properties result = new Properties();
+            for (Enumeration<?> names = properties.propertyNames(); names.hasMoreElements(); ) {
+                String name = (String) names.nextElement();
+                result.setProperty(name,
+                        sensitiveKeys.contains(name) ? Sensitive.MASK : properties.getProperty(name));
+            }
+            return result;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -424,7 +465,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void list(PrintStream out) {
         readLock.lock();
         try {
-            properties.list(out);
+            masked().list(out);
         } finally {
             readLock.unlock();
         }
@@ -435,7 +476,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public void list(PrintWriter out) {
         readLock.lock();
         try {
-            properties.list(out);
+            masked().list(out);
         } finally {
             readLock.unlock();
         }
@@ -587,7 +628,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     public String toString() {
         readLock.lock();
         try {
-            return properties.toString();
+            return masked().toString();
         } finally {
             readLock.unlock();
         }
