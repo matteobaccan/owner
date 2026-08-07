@@ -197,6 +197,11 @@ Enhancements
  * [#325](https://github.com/matteobaccan/owner/pull/325): temporary files are now created with owner-only
    permissions via `Files.createTempFile` (thanks to @JLLeitschuh); when storing a Config to an existing file,
    the file permissions are preserved.
+ * The jars declare an `Automatic-Module-Name` — `org.aeonbits.owner` and `org.aeonbits.owner.extras` — so a
+   `requires` written against them keeps resolving across releases, instead of depending on a module name
+   derived from the file name and therefore from the version. Note that the two artifacts share the
+   `org.aeonbits.owner.loaders` package: OSGi allows that, the module system does not, so they cannot both sit
+   on the module path until the split is resolved.
  * Bytecode is still compatible with Java 8 at runtime, while the project is built with modern JDKs
    (`compiler-release=8`); a JDK 11 or superior is required to build from sources.
  * Javadoc completed and improved across the codebase.

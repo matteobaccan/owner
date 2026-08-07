@@ -63,6 +63,16 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <!-- The name this jar takes when it is used as an automatic module on the module
+                             path. Without it the name is derived from the file name, which carries the
+                             version and changes at every release: declaring it here is what makes a
+                             `requires org.aeonbits.owner` keep working. It matches Bundle-SymbolicName,
+                             so the bundle and the module are named alike. -->
+                        <Automatic-Module-Name>org.aeonbits.owner</Automatic-Module-Name>
+                    </instructions>
+                </configuration>
             </plugin>
 
             <plugin>
