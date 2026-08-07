@@ -74,6 +74,42 @@ in your dependencies, just replace it with `owner`.
   </p>
 </div>
 
+On the module path
+------------------
+
+*Since 2.0.0.*
+
+The jars declare the name they take as automatic modules, so a `requires` written against them keeps
+resolving from one release to the next:
+
+```java
+module com.example.myapp {
+    requires org.aeonbits.owner;
+}
+```
+
+| Artifact | Module name |
+|---|---|
+| `owner` | `org.aeonbits.owner` |
+| `owner-extras` | `org.aeonbits.owner.extras` |
+
+The name matters because without it the module system derives one from the file name, which carries the
+version: a `requires` written against `owner-2.0.0.jar` would stop resolving against the next release.
+Declaring it pins the name to the artifact instead, and it is the same name the OSGi bundle already had.
+
+Both artifacts can be placed on the module path together, since they share no package: up to 1.0.12 the
+`ZooKeeperLoader` of `owner-extras` lived under `org.aeonbits.owner.loaders`, which the core also fills, and
+a package cannot belong to two modules.
+
+<div class="note">
+  <h5>Automatic modules, not explicit ones</h5>
+  <p>
+  The jars declare a name, they do not yet carry a <code>module-info</code>: OWNER is compiled for Java 8.
+  An automatic module reads every other module and exports all of its packages, so the arrangement above is
+  what makes the library usable on the module path, not a full modularisation of it.
+  </p>
+</div>
+
 
 Building from the sources
 -------------------------
