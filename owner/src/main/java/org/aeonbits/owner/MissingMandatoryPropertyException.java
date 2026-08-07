@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -31,7 +32,9 @@ public class MissingMandatoryPropertyException extends RuntimeException {
 
     MissingMandatoryPropertyException(List<String> keys) {
         super(buildMessage(keys));
-        this.keys = unmodifiableList(keys);
+        // copied, not just wrapped: the caller keeps a reference to the list it handed over, and the keys
+        // an exception reports have to stay the ones it was thrown for
+        this.keys = unmodifiableList(new ArrayList<String>(keys));
     }
 
     /**
