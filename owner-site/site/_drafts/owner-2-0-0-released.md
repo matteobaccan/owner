@@ -60,6 +60,13 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
  * The `owner-java8-extras` artifact is gone. The `DurationConverter`, `ByteSizeConverter` and the
    `ByteSize`/`ByteSizeUnit` classes it contained moved, with unchanged package names, into `owner-extras`:
    **replace the `owner-java8-extras` dependency with `owner-extras`**.
+ * `ZooKeeperLoader` moved from `org.aeonbits.owner.loaders` to **`org.aeonbits.owner.extras.loaders`**:
+   **change the import**, nothing else. It was the one class of `owner-extras` sitting under a package the
+   core artifact also owns, and a package cannot live in two modules: as long as it did, the two jars could
+   never both be put on the module path, whatever name they declare. The class itself is unchanged, it never
+   used anything package-private, and the `Loader` interface it implements stays exactly where it is — a
+   custom loader of your own is unaffected, since it lives in a package of yours and only imports
+   `org.aeonbits.owner.loaders.Loader`.
  * The internal utility class `org.aeonbits.owner.util.Base64` is gone. It was a runtime-selection shim
    between `java.util.Base64` (Java 8+) and `javax.xml.bind.DatatypeConverter` (Java 6/7), never used by the
    library API itself. If you referenced it, **use [`java.util.Base64`](https://docs.oracle.com/javase/8/docs/api/java/util/Base64.html)
@@ -220,9 +227,8 @@ Enhancements
    the file permissions are preserved.
  * The jars declare an `Automatic-Module-Name` — `org.aeonbits.owner` and `org.aeonbits.owner.extras` — so a
    `requires` written against them keeps resolving across releases, instead of depending on a module name
-   derived from the file name and therefore from the version. Note that the two artifacts share the
-   `org.aeonbits.owner.loaders` package: OSGi allows that, the module system does not, so they cannot both sit
-   on the module path until the split is resolved.
+   derived from the file name and therefore from the version. The two artifacts no longer share a package
+   either (see the `ZooKeeperLoader` move under Removals), so they can both sit on the module path.
  * Bytecode is still compatible with Java 8 at runtime, while the project is built with modern JDKs
    (`compiler-release=8`); a JDK 11 or superior is required to build from sources.
  * Javadoc completed and improved across the codebase.

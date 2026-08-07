@@ -107,12 +107,9 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <!-- See the same instruction in the core module. Note that this artifact and the
-                             core one share the org.aeonbits.owner.loaders package: OSGi allows it, the
-                             module system does not, so the two jars cannot both sit on the module path
-                             until the split is resolved. Naming the module does not create that
-                             situation — an automatic module named after the file name has it too — it
-                             only makes the name stable. -->
+                        <!-- See the same instruction in the core module. This artifact shares no package
+                             with the core one, which is what lets the two sit together on the module
+                             path; SplitPackageTest is there to keep it that way. -->
                         <Automatic-Module-Name>org.aeonbits.owner.extras</Automatic-Module-Name>
                     </instructions>
                 </configuration>

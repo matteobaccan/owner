@@ -5,8 +5,9 @@
  * This software is distributable under the BSD license.
  * See the terms of the BSD license in the documentation provided with this software.
  */
-package org.aeonbits.owner.loaders;
+package org.aeonbits.owner.extras.loaders;
 
+import org.aeonbits.owner.loaders.Loader;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.utils.ZKPaths;
