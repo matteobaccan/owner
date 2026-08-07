@@ -250,6 +250,7 @@ Map<String, String>[] authors();
 ```
 
   [Map]: http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
+  [Optional]: https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html
 
 By default OWNER uses the comma `","` character to tokenize values for the
 arrays and collections, but you can specify different characters (and regexp)
@@ -488,6 +489,60 @@ as [CollectionConverterClassTest] does.
 
   [CollectionConverterClassTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/collections/CollectionConverterClassTest.java
 
+Optional values
+---------------
+
+*Since 2.0.0.*
+
+A property that is not defined anywhere, and has no `@DefaultValue` to fall back on, is read as `null`. When
+the caller has something to do about it, saying so in the signature is clearer than leaving a `null` to be
+remembered:
+
+```java
+public interface ServerConfig extends Config {
+    Optional<Integer> port();
+}
+```
+
+```java
+int port = cfg.port().orElse(8080);
+cfg.port().ifPresent(this::bind);
+```
+
+The wrapper says what happens when the property is **absent**; it changes nothing about how the value is
+read. `Optional<Integer>` converts its value to an `Integer` exactly like `Integer` does, so `@Key`,
+`@Prefix`, the preprocessors, the variable expansion and the decryption all apply as usual, and so does
+everything in this chapter: `Optional<List<String>>` is tokenized and converted element by element, and a
+`@ConverterClass` is used if there is one. A `@ConverterClass` that returns `null` yields an empty
+`Optional`, since that is what "this value could not be turned into anything" means.
+
+Two cases are deliberately *not* absences:
+
+  * **A value that is there but wrong.** `port=8O80`, written with the letter O, keeps failing with an
+    `UnsupportedOperationException` instead of coming back empty. Turning it into an empty `Optional` would
+    make a typo indistinguishable from a property nobody ever set, which is the opposite of the point.
+  * **A value that is there but empty.** `port=` is a value like any other here as everywhere else, so
+    `Optional<String>` holds the empty string rather than being absent. Use
+    [`@DefaultValue(useOnEmpty = true)`]({{ site.url }}/docs/usage/#a-property-that-is-set-but-empty) when an
+    empty value should be treated as a missing one.
+
+A `@DefaultValue` combines with an `Optional`, but the result is never empty, since the default always
+resolves. And a raw `Optional`, or one holding a wildcard, carries no type to convert to and is read as
+`String`, the same default a raw collection takes.
+
+<div class="note info">
+  <h5>Optional and @Mandatory</h5>
+  <p>
+  The two say the opposite of each other, and writing both <b>on the same method</b> is reported when the
+  Config object is created. A <code>@Mandatory</code> written <b>on the interface</b> is a different matter:
+  it is the way of saying "these are all required", and a method returning an <code>Optional</code> is the
+  exception being made, so it is left alone rather than rejected.
+  </p>
+</div>
+
+There is no `Optional<Map<...>>`: a `Map` return type reads a *group* of properties and already comes back
+empty when nothing matches it, so there is no absence for an `Optional` to describe.
+
 All the types supported by OWNER
 --------------------------------
 
@@ -512,6 +567,8 @@ But there is more. OWNER API supports automatic conversion for:
       implementations like LinkedHashSet or user defined collections having a default no-arg constructor.
   14. [`Map`][Map] and sub-interfaces (since 2.0.0), reading the group of properties below the key of the
       method, with both the keys and the values converted to the declared types.
+  15. [`Optional`][Optional] (since 2.0.0) of any of the above, empty when the property is not defined
+      anywhere.
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
 with some meaningful description to identify the problem as quickly as possible. The message names the value, the

@@ -84,6 +84,16 @@ Enhancements
    javadoc note about it being unavailable dated back to the JDK 1.5 era.
  * The single-method SPI interfaces (`Converter`, `Preprocessor`, `ReloadListener`) are now marked
    `@FunctionalInterface`: converters, preprocessors and reload listeners can officially be written as lambdas.
+ * A method can return an **`Optional`** of any supported type, which comes back empty when the property is
+   defined nowhere and has no default, instead of returning `null`: `Optional<Integer> port()` reads the same
+   value `Integer port()` does, and says in the signature that the caller has to deal with its absence. The
+   wrapper only describes the absence, so everything else applies unchanged — `@Key`, `@Prefix`, the
+   preprocessors, the variable expansion, the decryption, the tokenization of `Optional<List<String>>` — and a
+   value that is *wrong* rather than missing keeps failing, so a typo does not silently become an empty
+   `Optional`. An empty value stays a value, as it does everywhere else. `@Mandatory` and `Optional` written on
+   the same method contradict each other and are reported when the Config object is created, while a
+   `@Mandatory` written on the interface leaves an `Optional` method alone, being the exception it declares.
+   See the [documentation]({{ site.url }}/docs/type-conversion/#optional-values).
  * New `@Mandatory` annotation: mark a property (or a whole interface) as required, and get a
    `MissingMandatoryPropertyException` listing all the unresolvable keys when the Config is created, as well as
    on access if a mandatory property disappears later (e.g. after a hot reload). See the

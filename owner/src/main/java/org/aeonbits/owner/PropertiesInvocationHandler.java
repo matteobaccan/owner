@@ -15,15 +15,19 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.convert;
+import static org.aeonbits.owner.OptionalSupport.isOptional;
+import static org.aeonbits.owner.OptionalSupport.valueClass;
 import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
 import static org.aeonbits.owner.PropertiesMapper.defaultValueOnEmpty;
 import static org.aeonbits.owner.PropertiesMapper.key;
 import static org.aeonbits.owner.util.Util.isFeatureDisabled;
+import static org.aeonbits.owner.util.Util.unsupported;
 import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
 import static org.aeonbits.owner.util.Reflection.isDefault;
 
@@ -85,11 +89,12 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                     entry -> propertiesManager.decryptIfNecessary(method,
                             expandVariables(method, preProcess(method, entry))));
 
+        boolean optional = isOptional(method);
         String value = lookupValue(method, key);
         if (value == null) {
             if (isMandatory(method))
                 throw new MissingMandatoryPropertyException(key);
-            return null;
+            return optional ? Optional.empty() : null;
         }
         String text = process(method, value, args);
 
@@ -101,9 +106,9 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                 text = process(method, onEmpty, args);
         }
 
-        Object result = convert(method, method.getReturnType(), text, key);
-        if (result == NULL) return null;
-        return result;
+        Object result = convert(method, valueClass(method), text, key);
+        if (result == NULL) return optional ? Optional.empty() : null;
+        return optional ? Optional.of(result) : result;
     }
 
     /**
@@ -134,9 +139,27 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         return value;
     }
 
+    /**
+     * A method returning an {@link Optional} states that the property may be absent, so a {@link Mandatory}
+     * inherited from the interface leaves it alone: annotating a whole interface is a way of saying "these
+     * are all required", and the one method that says otherwise is the exception being made. The two written
+     * on the <b>same</b> method contradict each other instead, and are rejected when the Config object is
+     * created: see {@link #rejectMandatoryOptional(Method)}.
+     */
     private static boolean isMandatory(Method method) {
+        if (isOptional(method))
+            return false;
         return method.getAnnotation(Mandatory.class) != null
                 || method.getDeclaringClass().getAnnotation(Mandatory.class) != null;
+    }
+
+    private static void rejectMandatoryOptional(Method method) {
+        if (isOptional(method) && method.getAnnotation(Mandatory.class) != null)
+            throw unsupported("Method '%s' is annotated with @Mandatory and returns an Optional: the two say "
+                            + "the opposite of each other. Drop the @Mandatory to let the property be absent, "
+                            + "or drop the Optional to require it. A @Mandatory written on the interface does "
+                            + "not need removing: it leaves an Optional method alone.",
+                    method.getName());
     }
 
     /**
@@ -147,6 +170,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     void validateMandatoryProperties(Class<?> clazz) {
         List<String> missingKeys = new LinkedList<>();
         for (Method method : clazz.getMethods()) {
+            rejectMandatoryOptional(method);
             if (!isMandatory(method)) continue;
             if (method.getParameterTypes().length > 0) continue;
             if (isDefault(method)) continue;

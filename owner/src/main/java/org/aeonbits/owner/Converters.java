@@ -16,6 +16,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -134,10 +135,11 @@ enum Converters {
         }
 
         private Class<?> getGenericType(Method targetMethod) {
-            if (targetMethod.getGenericReturnType() instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) targetMethod.getGenericReturnType();
-                return (Class<?>) parameterizedType.getActualTypeArguments()[0];
-            }
+            // an Optional<Collection<E>> keeps the collection one level down, and the element type is E
+            // either way: ask for the type the value converts to rather than for the return type
+            Type type = OptionalSupport.valueType(targetMethod);
+            if (type instanceof ParameterizedType)
+                return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
             // Default generic type for raw collections.
             return String.class;
         }
