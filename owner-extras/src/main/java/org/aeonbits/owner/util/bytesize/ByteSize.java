@@ -7,6 +7,10 @@
  */
 package org.aeonbits.owner.util.bytesize;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -28,10 +32,17 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * Instances are ordered by the number of bytes they represent, consistently with {@link #equals(Object)}.
  * </p>
+ * <p>
+ * Instances are {@link Serializable}, and serialization preserves the unit the size was written in along
+ * with the value, so what comes back reads the same way as what went in.
+ * </p>
  *
  * @author Stefan Freyr Stefansson
  */
-public final class ByteSize implements Comparable<ByteSize> {
+public final class ByteSize implements Comparable<ByteSize>, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final BigDecimal value;
     private final ByteSizeUnit unit;
 
@@ -192,5 +203,18 @@ public final class ByteSize implements Comparable<ByteSize> {
     @Override
     public int hashCode() {
         return getBytes().hashCode();
+    }
+
+    /**
+     * Deserialization builds an instance without running any constructor, so the check that rejects a
+     * missing part has to be made again here: a stream is an input like any other, and one that does not
+     * describe a byte size is refused rather than turned into an object that fails later.
+     */
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        if (value == null)
+            throw new InvalidObjectException("the value of a ByteSize cannot be null");
+        if (unit == null)
+            throw new InvalidObjectException("the unit of a ByteSize cannot be null");
     }
 }

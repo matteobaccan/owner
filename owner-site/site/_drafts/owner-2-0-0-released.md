@@ -154,6 +154,10 @@ Enhancements
  * `ByteSize` implements `Comparable`, ordering sizes by the amount of data they represent whatever unit
    they are written in, so `1 MB` sorts before `1 MiB`. The ordering is consistent with equality, which is
    what makes a `TreeSet` of byte sizes agree with a `HashSet` on which of them are duplicates.
+ * `ByteSize` is `Serializable`, which a `Config` object already was. The unit is preserved along with the
+   value, so a size written as `1 MB` comes back reading as `1 MB` and not as `1000000 B`, and the stream is
+   validated on the way in: deserialization runs no constructor, so a stream that does not describe a byte
+   size is refused with an `InvalidObjectException` instead of producing an object that fails later.
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
  * [#187](https://github.com/matteobaccan/owner/issues/187): `java.nio.file.Path` is converted, with a leading

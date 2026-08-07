@@ -703,7 +703,8 @@ boolean mebibyteIsLarger = oneMegaByte.compareTo(new ByteSize(1, ByteSizeUnit.ME
 `ByteSize` is immutable and `final`. Two instances are equal when they represent the same number of
 bytes, so `1 MB` equals `1000000 B`, and since 2.0.0 it implements
 [`Comparable`][comparable] with an ordering consistent with that equality: a `TreeSet` of byte sizes
-agrees with a `HashSet` on which of them are duplicates.
+agrees with a `HashSet` on which of them are duplicates. It is also `Serializable`, and the unit
+survives the round trip along with the value: a size written as `1 MB` comes back reading as `1 MB`.
 
   [comparable]: https://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html
 

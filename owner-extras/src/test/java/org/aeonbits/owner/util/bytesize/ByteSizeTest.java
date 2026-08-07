@@ -9,6 +9,13 @@ package org.aeonbits.owner.util.bytesize;
 
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -24,6 +31,7 @@ import java.util.TreeSet;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeNoException;
 
 public class ByteSizeTest {
     @Test
@@ -346,6 +354,106 @@ public class ByteSizeTest {
             fail("NullPointerException is expected");
         } catch (NullPointerException e) {
             assertNotNull(e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // serialization
+    // -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void theTypeIsSerializable(){
+        assertTrue(Serializable.class.isAssignableFrom(ByteSize.class));
+    }
+
+    /**
+     * Declared rather than computed, so that adding a method or reordering the fields does not silently
+     * make every stream written by an earlier version unreadable.
+     */
+    @Test
+    public void theSerialVersionUidIsDeclaredExplicitly() throws NoSuchFieldException {
+        Field uid = ByteSize.class.getDeclaredField("serialVersionUID");
+        assertTrue(Modifier.isStatic(uid.getModifiers()));
+        assertTrue(Modifier.isFinal(uid.getModifiers()));
+        assertTrue(Modifier.isPrivate(uid.getModifiers()));
+        assertEquals(long.class, uid.getType());
+    }
+
+    @Test
+    public void aSerializedByteSizeComesBackEqualToTheOriginal() throws Exception {
+        for (ByteSizeUnit unit : ByteSizeUnit.values()) {
+            ByteSize original = new ByteSize("1.5", unit);
+            ByteSize restored = roundTrip(original);
+
+            assertEquals(original, restored);
+            assertEquals(original.hashCode(), restored.hashCode());
+            assertEquals(0, original.compareTo(restored));
+            assertEquals(original.getBytes(), restored.getBytes());
+        }
+    }
+
+    /**
+     * The unit is part of what a ByteSize is, not only of how it was built: a size written as one megabyte
+     * has to come back reading as one megabyte, and not as a million bytes.
+     */
+    @Test
+    public void serializationPreservesTheUnitTheSizeWasWrittenIn() throws Exception {
+        ByteSize original = new ByteSize(1, ByteSizeUnit.MEGABYTES);
+        ByteSize restored = roundTrip(original);
+
+        assertEquals("1 MB", restored.toString());
+        assertEquals(original.toString(), restored.toString());
+    }
+
+    /**
+     * Deserialization builds an instance without running a constructor, so a stream is the one way left to
+     * produce a ByteSize whose parts are missing. The check has to be made again on the way in.
+     */
+    @Test
+    public void aStreamThatDoesNotDescribeAByteSizeIsRefused() throws Exception {
+        assertRefuses("value");
+        assertRefuses("unit");
+    }
+
+    private static void assertRefuses(String fieldName) throws Exception {
+        ByteSize corrupted = new ByteSize(1, ByteSizeUnit.MEGABYTES);
+        Field field = ByteSize.class.getDeclaredField(fieldName);
+        byte[] bytes;
+        try {
+            field.setAccessible(true);
+            field.set(corrupted, null);
+            bytes = serialize(corrupted);
+        } catch (RuntimeException | IllegalAccessException e) {
+            // writing a final field is how the corrupt stream is produced, and a JVM is entitled to
+            // refuse it. When it does, this check cannot be exercised — which is a reason to skip, not
+            // to report a failure of the code under test.
+            assumeNoException("this JVM does not allow building the corrupt object", e);
+            return;
+        }
+
+        try {
+            deserialize(bytes);
+            fail("InvalidObjectException is expected for a null '" + fieldName + "'");
+        } catch (InvalidObjectException e) {
+            assertTrue(e.getMessage().contains(fieldName));
+        }
+    }
+
+    private static ByteSize roundTrip(ByteSize original) throws Exception {
+        return deserialize(serialize(original));
+    }
+
+    private static byte[] serialize(ByteSize size) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+            out.writeObject(size);
+        }
+        return bytes.toByteArray();
+    }
+
+    private static ByteSize deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (ByteSize) in.readObject();
         }
     }
 }
