@@ -301,6 +301,11 @@ Bugs fixes
    `Cannot convert 'foo' to MyType`, consistently with what already happened for a non-array property. For the
    same reason, a `@ConverterClass` returning `null` for an element now yields a `null` element instead of
    failing the whole conversion.
+ * Conversion errors now name the property they come from: `Cannot convert 'abc' to int` became
+   `Cannot convert 'abc' to int for property 'server.port'`. The message used to say what could not be converted
+   but not where to go and fix it, which in a file with fifty properties left the search to be done by hand. The
+   key named is the one the property is read with, `@Key` and `@Prefix` included
+   ([#191](https://github.com/matteobaccan/owner/issues/191)).
  * Fixed a `NullPointerException` masking the real error in the hot reload example when the configuration URI is
    invalid.
  * Test suite stability fixes (thread handling in multi-threading tests, wait times).

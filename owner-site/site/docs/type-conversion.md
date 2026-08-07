@@ -514,13 +514,17 @@ But there is more. OWNER API supports automatic conversion for:
       method, with both the keys and the values converted to the declared types.
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
-with some meaningful description to identify the problem as quickly as possible.
+with some meaningful description to identify the problem as quickly as possible. The message names the value, the
+type it could not be converted to, and the key of the property it came from, for instance
+`Cannot convert 'abc' to int for property 'server.port'`. The key is the one the property is read with, so it
+accounts for `@Key` and `@Prefix`.
 
 The same applies to the single elements of an array or a collection: the conversion strategy is determined once
 from the first element, then applied to all of them, and a single element that cannot be converted fails the whole
 property with an [`UnsupportedOperationException`][unsupported-ex] naming the offending value. For instance
-`@DefaultValue("1, 2, foo, 4")` on a `MyType[]` reports `Cannot convert 'foo' to MyType`. A `@ConverterClass`
-is free to return `null` for an element, which produces a `null` in the resulting array or collection.
+`@DefaultValue("1, 2, foo, 4")` on a `MyType[]` reports `Cannot convert 'foo' to MyType for property 'myTypes'`.
+A `@ConverterClass` is free to return `null` for an element, which produces a `null` in the resulting array or
+collection.
 
 You can also register your custom [`PropertyEditor`][propedit] to convert text properties into your business objects
 using the static method [`PropertyEditorManager.registerEditor()`][propeditmanager].

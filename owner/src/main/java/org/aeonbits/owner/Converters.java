@@ -78,7 +78,7 @@ enum Converters {
                 // the converter is chosen once from the first chunk: the remaining ones may still
                 // fail, and their special values must not end up as elements of the resulting array
                 if (value == SKIP)
-                    throw unsupportedConversion(type, chunk);
+                    throw unsupportedConversion(targetMethod, type, chunk);
                 set(targetMethod, result, i, type, value == NULL ? null : value);
             }
 
@@ -218,7 +218,7 @@ enum Converters {
                 editor.setAsText(text);
                 return editor.getValue();
             } catch (Exception e) {
-                throw unsupportedConversion(e, targetType, text);
+                throw unsupportedConversion(e, targetMethod, targetType, text);
             }
         }
     },
@@ -265,7 +265,7 @@ enum Converters {
             try {
                 return Class.forName(text);
             } catch (ClassNotFoundException ex) {
-                throw unsupported(ex, CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName());
+                throw unsupportedConversion(ex, targetMethod, targetType, text);
             }
         }
     },
@@ -311,7 +311,7 @@ enum Converters {
     UNSUPPORTED {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text) {
-            throw unsupportedConversion(targetType, text);
+            throw unsupportedConversion(targetMethod, targetType, text);
         }
     };
 
@@ -359,12 +359,15 @@ enum Converters {
     }
 
     private static UnsupportedOperationException unsupportedConversion(
-            Exception cause, Class<?> targetType, String text) {
-        return unsupported(cause, CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName());
+            Exception cause, Method targetMethod, Class<?> targetType, String text) {
+        return unsupported(cause, CANNOT_CONVERT_MESSAGE,
+                text, targetType.getCanonicalName(), PropertiesMapper.key(targetMethod));
     }
 
-    private static UnsupportedOperationException unsupportedConversion(Class<?> targetType, String text) {
-        return unsupported(CANNOT_CONVERT_MESSAGE, text, targetType.getCanonicalName());
+    private static UnsupportedOperationException unsupportedConversion(
+            Method targetMethod, Class<?> targetType, String text) {
+        return unsupported(CANNOT_CONVERT_MESSAGE,
+                text, targetType.getCanonicalName(), PropertiesMapper.key(targetMethod));
     }
 
     private static class ConversionResult {
@@ -397,5 +400,9 @@ enum Converters {
         SKIP
     }
 
-    static final String CANNOT_CONVERT_MESSAGE = "Cannot convert '%s' to %s";
+    /**
+     * The value and the target type say what went wrong, the key says where to go and fix it: a file with
+     * fifty properties in it makes the difference between a one line message and a manual search.
+     */
+    static final String CANNOT_CONVERT_MESSAGE = "Cannot convert '%s' to %s for property '%s'";
 }
