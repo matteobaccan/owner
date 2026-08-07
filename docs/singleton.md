@@ -163,3 +163,10 @@ public final class org.aeonbits.owner.ConfigCache {
 ```
 
 The ConfigCache is designed to be thread safe, so you don't have to worry about concurrent access.
+
+Since a cached instance is the one created the first time, it also keeps the
+settings of the factory that created it. That matters for the
+[prefix configured on a factory]({{ site.url }}/docs/key-prefix/), which is
+read when the Config object is created: asking `ConfigCache` for the same `id`
+again returns the existing object, prefix included, whatever the factory
+handed over the second time says.
