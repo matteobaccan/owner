@@ -569,6 +569,8 @@ But there is more. OWNER API supports automatic conversion for:
       method, with both the keys and the values converted to the declared types.
   15. [`Optional`][Optional] (since 2.0.0) of any of the above, empty when the property is not defined
       anywhere.
+  16. [`java.time.Duration`][duration] (since 2.0.0), written with an explicit time unit — `10 s`,
+      `500 ms` — or as an ISO-8601 duration. See [below](#duration).
 
 If OWNER API cannot find any way to map your business object, you'll receive a [`UnsupportedOperationException`][unsupported-ex]
 with some meaningful description to identify the problem as quickly as possible. The message names the value, the
@@ -602,6 +604,7 @@ empty text. What follows is the whole picture, with `useOnEmpty` being the opt-i
 | `URL` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
 | `String` | `""` | `"abc"` | the default value |
 | `File`, `Path`, `URI` | an empty path | accepted | the default value |
+| `Duration` | `UnsupportedOperationException` | `UnsupportedOperationException` | the default value |
 | arrays and collections | an empty array or collection | `UnsupportedOperationException` on the element | the default value |
 
 Two rows deserve a word. `File`, `Path` and `URI` accept an empty value because any text is a valid path or
@@ -625,7 +628,9 @@ Converter classes shipped with OWNER
 ------------------------------------
 
 Since specifying duration and byte size values in configuration files is very common,
-OWNER ships with converter classes for these as well as some classes for the types themselves.
+OWNER ships with converter classes for these as well as some classes for the types themselves. A
+duration is converted automatically since 2.0.0; a byte size still asks for its converter to be named,
+since `ByteSize` is a type of ours and not one of the JDK's.
 
 Since 2.0.0 they are part of the core `owner` artifact, and no extra dependency is needed: they used
 to be shipped separately only because the core had to run on Java 6 and could not name
@@ -633,38 +638,70 @@ to be shipped separately only because the core had to run on Java 6 and could no
 are unchanged, so an existing `import` keeps working — if you depended on `owner-java8-extras` for
 them, replace that dependency with `owner`.
 
-You still have to name the converter with the `@ConverterClass` annotation: unlike the primitive and
-the other types described above, these are not applied automatically.
-
 ### Duration
 
-For duration, the `DurationConverter` class is provided which converts configuration strings to
-[`java.time.Duration`][duration].
+*Automatic since 2.0.0.*
+
+A [`java.time.Duration`][duration] is converted out of the box, like a `File` or a `URL`: a timeout is
+the commonest typed setting there is after a number and a string, so no annotation is needed.
 
   [duration]: https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html
 
-Example:
-
 ```java
-public class DurationConfig extends Config {
+public interface ServerConfig extends Config {
 
-  @ConverterClass(DurationConverter.class)
-  @DefaultValue("10 ms")
-  Duration getTenMilliseconds();
+  @DefaultValue("10 s")
+  Duration connectTimeout();
 
+  @DefaultValue("500 ms")
+  Duration readTimeout();
 
-  @ConverterClass(DurationConverter.class)
-  @DefaultValue("10d")
-  Duration getTenDays();
-
-  // The DurationConverter class also supports
-  // ISO 8601 time format as described in the
-  // JavaDoc for java.time.Duration.
-  @ConverterClass(DurationConverter.class)
+  // the ISO-8601 form that java.time.Duration.parse reads is accepted as well
   @DefaultValue("PT15M")
-  Duration iso8601FifteenMinutes();
+  Duration sessionExpiry();
 }
 ```
+
+The suffix may be written attached or separated — `10s` and `10 s` are the same — and collections,
+arrays and `Optional` work as they do for any other type: `List<Duration> retries()` reading
+`10 s, 30 s, 1 m` gives three durations.
+
+<div class="note warning">
+  <h5>The time unit is required</h5>
+  <p>
+  <code>timeout=30</code> is <b>refused</b>, with a message saying what to write instead. A bare number
+  would be read as milliseconds, and whoever writes 30 means seconds far more often than milliseconds —
+  a service that gives up thirty milliseconds in, with nothing said, is not a failure worth being
+  clever about. Write the unit, or an ISO-8601 duration.
+  </p>
+</div>
+
+The suffix is **case sensitive**: `10 s` is ten seconds and `10 S` is an error. Note that this differs
+from the byte size units below, which are case insensitive.
+
+#### Asking for the converter explicitly
+
+`DurationConverter` is still there and can still be named on a method, which is what you want when the
+value is not the automatic form:
+
+```java
+  @ConverterClass(DurationConverter.class)
+  @DefaultValue("30")
+  Duration legacyMillis();   // 30 milliseconds
+```
+
+**Named explicitly, the converter accepts a bare number and reads it as milliseconds.** That is the
+behaviour it has always had, and it is left alone: a configuration written before 2.0.0 keeps working
+exactly as it did. The rule is simply which of the two you get:
+
+| | A bare number, `30` | `30 s`, `PT30S` |
+|---|---|---|
+| automatic, no annotation | refused, with a message | 30 seconds |
+| `@ConverterClass(DurationConverter.class)` | 30 milliseconds | 30 seconds |
+
+A `@ConverterClass` naming any other converter, or one
+[registered]({{ site.url }}/docs/configuring/) for `Duration`, also takes precedence over the automatic
+conversion: the default never gets in the way of an explicit choice.
 
 The suffixes supported by DurationConverter are:
 

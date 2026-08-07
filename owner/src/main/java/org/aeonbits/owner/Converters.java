@@ -9,6 +9,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.CollectionConverterClass;
 import org.aeonbits.owner.Config.ConverterClass;
+import org.aeonbits.owner.converters.DurationConverter;
 
 import java.beans.PropertyEditor;
 import java.io.File;
@@ -19,6 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -264,6 +266,59 @@ enum Converters {
         Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (targetType != Path.class) return SKIP;
             return Paths.get(expandUserHome(text));
+        }
+    },
+
+    /**
+     * A timeout is the commonest typed setting there is after a number and a string, and
+     * {@link Duration} is the type the JDK has for it — so it is converted out of the box, as
+     * {@link #FILE} and {@link #PATH} are, rather than asking for a
+     * {@link ConverterClass @ConverterClass(DurationConverter.class)} on every method that returns one.
+     * <p>
+     * Coming after {@link #METHOD_WITH_CONVERTER_CLASS_ANNOTATION} and
+     * {@link #METHOD_WITH_REGISTERED_CONVERTER}, it is the default and not the rule: a converter named
+     * on the method, or registered for the type, still takes precedence.
+     * </p>
+     *
+     * @since 2.0.0
+     */
+    DURATION {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
+            if (targetType != Duration.class) return SKIP;
+            requireExplicitTimeUnit(text, key);
+            try {
+                return new DurationConverter().convert(targetMethod, text);
+            } catch (RuntimeException e) {
+                // the converter reports an IllegalArgumentException; every other type reports the
+                // same UnsupportedOperationException naming the value, the type and the key
+                throw unsupportedConversion(e, key, targetType, text);
+            }
+        }
+
+        /**
+         * A bare number is read as milliseconds by {@link DurationConverter}, which is a reasonable
+         * thing to opt into and a poor thing to have happen silently: whoever writes
+         * <code>timeout=30</code> means seconds far more often than milliseconds, and would get a
+         * service that gives up thirty milliseconds in, with nothing said. The unit is therefore
+         * required on this path — the automatic one — while the annotation keeps accepting a bare
+         * number, so nothing written against the previous behaviour changes.
+         */
+        private void requireExplicitTimeUnit(String text, String key) {
+            String trimmed = text.trim();
+            if (trimmed.isEmpty() || isIso8601(trimmed))
+                return;
+            if (!Character.isLetter(trimmed.charAt(trimmed.length() - 1)))
+                throw unsupported(
+                        "Cannot convert '%s' to a Duration for property '%s': the time unit is missing. "
+                                + "Write it explicitly — '%s ms', '%s s', '%s m', '%s h' or '%s d' — or use an "
+                                + "ISO-8601 duration such as 'PT30S'. A bare number would be read as "
+                                + "milliseconds, which is rarely what is meant.",
+                        text, key, trimmed, trimmed, trimmed, trimmed, trimmed);
+        }
+
+        private boolean isIso8601(String trimmed) {
+            return trimmed.startsWith("P") || trimmed.startsWith("-P") || trimmed.startsWith("+P");
         }
     },
 

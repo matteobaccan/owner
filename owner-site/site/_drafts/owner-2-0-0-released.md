@@ -170,6 +170,16 @@ Enhancements
    size is refused with an `InvalidObjectException` instead of producing an object that fails later.
  * [#320](https://github.com/matteobaccan/owner/pull/320): `EnumSet` and `Set<Enum>` are now supported by type
    conversion (thanks to @dexman545).
+ * **`java.time.Duration` is converted out of the box**, like a `File` or a `URL`, instead of asking for
+   `@ConverterClass(DurationConverter.class)` on every method that returns one: a timeout is the commonest
+   typed setting after a number and a string, and the JDK has a type for it. `10 s`, `500 ms`, `1 d` and the
+   ISO-8601 form `PT15M` are all read, in collections, arrays and `Optional` like any other type.
+   **The time unit is required on this path**: `timeout=30` is refused with a message saying what to write,
+   because a bare number would be read as milliseconds and whoever writes 30 means seconds far more often
+   than that. The converter named explicitly keeps its previous behaviour, bare number included, so no
+   configuration written before this release changes meaning; a converter registered for `Duration`, or named
+   with `@ConverterClass`, still takes precedence over the automatic conversion. See the
+   [documentation]({{ site.url }}/docs/type-conversion/#duration).
  * [#187](https://github.com/matteobaccan/owner/issues/187): `java.nio.file.Path` is converted, with a leading
    `~` expanded to the user home exactly as `java.io.File` already was — the two ways of naming a path no
    longer disagree. Arrays and collections of `Path` follow. The reporter asked in 2016 whether this belonged
