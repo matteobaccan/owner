@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.loaders.DotEnvLoader;
 import org.aeonbits.owner.loaders.Loader;
 import org.aeonbits.owner.loaders.PropertiesLoader;
 import org.aeonbits.owner.loaders.SystemLoader;
@@ -37,8 +38,11 @@ class LoadersManager implements Serializable {
     private final List<Loader> loaders = new LinkedList<>();
 
     LoadersManager() {
+        // registration pushes to the front, so PropertiesLoader must come first: it accepts every URL it can
+        // resolve and would otherwise answer for the formats registered after it
         registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
+        registerLoader(new DotEnvLoader());
         registerLoader(new SystemLoader());
     }
 

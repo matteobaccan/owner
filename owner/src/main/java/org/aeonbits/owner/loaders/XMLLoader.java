@@ -25,6 +25,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link Loader loader} able to read properties from standard XML Java properties files, as well as user defined
@@ -47,22 +49,40 @@ public class XMLLoader implements Loader {
             // (its DOCTYPE is intercepted by resolveEntity), but external DTDs and
             // external entities are neutralized, and secure processing limits
             // entity expansion (billion laughs).
-            setFeature("http://xml.org/sax/features/external-general-entities", false);
-            setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            setFeature(factory, "http://xml.org/sax/features/external-general-entities", false);
+            setFeature(factory, "http://xml.org/sax/features/external-parameter-entities", false);
+            setFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         }
         return factory;
     }
 
-    private void setFeature(String feature, boolean value) {
+    /**
+     * Asks the parser for one of the hardening features, and says so when it will not have it.
+     * <p>
+     * A parser that does not know a feature cannot be made to honour it, and there is nothing to do but carry
+     * on: refusing to read XML at all because one switch is missing would be worse than reading it. But the
+     * protection this class is documented to give is then not there, and silence would leave a deployment
+     * believing in a defence it does not have. Which feature was refused is named, because the three are not
+     * equally serious.
+     * </p>
+     */
+    static void setFeature(SAXParserFactory factory, String feature, boolean value) {
         try {
             factory.setFeature(feature, value);
-        } catch (ParserConfigurationException ignore) {
-            // feature not supported by this parser: skip it
-        } catch (SAXException ignore) {
-            // feature not recognized by this parser: skip it
+        } catch (ParserConfigurationException e) {
+            reportUnavailable(feature, e);
+        } catch (SAXException e) {
+            reportUnavailable(feature, e);
         }
+    }
+
+    private static void reportUnavailable(String feature, Exception cause) {
+        Logger.getLogger(XMLLoader.class.getName()).log(Level.WARNING, cause, () -> String.format(
+                "The XML parser in use does not support '%s', so that hardening is not in force for XML "
+                        + "configuration read by OWNER. An XML source from an untrusted place could then "
+                        + "reach an external entity or expand entities without limit. Placing a parser that "
+                        + "supports it on the classpath restores the protection.", feature));
     }
 
     static class XmlToPropsHandler extends DefaultHandler2 {

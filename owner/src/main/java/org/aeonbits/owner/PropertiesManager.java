@@ -25,6 +25,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
@@ -37,6 +39,9 @@ import static org.aeonbits.owner.util.Util.*;
  * @author Luigi R. Viggiano
  */
 class PropertiesManager implements Reloadable, Accessible, Mutable {
+
+    private static final Logger LOGGER = Logger.getLogger(PropertiesManager.class.getName());
+
     private final Class<? extends Config> clazz;
     private final Map<?, ?>[] imports;
     private final Properties properties;
@@ -49,6 +54,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final HotReloadLogic hotReloadLogic;
 
     private volatile boolean loading = false;
+
+    /**
+     * The last hot reload failure already reported, so that a source which stays broken is named once rather
+     * than at every check. Volatile because successive runs of a scheduled task need not be the same thread.
+     */
+    private volatile String lastReportedReloadFailure;
 
     final List<ReloadListener> reloadListeners = synchronizedList(new LinkedList<>());
 
@@ -132,7 +143,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             hotReloadLogic = new HotReloadLogic(hotReload, uris, this);
 
             if (hotReloadLogic.isAsync())
-                scheduler.scheduleAtFixedRate(() -> hotReloadLogic.checkAndReload(),
+                scheduler.scheduleAtFixedRate(this::checkAndReloadKeepingTheSchedule,
                         hotReload.value(), hotReload.value(), hotReload.unit());
         } else {
             hotReloadLogic = null;
@@ -272,6 +283,47 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         } finally {
             loading = false;
         }
+    }
+
+    /**
+     * Runs one asynchronous hot reload check without ever letting it out.
+     * <p>
+     * {@link java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate scheduleAtFixedRate}
+     * suppresses every later execution of a task that throws, so a single failed reload — a file caught
+     * halfway through being rewritten, a source momentarily malformed, a loader refusing what it was given —
+     * would silently stop the configuration reloading for the rest of the life of the process. It would go on
+     * answering with the values it happened to hold, and nothing anywhere would say so.
+     * </p>
+     * <p>
+     * So the failure is reported and the schedule is kept: the next tick tries again, and a fault that
+     * clears itself costs one line in the log instead of everything after it. {@link Error} is deliberately
+     * not caught — a process out of memory is not a thing to carry on through.
+     * </p>
+     */
+    private void checkAndReloadKeepingTheSchedule() {
+        try {
+            hotReloadLogic.checkAndReload();
+            // recovered: should the same fault return, it is worth hearing about again
+            lastReportedReloadFailure = null;
+        } catch (RuntimeException e) {
+            reportReloadFailure(e);
+        }
+    }
+
+    /**
+     * Says it once. A check runs as often as the {@link Config.HotReload} interval says, so a source that
+     * stays broken would otherwise fill the log at that rate; only a failure differing from the one before it
+     * is worth a line.
+     */
+    private void reportReloadFailure(RuntimeException failure) {
+        String signature = failure.getClass().getName() + ": " + failure.getMessage();
+        if (signature.equals(lastReportedReloadFailure))
+            return;
+        lastReportedReloadFailure = signature;
+        LOGGER.log(Level.WARNING, failure, () -> String.format(
+                "Hot reload of %s failed. It keeps the values it already had and will try again at the next "
+                        + "check; this is reported once, and again only if the failure changes or clears.",
+                clazz.getName()));
     }
 
     @Delegate

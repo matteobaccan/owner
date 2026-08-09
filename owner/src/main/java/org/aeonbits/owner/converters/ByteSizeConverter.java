@@ -14,6 +14,7 @@ import org.aeonbits.owner.Converter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
+import static org.aeonbits.owner.util.Util.blankLookingCharacterIn;
 import static org.aeonbits.owner.util.Util.splitNumericAndChar;
 
 /**
@@ -31,7 +32,7 @@ public class ByteSizeConverter implements Converter<ByteSize> {
         String value = parts[0];
         String unit = parts[1];
 
-        BigDecimal bdValue = new BigDecimal(value);
+        BigDecimal bdValue = number(input, value);
         ByteSizeUnit bsuUnit = ByteSizeUnit.parse(unit);
 
         if (bsuUnit == null){
@@ -39,5 +40,25 @@ public class ByteSizeConverter implements Converter<ByteSize> {
         }
 
         return new ByteSize(bdValue, bsuUnit);
+    }
+
+    /**
+     * Reads the amount, naming the character responsible when an invisible one is what stops it. A no-break
+     * space between the digits and the unit survives trimming and shows nothing on screen, so the message
+     * {@link BigDecimal} raises quotes a value that looks entirely correct.
+     */
+    private static BigDecimal number(String input, String value) {
+        try {
+            return new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            String blank = blankLookingCharacterIn(value);
+            if (blank != null)
+                throw new IllegalArgumentException(String.format(
+                        "Could not read the amount in byte size '%s': it contains %s, which reads as a space "
+                                + "and is not one. It usually arrives by copying out of a word processor or a "
+                                + "web page; replace it with an ordinary space.", input, blank), e);
+            throw new IllegalArgumentException(
+                    String.format("Could not read the amount in byte size '%s'", input), e);
+        }
     }
 }

@@ -159,6 +159,51 @@ public abstract class Util {
         return path.replace(" ", "%20");
     }
 
+    /** ZERO WIDTH SPACE: not a separator at all as far as Java is concerned, and shows nothing on screen. */
+    private static final int ZERO_WIDTH_SPACE = 0x200B;
+
+    /** ZERO WIDTH NO-BREAK SPACE, better known as the byte order mark when it leads a file. */
+    private static final int ZERO_WIDTH_NO_BREAK_SPACE = 0xFEFF;
+
+    /**
+     * Describes the first character of the text that the eye reads as a blank but the parser does not: a
+     * no-break space, a narrow one, a zero-width one.
+     * <p>
+     * They arrive by copying out of a word processor, a web page or a chat window; they survive
+     * {@link String#trim()}, which only removes characters up to <code>U+0020</code>; and they are invisible
+     * in every editor. A value that fails over one therefore gives the reader nothing whatever to look at,
+     * which is why it is worth naming the character rather than only reporting that the value was refused.
+     * </p>
+     *
+     * @param text the text to examine.
+     * @return a description naming the character and where it sits, or <code>null</code> if there is none.
+     */
+    public static String blankLookingCharacterIn(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (looksBlankButIsNot(c))
+                return format("%s (U+%04X) at position %d", nameOf(c), (int) c, i);
+        }
+        return null;
+    }
+
+    /**
+     * {@link Character#isSpaceChar} covers the Unicode space separators and {@link Character#isWhitespace}
+     * excludes the non-breaking ones, so the difference between the two is exactly the set that
+     * {@link String#trim()} leaves behind. The zero-width pair are not separators at all, so they have to be
+     * named on their own.
+     */
+    private static boolean looksBlankButIsNot(char c) {
+        return (Character.isSpaceChar(c) && !Character.isWhitespace(c))
+                || c == ZERO_WIDTH_SPACE
+                || c == ZERO_WIDTH_NO_BREAK_SPACE;
+    }
+
+    private static String nameOf(char c) {
+        String name = Character.getName(c);
+        return name == null ? "an unnamed character" : name;
+    }
+
     /**
      * Splits a string into a numeric part and a character part. The input string should conform to the format
      * <code>[numeric_part][char_part]</code> with an optional whitespace between the two parts.

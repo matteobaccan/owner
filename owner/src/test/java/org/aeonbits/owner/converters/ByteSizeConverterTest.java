@@ -99,4 +99,28 @@ public class ByteSizeConverterTest {
         }
     }
 
+    /**
+     * A no-break space between the amount and the unit survives trimming and shows nothing on screen, so the
+     * message has to name the character rather than quote a value that looks entirely correct.
+     *
+     * @author Matteo Baccan
+     */
+    @Test
+    public void testANoBreakSpaceInTheAmountIsNamed() {
+        try {
+            new ByteSizeConverter().convert(null, "10" + new String(Character.toChars(0x00A0)) + "MB");
+            fail("a no-break space is not a space and should be reported as such");
+        } catch (IllegalArgumentException expected) {
+            String message = expected.getMessage();
+            assertTrue(message, message.contains("NO-BREAK SPACE"));
+            assertTrue(message, message.contains("U+00A0"));
+        }
+    }
+
+    @Test
+    public void testAnOrdinarySpaceInTheAmountIsStillJustASeparator() {
+        assertEquals(new ByteSize(10, ByteSizeUnit.MEGABYTES),
+                new ByteSizeConverter().convert(null, "10 MB"));
+    }
+
 }

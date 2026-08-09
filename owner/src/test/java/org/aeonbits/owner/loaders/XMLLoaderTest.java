@@ -8,15 +8,26 @@
 package org.aeonbits.owner.loaders;
 
 import org.junit.Test;
+import org.xml.sax.SAXNotRecognizedException;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -93,6 +104,102 @@ public class XMLLoaderTest {
             fail("expected parsing to abort due to entity expansion limits");
         } catch (IOException expected) {
             // expected: secure processing caps entity expansion and aborts.
+        }
+    }
+
+    /**
+     * A parser that does not know one of the hardening features cannot be made to honour it, and reading XML
+     * has to carry on regardless. But the protection this class is documented to give is then absent, and a
+     * deployment must not be left believing in a defence it does not have.
+     *
+     * @author Matteo Baccan
+     */
+    @Test
+    public void testAFeatureTheParserRefusesIsReported() {
+        Logger log = Logger.getLogger(XMLLoader.class.getName());
+        final List<LogRecord> records = new ArrayList<>();
+        Handler recorder = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+                // nothing to release
+            }
+        };
+        boolean useParentHandlers = log.getUseParentHandlers();
+        Level level = log.getLevel();
+        log.setUseParentHandlers(false);
+        log.setLevel(Level.ALL);
+        log.addHandler(recorder);
+        try {
+            XMLLoader.setFeature(new ParserRefusingEveryFeature(), SOME_FEATURE, true);
+        } finally {
+            log.removeHandler(recorder);
+            log.setLevel(level);
+            log.setUseParentHandlers(useParentHandlers);
+        }
+
+        assertEquals(1, records.size());
+        assertEquals(Level.WARNING, records.get(0).getLevel());
+        String message = records.get(0).getMessage();
+        assertTrue(message, message.contains(SOME_FEATURE));
+        assertTrue(message, message.contains("hardening is not in force"));
+    }
+
+    @Test
+    public void testAFeatureTheParserAcceptsIsNotReported() {
+        Logger log = Logger.getLogger(XMLLoader.class.getName());
+        final List<LogRecord> records = new ArrayList<>();
+        Handler recorder = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+                // nothing to release
+            }
+        };
+        log.addHandler(recorder);
+        try {
+            XMLLoader.setFeature(SAXParserFactory.newInstance(),
+                    "http://xml.org/sax/features/external-general-entities", false);
+        } finally {
+            log.removeHandler(recorder);
+        }
+
+        assertTrue(records.toString(), records.isEmpty());
+    }
+
+    private static final String SOME_FEATURE = "http://xml.org/sax/features/external-general-entities";
+
+    /** Stands in for a parser too old, too small or too odd to know the features this loader asks for. */
+    private static class ParserRefusingEveryFeature extends SAXParserFactory {
+        @Override
+        public SAXParser newSAXParser() {
+            throw new UnsupportedOperationException("not needed by this test");
+        }
+
+        @Override
+        public void setFeature(String name, boolean value) throws SAXNotRecognizedException {
+            throw new SAXNotRecognizedException(name);
+        }
+
+        @Override
+        public boolean getFeature(String name) throws SAXNotRecognizedException {
+            throw new SAXNotRecognizedException(name);
         }
     }
 }

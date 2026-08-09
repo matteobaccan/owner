@@ -26,6 +26,48 @@ CODE
       public, so it is an API removal and belongs to a major version — decide it alongside the
       `module-info` question below rather than on its own.
 
+SILENT FAILURES STILL TO LOOK AT
+--------------------------------
+
+Found by reading the code on 2026-08-09, while adding the first two diagnostics the library has ever had:
+the hot reload that used to die on its first failure, and the XXE hardening that could be absent without
+anyone being told. `java.util.logging` is now used for both — the JDK's, so still no dependency, and
+`org.aeonbits.owner.level = OFF` quietens the lot. These four are the rest of what that reading turned up,
+in the order they seem worth doing.
+
+Two rules any of them has to keep. **Never log a value**: `@Sensitive` exists to keep values out of logs and
+a diagnostic that leaked a password would be a poor trade. And **say it once**: a configuration is long
+lived and `reload()` runs the whole load again, so anything reported per load has to be guarded the way
+`PropertiesManager.lastReportedReloadFailure` is, or it repeats at the hot reload interval for ever.
+
+- [ ] **A source that was named and never arrived.** `Config.LoadType.FIRST` and `MERGE` both do
+      `catch (IOException) { ignore(); }`, with a comment admitting it covers two different things: a file
+      legitimately absent, which is how the fallback is *meant* to work, and a file that is there but cannot
+      be read — wrong permissions, a typo in the path, a network source down. In the second case the caller
+      gets a configuration full of defaults and no hint whatever. A typo in
+      `@Sources("file:/etc/myap.env")` yields an object that works and lies.
+      Warning on every absent file would be unbearable noise, since `FIRST` expects misses by design and the
+      default probe tries `MyConfig.properties` and `MyConfig.xml` for every interface. The rule that seems
+      right: **`FileNotFoundException` stays silent, every other `IOException` is a warning**; and one
+      further warning when `@Sources` was declared explicitly and *nothing at all* could be read, which is
+      exactly the typo case and costs nothing in the normal one.
+- [ ] **A classpath source that disappears before any loader sees it.** `ConfigURIFactory.newURI` returns
+      `null` when `getResource` finds nothing, and `PropertiesManager.toURIs` drops it with
+      `if (uri != null)`. So `@Sources("classpath:missing.properties")` never reaches a loader at all: it is
+      simply not in the list. Same family as the item above but earlier, so a fix there would not cover it —
+      the two belong in one piece of work.
+- [ ] **XML that is malformed and is not in the Java properties format.** `XmlToPropsHandler.error` reads
+      `if (isJavaPropertiesFormat) throw e;`, so for a user-defined XML a validation error is swallowed and
+      the caller keeps whatever partial properties had been collected before it.
+- [ ] **A `@Key` whose value is not a legal format string.** `PropertiesInvocationHandler` catches the
+      failure from `String.format` and returns the template unexpanded, which is documented and probably the
+      right behaviour — a property value has no obligation to be a format string. Worth a `FINE`, not a
+      `WARNING`, and only if it costs nothing.
+
+Deliberately **not** on this list: the five `ignore()` calls in `PropertiesManager`. They all catch
+`RollbackBatchException` or `RollbackOperationException`, which means a listener chose to veto the change.
+That is the event API working, not a failure, and it should stay quiet.
+
 GAPS AGAINST THE OTHER CONFIGURATION LIBRARIES
 ----------------------------------------------
 

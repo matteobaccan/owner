@@ -713,6 +713,30 @@ The suffixes supported by DurationConverter are:
 - `h`, `hour`, `hours`
 - `d`, `day`, `days`
 
+<div class="note warning">
+  <h5>Two characters that look the same</h5>
+  <p>
+    The <code>µ</code> above is <strong>MICRO SIGN</strong>, U+00B5. There is a second character,
+    <strong>GREEK SMALL LETTER MU</strong> at U+03BC, that most fonts draw identically, and some keyboard
+    layouts and word processors produce it instead. It is not accepted — but rather than refusing it with the
+    ordinary "could not parse" message, which would leave you staring at a unit that looks exactly right,
+    OWNER names the difference and tells you which one you wrote. Writing <code>us</code> avoids the question
+    entirely, and is what we would suggest for a file that gets edited by more than one person.
+  </p>
+</div>
+
+<div class="note warning">
+  <h5>And a space that is not a space</h5>
+  <p>
+    The separator in <code>30 s</code> is also worth a word. A value pasted out of a word processor, a web
+    page or a chat window often carries a <strong>no-break space</strong> (U+00A0), a narrow one (U+202F) or
+    a zero-width one (U+200B) where an ordinary space belongs. None of them is removed by trimming, none of
+    them is visible anywhere, and the number then fails to parse over a character nobody can see. OWNER names
+    the character and its position instead of quoting a value that looks entirely correct. The same applies
+    to a <a href="#byte-size">byte size</a>.
+  </p>
+</div>
+
 ### Byte Size
 
 The Java API does not provide any classes to represent data sizes. Therefore,

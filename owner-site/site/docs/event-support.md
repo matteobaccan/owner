@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Event support
-prev_section: xml-support
+prev_section: dotenv-support
 next_section: singleton
 permalink: /docs/event-support/
 ---

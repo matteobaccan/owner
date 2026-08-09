@@ -10,6 +10,7 @@ package org.aeonbits.owner.util;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+import static org.aeonbits.owner.util.Util.blankLookingCharacterIn;
 import static org.aeonbits.owner.util.Util.splitNumericAndChar;
 
 /**
@@ -33,9 +34,18 @@ import static org.aeonbits.owner.util.Util.splitNumericAndChar;
  * </p>
  *
  * @author Stefan Freyr Stefansson
+ * @author Matteo Baccan
  * @since 2.0.0
  */
 public final class DurationParser {
+
+    /**
+     * GREEK SMALL LETTER MU. In most fonts it cannot be told apart from the MICRO SIGN that the unit table
+     * below holds, so someone whose keyboard or word processor produced this one sees a unit that looks
+     * exactly right being refused. Held as a code point rather than as a character, both because the source
+     * then survives any editor and because the two would otherwise be indistinguishable here too.
+     */
+    private static final int GREEK_SMALL_LETTER_MU = 0x03BC;
 
     // Suppresses default constructor, ensuring no one instantiate this class.
     private DurationParser() {}
@@ -102,7 +112,7 @@ public final class DurationParser {
                 units = ChronoUnit.NANOS;
                 break;
             case "us":
-            case "µs":
+            case "\u00b5s":  // MICRO SIGN, written as an escape so no editor can mangle it
             case "micros":
             case "microseconds":
                 units = ChronoUnit.MICROS;
@@ -130,10 +140,43 @@ public final class DurationParser {
                 units = ChronoUnit.DAYS;
                 break;
             default:
-                throw new IllegalArgumentException(
-                        String.format("Could not parse time unit '%s' (try ns, us, ms, s, m, h, d)", originalUnitString));
+                throw new IllegalArgumentException(unknownUnit(originalUnitString));
         }
 
-        return Duration.of(Long.parseLong(numberString), units);
+        return Duration.of(number(input, numberString), units);
+    }
+
+    /**
+     * The number is parsed here rather than inline so that the commonest way for it to be malformed — an
+     * invisible character sitting between the digits and the unit — is reported as what it is. Left to
+     * {@link Long#parseLong}, it raises a message quoting a value that looks perfectly correct.
+     */
+    private static long number(String input, String numberString) {
+        try {
+            return Long.parseLong(numberString);
+        } catch (NumberFormatException e) {
+            String blank = blankLookingCharacterIn(numberString);
+            if (blank != null)
+                throw new IllegalArgumentException(String.format(
+                        "Could not read the number in duration value '%s': it contains %s, which reads as a "
+                                + "space and is not one. It usually arrives by copying out of a word "
+                                + "processor or a web page; replace it with an ordinary space.", input, blank), e);
+            throw new IllegalArgumentException(
+                    String.format("Could not read the number in duration value '%s'", input), e);
+        }
+    }
+
+    /**
+     * Says plainly when the unit was refused over a character that cannot be seen to be wrong. Guessing what
+     * was meant and accepting it would be the other way out, but two code points that render alike are worth
+     * keeping distinct in a configuration file, and the advice costs the reader one edit.
+     */
+    private static String unknownUnit(String unit) {
+        if (unit.indexOf(GREEK_SMALL_LETTER_MU) >= 0)
+            return String.format("Could not parse time unit '%s': it is written with GREEK SMALL LETTER MU "
+                    + "(U+03BC), where the microsecond unit is spelled with MICRO SIGN (U+00B5). The two "
+                    + "characters look the same and are not. Write 'us' instead, which is never ambiguous.",
+                    unit);
+        return String.format("Could not parse time unit '%s' (try ns, us, ms, s, m, h, d)", unit);
     }
 }
