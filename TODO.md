@@ -85,10 +85,12 @@ an issue behind it, which is the point: what the others shipped is what our repo
       existed since 1.0.5, a loader is a three-method class, and two external projects have already
       hand-written a YAML loader and a JSON one against it. Being properties-only is the top reason
       people pick Typesafe Config over us. **`FORMATS.md` holds the whole analysis** — what each format
-      costs, what the core is missing, and the order. In short: `.env` first, because it is the most
-      widespread format in container work and the only one that needs none of the data-model work;
-      then loader enablement and options; then indexed keys and a documented flattening; then YAML and
-      JSON. Issues [#14](https://github.com/matteobaccan/owner/issues/14),
+      costs, what the core is missing, and the order.
+      **`.env` is done** (2026-08-09, `d04c500`): in the core, `DotEnvLoader` with an `EnvDialect` of
+      seven rules and three presets, `docker` by default. What is left, in order: loader enablement and
+      per-loader options; indexed keys and a documented flattening, which unblock every tree-shaped
+      format at once; then YAML and JSON; then INI and TOML. Issues
+      [#14](https://github.com/matteobaccan/owner/issues/14),
       [#65](https://github.com/matteobaccan/owner/issues/65),
       [#240](https://github.com/matteobaccan/owner/issues/240), and
       [#48](https://github.com/matteobaccan/owner/issues/48) is on the critical path rather than beside

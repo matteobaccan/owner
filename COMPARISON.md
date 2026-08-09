@@ -13,6 +13,11 @@ libraries belong here and need re-checking before they are relied on.
 Everything below was verified against the projects themselves — the GitHub API for release dates,
 the actual source files for the APIs — rather than taken from articles.
 
+**Amended 2026-08-09**, in the two places marked with that date: what SmallRye does with a `.env`,
+checked in its source while deciding our own, and the backlog line on formats, which the analysis in
+`FORMATS.md` has superseded. Everything else still dates from the snapshot above and still needs
+re-checking before it is relied on.
+
 
 The landscape
 -------------
@@ -81,6 +86,13 @@ Checked against all of the above:
 - **JMX**, **preprocessors**, **`Mutable`/`Accessible`** (we write, the others mostly only read),
   **parametrized properties**, **`@DisableFeature`** granularity, **prefix derived from the package**.
 - BSD licence, no framework lock-in.
+- **A `.env` whose dialect you choose** (added 2026-08-09; see `FORMATS.md`). Reading a `.env` is not
+  ours — SmallRye does it, and so does a handful of standalone libraries. Being able to say *which*
+  rules to read it by appears to be: SmallRye hands the file to `java.util.Properties.load` and takes
+  what comes, and the dotenv ports each implement one dialect and only that one. Since `docker run
+  --env-file`, Compose and the dotenv family genuinely disagree, and the same file is often read by
+  more than one of them, having the reader say so is worth something. Small, but real, and it cost
+  no dependency.
 
 
 ByteSize against the equivalents
@@ -134,6 +146,7 @@ coincidence; it is evidence the demand is real.
 |---|---|---|
 | Nested config interfaces | SmallRye, Gestalt, Coat | #129, #2, #72 |
 | YAML / JSON / HOCON / TOML | everyone but us | #14, #65, #240 |
+| `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
 | Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
 | Indexed keys `list[0]` | SmallRye, Gestalt | #48 |
@@ -166,10 +179,14 @@ Backlog, highest value first
 1. **Nested config interfaces** (`ServerConfig server();`) — the largest visible gap against
    SmallRye, and `@Prefix` from 2.0.0 already does half the work: key composition exists, what is
    missing is a return type that builds another proxy.
-2. **YAML/JSON/TOML as optional `Loader`s in owner-extras** — a loader is a three-method class, the
-   SPI has existed since 1.0.5, and people are already writing these by hand (see above). Keeps the
-   core dependency-free while removing the "properties only" objection, which is the top reason
-   people pick Typesafe Config. Add `ServiceLoader` discovery too: registration is programmatic only.
+2. **Further formats** — a loader is a three-method class, the SPI has existed since 1.0.5, and people
+   are already writing these by hand (see above). Removes the "properties only" objection, which is
+   the top reason people pick Typesafe Config. **`FORMATS.md` supersedes this line**: it was written
+   here as "YAML/JSON/TOML as optional loaders in owner-extras", and the analysis that followed
+   changed both halves of that. No external dependency means every parser is ours to write, which
+   makes HOCON the most expensive item rather than the cheapest; and `.env`, not YAML, turned out to
+   be the place to start — it is the most widespread format in container work and the only one
+   needing none of the data-model work. It shipped on 2026-08-09, in the core.
 3. **Origin tracking** (#277).
 4. **Configurable naming strategy** (#116) — hooks into the factory-prefix machinery from 2.0.0.
 5. **Bean Validation** (#201) as an optional module, never in the core.

@@ -4,12 +4,20 @@ CONFIGURATION FORMATS
 **Internal working document — not published on the project site.**
 
 Started 2026-08-09. Where the "further formats" item of `TODO.md` stands: what each format would
-cost, what the core is missing, and in which order they are worth doing. Nothing here is decided
-yet; the open questions are collected at the bottom.
+cost, what the core is missing, and in which order they are worth doing. The open questions are
+collected at the bottom.
 
 The companion documents are `COMPARISON.md`, which records what the other libraries support and how
 that was established, and `TODO.md`, which holds the ordered backlog. This file is the level of
 detail neither of those wants.
+
+**Shipped 2026-08-09, commit `d04c500`: phase 0, `.env` in the core.** `DotEnvLoader` and
+`EnvDialect` in `org.aeonbits.owner.loaders`, registered by default, 833 core tests green. Three
+things about it came out differently from what the rest of this file proposed before it was written,
+and each is marked *shipped* or *not built* where it belongs below. The short version: the
+interpolation flag was dropped because OWNER already expands `${…}` itself, a line-continuation flag
+was added in its place, and the `owner.loaders.env.*` settings were **not** built — they belong to
+C6, and what carries the dialect today is registering the loader or a query on the source.
 
 
 The constraint that shapes everything
@@ -54,6 +62,19 @@ Verified against the source on 2026-08-09, because two of these were assumed wro
 The cost to keep in mind: without `@Sources`, one spec per registered loader is probed on the
 classpath for every configuration interface loaded. Three loaders, three lookups; ten loaders, ten.
 
+Two more rules, learnt writing the first of these loaders, that every one after it has to keep:
+
+- **A content error must be unchecked.** `Config.LoadType.FIRST` and `MERGE` both catch `IOException`
+  and move on, which is right for a source that is not there and fatal for anything else: a malformed
+  file reported as an `IOException` is swallowed and the caller gets a configuration full of defaults
+  with no explanation. `DotEnvLoader` raises `Util.unsupported(...)` for everything it refuses, as
+  `LoadersManager.findLoader` already did, and keeps `IOException` for genuine I/O.
+- **Which means a loader can now throw during a hot reload**, and
+  `ScheduledExecutorService.scheduleAtFixedRate` suppresses every later run of a task that throws. That
+  hole was open before — `findLoader` could already do it — and is now closed in
+  `PropertiesManager.checkAndReloadKeepingTheSchedule`, but it is the reason the two rules are worth
+  stating together.
+
 
 What the core is missing
 ------------------------
@@ -65,7 +86,7 @@ What the core is missing
 | **C3** | Explicit `null` | JSON, YAML, CBOR | **missing.** `Properties` cannot hold a null value. TOML has no null; `.env` and INI have none |
 | **C4** | ~~Extension-less `accept()`~~ | — | **withdrawn.** `.env` is a file that is all extension, and the existing test shape matches it |
 | **C5** | More than one extension per format | YAML (`.yaml`/`.yml`), HOCON (`.conf`), INI (`.ini`/`.cfg`) | `defaultSpecFor` returns a single `String`. An additive `defaultSpecsFor` would do it, and the SPI must stay compatible — two external projects implement `Loader` by hand |
-| **C6** | Loader enablement and per-loader options | all of them | **most of it exists**: `owner.*` settings plus a `defaultSpecFor` that may return `null`. Missing: `ServiceLoader` discovery and the `owner.loaders.*` names |
+| **C6** | Loader enablement and per-loader options | all of them | **partly there.** Shipped with `.env`: options per source, in the URI query, and a dialect per factory by registering the loader. Still missing: the `owner.loaders.*` settings over `ConfigFactory.setProperty`, `ServiceLoader` discovery, and the query on a `classpath:` source (see below) |
 | **C7** | Binary payloads and non-string keys | CBOR | missing: byte strings need base64 or hex, integer keys need a canonical form |
 | **C8** | Selecting a document or a section | YAML multi-document, TOML `[[array of tables]]`, INI sections | a loader option, so **C6** |
 | **C9** | Duplicate keys and merge policy | HOCON merges, TOML forbids, INI varies, JSON leaves it undefined | a loader option, so **C6** |
@@ -146,7 +167,8 @@ any of the data-model work. It also sits next to something we already have, `sys
 A plan in phases
 ----------------
 
-0. **`.env` alone.** Depends on nothing else here. Deliverable on its own.
+0. ~~**`.env` alone.**~~ **Done 2026-08-09**, `d04c500`. It depended on nothing else here and shipped
+   on its own, as intended.
 1. **C6, the keystone.** `ServiceLoader` discovery plus `owner.loaders.*` over the `setProperty`
    machinery that exists. With the rule that settles the probe cost: **always registered, probed
    only on request.** `@Sources("classpath:app.yaml")` is already explicit and works immediately;
@@ -208,17 +230,29 @@ Sources: [docker run --env-file](https://docs.docker.com/reference/cli/docker/co
 
 A dialect is not a format, it is a name for a bundle of answers. So the model is a set of
 independent flags, with named presets that set them together, and every flag overridable on its own
-over the preset:
+over the preset. **Shipped**, as `EnvDialect`, with seven rules:
 
-- `quotes` — `strip` | `literal`
-- `escapes` — `expand` | `literal`
-- `exportPrefix` — `strip` | `reject`
-- `inlineComments` — `allow` | `deny`
-- `multiline` — `allow` | `deny`
-- `interpolation` — `none` | `owner` (our own `${}`) | `posix`
-- `bareName` — `fromEnvironment` | `ignore` | `error`
+| Flag | Settings | Query name |
+|---|---|---|
+| `quotesStripped` | true / false | `quotes=strip\|literal` |
+| `escapesExpanded` | true / false | `escapes=expand\|literal` |
+| `exportPrefixStripped` | true / false | `export=strip\|keep` |
+| `inlineComments` | true / false | `comments=inline\|none` |
+| `multilineValues` | true / false | `multiline=allow\|deny` |
+| `lineContinuation` | true / false | `continuation=allow\|deny` |
+| `bareNames` | `FROM_ENVIRONMENT` / `IGNORE` / `ERROR` | `bare=env\|ignore\|error` |
 
-Presets: **`docker` (the default)**, `dotenv`, `compose`, `systemd`.
+Two changes from the list this file first proposed:
+
+- **`interpolation` was dropped.** OWNER expands `${…}` in property values itself, after loading and
+  across every source, so a loader doing its own would expand them twice. No dialect interpolates.
+- **`lineContinuation` was added** — a trailing backslash joining the next line, which is a
+  mechanism of its own and not the same thing as a quoted value spanning lines.
+
+Presets shipped: **`docker` (the default)**, `dotenv`, `compose`. **`systemd` was not shipped**: its
+exact rules on trailing comments were not verified, and guessing them would put a wrong answer behind
+a name that claims authority. The seven flags describe it perfectly well in the meantime, which is
+the point of having flags rather than only presets.
 
 **`docker` is the default**, which reverses what this file proposed on the first draft. The evidence
 above is what turned it round:
@@ -242,30 +276,39 @@ processing*.
 
 ### Where the setting goes
 
-- Global, on the convention that already exists:
-  `ConfigFactory.setProperty("owner.loaders.env.dialect", "dotenv")`, and per-factory through
-  `ConfigFactory.newInstance()`, which carries its own properties.
-- Per source, in the URI query: `@Sources("file:.env?dialect=dotenv")`. Finer than an annotation on
-  the interface would be, since it distinguishes one source from another, so no new annotation is
-  needed.
-- Single flags override the preset: `owner.loaders.env.quotes=strip`.
+**Shipped:**
 
-Two implementation details the query brings with it, both verified: **`accept()` and `load()` must
-strip the query before using the path**, or `endsWith(".env")` fails and `openStream()` looks for a
-file named `.env?dialect=dotenv`; and on `classpath:` it has to come off earlier still, inside
-`ConfigURIFactory`, because it would otherwise become part of the name handed to
-`ClassLoader.getResource`.
+- Per source, in the URI query: `@Sources("file:.env?dialect=dotenv")`, and one rule at a time with
+  `?quotes=strip`. Finer than an annotation on the interface would be, since it distinguishes one
+  source from another, so no new annotation was needed. `dialect` sets the starting point wherever in
+  the query it appears, and the single rules apply over it. An unknown option or setting is refused,
+  not ignored.
+- Per factory, by registering the loader that suits:
+  `factory.registerLoader(new DotEnvLoader(EnvDialect.DOTENV))`, which needs no new machinery at all —
+  registration pushes to the front of the list, so it takes over from the built-in one.
 
-An in-file directive — a first-line `# owner:dialect=docker` — was considered. It travels with the
-file, which is genuinely attractive, but it writes our vendor name into somebody else's `.env`.
-Probably no.
+**Not built, and it belongs to C6:** the `owner.loaders.env.*` settings over
+`ConfigFactory.setProperty`. The convention exists and is right, but nothing in phase 0 needed it, and
+the naming should be settled once for every loader rather than invented for this one.
+
+**A known limitation.** The query works on `file:` and on any other scheme, and **not on
+`classpath:`**: `ConfigURIFactory.newURI` hands a `classpath:` path straight to
+`ClassLoader.getResource`, where `?dialect=dotenv` becomes part of the resource name and the lookup
+fails. Stripping it there is a small change to the core and was left out of phase 0 rather than
+smuggled in. In the loader itself both `accept()` and `load()` do strip the query, as they must, or
+`endsWith(".env")` would fail and `openStream()` would look for a file called `.env?dialect=dotenv`.
+
+An in-file directive — a first-line `# owner:dialect=docker` — was considered and rejected. It travels
+with the file, which is genuinely attractive, but it writes our vendor name into somebody else's
+`.env`.
 
 ### Default probing
 
-`defaultSpecFor` should almost certainly return `null`, as `SystemLoader` does. A `.env` is rarely on
+**Shipped as proposed**: `defaultSpecFor` returns `null`, as `SystemLoader` does. A `.env` is rarely on
 the classpath and never named after the configuration class: it lives at `file:.env` or at whatever
-path the container mounts. Declaring it explicitly is right. If automatic pickup is wanted later, it
-belongs behind an opt-in setting naming the location, not behind a class-name convention.
+path the container mounts. Declaring it explicitly is right, and it means the new loader costs nothing
+to a configuration that does not use one. If automatic pickup is wanted later, it belongs behind an
+opt-in setting naming the location, not behind a class-name convention.
 
 
 Where the parsers live
@@ -295,21 +338,31 @@ its security. Following the same rule:
   lines in it.
 
 The practical consequence is worth having: **`.env` in the core means phase 0 needs neither
-`ServiceLoader` nor a new artifact**, and can be done immediately.
+`ServiceLoader` nor a new artifact**, and can be done immediately. It was, and it did not: the loader
+and the dialect together are 742 lines of the core, against 6,852 before them.
+
+That settles half of question 4 below by doing it. The other half — a third artifact for the
+tree-shaped formats — is still open, and nothing so far commits us to it.
 
 
 Open questions
 --------------
 
-1. ~~**`.env` default dialect**~~ — **settled 2026-08-09: `docker`**, with `dotenv` and the rest
-   available as presets, and a warning when a value looks quoted. See the reasoning above.
+1. ~~**`.env` default dialect**~~ — **settled and shipped 2026-08-09: `docker`**, with `dotenv` and
+   `compose` as presets, seven rules adjustable one at a time, and a warning when a value looks quoted.
 2. **Do we call a YAML subset "YAML"?** Proposed: yes in the title, no in the documentation — a
    chapter listing exactly what is in and what is out, and a hard error on anchors and tags.
 3. **`list[0]` or `list.0`?** `list[0]` is what SmallRye and Gestalt use, which would align #48 with
    the field.
-4. **Where do the parsers live?** Proposed above: `.env` and INI in the core, the tree-shaped
-   formats in a new `owner-formats`, and `owner-extras` given over to remote sources. Not yet
-   decided — it commits us to a third artifact.
+4. **Where do the parsers live?** Half answered by shipping: `.env` is in the core and that was
+   right. Still open, and still uncommitted either way: whether the tree-shaped formats get an
+   `owner-formats` of their own, which is a third artifact to maintain and release.
 5. **TOON: verify or close?**
 6. **Does `ServiceLoader` discovery imply enablement?** Proposed no: discovered and registered, but
    probed only when asked.
+7. **New.** Should `ConfigURIFactory` strip a query from a `classpath:` spec, so that per-source
+   options work there as they do on `file:`? Small, and the only reason it is a question is that it
+   touches the core rather than a loader.
+8. **New.** Are the `owner.loaders.*` setting names worth having at all, now that registering the
+   loader you want covers the same ground per factory? They would only earn their keep for something
+   that cannot be expressed by choosing a loader — turning default probing on, most likely.
