@@ -311,6 +311,106 @@ to a configuration that does not use one. If automatic pickup is wanted later, i
 opt-in setting naming the location, not behind a class-name convention.
 
 
+Indexed keys, which is C1
+-------------------------
+
+Decided 2026-08-09, before writing any of it. This is the piece every tree-shaped format waits on, so the
+rules are settled here rather than discovered while implementing them.
+
+### Why issue #48 is worth reopening at all
+
+[#48](https://github.com/matteobaccan/owner/issues/48) asked for `server.0=`, `server.1=` reading into a
+`String[]`, and was turned down in 2013 on the grounds that properties files support multi-line values and
+OWNER already has collections, so indexed keys only serve to map legacy files. **That argument was right
+for as long as properties was the only format.** It stops being right the moment we read JSON, YAML or
+TOML, where a list is native and the only alternative to an index is joining with a comma — which loses
+information, since `["a,b"]` and `["a","b"]` become the same string.
+
+So this is no longer a concession to legacy files: it is the representation without which the other
+formats cannot be read honestly. Worth saying in the issue when it is closed.
+
+### The notation: `list[0]`
+
+Not because SmallRye, Gestalt and Spring Boot all write it that way, though they do. Because **the dot is
+already taken**: `PropertiesAggregator` has owned `prefix + "."` since 2.0.0, and
+
+```properties
+something.foo=1
+something.bar=2
+```
+```java
+Map<String, Integer> something();   // {foo=1, bar=2}
+```
+
+already works. With `list.0` the same layout of keys would mean two different things according to the
+return type alone, and worse, **a map with numeric keys would be indistinguishable from a list**:
+`errors.404=Not Found` is an entry, `errors.0=…` would be an index, and nothing in the file could tell
+them apart. With `list[0]` there is no collision: the aggregator looks for `list.` and finds nothing.
+
+### Precedence: if there is an indexed key, that is the list
+
+The single value is not consulted at all. SmallRye is the only one of the three with an explicit rule and
+says the same — *"the indexed property format is prioritized when both styles are found in the same
+configuration source"*.
+
+The alternative, "the single value wins and indexed keys are a fallback", reads as more cautious and runs
+straight into a fact of the code: `@DefaultValue` is merged into the same `Properties` at load time, so
+afterwards **a value from the file cannot be told from a default**. Under the simple rule the question does
+not arise. It is backwards compatible either way, since `list[0]` today is a property nothing reads.
+
+### Gaps: refuse
+
+If any indexed key is present there must be a `[0]`, and the sequence must be consecutive. A lone
+`servers[5]` is an error, not a list of one.
+
+There is no field to align with here — the three existing implementations do three incompatible things:
+
+| | `[0]` and `[2]`, no `[1]` |
+|---|---|
+| **Spring Boot** | error: *"Omitting indices will lead to an `UnboundConfigurationPropertiesException`"* |
+| **SmallRye** | compacts: the values are collected and sorted, with no empty elements |
+| **Gestalt** | inserts `null`, with `setTreatMissingArrayIndexAsError` to make it an error instead |
+
+Refusing, for four reasons. It is what the largest installed base of the three does, so it is the behaviour
+most people have already met. **Gestalt thought a switch to the strict behaviour worth adding**, which
+suggests the lenient default bit somebody. SmallRye's compaction has a fault of its own: `[0]` and `[2]`
+yields a list whose second element is at index 1, so reading it back in Java gives something other than
+what the file says, silently. And a silently dropped element is the class of failure this project spent
+2026-08-09 removing.
+
+One objection deserves an answer, because it looked fatal at first. Spring can afford strictness because
+**it never merges a collection across sources** — the whole list comes from the highest-precedence source
+that defines it — and that rule is not available to us: our loaders merge into one `Properties` before
+anything is resolved, and by the time a method is called there is no record of which source gave which
+key. That is origin tracking, #277, which we do not have. So under `@LoadPolicy(MERGE)` a gap could in
+principle arise between two files rather than from a typo. It does not survive examination: because we
+merge **by key**, two files contributing to one list overwrite each other index by index, so splitting a
+list across files is not a working pattern we would be breaking — it is already broken, and more quietly.
+
+No switch for now. Gestalt has one and we could copy it, but a flag is easy to add when somebody asks and
+hard to remove afterwards.
+
+### Elements are not tokenized
+
+Each indexed property is exactly one element: `@Separator` and `@Tokenizer` do not apply to it. This is the
+main thing gained over joining with a comma — `servers[0]=a,b` is one element — and it has to be stated,
+because the existing array conversion works the other way round. Type conversion per element is unchanged.
+
+### What is deliberately not in C1
+
+`servers[0].host=a` is this plus [nested interfaces](https://github.com/matteobaccan/owner/issues/129),
+and belongs to that. But the flattening convention has to be chosen now so that it produces exactly that
+shape, so the two meet without either being reworked.
+
+### Two things to fix rather than inherit
+
+- ~~`@Sensitive` does not reach the keys of a group~~ — **done 2026-08-09**, before C1 rather than after, so
+  that a list read from indexed keys is covered on the day it is written rather than reopening the hole.
+- **`XMLLoader` overwrites repeated sibling elements**, so `<tag>a</tag><tag>b</tag>` keeps only the second.
+  Emitting `parent.tag[0]` and `parent.tag[1]` fixes a loss of data, and is a change of behaviour for
+  anyone who adapted to the broken one: it needs a line in the release notes.
+
+
 Where the parsers live
 ----------------------
 
@@ -352,8 +452,8 @@ Open questions
    `compose` as presets, seven rules adjustable one at a time, and a warning when a value looks quoted.
 2. **Do we call a YAML subset "YAML"?** Proposed: yes in the title, no in the documentation — a
    chapter listing exactly what is in and what is out, and a hard error on anchors and tags.
-3. **`list[0]` or `list.0`?** `list[0]` is what SmallRye and Gestalt use, which would align #48 with
-   the field.
+3. ~~**`list[0]` or `list.0`?**~~ — **settled 2026-08-09: `list[0]`**, and for a better reason than the
+   one written here first. See *Indexed keys* below.
 4. **Where do the parsers live?** Half answered by shipping: `.env` is in the core and that was
    right. Still open, and still uncommitted either way: whether the tree-shaped formats get an
    `owner-formats` of their own, which is a third artifact to maintain and release.
