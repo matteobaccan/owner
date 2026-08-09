@@ -110,12 +110,13 @@ public class DotEnvLoader implements Loader {
     @Override
     public void load(Properties result, URI uri) throws IOException {
         EnvDialect effective = dialectFor(uri);
-        InputStream input = uriWithoutQuery(uri).toURL().openStream();
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input, ENCODING));
+        // the three are declared separately rather than nested: closing the outermost would be enough for the
+        // stream underneath, but a constructor that failed halfway would leave what it had already wrapped
+        // open, and this way each is closed whatever happens to the one after it
+        try (InputStream input = uriWithoutQuery(uri).toURL().openStream();
+             InputStreamReader characters = new InputStreamReader(input, ENCODING);
+             BufferedReader reader = new BufferedReader(characters)) {
             new Parser(readLines(reader), effective, uri, result).run();
-        } finally {
-            input.close();
         }
     }
 
