@@ -129,9 +129,10 @@ any Java.
   <p>
     Two elements with the same name under the same parent produce the same key, and the second wins:
     <code>&lt;tag&gt;a&lt;/tag&gt;&lt;tag&gt;b&lt;/tag&gt;</code> yields <code>parent.tag=b</code> and the
-    first value is lost. There is no notation for a list in a flattened key yet — that is
-    <a href="https://github.com/matteobaccan/owner/issues/48">issue #48</a> — and until there is, a
-    repeated element cannot be represented. Use a separator inside one element in the meantime.
+    first value is lost. There is now a notation that could carry them —
+    <a href="{{ site.url }}/docs/type-conversion/">indexed keys</a>, <code>parent.tag[0]</code> and
+    <code>parent.tag[1]</code> — but this loader does not yet emit it, so for the moment put the values in
+    one element with a separator between them.
   </p>
 </div>
 

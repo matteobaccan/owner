@@ -105,8 +105,12 @@ an issue behind it, which is the point: what the others shipped is what our repo
 - [ ] **Bean Validation (JSR-380)** as an optional `owner-validation` module, never in the core.
       SmallRye, Gestalt and Spring have it. Issue
       [#201](https://github.com/matteobaccan/owner/issues/201).
-- [ ] **Indexed keys**, `list[0]`, `list[1]`, complementing the `Map` grouping added in 2.0.0. SmallRye
-      and Gestalt have it. Issue [#48](https://github.com/matteobaccan/owner/issues/48).
+- [x] **Indexed keys**, `list[0]`, `list[1]`, complementing the `Map` grouping added in 2.0.0. Done
+      2026-08-09: an indexed key wins over a single value, the elements are not tokenized, and a gap in the
+      sequence is refused rather than closed up. The reasoning, and what the other three libraries do
+      instead, is in `FORMATS.md`. Still to follow: `XMLLoader` emitting indices for repeated sibling
+      elements, and `servers[0].host`, which belongs to nested interfaces.
+      Issue [#48](https://github.com/matteobaccan/owner/issues/48), which can be closed.
 - [ ] **Remote and cloud sources** — S3, Vault, Consul, JNDI — as loaders in `owner-extras`, which is
       what that artifact is for now that it holds nothing else. Gestalt covers all of these. Issues
       [#130](https://github.com/matteobaccan/owner/issues/130),

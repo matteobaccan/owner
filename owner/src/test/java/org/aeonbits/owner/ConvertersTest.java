@@ -92,17 +92,19 @@ public class ConvertersTest {
         assertEquals(new LinkedHashSet<>(Arrays.asList("pink", "black")), result);
     }
 
+    /**
+     * The generics keep a non-enum from reaching this in ordinary use, so the branch is reached the only way
+     * it can be. The method is a static of {@link Converters} since reading a list from indexed keys started
+     * needing the same choice of collection; it used to live inside the body of the COLLECTION constant.
+     */
     @Test
     public void testInstantiateEnumSetFailsWithNonEnumType() throws Exception {
-        Method instantiateEnumSet = null;
-        for (Method method : Converters.COLLECTION.getClass().getDeclaredMethods())
-            if ("instantiateEnumSet".equals(method.getName()))
-                instantiateEnumSet = method;
+        Method instantiateEnumSet = Converters.class.getDeclaredMethod("instantiateEnumSet", Class.class);
         assertNotNull(instantiateEnumSet);
         instantiateEnumSet.setAccessible(true);
 
         try {
-            instantiateEnumSet.invoke(Converters.COLLECTION, String.class);
+            instantiateEnumSet.invoke(null, String.class);
             fail("an UnsupportedOperationException was expected");
         } catch (InvocationTargetException e) {
             assertTrue(e.getCause() instanceof UnsupportedOperationException);

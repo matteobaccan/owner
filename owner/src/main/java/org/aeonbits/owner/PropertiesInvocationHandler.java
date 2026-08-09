@@ -90,6 +90,17 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                             expandVariables(method, preProcess(method, entry))));
 
         boolean optional = isOptional(method);
+
+        // a list written one element per key, servers[0] and servers[1]; null when there are none, and the
+        // ordinary lookup below then reads whatever single value the plain key holds
+        if (IndexedProperties.readsAList(method)) {
+            Object indexed = IndexedProperties.collect(method, key, propertiesManager,
+                    element -> propertiesManager.decryptIfNecessary(method,
+                            expandVariables(method, preProcess(method, element))));
+            if (indexed != null)
+                return optional ? Optional.of(indexed) : indexed;
+        }
+
         String value = lookupValue(method, key);
         if (value == null) {
             if (isMandatory(method))

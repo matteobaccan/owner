@@ -314,8 +314,14 @@ opt-in setting naming the location, not behind a class-name convention.
 Indexed keys, which is C1
 -------------------------
 
-Decided 2026-08-09, before writing any of it. This is the piece every tree-shaped format waits on, so the
-rules are settled here rather than discovered while implementing them.
+Decided 2026-08-09, before writing any of it, and **shipped the same day**: `IndexedProperties` in the
+core, with the rules below exactly as they are described here. This is the piece every tree-shaped format
+waits on, so they were settled first rather than discovered while implementing them.
+
+Two things came out of the writing that the plan had not said. The choice of concrete collection for a
+return type had to move out of the body of `Converters.COLLECTION`, where it was private, and become
+something both paths share — reading a list from indexed keys makes exactly the same choice. And the
+element type of an `Optional<List<E>>` is resolved in one place now instead of two.
 
 ### Why issue #48 is worth reopening at all
 

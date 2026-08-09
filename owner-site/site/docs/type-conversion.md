@@ -130,6 +130,57 @@ public interface MyConfig extends Config {
 
   [EnumSet]: https://docs.oracle.com/javase/8/docs/api/java/util/EnumSet.html
 
+### One element per key
+
+*Since 2.0.0.*
+
+A list can also be written with an index, one element to a property:
+
+```properties
+servers[0]=alpha
+servers[1]=beta
+```
+
+```java
+public interface MyConfig extends Config {
+    List<String> servers();               // [alpha, beta]
+}
+```
+
+which works for every array and collection type above. The order is the one the indices give, whatever
+order the file happens to be written in.
+
+The reason to prefer it is that **an element written this way is one element whatever it contains**. A list
+held in a single value has to be split on something, and a value containing that something then cannot be
+written at all — `a,b` as a single element is simply not expressible. With an index it is:
+
+```properties
+servers[0]=a,b
+servers[1]=c
+```
+
+gives two elements, `a,b` and `c`. The separator — the default comma, or one declared with `@Separator`
+or `@TokenizerClass` — does not apply here: there is nothing to split.
+
+**If there is an indexed key, that is the list**, and a single value under the plain key is not read — nor
+is a `@DefaultValue`, which applies only when no indexed key is there at all. Nothing that worked before
+changes: a `servers=alpha,beta` with no indexed keys anywhere is split exactly as it always was.
+
+<div class="note warning">
+  <h5>Number them from zero, without gaps</h5>
+  <p>
+    <code>servers[0]</code> and <code>servers[2]</code> with no <code>servers[1]</code> is refused, and so
+    is a list that starts at <code>servers[1]</code>. Reading across a gap would silently give a list
+    shorter than the file describes, with every element after the gap at a different position from the one
+    it was written at — and nothing in the result would show it. Other libraries close the gap up or fill
+    it with a null; OWNER would rather tell you.
+  </p>
+</div>
+
+A key *below* an element, such as `servers[0].port`, is not an element and is left alone: that describes
+something inside an entry rather than an entry, and reading it will come with nested configuration
+interfaces.
+
 A [`Map`][Map] return type reads a **group of properties**: the ones whose
 name starts with the key of the method, followed by a dot. The rest of the
 name becomes the entry key.

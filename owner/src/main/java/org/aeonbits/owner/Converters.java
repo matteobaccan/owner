@@ -15,6 +15,7 @@ import java.beans.PropertyEditor;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -113,72 +114,18 @@ enum Converters {
     },
 
     COLLECTION {
-        @SuppressWarnings("unchecked")
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
             if (!Collection.class.isAssignableFrom(targetType)) return SKIP;
 
-            Object[] array = convertToArray(targetMethod, text, key);
-            Collection<Object> collection = Arrays.asList(array);
-            Collection<Object> result;
-            if (getGenericType(targetMethod).isEnum() && targetType.equals(EnumSet.class)) {
-                result = (Collection<Object>) instantiateEnumSet((Class<? extends Enum>) getGenericType(targetMethod));
-            } else {
-                result = instantiateCollection(targetType);
-            }
-            result.addAll(collection);
+            Class<?> type = elementType(targetMethod);
+            Object stub = Array.newInstance(type, 0);
+            Object[] array = (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text, key);
+
+            Collection<Object> result = instantiateCollection(targetMethod, targetType);
+            result.addAll(Arrays.asList(array));
             return result;
         }
-
-        private Object[] convertToArray(Method targetMethod, String text, String key) {
-            Class<?> type = getGenericType(targetMethod);
-            Object stub = Array.newInstance(type, 0);
-            return (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text, key);
-        }
-
-        private Class<?> getGenericType(Method targetMethod) {
-            // an Optional<Collection<E>> keeps the collection one level down, and the element type is E
-            // either way: ask for the type the value converts to rather than for the return type
-            Type type = OptionalSupport.valueType(targetMethod);
-            if (type instanceof ParameterizedType)
-                return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            // Default generic type for raw collections.
-            return String.class;
-        }
-
-        private <T> Collection<T> instantiateCollection(Class<? extends T> targetType) {
-            if (targetType.isInterface())
-                return instantiateCollectionFromInterface(targetType);
-            return instantiateCollectionFromClass(targetType);
-        }
-
-        @SuppressWarnings("unchecked")
-        private <T> Collection<T> instantiateCollectionFromClass(Class<? extends T> targetType) {
-            try {
-                return (Collection<T>) targetType.newInstance();
-            } catch (Exception e) {
-                throw unsupported(e, "Cannot instantiate collection of type '%s'", targetType.getCanonicalName());
-            }
-        }
-
-        private <E extends Enum<E>> Collection<?> instantiateEnumSet(Class<E> targetType) {
-            try {
-                return EnumSet.noneOf(targetType);
-            } catch (Exception e) {
-                throw unsupported(e, "Cannot instantiate enumset of type '%s'", targetType.getCanonicalName());
-            }
-        }
-
-        private <T> Collection<T> instantiateCollectionFromInterface(Class<? extends T> targetType) {
-            if (List.class.isAssignableFrom(targetType))
-                return new ArrayList<>();
-            else if (SortedSet.class.isAssignableFrom(targetType))
-                return new TreeSet<>();
-            else if (Set.class.isAssignableFrom(targetType))
-                return new LinkedHashSet<>();
-            return new ArrayList<>();
-        }
-
     },
 
     METHOD_WITH_CONVERTER_CLASS_ANNOTATION {
@@ -374,6 +321,76 @@ enum Converters {
             throw unsupportedConversion(key, targetType, text);
         }
     };
+
+    /**
+     * The type of one element of the array or collection the method reads.
+     * <p>
+     * An <code>Optional&lt;Collection&lt;E&gt;&gt;</code> keeps the collection one level down and the
+     * element type is <code>E</code> either way, so what is asked for is the type the value converts to
+     * rather than the return type. A raw collection yields {@link String}.
+     * </p>
+     *
+     * @param targetMethod the method being resolved.
+     * @return the element type.
+     */
+    static Class<?> elementType(Method targetMethod) {
+        Type type = OptionalSupport.valueType(targetMethod);
+        if (type instanceof GenericArrayType)
+            return erase(((GenericArrayType) type).getGenericComponentType());
+        if (type instanceof Class && ((Class<?>) type).isArray())
+            return ((Class<?>) type).getComponentType();
+        if (type instanceof ParameterizedType)
+            return erase(((ParameterizedType) type).getActualTypeArguments()[0]);
+        return String.class;
+    }
+
+    private static Class<?> erase(Type type) {
+        if (type instanceof Class)
+            return (Class<?>) type;
+        if (type instanceof ParameterizedType)
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        return String.class;
+    }
+
+    /**
+     * An empty collection of the kind the method asks for: the very type when it names a class, and a
+     * reasonable one for each of the interfaces. Shared with whoever else has elements to put in a
+     * collection the caller chose — reading a list from indexed keys, for one.
+     *
+     * @param targetMethod the method being resolved, which carries the element type.
+     * @param targetType   the collection type asked for.
+     * @return an empty, modifiable collection.
+     */
+    @SuppressWarnings("unchecked")
+    static Collection<Object> instantiateCollection(Method targetMethod, Class<?> targetType) {
+        Class<?> element = elementType(targetMethod);
+        if (element.isEnum() && targetType.equals(EnumSet.class))
+            return (Collection<Object>) instantiateEnumSet((Class<? extends Enum>) element);
+        if (!targetType.isInterface())
+            return instantiateCollectionFromClass(targetType);
+        if (SortedSet.class.isAssignableFrom(targetType))
+            return new TreeSet<>();
+        if (Set.class.isAssignableFrom(targetType))
+            return new LinkedHashSet<>();
+        return new ArrayList<>();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Collection<Object> instantiateCollectionFromClass(Class<?> targetType) {
+        try {
+            return (Collection<Object>) targetType.newInstance();
+        } catch (Exception e) {
+            throw unsupported(e, "Cannot instantiate collection of type '%s'", targetType.getCanonicalName());
+        }
+    }
+
+    private static <E extends Enum<E>> Collection<?> instantiateEnumSet(Class<E> targetType) {
+        try {
+            return EnumSet.noneOf(targetType);
+        } catch (Exception e) {
+            throw unsupported(e, "Cannot instantiate enumset of type '%s'", targetType.getCanonicalName());
+        }
+    }
 
     private static Object convertWithConverterClass(
             Method targetMethod, String text, Class<? extends Converter> converterClass) {
