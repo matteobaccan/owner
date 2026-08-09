@@ -18,9 +18,9 @@ removal of some compatibility leftovers dating back to Java 6/7: see the "Remova
 
 Why 2.0.0
 ---------
-This release was prepared as 1.0.13 and renumbered before publication, because two of its changes alter the
+This release was prepared as 1.0.13 and renumbered before publication, because three of its changes alter the
 result of a configuration that used to work, and a patch number would have been a quiet place to put them.
-Neither is expected to affect a real configuration — the whole test suite of the project passes unchanged, and
+None is expected to affect a real configuration — the whole test suite of the project passes unchanged, and
 each is described in full below — but the number should say so rather than the changelog alone:
 
  * **Braces are matched, not counted from the left.** Up to 1.0.12 a `${` was closed by the first `}` that
@@ -32,6 +32,14 @@ each is described in full below — but the number should say so rather than the
    the stack, or — for the shape `a=${a:default}` — to produce an empty string. It now throws an
    `IllegalArgumentException` naming the chain. No cycle ever produced a useful value, but a configuration
    that quietly resolved to the empty string will now fail loudly, which is the point.
+ * **Repeated sibling elements in an XML source are numbered.** Two elements of the same name under the same
+   parent used to write the same key, so the second overwrote the first and every value but the last was
+   lost without a word. They now become `parent.tag[0]` and `parent.tag[1]`, which is what
+   [a list is read from]({{ site.url }}/docs/type-conversion/), and there is no longer a `parent.tag`. An
+   element that occurs only once is untouched and keeps its plain key, so a document with no repetition
+   reads exactly as it did. What changes is the reading of documents that were already losing data: if a
+   configuration reads `parent.tag` from an XML that repeats that element, it was getting the last of
+   several values, chosen by nothing better than document order.
 
 Everything else is additive. In particular, a `Map` return type used to throw on every access, so the new
 grouping behaviour described below cannot change the result of any configuration that worked.
@@ -230,6 +238,28 @@ Enhancements
    in [#286](https://github.com/matteobaccan/owner/issues/286) — keeps working. Nothing can break: a `Map`
    return type used to throw on every access, so no working configuration relied on it. See the
    [documentation]({{ site.url }}/docs/type-conversion/).
+ * A list can be written **one element per key**, closing a request open since 2013
+   ([#48](https://github.com/matteobaccan/owner/issues/48)):
+
+   ```properties
+   servers[0]=alpha
+   servers[1]=beta
+   ```
+
+   ```java
+   List<String> servers();               // [alpha, beta]
+   ```
+
+   for every array and collection type, `Optional` included. The point of it is that an element written this
+   way is one element whatever it contains, so `servers[0]=a,b` is a single value with a comma in it, which a
+   comma-separated list cannot express at all — and it is how a list out of a JSON or a YAML source will
+   survive being flattened into properties. The separator does not apply to an indexed element, there being
+   nothing to split. Square brackets rather than `servers.0` because the dot already belongs to the `Map`
+   grouping above, which would otherwise make one layout of keys mean two things. An indexed key wins over a
+   single value and over a `@DefaultValue`, and the elements must be numbered from zero without gaps: a gap
+   is refused rather than closed up, since a list quietly shorter than the file describes, with everything
+   after the gap moved, is not something the caller can notice. Nothing can break, `servers[0]` having been a
+   property nothing read. See the [documentation]({{ site.url }}/docs/type-conversion/).
  * A circular variable reference is now reported instead of being followed. A property whose value leads back to
    the property itself cannot be resolved, and an `IllegalArgumentException` names the chain that closes the
    loop — `Circular variable reference: ${a} -> ${b} -> ${a}` — where up to 1.0.12 the same configuration
