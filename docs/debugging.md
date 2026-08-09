@@ -134,6 +134,54 @@ those are how a configuration is read and written back, and masking them would r
   </p>
 </div>
 
+### A whole group at once
+
+A method that returns a `Map` reads a [group of properties]({{ site.url }}/docs/usage/) under a common
+prefix rather than a single one, so there is no property named after it to mask. Marking it sensitive masks
+**everything under the prefix**:
+
+```java
+public interface AppConfig extends Accessible {
+    String appName();
+
+    @Sensitive
+    Map<String, String> credentials();
+}
+```
+
+```java
+cfg.list(System.out);
+// -- listing properties --
+// app.name=invoicing
+// credentials.user=********
+// credentials.password=********
+```
+
+Note that `credentials.user` goes too. The annotation says the group is sensitive, and all of it is
+treated as such: picking out the entries whose name looks like a secret would be guesswork, and guesswork
+is the thing this annotation exists to avoid. If only part of the group needs hiding, read that part with
+a method of its own.
+
+Where two methods disagree — one declaring a group sensitive, another reading a key inside it and not —
+the mask wins. Printing a secret that was declared as one is the mistake that costs something; masking a
+value that need not have been is read as over-caution and no more.
+
+### Why the annotation, and what it cannot do
+
+Every other configuration library that hides values decides from the **key**, not from the method that
+reads it. Spring Boot 2.x matched the property name against patterns — `password`, `secret`, `token`,
+`*credentials.*`; Gestalt searches the path of a node for keywords; Spring Boot 3 went further and hides
+every value in its actuator endpoints unless you turn them on for an authorized role.
+
+OWNER decides from the method, which is a deliberate difference and buys precision: a password called
+`pwd`, or `dsn`, or `apiKey2`, is masked because you said it was a secret, not because its name happened
+to match somebody's regular expression. Nothing is guessed and nothing is missed by an unlucky name.
+
+It costs one thing, and it is worth knowing: **a property that no method of your interface reads cannot be
+masked**, because there is nothing to write the annotation on — and `list()` prints every property it
+holds, not only the ones with an accessor. If that matters for your configuration, read the values through
+the interface rather than leaving them loose in the file.
+
 The keys to mask are worked out when the Config object is created, from the methods that take no parameters.
 A key that depends on the invocation arguments is not known in advance, so a
 [parametrized property]({{ site.url }}/docs/parametrized-properties/) cannot be masked.
