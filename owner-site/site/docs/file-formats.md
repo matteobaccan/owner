@@ -33,6 +33,45 @@ coming, is in [what is not read yet](#not-yet).
 </div>
 
 
+How a tree becomes keys
+-----------------------
+{: #flattening}
+
+A loader hands back a `java.util.Properties`, which is flat, and most formats are trees. Every one of them
+therefore answers the same two questions the same way — a dot for a child, square brackets for an element:
+
+```json
+{"server": {"host": "localhost", "ports": [80, 443]}}
+```
+
+```properties
+server.host=localhost
+server.ports[0]=80
+server.ports[1]=443
+```
+
+A dot because that is what properties files have always used and what `@Key("server.host")` already
+expects. Square brackets because the dot is taken: a method returning a `Map` reads everything under
+`server.` as a group, so `ports.0` would make one layout of keys mean two things according only to the
+return type.
+
+The two compose, in both directions: `servers[0].host` is the host of the first server and `grid[0][1]` a
+cell of a list of lists. Reading the first of those needs nested configuration interfaces and does not work
+yet, but a source flattened today already produces the key that will be read then.
+
+<div class="note info">
+  <h5>A dot inside a name is ambiguous, on purpose</h5>
+  <p>
+    A JSON object <code>{"a.b": 1}</code> nested under <code>x</code> flattens to <code>x.a.b=1</code>, and
+    so does <code>{"a": {"b": 1}}</code>. Escaping would tell them apart, and would cost every reader of an
+    ordinary key the escape as well: <code>@Key("x.a.b")</code> works today for either file. Since nothing
+    in the library turns a flattened key back into a tree — a configuration method names the key it wants
+    and gets it — the ambiguity has nobody to hurt, and a quoting scheme invented for a reader that does
+    not exist would be the worse bargain.
+  </p>
+</div>
+
+
 Properties
 ----------
 {: #properties}
@@ -124,15 +163,46 @@ any Java.
 
 ### Two things to know
 
+### Repeated elements are a list
+
+*Since 2.0.0.* Two or more elements of the same name under the same parent are numbered, so that a list
+written the way XML writes one can be read as one:
+
+```xml
+<servers>
+    <server port="80">alpha</server>
+    <server port="443">beta</server>
+</servers>
+```
+
+```properties
+servers.server[0]=alpha
+servers.server[0].port=80
+servers.server[1]=beta
+servers.server[1].port=443
+```
+
+```java
+List<String> servers();   // @Key("servers.server") -> [alpha, beta]
+```
+
+**An element that occurs once keeps its plain key**, exactly as before: `server.http.hostname` is not
+`server.http.hostname[0]`. Only a name that repeats is numbered, and only from the second occurrence on —
+at which point the first is moved to `[0]`, subtree and attributes with it.
+
+That asymmetry is not elegance, it is compatibility: a stream cannot look ahead, so when the first
+`<server>` arrives there is no telling whether a second will follow, and numbering every element on the
+chance of it would rename the keys of every XML configuration written against this library so far.
+
 <div class="note warning">
-  <h5>Repeated sibling elements overwrite each other</h5>
+  <h5>This changed in 2.0.0, and it changed for files that were already broken</h5>
   <p>
-    Two elements with the same name under the same parent produce the same key, and the second wins:
-    <code>&lt;tag&gt;a&lt;/tag&gt;&lt;tag&gt;b&lt;/tag&gt;</code> yields <code>parent.tag=b</code> and the
-    first value is lost. There is now a notation that could carry them —
-    <a href="{{ site.url }}/docs/type-conversion/">indexed keys</a>, <code>parent.tag[0]</code> and
-    <code>parent.tag[1]</code> — but this loader does not yet emit it, so for the moment put the values in
-    one element with a separator between them.
+    Before 2.0.0 the second element overwrote the first: <code>&lt;tag&gt;a&lt;/tag&gt;&lt;tag&gt;b&lt;/tag&gt;</code>
+    left <code>parent.tag=b</code> and the first value was simply lost, with nothing said. Those files now
+    produce <code>parent.tag[0]</code> and <code>parent.tag[1]</code>, and no <code>parent.tag</code> at
+    all. If a configuration of yours reads <code>parent.tag</code> and the XML repeats that element, the
+    key it reads has moved — and what it was reading before was the last of several values, chosen by
+    accident. Documents without repeated elements are unaffected.
   </p>
 </div>
 

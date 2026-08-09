@@ -82,7 +82,7 @@ What the core is missing
 | # | Gap | Needed by | State |
 |---|---|---|---|
 | **C1** | Indexed keys / lists (`list[0]`) — issue #48 | JSON, YAML, TOML, HOCON, CBOR | **missing.** The universal blocker for every tree-shaped format |
-| **C2** | A documented flattening convention, with escaping for keys that contain a dot | every tree-shaped format | exists *de facto* in `XMLLoader`, undocumented, unshared, no escaping |
+| **C2** | A documented flattening convention, with escaping for keys that contain a dot | every tree-shaped format | **done 2026-08-09**, minus the escaping: `PropertyKeys` in `org.aeonbits.owner.loaders` states the convention and is public, since a loader in another artifact will need it. The escaping was deliberately not built — see below |
 | **C3** | Explicit `null` | JSON, YAML, CBOR | **missing.** `Properties` cannot hold a null value. TOML has no null; `.env` and INI have none |
 | **C4** | ~~Extension-less `accept()`~~ | — | **withdrawn.** `.env` is a file that is all extension, and the existing test shape matches it |
 | **C5** | More than one extension per format | YAML (`.yaml`/`.yml`), HOCON (`.conf`), INI (`.ini`/`.cfg`) | `defaultSpecFor` returns a single `String`. An additive `defaultSpecsFor` would do it, and the SPI must stay compatible — two external projects implement `Loader` by hand |
@@ -412,9 +412,32 @@ shape, so the two meet without either being reworked.
 
 - ~~`@Sensitive` does not reach the keys of a group~~ — **done 2026-08-09**, before C1 rather than after, so
   that a list read from indexed keys is covered on the day it is written rather than reopening the hole.
-- **`XMLLoader` overwrites repeated sibling elements**, so `<tag>a</tag><tag>b</tag>` keeps only the second.
-  Emitting `parent.tag[0]` and `parent.tag[1]` fixes a loss of data, and is a change of behaviour for
-  anyone who adapted to the broken one: it needs a line in the release notes.
+- ~~**`XMLLoader` overwrites repeated sibling elements**~~ — **done 2026-08-09**, with the line in the
+  release note draft. An element occurring once keeps its plain key and only a repeat is numbered, because
+  a stream cannot look ahead and numbering everything would rename the keys of every XML file written so
+  far; the first is moved to `[0]` when the second arrives, subtree and all.
+
+  Writing the tests turned up something the plan had not: the handler wrote straight into the `Properties`
+  it was given, and under MERGE that is the same object for every source, so renumbering could carry off a
+  key that had come from another file. It now reads into a map of its own that the loader merges at the
+  end, which is the right shape anyway — what a source contributes should be what it would contribute if
+  it were read alone.
+
+### The escaping that was not built
+
+C2 was written down as "a flattening convention, with escaping for keys that contain a dot". The convention
+is built and the escaping is not, deliberately.
+
+`{"a.b": 1}` under `x` flattens to `x.a.b=1`, and so does `{"a": {"b": 1}}`. Quoting the segment, as
+SmallRye does, would tell them apart — and would cost every reader of an ordinary key the quoting as well,
+since `@Key("x.a.b")` works today for either file and would have to become something less obvious. It would
+also want `PropertiesAggregator` to understand the quotes, which is a change to how a `Map` reads its
+entries.
+
+What settles it is that **nothing in the library turns a flattened key back into a tree**. A configuration
+method names the key it wants and gets it; the ambiguity has no victim. Inventing a quoting scheme for a
+reader that does not exist is the worse trade, so it is written down instead — in `PropertyKeys` and on the
+formats page — and can be revisited the day something does need to reverse a flattening.
 
 
 Where the parsers live

@@ -9,6 +9,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.CollectionConverterClass;
 import org.aeonbits.owner.Config.ConverterClass;
+import org.aeonbits.owner.loaders.PropertyKeys;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -70,8 +71,8 @@ import static org.aeonbits.owner.util.Util.unsupported;
  */
 final class IndexedProperties {
 
-    private static final String OPEN = "[";
-    private static final char CLOSE = ']';
+    private static final String OPEN = String.valueOf(PropertyKeys.INDEX_OPEN);
+    private static final char CLOSE = PropertyKeys.INDEX_CLOSE;
 
     /** Don't let anyone instantiate this class */
     private IndexedProperties() {}

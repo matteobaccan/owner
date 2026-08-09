@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.CollectionConverterClass;
 import org.aeonbits.owner.Config.ConverterClass;
 import org.aeonbits.owner.Config.DefaultValue;
+import org.aeonbits.owner.loaders.PropertyKeys;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -46,7 +47,7 @@ final class PropertiesAggregator {
      * because whoever has to recognise the properties belonging to a group needs the same rule: masking a
      * {@link Config.Sensitive} group, for one.
      */
-    static final String SEPARATOR = ".";
+    static final String SEPARATOR = String.valueOf(PropertyKeys.NESTING);
 
     /** Don't let anyone instantiate this class */
     private PropertiesAggregator() {}
