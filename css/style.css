@@ -878,6 +878,35 @@ td p code {
   font-size: 14px;
 }
 
+/*
+  Inline code inside a table may wrap.
+
+  Everywhere else `code` is a `white-space: pre` inline-block, which is right in a line of prose and
+  wrong in a cell: each span is then an unbreakable box, the cell has a minimum width nothing can
+  reduce, and a table with a few of them per row grows wider than the column it sits in. Measured on
+  /docs/file-formats/, where the first table wanted 782px of a 742px column.
+
+  `overflow-wrap: anywhere` and not `break-word`, which was tried first and does nothing here: it
+  breaks a word when it is laid out but leaves the minimum content width alone, and that width is
+  exactly what sizes a table. `anywhere` reduces it, while still preferring an ordinary break — a token
+  is only cut through the middle when there is no other way to fit it. `break-all` would fit too and
+  cut eagerly; `table-layout: fixed` would fit as well and re-proportion every table on the site.
+
+  `pre-wrap` rather than `normal` keeps any run of spaces inside a span, which is the one thing `pre`
+  was there for. Nothing else is lost: the dark rounded background comes from rules naming p, li, h5
+  and .note, so code in a cell never had one.
+*/
+th code, td code {
+  display: inline;
+  white-space: pre-wrap;
+  overflow-wrap: break-word; /* for browsers without the next one; leaves the width alone but wraps */
+  overflow-wrap: anywhere;
+}
+
+th, td {
+  overflow-wrap: break-word;
+}
+
 code.option, th .option, code.filter, th .filter {
   color: #50B600;
 }
