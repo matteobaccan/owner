@@ -203,6 +203,173 @@ public class SensitiveTest {
     }
 
     // -------------------------------------------------------------------------------------------------
+    // a group of properties read as a whole
+    // -------------------------------------------------------------------------------------------------
+
+    interface WithSensitiveGroup extends Accessible {
+        String username();
+
+        @Sensitive
+        Map<String, String> credentials();
+    }
+
+    /**
+     * A method returning a {@link Map} resolves to a prefix rather than to a property: it reads
+     * <code>credentials.password</code>, and there is no property named <code>credentials</code> at all.
+     * Masking the key it resolves to would therefore hide nothing, so what is masked is everything below it.
+     */
+    @Test
+    public void everyPropertyOfASensitiveGroupIsMasked() throws UnsupportedEncodingException {
+        WithSensitiveGroup cfg = ConfigFactory.create(WithSensitiveGroup.class, new Properties() {{
+            setProperty("username", "matteo");
+            setProperty("credentials.user", "someone");
+            setProperty("credentials.password", PASSWORD);
+        }});
+
+        String output = list(cfg);
+        assertFalse("the password was printed", output.contains(PASSWORD));
+        assertTrue(output.contains("credentials.password=" + Sensitive.MASK));
+        assertTrue("the whole group goes, not only what looks like a secret",
+                output.contains("credentials.user=" + Sensitive.MASK));
+        assertTrue("and nothing outside the group is touched", output.contains("username=matteo"));
+    }
+
+    @Test
+    public void theGroupItselfIsStillReadCorrectly() {
+        WithSensitiveGroup cfg = ConfigFactory.create(WithSensitiveGroup.class, new Properties() {{
+            setProperty("credentials.password", PASSWORD);
+        }});
+
+        assertEquals("masking is not encryption here either", PASSWORD, cfg.credentials().get("password"));
+    }
+
+    @Test
+    public void aSensitiveGroupSurvivesAStore() throws IOException {
+        WithSensitiveGroup cfg = ConfigFactory.create(WithSensitiveGroup.class, new Properties() {{
+            setProperty("credentials.password", PASSWORD);
+        }});
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        cfg.store(out, "a comment");
+
+        String stored = out.toString("ISO-8859-1");
+        assertTrue("the password must survive a save", stored.contains("credentials.password=" + PASSWORD));
+        assertFalse(stored.contains(Sensitive.MASK));
+    }
+
+    @Sensitive
+    interface AllSensitiveWithGroup extends Accessible {
+        Map<String, String> credentials();
+    }
+
+    @Test
+    public void theAnnotationOnTheInterfaceReachesAGroupToo() throws UnsupportedEncodingException {
+        AllSensitiveWithGroup cfg = ConfigFactory.create(AllSensitiveWithGroup.class, new Properties() {{
+            setProperty("credentials.password", PASSWORD);
+        }});
+
+        String output = list(cfg);
+        assertFalse(output.contains(PASSWORD));
+        assertTrue(output.contains("credentials.password=" + Sensitive.MASK));
+    }
+
+    interface GroupNotSensitive extends Accessible {
+        Map<String, String> credentials();
+    }
+
+    @Test
+    public void aGroupThatIsNotSensitiveIsPrintedAsBefore() throws UnsupportedEncodingException {
+        GroupNotSensitive cfg = ConfigFactory.create(GroupNotSensitive.class, new Properties() {{
+            setProperty("credentials.password", PASSWORD);
+        }});
+
+        assertTrue(list(cfg).contains("credentials.password=" + PASSWORD));
+    }
+
+    @Prefix("app.")
+    interface PrefixedGroup extends Accessible {
+        @Sensitive
+        Map<String, String> credentials();
+    }
+
+    /** The prefix that is masked is the one the group is actually read with, exactly as for a single key. */
+    @Test
+    public void theMaskedPrefixIsTheOneTheGroupIsReadWith() throws UnsupportedEncodingException {
+        PrefixedGroup cfg = ConfigFactory.create(PrefixedGroup.class, new Properties() {{
+            setProperty("app.credentials.password", PASSWORD);
+            setProperty("credentials.password", "not read by this configuration");
+        }});
+
+        String output = list(cfg);
+        assertTrue(output.contains("app.credentials.password=" + Sensitive.MASK));
+        assertTrue("a key outside the prefix is none of this group's business",
+                output.contains("credentials.password=not read by this configuration"));
+    }
+
+    interface NeighbourOfAGroup extends Accessible {
+        @Sensitive
+        Map<String, String> db();
+
+        String dbHost();
+    }
+
+    /**
+     * The prefix ends with the separator on purpose. Without it, a sensitive <code>db</code> group would also
+     * swallow an unrelated <code>dbHost</code>, which merely begins with the same letters.
+     */
+    @Test
+    public void aKeyThatMerelyStartsWithTheSameLettersIsNotMasked() throws UnsupportedEncodingException {
+        NeighbourOfAGroup cfg = ConfigFactory.create(NeighbourOfAGroup.class, new Properties() {{
+            setProperty("db.password", PASSWORD);
+            setProperty("dbHost", "localhost");
+        }});
+
+        String output = list(cfg);
+        assertTrue(output.contains("db.password=" + Sensitive.MASK));
+        assertTrue(output.contains("dbHost=localhost"));
+    }
+
+    interface DisagreeingMethods extends Accessible {
+        @Sensitive
+        Map<String, String> db();
+
+        @Key("db.host")
+        String host();
+    }
+
+    /**
+     * One method says the group is sensitive, another reads a key inside it and does not. The mask wins:
+     * printing a secret that was declared as one is the mistake that costs something, while masking a value
+     * that need not have been reads as over-caution and no more.
+     */
+    @Test
+    public void whenTwoMethodsDisagreeTheMaskWins() throws UnsupportedEncodingException {
+        DisagreeingMethods cfg = ConfigFactory.create(DisagreeingMethods.class, new Properties() {{
+            setProperty("db.host", "localhost");
+            setProperty("db.password", PASSWORD);
+        }});
+
+        String output = list(cfg);
+        assertFalse(output.contains(PASSWORD));
+        assertTrue(output.contains("db.host=" + Sensitive.MASK));
+        assertEquals("the value itself is untouched", "localhost", cfg.host());
+    }
+
+    interface DeepGroup extends Accessible {
+        @Sensitive
+        Map<String, String> credentials();
+    }
+
+    @Test
+    public void anEntryFurtherDownTheGroupIsMaskedAsWell() throws UnsupportedEncodingException {
+        DeepGroup cfg = ConfigFactory.create(DeepGroup.class, new Properties() {{
+            setProperty("credentials.db.primary.password", PASSWORD);
+        }});
+
+        assertFalse(list(cfg).contains(PASSWORD));
+    }
+
+    // -------------------------------------------------------------------------------------------------
     // nothing changes when nothing is sensitive
     // -------------------------------------------------------------------------------------------------
 

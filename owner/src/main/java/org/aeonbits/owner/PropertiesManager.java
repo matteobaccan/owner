@@ -88,6 +88,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
      */
     private final Set<String> sensitiveKeys = new HashSet<>();
 
+    /**
+     * The prefixes below which every key is masked, one for each {@link Sensitive} method that reads a group
+     * of properties rather than a single one. Such a method resolves to a prefix and not to a property, so
+     * there is no single name to put in {@link #sensitiveKeys}: what has to be hidden is everything under it.
+     */
+    private final Set<String> sensitivePrefixes = new HashSet<>();
+
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
                 @Override
@@ -165,8 +172,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         for (Method method : methods) {
             // a key that depends on the invocation arguments is not known in advance: those methods
             // are skipped rather than masked under a key that would never match
-            if (isSensitive(method) && method.getParameterTypes().length == 0)
-                sensitiveKeys.add(PropertiesMapper.key(method, keyPrefix));
+            if (isSensitive(method) && method.getParameterTypes().length == 0) {
+                String key = PropertiesMapper.key(method, keyPrefix);
+                // a method reading a group resolves to a prefix, not to a property: there is no key of that
+                // name in the file, and masking it alone would hide nothing at all
+                if (PropertiesAggregator.aggregates(method))
+                    sensitivePrefixes.add(PropertiesAggregator.prefixOf(key));
+                else
+                    sensitiveKeys.add(key);
+            }
 
             if (PropertiesMapper.isEncryptedValue(method)) {
                 EncryptedValue encriptedKey = method.getAnnotation(EncryptedValue.class);
@@ -206,18 +220,35 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private Properties masked() {
         readLock.lock();
         try {
-            if (sensitiveKeys.isEmpty())
+            if (sensitiveKeys.isEmpty() && sensitivePrefixes.isEmpty())
                 return properties;
             Properties result = new Properties();
             for (Enumeration<?> names = properties.propertyNames(); names.hasMoreElements(); ) {
                 String name = (String) names.nextElement();
-                result.setProperty(name,
-                        sensitiveKeys.contains(name) ? Sensitive.MASK : properties.getProperty(name));
+                result.setProperty(name, isSensitiveKey(name) ? Sensitive.MASK : properties.getProperty(name));
             }
             return result;
         } finally {
             readLock.unlock();
         }
+    }
+
+    /**
+     * Tells whether a property is to be masked, either because a method reads exactly it and is sensitive, or
+     * because it sits below a group that is.
+     * <p>
+     * Where the two disagree — one method declaring a group sensitive while another reads a key inside it and
+     * does not — the mask wins. Printing a secret that was declared as one is the mistake that costs
+     * something; masking a value that need not have been is read as over-caution and no more.
+     * </p>
+     */
+    private boolean isSensitiveKey(String name) {
+        if (sensitiveKeys.contains(name))
+            return true;
+        for (String prefix : sensitivePrefixes)
+            if (name.startsWith(prefix))
+                return true;
+        return false;
     }
 
     /**

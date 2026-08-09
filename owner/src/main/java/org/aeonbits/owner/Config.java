@@ -288,9 +288,18 @@ public interface Config extends Serializable {
      * When applied to an interface, all the properties declared in that interface are masked.
      * </p>
      * <p>
+     * <b>On a method that reads a group</b> — one returning a {@link java.util.Map}, which resolves to a
+     * prefix rather than to a single property — <b>everything under that prefix is masked</b>, since there is
+     * no property of that name to mask on its own. All of it goes, not only the entries whose name looks like
+     * a secret: the annotation says the group is sensitive, and guessing which parts of it really are would
+     * be a different feature. Where one method declares a group sensitive and another reads a key inside it
+     * and does not, the mask wins.
+     * </p>
+     * <p>
      * The keys to mask are worked out when the Config object is created, from the methods that take no
      * parameters: a key that depends on the invocation arguments, or on a variable expanded at access time,
-     * is not known in advance and is left alone.
+     * is not known in advance and is left alone. A property that no method of the interface reads cannot be
+     * masked either, there being nothing to write the annotation on.
      * </p>
      *
      * @since 2.0.0

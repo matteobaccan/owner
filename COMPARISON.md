@@ -136,6 +136,35 @@ Notes worth keeping:
   arithmetic correct by construction.
 
 
+Hiding a value against the equivalents
+--------------------------------------
+
+Checked 2026-08-09, while fixing our own. The interesting part is that **nobody else decides from the
+method**, and the four who do it decide from the key in four different ways.
+
+| | What marks a value as secret | Reaches a group? |
+|---|---|---|
+| **OWNER** | `@Sensitive` on the method or the interface | yes, since 2026-08-09: an annotated method reading a group masks everything under its prefix |
+| **Spring Boot 3** | nothing — every value in `/env` and `/configprops` is hidden unless `show-values` is turned up, optionally per role | yes, by hiding everything |
+| **Spring Boot 2** | patterns on the property name: `password`, `secret`, `key`, `token`, `*credentials.*`, `vcap_services` | yes, the pattern matches the whole name |
+| **SmallRye** | a registered set of property names, enforced at lookup: a read throws `SecurityException` unless inside `SecretKeys.doUnlocked` | not addressed; the documentation covers single named properties only |
+| **Gestalt** | keywords searched in the path of the node, leaf replaced by a configurable mask. Also temporary values, released after N reads | yes, path-based |
+
+Deciding from the method is the more precise of the two designs and it is worth keeping: a password
+called `pwd` or `dsn` is masked because somebody said it was one, not because its name happened to match
+a regular expression. Spring 2 and Gestalt are both guessing, and a guess that misses is silent.
+
+It costs one thing, which is worth writing down because it is structural and no fix removes it: **a
+property no method reads cannot be masked**, and `list()` prints every property held, not only those with
+an accessor. That is exactly the ground the pattern-based designs cover and we do not. If it ever matters,
+the shape would be additive — a list of patterns that adds to the annotation rather than replacing it —
+and it should stay optional, because turning it on by default would start guessing on everyone's behalf.
+
+Spring Boot 3's answer is the strongest of the four, and it is available to them because `/env` is an
+endpoint with roles and authorization behind it. Our `list()` is a debugging convenience: hiding
+everything by default would break every existing caller and leave the feature useless.
+
+
 What the gaps line up with
 --------------------------
 

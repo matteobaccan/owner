@@ -41,10 +41,25 @@ import static org.aeonbits.owner.util.Util.unsupported;
  */
 final class PropertiesAggregator {
 
-    private static final String SEPARATOR = ".";
+    /**
+     * What sits between the key a method resolves to and the name of an entry below it. Package visible
+     * because whoever has to recognise the properties belonging to a group needs the same rule: masking a
+     * {@link Config.Sensitive} group, for one.
+     */
+    static final String SEPARATOR = ".";
 
     /** Don't let anyone instantiate this class */
     private PropertiesAggregator() {}
+
+    /**
+     * The prefix under which the entries of a group live: the key the method resolves to, and the separator.
+     *
+     * @param key the key the method resolves to.
+     * @return the prefix every property of that group starts with.
+     */
+    static String prefixOf(String key) {
+        return key + SEPARATOR;
+    }
 
     /**
      * Tells whether the given method reads a group of properties rather than a single one, which is the case
@@ -79,7 +94,7 @@ final class PropertiesAggregator {
 
         Class<?> keyType = typeArgument(method, 0);
         Class<?> valueType = typeArgument(method, 1);
-        String start = prefix + SEPARATOR;
+        String start = prefixOf(prefix);
 
         Map<Object, Object> result = instantiate(method.getReturnType());
         for (String name : manager.propertyNames()) {
