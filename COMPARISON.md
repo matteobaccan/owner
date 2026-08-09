@@ -13,10 +13,18 @@ libraries belong here and need re-checking before they are relied on.
 Everything below was verified against the projects themselves — the GitHub API for release dates,
 the actual source files for the APIs — rather than taken from articles.
 
-**Amended 2026-08-09**, in the two places marked with that date: what SmallRye does with a `.env`,
-checked in its source while deciding our own, and the backlog line on formats, which the analysis in
-`FORMATS.md` has superseded. Everything else still dates from the snapshot above and still needs
-re-checking before it is relied on.
+**Amended 2026-08-09**, everywhere marked with that date. Four things were checked against the sources
+that day, each because we were deciding the same question and wanted to know what the field had settled
+on before choosing: how SmallRye reads a `.env`, how the three libraries with indexed keys treat a gap in
+the sequence, how each of them decides that a value is a secret, and — for the backlog line on formats —
+what `FORMATS.md` has since superseded.
+
+Two of those four found **no agreement at all** among the others, which is itself the useful result: it
+meant the question had to be decided on merit rather than by alignment, and both decisions are written
+down with the reasoning rather than with a citation.
+
+Everything not marked with that date still dates from the snapshot above and still needs re-checking
+before it is relied on.
 
 
 The landscape
@@ -136,6 +144,32 @@ Notes worth keeping:
   arithmetic correct by construction.
 
 
+Indexed keys against the equivalents
+------------------------------------
+
+Checked 2026-08-09, while deciding our own. Three libraries have this, and **on the one case that has to
+be decided they do three incompatible things**, which is worth knowing: there was no convention to follow,
+so it was decided on merit rather than by alignment.
+
+| | `[0]` and `[2]`, with no `[1]` | An indexed key beside a single value |
+|---|---|---|
+| **OWNER** | refused, naming the gap | the indexed key wins |
+| **Spring Boot** | refused: *"omitting indices will lead to an `UnboundConfigurationPropertiesException`"* | not documented; a collection is never merged across sources, it comes whole from the highest one |
+| **SmallRye** | closed up: the values are collected and sorted, with no empty elements | *"the indexed property format is prioritized"* |
+| **Gestalt** | a `null` is inserted, with `setTreatMissingArrayIndexAsError` to refuse instead | not documented |
+
+Two things came out of this that are ours rather than borrowed. **The notation is `[0]` because the dot
+was already taken** by the `Map` grouping we added in 2.0.0 — with `list.0` a map whose keys are numbers
+would be indistinguishable from a list — which is a better argument than "the others write it that way".
+And **the gap is refused** because SmallRye's compaction moves every element after the gap to a different
+position with nothing said, and Gestalt thought a switch to strictness worth adding, which suggests the
+lenient default bit somebody.
+
+Spring can afford to refuse a gap for a reason we cannot copy: it never merges a collection across
+sources, so a gap is always one file's mistake. Ours merge by key, which makes splitting a list across
+files broken already, in a quieter way — see `FORMATS.md`.
+
+
 Hiding a value against the equivalents
 --------------------------------------
 
@@ -178,7 +212,7 @@ coincidence; it is evidence the demand is real.
 | `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
 | Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
-| Indexed keys `list[0]` | SmallRye, Gestalt | #48 |
+| Indexed keys `list[0]` | SmallRye, Gestalt, Spring | — (**closed 2026-08-09**) |
 | "Which source provided this?" | Spring (origin tracking), Gestalt | #277 |
 | Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130, #143 |
 | DI integration | every framework | #222, #147 |
@@ -207,7 +241,10 @@ Backlog, highest value first
 
 1. **Nested config interfaces** (`ServerConfig server();`) — the largest visible gap against
    SmallRye, and `@Prefix` from 2.0.0 already does half the work: key composition exists, what is
-   missing is a return type that builds another proxy.
+   missing is a return type that builds another proxy. **It gained a second reason on 2026-08-09**: the
+   flattening convention now produces `servers[0].host` out of any tree-shaped source, and nothing can
+   read it. A JSON or YAML file holding a list of objects — which is most of them — will flatten
+   correctly and be unreachable until this lands.
 2. **Further formats** — a loader is a three-method class, the SPI has existed since 1.0.5, and people
    are already writing these by hand (see above). Removes the "properties only" objection, which is
    the top reason people pick Typesafe Config. **`FORMATS.md` supersedes this line**: it was written

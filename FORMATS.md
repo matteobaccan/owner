@@ -81,7 +81,7 @@ What the core is missing
 
 | # | Gap | Needed by | State |
 |---|---|---|---|
-| **C1** | Indexed keys / lists (`list[0]`) — issue #48 | JSON, YAML, TOML, HOCON, CBOR | **missing.** The universal blocker for every tree-shaped format |
+| **C1** | Indexed keys / lists (`list[0]`) — issue #48 | JSON, YAML, TOML, HOCON, CBOR | **done 2026-08-09**, `aace753`: `IndexedProperties` in the core, and `XMLLoader` emitting them for repeated elements. The universal blocker, now out of the way |
 | **C2** | A documented flattening convention, with escaping for keys that contain a dot | every tree-shaped format | **done 2026-08-09**, minus the escaping: `PropertyKeys` in `org.aeonbits.owner.loaders` states the convention and is public, since a loader in another artifact will need it. The escaping was deliberately not built — see below |
 | **C3** | Explicit `null` | JSON, YAML, CBOR | **missing.** `Properties` cannot hold a null value. TOML has no null; `.env` and INI have none |
 | **C4** | ~~Extension-less `accept()`~~ | — | **withdrawn.** `.env` is a file that is all extension, and the existing test shape matches it |
@@ -92,12 +92,14 @@ What the core is missing
 | **C9** | Duplicate keys and merge policy | HOCON merges, TOML forbids, INI varies, JSON leaves it undefined | a loader option, so **C6** |
 | **C10** | Strict mode — refuse unsupported constructs loudly | YAML above all | a loader option, so **C6** |
 
-C8, C9 and C10 collapse into C6. What is left is two pieces of core work — **C1 + C2**, the data
-model, and **C6**, the keystone — and then parsers.
+C8, C9 and C10 collapse into C6.
 
-C1 + C2 is not new debt. `XMLLoader.endElement` calls `props.setProperty(key, value)` with no index,
-so `<tag>a</tag><tag>b</tag>` under one parent silently overwrites the first value. The same work
-fixes that.
+**Where that leaves things, end of 2026-08-09.** The data model is done: `C1` and `C2` shipped, and with
+them the XML hole they were always going to fix — `<tag>a</tag><tag>b</tag>` used to keep only the second
+value. Of the rest, only **C6** stands between here and a tree-shaped format, and only partly: options per
+source and a dialect per factory work, the `owner.loaders.*` settings and `ServiceLoader` discovery do not.
+**C3** — how a format that has `null` says so — is the one nobody has thought about yet and the first that
+JSON will run into. `C5` and `C7` belong to particular formats and can wait for them.
 
 
 The formats
@@ -173,12 +175,31 @@ A plan in phases
    machinery that exists. With the rule that settles the probe cost: **always registered, probed
    only on request.** `@Sources("classpath:app.yaml")` is already explicit and works immediately;
    having `config.yaml` found automatically is opt-in. Nothing costs anything to whoever uses none
-   of it.
-2. **C1 + C2, the data model.** Indexed lists and a documented, escaped flattening. Unblocks every
-   tree-shaped format at once and repairs the XML hole.
+   of it. **Still open**, and questions 6 and 8 below have to be answered as part of it.
+2. ~~**C1 + C2, the data model.**~~ **Done 2026-08-09**, `aace753` and `d77165c`. Indexed lists, the
+   flattening convention stated in `PropertyKeys`, and the XML hole repaired.
 3. **YAML, then JSON** — in order of demand rather than ease.
 4. **INI, then TOML.**
 5. **HOCON, CBOR, TOON if ever.**
+
+### Where to start again
+
+Phase 2 was the one everything queued behind, and it is out of the way, so the order above is no longer
+the only reading. Three things could sensibly come next, and they are not in competition for the same
+reason:
+
+- **JSON**, because it is now unblocked and is the cheapest real parser on the list — a formal
+  specification, a public test suite to check against, and 350–450 lines. It would be the first proof that
+  the data model is right, which is worth having before YAML is written on top of the same assumptions.
+  What it will hit first is **C3**, `null`, which nothing has decided.
+- **Nested configuration interfaces**, [#129](https://github.com/matteobaccan/owner/issues/129). Bigger,
+  and not a format at all, but `servers[0].host` is already produced by the flattener and read by nobody.
+  Until it lands, a JSON or YAML source holding a list of objects flattens correctly and is unreachable.
+- **C6**, which is small, unblocks nothing on its own, and would keep the formats that follow from each
+  inventing their own way of being configured.
+
+The honest ordering argument is that **JSON first tells us whether C1 and C2 were right** while the
+reasoning is still fresh, and everything after it is cheaper for knowing.
 
 
 `.env` in detail
@@ -495,3 +516,13 @@ Open questions
 8. **New.** Are the `owner.loaders.*` setting names worth having at all, now that registering the
    loader you want covers the same ground per factory? They would only earn their keep for something
    that cannot be expressed by choosing a loader — turning default probing on, most likely.
+9. **New, and the first one JSON will run into.** C3: **how does a format that has `null` say so?**
+   `Properties` cannot hold a null value, so `{"host": null}` has three possible readings — leave the
+   key out, write an empty string, or invent a marker — and they differ in what the method returns:
+   `null`, `""`, or a `@DefaultValue` where one exists. Related and equally undecided: `{"servers": []}`
+   produces no key at all, so an empty list and an absent one are the same thing. Nothing in the library
+   distinguishes them today, and choosing to leave it that way is a legitimate answer — but it should be
+   chosen rather than arrived at.
+10. **New, and cheap.** Should the flattener be reachable as a `Properties`-shaped helper — "here is a
+    tree, give me the keys" — rather than only as the two naming methods `PropertyKeys` exposes? Writing
+    JSON will answer it by needing it or not. Deliberately not designed in advance.

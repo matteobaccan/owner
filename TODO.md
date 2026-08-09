@@ -12,6 +12,36 @@ WEBSITE
 - [ ] Update the release note: a draft for 2.0.0 is ready in `owner-site/site/_drafts/owner-2-0-0-released.md`,
       to be moved into `_posts/` (with the release date in the file name and front matter) when 2.0.0 is published.
 
+WHERE TO PICK UP
+----------------
+
+Written at the end of 2026-08-09, when the data model stopped being the thing everything waited for.
+`FORMATS.md` has the detail and the open questions; this is the short version.
+
+**Three candidates, and they do not compete for the same reason.** **JSON** is unblocked and the cheapest
+real parser left — a formal specification, a public test suite, 350–450 lines — and writing it is how we
+find out whether indexed keys and the flattening convention were right, while the reasoning is still
+fresh. **Nested interfaces** (#129) is bigger and not a format at all, but until it lands a source holding
+a list of objects flattens correctly to `servers[0].host` and is unreachable. **C6**, loader enablement,
+is small, unblocks nothing on its own, and keeps the formats after it from each inventing their own way of
+being configured.
+
+The argument for JSON first is that everything after it is cheaper for knowing. The first thing it will
+run into is the one question nobody has answered: **what a format that has `null` does about it**, since
+`Properties` cannot hold one. That is question 9 in `FORMATS.md`.
+
+**Two small things left on the floor**, neither urgent:
+
+- [ ] The two open [code scanning alerts](https://github.com/matteobaccan/owner/security/code-scanning),
+      #235 and #218, both `java/internal-representation-exposure`. Read on 2026-08-09 and both are false
+      positives: the fields are already an unmodifiable view over a defensive copy, and the analysis that
+      still reports them ran on a commit that contains the fix. They want dismissing with that reason,
+      which is a maintainer's call rather than a change to make.
+- [ ] `PropertiesLoader` wraps its stream in an `InputStreamReader` that is never closed, exactly as
+      `DotEnvLoader` did before `7af2529`. No descriptor is lost — the underlying stream is closed and
+      that is where the handle lives — but it is the shape that invites a real leak, and the same
+      try-with-resources fixes it.
+
 CODE
 ----
 
@@ -78,7 +108,10 @@ an issue behind it, which is the point: what the others shipped is what our repo
 - [ ] **Nested configuration interfaces** — `ServerConfig server();` resolving `server.host`,
       `server.port`. The largest visible gap: SmallRye, Gestalt and Coat all have it. `@Prefix` from
       2.0.0 already does half the work — key composition exists, what is missing is a return type that
-      builds another proxy. Issues [#129](https://github.com/matteobaccan/owner/issues/129),
+      builds another proxy. **Gained a second reason on 2026-08-09**: the flattening convention now
+      produces `servers[0].host` out of any tree-shaped source and nothing can read it, so a JSON or YAML
+      file holding a list of objects — which is most of them — will flatten correctly and be unreachable
+      until this lands. Issues [#129](https://github.com/matteobaccan/owner/issues/129),
       [#2](https://github.com/matteobaccan/owner/issues/2),
       [#72](https://github.com/matteobaccan/owner/issues/72).
 - [ ] **Further formats as `Loader`s, written by hand, with no external dependency.** The SPI has
@@ -86,10 +119,11 @@ an issue behind it, which is the point: what the others shipped is what our repo
       hand-written a YAML loader and a JSON one against it. Being properties-only is the top reason
       people pick Typesafe Config over us. **`FORMATS.md` holds the whole analysis** — what each format
       costs, what the core is missing, and the order.
-      **`.env` is done** (2026-08-09, `d04c500`): in the core, `DotEnvLoader` with an `EnvDialect` of
-      seven rules and three presets, `docker` by default. What is left, in order: loader enablement and
-      per-loader options; indexed keys and a documented flattening, which unblock every tree-shaped
-      format at once; then YAML and JSON; then INI and TOML. Issues
+      **Done 2026-08-09**: `.env` in the core, `DotEnvLoader` with an `EnvDialect` of seven rules and
+      three presets, `docker` by default (`d04c500`); indexed keys (`aace753`); and the flattening
+      convention, `PropertyKeys`, with `XMLLoader` emitting indices for repeated elements (`d77165c`).
+      **The data model is no longer the blocker** — what queued behind it can now be written. What is
+      left: loader enablement and per-loader options, then JSON, then YAML, then INI and TOML. Issues
       [#14](https://github.com/matteobaccan/owner/issues/14),
       [#65](https://github.com/matteobaccan/owner/issues/65),
       [#240](https://github.com/matteobaccan/owner/issues/240), and
@@ -107,10 +141,12 @@ an issue behind it, which is the point: what the others shipped is what our repo
       [#201](https://github.com/matteobaccan/owner/issues/201).
 - [x] **Indexed keys**, `list[0]`, `list[1]`, complementing the `Map` grouping added in 2.0.0. Done
       2026-08-09: an indexed key wins over a single value, the elements are not tokenized, and a gap in the
-      sequence is refused rather than closed up. The reasoning, and what the other three libraries do
-      instead, is in `FORMATS.md`. Still to follow: `XMLLoader` emitting indices for repeated sibling
-      elements, and `servers[0].host`, which belongs to nested interfaces.
-      Issue [#48](https://github.com/matteobaccan/owner/issues/48), which can be closed.
+      sequence is refused rather than closed up. `XMLLoader` emits them for repeated sibling elements,
+      which is a change of behaviour and is in the release note draft. The reasoning, and what the other
+      three libraries do instead — they disagree with each other — is in `FORMATS.md`.
+      Issue [#48](https://github.com/matteobaccan/owner/issues/48) **can be closed**, saying why the 2013
+      refusal no longer holds: it was right while properties was the only format, and JSON or YAML cannot
+      express a list without this.
 - [ ] **Remote and cloud sources** — S3, Vault, Consul, JNDI — as loaders in `owner-extras`, which is
       what that artifact is for now that it holds nothing else. Gestalt covers all of these. Issues
       [#130](https://github.com/matteobaccan/owner/issues/130),
