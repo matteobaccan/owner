@@ -5,6 +5,16 @@ author: lviggiano
 categories: [news]
 ---
 
+<div class="note warning">
+  <h5>This chat no longer exists</h5>
+  <p>
+    The Telegram group announced below has since been closed. The post is kept as it was written, but
+    the link goes nowhere. Questions are now asked in
+    <a href="https://github.com/matteobaccan/owner/discussions">Discussions</a>, and bugs and feature
+    requests in <a href="https://github.com/matteobaccan/owner/issues">Issues</a>.
+  </p>
+</div>
+
 Hi All!
 
 Just a quick post to announce that a Telegram Chat is available for quick Q&A.
