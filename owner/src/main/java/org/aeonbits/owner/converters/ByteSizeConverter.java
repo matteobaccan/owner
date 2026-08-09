@@ -14,6 +14,8 @@ import org.aeonbits.owner.Converter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
+import static org.aeonbits.owner.util.Util.splitNumericAndChar;
+
 /**
  * @author Stefan Freyr Stefansson
  */
@@ -25,7 +27,7 @@ public class ByteSizeConverter implements Converter<ByteSize> {
     }
 
     private static ByteSize parse(String input){
-        String[] parts = ConverterUtil.splitNumericAndChar(input);
+        String[] parts = splitNumericAndChar(input);
         String value = parts[0];
         String unit = parts[1];
 

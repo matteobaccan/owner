@@ -9,7 +9,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.CollectionConverterClass;
 import org.aeonbits.owner.Config.ConverterClass;
-import org.aeonbits.owner.converters.DurationConverter;
+import org.aeonbits.owner.util.DurationParser;
 
 import java.beans.PropertyEditor;
 import java.io.File;
@@ -288,7 +288,7 @@ enum Converters {
             if (targetType != Duration.class) return SKIP;
             requireExplicitTimeUnit(text, key);
             try {
-                return new DurationConverter().convert(targetMethod, text);
+                return DurationParser.parse(text);
             } catch (RuntimeException e) {
                 // the converter reports an IllegalArgumentException; every other type reports the
                 // same UnsupportedOperationException naming the value, the type and the key
@@ -297,7 +297,7 @@ enum Converters {
         }
 
         /**
-         * A bare number is read as milliseconds by {@link DurationConverter}, which is a reasonable
+         * A bare number is read as milliseconds by {@link DurationParser}, which is a reasonable
          * thing to opt into and a poor thing to have happen silently: whoever writes
          * <code>timeout=30</code> means seconds far more often than milliseconds, and would get a
          * service that gives up thirty milliseconds in, with nothing said. The unit is therefore
@@ -306,7 +306,7 @@ enum Converters {
          */
         private void requireExplicitTimeUnit(String text, String key) {
             String trimmed = text.trim();
-            if (trimmed.isEmpty() || isIso8601(trimmed))
+            if (trimmed.isEmpty() || DurationParser.isIso8601(trimmed))
                 return;
             if (!Character.isLetter(trimmed.charAt(trimmed.length() - 1)))
                 throw unsupported(
@@ -315,10 +315,6 @@ enum Converters {
                                 + "ISO-8601 duration such as 'PT30S'. A bare number would be read as "
                                 + "milliseconds, which is rarely what is meant.",
                         text, key, trimmed, trimmed, trimmed, trimmed, trimmed);
-        }
-
-        private boolean isIso8601(String trimmed) {
-            return trimmed.startsWith("P") || trimmed.startsWith("-P") || trimmed.startsWith("+P");
         }
     },
 

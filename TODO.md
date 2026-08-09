@@ -15,14 +15,17 @@ WEBSITE
 CODE
 ----
 
-- [ ] **Break the package cycle between `org.aeonbits.owner` and `org.aeonbits.owner.converters`.**
-      `Converters.DURATION` imports `DurationConverter`, which implements `Converter` from the parent
-      package, so the two now point at each other. It compiles, bundles and modularises fine — one
-      artifact, one bundle, one module — but it welds the two packages together permanently and static
-      analysers report the cycle. The fix reverses the direction rather than removing anything: move the
-      parsing into a package-private class of the core and leave `DurationConverter` as the public
-      adapter that delegates to it. `parseDuration` is already private, so no public API changes, and the
-      existing tests cover it.
+- [x] **Break the package cycle between `org.aeonbits.owner` and `org.aeonbits.owner.converters`.** The
+      parsing now lives in `org.aeonbits.owner.util.DurationParser`, which both the core and
+      `DurationConverter` call; the converter is the public adapter and the core no longer imports the
+      `converters` package.
+- [ ] **Break the remaining package cycle, between `org.aeonbits.owner` and `org.aeonbits.owner.util`.**
+      Older than the one above and the last one left: `Util.isFeatureDisabled` reads
+      `Config.DisableFeature`, so `util` points back at the core while most of the core points at `util`.
+      The method is the only edge. Moving it into the core would break the cycle for good, but `Util` is
+      public, so it is an API removal and belongs to a major version — decide it alongside the
+      `module-info` question below rather than on its own.
+
 GAPS AGAINST THE OTHER CONFIGURATION LIBRARIES
 ----------------------------------------------
 
