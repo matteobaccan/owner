@@ -33,24 +33,28 @@ abstract class MultiThreadTestBase {
             }
     }
 
+    /**
+     * Fails with what the threads collected, all of it.
+     * <p>
+     * Only one exception can be thrown, and a run that goes wrong under concurrency usually collects
+     * several: the ones that cannot be thrown are attached to the one that can. They then travel into the
+     * test report along with it, which is where somebody reading a build that failed overnight will look —
+     * printing them to the console instead leaves the evidence in a place nothing keeps.
+     * </p>
+     */
     <T extends Config> void assertNoErrors(ThreadBase<T>[] threads) throws Throwable {
-        for (int i = 0; i < threads.length; i++) {
-            ThreadBase<T> thread = threads[i];
-
-            int errorCount = thread.errors.size();
-
-            if (errorCount > 0)
-                System.err.printf("There are %d exception collected by %s#%d%n", errorCount,
-                        thread.getClass().getName(), i);
-
+        for (ThreadBase<T> thread : threads) {
             List<Throwable> errors = thread.errors;
-            for (Throwable error : errors) {
-                System.err.printf("%s#%d thrown an exception: %s%n", thread.getClass().getName(), i,
-                        error.getMessage());
-                error.printStackTrace(System.err);
-            }
-            if (!errors.isEmpty())
-                throw errors.get(0);
+            if (errors.isEmpty())
+                continue;
+
+            Throwable failure = errors.get(0);
+            for (Throwable other : errors.subList(1, errors.size()))
+                // the same instance twice would make addSuppressed throw, and that exception would then be
+                // the one reported instead of the failure it was meant to describe
+                if (other != failure)
+                    failure.addSuppressed(other);
+            throw failure;
         }
     }
 

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.jar.JarOutputStream;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
 import static java.lang.String.format;
@@ -43,6 +44,9 @@ import static org.junit.Assert.assertTrue;
  * @author Luigi R. Viggiano
  */
 public class UtilTest {
+
+    /** Named after the library rather than after this class, so one switch covers the tests and the code. */
+    private static final Logger LOGGER = Logger.getLogger("org.aeonbits.owner");
 
     public static SystemProvider setSystem(Object system) {
         SystemProvider save = Util.system;
@@ -162,9 +166,25 @@ public class UtilTest {
         }
     }
 
+    /**
+     * Traces what a test is doing, for whoever is chasing one that fails now and then.
+     * <p>
+     * This was a hand-rolled logger — a level check on a <code>debug</code> system property, guarding a
+     * <code>printf</code> — which is what {@link java.util.logging} does, only with one switch for the whole
+     * test suite and none of the configuration. Now that the library itself reports through
+     * <code>java.util.logging</code>, the tests may as well use the same thing. Turn it on with
+     * <code>-Djava.util.logging.config.file=…</code> holding
+     * <code>org.aeonbits.owner.level = FINE</code> and a handler at the same level, or from code with
+     * {@code Logger.getLogger("org.aeonbits.owner").setLevel(Level.FINE)}.
+     * </p>
+     *
+     * @param format the format string, as {@link String#format}.
+     * @param args   its arguments.
+     */
     public static void debug(String format, Object... args) {
-        if (Boolean.getBoolean("debug"))
-            System.out.printf(format, args);
+        // formatted lazily: a trace inside a loop of a concurrency test is called far more often than it is
+        // read, and it costs nothing at all while it is switched off
+        LOGGER.fine(() -> String.format(format, args));
     }
 
     public static <T> T ignoreAndReturnNull() {

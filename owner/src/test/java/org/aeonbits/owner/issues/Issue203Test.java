@@ -30,7 +30,6 @@ public class Issue203Test {
             final AtomicBoolean running = new AtomicBoolean(true);
             Future<Void> createConfigFuture = exe.submit(() -> {
                 for (int cnt = 0; cnt < 100; cnt++) {
-                    System.out.println(cnt);
                     ConfigFactory.create(SomeConfig.class);
                 }
                 return null;
