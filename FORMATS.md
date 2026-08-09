@@ -168,18 +168,41 @@ At least four dialects disagree, and two of them are both Docker. The headline: 
 --env-file` does not strip quotes and dotenv does.** Write `NAME="Matteo"` and Docker gives you a
 value of `"Matteo"`, quotes included, where dotenv gives you `Matteo`.
 
-| | `docker run --env-file` | `docker compose` `env_file` | dotenv (Node/Python/Go) | systemd `EnvironmentFile` |
-|---|---|---|---|---|
-| Quotes | literal, part of the value | delimiters | delimiters | delimiters |
-| `\n` inside `"…"` | literal | expanded | expanded | limited |
-| `export VAR=x` | not recognised | not recognised | prefix stripped | not recognised |
-| Trailing comment | no | yes | yes | yes |
-| Multi-line values | no | yes | yes, inside quotes | via backslash continuation |
-| `${VAR}` interpolation | no | yes | python-dotenv yes, Node only with `dotenv-expand` | no |
-| Bare `VAR`, no `=` | taken from the host environment | taken from the host environment | ignored | error |
+Verified 2026-08-09 against the sources rather than against articles, and one of them changed the
+conclusion.
 
-The fine detail — Docker's exact trimming, what changed between Compose v1 and v2 — is **not
-verified** and must be checked against the current documentation before any of this is implemented.
+| | `docker run --env-file` | `docker compose` `env_file` | dotenv-java | dotenv Node/Python/Go | **SmallRye Config** | systemd |
+|---|---|---|---|---|---|---|
+| Quotes | **literal** | delimiters | delimiters | delimiters | **literal** | delimiters |
+| `\n` inside `"…"` | literal | expanded | expanded | expanded | `Properties` escaping | limited |
+| `export VAR=x` | not recognised | not recognised | **not** recognised | prefix stripped | not recognised | not recognised |
+| Trailing comment | no, `#` only at line start | yes, needs `" #"` | yes | yes | no | yes |
+| Multi-line values | no | no, in v2 | yes | yes, inside quotes | backslash continuation | backslash continuation |
+| `${VAR}` | no | yes | no | varies | no | no |
+| Bare `VAR`, no `=` | from the host environment | from the host environment | ignored | ignored | ignored | error |
+
+**The finding that matters: SmallRye Config reads `.env` with `java.util.Properties.load()`.**
+`DotEnvConfigSourceProvider` delegates to `ConfigSourceUtil.urlToMap`, which calls
+`properties.load(reader)` and converts the result to a map. No quote handling of any kind. So in the
+Java ecosystem — and SmallRye is the MicroProfile implementation, therefore the default in Quarkus
+and Open Liberty — **the incumbent behaviour is not dotenv's.**
+
+That choice has its own traps, and we should not copy it wholesale: `Properties.load` treats
+backslash as an escape, so a Windows path loses its separators; it also accepts `:` and space as
+key/value separators and treats `!` as a comment. None of that belongs in a `.env`.
+
+Note also that there is no de facto standard to appeal to. Inline comments are the worst of it:
+`TOKEN=abc#123 # comment` yields a different value in nearly every ecosystem. Node.js's own built-in
+`--env-file` is yet another dialect, and diverges from the `dotenv` package it resembles.
+
+Sources: [docker run --env-file](https://docs.docker.com/reference/cli/docker/container/run/#env),
+[docker/cli#3630](https://github.com/docker/cli/issues/3630),
+[moby#46773](https://github.com/moby/moby/issues/46773),
+[docker/compose#8388](https://github.com/docker/compose/issues/8388),
+[SmallRye DotEnvConfigSourceProvider](https://github.com/smallrye/smallrye-config/blob/main/implementation/src/main/java/io/smallrye/config/DotEnvConfigSourceProvider.java),
+[dotenv-java](https://github.com/cdimascio/dotenv-java),
+[nodejs/node#54134](https://github.com/nodejs/node/issues/54134),
+[.env syntax comparison](https://env.dev/guides/env-file-syntax).
 
 ### Flags with presets, rather than a choice of dialect
 
@@ -195,20 +218,43 @@ over the preset:
 - `interpolation` — `none` | `owner` (our own `${}`) | `posix`
 - `bareName` — `fromEnvironment` | `ignore` | `error`
 
-Presets: `dotenv` (the default), `docker`, `compose`, `systemd`.
+Presets: **`docker` (the default)**, `dotenv`, `compose`, `systemd`.
 
-Proposed default **`dotenv`**, because someone writing a `.env` by hand and putting quotes around a
-value nearly always means them as delimiters. Docker's literal-quote behaviour is a known trap, and
-a trap is a poor default even when it is faithful.
+**`docker` is the default**, which reverses what this file proposed on the first draft. The evidence
+above is what turned it round:
+
+1. **In Java, the incumbent does not strip quotes.** Matching dotenv would put us out of step with
+   SmallRye, and so with what someone arriving from Quarkus or MicroProfile expects.
+2. **It fails visibly.** Reading a dotenv-style file under the docker dialect yields `"Matteo"`,
+   quotes included — noticed at once. Reading a docker-style file under the dotenv dialect removes
+   characters that were meant to be there, and says nothing.
+3. **It does the least.** On a format with no standard, the most defensible default is the one that
+   transforms nothing: whatever follows the `=` is the value.
+
+The one weakness of that default is worth spending five lines on: **under `docker`, when a value
+both begins and ends with the same quote character, log a warning** naming the key and suggesting
+`dialect=dotenv`. It is almost certainly a dotenv file being read with the wrong dialect. Docker
+semantics stay exactly as they are, but they stop being silent.
+
+We should not copy `Properties.load` semantics the way SmallRye does — no backslash escapes, no `:`
+or space as a separator, no `!` comment. The `docker` preset means *no processing*, not *properties
+processing*.
 
 ### Where the setting goes
 
 - Global, on the convention that already exists:
-  `ConfigFactory.setProperty("owner.loaders.env.dialect", "docker")`, and per-factory through
-  `ConfigFactory.newInstance()`.
-- Per source, in the URI query: `@Sources("file:.env?dialect=docker")`. This works today for
-  `file:`; `classpath:` needs the query stripped before the resource lookup.
-- Single flags override the preset: `owner.loaders.env.quotes=literal`.
+  `ConfigFactory.setProperty("owner.loaders.env.dialect", "dotenv")`, and per-factory through
+  `ConfigFactory.newInstance()`, which carries its own properties.
+- Per source, in the URI query: `@Sources("file:.env?dialect=dotenv")`. Finer than an annotation on
+  the interface would be, since it distinguishes one source from another, so no new annotation is
+  needed.
+- Single flags override the preset: `owner.loaders.env.quotes=strip`.
+
+Two implementation details the query brings with it, both verified: **`accept()` and `load()` must
+strip the query before using the path**, or `endsWith(".env")` fails and `openStream()` looks for a
+file named `.env?dialect=dotenv`; and on `classpath:` it has to come off earlier still, inside
+`ConfigURIFactory`, because it would otherwise become part of the name handed to
+`ClassLoader.getResource`.
 
 An in-file directive — a first-line `# owner:dialect=docker` — was considered. It travels with the
 file, which is genuinely attractive, but it writes our vendor name into somebody else's `.env`.
@@ -222,17 +268,48 @@ path the container mounts. Declaring it explicitly is right. If automatic pickup
 belongs behind an opt-in setting naming the location, not behind a class-name convention.
 
 
+Where the parsers live
+----------------------
+
+With no external dependency there is no *technical* reason to split the artifact, so the question is
+open on other grounds. The measurements, taken 2026-08-09: the core is **6,852 lines across 61
+files**, `owner-extras` is **84 lines in one class**. The parsers estimated above come to roughly
+5,700 lines, plus 1.5–2× that in tests. Putting them all in the core would more than double it.
+
+Size is not the deciding argument, though. **A parser is code that chews on untrusted input.** A bug
+in a YAML or CBOR parser sitting in the core is a CVE that forces an upgrade on everyone, including
+the majority who never load a YAML file. In its own artifact it reaches only the people who use that
+format, and it can be patched and released on its own.
+
+There is already a line of principle in the code, and it draws the boundary for us: **the core ships
+the formats the JDK can already parse.** `PropertiesLoader` uses `Properties`, `XMLLoader` uses SAX
+— XML is an enormous format that costs the core nothing, because the parser is the JDK's and so is
+its security. Following the same rule:
+
+- **core** — properties, XML, system, plus **`.env` and INI**. Around 400 lines together, flat, no
+  dependency on the data-model work, and little more than variations on `Properties`.
+- **`owner-formats`** (new) — YAML, JSON, TOML, HOCON, CBOR. Real parsers, written and maintained by
+  us, released and patched on their own cadence.
+- **`owner-extras`** — remote and cloud sources: ZooKeeper today, S3, Vault and Consul later
+  (#130, #143). That finally gives it a coherent theme instead of being the drawer with 84 unused
+  lines in it.
+
+The practical consequence is worth having: **`.env` in the core means phase 0 needs neither
+`ServiceLoader` nor a new artifact**, and can be done immediately.
+
+
 Open questions
 --------------
 
-1. **`.env` default dialect** — `dotenv` proposed. This is the only answer needed to start phase 0.
+1. ~~**`.env` default dialect**~~ — **settled 2026-08-09: `docker`**, with `dotenv` and the rest
+   available as presets, and a warning when a value looks quoted. See the reasoning above.
 2. **Do we call a YAML subset "YAML"?** Proposed: yes in the title, no in the documentation — a
    chapter listing exactly what is in and what is out, and a hard error on anchors and tags.
 3. **`list[0]` or `list.0`?** `list[0]` is what SmallRye and Gestalt use, which would align #48 with
    the field.
-4. **Where do the parsers live?** `owner-extras`, as originally planned, or the core, now that they
-   bring no dependencies? The core would stay dependency-free either way but would grow by a few
-   thousand lines.
+4. **Where do the parsers live?** Proposed above: `.env` and INI in the core, the tree-shaped
+   formats in a new `owner-formats`, and `owner-extras` given over to remote sources. Not yet
+   decided — it commits us to a third artifact.
 5. **TOON: verify or close?**
 6. **Does `ServiceLoader` discovery imply enablement?** Proposed no: discovered and registered, but
    probed only when asked.
