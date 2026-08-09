@@ -2,7 +2,7 @@
 layout: docs
 title: XML support
 prev_section: configuring
-next_section: event-support
+next_section: dotenv-support
 permalink: /docs/xml-support/
 ---
 

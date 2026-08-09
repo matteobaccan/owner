@@ -149,11 +149,16 @@ Three are available out of the box, and they are consulted in this order:
 | Loader | Accepts |
 |---|---|
 | `SystemLoader` | the `system:properties` and `system:env` pseudo-URIs, and nothing else |
+| `DotEnvLoader` | a URI whose path ends in `.env` — see [.env support]({{ site.url }}/docs/dotenv-support/) |
 | `XMLLoader` | a URI whose path ends in `.xml` — see [XML support]({{ site.url }}/docs/xml-support/) |
 | `PropertiesLoader` | anything that is a valid URL, in the [standard properties format][props] |
 
-`PropertiesLoader` comes last because it accepts everything the other two turned down: it is the
+`PropertiesLoader` comes last because it accepts everything the others turned down: it is the
 fallback, not a candidate among equals.
+
+Only two of them offer a default file name, so a configuration with no `@Sources` looks for
+`MyConfig.properties` and `MyConfig.xml` and nothing more: `SystemLoader` and `DotEnvLoader` answer
+when they are named and cost nothing when they are not.
 
 A loader you register yourself goes in **front of all of these**, so it takes precedence over the
 built-in ones and can be used to take over a URI that one of them would otherwise have accepted.
