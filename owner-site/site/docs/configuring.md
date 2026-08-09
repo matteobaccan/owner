@@ -2,7 +2,7 @@
 layout: docs
 title: Configuring the ConfigFactory
 prev_section: disabling-features
-next_section: xml-support
+next_section: file-formats
 permalink: /docs/configuring/
 ---
 

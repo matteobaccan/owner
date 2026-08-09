@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Event support
-prev_section: dotenv-support
+prev_section: file-formats
 next_section: singleton
 permalink: /docs/event-support/
 ---

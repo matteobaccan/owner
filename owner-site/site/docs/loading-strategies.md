@@ -149,8 +149,8 @@ Three are available out of the box, and they are consulted in this order:
 | Loader | Accepts |
 |---|---|
 | `SystemLoader` | the `system:properties` and `system:env` pseudo-URIs, and nothing else |
-| `DotEnvLoader` | a URI whose path ends in `.env` — see [.env support]({{ site.url }}/docs/dotenv-support/) |
-| `XMLLoader` | a URI whose path ends in `.xml` — see [XML support]({{ site.url }}/docs/xml-support/) |
+| `DotEnvLoader` | a URI whose path ends in `.env` — see [File formats]({{ site.url }}/docs/file-formats/#env) |
+| `XMLLoader` | a URI whose path ends in `.xml` — see [File formats]({{ site.url }}/docs/file-formats/#xml) |
 | `PropertiesLoader` | anything that is a valid URL, in the [standard properties format][props] |
 
 `PropertiesLoader` comes last because it accepts everything the others turned down: it is the
