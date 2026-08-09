@@ -39,14 +39,18 @@ an issue behind it, which is the point: what the others shipped is what our repo
       builds another proxy. Issues [#129](https://github.com/matteobaccan/owner/issues/129),
       [#2](https://github.com/matteobaccan/owner/issues/2),
       [#72](https://github.com/matteobaccan/owner/issues/72).
-- [ ] **Further formats — YAML, TOML, JSON, HOCON — as optional `Loader`s in `owner-extras`**, with
-      `ServiceLoader` discovery, since registration is programmatic only today. The SPI has existed since
-      1.0.5 and a loader is a three-method class; the dependencies stay out of the core. This is the top
-      reason people pick Typesafe Config over us, and two external projects have already hand-written a
-      YAML loader and a JSON one against our own SPI. Issues
-      [#14](https://github.com/matteobaccan/owner/issues/14),
+- [ ] **Further formats as `Loader`s, written by hand, with no external dependency.** The SPI has
+      existed since 1.0.5, a loader is a three-method class, and two external projects have already
+      hand-written a YAML loader and a JSON one against it. Being properties-only is the top reason
+      people pick Typesafe Config over us. **`FORMATS.md` holds the whole analysis** — what each format
+      costs, what the core is missing, and the order. In short: `.env` first, because it is the most
+      widespread format in container work and the only one that needs none of the data-model work;
+      then loader enablement and options; then indexed keys and a documented flattening; then YAML and
+      JSON. Issues [#14](https://github.com/matteobaccan/owner/issues/14),
       [#65](https://github.com/matteobaccan/owner/issues/65),
-      [#240](https://github.com/matteobaccan/owner/issues/240).
+      [#240](https://github.com/matteobaccan/owner/issues/240), and
+      [#48](https://github.com/matteobaccan/owner/issues/48) is on the critical path rather than beside
+      it.
 - [ ] **Origin tracking** — which source a merged property actually came from. Only Spring does this
       decently, and with `@Sources` plus `LoadType.MERGE` it is a question our users really do ask.
       Issue [#277](https://github.com/matteobaccan/owner/issues/277); related to
