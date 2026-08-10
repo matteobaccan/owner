@@ -37,10 +37,10 @@ run into is the one question nobody has answered: **what a format that has `null
       positives: the fields are already an unmodifiable view over a defensive copy, and the analysis that
       still reports them ran on a commit that contains the fix. They want dismissing with that reason,
       which is a maintainer's call rather than a change to make.
-- [ ] `PropertiesLoader` wraps its stream in an `InputStreamReader` that is never closed, exactly as
-      `DotEnvLoader` did before `7af2529`. No descriptor is lost — the underlying stream is closed and
-      that is where the handle lives — but it is the shape that invites a real leak, and the same
-      try-with-resources fixes it.
+- [x] ~~`PropertiesLoader` wraps its stream in an `InputStreamReader` that is never closed~~ — **done
+      2026-08-10**, with try-with-resources on both, as `7af2529` did for `DotEnvLoader`. No descriptor
+      was being lost, so nothing observable changes; what changes is that each of the two now closes
+      what it opened, which is the rule the next loader will follow.
 
 CODE
 ----

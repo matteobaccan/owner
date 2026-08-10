@@ -39,16 +39,29 @@ public class PropertiesLoader implements Loader {
     @Override
     public void load(Properties result, URI uri) throws IOException {
         URL url = uri.toURL();
-        InputStream input = url.openStream();
-        try {
+        try (InputStream input = url.openStream()) {
             load(result, input);
-        } finally {
-            input.close();
         }
     }
 
+    /**
+     * Reads the stream as UTF-8, whoever opened it.
+     * <p>
+     * The reader is closed here because it is created here: closing it closes the stream underneath as well, and
+     * the caller that opened the stream closes it too, which {@link java.io.Closeable#close()} defines as having
+     * no effect the second time. The alternative - leaving the reader to the garbage collector because the stream
+     * is closed anyway - loses no file descriptor either, but it is the shape that invites a leak the day the
+     * reader wraps something with a buffer of its own.
+     * </p>
+     *
+     * @param result the properties where to load the stream.
+     * @param input  the stream to read, owned by the caller.
+     * @throws IOException if there is some I/O error while reading.
+     */
     void load(Properties result, InputStream input) throws IOException {
-        result.load(new InputStreamReader(input, DEFAULT_ENCODING));
+        try (InputStreamReader characters = new InputStreamReader(input, DEFAULT_ENCODING)) {
+            result.load(characters);
+        }
     }
 
     @Override
