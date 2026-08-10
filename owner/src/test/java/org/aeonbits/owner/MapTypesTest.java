@@ -19,6 +19,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,11 +40,17 @@ import static org.junit.Assert.fail;
 public class MapTypesTest {
 
     private static final Map<String, String> GROUP = new HashMap<>();
+    /** Written out of order on purpose, so that a map claiming to sort has to prove it. */
+    private static final Map<String, String> NAMED_LIKE_THE_ENUM = new HashMap<>();
 
     static {
         GROUP.put("server.beta", "2");
         GROUP.put("server.alpha", "1");
         GROUP.put("server.gamma", "3");
+
+        NAMED_LIKE_THE_ENUM.put("server.BETA", "2");
+        NAMED_LIKE_THE_ENUM.put("server.ALPHA", "1");
+        NAMED_LIKE_THE_ENUM.put("server.GAMMA", "3");
     }
 
     public interface AsInterface extends Config {
@@ -83,6 +91,23 @@ public class MapTypesTest {
 
     public interface AsConcurrentMap extends Config {
         ConcurrentMap<String, Integer> server();
+    }
+
+    public interface AsConcurrentNavigable extends Config {
+        ConcurrentNavigableMap<String, Integer> server();
+    }
+
+    @SuppressWarnings("rawtypes")
+    public interface AsRawEnumMap extends Config {
+        EnumMap server();
+    }
+
+    public interface AsSomebodyElses extends Config {
+        SomebodyElsesMap<String, Integer> server();
+    }
+
+    public interface AsNeedsAnArgument extends Config {
+        NeedsAnArgument<String, Integer> server();
     }
 
     public enum Which { ALPHA, BETA, GAMMA }
@@ -131,36 +156,106 @@ public class MapTypesTest {
         assertEquals("1", group.get("alpha"));
     }
 
-    // ---------------------------------------------------------------- the two that cannot be built
-
     /**
-     * EnumMap has no no-argument constructor - it needs the key class - so it cannot be built the way every
-     * other concrete map is. It fails well: the message names the type, at the first call.
+     * A concurrent interface used to be handed a LinkedHashMap, which does not satisfy it, and the proxy
+     * refused the value on the way out with a ClassCastException that said nothing about the cause. The
+     * implementation now has to satisfy the interface, so these work rather than fail.
      */
     @Test
-    public void anEnumMapCannotBeBuiltAndSaysSo() {
+    public void aConcurrentMapGetsSomethingConcurrent() {
+        ConcurrentMap<String, Integer> map = ConfigFactory.create(AsConcurrentMap.class, GROUP).server();
+        assertEquals(3, map.size());
+        assertEquals(ConcurrentHashMap.class, map.getClass());
+    }
+
+    /**
+     * The one that was wrong twice over: ConcurrentNavigableMap is a SortedMap too, so it took that branch
+     * and was handed a TreeMap - which is not concurrent either.
+     */
+    @Test
+    public void aConcurrentNavigableMapGetsSomethingBothConcurrentAndSorted() {
+        ConcurrentNavigableMap<String, Integer> map =
+                ConfigFactory.create(AsConcurrentNavigable.class, GROUP).server();
+        assertEquals("alpha", map.firstKey());
+        assertEquals(ConcurrentSkipListMap.class, map.getClass());
+    }
+
+    /**
+     * EnumMap cannot be built by the ordinary path - it is the one map in the JDK that needs to be told the
+     * class of its keys - but that class is already in hand, read off the return type in order to convert
+     * the keys. So it works, and the keys come back as the enum constants.
+     */
+    @Test
+    public void anEnumMapIsBuiltFromTheKeyTypeItDeclares() {
+        EnumMap<Which, Integer> map = ConfigFactory.create(AsEnumMap.class, NAMED_LIKE_THE_ENUM).server();
+        assertEquals(3, map.size());
+        assertEquals(Integer.valueOf(1), map.get(Which.ALPHA));
+        assertEquals("an EnumMap iterates in the order the constants are declared",
+                Which.ALPHA, map.keySet().iterator().next());
+    }
+
+    /**
+     * The keys of the group are converted to the key type like any other value, so for an enum they have to
+     * name a constant exactly - the conversion is Enum.valueOf and nothing is folded. A property called
+     * <code>server.alpha</code> does not become <code>ALPHA</code>, and says which property it choked on.
+     */
+    @Test
+    public void aKeyThatNamesNoConstantSaysWhichPropertyItWas() {
         try {
             ConfigFactory.create(AsEnumMap.class, GROUP).server();
-            fail("EnumMap has no no-argument constructor and cannot be instantiated");
+            fail("'alpha' is not a constant of Which");
         } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage(), e.getMessage().contains("Cannot instantiate map"));
-            assertTrue(e.getMessage(), e.getMessage().contains("EnumMap"));
+            assertTrue(e.getMessage(), e.getMessage().contains("server.alpha"));
+        }
+    }
+
+    // ---------------------------------------------------------------- what is left, and how it reads
+
+    /** A raw EnumMap has no key type to read, so it cannot be built - and the message says what to write. */
+    @Test
+    public void aRawEnumMapSaysWhatIsMissing() {
+        try {
+            ConfigFactory.create(AsRawEnumMap.class, GROUP).server();
+            fail("an EnumMap needs an enum key type");
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("has to be an enum"));
         }
     }
 
     /**
-     * ConcurrentMap is an interface that is not sorted, so it takes the LinkedHashMap branch - and a
-     * LinkedHashMap is not a ConcurrentMap. The proxy then refuses the value on the way out, which is a
-     * ClassCastException with nothing in it to say what to do about it. This is the one gap worth knowing
-     * about: it is a poorer failure than the EnumMap one above, not a different capability.
+     * A map interface OWNER has never heard of cannot be satisfied by anything it knows how to build.
+     * It now says so, where before it handed back a LinkedHashMap and let the proxy refuse it.
      */
     @Test
-    public void aConcurrentMapIsTheOneThatFailsPoorly() {
+    public void anUnknownMapInterfaceIsRefusedWithItsNameInTheMessage() {
         try {
-            ConfigFactory.create(AsConcurrentMap.class, GROUP).server();
-            fail("a LinkedHashMap cannot be returned as a ConcurrentMap");
-        } catch (ClassCastException e) {
-            assertTrue(String.valueOf(e.getMessage()), true);
+            ConfigFactory.create(AsSomebodyElses.class, GROUP).server();
+            fail("nothing OWNER can build satisfies that interface");
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("no implementation known to OWNER"));
+            assertTrue(e.getMessage(), e.getMessage().contains("SomebodyElsesMap"));
+        }
+    }
+
+    /** A class with no no-argument constructor still cannot be built, and still says which one. */
+    @Test
+    public void aClassWithNoUsableConstructorSaysWhichOne() {
+        try {
+            ConfigFactory.create(AsNeedsAnArgument.class, GROUP).server();
+            fail("that class cannot be instantiated");
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("Cannot instantiate map"));
+            assertTrue(e.getMessage(), e.getMessage().contains("NeedsAnArgument"));
+        }
+    }
+
+    public interface SomebodyElsesMap<K, V> extends Map<K, V> { }
+
+    public static class NeedsAnArgument<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        public NeedsAnArgument(int size) {
+            super(size);
         }
     }
 }

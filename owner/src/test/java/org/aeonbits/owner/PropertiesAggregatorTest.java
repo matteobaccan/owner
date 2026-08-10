@@ -299,21 +299,50 @@ public class PropertiesAggregatorTest {
         assertEquals("1", value);
     }
 
-    interface NotInstantiableConfig extends Config {
+    interface EnumKeyedConfig extends Config {
         EnumMap<Colour, String> group();
+    }
+
+    /**
+     * This used to assert the opposite - that an EnumMap could not be instantiated - and it was right at the
+     * time: an EnumMap is the one map in the JDK with no no-argument constructor, since it has to be told
+     * the class of its keys. That class was always in hand, though, having been read off the return type in
+     * order to convert the keys, so the limitation was a few lines rather than a fact about the world.
+     */
+    @Test
+    public void anEnumMapIsBuiltFromTheKeyTypeItDeclares() {
+        EnumMap<Colour, String> group = ConfigFactory.create(EnumKeyedConfig.class, new Properties() {{
+            setProperty("group.GREEN", "jms/QueueA");
+        }}).group();
+
+        assertEquals(1, group.size());
+        assertEquals("jms/QueueA", group.get(Colour.GREEN));
+    }
+
+    interface NoUsableConstructorConfig extends Config {
+        SizedMap<String, String> group();
     }
 
     /** A concrete map type with no no-argument constructor is reported, rather than failing obscurely. */
     @Test
     public void aMapTypeThatCannotBeInstantiatedIsReported() {
         try {
-            ConfigFactory.create(NotInstantiableConfig.class, new Properties() {{
-                setProperty("group.GREEN", "jms/QueueA");
+            ConfigFactory.create(NoUsableConstructorConfig.class, new Properties() {{
+                setProperty("group.a", "1");
             }}).group();
             fail("UnsupportedOperationException is expected");
         } catch (UnsupportedOperationException e) {
             assertTrue("unexpected message: " + e.getMessage(),
-                    e.getMessage().contains("Cannot instantiate map of type 'java.util.EnumMap'"));
+                    e.getMessage().contains("Cannot instantiate map of type"));
+            assertTrue("unexpected message: " + e.getMessage(), e.getMessage().contains("SizedMap"));
+        }
+    }
+
+    public static class SizedMap<K, V> extends java.util.HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        public SizedMap(int size) {
+            super(size);
         }
     }
 

@@ -15,10 +15,15 @@ import org.aeonbits.owner.loaders.PropertyKeys;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.UnaryOperator;
 
 import static org.aeonbits.owner.Converters.convert;
@@ -97,7 +102,7 @@ final class PropertiesAggregator {
         Class<?> valueType = typeArgument(method, 1);
         String start = prefixOf(prefix);
 
-        Map<Object, Object> result = instantiate(method.getReturnType());
+        Map<Object, Object> result = instantiate(method.getReturnType(), keyType);
         for (String name : manager.propertyNames()) {
             if (!name.startsWith(start) || name.length() == start.length())
                 continue;
@@ -132,17 +137,60 @@ final class PropertiesAggregator {
         return String.class;
     }
 
-    @SuppressWarnings("unchecked")
-    private static Map<Object, Object> instantiate(Class<?> targetType) {
-        if (!targetType.isInterface()) {
-            try {
-                return (Map<Object, Object>) targetType.getDeclaredConstructor().newInstance();
-            } catch (Exception e) {
-                throw unsupported(e, "Cannot instantiate map of type '%s'", targetType.getCanonicalName());
-            }
-        }
+    /**
+     * Builds the map a method asked for.
+     * <p>
+     * A <b>class</b> is instantiated as itself and nothing is substituted: a method declaring a
+     * {@link java.util.HashMap} gets a <code>HashMap</code>. Only an <b>interface</b> has to be given an
+     * implementation, there being no constructor to call, and then the one chosen has to satisfy it - which
+     * is the whole of the rule, and was where this went wrong: a {@link ConcurrentMap} used to be handed a
+     * {@link LinkedHashMap}, and the proxy refused it on the way out with a {@link ClassCastException} that
+     * said nothing about the cause.
+     * </p>
+     * <p>
+     * The order of the tests below is the order of the hierarchy, most specific first, since
+     * {@link ConcurrentNavigableMap} is all three of the others.
+     * </p>
+     *
+     * @param targetType the declared return type of the method.
+     * @param keyType    the type of the keys, which {@link EnumMap} needs in order to exist at all.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Map<Object, Object> instantiate(Class<?> targetType, Class<?> keyType) {
+        if (!targetType.isInterface())
+            return instantiateClass(targetType, keyType);
+
+        if (ConcurrentNavigableMap.class.isAssignableFrom(targetType))
+            return new ConcurrentSkipListMap<>();
+        if (ConcurrentMap.class.isAssignableFrom(targetType))
+            return new ConcurrentHashMap<>();
         if (SortedMap.class.isAssignableFrom(targetType))
             return new TreeMap<>();
-        return new LinkedHashMap<>();
+        if (targetType.isAssignableFrom(LinkedHashMap.class))
+            return new LinkedHashMap<>();
+
+        // a map interface this library has never heard of - somebody else's, most likely. Nothing here can
+        // satisfy it, and saying so beats handing back a LinkedHashMap and letting the proxy refuse it
+        throw unsupported("Cannot build a map of type '%s': no implementation known to OWNER satisfies it. "
+                + "Declare one of Map, SortedMap, NavigableMap, ConcurrentMap or ConcurrentNavigableMap, or "
+                + "name a class with a no-argument constructor", targetType.getCanonicalName());
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Map<Object, Object> instantiateClass(Class<?> targetType, Class<?> keyType) {
+        // EnumMap is the one map in the JDK that cannot be built without knowing something else - the class
+        // of its keys - and that something is already in hand, read off the return type a line above
+        if (EnumMap.class.equals(targetType)) {
+            if (!keyType.isEnum())
+                throw unsupported("Cannot build an EnumMap whose keys are '%s': the key type of an EnumMap "
+                        + "has to be an enum, so declare it as EnumMap<YourEnum, ...>",
+                        keyType.getCanonicalName());
+            return new EnumMap(keyType);
+        }
+        try {
+            return (Map<Object, Object>) targetType.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw unsupported(e, "Cannot instantiate map of type '%s'", targetType.getCanonicalName());
+        }
     }
 }

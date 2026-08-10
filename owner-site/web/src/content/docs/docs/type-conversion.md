@@ -221,11 +221,31 @@ decrypted entry by entry:
 group.url=http://${host}/api
 ```
 
-The map that comes back is the one you declared: a `SortedMap` is a
-`TreeMap`, a plain `Map` is a `LinkedHashMap`, and a concrete class is
-instantiated as it is, provided it has a no-argument constructor — an
-`EnumMap` does not, and says so. A raw `Map`, and any type argument that is
-not a plain class such as a wildcard, is read as `String`.
+The map that comes back is the one you declared. A **class** is instantiated
+as itself, provided it has a no-argument constructor: declare a `HashMap` and
+you get a `HashMap`, nothing is substituted. An **interface** has no
+constructor to call, so one implementation is chosen for it, and it is always
+one that satisfies the interface:
+
+| Declared | You get |
+|---|---|
+| `Map` | `LinkedHashMap` |
+| `SortedMap`, `NavigableMap` | `TreeMap` |
+| `ConcurrentMap` | `ConcurrentHashMap` |
+| `ConcurrentNavigableMap` | `ConcurrentSkipListMap` |
+| `HashMap`, `TreeMap`, `Properties`, … | that exact class |
+| `EnumMap<YourEnum, …>` | an `EnumMap` over that enum |
+
+`EnumMap` is worth a note: it is the one map in the JDK with no no-argument
+constructor, since it has to be told the class of its keys — which OWNER
+already knows, having read it off the return type in order to convert them.
+The keys of the group then have to name the enum constants exactly, `Enum`
+conversion being what it is: `group.GREEN`, not `group.green`.
+
+A map type nothing here can satisfy — an interface of your own, or a class
+whose only constructor takes arguments — is refused with its name in the
+message. A raw `Map`, and any type argument that is not a plain class such as
+a wildcard, is read as `String`.
 
 The other shape: one property holding the pairs
 -----------------------------------------------

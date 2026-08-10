@@ -242,7 +242,12 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    `Map<Colour, String>` work as well; the group is named like any other key, so `@Key`, `@Prefix` and variable
    expansion all apply — `@Key("servers.${env}")` picks the section at runtime. A name with further dots keeps
    them, so `something.a.b` becomes the entry `a.b`; no match gives an empty map rather than `null`; the
-   declared map type is honoured, a `SortedMap` coming back as a `TreeMap`; and `@DefaultValue` is refused on
+   declared map type is honoured — a class is instantiated as itself, and an interface is given an
+   implementation that satisfies it: `LinkedHashMap` for `Map`, `TreeMap` for `SortedMap` and
+   `NavigableMap`, `ConcurrentHashMap` for `ConcurrentMap`, `ConcurrentSkipListMap` for
+   `ConcurrentNavigableMap`, and an `EnumMap` over the enum it declares, which is built from the key type
+   rather than refused for want of a no-argument constructor. A type nothing can satisfy is named in the
+   message instead of failing as a `ClassCastException` on the way out; and `@DefaultValue` is refused on
    such a method, since a default belongs to the individual properties. A `@ConverterClass` still takes
    precedence, which is how the other shape of the request — one property whose value holds the pairs, as asked
    in [#286](https://github.com/matteobaccan/owner/issues/286) — keeps working. Nothing can break: a `Map`
