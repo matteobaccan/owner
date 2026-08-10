@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -96,7 +97,9 @@ public class LoaderOptionsTest {
      */
     @Test
     public void testOptionsAreReadOnAResourceInsideAJar() throws IOException, URISyntaxException {
-        File jar = File.createTempFile("owner-test", ".jar");
+        // Files.createTempFile rather than File.createTempFile: it creates the file with owner-only
+        // permissions, which is the same reason #325 changed the ones in the library itself
+        File jar = Files.createTempFile("owner-test", ".jar").toFile();
         jar.deleteOnExit();
         try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(jar))) {
             zip.putNextEntry(new ZipEntry("conf/app.env"));
@@ -117,7 +120,7 @@ public class LoaderOptionsTest {
     }
 
     private static File write(String prefix, String suffix, String content) throws IOException {
-        File file = File.createTempFile(prefix, suffix);
+        File file = Files.createTempFile(prefix, suffix).toFile();
         file.deleteOnExit();
         try (OutputStream out = new FileOutputStream(file)) {
             out.write(content.getBytes(ENCODING));

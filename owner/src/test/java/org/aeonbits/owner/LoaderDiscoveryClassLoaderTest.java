@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -143,7 +144,9 @@ public class LoaderDiscoveryClassLoaderTest {
      * class path put them.
      */
     private static File jarDeclaring(String loaderClassName) throws IOException {
-        File jar = File.createTempFile("owner-discovery", ".jar");
+        // Files.createTempFile rather than File.createTempFile: it creates the file with owner-only
+        // permissions, which is the same reason #325 changed the ones in the library itself
+        File jar = Files.createTempFile("owner-discovery", ".jar").toFile();
         jar.deleteOnExit();
         try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(jar))) {
             zip.putNextEntry(new ZipEntry(SERVICE_FILE));

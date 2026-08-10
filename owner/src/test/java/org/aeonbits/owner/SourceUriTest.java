@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -241,7 +242,9 @@ public class SourceUriTest {
     }
 
     private static File write(String suffix, String content) throws IOException {
-        File file = File.createTempFile("owner-source", suffix);
+        // Files.createTempFile rather than File.createTempFile: it creates the file with owner-only
+        // permissions, which is the same reason #325 changed the ones in the library itself
+        File file = Files.createTempFile("owner-source", suffix).toFile();
         file.deleteOnExit();
         try (OutputStream out = new FileOutputStream(file)) {
             out.write(content.getBytes("UTF-8"));
