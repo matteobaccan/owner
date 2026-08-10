@@ -45,7 +45,12 @@ jobs:
 
     - name: Install dependencies
       working-directory: owner-site/web
-      run: npm ci
+      # --ignore-scripts: a lifecycle script runs arbitrary code from a transitive dependency, with the
+      # workflow's token in the environment. Only two packages in the tree declare one - fsevents, which is
+      # macOS only, and esbuild, whose binary comes from the platform package @esbuild/linux-x64 rather than
+      # from its script. sharp and pagefind ship theirs as ordinary packages too, so nothing here needs a
+      # script to work: verified by installing this lock file with the flag and building the site from it.
+      run: npm ci --ignore-scripts
 
     - name: Build the site
       working-directory: owner-site/web
