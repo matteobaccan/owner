@@ -85,6 +85,12 @@ public class IniLoader implements Loader {
     private static final char BYTE_ORDER_MARK = '\uFEFF';
     /** What Python would interpolate and this library will not. */
     private static final Pattern INTERPOLATION = Pattern.compile("%\\([^)]*\\)s");
+    /**
+     * The one option named in three places that have to agree: the list of what is accepted, the search
+     * that reads it first, and the loop that must then skip it. A typo in any one of them would either
+     * refuse a dialect as unknown or accept it and never apply it.
+     */
+    private static final String DIALECT = "dialect";
 
     private final IniDialect dialect;
 
@@ -137,11 +143,11 @@ public class IniLoader implements Loader {
         if (options.isEmpty())
             return dialect;
 
-        options.refuseUnknown("dialect", "separator", "duplicates", "keys", "bare", "comments", "quotes",
+        options.refuseUnknown(DIALECT, "separator", "duplicates", "keys", "bare", "comments", "quotes",
                 "continuation", "subsections", "default", "interpolation");
         IniDialect result = baseDialect(options);
         for (SourceOptions.Option option : options.all())
-            if (!"dialect".equals(option.name()))
+            if (!DIALECT.equals(option.name()))
                 result = apply(result, option.name(), option.setting().toLowerCase(), uri);
         return result;
     }
@@ -149,7 +155,7 @@ public class IniLoader implements Loader {
     /** Read before everything else, so that {@code dialect} sets the starting point wherever it appears. */
     private IniDialect baseDialect(SourceOptions options) {
         for (SourceOptions.Option option : options.all())
-            if ("dialect".equals(option.name()))
+            if (DIALECT.equals(option.name()))
                 return IniDialect.named(option.setting());
         return dialect;
     }

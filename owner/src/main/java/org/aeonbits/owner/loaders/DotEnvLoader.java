@@ -83,6 +83,12 @@ public class DotEnvLoader implements Loader {
     /** Written as an escape on purpose: the character itself is invisible, so a mangled file would look right. */
     private static final char BYTE_ORDER_MARK = '\uFEFF';
     private static final Pattern NAME = Pattern.compile("[A-Za-z_][A-Za-z0-9_.\\-]*");
+    /**
+     * The one option named in three places that have to agree: the list of what is accepted, the search
+     * that reads it first, and the loop that must then skip it. A typo in any one of them would either
+     * refuse a dialect as unknown or accept it and never apply it.
+     */
+    private static final String DIALECT = "dialect";
 
     private final EnvDialect dialect;
 
@@ -142,11 +148,11 @@ public class DotEnvLoader implements Loader {
         if (options.isEmpty())
             return dialect;
 
-        options.refuseUnknown("dialect", "quotes", "escapes", "export", "comments", "multiline",
+        options.refuseUnknown(DIALECT, "quotes", "escapes", "export", "comments", "multiline",
                 "continuation", "bare");
         EnvDialect result = baseDialect(options);
         for (SourceOptions.Option option : options.all())
-            if (!"dialect".equals(option.name()))
+            if (!DIALECT.equals(option.name()))
                 result = apply(result, option.name(), option.setting().toLowerCase(), uri);
         return result;
     }
@@ -154,7 +160,7 @@ public class DotEnvLoader implements Loader {
     /** Read before everything else, so that {@code dialect} sets the starting point wherever it appears. */
     private EnvDialect baseDialect(SourceOptions options) {
         for (SourceOptions.Option option : options.all())
-            if ("dialect".equals(option.name()))
+            if (DIALECT.equals(option.name()))
                 return EnvDialect.named(option.setting());
         return dialect;
     }
