@@ -270,6 +270,55 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    is refused rather than closed up, since a list quietly shorter than the file describes, with everything
    after the gap moved, is not something the caller can notice. Nothing can break, `servers[0]` having been a
    property nothing read. See the [documentation](/owner/docs/type-conversion/).
+ * **`.env` files are read**, which is how container tooling carries configuration into a process —
+   `docker run --env-file`, `env_file` in Compose, `envFrom` in Kubernetes, the secrets of a CI pipeline. Any
+   source whose path ends in `.env` is read this way, values go through the usual type conversion, and the
+   parser is ours: the core still has no dependencies.
+
+   There is no `.env` standard, and the tools that read one disagree on the point that bites hardest, which
+   is quoting: given `NAME="Matteo"`, `docker run --env-file` gives you the quotes and the `dotenv` family
+   does not — and Docker Compose does not agree with `docker run`. So OWNER does not implement "the .env
+   format", it implements a **dialect**, and there are three presets — `docker`, `dotenv`, `compose` — plus
+   seven rules that can each be set on their own, for the tools that match none of them. **`docker` is the
+   default**, because it does nothing at all to a value and a value that arrives with its quotes still
+   attached is noticed at once, where quotes silently removed are not. A file that looks quoted under a
+   dialect that keeps quotes draws one `WARNING`. A `.env` is never looked for on its own: it is not named
+   after the configuration interface, so it is always named explicitly, and configurations that do not use
+   one pay no extra lookup. See the [documentation](/owner/docs/file-formats/#env).
+ * **A source can carry options, written in its fragment.** `@Sources("file:.env#dialect=dotenv")` sets the
+   dialect for that file alone, several options separated by `&`. The rule is the same for every loader and
+   every scheme: **the query belongs to the protocol and the fragment belongs to OWNER**. A query is never
+   touched, so `https://config/app.env?token=abc#dialect=dotenv` sends the token to the server and keeps the
+   dialect; and the fragment is the only place the options can be written at all for a resource inside a
+   jar, whose URI has no query to speak of. An option a loader does not recognise is **refused, not
+   ignored**, and the message names the option, the source and what would have been accepted — a misspelt
+   option that passes in silence is a configuration that is wrong and says nothing. This works on a
+   `classpath:` source as well as on a file. See the [documentation](/owner/docs/loading-strategies/#options-on-a-source).
+ * **A loader can be found on the classpath** instead of being registered by hand: declare it in
+   `META-INF/services/org.aeonbits.owner.loaders.Loader` and it is picked up when a factory is created,
+   which is what a jar shipping a format is for. Being found enables it — it answers for its formats at
+   once, and its default file names join the ones looked for when an interface declares no `@Sources`, as
+   Spring Boot, MicroProfile and Gestalt all do with theirs.
+
+   Where it lands is deliberately not the same in both directions. A found loader comes **before** the
+   built-in ones when a source is matched, or `PropertiesLoader` — which accepts every URL it can resolve —
+   would take its files; and **last** among the default file names, so that adding a jar to a build cannot
+   make a stray `MyConfig.yaml` start beating the `MyConfig.properties` an application already reads.
+   Registering a loader by hand keeps the front in both, that being something the application said on
+   purpose.
+
+   The searching is done by the thread's context class loader, falling back on the one that loaded OWNER.
+   That is right in an ordinary application and in an application server, and it is not right on a pooled
+   thread carrying somebody else's context, nor under OSGi; in those, `registerLoader` still works and
+   depends on nothing. Since a loader that is not found does not fail — its file falls through to the
+   properties loader and is read as properties, quietly — OWNER now reports what it found at the `CONFIG`
+   logging level, including when it found nothing. `org.aeonbits.owner.level = CONFIG` is the switch, and it
+   is silent unless you turn it on. See the [documentation](/owner/docs/loading-strategies/#letting-it-be-found-instead).
+ * **A format may go by more than one name.** `Loader.defaultSpecsFor(String)` returns every default file
+   name a loader offers, for the formats spelled two ways — `.yaml` and `.yml`, `.ini` and `.cfg`. It is a
+   `default` method, and so is `defaultSpecFor`, which now returns `null` by default: declining to be looked
+   for is a choice a loader is allowed to make, and `SystemLoader` and `DotEnvLoader` both make it. Nothing
+   that implements `Loader` today has to change, or even to be recompiled.
  * A circular variable reference is now reported instead of being followed. A property whose value leads back to
    the property itself cannot be resolved, and an `IllegalArgumentException` names the chain that closes the
    loop — `Circular variable reference: ${a} -> ${b} -> ${a}` — where up to 1.0.12 the same configuration
@@ -377,6 +426,14 @@ closed only when it has been understood.
    different variants; both are now uniform. The Maven wrapper sources are excluded, as they ship under Apache 2.0.
 
 #### Bugs fixes
+ * An XML source carrying a query string was not recognised as XML. `XMLLoader` decided from
+   `URL.getFile()`, which by contract is the path **plus the query**, so
+   `@Sources("https://config/app.xml?v=2")` failed its own test, fell through to `PropertiesLoader` — which
+   accepts everything the others turn down — and was read as a properties file. There was no error and no
+   warning: the configuration came back holding nothing but its defaults. The format is now decided from the
+   path alone, so a query changes nothing about how a source is read, and a query on a `file:` or `jar:`
+   source, where it can mean nothing and would send the handler looking for a file whose name ends in
+   `?v=2`, is refused with a message saying that options go in the fragment.
  * [#195](https://github.com/matteobaccan/owner/issues/195): imported `Map` entries whose key or value is not a
    `String` are now rejected with an `IllegalArgumentException` naming the offending key, instead of being accepted
    and then silently misbehaving. Originally reported and fixed by Stefán Freyr Stefánsson in

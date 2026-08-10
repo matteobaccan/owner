@@ -11,14 +11,14 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [Properties](#properties) | anything the others turn down | `MyConfig.properties` | `java.util.Properties` |
 | [XML](#xml) | a path ending in `.xml` | `MyConfig.xml` | the JDK's SAX parser |
 | [`.env`](#env) | a path ending in `.env` | — never looked for on its own | ours |
-| [System properties and environment](#system) | the `system:properties` and `system:env` pseudo-URIs | — | — |
+| [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
 Two of them are worth reading twice. **`.env` has no standard**, so which rules it is read by is something
 you choose; see [below](#env). And **XML is parsed with hardening turned on**, which in rare cases cannot be
 applied; see [below](#xml).
 
 Nothing else is read yet — no YAML, JSON, TOML or HOCON. What that would take, and in which order it is
-coming, is in [what is not read yet](#not-yet).
+coming, is in [what is not read yet](#what-is-not-read-yet).
 
 <div class="note info">
   <h5>The core has no dependencies, and these do not change that</h5>
@@ -31,7 +31,6 @@ coming, is in [what is not read yet](#not-yet).
 
 How a tree becomes keys
 -----------------------
-{: #flattening}
 
 A loader hands back a `java.util.Properties`, which is flat, and most formats are trees. Every one of them
 therefore answers the same two questions the same way — a dot for a child, square brackets for an element:
@@ -70,7 +69,6 @@ yet, but a source flattened today already produces the key that will be read the
 
 Properties
 ----------
-{: #properties}
 
 The baseline, and the fallback: a source that no other loader claims is read as a
 [standard properties file][props], by `java.util.Properties`, in UTF-8.
@@ -99,7 +97,6 @@ properties, and correctly so.
 
 XML
 ---
-{: #xml}
 
 A source whose path ends in `.xml` is read as XML, in either of two shapes.
 
@@ -224,7 +221,6 @@ shape was read.
 
 `.env`
 ------
-{: #env}
 
 *Since 2.0.0.*
 
@@ -303,14 +299,27 @@ only the first `=` separates, the file is read as UTF-8, and a leading byte orde
 
 ### Choosing the dialect
 
-Per source, in the URI, which is the finest and the one to reach for first:
+Per source, after a `#` in the URI, which is the finest and the one to reach for first:
 
 ```java
-@Sources("file:.env?dialect=dotenv")
+@Sources("file:.env#dialect=dotenv")
 public interface ServerConfig extends Config {
     String name();
 }
 ```
+
+<div class="note info">
+  <h5>The query belongs to the protocol, the fragment belongs to OWNER</h5>
+  <p>
+    <em>Since 2.0.0.</em> Options on a source are written in the fragment — after the <code>#</code>, several
+    of them separated by <code>&amp;</code> — and that is the rule for every loader and every scheme, not a
+    quirk of <code>.env</code>. A query is left strictly alone, because on a remote source it means something
+    to the server:
+    <code>@Sources("https://config/app.env?token=abc#dialect=dotenv")</code> sends the token and keeps the
+    dialect. It is also the only place the options can be written at all for a resource inside a jar, whose
+    URI has no query to speak of.
+  </p>
+</div>
 
 Or for a whole factory, by registering the loader you want. It goes in front of the built-in one:
 
@@ -329,7 +338,7 @@ application.
 A dialect is not a format: it is a name for a bundle of answers, and each answer can be given separately. A
 tool that is not one of the three is still describable.
 
-| Option in the URI | Settings | What it decides |
+| Option | Settings | What it decides |
 |---|---|---|
 | `dialect` | `docker`, `dotenv`, `compose` | the bundle to start from |
 | `quotes` | `strip`, `literal` | whether matching quotes around a value delimit it or belong to it |
@@ -342,7 +351,7 @@ tool that is not one of the three is still describable.
 
 ```java
 // systemd writes an EnvironmentFile that quotes, does not escape, and continues lines with a backslash
-@Sources("file:/etc/myapp.env?quotes=strip&escapes=literal&continuation=allow")
+@Sources("file:/etc/myapp.env#quotes=strip&escapes=literal&continuation=allow")
 ```
 
 The same rules are available in Java, over any dialect:
@@ -356,13 +365,14 @@ EnvDialect systemd = EnvDialect.DOCKER
 factory.registerLoader(new DotEnvLoader(systemd));
 ```
 
-An option or a setting that is not one of the above is **refused, not ignored**, so a typo in a query fails
-at once instead of quietly reading the file by the wrong rules.
+An option or a setting that is not one of the above is **refused, not ignored**, so `#dilaect=docker` fails
+at once instead of quietly reading the file by the wrong rules. The message names the option, the source it
+was written on, and the options that would have been accepted. The same goes for a loader that takes no
+options at all: `classpath:app.properties#dialect=dotenv` is an error, not a line that does nothing.
 
-Two things the query cannot do yet. It does not work on a `classpath:` source, where it would end up part
-of the resource name; and no dialect interpolates `${...}`, because OWNER expands variables in property
-values [itself](/owner/docs/variables-expansion/), after loading and across every source, so a
-loader doing its own would expand them twice.
+One thing no dialect does is interpolate `${...}`, because OWNER expands variables in property values
+[itself](/owner/docs/variables-expansion/), after loading and across every source, so a loader doing its own
+would expand them twice.
 
 ### When the file is wrong
 
@@ -381,7 +391,7 @@ Each raises an `UnsupportedOperationException` naming the file and the line.
 
 Under a dialect that keeps quotes — the default — a value written `NAME="Matteo"` almost certainly came
 from a file meant for `dotenv`. Reading it verbatim is correct, but silent, so `DotEnvLoader` writes one
-`WARNING` per file naming the first key concerned and suggesting `?dialect=dotenv`.
+`WARNING` per file naming the first key concerned and suggesting `#dialect=dotenv`.
 
 It uses `java.util.logging`, which is part of the JDK: OWNER adds no logging dependency, and never will.
 The message is worth reading once and a nuisance afterwards, so here is how to stop it.
@@ -405,15 +415,26 @@ Logger.getLogger(DotEnvLoader.class.getName()).setLevel(Level.OFF);
 `jul-to-slf4j` or into Log4j 2 with its JUL adapter: the message arrives in the ordinary logs, under the
 logger name `org.aeonbits.owner.loaders.DotEnvLoader`.
 
-This is one of only three things OWNER ever says. The others are a hot reload that failed — reported once,
-because the configuration keeps the values it had and tries again at the next check — and the XML parser
-warning [above](#xml). All three sit under `org.aeonbits.owner`, so `org.aeonbits.owner.level = OFF` turns
-off every one of them at a stroke.
+This is one of only three things OWNER ever says without being asked. The others are a hot reload that
+failed — reported once, because the configuration keeps the values it had and tries again at the next check
+— and the XML parser warning [above](#xml). All three sit under `org.aeonbits.owner`, so
+`org.aeonbits.owner.level = OFF` turns off every one of them at a stroke.
+
+There is one thing it says only when asked, and it is worth knowing about before you need it. At the
+`CONFIG` level — which is below `INFO` and therefore silent unless you turn it on — OWNER reports the
+loaders it found on the classpath, including when it found none:
+
+```properties
+org.aeonbits.owner.level = CONFIG
+```
+
+That is the line to reach for when a format seems to be ignored, because a loader that was not found does
+not fail: its file falls through to the properties loader and is read as properties, quietly. See
+[writing your own loader](/owner/docs/loading-strategies/#writing-your-own-loader).
 
 
 System properties and the environment
 -------------------------------------
-{: #system}
 
 Not files, but sources all the same, and named the same way:
 
@@ -430,7 +451,6 @@ See [importing properties](/owner/docs/importing-properties/) for the other ways
 
 What is not read yet
 --------------------
-{: #not-yet}
 
 **YAML, JSON, TOML and HOCON are not supported.** Being able to say what is *not* there is half the point of
 this page, so: there is no partial support, no experimental flag, nothing to turn on. A `.yaml` source given
@@ -438,16 +458,20 @@ to `@Sources` today falls through to the properties loader, which will read it a
 nonsense.
 
 They are coming, in that order of demand rather than of ease, and they are being written by hand so that
-the core keeps its promise of no dependencies. What holds them up is not the parsers but a decision that
-has to come first: a flattened key has no way of expressing a list, which is
-[issue #48](https://github.com/matteobaccan/owner/issues/48), and every one of those formats needs one.
+the core keeps its promise of no dependencies. **What used to hold them up no longer does**: a flattened key
+had no way of expressing a list, which was [issue #48](https://github.com/matteobaccan/owner/issues/48) and
+which every one of those formats needs, and 2.0.0 settled it — the `list[0]` notation described
+[above](#how-a-tree-becomes-keys) works, and the XML loader already emits it. What is left is the parsers
+themselves.
 
 In the meantime, two things work today:
 
-- **A loader of your own.** The [`Loader`][loader] interface has three methods — does it accept this URI,
-  read it into a `Properties`, and what file name should be looked for by default — and it has been stable
-  since 1.0.5. Register it with `factory.registerLoader(...)` and it takes precedence over the built-in
-  ones. Two projects outside this one have been reading YAML and JSON through it for years.
+- **A loader of your own**, and 2.0.0 made that easier in two ways: it can be **found on the classpath**
+  rather than registered by hand, and it can read options off the source it was given. See
+  [writing your own loader](/owner/docs/loading-strategies/#writing-your-own-loader). Two projects outside
+  this one have been reading YAML and JSON through the [`Loader`][loader] interface for years, which has
+  been stable since 1.0.5 and stays that way — everything added in 2.0.0 is a default method, so an
+  implementation written against the old interface needs no change and no recompilation.
 - **[ZooKeeper](/owner/docs/loading-strategies/)**, in the `owner-extras` artifact, for
   configuration that does not come from a file at all.
 

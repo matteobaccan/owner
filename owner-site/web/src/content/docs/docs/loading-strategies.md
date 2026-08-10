@@ -141,7 +141,7 @@ Where the properties come from
 ------------------------------
 
 A `@Sources` entry is a URI, and the loader that reads it is the first one that declares it accepts it.
-Three are available out of the box, and they are consulted in this order:
+Four are available out of the box, and they are consulted in this order:
 
 | Loader | Accepts |
 |---|---|
@@ -157,10 +157,28 @@ Only two of them offer a default file name, so a configuration with no `@Sources
 `MyConfig.properties` and `MyConfig.xml` and nothing more: `SystemLoader` and `DotEnvLoader` answer
 when they are named and cost nothing when they are not.
 
-A loader you register yourself goes in **front of all of these**, so it takes precedence over the
-built-in ones and can be used to take over a URI that one of them would otherwise have accepted.
-
   [props]: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-
+
+### Where a loader of your own sits among them
+
+*Since 2.0.0.* There are two ways in, and they land in different places:
+
+| | Matching a source | Guessing the file name |
+|---|---|---|
+| **registered** with `registerLoader` | first of all | first of all |
+| **found** on the classpath | after the registered ones, before the built-in ones | **last of all** |
+| built in | last, `PropertiesLoader` last of those | in the middle |
+
+Both come before the built-in loaders when a source is being matched — otherwise `PropertiesLoader`, which
+accepts every URL it can resolve, would take their files before they were asked.
+
+The second column is deliberately not the same, and it is the one that matters when a configuration
+declares no `@Sources` at all. Those names are tried in order, and under `LoadType.FIRST` the first that
+resolves is the one that answers. If a loader found on the classpath contributed its name first, adding a
+jar to a build would be enough to make a stray `MyConfig.yaml` start beating the `MyConfig.properties` an
+application already reads — a change of behaviour nobody asked for and nothing announced. Placed last, it
+can only answer for a name nothing else claimed. Registering a loader by hand is a different matter: that is
+something the application said on purpose, so it keeps the front in both columns.
 
 Reading from ZooKeeper
 ----------------------
@@ -222,7 +240,104 @@ Writing your own loader
 
 A loader is an implementation of [`Loader`][loader], which answers three questions: whether it accepts a
 given URI, how to read one into a `java.util.Properties`, and what default file name to look for when the
-configuration declares no `@Sources` at all. Register it on a factory as shown above, and it takes part in
-the resolution like the built-in ones.
+configuration declares no `@Sources` at all.
+
+```java
+public class YamlLoader implements Loader {
+
+    private static final String[] SUFFIXES = {".yaml", ".yml"};
+
+    @Override
+    public boolean accept(URI uri) {
+        return SourceOptions.hasExtension(uri, SUFFIXES);
+    }
+
+    @Override
+    public void load(Properties result, URI uri) throws IOException {
+        SourceOptions.of(uri).refuseUnknown();   // this loader takes no options
+        // ...read the source into result...
+    }
+
+    @Override
+    public String[] defaultSpecsFor(String uriPrefix) {
+        return new String[] { uriPrefix + ".yaml", uriPrefix + ".yml" };
+    }
+}
+```
+
+Register it on a factory as shown above and it takes part in the resolution like the built-in ones.
 
   [loader]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/loaders/Loader.html
+
+### Letting it be found instead
+
+*Since 2.0.0.* A loader declared in `META-INF/services/org.aeonbits.owner.loaders.Loader` is picked up when
+a factory is created, without anyone calling `registerLoader`:
+
+```
+org.example.YamlLoader
+```
+
+It has to be a public class with a public no-argument constructor — that is
+[`ServiceLoader`][serviceloader]'s requirement, not OWNER's. Being found **enables** it: it answers for its
+formats at once, and its default file names join the ones looked for when an interface declares no
+`@Sources`. That is what a jar shipping a format is for, so there is nothing further to turn on.
+
+<div class="note warning">
+  <h5>Which class loader does the looking, and when that matters</h5>
+  <p>
+    The context class loader of the thread that creates the factory, falling back on the one that loaded
+    OWNER when the thread has none. That is right in an ordinary application, where there is effectively one
+    class loader, and it is right in an application server, where OWNER sits in the shared libraries and
+    only the context class loader can see a jar in a web application's <code>WEB-INF/lib</code> — a parent
+    never sees a child's jars.
+  </p>
+  <p>
+    It is not right everywhere. On a thread a container or a pool set up, the context class loader may point
+    at something that knows nothing of your application, and the loader is not found although it is on the
+    class path. Under OSGi there is no class path to search and <code>ServiceLoader</code> needs help from
+    the container to work at all. In both cases, call <code>registerLoader</code>: that route depends on
+    nothing.
+  </p>
+</div>
+
+<div class="note warning">
+  <h5>A loader that is not found does not look like an error</h5>
+  <p>
+    <code>PropertiesLoader</code> accepts every URL it can resolve and is consulted last, so a
+    <code>app.yaml</code> whose loader was not found is not left unread — it is read <b>as a properties
+    file</b>, and the configuration comes back holding almost nothing, with nothing said. When a format
+    seems to be ignored, put <code>org.aeonbits.owner.level = CONFIG</code> in a
+    <code>logging.properties</code>: OWNER then names the loaders it found, including when it found none,
+    which tells a loader that is absent from a loader that is broken.
+  </p>
+</div>
+
+  [serviceloader]: https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html
+
+### Options on a source
+
+*Since 2.0.0.* A loader can be told something about one particular source, written in the fragment of its
+URI — after the `#`, several separated by `&`:
+
+```java
+@Sources("file:.env#dialect=dotenv&quotes=strip")
+```
+
+**The query belongs to the protocol and the fragment belongs to OWNER.** A query is never touched, because
+on a remote source it means something to the server; the fragment is never sent to one. It is also the only
+place the options can be written for a resource inside a jar, whose URI has no query to speak of.
+`SourceOptions.of(uri)` reads them and `refuseUnknown(...)` turns away the ones a loader does not
+understand, naming the offender, the source and what would have been accepted — because an option that is
+misspelt and ignored is a configuration that is wrong and says nothing.
+
+The only built-in loader with options of its own is the `.env` one; see
+[File formats](/owner/docs/file-formats/#one-rule-at-a-time).
+
+### What 2.0.0 added, and what it did not break
+
+Everything above is additive. `defaultSpecsFor` and a default `defaultSpecFor` are `default` methods, so a
+`Loader` written against 1.x compiles and runs unchanged, and does not need recompiling; a loader offering a
+single file name may still say so with `defaultSpecFor`, and one whose format goes by two names overrides
+`defaultSpecsFor` instead. Returning `null` from the first, or an empty array from the second, means the
+loader adds nothing to what is looked for — which is what `SystemLoader` and `DotEnvLoader` both do.
