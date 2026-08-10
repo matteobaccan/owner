@@ -488,10 +488,7 @@ OWNER v1.0.11 contains following enhancements and bug fixes.
  
 #### Site Enhancements
  * [#247](https://github.com/matteobaccan/owner/pull/247): Documentation for system:properties and system:env.
- * Fixed [Sonar](https://sonarcloud.io/project/overview?id=matteobaccan_owner) and 
-   Travis; but still it looks that 
-   Coveralls has issue to link source files to github, I need to look 
-   more into it.
+ * Fixed [Sonar](https://sonarcloud.io/project/overview?id=matteobaccan_owner) and Travis.
  * [#274](https://github.com/matteobaccan/owner/pull/247): 
    Documentation for system:properties and system:env, Update importing-properties.md. 
  * [#246](https://github.com/matteobaccan/owner/pull/246): Fixed doc typos & errors and improved readability.
@@ -736,10 +733,8 @@ v1.0.5.1 contains following enhancements and bug fixes.
  * Restructured maven project to allow sub-modules.
 
 #### Site Enhancements
- * Dyndns dropped free service, so updated links for Sonar, from sheldon.dyndns.tv ->  dev.aeonbits.org
  * Documentation website minor style/layout, updates and improvements.
  * Added [SlideShare presentation](https://www.slideshare.net/LuigiViggiano/owner-31716769) in home page.
- * Added Coveralls. (See [#59](https://github.com/matteobaccan/owner/issues/59))
 
 #### Bugs fixes
  * Code cleanup, removed warnings.
