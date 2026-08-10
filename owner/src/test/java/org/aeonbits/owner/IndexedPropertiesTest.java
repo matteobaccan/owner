@@ -46,9 +46,18 @@ public class IndexedPropertiesTest {
         List<String> servers();
     }
 
+    /**
+     * @param pairs key and value alternating, so an even number of them - miscounting is a mistake in the
+     *              test rather than in what it tests, and it should read as one instead of as an array
+     *              index running off the end somewhere inside the helper
+     */
     private static <T extends Config> T create(Class<T> type, String... pairs) {
+        if (pairs.length % 2 != 0)
+            throw new IllegalArgumentException("expected key and value alternating, got " + pairs.length
+                    + " arguments: " + Arrays.toString(pairs));
+
         Properties props = new Properties();
-        for (int i = 0; i < pairs.length; i += 2)
+        for (int i = 0; i + 1 < pairs.length; i += 2)
             props.setProperty(pairs[i], pairs[i + 1]);
         return ConfigFactory.create(type, props);
     }
