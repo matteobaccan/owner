@@ -19,7 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
-import java.util.Date;
+import java.time.LocalTime;
 import java.util.Properties;
 
 /**
@@ -61,7 +61,7 @@ public class HotReloadExample {
         AutoReloadConfig cfg = ConfigFactory.create(AutoReloadConfig.class);
 
         cfg.addReloadListener(event ->
-                System.out.print("\rReload intercepted at " + new Date() + " \n"));
+                System.out.print("\rReload intercepted at " + LocalTime.now() + " \n"));
 
         System.out.println("The program is running. ");
 

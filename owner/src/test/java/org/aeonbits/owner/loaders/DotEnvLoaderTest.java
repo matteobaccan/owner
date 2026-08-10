@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aeonbits.owner.util.Util.system;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -99,14 +100,11 @@ public class DotEnvLoaderTest {
     private static File writeEnvSeparatedBy(String lineSeparator, String... lines) throws IOException {
         File file = Files.createTempFile("owner-dotenv", ".env").toFile();
         file.deleteOnExit();
-        Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), "UTF-8");
-        try {
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), UTF_8)) {
             for (String line : lines) {
                 writer.write(line);
                 writer.write(lineSeparator);
             }
-        } finally {
-            writer.close();
         }
         return file;
     }

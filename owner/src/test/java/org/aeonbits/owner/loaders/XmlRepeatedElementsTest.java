@@ -16,6 +16,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -38,11 +39,8 @@ public class XmlRepeatedElementsTest {
     private static Properties read(String xml) throws IOException {
         File file = Files.createTempFile("owner-xml", ".xml").toFile();
         file.deleteOnExit();
-        Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), "UTF-8");
-        try {
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), UTF_8)) {
             writer.write(xml);
-        } finally {
-            writer.close();
         }
         Properties result = new Properties();
         new XMLLoader().load(result, file.toURI());
@@ -165,11 +163,8 @@ public class XmlRepeatedElementsTest {
     public void aKeyFromAnotherSourceIsNotRenumbered() throws IOException {
         File file = Files.createTempFile("owner-xml", ".xml").toFile();
         file.deleteOnExit();
-        Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), "UTF-8");
-        try {
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), UTF_8)) {
             writer.write("<r><tag>a</tag><tag>b</tag></r>");
-        } finally {
-            writer.close();
         }
 
         Properties shared = new Properties();

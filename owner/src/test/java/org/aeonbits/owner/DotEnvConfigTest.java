@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -111,14 +112,11 @@ public class DotEnvConfigTest {
     }
 
     private static void write(String path, String... lines) throws IOException {
-        Writer writer = new OutputStreamWriter(Files.newOutputStream(new File(path).toPath()), "UTF-8");
-        try {
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(new File(path).toPath()), UTF_8)) {
             for (String line : lines) {
                 writer.write(line);
                 writer.write("\n");
             }
-        } finally {
-            writer.close();
         }
     }
 

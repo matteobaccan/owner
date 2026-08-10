@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -79,7 +81,8 @@ public class IniLoader implements Loader {
     private static final long serialVersionUID = 5806483104578471951L;
 
     private static final String[] SUFFIXES = {".ini", ".cfg"};
-    private static final String ENCODING = "UTF-8";
+    /** The constant rather than the name: a name has to be looked up, and can fail at run time. */
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
     private static final String DEFAULT_SECTION = "DEFAULT";
     /** Written as an escape on purpose: the character itself is invisible, so a mangled file would look right. */
     private static final char BYTE_ORDER_MARK = '﻿';
@@ -518,11 +521,8 @@ public class IniLoader implements Loader {
         /** Python's DEFAULT section supplies what a section does not say for itself, and never overrides it. */
         private void applyInheritedDefaults() {
             for (String each : sections)
-                for (Map.Entry<String, String> entry : inherited.entrySet()) {
-                    String key = PropertyKeys.child(each, entry.getKey());
-                    if (!read.containsKey(key))
-                        read.put(key, entry.getValue());
-                }
+                for (Map.Entry<String, String> entry : inherited.entrySet())
+                    read.putIfAbsent(PropertyKeys.child(each, entry.getKey()), entry.getValue());
         }
     }
 }

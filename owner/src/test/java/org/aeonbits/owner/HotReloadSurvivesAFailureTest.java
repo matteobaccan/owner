@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
@@ -127,12 +128,9 @@ public class HotReloadSurvivesAFailureTest {
 
     private void write(String line) throws IOException {
         File file = new File(SOURCE);
-        Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), "UTF-8");
-        try {
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), UTF_8)) {
             writer.write(line);
             writer.write("\n");
-        } finally {
-            writer.close();
         }
         // the watcher compares modification times, and the file system may not have the resolution to tell
         // two writes of this test apart on its own

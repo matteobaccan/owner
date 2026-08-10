@@ -58,13 +58,13 @@ public class PropertiesInvocationHandlerTest {
     @Test
     public void testListPrintStream() throws Throwable {
         handler.invoke(proxy, MyConfig.class.getDeclaredMethod("list", PrintStream.class), printStream);
-        verify(properties).list(eq(printStream));
+        verify(properties).list(printStream);
     }
 
     @Test
     public void testListPrintWriter() throws Throwable {
         handler.invoke(proxy, MyConfig.class.getDeclaredMethod("list", PrintWriter.class), printWriter);
-        verify(properties).list(eq(printWriter));
+        verify(properties).list(printWriter);
     }
 
     // Stubbing the Reflection static methods keeps this test focused on the dispatching logic of
