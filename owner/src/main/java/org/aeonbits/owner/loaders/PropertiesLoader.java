@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -26,8 +25,6 @@ import java.util.Properties;
 public class PropertiesLoader implements Loader {
 
     private static final long serialVersionUID = -1781643040589572341L;
-    /** The constant rather than the name: a name has to be looked up, and can fail at run time. */
-    private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
     @Override
     public boolean accept(URI uri) {
@@ -68,7 +65,7 @@ public class PropertiesLoader implements Loader {
      * @throws IOException if there is some I/O error while reading.
      */
     void load(Properties result, InputStream input) throws IOException {
-        try (InputStreamReader characters = new InputStreamReader(input, DEFAULT_ENCODING)) {
+        try (InputStreamReader characters = new InputStreamReader(input, StandardCharsets.UTF_8)) {
             result.load(characters);
         }
     }

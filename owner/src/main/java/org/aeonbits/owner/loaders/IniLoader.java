@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -81,8 +80,6 @@ public class IniLoader implements Loader {
     private static final long serialVersionUID = 5806483104578471951L;
 
     private static final String[] SUFFIXES = {".ini", ".cfg"};
-    /** The constant rather than the name: a name has to be looked up, and can fail at run time. */
-    private static final Charset ENCODING = StandardCharsets.UTF_8;
     private static final String DEFAULT_SECTION = "DEFAULT";
     /** Written as an escape on purpose: the character itself is invisible, so a mangled file would look right. */
     private static final char BYTE_ORDER_MARK = '﻿';
@@ -116,7 +113,7 @@ public class IniLoader implements Loader {
     public void load(Properties result, URI uri) throws IOException {
         IniDialect effective = dialectFor(uri);
         try (InputStream input = uri.toURL().openStream();
-             InputStreamReader characters = new InputStreamReader(input, ENCODING);
+             InputStreamReader characters = new InputStreamReader(input, StandardCharsets.UTF_8);
              BufferedReader reader = new BufferedReader(characters)) {
             new Parser(readLines(reader), effective, uri).run(result);
         }
