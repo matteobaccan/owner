@@ -27,9 +27,9 @@
     </modules>
 
     <inceptionYear>2012</inceptionYear>
+    <!-- aeonbits.org no longer exists; the name is kept as attribution, the dead link is not. -->
     <organization>
         <name>Luigi R. Viggiano</name>
-        <url>https://www.aeonbits.org/</url>
     </organization>
 
     <licenses>
@@ -47,7 +47,6 @@
             <email>luigi.viggiano@gmail.com</email>
             <url>https://github.com/lviggiano/</url>
             <organization>aeonbits.org</organization>
-            <organizationUrl>https://www.aeonbits.org/</organizationUrl>
             <timezone>+1</timezone>
             <roles>
                 <role>dev</role>
