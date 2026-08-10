@@ -475,10 +475,13 @@ public class IniLoader implements Loader {
             }
 
             String full = PropertyKeys.child(section, key);
-            Integer times = seen.get(full);
-            if (times == null) {
+            // how many times this key has been met before now, counted in one place rather than in each
+            // branch below: only the list needs the number, but every branch has to leave the count right
+            int times = seen.getOrDefault(full, 0);
+            seen.put(full, times + 1);
+
+            if (times == 0) {
                 read.put(full, value);
-                seen.put(full, 1);
                 lastKey = full;
                 return;
             }
@@ -496,7 +499,6 @@ public class IniLoader implements Loader {
                     return;
                 default:
                     lastKey = numbered(full, times, value);
-                    seen.put(full, times + 1);
             }
         }
 
