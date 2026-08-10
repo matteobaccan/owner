@@ -23,8 +23,15 @@ Two of those four found **no agreement at all** among the others, which is itsel
 meant the question had to be decided on merit rather than by alignment, and both decisions are written
 down with the reasoning rather than with a citation.
 
-Everything not marked with that date still dates from the snapshot above and still needs re-checking
-before it is relied on.
+**Amended again 2026-08-10**, before deciding C6 rather than after: how the field discovers loaders and
+whether discovery means enablement, whether anyone has per-loader settings or per-source options, what
+happens to a `null` in a tree-shaped source, and whether refusing an unrecognised option has a precedent.
+The first of those found the field **unanimous against what we had proposed**, and the reason it is still
+right to follow them is a difference in precedence models rather than in taste — see below. The one on
+`null` found the two largest in open disagreement.
+
+Everything not marked with one of those dates still dates from the snapshot above and still needs
+re-checking before it is relied on.
 
 
 The landscape
@@ -197,6 +204,88 @@ and it should stay optional, because turning it on by default would start guessi
 Spring Boot 3's answer is the strongest of the four, and it is available to them because `/env` is an
 endpoint with roles and authorization behind it. Our `list()` is a debugging convenience: hiding
 everything by default would break every existing caller and leave the feature useless.
+
+
+Loader discovery against the equivalents
+----------------------------------------
+
+Checked 2026-08-10, while deciding C6. **All three do the opposite of what `FORMATS.md` proposed**, which
+was "discovered and registered, but probed only when asked".
+
+| | discovery | does it imply probing? |
+|---|---|---|
+| **Spring Boot** | `PropertySourceLoader` listed in `META-INF/spring.factories` | **yes.** `StandardConfigDataLocationResolver` collects the extensions of every registered loader and looks for `application.<ext>` for each |
+| **MicroProfile / SmallRye** | `ServiceLoader` on `ConfigSource` / `ConfigSourceProvider` | **yes.** A discovered source is active by the fact of being discovered, ordered by `config_ordinal`, default 100 |
+| **Gestalt** | `ServiceLoader.load(ConfigLoader.class)` in `addDefaultConfigLoaders()` | **yes**, with a twist: register one loader of your own and the defaults are *not* added, so you have to ask for them back |
+
+The reason to follow them is not that they agree. It is that **the disagreement is about precedence, not
+about discovery**: they all merge every source with a defined ordinal, so a discovered loader *adds* a
+source. We resolve `LoadType.FIRST` to exactly one source, and since `registerLoader` inserts at the head
+and `defaultSpecs` walks the list in order, a discovered loader would put its spec **first** — and adding
+a jar to the classpath would silently make a forgotten `MyConfig.yaml` beat a working `MyConfig.properties`.
+
+So the rule that lets us follow the field without importing that risk is to **separate the two orderings**:
+a discovered loader goes to the **head** of the `accept()` list, or `PropertiesLoader` — which accepts
+everything it can resolve — takes its files away from it; and to the **tail** of the default-spec list,
+where it cannot displace the file an application already loads. Those two are the same list today.
+
+Per-loader options: **nobody has a settings namespace for them.** Gestalt configures a loader with a typed
+`ModuleConfig` object registered on the builder, Spring has nothing at all — you register a different
+loader — and SmallRye's settings are per *source* (`smallrye.config.source.file.locations`), not per parser.
+Which answers question 8 in `FORMATS.md`: `owner.loaders.<name>.*` earns nothing that
+`registerLoader(new DotEnvLoader(EnvDialect.DOTENV))` does not already do, so `Loader` needs no name.
+
+**More than one extension per format (our C5) has an exact precedent**: Spring's `PropertySourceLoader`
+declares `String[] getFileExtensions()` — *"the file extensions that the loader supports (excluding the
+'.')"* — an array from the first version. Our `defaultSpecFor` returns a single `String`.
+
+And **per-source options in the URI query are ours alone.** Searched for and not found in any of them:
+Spring uses prefixes on the location (`optional:`, `configtree:`), Gestalt uses objects in code, SmallRye
+uses global settings. That is not an argument against what shipped with `.env` — it distinguishes one file
+from another, which none of those do — but it is the third decision in two days with no field to align
+with, and it is written with reasoning rather than a citation for that reason.
+
+
+Refusing what is not understood
+-------------------------------
+
+Checked 2026-08-10. The question was whether an unrecognised option should be an error, and Spring has
+lived the whole story in [#17241](https://github.com/spring-projects/spring-boot/issues/17241).
+
+They used to ignore in silence a location whose extension no loader could read. A user opened the issue
+because a `.conf` was not being read and nothing said so; Wilkinsona's answer was *"Perhaps we should fail
+or log a warning if [...] none of the known loaders handles the location's file extension"*, and 2.2.0
+made it an error.
+
+The part worth importing is what happened next. The new error **broke somebody's application at startup** —
+a directory written without a trailing slash — and the reporter's own words were *"The new exception did
+point at a problem with my config"*. It had been broken all along, quietly. They did not revert; they put
+the remedy inside the message, which today reads: `File extension is not known to any PropertySourceLoader.
+If the location is meant to reference a directory, it must end in '/' or File.separator`.
+
+So: refusing is right, **and the message has to carry the likely cause**, because the day strictness is
+turned on the people it hits first are the ones whose configuration was already wrong. Same direction at
+SmallRye, where `smallrye.config.mapping.validate-unknown` defaults to `true` and an unmapped property
+under the prefix fails the mapping.
+
+
+Null against the equivalents
+----------------------------
+
+Checked 2026-08-10, for question 9 in `FORMATS.md`. **The two largest disagree**, which is the third time
+in two days.
+
+- **SmallRye drops the key**: `if (value != null) target.put(key, value.toString())` in `YamlConfigSource`.
+  A `host: null` produces no key at all, and neither does an empty list.
+- **Spring writes the empty string**: `result.put(key, (value != null ? value : ""))` in
+  `YamlProcessor#buildFlattenedMap`. It has been a running sore for a decade — SPR-15425, spring-boot
+  #40176, #24133 — because it lands differently per type: a `String` becomes `""` and a `Long` becomes
+  `null`, from the same file.
+
+Two more things from reading that source, both about the flattening convention we chose independently.
+SmallRye indexes as `servers[0].host`, with no dot before the bracket, which is exactly ours. And it
+**quotes a segment containing a dot** — `if (key.contains(".")) key = "\"" + key + "\"";` — which is the
+escaping we deliberately did not build, with the reasoning in `FORMATS.md`.
 
 
 What the gaps line up with

@@ -15,20 +15,33 @@ WEBSITE
 WHERE TO PICK UP
 ----------------
 
-Written at the end of 2026-08-09, when the data model stopped being the thing everything waited for.
-`FORMATS.md` has the detail and the open questions; this is the short version.
+Updated 2026-08-10. `FORMATS.md` has the detail and the open questions; this is the short version.
 
-**Three candidates, and they do not compete for the same reason.** **JSON** is unblocked and the cheapest
-real parser left — a formal specification, a public test suite, 350–450 lines — and writing it is how we
-find out whether indexed keys and the flattening convention were right, while the reasoning is still
-fresh. **Nested interfaces** (#129) is bigger and not a format at all, but until it lands a source holding
-a list of objects flattens correctly to `servers[0].host` and is unreachable. **C6**, loader enablement,
-is small, unblocks nothing on its own, and keeps the formats after it from each inventing their own way of
-being configured.
+**C6 is the one being built**, chosen over JSON and over nested interfaces. Before any of it was written,
+a day went into checking the open questions against Spring Boot, SmallRye/MicroProfile and Gestalt rather
+than deciding them from taste, and that changed the work itself: **a third of C6 no longer exists**, and
+the rule at the centre of it is the opposite of what was planned. The three pieces left, in order:
 
-The argument for JSON first is that everything after it is cheaper for knowing. The first thing it will
-run into is the one question nobody has answered: **what a format that has `null` does about it**, since
-`Properties` cannot hold one. That is question 9 in `FORMATS.md`.
+1. **One shared way of reading the options on a source, and refusing an option it does not recognise.**
+   `DotEnvLoader` already refuses; `PropertiesLoader` and `XMLLoader` do not so much as strip a query,
+   so a misspelt `?dilaect=docker` passes in silence today. Together with the `classpath:` query, which
+   currently resolves no resource and reports nothing — a silent failure of the kind 2026-08-09 was spent
+   removing. Spring lived this exact story in their #17241, and the lesson to copy is not only "refuse"
+   but **"put the likely cause in the message"**, because the day strictness arrives it hits hardest the
+   people whose configuration was already broken.
+2. **`ServiceLoader` discovery, which enables what it discovers** — the field is unanimous on that and we
+   were about to do the opposite. The safe shape for us is to split two orderings that are one list
+   today: head of the `accept()` list, tail of the default-spec list, so a jar added to the classpath
+   cannot make a forgotten `MyConfig.yaml` win over a working `MyConfig.properties`.
+3. **C5, more than one extension per format**, in the same additive touch to the SPI.
+
+**Cancelled, not postponed**: the `owner.loaders.*` settings and any name on `Loader`. Nobody in the field
+has a settings namespace for a loader, and the single thing ours was to express stops existing once
+discovery enables.
+
+**`null` is settled by being moved**: the core keeps its three states and learns nothing new, and a format
+that has a null decides in its own loader, as an option of that format. Two core rules already constrain
+that decision and are written down in `FORMATS.md` so the JSON loader does not rediscover them.
 
 **Two small things left on the floor**, neither urgent:
 

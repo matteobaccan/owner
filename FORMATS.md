@@ -19,6 +19,17 @@ interpolation flag was dropped because OWNER already expands `${…}` itself, a 
 was added in its place, and the `owner.loaders.env.*` settings were **not** built — they belong to
 C6, and what carries the dialect today is registering the loader or a query on the source.
 
+**Amended 2026-08-10, before writing C6 rather than after.** A day was spent checking the open questions
+against the other libraries instead of deciding them from taste, and it paid before a line was written:
+question 8 is cancelled outright — nobody in the field has per-loader settings, so neither do we and
+`Loader` gets no name; question 6 is **inverted**, because all three of Spring Boot, MicroProfile/SmallRye
+and Gestalt probe what they discover, and the reason they can is a difference in precedence models that
+tells us exactly what to do differently; question 5 is closed and the line that stood here about TOON was
+factually wrong; question 9 is answered by being moved out of the core entirely. `COMPARISON.md` holds the
+evidence, each claim next to its source. The one thing to take from all of it: **two of the four checks
+that day found the field in open disagreement**, which is not a failure of the method but its point — it
+says which decisions have to be argued rather than aligned.
+
 
 The constraint that shapes everything
 -------------------------------------
@@ -83,10 +94,10 @@ What the core is missing
 |---|---|---|---|
 | **C1** | Indexed keys / lists (`list[0]`) — issue #48 | JSON, YAML, TOML, HOCON, CBOR | **done 2026-08-09**, `aace753`: `IndexedProperties` in the core, and `XMLLoader` emitting them for repeated elements. The universal blocker, now out of the way |
 | **C2** | A documented flattening convention, with escaping for keys that contain a dot | every tree-shaped format | **done 2026-08-09**, minus the escaping: `PropertyKeys` in `org.aeonbits.owner.loaders` states the convention and is public, since a loader in another artifact will need it. The escaping was deliberately not built — see below |
-| **C3** | Explicit `null` | JSON, YAML, CBOR | **missing.** `Properties` cannot hold a null value. TOML has no null; `.env` and INI have none |
+| **C3** | Explicit `null` | JSON, YAML, CBOR | **withdrawn as a core gap, 2026-08-10.** `Properties` cannot hold a null value and the core will not learn to: the formats it ships have no null, and a format that has one decides for itself, as an option of that format. Two core rules constrain that decision already — see *Null, and why it is not a core rule* |
 | **C4** | ~~Extension-less `accept()`~~ | — | **withdrawn.** `.env` is a file that is all extension, and the existing test shape matches it |
-| **C5** | More than one extension per format | YAML (`.yaml`/`.yml`), HOCON (`.conf`), INI (`.ini`/`.cfg`) | `defaultSpecFor` returns a single `String`. An additive `defaultSpecsFor` would do it, and the SPI must stay compatible — two external projects implement `Loader` by hand |
-| **C6** | Loader enablement and per-loader options | all of them | **partly there.** Shipped with `.env`: options per source, in the URI query, and a dialect per factory by registering the loader. Still missing: the `owner.loaders.*` settings over `ConfigFactory.setProperty`, `ServiceLoader` discovery, and the query on a `classpath:` source (see below) |
+| **C5** | More than one extension per format | YAML (`.yaml`/`.yml`), HOCON (`.conf`), INI (`.ini`/`.cfg`) | `defaultSpecFor` returns a single `String`. An additive `defaultSpecsFor` would do it, and the SPI must stay compatible — two external projects implement `Loader` by hand. **Precedent found 2026-08-10**: Spring's `PropertySourceLoader` has declared `String[] getFileExtensions()` from the first version |
+| **C6** | Loader enablement and per-loader options | all of them | **partly there.** Shipped with `.env`: options per source, in the URI query, and a dialect per factory by registering the loader. Still missing after the decisions of 2026-08-10: `ServiceLoader` discovery, the query on a `classpath:` source, and one shared way of reading and **refusing** the options in it. The `owner.loaders.*` settings are **not** missing — they are cancelled, see question 8 |
 | **C7** | Binary payloads and non-string keys | CBOR | missing: byte strings need base64 or hex, integer keys need a canonical form |
 | **C8** | Selecting a document or a section | YAML multi-document, TOML `[[array of tables]]`, INI sections | a loader option, so **C6** |
 | **C9** | Duplicate keys and merge policy | HOCON merges, TOML forbids, INI varies, JSON leaves it undefined | a loader option, so **C6** |
@@ -94,12 +105,13 @@ What the core is missing
 
 C8, C9 and C10 collapse into C6.
 
-**Where that leaves things, end of 2026-08-09.** The data model is done: `C1` and `C2` shipped, and with
-them the XML hole they were always going to fix — `<tag>a</tag><tag>b</tag>` used to keep only the second
-value. Of the rest, only **C6** stands between here and a tree-shaped format, and only partly: options per
-source and a dialect per factory work, the `owner.loaders.*` settings and `ServiceLoader` discovery do not.
-**C3** — how a format that has `null` says so — is the one nobody has thought about yet and the first that
-JSON will run into. `C5` and `C7` belong to particular formats and can wait for them.
+**Where that leaves things, 2026-08-10.** The data model is done: `C1` and `C2` shipped, and with them the
+XML hole they were always going to fix — `<tag>a</tag><tag>b</tag>` used to keep only the second value.
+**C3 is off the list**, not by being built but by being placed where it belongs, in the loader of a format
+that has a null. Of the rest, only **C6** stands between here and a tree-shaped format, and it is smaller
+than it was a day ago: one third of it turned out to be a namespace of settings nobody in the field has and
+nothing here needs. `C5` is worth doing alongside it, since both are additive default methods on `Loader`
+and the second touch to an SPI costs what the first one did. `C7` belongs to CBOR and waits for it.
 
 
 The formats
@@ -113,7 +125,7 @@ Line counts are estimates for a hand-written parser only; tests run another 1.5�
 | INI | none | 150–250 | low | Same: `;` or `#`, `=` or `:`, nested `[a.b]`, duplicates |
 | JSON | RFC 8259 | 350–450 | low | Nothing subtle: `\uXXXX`, surrogate pairs, numbers. JSONTestSuite exists to check against |
 | CBOR | RFC 8949 | 450–650 | low-medium | A small deterministic spec — easier to get right than YAML or TOML, for all that it is binary |
-| TOON | recent, unverified | ~400 | ? | See below |
+| ~~TOON~~ | toonformat.dev | ~400 | — | **closed 2026-08-10.** Not a configuration format. See below |
 | YAML (subset) | large | 700–1000 | medium | See below |
 | TOML | v1.0.0 | 1200–1800 | medium-high | Dotted keys, four string forms, `_`/hex/oct/bin integers, inf/nan floats, four date-time types, inline tables, `[[arrays of tables]]`, strict redefinition rules. `toml-test` exists |
 | HOCON | Lightbend | 1500–2500 | high | See below |
@@ -138,9 +150,13 @@ configuration in silence — worse than not supporting it. We do have `${}` expa
 head start.
 
 **TOON.** Token-Oriented Object Notation, aimed at cutting token counts when structured data is put
-in an LLM prompt, optimised for uniform tabular arrays. Not intended for hand-written configuration,
-and Java tooling appears to be nil. This is the least certain line in the table and needs checking
-before it is either scheduled or closed.
+in an LLM prompt, optimised for uniform tabular arrays. **Verified 2026-08-10 and closed** — and half
+of what stood here was wrong. The specification is public at `toonformat.dev`, and Java tooling is not
+nil: there is JToon, the community implementation with Jackson integration, `json-io` has added TOON as
+an output format, and there is even a Spring Boot module. What was right is the half that decides it:
+TOON is an encoding for *feeding an LLM*, not a format anybody writes a configuration in by hand. It is
+closed for irrelevance, not for absence of tooling, which is a different reason and would be reopened by
+a different fact — somebody asking for it.
 
 
 Priority
@@ -171,11 +187,19 @@ A plan in phases
 
 0. ~~**`.env` alone.**~~ **Done 2026-08-09**, `d04c500`. It depended on nothing else here and shipped
    on its own, as intended.
-1. **C6, the keystone.** `ServiceLoader` discovery plus `owner.loaders.*` over the `setProperty`
-   machinery that exists. With the rule that settles the probe cost: **always registered, probed
-   only on request.** `@Sources("classpath:app.yaml")` is already explicit and works immediately;
-   having `config.yaml` found automatically is opt-in. Nothing costs anything to whoever uses none
-   of it. **Still open**, and questions 6 and 8 below have to be answered as part of it.
+1. **C6, the keystone.** **In progress, and rewritten 2026-08-10** — what stood here was
+   `ServiceLoader` discovery plus `owner.loaders.*`, with the rule "always registered, probed only on
+   request". The verification against the field cancelled the second half and inverted the rule. What
+   is left, in the order it is worth doing:
+   1. **One shared way of reading a source's options, and refusing what it does not recognise.** Public,
+      in `org.aeonbits.owner.loaders`, used by every loader in the tree — `DotEnvLoader` has the
+      behaviour already and the other two have neither. Plus the `classpath:` query, which today fails
+      by resolving no resource and saying nothing. This is the piece that delivers what C6 is *for*.
+   2. **`ServiceLoader` discovery, which enables** — head of the `accept()` list, tail of the
+      default-spec list. See question 6.
+   3. **C5 in the same touch to the SPI**, as an additive default method, since a second touch costs
+      what the first one did.
+   No `owner.loaders.*` and no name on `Loader`: see question 8.
 2. ~~**C1 + C2, the data model.**~~ **Done 2026-08-09**, `aace753` and `d77165c`. Indexed lists, the
    flattening convention stated in `PropertyKeys`, and the XML hole repaired.
 3. **YAML, then JSON** — in order of demand rather than ease.
@@ -191,7 +215,8 @@ reason:
 - **JSON**, because it is now unblocked and is the cheapest real parser on the list — a formal
   specification, a public test suite to check against, and 350–450 lines. It would be the first proof that
   the data model is right, which is worth having before YAML is written on top of the same assumptions.
-  What it will hit first is **C3**, `null`, which nothing has decided.
+  What it will hit first is `null` — which is now decided to be **its** decision, with the two constraints
+  the core imposes written down for it.
 - **Nested configuration interfaces**, [#129](https://github.com/matteobaccan/owner/issues/129). Bigger,
   and not a format at all, but `servers[0].host` is already produced by the flattener and read by nobody.
   Until it lands, a JSON or YAML source holding a list of objects flattens correctly and is unreachable.
@@ -200,6 +225,11 @@ reason:
 
 The honest ordering argument is that **JSON first tells us whether C1 and C2 were right** while the
 reasoning is still fresh, and everything after it is cheaper for knowing.
+
+**Chosen 2026-08-10: C6 first**, and the day of verification that went into it earned its keep before a
+line was written — it cancelled a third of the work, inverted the discovery rule, and turned up two
+loaders that accept a query nobody handles. JSON follows, and finds its own question about `null`
+already framed.
 
 
 `.env` in detail
@@ -461,6 +491,66 @@ reader that does not exist is the worse trade, so it is written down instead —
 formats page — and can be revisited the day something does need to reverse a flattening.
 
 
+Null, and why it is not a core rule
+-----------------------------------
+
+Decided 2026-08-10, and the decision is about **scope** before it is about behaviour: `null` does not
+become a concept in the core. Properties, XML, `.env` and INI have no null to represent, so nothing in
+the core needs a fourth state; a format that *has* one answers for itself, as **an option of that
+format**, in the loader that reads it. Question 9 is therefore closed here and reopened, deliberately,
+in the first loader that meets it.
+
+What the core offers a loader to write into is three states, and they were measured rather than assumed:
+
+| the source | what the method returns |
+|---|---|
+| no key | the `@DefaultValue`; without one, `null` or `Optional.empty()`; `MissingMandatoryPropertyException` if the method is `@Mandatory` |
+| key with an empty value | **not** the default — unless the method asked with `@DefaultValue(useOnEmpty = true)`, which is `false` unless written. Then per type: an error for numbers, `boolean`, `char`, enum, `Class`, `URL`, `BigDecimal`; `""` for `String`; an empty path for `File`, `Path`, `URI`; an **empty collection** for arrays and collections |
+| key with a value | the value |
+
+The mechanism behind the first two rows is one line of ordering, in `PropertiesManager.load()`: the
+defaults are written into the properties first and the sources are merged **over** them. So a source that
+writes a key overrides the default, and a source that omits it leaves the default standing. Every option
+for `null` is a choice between those two, and nothing else — which is exactly why the core does not need
+to know about it.
+
+### Two constraints the core has already imposed on whoever decides later
+
+Neither is negotiable by a format option, and both were found by working the question through rather than
+by reading the code, so they are written here to save the rediscovery.
+
+- **A `null` element inside a list cannot be omitted.** C1 refuses a gap: if any indexed key is present
+  there must be a `[0]` and the sequence must be consecutive. So `["a", null, "c"]` cannot drop
+  `servers[1]` — that is an error by our own rule, and a worse one, because it reports a malformed list
+  rather than the null that caused it. A format option may write an empty value there, or refuse the
+  document; it may not omit.
+- **An empty list has a representation and a `null` does not.** `servers=` already yields an empty
+  collection, by the table above, so `{"servers": []}` has a faithful reading available and should use
+  it — including the consequence that it overrides a `@DefaultValue`, which is what the file says.
+  A `null` has no such reading: `Properties` cannot hold one.
+
+Which suggests the shape the first loader will most likely land on — write what `Properties` can
+represent, omit only what it cannot — but that is a suggestion to the loader, not a rule of the core,
+and it is not decided here.
+
+### Why this is a format option and not a default
+
+Because the same rule lands differently on two formats we both intend to ship. In JSON you have to type
+`null` for it to be there. **In YAML you do not**: `host:` followed by nothing *is* null, not the empty
+string, and it is the most innocuous line anybody writes. A single core rule would decide the meaning of
+that line for everyone, and it is almost certainly why Spring chose to write `""` and has been unable to
+move since — see `COMPARISON.md`, where SmallRye drops the key and Spring writes the empty string, in
+open disagreement, with a decade of issues on Spring's side.
+
+There is one cost to state plainly whichever way a loader goes, because it is the same cost: **no method
+signature in OWNER can tell "absent" from "explicitly null"** — both resolve to `null` or
+`Optional.empty()`. A loader that omits the key therefore lets a `@DefaultValue` win over an explicit
+`null`, which is not what the author of `{"proxy": null}` meant. The escape is documentation, and it is
+the same trade already accepted for the escaping in C2: a distinction no reader can observe is not worth
+inventing machinery for. The one thing that must not happen is that it gets *arrived at* — which is what
+this section exists to prevent.
+
+
 Where the parsers live
 ----------------------
 
@@ -501,28 +591,46 @@ Open questions
 1. ~~**`.env` default dialect**~~ — **settled and shipped 2026-08-09: `docker`**, with `dotenv` and
    `compose` as presets, seven rules adjustable one at a time, and a warning when a value looks quoted.
 2. **Do we call a YAML subset "YAML"?** Proposed: yes in the title, no in the documentation — a
-   chapter listing exactly what is in and what is out, and a hard error on anchors and tags.
+   chapter listing exactly what is in and what is out, and a hard error on anchors and tags. **Still
+   open, with a precedent found 2026-08-10**: StrictYAML calls itself *"a restricted subset of the YAML
+   specification"*, does **not** call itself YAML, and gives the features it removes — implicit typing,
+   tags, anchors, flow style — a documentation page of their own rather than a paragraph. Whichever way
+   the name goes, the list of what is missing wants that much room.
 3. ~~**`list[0]` or `list.0`?**~~ — **settled 2026-08-09: `list[0]`**, and for a better reason than the
    one written here first. See *Indexed keys* below.
 4. **Where do the parsers live?** Half answered by shipping: `.env` is in the core and that was
    right. Still open, and still uncommitted either way: whether the tree-shaped formats get an
-   `owner-formats` of their own, which is a third artifact to maintain and release.
-5. **TOON: verify or close?**
-6. **Does `ServiceLoader` discovery imply enablement?** Proposed no: discovered and registered, but
-   probed only when asked.
+   `owner-formats` of their own, which is a third artifact to maintain and release. **Checked
+   2026-08-10**: the field splits *per format*, finer than what is proposed here — Gestalt publishes
+   `gestalt-json`, `gestalt-yaml`, `gestalt-toml` and `gestalt-hocon` separately, SmallRye ships the
+   YAML source as its own artifact, and only Spring keeps the loaders in the core with the parser as
+   an optional dependency. A single `owner-formats` sits between the two practices; that is a position
+   to hold deliberately, not one to arrive at.
+5. ~~**TOON: verify or close?**~~ — **verified and closed 2026-08-10**, and the line that used to be
+   here was wrong. See the table above.
+6. ~~**Does `ServiceLoader` discovery imply enablement?**~~ — **settled 2026-08-10: yes, it does**, and
+   the "proposed no" that stood here is what the verification overturned. All three of Spring Boot,
+   MicroProfile/SmallRye and Gestalt probe what they discover. What we take from their disagreement with
+   us is not the answer but the reason: they merge every source by ordinal, so a discovered loader adds
+   one, while we resolve `FIRST` to a single source and a discovered loader would replace it. The rule
+   that lets us follow them safely is to **split the two orderings** — head of the `accept()` list, tail
+   of the default-spec list. `COMPARISON.md` has the table.
 7. **New.** Should `ConfigURIFactory` strip a query from a `classpath:` spec, so that per-source
    options work there as they do on `file:`? Small, and the only reason it is a question is that it
-   touches the core rather than a loader.
-8. **New.** Are the `owner.loaders.*` setting names worth having at all, now that registering the
-   loader you want covers the same ground per factory? They would only earn their keep for something
-   that cannot be expressed by choosing a loader — turning default probing on, most likely.
-9. **New, and the first one JSON will run into.** C3: **how does a format that has `null` say so?**
-   `Properties` cannot hold a null value, so `{"host": null}` has three possible readings — leave the
-   key out, write an empty string, or invent a marker — and they differ in what the method returns:
-   `null`, `""`, or a `@DefaultValue` where one exists. Related and equally undecided: `{"servers": []}`
-   produces no key at all, so an empty list and an absent one are the same thing. Nothing in the library
-   distinguishes them today, and choosing to leave it that way is a legitimate answer — but it should be
-   chosen rather than arrived at.
+   touches the core rather than a loader. **Two things learnt 2026-08-10.** It is cheaper than it
+   looked: `DotEnvLoader` reads the query by cutting `uri.toString()` at the first `?`, not through
+   `getQuery()`, so the query survives being re-appended even to the opaque `jar:` URI a resource inside
+   a jar resolves to — where `getQuery()` would have returned `null` and nobody would have noticed until
+   somebody packaged. And it is wider than it looked: `PropertiesLoader` and `XMLLoader` neither strip
+   the query nor refuse one, so the moment a query works on the classpath it becomes a live path that
+   two loaders do not handle. That is the shared helper C6 is for.
+8. ~~**Are the `owner.loaders.*` setting names worth having at all?**~~ — **settled 2026-08-10: no.**
+   Nobody in the field has a settings namespace for a loader: Gestalt registers a typed `ModuleConfig`
+   object, Spring has nothing and expects you to register a different loader, SmallRye's settings are
+   per source rather than per parser. The one thing the namespace was to express — turning default
+   probing on — stops existing once question 6 is answered the way it is. **`Loader` gets no name.**
+9. ~~**How does a format that has `null` say so?**~~ — **settled 2026-08-10, and the answer is that the
+   core does not answer it.** See *Null, and why it is not a core rule* below.
 10. **New, and cheap.** Should the flattener be reachable as a `Properties`-shaped helper — "here is a
     tree, give me the keys" — rather than only as the two naming methods `PropertyKeys` exposes? Writing
     JSON will answer it by needing it or not. Deliberately not designed in advance.
