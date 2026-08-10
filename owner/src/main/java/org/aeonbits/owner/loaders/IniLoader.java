@@ -260,8 +260,7 @@ public class IniLoader implements Loader {
         void run(Properties result) {
             for (String line : joined()) {
                 number++;
-                if (!readLine(line))
-                    break;
+                readLine(line);
             }
             applyInheritedDefaults();
             result.putAll(read);
@@ -293,24 +292,26 @@ public class IniLoader implements Loader {
             return result;
         }
 
-        /** @return whether to carry on reading; always true, the loop being kept for symmetry with a break. */
-        private boolean readLine(String line) {
+        /**
+         * Reads one line. Nothing stops the reading early: a line this loader cannot make sense of is
+         * refused there and then, so there is no case where it would carry on with less than the whole file.
+         */
+        private void readLine(String line) {
             if (isContinuation(line)) {
                 append(line.trim());
-                return true;
+                return;
             }
 
             String text = line.trim();
             if (text.isEmpty() || isComment(text))
-                return true;
+                return;
 
             if (text.charAt(0) == '[') {
                 openSection(text);
-                return true;
+                return;
             }
 
             assign(text);
-            return true;
         }
 
         private boolean isContinuation(String line) {
