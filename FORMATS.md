@@ -96,8 +96,8 @@ What the core is missing
 | **C2** | A documented flattening convention, with escaping for keys that contain a dot | every tree-shaped format | **done 2026-08-09**, minus the escaping: `PropertyKeys` in `org.aeonbits.owner.loaders` states the convention and is public, since a loader in another artifact will need it. The escaping was deliberately not built — see below |
 | **C3** | Explicit `null` | JSON, YAML, CBOR | **withdrawn as a core gap, 2026-08-10.** `Properties` cannot hold a null value and the core will not learn to: the formats it ships have no null, and a format that has one decides for itself, as an option of that format. Two core rules constrain that decision already — see *Null, and why it is not a core rule* |
 | **C4** | ~~Extension-less `accept()`~~ | — | **withdrawn.** `.env` is a file that is all extension, and the existing test shape matches it |
-| **C5** | More than one extension per format | YAML (`.yaml`/`.yml`), HOCON (`.conf`), INI (`.ini`/`.cfg`) | `defaultSpecFor` returns a single `String`. An additive `defaultSpecsFor` would do it, and the SPI must stay compatible — two external projects implement `Loader` by hand. **Precedent found 2026-08-10**: Spring's `PropertySourceLoader` has declared `String[] getFileExtensions()` from the first version |
-| **C6** | Loader enablement and per-loader options | all of them | **partly there.** Shipped with `.env`: options per source, in the URI query, and a dialect per factory by registering the loader. Still missing after the decisions of 2026-08-10: `ServiceLoader` discovery, the query on a `classpath:` source, and one shared way of reading and **refusing** the options in it. The `owner.loaders.*` settings are **not** missing — they are cancelled, see question 8 |
+| **C5** | More than one extension per format | YAML (`.yaml`/`.yml`), HOCON (`.conf`), INI (`.ini`/`.cfg`) | **done 2026-08-10**, `512ab586`: `defaultSpecsFor` returning `String[]`, and `defaultSpecFor` no longer abstract — both default methods, so the two external projects implementing `Loader` by hand need neither a change nor a recompilation. INI is its first consumer |
+| **C6** | Loader enablement and per-loader options | all of them | **done 2026-08-10**, `673c6ee6` and `8b12f8e2`: options on a source in the **fragment**, read and refused through the public `SourceOptions`; `ServiceLoader` discovery that enables, with the accept order and the default-spec order deliberately reversed; a `CONFIG` line naming what was discovered. The `owner.loaders.*` settings were cancelled rather than postponed — see question 8 |
 | **C7** | Binary payloads and non-string keys | CBOR | missing: byte strings need base64 or hex, integer keys need a canonical form |
 | **C8** | Selecting a document or a section | YAML multi-document, TOML `[[array of tables]]`, INI sections | a loader option, so **C6** |
 | **C9** | Duplicate keys and merge policy | HOCON merges, TOML forbids, INI varies, JSON leaves it undefined | a loader option, so **C6** |
@@ -105,13 +105,17 @@ What the core is missing
 
 C8, C9 and C10 collapse into C6.
 
-**Where that leaves things, 2026-08-10.** The data model is done: `C1` and `C2` shipped, and with them the
-XML hole they were always going to fix — `<tag>a</tag><tag>b</tag>` used to keep only the second value.
-**C3 is off the list**, not by being built but by being placed where it belongs, in the loader of a format
-that has a null. Of the rest, only **C6** stands between here and a tree-shaped format, and it is smaller
-than it was a day ago: one third of it turned out to be a namespace of settings nobody in the field has and
-nothing here needs. `C5` is worth doing alongside it, since both are additive default methods on `Loader`
-and the second touch to an SPI costs what the first one did. `C7` belongs to CBOR and waits for it.
+**Where that leaves things, end of 2026-08-10. Nothing in this table blocks a format any more.** The data
+model shipped on the 9th — `C1` and `C2`, and with them the XML hole they were always going to fix, where
+`<tag>a</tag><tag>b</tag>` used to keep only the second value. The loader plumbing shipped on the 10th —
+`C6` and `C5`, in three commits, after a day spent checking the open questions against the field, which
+cancelled a third of the work before any of it was written. **C3 is off the list** not by being built but by
+being placed where it belongs, in the loader of a format that has a null.
+
+What is left is `C7`, which belongs to CBOR and waits for it, and `C8`/`C9`/`C10`, which are options on a
+source and therefore no longer gaps at all: the machinery for them exists, and **INI is the first format
+that needs two of them** — a section to select and a policy for duplicate keys. That is a large part of why
+it goes first.
 
 
 The formats
@@ -187,41 +191,61 @@ A plan in phases
 
 0. ~~**`.env` alone.**~~ **Done 2026-08-09**, `d04c500`. It depended on nothing else here and shipped
    on its own, as intended.
-1. **C6, the keystone.** **In progress, and rewritten 2026-08-10** — what stood here was
-   `ServiceLoader` discovery plus `owner.loaders.*`, with the rule "always registered, probed only on
-   request". The verification against the field cancelled the second half and inverted the rule. What
-   is left, in the order it is worth doing:
-   1. **One shared way of reading a source's options, and refusing what it does not recognise.** Public,
-      in `org.aeonbits.owner.loaders`, used by every loader in the tree — `DotEnvLoader` has the
-      behaviour already and the other two have neither. Plus the `classpath:` query, which today fails
-      by resolving no resource and saying nothing. This is the piece that delivers what C6 is *for*.
-   2. **`ServiceLoader` discovery, which enables** — head of the `accept()` list, tail of the
-      default-spec list. See question 6.
-   3. **C5 in the same touch to the SPI**, as an additive default method, since a second touch costs
-      what the first one did.
-   No `owner.loaders.*` and no name on `Loader`: see question 8.
+1. ~~**C6, the keystone.**~~ **Done 2026-08-10**, in three commits, and a day of checking the open
+   questions against the field first — which cancelled a third of it before a line was written. The
+   plan that stood here was `ServiceLoader` discovery plus `owner.loaders.*`, with the rule "always
+   registered, probed only on request"; the verification cancelled the second half and inverted the
+   rule.
+   1. **`673c6ee6`** — `SourceOptions`, public: one way to read the options on a source and to refuse
+      what a loader does not recognise, used by every loader in the tree. The options moved from the
+      query to the **fragment**, which removed the stripping that had caused two silent failures — a
+      `.env` over HTTPS losing its token, and an XML with a query read as properties — and made the
+      `classpath:` case work like the others.
+   2. **`8b12f8e2`** — discovery, which enables. Head of the `accept()` list, tail of the default-spec
+      list, context class loader with a fallback, and a `CONFIG` line naming what was found.
+   3. **`512ab586`** — C5, several names per format, as additive default methods.
 2. ~~**C1 + C2, the data model.**~~ **Done 2026-08-09**, `aace753` and `d77165c`. Indexed lists, the
    flattening convention stated in `PropertyKeys`, and the XML hole repaired.
-3. **YAML, then JSON** — in order of demand rather than ease.
-4. **INI, then TOML.**
-5. **HOCON, CBOR, TOON if ever.**
+3. **INI** — see the reordering below.
+4. **JSON, then YAML.**
+5. **TOML, then HOCON, CBOR, TOON if ever.**
 
-### Where to start again
+### Why INI moved in front of JSON and YAML
 
-Phase 2 was the one everything queued behind, and it is out of the way, so the order above is no longer
-the only reading. Three things could sensibly come next, and they are not in competition for the same
-reason:
+Decided 2026-08-10. What stood here was "YAML, then JSON — in order of demand rather than ease", with INI
+after them. Two things changed that had nothing to do with taste.
 
-- **JSON**, because it is now unblocked and is the cheapest real parser on the list — a formal
-  specification, a public test suite to check against, and 350–450 lines. It would be the first proof that
-  the data model is right, which is worth having before YAML is written on top of the same assumptions.
-  What it will hit first is `null` — which is now decided to be **its** decision, with the two constraints
-  the core imposes written down for it.
+**The deadline that made demand the criterion is gone.** Ordering by demand was right while the risk was
+that the data model — public in `PropertyKeys`, and `list[0]` already in the release note — would freeze at
+the 2.0.0 release before anything with real nesting had tested it. **2.0.0 now ships at the end of the
+format work**, so JSON will validate C1 and C2 before the release whatever order they are written in. The
+window does not close, so nothing has to race for it.
+
+**And C6 did not exist when that line was written.** Now it does, it is public, and it has no consumer:
+nothing in the tree needs two extensions, a section, or a duplicate-key policy. INI needs all three. It is
+also the second format with no standard, so it re-uses the dialect machinery `.env` proved rather than
+inventing anything — which is the cheapest kind of validation there is.
+
+The rest of the case for INI is arithmetic. It is the cheapest real format left, 150–250 lines. It belongs
+in the **core** by the rule above, so it does not force question 4, the `owner-formats` artifact, which is
+still open — JSON does, on the day it is written. And its repeated keys are the same shape as the repeated
+XML elements already shipped, so it exercises a corner of C1 as well.
+
+**The one thing against it, stated rather than buried: nobody has ever asked for INI.** Checked against the
+issue tracker on 2026-08-10 — YAML appears in four issues (#14, #53, #34, #212), JSON in three (#240, #53,
+#14), TOML in two, HOCON in one, and INI in **none, ever**. That objection would be decisive if INI shipped
+on its own. It does not: every format goes out together in 2.0.0, so the order decides what *we* learn
+first, not what anybody receives.
+
+### The two that are not formats
+
 - **Nested configuration interfaces**, [#129](https://github.com/matteobaccan/owner/issues/129). Bigger,
   and not a format at all, but `servers[0].host` is already produced by the flattener and read by nobody.
   Until it lands, a JSON or YAML source holding a list of objects flattens correctly and is unreachable.
-- **C6**, which is small, unblocks nothing on its own, and would keep the formats that follow from each
-  inventing their own way of being configured.
+  It has to land before YAML is worth having, and it does not block INI at all.
+- **A configuration that explains itself** — the diagnostics, at `CONFIG` for what was decided and at
+  `WARNING` for what went wrong. See `TODO.md`, where the two halves are listed together because they are
+  one reading of the same code.
 
 The honest ordering argument is that **JSON first tells us whether C1 and C2 were right** while the
 reasoning is still fresh, and everything after it is cheaper for knowing.
@@ -329,25 +353,29 @@ processing*.
 
 **Shipped:**
 
-- Per source, in the URI query: `@Sources("file:.env?dialect=dotenv")`, and one rule at a time with
-  `?quotes=strip`. Finer than an annotation on the interface would be, since it distinguishes one
-  source from another, so no new annotation was needed. `dialect` sets the starting point wherever in
-  the query it appears, and the single rules apply over it. An unknown option or setting is refused,
+- Per source, **in the fragment**: `@Sources("file:.env#dialect=dotenv")`, and one rule at a time with
+  `#quotes=strip`, several separated by `&`. Finer than an annotation on the interface would be, since
+  it distinguishes one source from another, so no new annotation was needed. `dialect` sets the starting
+  point wherever it appears, and the single rules apply over it. An unknown option or setting is refused,
   not ignored.
 - Per factory, by registering the loader that suits:
   `factory.registerLoader(new DotEnvLoader(EnvDialect.DOTENV))`, which needs no new machinery at all —
   registration pushes to the front of the list, so it takes over from the built-in one.
 
-**Not built, and it belongs to C6:** the `owner.loaders.env.*` settings over
-`ConfigFactory.setProperty`. The convention exists and is right, but nothing in phase 0 needed it, and
-the naming should be settled once for every loader rather than invented for this one.
+**It shipped in the query and moved to the fragment on 2026-08-10**, with C6, once the rule had to be
+stated for every loader rather than for this one. The query cannot be claimed: on an
+`https://config/app.env?token=abc` it belongs to the server, and cutting it — which is what phase 0 did,
+on every scheme — sent the request without the token. The fragment is never sent to a server, is excluded
+from `URL.getFile()` so nothing has to be stripped at all, and is readable on the opaque `jar:` URI that
+a resource inside a jar resolves to, where `getQuery()` is `null`. Nothing was released with the query
+form, so the change cost nobody anything.
 
-**A known limitation.** The query works on `file:` and on any other scheme, and **not on
-`classpath:`**: `ConfigURIFactory.newURI` hands a `classpath:` path straight to
-`ClassLoader.getResource`, where `?dialect=dotenv` becomes part of the resource name and the lookup
-fails. Stripping it there is a small change to the core and was left out of phase 0 rather than
-smuggled in. In the loader itself both `accept()` and `load()` do strip the query, as they must, or
-`endsWith(".env")` would fail and `openStream()` would look for a file called `.env?dialect=dotenv`.
+**Cancelled, not postponed:** the `owner.loaders.env.*` settings over `ConfigFactory.setProperty`. Nobody
+in the field has a settings namespace for a loader, and the one thing ours was to express — turning
+default probing on — stopped existing when discovery was made to enable. See question 8.
+
+**The `classpath:` limitation is gone.** `ConfigURIFactory` splits the fragment off before the resource
+lookup and re-attaches it to what it resolved, so options work there exactly as on a file.
 
 An in-file directive — a first-line `# owner:dialect=docker` — was considered and rejected. It travels
 with the file, which is genuinely attractive, but it writes our vendor name into somebody else's
@@ -615,15 +643,16 @@ Open questions
    one, while we resolve `FIRST` to a single source and a discovered loader would replace it. The rule
    that lets us follow them safely is to **split the two orderings** — head of the `accept()` list, tail
    of the default-spec list. `COMPARISON.md` has the table.
-7. **New.** Should `ConfigURIFactory` strip a query from a `classpath:` spec, so that per-source
-   options work there as they do on `file:`? Small, and the only reason it is a question is that it
-   touches the core rather than a loader. **Two things learnt 2026-08-10.** It is cheaper than it
-   looked: `DotEnvLoader` reads the query by cutting `uri.toString()` at the first `?`, not through
-   `getQuery()`, so the query survives being re-appended even to the opaque `jar:` URI a resource inside
-   a jar resolves to — where `getQuery()` would have returned `null` and nobody would have noticed until
-   somebody packaged. And it is wider than it looked: `PropertiesLoader` and `XMLLoader` neither strip
-   the query nor refuse one, so the moment a query works on the classpath it becomes a live path that
-   two loaders do not handle. That is the shared helper C6 is for.
+7. ~~**Should `ConfigURIFactory` strip a query from a `classpath:` spec?**~~ — **overtaken and settled
+   2026-08-10.** The question assumed the options were in the query, and they are not any more: they are
+   in the **fragment**, for every loader and every scheme, because a query on a remote source belongs to
+   the server and cannot be claimed. `ConfigURIFactory` splits the fragment off before the resource
+   lookup and puts it back on what it resolved, so the classpath is no longer the exception.
+   Three things came out of the measuring, and they are why the fragment won: `URL.getFile()` excludes
+   it, so no loader has anything to strip and the code that caused two silent failures is gone rather
+   than fixed; it is never sent to a server; and it survives on the opaque `jar:` URI a resource inside a
+   jar resolves to, where `getQuery()` returns `null` and options in a query would simply have been
+   unreadable — pinned by a test that builds a jar, that being the part of the reasoning trusted least.
 8. ~~**Are the `owner.loaders.*` setting names worth having at all?**~~ — **settled 2026-08-10: no.**
    Nobody in the field has a settings namespace for a loader: Gestalt registers a typed `ModuleConfig`
    object, Spring has nothing and expects you to register a different loader, SmallRye's settings are

@@ -29,33 +29,53 @@ RELEASING
 WHERE TO PICK UP
 ----------------
 
-Updated 2026-08-10. `FORMATS.md` has the detail and the open questions; this is the short version.
+Updated at the end of 2026-08-10. `FORMATS.md` has the detail and the open questions; this is the short
+version.
 
-**C6 is the one being built**, chosen over JSON and over nested interfaces. Before any of it was written,
-a day went into checking the open questions against Spring Boot, SmallRye/MicroProfile and Gestalt rather
-than deciding them from taste, and that changed the work itself: **a third of C6 no longer exists**, and
-the rule at the centre of it is the opposite of what was planned. The three pieces left, in order:
+**C6 and C5 are done**, in three commits, and the day spent checking the open questions against Spring
+Boot, SmallRye/MicroProfile and Gestalt before writing any of it paid for itself: it cancelled a third of
+the work, inverted the rule at the centre of it, and turned up two silent failures nobody had noticed.
 
-1. **One shared way of reading the options on a source, and refusing an option it does not recognise.**
-   `DotEnvLoader` already refuses; `PropertiesLoader` and `XMLLoader` do not so much as strip a query,
-   so a misspelt `?dilaect=docker` passes in silence today. Together with the `classpath:` query, which
-   currently resolves no resource and reports nothing — a silent failure of the kind 2026-08-09 was spent
-   removing. Spring lived this exact story in their #17241, and the lesson to copy is not only "refuse"
-   but **"put the likely cause in the message"**, because the day strictness arrives it hits hardest the
-   people whose configuration was already broken.
-2. **`ServiceLoader` discovery, which enables what it discovers** — the field is unanimous on that and we
-   were about to do the opposite. The safe shape for us is to split two orderings that are one list
-   today: head of the `accept()` list, tail of the default-spec list, so a jar added to the classpath
-   cannot make a forgotten `MyConfig.yaml` win over a working `MyConfig.properties`.
-3. **C5, more than one extension per format**, in the same additive touch to the SPI.
+- **`673c6ee6`** — `SourceOptions`, public: one way to read the options on a source and to refuse what a
+  loader does not recognise. The options live in the **fragment** now, which is a rule for every loader and
+  every scheme — the query belongs to the protocol. That removed the stripping that had been losing a token
+  from a `.env` fetched over HTTPS, and repaired an XML with a query string being read as a properties file.
+  The `classpath:` case works like every other.
+- **`8b12f8e2`** — `ServiceLoader` discovery, which **enables** what it finds. The two orderings are
+  separated: head of the `accept()` list so a format loader is asked before `PropertiesLoader` takes its
+  files, tail of the default-spec list so a jar on the classpath cannot make a forgotten `MyConfig.yaml`
+  beat a working `MyConfig.properties`. Context class loader with a fallback, and a `CONFIG` line naming
+  what was found — including when nothing was.
+- **`512ab586`** — C5: a format may go by more than one name, as additive default methods, so no
+  implementation of `Loader` anywhere needs a change or a recompilation.
 
 **Cancelled, not postponed**: the `owner.loaders.*` settings and any name on `Loader`. Nobody in the field
-has a settings namespace for a loader, and the single thing ours was to express stops existing once
-discovery enables.
+has a settings namespace for a loader, and the single thing ours was to express stopped existing once
+discovery was made to enable.
 
 **`null` is settled by being moved**: the core keeps its three states and learns nothing new, and a format
 that has a null decides in its own loader, as an option of that format. Two core rules already constrain
 that decision and are written down in `FORMATS.md` so the JSON loader does not rediscover them.
+
+WHAT IS NEXT: INI, AND WHY IT MOVED IN FRONT
+--------------------------------------------
+
+**INI is next**, ahead of JSON and YAML, which is a change from the order written in `FORMATS.md` and is
+argued there in full. The short version: ordering by demand was right while the data model risked freezing
+at the 2.0.0 release before anything with real nesting had tested it, and **2.0.0 now ships at the end of
+the format work**, so that race is off. Meanwhile C6 exists, is public, and has no consumer — nothing in
+the tree needs two extensions, a section, or a duplicate-key policy, and INI needs all three. It is also
+the cheapest format left, it belongs in the core so it does not force the `owner-formats` artifact
+question, and its repeated keys are the same shape as the repeated XML elements already shipped.
+
+Against it, stated rather than buried: **nobody has ever asked for INI.** The issue tracker has YAML in
+four issues, JSON in three, TOML in two, HOCON in one and INI in none. That would decide it if INI shipped
+alone — it does not, every format goes out together in 2.0.0, so the order decides what we learn first
+rather than what anybody receives.
+
+Settle before writing, as was done for indexed keys: the dialects and what they disagree on, how a section
+becomes a prefix, what a duplicate key does (**C9**, and the answer serves YAML, TOML and HOCON later), and
+whether repeated keys become an indexed list.
 
 **Two small things left on the floor**, neither urgent:
 
