@@ -108,6 +108,15 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!-- demo main() programs and the SonaType release placeholder are not meant to be tested -->
         <sonar.coverage.exclusions>**/examples/**,**/dummy/**</sonar.coverage.exclusions>
+        <!--
+            Writing to the console is what an example is for: the hot reload one asks the reader to edit a
+            file and watch the values change, which a logger would hide behind a configuration they have not
+            got. S106 is right about production code and wrong about a demonstration, so it is turned off
+            there rather than obeyed there.
+        -->
+        <sonar.issue.ignore.multicriteria>consoleInExamples</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.consoleInExamples.ruleKey>java:S106</sonar.issue.ignore.multicriteria.consoleInExamples.ruleKey>
+        <sonar.issue.ignore.multicriteria.consoleInExamples.resourceKey>**/examples/**</sonar.issue.ignore.multicriteria.consoleInExamples.resourceKey>
     </properties>
 
     <profiles>

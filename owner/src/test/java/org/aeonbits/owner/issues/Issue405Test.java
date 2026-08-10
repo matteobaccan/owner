@@ -20,7 +20,6 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * See: https://github.com/matteobaccan/owner/issues/405
