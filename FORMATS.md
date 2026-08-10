@@ -46,11 +46,17 @@ It also sets the standard of honesty we owe: a hand-written parser for a large f
 What the SPI already gives us
 -----------------------------
 
-Verified against the source on 2026-08-09, because two of these were assumed wrong at first.
+Verified against the source on 2026-08-09, because two of these were assumed wrong at first. **Three
+of them were overtaken by C6 on 2026-08-10** and are corrected in place, since a survey that is quietly
+out of date is worse than no survey.
 
-- **`accept(URI)` handles extension-only filenames already.** `XMLLoader` matches with
-  `url.getFile().toLowerCase().endsWith(".xml")`. A file named `.env` has a path ending in `.env`,
-  so the same shape of test accepts both a bare `.env` and a `local.env`. There is nothing to add.
+- **`accept(URI)` handles extension-only filenames already.** A file named `.env` has a path ending in
+  `.env`, so one test accepts both a bare `.env` and a `local.env`. ~~`XMLLoader` matches with
+  `url.getFile().toLowerCase().endsWith(".xml")`, and there is nothing to add.~~ **There was.**
+  `URL.getFile()` is the path *plus the query*, so `config.xml?v=2` failed that test, fell through to
+  `PropertiesLoader` — which accepts anything it can resolve — and was read as a properties file, in
+  silence. Matching now goes through `SourceOptions.path(URI)`, which also handles the opaque URIs that
+  `file:.env` and a resource inside a jar both produce, and where `getPath()` is `null`.
 - **A loader can be registered without being probed.** `SystemLoader.defaultSpecFor` returns `null`
   and `LoadersManager.defaultSpecs` skips nulls. So a loader can answer `@Sources("...")` without
   adding a classpath lookup to every `create()`. This is what makes "support many formats"
@@ -58,20 +64,30 @@ Verified against the source on 2026-08-09, because two of these were assumed wro
 - **A global and a local settings mechanism exist**, with an established naming convention:
   `ConfigFactory.setProperty("owner.key.prefix", ...)`, `owner.key.prefix.from.package`,
   `owner.nested.variable.expansion`. Global through `ConfigFactory`, local through
-  `ConfigFactory.newInstance()`, which carries its own properties. Loader settings should be
-  `owner.loaders.*` and nothing new needs inventing.
+  `ConfigFactory.newInstance()`, which carries its own properties. ~~Loader settings should be
+  `owner.loaders.*` and nothing new needs inventing.~~ **Cancelled 2026-08-10**: nobody in the field has
+  a settings namespace for a loader, and the one thing ours was to express stopped existing when
+  discovery was made to enable. See question 8. The mechanism is still there and still right — for
+  settings that belong to the factory, which these did not.
 - **`defaultSpecs` always builds `prefix + suffix`**, where the prefix is `classpath:` plus the
   class name with dots turned into slashes. A loader is free to ignore the prefix, or to return
   `null`, so this is a convention to choose rather than a limitation to work around.
-- **Query strings survive on `file:` but not on `classpath:`.** `ConfigURIFactory.newURI` passes a
-  `classpath:` path to `ClassLoader.getResource`, where a `?dialect=docker` would become part of the
-  resource name and fail the lookup; `file:` and other schemes go through `new URI(...)` intact.
-  Per-source options in the URI therefore work today for files and need a small change for the
-  classpath.
+- ~~**Query strings survive on `file:` but not on `classpath:`**, so per-source options work for files
+  and need a small change for the classpath.~~ **Superseded 2026-08-10.** The options are not in the
+  query at all: they are in the **fragment**, for every loader and every scheme, because a query on a
+  remote source belongs to the server and cutting it — which is what phase 0 did, on every scheme — sent
+  the request without its token. The fragment is excluded from `URL.getFile()`, so nothing has to be
+  stripped anywhere; it is never sent to a server; and it is readable on an opaque `jar:` URI, where
+  `getQuery()` returns `null`. `ConfigURIFactory` splits it off before the `classpath:` lookup and puts
+  it back on what it resolved, so that scheme is no longer the exception either.
 - **The specs are variable-expanded** before use, so `${...}` already works inside a source spec.
 
 The cost to keep in mind: without `@Sources`, one spec per registered loader is probed on the
 classpath for every configuration interface loaded. Three loaders, three lookups; ten loaders, ten.
+**Measured properly on 2026-08-10, and it is paid whatever the order**: `PropertiesManager.toURIs`
+resolves every spec to a URI before any of them is loaded, so `LoadType.FIRST` short-circuits the
+*loading* and not the *resolution*. Putting the discovered loaders last therefore fixes precedence and
+not cost. An interface that names its sources pays none of it, `defaultSpecs` never being called.
 
 Two more rules, learnt writing the first of these loaders, that every one after it has to keep:
 
@@ -611,6 +627,13 @@ and the dialect together are 742 lines of the core, against 6,852 before them.
 
 That settles half of question 4 below by doing it. The other half — a third artifact for the
 tree-shaped formats — is still open, and nothing so far commits us to it.
+
+**What C6 changed about that question, 2026-08-10.** Until discovery existed, a format in a separate
+artifact reached the user only if the user called `registerLoader` — so the split cost every one of them a
+line of code and a piece of documentation to find. It does not any more: an artifact declaring its loader
+in `META-INF/services` is on as soon as it is on the classpath, which is what people expect of a
+dependency. That does not decide question 4, but it removes the argument that used to weigh most against
+splitting.
 
 
 Open questions
