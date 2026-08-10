@@ -20,28 +20,17 @@
     <description>OWNER's awesome website.</description>
     <packaging>pom</packaging>
 
-    <!-- Install RUBY -->
-    <!-- gem install jekyll bundler -->
-    <!-- ridk install -->
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <configuration>
-                            <target>
-                                <ant antfile="build.xml" target="run" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    
+    <!--
+        This module carries the website sources and build.xml, which publishes
+        the Javadoc to gh-pages. It builds nothing itself.
+
+        It used to bind maven-antrun-plugin to `ant run`, i.e. `jekyll serve`.
+        The site is no longer a Jekyll site: it is an Astro/Starlight project in
+        owner-site/web, served locally with
+
+            cd owner-site/web && npm install && npm run dev
+
+        and published by the "Publish site" GitHub Actions workflow.
+    -->
+
 </project>

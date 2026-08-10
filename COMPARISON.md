@@ -7,7 +7,7 @@ This file is a snapshot taken on **2026-08-07**, for our own use in deciding wha
 It is deliberately not part of the documentation: a comparison of somebody else's API dates fast,
 and this project is the proof — every page on the web comparing OWNER to something else still names
 cfg4j as *the* alternative, and cfg4j has not seen a release since 2017. Statements about OWNER
-belong on the [why page](owner-site/site/docs/why.md) and stay true; statements about other people's
+belong on the [why page](owner-site/web/src/content/docs/docs/why.md) and stay true; statements about other people's
 libraries belong here and need re-checking before they are relied on.
 
 Everything below was verified against the projects themselves — the GitHub API for release dates,

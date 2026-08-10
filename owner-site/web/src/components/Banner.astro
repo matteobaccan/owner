@@ -1,0 +1,55 @@
+---
+/**
+ * Tells the reader, honestly, when a page has not been translated yet.
+ *
+ * Falling back to English is better than a 404, but showing English under an
+ * Italian or Chinese URL without saying so is not: the reader is left guessing
+ * whether the translation is missing or the project simply writes in English.
+ * Starlight already flags the situation as `isFallback`; this surfaces it.
+ *
+ * The default banner is still rendered, so a page can carry both its own
+ * frontmatter banner and this notice.
+ */
+import Default from '@astrojs/starlight/components/Banner.astro';
+
+const { isFallback, lang } = Astro.locals.starlightRoute;
+
+// The notice has to speak the language the reader picked — writing "not yet
+// translated" in English to someone who just asked for Chinese would rather
+// miss the point.
+const NOTICE: Record<string, { text: string; lang: string }> = {
+	it: {
+		text: 'Questa pagina non è ancora tradotta in italiano: quello che segue è il testo inglese.',
+		lang: 'it',
+	},
+	'zh-CN': {
+		text: '此页面尚未翻译成中文，以下为英文原文。',
+		lang: 'zh-CN',
+	},
+};
+
+const notice = isFallback ? NOTICE[lang] : undefined;
+---
+
+<Default />
+
+{
+	notice && (
+		<p class="owner-untranslated" lang={notice.lang} data-pagefind-ignore>
+			{notice.text}
+		</p>
+	)
+}
+
+<style>
+	.owner-untranslated {
+		margin: 0;
+		padding: 0.6rem var(--sl-content-pad-x, 1.5rem);
+		background-color: var(--sl-color-accent-low);
+		color: var(--sl-color-white);
+		border-bottom: 1px solid var(--sl-color-accent);
+		font-size: var(--sl-text-sm);
+		text-align: center;
+		text-wrap: balance;
+	}
+</style>

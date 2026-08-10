@@ -1,0 +1,22 @@
+{
+  "name": "owner-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Documentation website for OWNER — Java properties reinvented.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "check:external": "node scripts/check-external-references.mjs dist"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.41.7",
+    "@fontsource/lato": "^5.3.0",
+    "astro": "^7.2.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

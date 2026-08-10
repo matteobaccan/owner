@@ -1,18 +1,26 @@
 name: Publish site
 
-# Publishes the documentation website: syncs owner-site/site onto the
-# gh-pages branch, from which GitHub Pages builds and serves
+# Builds the documentation website with Astro/Starlight and syncs the result
+# onto the gh-pages branch, from which GitHub Pages serves
 # https://matteobaccan.github.io/owner/
 #
-# The copy is additive, like the historical `ant publish`: files that exist
-# only on gh-pages (e.g. apidocs/, maintained by `ant javadoc publish`) are
-# preserved.
+# The sync deletes files that the build no longer produces, so that the leftover
+# Jekyll sources (_layouts, _includes, _posts, css, js …) do not linger on the
+# branch forever. Two directories are excluded from that deletion because they
+# are not ours to manage and cannot be regenerated from this build:
+#
+#   apidocs/     the Javadoc, published separately by `ant javadoc publish`
+#   .well-known/ holds brave-rewards-verification.txt; deleting it silently
+#                breaks the verification
+#
+# The build also refuses to publish anything that would load a resource from an
+# external host — see owner-site/web/scripts/check-external-references.mjs.
 
 on:
   push:
     branches: [ master ]
     paths:
-      - 'owner-site/site/**'
+      - 'owner-site/web/**'
       - '.github/workflows/site.yml'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -28,6 +36,25 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v7
 
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: owner-site/web/package-lock.json
+
+    - name: Install dependencies
+      working-directory: owner-site/web
+      run: npm ci
+
+    - name: Build the site
+      working-directory: owner-site/web
+      run: npm run build
+
+    - name: Check that nothing is loaded from an external host
+      working-directory: owner-site/web
+      run: npm run check:external
+
     - name: Checkout gh-pages
       uses: actions/checkout@v7
       with:
@@ -35,7 +62,12 @@ jobs:
         path: gh-pages
 
     - name: Sync site content
-      run: rsync -av owner-site/site/ gh-pages/
+      run: |
+        rsync -av --delete \
+          --exclude '.git/' \
+          --exclude 'apidocs/' \
+          --exclude '.well-known/' \
+          owner-site/web/dist/ gh-pages/
 
     - name: Commit and push
       working-directory: gh-pages

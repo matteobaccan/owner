@@ -13,3 +13,9 @@ target/
 .project
 .ant-targets-build.xml
 .vscode
+
+# Website build (owner-site/web). package-lock.json is deliberately NOT ignored:
+# the publish workflow runs `npm ci`, which requires it.
+node_modules/
+owner-site/web/dist/
+owner-site/web/.astro/

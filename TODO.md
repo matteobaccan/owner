@@ -9,8 +9,9 @@ WEBSITE
 
 - [x] Write documentation for pre processing feature (see [Preprocessors](https://matteobaccan.github.io/owner/docs/preprocessors/))
 - [x] Write documentation for JMX support (see [JMX support](https://matteobaccan.github.io/owner/docs/jmx/))
-- [ ] Update the release note: a draft for 2.0.0 is ready in `owner-site/site/_drafts/owner-2-0-0-released.md`,
-      to be moved into `_posts/` (with the release date in the file name and front matter) when 2.0.0 is published.
+- [ ] Update the release note: the 2.0.0 announcement is already on the site, at the top of
+      `owner-site/web/src/content/docs/news.md`, behind a notice saying the version is not out yet.
+      When 2.0.0 is published, remove that notice and add the release date.
 
 WHERE TO PICK UP
 ----------------

@@ -1,0 +1,75 @@
+---
+/**
+ * Restores the credits the Jekyll footer carried on every page: who maintains
+ * the project, the JetBrains open source licence acknowledgement, and where the
+ * site is hosted. The default Starlight footer — pagination, edit link, last
+ * updated — is kept and these sit underneath it.
+ */
+import Default from '@astrojs/starlight/components/Footer.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Default />
+
+<div class="owner-credits">
+	<p>
+		Project maintained by <a href="https://github.com/matteobaccan">Matteo Baccan</a>, and the{' '}
+		<a href="https://github.com/matteobaccan/owner/graphs/contributors">awesome contributors</a>.
+	</p>
+	<p>
+		Developed with{' '}
+		<a href="https://www.jetbrains.com/idea/">
+			<img src={`${base}img/ij-logo.png`} alt="IntelliJ IDEA" width="30" height="30" />
+		</a>
+	</p>
+	<p>
+		Hosted on{' '}
+		<a href="https://github.com">
+			<img
+				class="github-wordmark"
+				src={`${base}img/footer-logo.png`}
+				alt="GitHub"
+				width="100"
+				height="30"
+			/>
+		</a>
+	</p>
+</div>
+
+<style>
+	.owner-credits {
+		margin-top: 2rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--sl-color-hairline);
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 2rem;
+		align-items: center;
+		justify-content: space-between;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+
+	.owner-credits p {
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.owner-credits img {
+		width: auto;
+		height: 1.8em;
+	}
+
+	/*
+	 * The GitHub wordmark is a pale grey bitmap drawn for the dark site the
+	 * project has had since 2012. Left alone on the light theme it is pale grey
+	 * on white, which is to say invisible; inverting it keeps the same asset
+	 * legible in both themes.
+	 */
+	:global(:root[data-theme='light']) .github-wordmark {
+		filter: invert(1);
+	}
+</style>

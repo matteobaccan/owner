@@ -1,0 +1,76 @@
+---
+title: OWNER
+description: Get rid of the boilerplate code in properties based configuration.
+template: splash
+hero:
+  tagline: Java™ properties reinvented. Declare an interface, annotate it, and stop writing code that loads, converts and manages configuration.
+  actions:
+    - text: Get started
+      link: /owner/docs/welcome/
+      icon: right-arrow
+    - text: Why OWNER?
+      link: /owner/docs/why/
+      icon: open-book
+      variant: minimal
+    - text: View on GitHub
+      link: https://github.com/matteobaccan/owner
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## See how it works
+
+Put your settings in a properties file, exactly as you already do:
+
+```properties title="ServerConfig.properties"
+port=80
+hostname=foobar.com
+maxThreads=100
+```
+
+Declare an interface next to it, and let OWNER do the wiring:
+
+```java title="ServerConfig.java"
+import org.aeonbits.owner.Config;
+
+public interface ServerConfig extends Config {
+    int port();
+    String hostname();
+
+    @DefaultValue("42")
+    int maxThreads();
+}
+```
+
+Then read your configuration as typed values, with no loading code at all:
+
+```java
+ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
+System.out.println("Running on " + cfg.hostname() + ":" + cfg.port());
+```
+
+That is the whole thing. No `Properties` object to load, no `getProperty()` call
+to spell out, no string to parse into an `int`.
+
+<CardGrid>
+  <Card title="Simple" icon="approve-check">
+    No more code to load, convert and manage properties files — just use *your
+    properties* in the simplest possible way.
+
+    [See how OWNER works →](/owner/docs/usage/)
+  </Card>
+  <Card title="Powerful" icon="rocket">
+    Annotation based, automatic type conversion, variables expansion, loading
+    strategies, hot reload, event notifications, and *much* more.
+
+    [See the features list →](/owner/docs/features/)
+  </Card>
+  <Card title="Flexible" icon="puzzle">
+    Pick the features you need and forget the ones you don't. Easy to adopt,
+    scales with complexity, fully documented.
+
+    [Why should I use OWNER? →](/owner/docs/why/)
+  </Card>
+</CardGrid>

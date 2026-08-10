@@ -6,10 +6,20 @@
   ~ See the terms of the BSD license in the documentation provided with this software.
   -->
 
+<!--
+  Publishes the Javadoc onto the gh-pages branch.
+
+  This file used to publish the website too: `copy` copied the Jekyll sources in
+  owner-site/site straight onto gh-pages, so `ant javadoc publish` shipped both
+  at once. The website is now built by the "Publish site" GitHub Actions
+  workflow from owner-site/web, and if this script still copied a site it would
+  overwrite what that workflow published every time somebody updated the
+  Javadoc. So it does not: the two publish paths are separate, and this one owns
+  apidocs/ and nothing else.
+-->
 <project name="site" basedir="." default="help">
     <property environment="env"/>
     <property name="build.directory" value="${basedir}/target"/>
-    <property name="site.directory" value="${basedir}/site"/>
 
     <property name="gh-pages.directory" value="${build.directory}/gh-pages"/>
     <property name="gh-pages.javadoc.directory" value="${gh-pages.directory}/apidocs/latest"/>
@@ -34,26 +44,18 @@
         <git dir="${gh-pages.directory}" command="pull origin gh-pages"/>
     </target>
 
-    <target name="copy-site">
-        <copy todir="${gh-pages.directory}" overwrite="true">
-            <fileset dir="${site.directory}" />
-        </copy>
-    </target>
-
     <target name="copy-javadoc" depends="test-javadoc" if="javadoc.available">
         <copy todir="${gh-pages.javadoc.directory}" overwrite="true">
             <fileset dir="${parent.project.javadoc.directory}"/>
         </copy>
     </target>
 
-    <target name="copy" depends="pull,copy-site,copy-javadoc">
-        <copy file="${site.directory}/.gitignore" todir="${gh-pages.directory}"/>
-    </target>
+    <target name="copy" depends="pull,copy-javadoc"/>
 
     <target name="commit" depends="copy">
         <git dir="${gh-pages.directory}" command="add ."/>
         <git-hash dir="${basedir}" property="sha"/>
-        <git dir="${gh-pages.directory}" command="commit -m 'Updating to ${sha}.'"/>
+        <git dir="${gh-pages.directory}" command="commit -m 'Updating javadocs to ${sha}.'"/>
     </target>
 
     <target name="push" depends="commit">
@@ -66,35 +68,24 @@
         <delete dir="${gh-pages.directory}"/>
     </target>
 
-    <target name="run-drafts">
-        <jekyll-serve options="-w --drafts" />
-    </target>
-
-    <target name="run">
-        <jekyll-serve options="-w" />
-    </target>
-
     <target name="javadoc">
         <mvn dir="${parent.project.directory}" command="javadoc:aggregate" />
-    </target>
-
-    <target name="build">
-        <property name="site.destination.directory" value="${build.directory}/www"/>
-        <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_build-" suffix=".yml" property="build.file"/>
-        <echo file="${build.file}" message="url: file://${site.destination.directory}"/>
-        <jekyll dir="${site.directory}" command="build" options="--destination ${site.destination.directory} --config _config.yml,${build.file}" />
     </target>
 
     <target name="help">
         <echo>
         ant clean                           - cleans up the target dir
-        ant build                           - generates the website in the _site dir (it's not necessary to publish)
         ant javadoc                         - generates javadocs
-        ant publish                         - publish site to gh-pages
-        ant run-drafts                      - run jekyll serve (with '-w --drafts' options)
-        ant run                             - run jekyll serve (with '-w' option)
+        ant publish                         - publishes the javadocs to gh-pages
 
-        Use `ant javadoc publish`, to publish javadocs and the documentation website on https://matteobaccan.github.io/owner
+        Use `ant javadoc publish` to publish the javadocs on
+        https://matteobaccan.github.io/owner/apidocs/latest/
+
+        The documentation website is NOT published from here. It is built from
+        owner-site/web by the "Publish site" GitHub Actions workflow, which runs
+        on every push to master that touches it. To work on it locally:
+
+            cd owner-site/web &amp;&amp; npm install &amp;&amp; npm run dev
         </echo>
     </target>
 
@@ -117,26 +108,6 @@
             <git dir="@{dir}" command="log -1 --pretty=%h">
                 <redirector outputproperty="@{property}"/>
             </git>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="jekyll-serve">
-        <attribute name="options"/>
-        <sequential>
-            <tempfile deleteonexit="true" destdir="${site.directory}" prefix="_serve-" suffix=".yml" property="serve.file"/>
-            <echo file="${serve.file}" message="url: http://localhost:4000"/>
-            <jekyll dir="${site.directory}" command="serve" options="@{options} --config _config.yml,${serve.file}"/>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="jekyll">
-        <attribute name="dir"/>
-        <attribute name="command"/>
-        <attribute name="options"/>
-        <sequential>
-            <exec dir="@{dir}" executable="jekyll" taskname="jekyll">
-                <arg line="@{command} @{options} ${env.JEKYLL_OPTS}"/>
-            </exec>
         </sequential>
     </macrodef>
 

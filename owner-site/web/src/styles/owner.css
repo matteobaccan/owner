@@ -1,0 +1,119 @@
+/*
+ * OWNER visual identity, expressed as design tokens.
+ *
+ * The old site was dark-only: #333 background and #ddd text were written
+ * straight into the rules, so a visitor whose system asked for a light theme
+ * got the dark one anyway. Everything here is a variable instead, declared once
+ * for dark and once for light, and Starlight switches between them from the
+ * `prefers-color-scheme` media query — with a toggle for people who want to
+ * override their system.
+ *
+ * The one thing that does not vary is the yellow. #fc0 has identified OWNER
+ * since 2012 and it stays, but only ever as a surface or a stripe: as *text* it
+ * is unreadable on white (1.5:1), so each theme gets its own readable variant.
+ */
+
+:root {
+  /* The identity yellow. Used for decoration, never for text on light. */
+  --owner-yellow: #fc0;
+
+  /*
+   * Lato is served from node_modules through @fontsource — no request to
+   * fonts.googleapis.com, which is both a privacy leak and, on the old site,
+   * broken anyway: the stylesheet was linked over http:// and every browser
+   * blocked it as mixed content, so the page had been silently falling back to
+   * Helvetica for years.
+   *
+   * Chinese is deliberately left to the system stack. A CJK webfont covering
+   * the simplified set is measured in megabytes, which is not a reasonable
+   * price for a documentation site.
+   */
+  --sl-font: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  --sl-font-system-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+    Consolas, 'Liberation Mono', monospace;
+}
+
+:root:lang(zh-CN),
+:root:lang(zh) {
+  --sl-font: 'Lato', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif;
+}
+
+/* Dark theme — the historical look, rebuilt on neutral greys. */
+:root,
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #453200;
+  --sl-color-accent: #9c7a00;
+  --sl-color-accent-high: #ffd94d;
+
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #eeeeee;
+  --sl-color-gray-2: #c6c6c6;
+  --sl-color-gray-3: #8c8c8c;
+  --sl-color-gray-4: #585858;
+  --sl-color-gray-5: #3a3a3a;
+  --sl-color-gray-6: #282828;
+  --sl-color-black: #1c1c1c;
+}
+
+/*
+ * Light theme.
+ *
+ * The accent used for link text is #6b4d00 rather than the identity yellow:
+ * 7.8:1 against white, where #fc0 would be 1.5:1 and fail WCAG 1.4.3 outright.
+ */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #fff2cc;
+  --sl-color-accent: #9c7a00;
+  --sl-color-accent-high: #6b4d00;
+
+  --sl-color-white: #1c1c1c;
+  --sl-color-gray-1: #282828;
+  --sl-color-gray-2: #3a3a3a;
+  --sl-color-gray-3: #585858;
+  --sl-color-gray-4: #8c8c8c;
+  --sl-color-gray-5: #c6c6c6;
+  --sl-color-gray-6: #eeeeee;
+  --sl-color-gray-7: #f6f6f6;
+  --sl-color-black: #ffffff;
+}
+
+/*
+ * The yellow rule that has sat across the top of the page since 2012.
+ * Drawn as an inset shadow rather than a border so it cannot change the height
+ * of the fixed header and push the content down.
+ */
+header.header {
+  box-shadow: inset 0 4px 0 0 var(--owner-yellow),
+    var(--sl-shadow-md, 0 1px 0 0 var(--sl-color-hairline-shade));
+}
+
+/*
+ * A focus ring that is actually visible.
+ *
+ * The old stylesheet inherited normalize.css 2012, whose only focus style was a
+ * thin dotted outline that `a:active` then removed — leaving keyboard users
+ * with nothing to follow. This is WCAG 2.4.7, and it is not optional.
+ */
+:focus-visible {
+  outline: 3px solid var(--owner-yellow);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/*
+ * Respect a request for less motion. Starlight animates a few transitions and
+ * the old site animated navigation hovers; neither is worth triggering
+ * vestibular symptoms.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
