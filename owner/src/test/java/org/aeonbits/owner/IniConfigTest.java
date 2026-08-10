@@ -7,12 +7,10 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.DefaultValue;
-import org.aeonbits.owner.Config.Key;
-import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;
-import org.aeonbits.owner.Config.Prefix;
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.Config.Prefix;
+import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.loaders.IniDialect;
 import org.aeonbits.owner.loaders.IniLoader;
 import org.junit.Before;

@@ -82,7 +82,7 @@ public class IniLoader implements Loader {
     private static final String[] SUFFIXES = {".ini", ".cfg"};
     private static final String DEFAULT_SECTION = "DEFAULT";
     /** Written as an escape on purpose: the character itself is invisible, so a mangled file would look right. */
-    private static final char BYTE_ORDER_MARK = '﻿';
+    private static final char BYTE_ORDER_MARK = '\uFEFF';
     /** What Python would interpolate and this library will not. */
     private static final Pattern INTERPOLATION = Pattern.compile("%\\([^)]*\\)s");
 

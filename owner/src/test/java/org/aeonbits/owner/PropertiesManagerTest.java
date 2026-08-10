@@ -7,12 +7,11 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.EncryptedValue;
-import org.aeonbits.owner.Config.HotReload;
-import org.aeonbits.owner.Config.HotReloadType;
-import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;
+import org.aeonbits.owner.Config.HotReloadType;
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.Config.LoadPolicy;
+import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.crypto.Decryptor;
 import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
 import org.junit.Test;

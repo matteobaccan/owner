@@ -7,9 +7,8 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Key;
-import org.aeonbits.owner.Config.Prefix;
 import org.aeonbits.owner.Config.Sensitive;
+import org.aeonbits.owner.Config.Prefix;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;

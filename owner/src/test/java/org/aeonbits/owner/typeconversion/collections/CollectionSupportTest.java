@@ -8,7 +8,6 @@
 package org.aeonbits.owner.typeconversion.collections;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.CollectionConverterClass;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Converter;
 import org.junit.Before;

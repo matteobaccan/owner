@@ -7,8 +7,6 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.DefaultValue;
-import org.aeonbits.owner.Config.Key;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -315,7 +315,7 @@ public class IniLoaderTest {
 
     @Test
     public void aByteOrderMarkIsNotPartOfTheFirstKey() throws IOException {
-        assertEquals("1", read("﻿a = 1").getProperty("a"));
+        assertEquals("1", read("\uFEFFa = 1").getProperty("a"));
     }
 
     @Test

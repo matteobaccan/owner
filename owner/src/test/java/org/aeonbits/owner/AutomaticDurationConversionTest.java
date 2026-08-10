@@ -7,8 +7,6 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.ConverterClass;
-import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.converters.DurationConverter;
 import org.junit.Test;
 

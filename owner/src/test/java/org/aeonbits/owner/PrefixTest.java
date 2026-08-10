@@ -7,10 +7,8 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.DisableFeature;
-import org.aeonbits.owner.Config.Key;
-import org.aeonbits.owner.Config.Mandatory;
 import org.aeonbits.owner.Config.Prefix;
+import org.aeonbits.owner.Config.DisableFeature;
 import org.junit.Test;
 
 import java.util.Properties;

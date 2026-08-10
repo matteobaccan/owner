@@ -7,11 +7,8 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.ConverterClass;
-import org.aeonbits.owner.Config.DefaultValue;
-import org.aeonbits.owner.Config.Key;
-import org.aeonbits.owner.Config.Prefix;
 import org.aeonbits.owner.Config.Separator;
+import org.aeonbits.owner.Config.Prefix;
 import org.junit.Test;
 
 import java.lang.reflect.Method;

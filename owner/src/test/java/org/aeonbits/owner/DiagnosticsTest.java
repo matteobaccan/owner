@@ -7,7 +7,6 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.Sources;
 import org.junit.After;
 import org.junit.Before;
