@@ -73,6 +73,13 @@ public interface Config extends Serializable {
      * By default, allowed protocols are the ones allowed by {@link java.net.URL} plus
      * <code>classpath:path/to/resource.properties</code>, but user can specify his own additional protocols.
      * <p>
+     * A source may carry options for the loader that reads it, written in the <b>fragment</b> - after the
+     * <code>#</code>, several of them separated by <code>&amp;</code>, as in
+     * <code>file:.env#dialect=dotenv&amp;quotes=strip</code>. The query is never touched, since on a remote
+     * source it belongs to the server being addressed. An option a loader does not recognise is refused
+     * rather than ignored. See {@link org.aeonbits.owner.loaders.SourceOptions}.
+     * </p>
+     * <p>
      * Unlike {@link LoadPolicy} and {@link HotReload}, this annotation describes a set rather than a single
      * setting, and across a hierarchy of interfaces it <b>accumulates</b>, by design: the URIs declared here come
      * first, followed by those declared on each super-interface, and the resulting list is the one the load

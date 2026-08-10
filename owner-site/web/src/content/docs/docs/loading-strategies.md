@@ -239,8 +239,8 @@ Writing your own loader
 -----------------------
 
 A loader is an implementation of [`Loader`][loader], which answers three questions: whether it accepts a
-given URI, how to read one into a `java.util.Properties`, and what default file name to look for when the
-configuration declares no `@Sources` at all.
+given URI, how to read one into a `java.util.Properties`, and what file name — or names — to look for when
+the configuration declares no `@Sources` at all.
 
 ```java
 public class YamlLoader implements Loader {

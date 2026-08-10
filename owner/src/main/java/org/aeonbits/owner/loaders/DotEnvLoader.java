@@ -327,7 +327,7 @@ public class DotEnvLoader implements Loader {
             Logger.getLogger(DotEnvLoader.class.getName()).warning(String.format(
                     "%d value(s) in %s are wrapped in matching quotes but were read with the quotes included, "
                             + "because the '%s' dialect treats them as part of the value (the first is '%s'). "
-                            + "If they are meant to delimit, add '?dialect=dotenv' to the source or register "
+                            + "If they are meant to delimit, add '#dialect=dotenv' to the source or register "
                             + "new DotEnvLoader(EnvDialect.DOTENV).",
                     quotedButKeptVerbatim.size(), uri, dialect.name(), quotedButKeptVerbatim.get(0)));
         }

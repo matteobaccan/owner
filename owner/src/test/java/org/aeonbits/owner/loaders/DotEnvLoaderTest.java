@@ -694,7 +694,10 @@ public class DotEnvLoaderTest {
         assertEquals(Level.WARNING, log.get(0).getLevel());
         assertTrue(message, message.contains("2 value"));
         assertTrue(message, message.contains("NAME"));
-        assertTrue(message, message.contains("dialect=dotenv"));
+        // the whole remedy, not just the option: advice this message once gave - '?dialect=dotenv' - is now
+        // refused by the loader it came from, and an assertion on 'dialect=dotenv' alone let that through
+        assertTrue(message, message.contains("#dialect=dotenv"));
+        assertFalse(message, message.contains("?dialect=dotenv"));
     }
 
     @Test

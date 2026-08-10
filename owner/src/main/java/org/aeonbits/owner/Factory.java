@@ -97,9 +97,19 @@ public interface Factory {
 
     /**
      * Registers a loader to enables additional file formats.
+     * <p>
+     * A registered loader comes <b>first</b>, both when a source is being matched to a loader and among the
+     * file names looked for when a configuration declares no {@link Config.Sources}. It therefore takes
+     * precedence over the built-in loaders and can take over a source one of them would have accepted.
+     * </p>
+     * <p>
+     * Registering is one of the two ways in, and it is the explicit one: a loader declared in
+     * <code>META-INF/services/org.aeonbits.owner.loaders.Loader</code> is found on the classpath without
+     * this call. See {@link Loader} for the difference, which matters in a container.
+     * </p>
      *
      * @param loader the loader to register.
-     * @throws NullPointerException if specified loader is <code>null</code>.
+     * @throws IllegalArgumentException if the specified loader is <code>null</code>.
      * @since 1.0.5
      */
     void registerLoader(Loader loader);
