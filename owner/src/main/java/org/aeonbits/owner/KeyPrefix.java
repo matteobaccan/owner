@@ -56,11 +56,11 @@ final class KeyPrefix implements Serializable {
     /** No prefix at all, which is what every factory does unless it is told otherwise. */
     static final KeyPrefix NONE = new KeyPrefix("", false);
 
-    private final String literal;
+    private final String literalPrefix;
     private final boolean fromPackage;
 
-    private KeyPrefix(String literal, boolean fromPackage) {
-        this.literal = literal;
+    private KeyPrefix(String literalPrefix, boolean fromPackage) {
+        this.literalPrefix = literalPrefix;
         this.fromPackage = fromPackage;
     }
 
@@ -73,11 +73,11 @@ final class KeyPrefix implements Serializable {
     static KeyPrefix from(Properties props) {
         if (props == null) return NONE;
 
-        String literal = props.getProperty(LITERAL, "");
+        String literalPrefix = props.getProperty(LITERAL, "");
         boolean fromPackage = Boolean.parseBoolean(props.getProperty(FROM_PACKAGE));
-        if (literal.isEmpty() && !fromPackage) return NONE;
+        if (literalPrefix.isEmpty() && !fromPackage) return NONE;
 
-        return new KeyPrefix(literal, fromPackage);
+        return new KeyPrefix(literalPrefix, fromPackage);
     }
 
     /**
@@ -87,8 +87,8 @@ final class KeyPrefix implements Serializable {
      * @return the prefix, possibly empty; never <code>null</code>.
      */
     String of(Class<?> declaringClass) {
-        if (!fromPackage) return literal;
-        return literal + packageOf(declaringClass);
+        if (!fromPackage) return literalPrefix;
+        return literalPrefix + packageOf(declaringClass);
     }
 
     /**
