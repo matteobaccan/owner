@@ -1,0 +1,993 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>What's new | OWNER</title><link rel="canonical" href="https://matteobaccan.github.io/owner/zh-cn/news/"/><link rel="alternate" hreflang="en" href="https://matteobaccan.github.io/owner/news/"/><link rel="alternate" hreflang="it" href="https://matteobaccan.github.io/owner/it/news/"/><link rel="alternate" hreflang="zh-CN" href="https://matteobaccan.github.io/owner/zh-cn/news/"/><link rel="alternate" hreflang="x-default" href="https://matteobaccan.github.io/owner/news/"/><link rel="sitemap" href="/owner/sitemap-index.xml"/><link rel="shortcut icon" href="/owner/favicon.png" type="image/png"/><meta name="generator" content="Astro v7.2.0"/><meta name="generator" content="Starlight v0.41.7"/><meta property="og:title" content="What's new"/><meta property="og:type" content="article"/><meta property="og:url" content="https://matteobaccan.github.io/owner/zh-cn/news/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="Every OWNER version and what changed in it, newest first."/><meta property="og:site_name" content="OWNER"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Every OWNER version and what changed in it, newest first."/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/owner/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/owner/_astro/common.CxSqMRi0.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/owner/_astro/page.Dwipeu-R.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">跳转到内容</a><div class="page sl-flex astro-gqpr5s5a"><header class="header astro-gqpr5s5a"><div class="header astro-nczgtkxc"><div class="title-wrapper sl-flex astro-nczgtkxc"><a href="/owner/zh-cn/" class="site-title sl-flex astro-clw6ags5"><span class="astro-clw6ags5" translate="no">OWNER</span></a></div><div class="sl-flex print:hidden astro-nczgtkxc"><site-search class="astro-nczgtkxc astro-r5ar4xm7" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-r5ar4xm7"><svg aria-hidden="true" class="astro-r5ar4xm7 astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-r5ar4xm7" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-r5ar4xm7" style="display: none;"><kbd class="astro-r5ar4xm7">Ctrl</kbd><kbd class="astro-r5ar4xm7">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-r5ar4xm7"><div class="dialog-frame sl-flex astro-r5ar4xm7"><button data-close-modal class="sl-flex md:sl-hidden astro-r5ar4xm7">取消</button><div class="search-container astro-r5ar4xm7"><div id="starlight__search" class="astro-r5ar4xm7"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/owner/_astro/Search.astro_astro_type_script_index_0_lang.CdLWC6YK.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-nczgtkxc"><div class="sl-flex social-icons astro-nczgtkxc"><a href="https://github.com/matteobaccan/owner" rel="me" class="sl-flex astro-cg55etiy"><span class="sr-only astro-cg55etiy">GitHub</span><svg aria-hidden="true" class="astro-cg55etiy astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-r2p65idu"><span class="sr-only astro-r2p65idu">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-r2p65idu"><option value="dark" class="astro-r2p65idu">深色</option><option value="light" class="astro-r2p65idu">浅色</option><option value="auto" selected class="astro-r2p65idu">自动</option></select><svg aria-hidden="true" class="icon caret astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><starlight-lang-select><label style="--sl-select-width: 7em" class="astro-r2p65idu"><span class="sr-only astro-r2p65idu">选择语言</span><svg aria-hidden="true" class="icon label-icon astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg><select autocomplete="off" class="astro-r2p65idu"><option value="/owner/news/" class="astro-r2p65idu">English</option><option value="/owner/it/news/" class="astro-r2p65idu">Italiano</option><option value="/owner/zh-cn/news/" selected class="astro-r2p65idu">简体中文</option></select><svg aria-hidden="true" class="icon caret astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-lang-select><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-gqpr5s5a" aria-label="主要"><starlight-menu-button class="print:hidden astro-vvx7mffu"><button aria-expanded="false" aria-label="菜单" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-vvx7mffu"><svg aria-hidden="true" class="open-menu astro-vvx7mffu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-vvx7mffu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg></button></starlight-menu-button><script type="module">var e=class extends HTMLElement{btn=this.querySelector(`button`);constructor(){super(),this.btn.addEventListener(`click`,()=>this.toggleExpanded());let e=this.closest(`nav`);e&&e.addEventListener(`keyup`,e=>this.closeOnEscape(e)),matchMedia(`(min-width: 50em)`).addEventListener(`change`,()=>this.setExpanded(!1))}setExpanded(e){this.setAttribute(`aria-expanded`,String(e)),document.body.toggleAttribute(`data-mobile-menu-expanded`,e),document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}toggleExpanded(){this.setExpanded(this.getAttribute(`aria-expanded`)!==`true`)}closeOnEscape(e){e.code===`Escape`&&(this.setExpanded(!1),this.btn.focus())}};customElements.define(`starlight-menu-button`,e);</script><div id="starlight__sidebar" class="sidebar-pane astro-gqpr5s5a"><div class="sidebar-content sl-flex astro-gqpr5s5a"><sl-sidebar-state-persist data-hash="1y5ztv6" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">开始使用</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/welcome/" class="astro-ojxuodky"><span class="astro-ojxuodky">Welcome</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/installation/" class="astro-ojxuodky"><span class="astro-ojxuodky">Installation</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/usage/" class="astro-ojxuodky"><span class="astro-ojxuodky">Basic usage</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">更多功能</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/key-prefix/" class="astro-ojxuodky"><span class="astro-ojxuodky">Key prefix</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/loading-strategies/" class="astro-ojxuodky"><span class="astro-ojxuodky">Loading strategies</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/importing-properties/" class="astro-ojxuodky"><span class="astro-ojxuodky">Importing properties</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/parametrized-properties/" class="astro-ojxuodky"><span class="astro-ojxuodky">Parametrized properties</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/type-conversion/" class="astro-ojxuodky"><span class="astro-ojxuodky">Type conversion</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/variables-expansion/" class="astro-ojxuodky"><span class="astro-ojxuodky">Variables expansion</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/reload/" class="astro-ojxuodky"><span class="astro-ojxuodky">Reload and Hot Reload</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/accessible-mutable/" class="astro-ojxuodky"><span class="astro-ojxuodky">Accessible and Mutable</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/debugging/" class="astro-ojxuodky"><span class="astro-ojxuodky">Debugging and sensitive values</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/disabling-features/" class="astro-ojxuodky"><span class="astro-ojxuodky">Disabling features</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/configuring/" class="astro-ojxuodky"><span class="astro-ojxuodky">Metaconfiguring</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/file-formats/" class="astro-ojxuodky"><span class="astro-ojxuodky">File formats</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/event-support/" class="astro-ojxuodky"><span class="astro-ojxuodky">Event support</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/singleton/" class="astro-ojxuodky"><span class="astro-ojxuodky">Singleton</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/crypto/" class="astro-ojxuodky"><span class="astro-ojxuodky">Crypto support</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/preprocessors/" class="astro-ojxuodky"><span class="astro-ojxuodky">Preprocessors</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/jmx/" class="astro-ojxuodky"><span class="astro-ojxuodky">JMX support</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">其他</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/features/" class="astro-ojxuodky"><span class="astro-ojxuodky">Features</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/why/" class="astro-ojxuodky"><span class="astro-ojxuodky">Why OWNER?</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/faq/" class="astro-ojxuodky"><span class="astro-ojxuodky">FAQ</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/support/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting support</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">项目</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/building/" class="astro-ojxuodky"><span class="astro-ojxuodky">Building from sources</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/contributing/" class="astro-ojxuodky"><span class="astro-ojxuodky">Contributing</span></a></li><li class="astro-ojxuodky"><a href="/owner/zh-cn/docs/license/" class="astro-ojxuodky"><span class="astro-ojxuodky">License</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">其他资源</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/owner/zh-cn/news/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">What&#39;s new</span></a></li><li class="astro-ojxuodky"><a href="https://matteobaccan.github.io/owner/apidocs/latest/index.html" class="astro-ojxuodky"><span class="astro-ojxuodky">Javadoc</span></a></li><li class="astro-ojxuodky"><a href="https://central.sonatype.com/artifact/org.aeonbits.owner/owner" class="astro-ojxuodky"><span class="astro-ojxuodky">Downloads</span></a></li><li class="astro-ojxuodky"><a href="https://github.com/matteobaccan/owner/releases" class="astro-ojxuodky"><span class="astro-ojxuodky">Releases</span></a></li><li class="astro-ojxuodky"><a href="https://github.com/matteobaccan/owner/discussions" class="astro-ojxuodky"><span class="astro-ojxuodky">Discussions</span></a></li><li class="astro-ojxuodky"><a href="https://github.com/matteobaccan/owner/actions" class="astro-ojxuodky"><span class="astro-ojxuodky">CI reports</span></a></li><li class="astro-ojxuodky"><a href="https://sonarcloud.io/project/overview?id=matteobaccan_owner" class="astro-ojxuodky"><span class="astro-ojxuodky">Sonar reports</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-b5gddk54"><div class="social-icons astro-b5gddk54"><a href="https://github.com/matteobaccan/owner" rel="me" class="sl-flex astro-cg55etiy"><span class="sr-only astro-cg55etiy">GitHub</span><svg aria-hidden="true" class="astro-cg55etiy astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-r2p65idu"><span class="sr-only astro-r2p65idu">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-r2p65idu"><option value="dark" class="astro-r2p65idu">深色</option><option value="light" class="astro-r2p65idu">浅色</option><option value="auto" selected class="astro-r2p65idu">自动</option></select><svg aria-hidden="true" class="icon caret astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><starlight-lang-select><label style="--sl-select-width: 7em" class="astro-r2p65idu"><span class="sr-only astro-r2p65idu">选择语言</span><svg aria-hidden="true" class="icon label-icon astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg><select autocomplete="off" class="astro-r2p65idu"><option value="/owner/news/" class="astro-r2p65idu">English</option><option value="/owner/it/news/" class="astro-r2p65idu">Italiano</option><option value="/owner/zh-cn/news/" selected class="astro-r2p65idu">简体中文</option></select><svg aria-hidden="true" class="icon caret astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-lang-select></div></div></div></div></nav><div class="main-frame astro-gqpr5s5a"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-abfeecmu"><aside class="right-sidebar-container print:hidden astro-abfeecmu"><div class="right-sidebar astro-abfeecmu"><div class="lg:sl-hidden astro-q5mffni3"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">本页内容<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">概述</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#200" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">2.0.0</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#release-notes" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">RELEASE NOTES</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1012" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.12</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#release-notes-1" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">RELEASE NOTES</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1010" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.10</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#release-notes-2" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">RELEASE NOTES</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#109" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.9</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#108" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.8</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#107" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.7</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#106" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.6</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1051" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.5.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#105" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.5</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1041" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.4.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#104" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.4</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1031" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.3.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#103" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.3</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#102" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.2</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#101" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#100" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.0</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#other-announcements" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Other announcements</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#telegram-chat-for-users-and-devs" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Telegram Chat for Users and Devs</span></a></li></ul></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/owner/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">概述</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#200" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">2.0.0</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#release-notes" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">RELEASE NOTES</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1012" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.12</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#release-notes-1" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">RELEASE NOTES</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1010" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.10</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#release-notes-2" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">RELEASE NOTES</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#109" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.9</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#108" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.8</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#107" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.7</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#106" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.6</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1051" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.5.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#105" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.5</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1041" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.4.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#104" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.4</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#1031" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.3.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#103" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.3</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#102" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.2</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#101" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.1</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#100" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">1.0.0</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#other-announcements" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Other announcements</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#telegram-chat-for-users-and-devs" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Telegram Chat for Users and Devs</span></a></li></ul></li></ul></nav></starlight-toc><script type="module" src="/owner/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-abfeecmu"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><p class="owner-untranslated astro-uljtwisc" lang="zh-CN" data-pagefind-ignore>此页面尚未翻译成中文，以下为英文原文。</p><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">What&#39;s new</h1><p class="sl-flex astro-3rf4otau"><svg aria-hidden="true" class="astro-3rf4otau astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: var(--sl-color-orange-high);--sl-icon-size: 1.5em;"><path d="M12 16a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10.67 1.47-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53Zm-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51 1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02v-.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1Z"/></svg><span class="astro-3rf4otau">此内容尚不支持你的语言。</span></p></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><p>Every version of OWNER and what changed in it, newest first. The one at the top,
+2.0.0, has not been released yet.</p>
+<p>The 1.0.x announcements were written by
+<a href="https://github.com/lviggiano">Luigi R. Viggiano</a>, the original author of OWNER,
+at the time of each release, and are kept as they were written — including the
+first person, and the links that have since gone stale — because they are a
+record of what happened rather than current documentation. The 2.0.0 one is by
+<a href="https://github.com/matteobaccan">Matteo Baccan</a>, who maintains the project now.</p>
+<p>Published artifacts are listed in the
+<a href="https://github.com/matteobaccan/owner/releases">releases on GitHub</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="200">2.0.0</h2><a class="sl-anchor-link" href="#200"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “2.0.0”</span></a></div>
+<aside aria-label="In preparation — not released yet" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10.67 1.47-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53Zm-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51 1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02v-.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1Z"/></svg>In preparation — not released yet</p><div class="starlight-aside__content"><p>2.0.0 has not been published. What follows is the announcement as it stands while
+the version is being prepared, and it may still change before it ships. The latest
+released version is <a href="#1012">1.0.12</a>.</p></div></aside>
+<p>Version 2.0.0 is the first release since the project maintenance moved from Luigi Viggiano to Matteo Baccan.
+It brings a set of new features, a security hardening pass, a fully modernized build infrastructure, and a long
+list of dependency updates accumulated since 1.0.12. Java 8 is now the minimum runtime, which allowed the
+removal of some compatibility leftovers dating back to Java 6/7: see the “Removals” section below for the
+(short) migration instructions.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="why-200">Why 2.0.0</h4><a class="sl-anchor-link" href="#why-200"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Why 2.0.0”</span></a></div>
+<p>This release was prepared as 1.0.13 and renumbered before publication, because three of its changes alter the
+result of a configuration that used to work, and a patch number would have been a quiet place to put them.
+None is expected to affect a real configuration — the whole test suite of the project passes unchanged, and
+each is described in full below — but the number should say so rather than the changelog alone:</p>
+<ul>
+<li><strong>Braces are matched, not counted from the left.</strong> Up to 1.0.12 a <code dir="auto">${</code> was closed by the first <code dir="auto">}</code> that
+followed it; now it is closed by the one that matches it, which is what makes nested variables possible.
+Only the <code dir="auto">${</code> sequence opens a level, so a lone brace inside an expression is still ordinary text. Should
+an unforeseen combination of braces read differently, <code dir="auto">-Downer.nested.variable.expansion=false</code> restores
+the previous behaviour for the whole JVM, by running the previous implementation unchanged.</li>
+<li><strong>A circular variable reference is an error.</strong> A property whose value leads back to itself used to exhaust
+the stack, or — for the shape <code dir="auto">a=${a:default}</code> — to produce an empty string. It now throws an
+<code dir="auto">IllegalArgumentException</code> naming the chain. No cycle ever produced a useful value, but a configuration
+that quietly resolved to the empty string will now fail loudly, which is the point.</li>
+<li><strong>Repeated sibling elements in an XML source are numbered.</strong> Two elements of the same name under the same
+parent used to write the same key, so the second overwrote the first and every value but the last was
+lost without a word. They now become <code dir="auto">parent.tag[0]</code> and <code dir="auto">parent.tag[1]</code>, which is what
+<a href="/owner/docs/type-conversion/">a list is read from</a>, and there is no longer a <code dir="auto">parent.tag</code>. An
+element that occurs only once is untouched and keeps its plain key, so a document with no repetition
+reads exactly as it did. What changes is the reading of documents that were already losing data: if a
+configuration reads <code dir="auto">parent.tag</code> from an XML that repeats that element, it was getting the last of
+several values, chosen by nothing better than document order.</li>
+</ul>
+<p>Everything else is additive. In particular, a <code dir="auto">Map</code> return type used to throw on every access, so the new
+grouping behaviour described below cannot change the result of any configuration that worked.</p>
+<p>Beyond the individual changes, this release has an explicit goal: to bring the test coverage as high as it can
+practically go, and to bring the number of warnings reported by the static analysers down to zero. A library
+that other projects depend on for their configuration has to be trustworthy first and featureful second, and
+after several years without a release the most valuable thing to do was to verify — line by line — that the
+existing behaviour is the intended one. The “Code quality and test coverage” section below explains what this
+means in practice, and what it turned up.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="release-notes">RELEASE NOTES</h3><a class="sl-anchor-link" href="#release-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “RELEASE NOTES”</span></a></div>
+<p>OWNER v2.0.0 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="removals">Removals</h4><a class="sl-anchor-link" href="#removals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Removals”</span></a></div>
+<p>Java 8 is the minimum runtime required by this release, and the machinery that existed only to support
+older JVMs is gone. If you are affected, migration is a one-liner in each case:</p>
+<ul>
+<li>The <code dir="auto">owner-java8</code> artifact is gone. Its only feature, the support for
+<a href="http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html"><code dir="auto">default</code> methods</a> in config
+interfaces, is now built into the core: <strong>replace the <code dir="auto">owner-java8</code> dependency with <code dir="auto">owner</code></strong> and
+everything keeps working.</li>
+<li>The <code dir="auto">owner-java8-extras</code> artifact is gone. The <code dir="auto">DurationConverter</code>, <code dir="auto">ByteSizeConverter</code> and the
+<code dir="auto">ByteSize</code>/<code dir="auto">ByteSizeUnit</code>/<code dir="auto">ByteSizeStandard</code> classes it contained are now part of the core <code dir="auto">owner</code>
+artifact, with unchanged package names: <strong>replace the <code dir="auto">owner-java8-extras</code> dependency with <code dir="auto">owner</code></strong>,
+and no <code dir="auto">import</code> changes. They were shipped apart only because the core had to run on Java 6 and could
+not so much as name <code dir="auto">java.time.Duration</code>; with Java 8 as the minimum that reason is gone, and neither
+the converters nor the byte size classes bring a dependency of their own. <code dir="auto">owner-extras</code> is left with
+what actually needs a third party library on the classpath — the ZooKeeper loader.</li>
+<li><code dir="auto">ZooKeeperLoader</code> moved from <code dir="auto">org.aeonbits.owner.loaders</code> to <strong><code dir="auto">org.aeonbits.owner.extras.loaders</code></strong>:
+<strong>change the import</strong>, nothing else. It was the one class of <code dir="auto">owner-extras</code> sitting under a package the
+core artifact also owns, and a package cannot live in two modules: as long as it did, the two jars could
+never both be put on the module path, whatever name they declare. The class itself is unchanged, it never
+used anything package-private, and the <code dir="auto">Loader</code> interface it implements stays exactly where it is — a
+custom loader of your own is unaffected, since it lives in a package of yours and only imports
+<code dir="auto">org.aeonbits.owner.loaders.Loader</code>.</li>
+<li>The internal utility class <code dir="auto">org.aeonbits.owner.util.Base64</code> is gone. It was a runtime-selection shim
+between <code dir="auto">java.util.Base64</code> (Java 8+) and <code dir="auto">javax.xml.bind.DatatypeConverter</code> (Java 6/7), never used by the
+library API itself. If you referenced it, <strong>use <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Base64.html"><code dir="auto">java.util.Base64</code></a>
+directly</strong>: <code dir="auto">Base64.encode(bytes)</code> becomes <code dir="auto">Base64.getEncoder().encodeToString(bytes)</code> and
+<code dir="auto">Base64.decode(string)</code> becomes <code dir="auto">Base64.getDecoder().decode(string)</code>.</li>
+<li>The internal utility method <code dir="auto">org.aeonbits.owner.util.Util.eq(a, b)</code> is gone: it predated
+<code dir="auto">java.util.Objects</code> and did exactly what the standard
+<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Objects.html#equals-java.lang.Object-java.lang.Object-"><code dir="auto">Objects.equals(a, b)</code></a>
+does — <strong>use that instead</strong>.</li>
+<li>The test-support methods <code dir="auto">Util.save(File, Properties)</code>, <code dir="auto">Util.saveJar(File, String, Properties)</code>
+and <code dir="auto">Util.delete(File)</code> are gone from the public API: they were never used by the library itself
+and now live in the test suite. If you relied on them, the standard
+<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#store-java.io.OutputStream-java.lang.String-"><code dir="auto">Properties.store</code></a>,
+<code dir="auto">java.util.jar.JarOutputStream</code> and <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html"><code dir="auto">java.nio.file.Files</code></a>
+APIs cover the same ground.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements">Enhancements</h4><a class="sl-anchor-link" href="#enhancements"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>
+<p><code dir="auto">default</code> methods in config interfaces work out of the box with the core <code dir="auto">owner</code> artifact: no extra
+dependency is needed anymore (see Removals above).</p>
+</li>
+<li>
+<p>New <code dir="auto">Accessible.store(Writer, String)</code> overload, mirroring <code dir="auto">Properties.store(Writer, String)</code>; the old
+javadoc note about it being unavailable dated back to the JDK 1.5 era.</p>
+</li>
+<li>
+<p>The single-method SPI interfaces (<code dir="auto">Converter</code>, <code dir="auto">Preprocessor</code>, <code dir="auto">ReloadListener</code>) are now marked
+<code dir="auto">@FunctionalInterface</code>: converters, preprocessors and reload listeners can officially be written as lambdas.</p>
+</li>
+<li>
+<p>A method can return an <strong><code dir="auto">Optional</code></strong> of any supported type, which comes back empty when the property is
+defined nowhere and has no default, instead of returning <code dir="auto">null</code>: <code dir="auto">Optional&lt;Integer&gt; port()</code> reads the same
+value <code dir="auto">Integer port()</code> does, and says in the signature that the caller has to deal with its absence. The
+wrapper only describes the absence, so everything else applies unchanged — <code dir="auto">@Key</code>, <code dir="auto">@Prefix</code>, the
+preprocessors, the variable expansion, the decryption, the tokenization of <code dir="auto">Optional&lt;List&lt;String&gt;&gt;</code> — and a
+value that is <em>wrong</em> rather than missing keeps failing, so a typo does not silently become an empty
+<code dir="auto">Optional</code>. An empty value stays a value, as it does everywhere else. <code dir="auto">@Mandatory</code> and <code dir="auto">Optional</code> written on
+the same method contradict each other and are reported when the Config object is created, while a
+<code dir="auto">@Mandatory</code> written on the interface leaves an <code dir="auto">Optional</code> method alone, being the exception it declares.
+See the <a href="/owner/docs/type-conversion/#optional-values">documentation</a>.</p>
+</li>
+<li>
+<p>New <code dir="auto">@Sensitive</code> annotation: the value of the annotated property (or of every property of the annotated
+interface) is printed as <code dir="auto">********</code> by <code dir="auto">Accessible.list()</code> and by <code dir="auto">toString()</code>. A password written in clear
+in a properties file is a value like any other to this library, and a <code dir="auto">cfg.list(System.out)</code> added while
+debugging and then forgotten is how one ends up in a log. Only the output meant to be read by a human is
+masked: the method itself, <code dir="auto">getProperty</code>, <code dir="auto">fill</code>, <code dir="auto">store</code>, <code dir="auto">storeToXML</code> and the JMX attributes keep
+returning the real value, since those are how a configuration is read and written back and masking them
+would replace the password with the mask in the file at the next save. Masking is not encryption — see
+<code dir="auto">@EncryptedValue</code> for that, whose values are already printed as ciphertext — it only keeps a value from
+being printed by accident. The keys to mask are resolved when the Config object is created, so a
+parametrized property, whose key depends on the arguments, is left alone. See the
+<a href="/owner/docs/debugging/#keeping-a-property-out-of-the-output">documentation</a>.</p>
+</li>
+<li>
+<p>New <code dir="auto">@Mandatory</code> annotation: mark a property (or a whole interface) as required, and get a
+<code dir="auto">MissingMandatoryPropertyException</code> listing all the unresolvable keys when the Config is created, as well as
+on access if a mandatory property disappears later (e.g. after a hot reload). See the
+<a href="/owner/docs/usage/#mandatory-properties">documentation</a>. Originally proposed by Alexander Poulikakos in
+<a href="https://github.com/matteobaccan/owner/pull/216">#216</a>.</p>
+</li>
+<li>
+<p>New <code dir="auto">@Prefix</code> annotation: declare the common prefix of a group of keys once, on the interface, instead of
+repeating it in the <code dir="auto">@Key</code> of every method. <code dir="auto">@Prefix("server.")</code> makes <code dir="auto">String hostname()</code> resolve to
+<code dir="auto">server.hostname</code>, and it is prepended to the <code dir="auto">@Key</code> value as well. The prefix belongs to the interface that
+<em>declares</em> the method, so it never leaks onto the methods a sub-interface inherits, at any depth of the
+hierarchy; it is expanded like the rest of the key, so <code dir="auto">@Prefix("servers.${env}.")</code> selects a section at
+runtime; and it can be switched off per method or per interface with
+<code dir="auto">@DisableFeature(PREFIX)</code>, a new value of <code dir="auto">DisableableFeature</code>. Nothing changes for existing configurations:
+an interface without <code dir="auto">@Prefix</code> resolves its keys exactly as before. See the
+<a href="/owner/docs/key-prefix/">documentation</a>. Originally proposed by Gmugra in
+<a href="https://github.com/matteobaccan/owner/pull/273">#273</a>.</p>
+</li>
+<li>
+<p>A prefix can also be configured <strong>on the factory</strong>, for the interfaces that do not declare a <code dir="auto">@Prefix</code> of
+their own: <code dir="auto">owner.key.prefix</code> prepends a literal to every key, and <code dir="auto">owner.key.prefix.from.package</code> derives
+it from the package of the interface declaring the method, so <code dir="auto">com.example.ServerConfig.port()</code> reads
+<code dir="auto">com.example.port</code>. Being derived rather than typed, the second form follows the class when it is moved to
+another package — and it extends to the keys the convention OWNER already applies to the name of the
+default properties file. It is set through the factory properties, so no method is added to the <code dir="auto">Factory</code>
+interface, and it belongs to the factory rather than to the JVM: two factories do not interfere, and a
+library can create its own and be unaffected by what the application does. <code dir="auto">@Prefix</code> wins over it,
+<code dir="auto">@DisableFeature(PREFIX)</code> switches off both, and the prefix is read when the Config object is created and
+kept for its whole life — so reconfiguring the factory cannot rename the keys of what already exists, a
+reload resolves the same keys, and the mapping survives serialization. See the
+<a href="/owner/docs/key-prefix/">documentation</a>. Answers the request in
+<a href="https://github.com/matteobaccan/owner/issues/259">#259</a>.</p>
+</li>
+<li>
+<p>New <code dir="auto">@DefaultValue(useOnEmpty = true)</code> flag: a property that is present but <strong>empty</strong> is normally a value
+like any other — <code dir="auto">port=</code> is not a missing property, and on a numeric type it fails the conversion — which is
+the distinction MicroProfile Config, Quarkus and Spring Boot all draw, and what keeps a typo like
+<code dir="auto">port=8O80</code>, written with the letter O, from silently becoming the default. The flag covers the one case
+where the distinction gets in the way: a value left empty by a template, as in <code dir="auto">port=${PORT}</code> with <code dir="auto">PORT</code>
+unset. With it, an empty value — whitespace included, and after the variables are expanded — falls back on
+the default as if the property were missing, while a value that is <em>wrong</em> rather than empty keeps failing.
+It is opt-in and per method, so nothing changes for existing configurations. See the
+<a href="/owner/docs/usage/#a-property-that-is-set-but-empty">documentation</a> and the
+<a href="/owner/docs/type-conversion/">table of what an empty value does on each type</a>. Partially answers
+<a href="https://github.com/matteobaccan/owner/issues/191">#191</a>.</p>
+</li>
+<li>
+<p><code dir="auto">ByteSize</code> implements <code dir="auto">Comparable</code>, ordering sizes by the amount of data they represent whatever unit
+they are written in, so <code dir="auto">1 MB</code> sorts before <code dir="auto">1 MiB</code>. The ordering is consistent with equality, which is
+what makes a <code dir="auto">TreeSet</code> of byte sizes agree with a <code dir="auto">HashSet</code> on which of them are duplicates.</p>
+</li>
+<li>
+<p>New <code dir="auto">ByteSize.in(ByteSizeStandard)</code>: the same size written in the unit of that family that suits it — the
+largest one in which the value does not fall below one — so 2048576 bytes read as <code dir="auto">2.048576 MB</code> in SI and
+as <code dir="auto">1.95367431640625 MiB</code> in IEC. Where <code dir="auto">convertTo</code> has to be told the unit, this needs only the family to
+choose from, which is what one usually has when a configured size is to be logged or shown. The answer is
+canonical, depending on the size and never on the unit it happened to be written in, and exact, every
+factor being a power of 1000 or of 1024.</p>
+</li>
+<li>
+<p><code dir="auto">ByteSize</code> is <code dir="auto">Serializable</code>, which a <code dir="auto">Config</code> object already was. The unit is preserved along with the
+value, so a size written as <code dir="auto">1 MB</code> comes back reading as <code dir="auto">1 MB</code> and not as <code dir="auto">1000000 B</code>, and the stream is
+validated on the way in: deserialization runs no constructor, so a stream that does not describe a byte
+size is refused with an <code dir="auto">InvalidObjectException</code> instead of producing an object that fails later.</p>
+</li>
+<li>
+<p><a href="https://github.com/matteobaccan/owner/pull/320">#320</a>: <code dir="auto">EnumSet</code> and <code dir="auto">Set&lt;Enum&gt;</code> are now supported by type
+conversion (thanks to @dexman545).</p>
+</li>
+<li>
+<p><strong><code dir="auto">java.time.Duration</code> is converted out of the box</strong>, like a <code dir="auto">File</code> or a <code dir="auto">URL</code>, instead of asking for
+<code dir="auto">@ConverterClass(DurationConverter.class)</code> on every method that returns one: a timeout is the commonest
+typed setting after a number and a string, and the JDK has a type for it. <code dir="auto">10 s</code>, <code dir="auto">500 ms</code>, <code dir="auto">1 d</code> and the
+ISO-8601 form <code dir="auto">PT15M</code> are all read, in collections, arrays and <code dir="auto">Optional</code> like any other type.
+<strong>The time unit is required on this path</strong>: <code dir="auto">timeout=30</code> is refused with a message saying what to write,
+because a bare number would be read as milliseconds and whoever writes 30 means seconds far more often
+than that. The converter named explicitly keeps its previous behaviour, bare number included, so no
+configuration written before this release changes meaning; a converter registered for <code dir="auto">Duration</code>, or named
+with <code dir="auto">@ConverterClass</code>, still takes precedence over the automatic conversion. See the
+<a href="/owner/docs/type-conversion/#duration">documentation</a>.</p>
+</li>
+<li>
+<p><a href="https://github.com/matteobaccan/owner/issues/187">#187</a>: <code dir="auto">java.nio.file.Path</code> is converted, with a leading
+<code dir="auto">~</code> expanded to the user home exactly as <code dir="auto">java.io.File</code> already was — the two ways of naming a path no
+longer disagree. Arrays and collections of <code dir="auto">Path</code> follow. The reporter asked in 2016 whether this belonged
+in a separate module for Java 7; the question no longer arises, since Java 8 is the minimum runtime.</p>
+</li>
+<li>
+<p>Variables can now carry a default value: <code dir="auto">${db.host:localhost}</code> resolves to <code dir="auto">localhost</code> when <code dir="auto">db.host</code> is
+defined nowhere, instead of to the empty string. Everything after the first colon is the default, colons
+included, so URLs, Windows paths and <code dir="auto">host:port</code> pairs survive intact. Existing configurations are unaffected:
+the text inside <code dir="auto">${...}</code> is looked up as a property key in its entirety first, and only if there is no such
+property is the colon read as a separator — so a key like <code dir="auto">jdbc:url</code> keeps resolving as before. The one
+behaviour that changes is a variable that used to resolve to nothing: <code dir="auto">${a:b}</code>, with neither <code dir="auto">a:b</code> nor <code dir="auto">a</code>
+defined, yielded the empty string up to 1.0.12 and yields <code dir="auto">b</code> from now on. See the
+<a href="/owner/docs/variables-expansion/">documentation</a>. Proposed by Ilya Koshaleu in
+<a href="https://github.com/matteobaccan/owner/pull/256">#256</a>.</p>
+</li>
+<li>
+<p>Variables can now be nested: the expression inside <code dir="auto">${...}</code> is expanded first, and the result is then looked
+up as a key, so <code dir="auto">${servers.${env}.url}</code> reads the key named by the value of <code dir="auto">env</code>. It works at any depth, in
+the <code dir="auto">@Key</code>, in a property value and in the <code dir="auto">@Sources</code> specification, and it combines with the default values
+above — <code dir="auto">${servers.${env}.url:http://localhost}</code>. This is what makes a key depend on a key that itself
+depends on another one, the case that produced silently wrong lookups before. See the
+<a href="/owner/docs/variables-expansion/#nested-variables">documentation</a>. Proposed by Tomek in
+<a href="https://github.com/matteobaccan/owner/pull/326">#326</a>.</p>
+<p><strong>Compatibility.</strong> This is the one change in this release that touches an existing parsing rule: up to 1.0.12
+a <code dir="auto">${</code> was closed by the first <code dir="auto">}</code> that followed it, now it is closed by the one that matches it. Only the
+<code dir="auto">${</code> sequence opens a nesting level, so a lone brace inside an expression remains ordinary text and a key such
+as <code dir="auto">a{b</code> keeps resolving; <code dir="auto">${}</code> and an unbalanced <code dir="auto">${</code> are left alone as before. A configuration that uses
+plain variables is therefore unaffected. Should some unforeseen combination of braces read differently, the
+whole behaviour can be switched off for the JVM with <code dir="auto">-Downer.nested.variable.expansion=false</code>, which runs the
+substitution of the previous releases unchanged.</p>
+</li>
+<li>
+<p>A <code dir="auto">Map</code> return type now reads the <strong>group of properties below the key of the method</strong>, closing a request open
+since 2013 (<a href="https://github.com/matteobaccan/owner/issues/41">#41</a>):</p>
+<div class="expressive-code"><link rel="stylesheet" href="/owner/_astro/ec.w36nc.css"><script type="module" src="/owner/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="properties"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">something.foo</span><span style="--0:#D6DEEB;--1:#403F53">=1</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">something.bar</span><span style="--0:#D6DEEB;--1:#403F53">=2</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="something.foo=1something.bar=2"><div></div></button></div></figure></div>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="java"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">Map&lt;</span><span style="--0:#D6DEEB;--1:#403F53">String, Integer</span><span style="--0:#C792EA;--1:#8844AE">&gt;</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">something</span><span style="--0:#D9F5DD;--1:#111111">()</span><span style="--0:#D6DEEB;--1:#403F53">;     </span><span style="--0:#919F9F;--1:#5D6376">// {foo=1, bar=2}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Map<String, Integer> something();     // {foo=1, bar=2}"><div></div></button></div></figure></div>
+<p>Both sides of the entry go through the regular type conversion, so <code dir="auto">Map&lt;Integer, String&gt;</code> and
+<code dir="auto">Map&lt;Colour, String&gt;</code> work as well; the group is named like any other key, so <code dir="auto">@Key</code>, <code dir="auto">@Prefix</code> and variable
+expansion all apply — <code dir="auto">@Key("servers.${env}")</code> picks the section at runtime. A name with further dots keeps
+them, so <code dir="auto">something.a.b</code> becomes the entry <code dir="auto">a.b</code>; no match gives an empty map rather than <code dir="auto">null</code>; the
+declared map type is honoured, a <code dir="auto">SortedMap</code> coming back as a <code dir="auto">TreeMap</code>; and <code dir="auto">@DefaultValue</code> is refused on
+such a method, since a default belongs to the individual properties. A <code dir="auto">@ConverterClass</code> still takes
+precedence, which is how the other shape of the request — one property whose value holds the pairs, as asked
+in <a href="https://github.com/matteobaccan/owner/issues/286">#286</a> — keeps working. Nothing can break: a <code dir="auto">Map</code>
+return type used to throw on every access, so no working configuration relied on it. See the
+<a href="/owner/docs/type-conversion/">documentation</a>.</p>
+</li>
+<li>
+<p>A list can be written <strong>one element per key</strong>, closing a request open since 2013
+(<a href="https://github.com/matteobaccan/owner/issues/48">#48</a>):</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="properties"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">servers[0]=alpha</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">servers[1]=beta</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="servers[0]=alphaservers[1]=beta"><div></div></button></div></figure></div>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="java"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">List&lt;</span><span style="--0:#D6DEEB;--1:#403F53">String</span><span style="--0:#C792EA;--1:#8844AE">&gt;</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">servers</span><span style="--0:#D9F5DD;--1:#111111">()</span><span style="--0:#D6DEEB;--1:#403F53">;               </span><span style="--0:#919F9F;--1:#5D6376">// [alpha, beta]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="List<String> servers();               // [alpha, beta]"><div></div></button></div></figure></div>
+<p>for every array and collection type, <code dir="auto">Optional</code> included. The point of it is that an element written this
+way is one element whatever it contains, so <code dir="auto">servers[0]=a,b</code> is a single value with a comma in it, which a
+comma-separated list cannot express at all — and it is how a list out of a JSON or a YAML source will
+survive being flattened into properties. The separator does not apply to an indexed element, there being
+nothing to split. Square brackets rather than <code dir="auto">servers.0</code> because the dot already belongs to the <code dir="auto">Map</code>
+grouping above, which would otherwise make one layout of keys mean two things. An indexed key wins over a
+single value and over a <code dir="auto">@DefaultValue</code>, and the elements must be numbered from zero without gaps: a gap
+is refused rather than closed up, since a list quietly shorter than the file describes, with everything
+after the gap moved, is not something the caller can notice. Nothing can break, <code dir="auto">servers[0]</code> having been a
+property nothing read. See the <a href="/owner/docs/type-conversion/">documentation</a>.</p>
+</li>
+<li>
+<p>A circular variable reference is now reported instead of being followed. A property whose value leads back to
+the property itself cannot be resolved, and an <code dir="auto">IllegalArgumentException</code> names the chain that closes the
+loop — <code dir="auto">Circular variable reference: ${a} -&gt; ${b} -&gt; ${a}</code> — where up to 1.0.12 the same configuration
+exhausted the stack with a <code dir="auto">StackOverflowError</code>. A default value does not rescue it: <code dir="auto">db.host=${db.host:localhost}</code>
+is the shell idiom for “keep it if set, otherwise use this”, but it relies on the substitution happening once
+at assignment, while OWNER expands variables when a property is read, and inside values. That line therefore
+describes a loop rather than a fallback, and it is reported as one — what was meant is <code dir="auto">db.host=localhost</code>.
+See the <a href="/owner/docs/variables-expansion/#circular-references">documentation</a>.</p>
+</li>
+<li>
+<p>New <code dir="auto">@CollectionConverterClass</code> annotation: hands the raw property value to a single converter instead of
+splitting it first and converting one element at a time, as <code dir="auto">@ConverterClass</code> does. It is the way to opt out of
+the built-in tokenization — for a property holding a single JSON document, say — or to return a collection type
+OWNER cannot instantiate itself, such as an immutable one or an implementation without a no-argument
+constructor. Using it on a method that does not return a <code dir="auto">Collection</code> reports which method is at fault instead
+of failing later with a <code dir="auto">ClassCastException</code>. See the
+<a href="/owner/docs/type-conversion/">documentation</a>. Contributed by Adam Huječek in
+<a href="https://github.com/matteobaccan/owner/pull/248">#248</a>, closing
+<a href="https://github.com/matteobaccan/owner/issues/206">#206</a>.</p>
+</li>
+<li>
+<p>Security hardening of the <code dir="auto">XMLLoader</code> against XXE attacks: external DTDs and entities are neutralized, secure
+processing limits entity expansion; the standard Java properties XML format keeps working as before.</p>
+</li>
+<li>
+<p><a href="https://github.com/matteobaccan/owner/pull/325">#325</a>: temporary files are now created with owner-only
+permissions via <code dir="auto">Files.createTempFile</code> (thanks to @JLLeitschuh); when storing a Config to an existing file,
+the file permissions are preserved.</p>
+</li>
+<li>
+<p>The jars declare an <code dir="auto">Automatic-Module-Name</code> — <code dir="auto">org.aeonbits.owner</code> and <code dir="auto">org.aeonbits.owner.extras</code> — so a
+<code dir="auto">requires</code> written against them keeps resolving across releases, instead of depending on a module name
+derived from the file name and therefore from the version. The two artifacts no longer share a package
+either (see the <code dir="auto">ZooKeeperLoader</code> move under Removals), so they can both sit on the module path.</p>
+</li>
+<li>
+<p>Bytecode is still compatible with Java 8 at runtime, while the project is built with modern JDKs
+(<code dir="auto">compiler-release=8</code>); a JDK 11 or superior is required to build from sources.</p>
+</li>
+<li>
+<p>Javadoc completed and improved across the codebase.</p>
+</li>
+<li>
+<p>Dependencies updated across the board, including security-driven pins: JUnit 4.13.2, Mockito 5.x, SLF4J 2.x,
+commons-codec 1.22, Curator with ZooKeeper forced to 3.9.5 and Netty aligned via BOM to address published
+vulnerabilities.</p>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="code-quality-and-test-coverage">Code quality and test coverage</h4><a class="sl-anchor-link" href="#code-quality-and-test-coverage"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Code quality and test coverage”</span></a></div>
+<p>A large part of the work that went into 2.0.0 is not visible in the API. The objective was to raise the test
+coverage as far as it reasonably goes and to leave no warning unexamined, so that future changes start from a
+codebase that says what it does.</p>
+<ul>
+<li><strong>Test coverage extended</strong>, with the crypto, loaders, util and ConfigCache packages at or near 100%. The
+tests were written to pin down actual behaviour, not to move a percentage: several of them document
+decisions that were previously only implicit in the code.</li>
+<li><strong>Every warning triaged, one by one.</strong> The project is analysed on each push by
+<a href="https://github.com/matteobaccan/owner/security/code-scanning">CodeQL</a> with the <code dir="auto">security-and-quality</code>
+query pack, by <a href="https://sonarcloud.io/project/overview?id=matteobaccan_owner">SonarCloud</a>, and by the
+inspections built into the IDEs used for development. Every finding was either fixed, or dismissed with a
+written technical justification explaining why the construct is correct as it stands — an analyser being
+wrong is a legitimate outcome, an unread warning is not.</li>
+<li><strong>The exercise was not cosmetic.</strong> Chasing warnings that looked like style issues surfaced genuine defects
+that had gone unnoticed for years. The array and collection conversion bug listed under “Bugs fixes” was
+found exactly this way: a CodeQL note about an inner class that could be made <code dir="auto">static</code> turned out to be
+hiding a test that passed for the wrong reason, and behind it a real failure affecting any user converting
+a list of custom objects.</li>
+<li><strong>Tests that passed for the wrong reason were corrected.</strong> A green test suite is only meaningful if each
+test fails when the behaviour it describes breaks. Where a test was found to be satisfied by an accident of
+its fixtures rather than by the behaviour under test, the fixture was fixed and the assertion re-verified.</li>
+</ul>
+<p>The intention is to keep this state: warnings are not allowed to accumulate between releases, and a finding is
+closed only when it has been understood.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>New documentation for the <a href="/owner/docs/preprocessors/">Preprocessors</a> feature (available since 1.0.9,
+never documented).</li>
+<li>New documentation for the <a href="/owner/docs/jmx/">JMX support</a> (available since 1.0.10, never documented).</li>
+<li>New chapter on the <a href="/owner/docs/key-prefix/">Key prefix</a> feature, and the list of the
+<a href="/owner/docs/disabling-features/">disableable features</a> is now spelled out, with the version each
+one appeared in.</li>
+<li>New sections on <a href="/owner/docs/variables-expansion/#nested-variables">nested variables</a> and on
+<a href="/owner/docs/variables-expansion/#disabling-nested-variables">how to switch them off</a> in Variables expansion.</li>
+<li>New section on <a href="/owner/docs/loading-strategies/#sources-and-interface-inheritance">Sources and interface inheritance</a>, writing down
+what was until now only implicit in the code: <code dir="auto">@Sources</code> accumulates across the interfaces a mapping interface
+extends — by design, since it describes a set and not a single setting — while <code dir="auto">@LoadPolicy</code> and <code dir="auto">@HotReload</code>
+take the first annotation found. The section also documents the limitation the three of them share, that only
+the direct super-interfaces are read, so an annotation two levels up is silently ignored. The behaviour is
+unchanged in 2.0.0 and is now covered by tests, so that changing it will be a deliberate step.</li>
+<li>New section on <a href="/owner/docs/usage/#mandatory-properties">Mandatory properties</a> in Basic usage.</li>
+<li><a href="/owner/docs/type-conversion/">Type conversion</a> no longer stops at “<code dir="auto">Map</code> is not supported”, a
+sentence that read as “cannot be done” and had been sending people away since at least
+<a href="https://github.com/matteobaccan/owner/issues/41">#41</a>. The chapter now describes the grouping above, and
+keeps the <code dir="auto">@ConverterClass</code> recipe for the case where a single property value holds the pairs — arrays of
+maps included.</li>
+<li>New section on <a href="/owner/docs/usage/#overriding-a-property-in-a-sub-interface">overriding a property in a sub-interface</a>, answering
+<a href="https://github.com/matteobaccan/owner/issues/421">#421</a>: an override redirects a property instead of adding
+one, since there is one method and therefore one key. Both of the things usually wanted there — keeping the
+base key readable, and making the concrete setting fall back to the base one — are shown written down
+explicitly, the second one as a three-level chain built with a variable.</li>
+<li><a href="/owner/docs/crypto/">Crypto support</a> is no longer labelled as experimental: the <code dir="auto">@EncryptedValue</code> and
+<code dir="auto">@DecryptorClass</code> annotations have shipped unchanged since 1.0.10 and are part of the stable API.</li>
+<li>Documentation refreshed to the current state of the project: installation instructions, build requirements,
+FAQ (encrypted properties are supported since 1.0.10, not 1.0.12 as previously stated;
+<a href="https://github.com/matteobaccan/owner/issues/229">#229</a>), links and navigation updated to the maintained
+repository and to the current CI services.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="infrastructure">Infrastructure</h4><a class="sl-anchor-link" href="#infrastructure"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Infrastructure”</span></a></div>
+<ul>
+<li>Continuous integration migrated from Travis CI to
+<a href="https://github.com/matteobaccan/owner/actions">GitHub Actions</a>: every push and pull request is built on all
+the supported LTS JDKs (11, 17, 21 and 25) with Maven caching.</li>
+<li>Code quality and coverage tracked on <a href="https://sonarcloud.io/project/overview?id=matteobaccan_owner">SonarCloud</a>;
+security scanning via CodeQL and Dependabot; dependencies kept current by Renovate.</li>
+<li>Maven wrapper added; Maven Enforcer requires Maven 3.6.3+; Travis, Coveralls and WhiteSource/Mend leftovers
+removed.</li>
+<li>The BSD license header is now enforced on every Java source file by the
+<a href="https://oss.carbou.me/license-maven-plugin/">license-maven-plugin</a>: <code dir="auto">mvn license:format</code> adds or fixes it,
+and <code dir="auto">mvn license:check</code> — bound to the <code dir="auto">verify</code> phase, so it also runs in CI — fails the build when a file is
+missing it. Nineteen files had drifted without one over the years, and the copyright line existed in three
+different variants; both are now uniform. The Maven wrapper sources are excluded, as they ship under Apache 2.0.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>
+<p><a href="https://github.com/matteobaccan/owner/issues/195">#195</a>: imported <code dir="auto">Map</code> entries whose key or value is not a
+<code dir="auto">String</code> are now rejected with an <code dir="auto">IllegalArgumentException</code> naming the offending key, instead of being accepted
+and then silently misbehaving. Originally reported and fixed by Stefán Freyr Stefánsson in
+<a href="https://github.com/matteobaccan/owner/pull/197">#197</a>, extended here to cover keys as well as values.</p>
+<p>Imports are merged into a <code dir="auto">java.util.Properties</code>, whose contract only admits <code dir="auto">String</code> keys and values, but
+which extends <code dir="auto">Hashtable&lt;Object, Object&gt;</code> and therefore accepts anything through <code dir="auto">putAll</code>. The entry then
+became invisible to <code dir="auto">getProperty</code>, in two different ways:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="java"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">public</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">interface</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#FFCB8B;--1:#111111">MyConfig</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">extends</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">Config</span><span style="--0:#D6DEEB;--1:#403F53"> {</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">@</span><span style="--0:#C792EA;--1:#8844AE">Key</span><span style="--0:#D6DEEB;--1:#403F53">(</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">some.key</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">@</span><span style="--0:#C792EA;--1:#8844AE">DefaultValue</span><span style="--0:#D6DEEB;--1:#403F53">(</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">1</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">)</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">Integer</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">someValue</span><span style="--0:#D9F5DD;--1:#111111">()</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="public interface MyConfig extends Config {    @Key(&quot;some.key&quot;)    @DefaultValue(&quot;1&quot;)    Integer someValue();}"><div></div></button></div></figure></div>
+<table>
+<thead>
+<tr>
+<th>Import</th>
+<th>Up to 1.0.12</th>
+<th>Since 2.0.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">imports.put("some.key", 42)</code></td>
+<td><code dir="auto">someValue()</code> returns <code dir="auto">null</code>, <em>shadowing</em> <code dir="auto">@DefaultValue("1")</code></td>
+<td><code dir="auto">IllegalArgumentException</code> at <code dir="auto">create()</code></td>
+</tr>
+<tr>
+<td><code dir="auto">imports.put(42, "42")</code></td>
+<td>the entry is dropped, <code dir="auto">someValue()</code> returns the default <code dir="auto">1</code></td>
+<td><code dir="auto">IllegalArgumentException</code> at <code dir="auto">create()</code></td>
+</tr>
+<tr>
+<td><code dir="auto">imports.put("some.key", new StringBuilder("42"))</code></td>
+<td><code dir="auto">someValue()</code> returns <code dir="auto">null</code></td>
+<td><code dir="auto">IllegalArgumentException</code> at <code dir="auto">create()</code></td>
+</tr>
+<tr>
+<td><code dir="auto">imports.put("some.key", "42")</code></td>
+<td><code dir="auto">someValue()</code> returns <code dir="auto">42</code></td>
+<td>unchanged, returns <code dir="auto">42</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Compatibility.</strong> Code that imported only <code dir="auto">String</code> keys and values is unaffected. Code that imported anything
+else was already getting a wrong value, or none, so no working behaviour is lost — but a heterogeneous <code dir="auto">Map</code>
+that happened to be read only through its <code dir="auto">String</code> entries will now fail fast at <code dir="auto">create()</code> time rather than
+half-working. Note that a <code dir="auto">CharSequence</code> is not sufficient, as <code dir="auto">Properties</code> compares against <code dir="auto">String</code>
+specifically: call <code dir="auto">toString()</code> on <code dir="auto">StringBuilder</code>/<code dir="auto">StringBuffer</code> values before importing them. See the
+<a href="/owner/docs/importing-properties/">documentation</a>.</p>
+<p>The validation lives in the factory, so it applies uniformly to <code dir="auto">ConfigFactory.create()</code>, to a <code dir="auto">Factory</code>
+obtained from <code dir="auto">ConfigFactory.newInstance()</code>, and to <code dir="auto">ConfigCache.getOrCreate()</code>; previously the equivalent
+check on null keys and values only covered the first of the three.</p>
+</li>
+<li>
+<p>Fixed the conversion of arrays and collections when a single element cannot be converted. The converter is
+chosen once from the first element, so the remaining ones could still fail: their internal “skip” marker
+ended up being stored into the resulting array, surfacing as an
+<code dir="auto">IllegalArgumentException: array element type mismatch</code> instead of the documented
+<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/UnsupportedOperationException.html"><code dir="auto">UnsupportedOperationException</code></a>.
+A property like <code dir="auto">@DefaultValue("1, 2, foo, 4")</code> mapped to a custom type now reports
+<code dir="auto">Cannot convert 'foo' to MyType</code>, consistently with what already happened for a non-array property. For the
+same reason, a <code dir="auto">@ConverterClass</code> returning <code dir="auto">null</code> for an element now yields a <code dir="auto">null</code> element instead of
+failing the whole conversion.</p>
+</li>
+<li>
+<p>Conversion errors now name the property they come from: <code dir="auto">Cannot convert 'abc' to int</code> became
+<code dir="auto">Cannot convert 'abc' to int for property 'server.port'</code>. The message used to say what could not be converted
+but not where to go and fix it, which in a file with fifty properties left the search to be done by hand. The
+key named is the one the property is read with, <code dir="auto">@Key</code> and <code dir="auto">@Prefix</code> included
+(<a href="https://github.com/matteobaccan/owner/issues/191">#191</a>). When the value comes from a group of
+properties read as a <code dir="auto">Map</code>, the key named is the individual entry — <code dir="auto">group.second</code>, not <code dir="auto">group</code>.</p>
+</li>
+<li>
+<p><code dir="auto">ByteSizeUnit.parse</code> no longer depends on the default locale of the JVM. It lowercased the text without
+saying in which language, and in Turkish a capital <code dir="auto">I</code> lowercases to the dotless <code dir="auto">ı</code>: <code dir="auto">512 KIB</code> was
+therefore rejected as an invalid unit on a Turkish JVM and accepted everywhere else. Every IEC unit
+written in capitals was affected, since all of them carry an <code dir="auto">i</code>.</p>
+</li>
+<li>
+<p><code dir="auto">ByteSize</code> honours the <code dir="auto">equals</code>/<code dir="auto">hashCode</code> contract. <code dir="auto">equals</code> compares the number of bytes, so <code dir="auto">1 MB</code> and
+<code dir="auto">1000000 B</code> are equal, while the hash code was derived from the value and the unit as they were written:
+the two were equal with different hash codes, which made the type unusable as a key of a <code dir="auto">HashMap</code> or as
+an element of a <code dir="auto">HashSet</code> — a set could hold the same size twice, and a lookup could miss. The class is
+now <code dir="auto">final</code>, and both parts are rejected at construction when null, instead of failing later at the first
+arithmetic with no indication of where the missing part was written.</p>
+</li>
+<li>
+<p>Fixed a <code dir="auto">NullPointerException</code> masking the real error in the hot reload example when the configuration URI is
+invalid.</p>
+</li>
+<li>
+<p>Test suite stability fixes (thread handling in multi-threading tests, wait times).</p>
+</li>
+</ul>
+<p>Downloadable artifacts are published on
+<a href="https://github.com/matteobaccan/owner/releases/tag/owner-2.0.0">GitHub</a> and on
+<a href="https://central.sonatype.com/artifact/org.aeonbits.owner/owner/2.0.0">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="1012">1.0.12</h2><a class="sl-anchor-link" href="#1012"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.12”</span></a></div>
+<p><em>Released 7 June 2020</em></p>
+<p>I just released version 1.0.12, it contains all the bug fixes included in 1.0.11 plus a fix to a
+multi threading issue that appeared in 1.0.11.</p>
+<p>–Luigi.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="release-notes-1">RELEASE NOTES</h3><a class="sl-anchor-link" href="#release-notes-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “RELEASE NOTES”</span></a></div>
+<p>OWNER v1.0.12 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-1">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>None</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-1">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>None</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-1">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Fixed <a href="https://github.com/matteobaccan/owner/issues/268">#268</a>: Calling a value is not thread safe (return another value)</li>
+<li>Fixed <a href="https://github.com/matteobaccan/owner/issues/266">#266</a>: PropertyEditor - Concurrency Issues</li>
+</ul>
+<p>Downloadable artifacts are published on <a href="https://github.com/matteobaccan/owner/releases/tag/owner-1.0.12">GitHub</a> and
+on <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.12/">Maven Central Repository</a>.</p>
+<aside aria-label="The 1.0.11 was not announced, in fact it introduced a bug in multi threading." class="starlight-aside starlight-aside--note"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 11a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1Zm.38-3.92a1 1 0 0 0-.76 0 1 1 0 0 0-.33.21 1.15 1.15 0 0 0-.21.33 1 1 0 0 0 .21 1.09c.097.088.209.16.33.21A1 1 0 0 0 13 8a1.05 1.05 0 0 0-.29-.71 1 1 0 0 0-.33-.21ZM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16.001A8 8 0 0 1 12 20Z"/></svg>The 1.0.11 was not announced, in fact it introduced a bug in multi threading.</p><div class="starlight-aside__content"><p>If you are using 1.0.11, please update to 1.0.12 asap, so that you should have the bug fixed.</p></div></aside>
+<p>OWNER v1.0.11 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-2">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li><a href="https://github.com/matteobaccan/owner/pull/234">#234</a>: Allowing to format Key value by method arguments as
+with DefaultValue.</li>
+<li><a href="https://github.com/matteobaccan/owner/pull/255">#255</a>: Solves the thread contention problem reported on Issue #254;
+Note this has partially been rolled back in 1.0.12 due to bugs <a href="https://github.com/matteobaccan/owner/issues/268">#268</a>
+and <a href="https://github.com/matteobaccan/owner/issues/266">#266</a>.</li>
+<li><a href="https://github.com/matteobaccan/owner/commit/64a7c07bd79287b1d9debacfe60ad6e4e597cc39">64a7c07</a>:
+Updated dependencies to work with Java 11 LTS.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-2">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li><a href="https://github.com/matteobaccan/owner/pull/247">#247</a>: Documentation for system:properties and system:env.</li>
+<li>Fixed <a href="https://sonarcloud.io/project/overview?id=matteobaccan_owner">Sonar</a> and Travis.</li>
+<li><a href="https://github.com/matteobaccan/owner/pull/247">#274</a>:
+Documentation for system:properties and system:env, Update importing-properties.md.</li>
+<li><a href="https://github.com/matteobaccan/owner/pull/246">#246</a>: Fixed doc typos &amp; errors and improved readability.</li>
+<li><a href="https://github.com/matteobaccan/owner/issues/242">#242</a>: FAQ broken link.</li>
+<li><a href="https://github.com/matteobaccan/owner/pull/224">#224</a>: Adding some documentation for bug
+<a href="https://github.com/matteobaccan/owner/issues/184">#184</a> (Maps with null values cause an unclear exception).</li>
+<li>Fixed Javadocs.</li>
+<li>Updated documentation.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-2">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li><a href="https://github.com/matteobaccan/owner/commit/2479d4718c5996e432f6cc0dedcbb4f250b29c43">2479d47</a>: decryption not working when used in combination with variable substitution</li>
+<li><a href="https://github.com/matteobaccan/owner/commit/0b2d209b0fe661a1596aa55921fff16e2ba5bc92">0b2d209</a>: removed [double check locking] anti pattern.</li>
+<li><a href="https://github.com/matteobaccan/owner/pull/227">#227</a>: Fixes properties issue in loading file URLs.</li>
+<li><a href="https://github.com/matteobaccan/owner/pull/239">#239</a>: Allow property values to contain a ‘%’ character without being a format string.</li>
+<li><a href="https://github.com/matteobaccan/owner/issues/203">#203</a>, <a href="https://github.com/matteobaccan/owner/pull/241">#241</a>:
+ConcurrentModificationException on creating Config.</li>
+<li><a href="https://github.com/matteobaccan/owner/issues/226">#226</a>, <a href="https://github.com/matteobaccan/owner/pull/227">#227</a>:
+Empty system variables for file paths in @Sources cause URISyntaxException failures.
+Fixes properties issue in loading file URLs.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="1010">1.0.10</h2><a class="sl-anchor-link" href="#1010"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.10”</span></a></div>
+<p><em>Released 1 March 2018</em></p>
+<p>After long time (more than 2 years now), and many people asking for a new release, here we are.
+And here my apologies for the delay.</p>
+<p>As you may know, I had serious health problems that kept me away from coding. Now my health is getting better, but I
+feel much slower in coding and using awesome tools like IntelliJ IDEA; in the meantime, my open source license has
+expired, so I hope the guys from JetBrains will be so nice to renew it :).</p>
+<p>Also, I always found the maven release process being cumbersome so that also kept me away from the effort.
+Now I took some time to simply it a little bit, and I kept some note for the future.</p>
+<p>In this release, a huge amount of work has been conducted by contributors, and I mostly did housekeeping with
+refactoring, code review, enforcing quality standards, asking for documentation and tests, and integrating the great
+ideas coming from the users’ community.</p>
+<p>I took back the project recently to upgrade it to have Java 9 support, and simplify release deployment, and only now
+that I am writing this release note, I realize how many things have been added and was waiting to be released.</p>
+<p>Documentation is very important; I hadn’t had the chance to keep all in sync, so many things here need to be
+documented. If you think you can help, feel free to help: this website is a sub-project
+<a href="https://github.com/matteobaccan/owner/tree/master/owner-site"><code dir="auto">owner-site</code></a>, and uses Markdown language, which is very
+handy and quick to learn; the structure is quite easy to follow.
+<a href="https://jekyllrb.com/">Jekyll</a> is used as site generator, which is written in Ruby and can be tricky for a Java dev
+like me, but it works awesomely with github. So feel free to help there too.
+There is also an <a href="https://github.com/matteobaccan/owner/blob/master/owner-site/build.xml">ant script</a> which allows
+you to launch Jekyll and live-preview the end result of your edits.</p>
+<p>I don’t feel very comfortable in making promises, but I’d really like to give back life to this project and, for the
+future, avoid such a long wait for a release.</p>
+<p>Please notice that at the moment I am not professionally working, I closed my consultancy company years back, and
+in this moment I am writing from a nice <a href="https://torino.impacthub.net/">Coworking Space “ImpactHub” here in Torino</a>.
+So, let me quickly say that <a href="https://github.com/matteobaccan/owner/#donations">donations are very welcome</a>.
+Or if you want, you can hire me for some custom development on OWNER, training, or to help implementing your
+projects.
+This would definitely help keeping OWNER alive.</p>
+<p>Credits to ALL the contributors of OWNER, and to the end-users of this neat library.
+To you all it goes my gratitude for this release.</p>
+<p><strong>Thank you!</strong></p>
+<p>–Luigi.</p>
+<hr>
+<div class="sl-heading-wrapper level-h3"><h3 id="release-notes-2">RELEASE NOTES</h3><a class="sl-anchor-link" href="#release-notes-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “RELEASE NOTES”</span></a></div>
+<p>OWNER v1.0.10 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-3">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>Added Java 9 support, dropped Java 6 support. All code and tests are running and built with Java 9, so you can use
+OWNER with the latest Java version. It was not trivial. If you want to use some specific feature like default
+methods in interfaces introduced in Java8, you still need to add <code dir="auto">owner-java8</code> dependency. I know… I didn’t want to
+create a new sub-module for Java 9 and every newer versions, if it’s not necessary.
+Also, I updated all the dependencies (testing, and optional) and Maven plugins, in order to have it working
+with Java 9.
+A huge thank you to my friend <a href="https://github.com/sbordet">@sbordet</a>.</li>
+<li>Added <code dir="auto">list()</code> method to <code dir="auto">ConfigCache</code>. ConfigCache is a great way to centralise configuration for various
+parts of an application. This commit adds a list() method to the ConfigCache class, which lists the keys for all
+configurations present in the cache. This allows the entire application configuration to be inspected (e.g. for
+debugging) without the need for storing cache keys elsewhere. Thanks
+<a href="https://github.com/kevin-canadian">@kevin-canadian</a>, who also was so nice to update the documentation on the
+website.</li>
+<li>Added <code dir="auto">@EncryptedValue</code> and <code dir="auto">@DecryptorClass</code> annotations to allow hiding passwords stored in configuration
+properties. See <a href="https://github.com/matteobaccan/owner/issues/49">#49</a>, thanks <a href="https://github.com/rrialq">@rrialq</a>
+for the implementation and the awesome documentation.</li>
+<li>Added a Java 8 duration converter class: <code dir="auto">DurationConverter.class</code> in <code dir="auto">owner-java8-extras.jar</code> .
+Thanks <a href="https://github.com/StFS">@StFS</a>.</li>
+<li>Added system properties and enviroment variable as sources: example <code dir="auto">@Sources({"system:properties", "system:env"})</code>.
+See <a href="https://github.com/matteobaccan/owner/issues/110">#110</a>. Thanks <a href="https://github.com/gintau">@gintau</a> for the
+implementation and <a href="https://github.com/kevin-canadian">@kevin-canadian</a> for the idea.</li>
+<li>Added <code dir="auto">ByteSizeConverter</code> and <code dir="auto">DurationConverter</code> classes in <code dir="auto">owner-java8-extras</code> jar, see
+<a href="https://github.com/matteobaccan/owner/issues/155">#155</a>. Thanks <a href="https://github.com/StFS">@StFS</a>, also for providing
+the <a href="https://matteobaccan.github.io/owner/docs/type-conversion/#byte-size">necessary documentation</a> and unit tests.</li>
+<li>Added the ability to register default converters for types and classes defined by users.
+See <a href="https://github.com/matteobaccan/owner/issues/184">#184</a>.
+Thanks <a href="https://github.com/StFS">@StFS</a>.</li>
+<li>Added inheritance support for <code dir="auto">@Sources</code>, <code dir="auto">@LoadPolicy</code> and <code dir="auto">@HotReload</code>.
+Sources defined for all extended interfaces will be merged.
+LoadPolicy and HotReload can be inherited and override by the extended interface.
+Thanks <a href="https://github.com/chengmingwang">@chengmingwang</a>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-3">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Replaced <code dir="auto">fixBackslashForRegex</code> with better implementation. Thanks <a href="https://github.com/kiefinger">@kiefinger</a>.</li>
+<li>Have <code dir="auto">ConfigFactory</code> throw an exception on imported Maps having either null keys or null values.
+See <a href="https://github.com/matteobaccan/owner/pull/185">#185</a>, <a href="https://github.com/matteobaccan/owner/pull/184">#184</a>.
+Thanks <a href="https://github.com/StFS">@StFS</a>.</li>
+<li>Accept file URI containing spaces. Updated the uri processing to allow loading files that contain spaces in
+their paths.
+See <a href="https://github.com/matteobaccan/owner/issues/134">#134</a>. Thanks <a href="https://github.com/icirellik">@icirellik</a>.</li>
+<li>Maps with null values cause an unclear exception. See <a href="https://github.com/matteobaccan/owner/issues/184">#184</a>.
+Thanks <a href="https://github.com/StFS">@StFS</a>.</li>
+<li>Set tar long file mode to posix in maven assembly plugin to avoid build errors.
+Thanks <a href="https://github.com/gdenning">@gdenning</a>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-3">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>Added <a href="https://matteobaccan.github.io/owner/docs/crypto/">Crypto support</a> documentation page.</li>
+<li>Added <a href="https://matteobaccan.github.io/owner/docs/type-conversion/#byte-size">ByteSize Converter</a> converter and
+<a href="https://matteobaccan.github.io/owner/docs/type-conversion/#duration">Duration Converter</a> documentation section.
+Thanks <a href="https://github.com/StFS">@StFS</a>.</li>
+<li>Chinese documentation has been contributed by <a href="https://github.com/cyfonly">@cyfonly</a> and is available
+<a href="https://github.com/cyfonly/owner-doc">here</a>. Sorry, I cannot check that everything is correct or update that! :-)
+See <a href="https://github.com/matteobaccan/owner/issues/172">#172</a>.</li>
+<li>Added security/stability badges by <a href="https://www.meterian.com/">Meterian</a>.
+Thanks <a href="https://github.com/fdiotalevi">@fdiotalevi</a>, <a href="https://github.com/bbossola">@bbossola</a></li>
+</ul>
+<p>Downloadable artifacts are published on <a href="https://github.com/matteobaccan/owner/releases/tag/owner-1.0.10">GitHub</a> and
+on <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.10/">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="109">1.0.9</h2><a class="sl-anchor-link" href="#109"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.9”</span></a></div>
+<p><em>Released 22 July 2015</em></p>
+<p>v1.0.9 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-4">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-4"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>Added <code dir="auto">fill(java.util.Map)</code> method to the <code dir="auto">Accessible</code> interface.</li>
+<li>Added pre-processing feature. See <a href="https://github.com/matteobaccan/owner/issues/120">#120</a>, thanks
+<a href="https://github.com/a1730">@a1730</a> for the feedback.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-4">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-4"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>None.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-4">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-4"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Config.Sources with ~ doesn’t create a valid URI on Windows.
+See <a href="https://github.com/matteobaccan/owner/issues/123">#123</a>, thanks <a href="https://github.com/outofrange">@outofrange</a> for
+spotting this bug.</li>
+</ul>
+<p>Downloadable artifacts are published on <a href="https://github.com/matteobaccan/owner/releases/tag/owner-parent-1.0.9">GitHub</a> and
+on <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.9/">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="108">1.0.8</h2><a class="sl-anchor-link" href="#108"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.8”</span></a></div>
+<p><em>Released 1 April 2015</em></p>
+<aside aria-label="Release 1.0.7 failed deployment in Maven Central Repository" class="starlight-aside starlight-aside--note"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 11a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1Zm.38-3.92a1 1 0 0 0-.76 0 1 1 0 0 0-.33.21 1.15 1.15 0 0 0-.21.33 1 1 0 0 0 .21 1.09c.097.088.209.16.33.21A1 1 0 0 0 13 8a1.05 1.05 0 0 0-.29-.71 1 1 0 0 0-.33-.21ZM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16.001A8 8 0 0 1 12 20Z"/></svg>Release 1.0.7 failed deployment in Maven Central Repository</p><div class="starlight-aside__content"><p>Some required pom was skipped, and if you try to use it as dependency in your project, it
+may raise some maven error or other issues. So here the hotfix: 1.0.8 is out!</p></div></aside>
+<p>v1.0.8 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-5">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-5"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>Fixed the javadocs included in the tarballs/zips released.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-5">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-5"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>None.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-5">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-5"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>No <code dir="auto">owner-parent</code> pom in Maven Central Repository. See <a href="https://github.com/matteobaccan/owner/issues/121">#121</a>,
+thanks <a href="https://github.com/rajatvig">@rajatvig</a> for quickly spotting the issue.</li>
+</ul>
+<p>Downloadable artifacts are published on <a href="https://github.com/matteobaccan/owner/releases/tag/owner-parent-1.0.8">GitHub</a> and
+on <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.8/">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="107">1.0.7</h2><a class="sl-anchor-link" href="#107"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.7”</span></a></div>
+<p><em>Released 30 March 2015</em></p>
+<aside aria-label="Release 1.0.7 failed deployment in Maven Central Repository" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10.67 1.47-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53Zm-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51 1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02v-.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1Z"/></svg>Release 1.0.7 failed deployment in Maven Central Repository</p><div class="starlight-aside__content"><p>Some required pom was skipped, and if you try to use it as dependency in your project, it
+may raise some maven error or other issues. So, avoid using 1.0.7 and jump to 1.0.8!</p></div></aside>
+<p>v1.0.7 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-6">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-6"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>Added JMX Support. See <a href="https://github.com/matteobaccan/owner/pull/107">#107</a> and
+<a href="https://github.com/matteobaccan/owner/issues/19">#19</a>.
+Thanks <a href="https://github.com/robinmeiss">@robinmeiss</a>.
+I still need to write the documentation on how to use it (sorry).</li>
+<li>Added examples module, containing some example Maven Java projects to show some of the API features.
+This gets packaged in the <a href="https://github.com/matteobaccan/owner/releases/tag/owner-parent-1.0.7">released archive artifacts (zip and tarballs)</a>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-6">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-6"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>None.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-6">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-6"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Fixed packaging: the <code dir="auto">owner-extras.jar</code> was missing required classes.
+See <a href="https://github.com/matteobaccan/owner/issues/114">#114</a>. Thanks <a href="https://github.com/ksaritek">@ksaritek</a> for the patience.</li>
+</ul>
+<p>Downloadable artifacts are published on <a href="https://github.com/matteobaccan/owner/releases/tag/owner-parent-1.0.7">GitHub</a> and
+on <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.7/">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="106">1.0.6</h2><a class="sl-anchor-link" href="#106"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.6”</span></a></div>
+<p><em>Released 18 November 2014</em></p>
+<p>v1.0.6 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-7">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-7"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>Added basic support for ZooKeeper <a href="https://github.com/matteobaccan/owner/issues/81">#81</a>. Thanks <a href="https://github.com/ksaritek">@ksaritek</a>.</li>
+<li>Added Java 8 Support (default and static methods on interfaces). See <a href="https://github.com/matteobaccan/owner/issues/94">#94</a>.</li>
+<li>Added OSGi support. See <a href="https://github.com/matteobaccan/owner/issues/101">#101</a>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-7">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-7"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>Fixed documentation errors. See <a href="https://github.com/matteobaccan/owner/issues/88">#88</a>, <a href="https://github.com/matteobaccan/owner/issues/89">#89</a>, <a href="https://github.com/matteobaccan/owner/issues/92">#92</a>. Thanks <a href="https://github.com/hemus2121">@hemus2121</a>.</li>
+<li>Minor changes in build.xml (ant publishing script to gh-pages)</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-7">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-7"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Use of default value for for properties using the Key Expansion mechanism <a href="https://github.com/matteobaccan/owner/pull/84">#84</a>.</li>
+</ul>
+<p>Downloadable artifacts are published on <a href="https://github.com/matteobaccan/owner/releases/tag/owner-1.0.6">GitHub</a> and on <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner-assembly/1.0.6/">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="1051">1.0.5.1</h2><a class="sl-anchor-link" href="#1051"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.5.1”</span></a></div>
+<p><em>Released 28 May 2014</em></p>
+<p>v1.0.5.1 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-8">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-8"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>Java8 fixes, so now it is officially supported.</li>
+<li>Added UTF-8 Support for properties files. (See <a href="https://github.com/matteobaccan/owner/issues/77">#77</a> and
+<a href="https://github.com/matteobaccan/owner/issues/78">#78</a>, thanks <a href="https://github.com/SvetaNesterenko">@SvetaNesterenko</a> )</li>
+<li>Added <a href="/owner/docs/singleton/">ConfigCache (Singleton)</a> feature. (See <a href="https://github.com/matteobaccan/owner/issues/64">#64</a>)</li>
+<li>Improved support for Android. Somebody wants to verify/help with this? (See <a href="https://github.com/matteobaccan/owner/issues/75">#75</a>)</li>
+<li>Implemented variable expansion for <code dir="auto">@Key</code> annotation. (See <a href="https://github.com/matteobaccan/owner/issues/63">#63</a>)</li>
+<li>Restructured maven project to allow sub-modules.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-8">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-8"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>Documentation website minor style/layout, updates and improvements.</li>
+<li>Added <a href="https://www.slideshare.net/LuigiViggiano/owner-31716769">SlideShare presentation</a> in home page.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-8">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-8"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Code cleanup, removed warnings.</li>
+<li>Fixed compatibility issue on exception raised by Java7 and Java6. (See <a href="https://github.com/matteobaccan/owner/issues/71">#71</a>)</li>
+</ul>
+<p>Downloadable artifacts are published on <a href="https://github.com/matteobaccan/owner/releases/tag/owner-1.0.5.1">GitHub</a> and on <a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner/1.0.5.1/">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="105">1.0.5</h2><a class="sl-anchor-link" href="#105"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.5”</span></a></div>
+<p><em>Released 9 October 2013</em></p>
+<p>v1.0.5 contains following enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-9">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-9"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li><a href="/owner/docs/xml-support/">Support for XML</a>.
+OWNER is now able to load not only from properties files, but also from XML files. The XML
+can follow the <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html">Java XML Properties format</a>,
+or can be freely defined by the user.<br/>
+(See more in the documentation: <a href="/owner/docs/xml-support/">XML support</a> and see
+<a href="https://github.com/matteobaccan/owner/issues/5">#5</a>).</li>
+<li>Added method <code dir="auto">registerLoader()</code> to <code dir="auto">ConfigFactory</code>, so the user can define new loaders for more file formats.<br/>
+(See <a href="https://github.com/matteobaccan/owner/issues/55">#55</a>).</li>
+<li>Support for <code dir="auto">classpath:</code> URLs in HotReload. Also it works with the default files associated to the mapping
+interface, when <code dir="auto">@Sources</code> is not specified.</li>
+<li>Added method <code dir="auto">Set&lt;String&gt; propertyNames()</code> in the <code dir="auto">Accessible</code> interface.<br/>
+(See <a href="https://github.com/matteobaccan/owner/issues/46">#46</a>).</li>
+<li>Added <a href="/owner/docs/event-support/">Event support</a> for property changes and reload.
+Both the events can now be transactional: the listener can be notified by an event before and after a property change
+or a reload takes place. The listener can check what is changed and eventually rollback the reload or property change
+operation.<br/>
+(See more in the documentation: <a href="/owner/docs/event-support/">Event support</a> and see
+<a href="https://github.com/matteobaccan/owner/issues/47">#47</a>).</li>
+<li>Added non-static <code dir="auto">ConfigFactory</code>, so one can create independent instances of OWNER <code dir="auto">Factory</code> objects.<br/>
+(See <a href="https://github.com/matteobaccan/owner/issues/43">#43</a>).</li>
+<li>Added implementation on <code dir="auto">hashCode()</code> and <code dir="auto">equals()</code>.</li>
+<li>Added serialization capability to OWNER <code dir="auto">Config</code> objects, so now they can be transferred through the network or
+transformed to byte streams. <br/>
+(See <a href="https://github.com/matteobaccan/owner/issues/54">#54</a>).</li>
+<li>Allow <code dir="auto">@ConverterClass</code> annotation to override default converters (i.e. primitive types, etc).</li>
+<li>The interfaces <code dir="auto">Reloadable</code>, <code dir="auto">Mutable</code> and <code dir="auto">Accessible</code> now extend from <code dir="auto">Config</code>, so you don’t need anymore to extend
+directly from Config. For instance, your interface can now extend just from Mutable to generate an object which is
+also a valid <code dir="auto">Config</code> object that can be instantiated by the <code dir="auto">ConfigFactory</code>:<br/><br/>
+<img src="/owner/img/config-hierarchy.png" alt="config-hierarchy"></li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-9">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-9"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>Website sources reorganized: moved from <code dir="auto">gh-pages</code> branch to <code dir="auto">master</code>, with publish ant scripts <code dir="auto">build.xml</code>.</li>
+<li>Added news section, with release announcements and blog posts.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-9">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-9"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Fixed bugs on tests that were making the build failing on Windows systems.</li>
+<li>Fixed bug <a href="https://github.com/matteobaccan/owner/pull/51">#51</a>, variables expansion, and path expansion not working
+properly with string containing the backslash characters <code dir="auto">'\'</code>. <br/>
+Thanks <a href="https://github.com/NiXXeD">NiXXeD</a>.</li>
+<li>Fixed bug <a href="https://github.com/matteobaccan/owner/issues/42">#42</a>, regarding the incompatibility of the OWNER
+library with the Google App Engine security restrictions.</li>
+</ul>
+<p>Downloadable artifacts are published on
+<a href="http://repo1.maven.org/maven2/org/aeonbits/owner/owner/1.0.5/">Maven Central Repository</a>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="1041">1.0.4.1</h2><a class="sl-anchor-link" href="#1041"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.4.1”</span></a></div>
+<p><em>Released 19 September 2013</em></p>
+<p>v1.0.4.1 is a bug fix release for v1.0.4 branch.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-10">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-10"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Fixed some multi-threaded tests that were failing sometimes randomly during continuous integration.</li>
+<li>Fixed bug <a href="https://github.com/matteobaccan/owner/issues/50">#50</a>, regarding hot reload not working
+when file name needs to be expanded.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="104">1.0.4</h2><a class="sl-anchor-link" href="#104"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.4”</span></a></div>
+<p><em>Released 11 July 2013</em></p>
+<p>v1.0.4 contains some key enhancements and bug fixes.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="enhancements-10">Enhancements</h4><a class="sl-anchor-link" href="#enhancements-10"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Enhancements”</span></a></div>
+<ul>
+<li>New <code dir="auto">@ConverterClass</code> annotation.
+See <a href="/owner/docs/type-conversion/#the-converterclass-annotation">The @ConverterClass annotation</a>, <a href="https://github.com/matteobaccan/owner/issues/38">#38</a>.</li>
+<li>Hot reload for file based sources.
+See <a href="/owner/docs/reload/#automatic-hot-reload">Automatic “hot reload”</a>, <a href="https://github.com/matteobaccan/owner/issues/15">#15</a>.</li>
+<li>toString() method can be invoked on the Config object to get some useful text for debugging.
+See <a href="/owner/docs/debugging/#the-tostring-method">The toString() method</a>, <a href="https://github.com/matteobaccan/owner/issues/33">#33</a>.</li>
+<li>Added <a href="https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Mutable.html"><code dir="auto">Mutable</code></a> interface for the methods giving <em>write</em> access to the underlying properties structure:
+setProperty, removeProperty, clear.
+See <a href="/owner/docs/accessible-mutable/#the-mutable-interface">The Mutable interface</a>, <a href="https://github.com/matteobaccan/owner/issues/31">#31</a>.</li>
+<li>Added <a href="https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Accessible.html"><code dir="auto">Accessible</code></a> interface for the <code dir="auto">list()</code> methods used to aid debugging, and other methods
+giving read access to the underlying properties structure.
+See <a href="/owner/docs/accessible-mutable/#the-accessible-interface">The Accessible interface</a>.</li>
+<li>Added the <code dir="auto">reload()</code> method that can be exposed implementing the interface <a href="https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Reloadable.html"><code dir="auto">Reloadable</code></a>.
+See <a href="/owner/docs/reload/#programmatic-reload">Programmatic reload</a>.</li>
+<li>Fist class Java Arrays and Collections support in type conversion. Thanks <a href="https://github.com/ffbit">ffbit</a>.
+See <a href="/owner/docs/type-conversion/#arrays-and-collections">Arrays and Collections</a>, <a href="https://github.com/matteobaccan/owner/issues/21">#21</a>, <a href="https://github.com/matteobaccan/owner/issues/22">#22</a> and <a href="https://github.com/matteobaccan/owner/issues/24">#24</a>.</li>
+<li>Implemented <code dir="auto">@DisableFeature</code> annotation to provide the possibility to disable variable expansion and parametrized
+formatting.
+See <a href="/owner/docs/disabling-features/">Disabling Features</a>, <a href="https://github.com/matteobaccan/owner/issues/20">#20</a>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="site-enhancements-10">Site Enhancements</h4><a class="sl-anchor-link" href="#site-enhancements-10"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Site Enhancements”</span></a></div>
+<ul>
+<li>New website for documentation.</li>
+<li>Added Sonar to keep high attention on code quality.</li>
+<li>Added <a href="https://sonarcloud.io/project/overview?id=matteobaccan_owner">Travis CI</a> to the project to track changes and run tests on different JDK versions.</li>
+<li>Website code snippets now have syntax highlighting. Thanks <a href="https://github.com/ming13">ming13</a>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="bugs-fixes-11">Bugs fixes</h4><a class="sl-anchor-link" href="#bugs-fixes-11"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bugs fixes”</span></a></div>
+<ul>
+<li>Fixed bug <a href="https://github.com/matteobaccan/owner/issues/40">#40</a> about tilde expansion.</li>
+<li>Fixed bug <a href="https://github.com/matteobaccan/owner/issues/17">#17</a> Substitution and format not working as expected when used together.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="1031">1.0.3.1</h2><a class="sl-anchor-link" href="#1031"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.3.1”</span></a></div>
+<p><em>Released 26 June 2013</em></p>
+<p>v1.0.3.1 contains some key enhancements and bug fixes:</p>
+<ul>
+<li>Fixed bug <a href="https://github.com/matteobaccan/owner/issues/35">#35</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="103">1.0.3</h2><a class="sl-anchor-link" href="#103"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.3”</span></a></div>
+<p><em>Released 3 February 2013</em></p>
+<p>v1.0.3 contains some key enhancements and bug fixes:</p>
+<ul>
+<li>Fixed incompatibility with JRE 6 (project was compiled using JDK 7 and in some places I was catching
+ReflectiveOperationException that has been introduced in JDK 7).</li>
+<li>Minor code cleanup/optimization.</li>
+</ul>
+<p>See <a href="http://en.newinstance.it/2013/02/04/owner-1-0-3-whats-new-part-1-variable-expansion/">what’s new</a> and <a href="http://en.newinstance.it/2013/05/29/owner-1-0-3-whats-new-part-2/">what’s new part 2</a> articles for more information on this release.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="102">1.0.2</h2><a class="sl-anchor-link" href="#102"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.2”</span></a></div>
+<p><em>Released 27 January 2013</em></p>
+<p>v1.0.2 contains some key enhancements and bug fixes:</p>
+<ul>
+<li>Changed package name from <code dir="auto">owner</code> to <code dir="auto">org.aeonbits.owner</code>.
+Sorry to break backward compatibility, but this has been necessary in order to publish the artifact on Maven Central
+Repository.</li>
+<li>Custom &amp; special return types.</li>
+<li>Properties variables expansion.</li>
+<li>Added possibility to specify <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html">Properties</a> to import with the method <code dir="auto">ConfigFactory.create()</code>.</li>
+<li>Added list() methods to aide debugging. User can specify these methods in his properties mapping interfaces.</li>
+<li>Improved the documentation (this big file that you are reading), and Javadocs.</li>
+</ul>
+<p>See <a href="http://en.newinstance.it/2013/02/04/owner-1-0-3-whats-new-part-1-variable-expansion/">what’s new</a> and <a href="http://en.newinstance.it/2013/05/29/owner-1-0-3-whats-new-part-2/">what’s new part 2</a> articles (most of them applies to 1.0.3 and 1.0.2 as well) for
+more information on this release.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="101">1.0.1</h2><a class="sl-anchor-link" href="#101"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.1”</span></a></div>
+<p><em>Released 27 December 2012</em></p>
+<p>v1.0.1 contains some key enhancements and bug fixes:</p>
+<ul>
+<li>Removed <a href="http://commons.apache.org/lang/">commons-lang</a> transitive dependency. Minor bug fixes.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="100">1.0.0</h2><a class="sl-anchor-link" href="#100"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “1.0.0”</span></a></div>
+<p><em>Released 24 December 2012</em></p>
+<p>v1.0.0 contains following key features:</p>
+<ul>
+<li>Mapping between Java interfaces and properties files.</li>
+<li><code dir="auto">@DefaultValue</code> and <code dir="auto">@Key</code> annotations.</li>
+<li><code dir="auto">@Sources</code> annotation for loading properties from specified urls.</li>
+</ul>
+<p>See article <a href="http://en.newinstance.it/2012/12/27/introducing-owner-a-tiny-framework-for-java-properties-files/">Introducing OWNER, a tiny framework for Java Properties files.</a></p>
+<div class="sl-heading-wrapper level-h2"><h2 id="other-announcements">Other announcements</h2><a class="sl-anchor-link" href="#other-announcements"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Other announcements”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="telegram-chat-for-users-and-devs">Telegram Chat for Users and Devs</h3><a class="sl-anchor-link" href="#telegram-chat-for-users-and-devs"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Telegram Chat for Users and Devs”</span></a></div>
+<p><em>2 March 2018</em></p>
+<aside aria-label="This chat no longer exists" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10.67 1.47-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53Zm-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51 1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02v-.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1Z"/></svg>This chat no longer exists</p><div class="starlight-aside__content"><p>The Telegram group announced below has since been closed. The post is kept as it was
+written, but the link goes nowhere. Questions are now asked in
+<a href="https://github.com/matteobaccan/owner/discussions">Discussions</a>, and bugs and feature
+requests in <a href="https://github.com/matteobaccan/owner/issues">Issues</a>.</p></div></aside>
+<p>Hi All!</p>
+<p>Just a quick post to announce that a Telegram Chat is available for quick Q&amp;A.</p>
+<p>If you don’t already know <a href="https://www.telegram.org">Telegram</a>, you should check it out right now!</p>
+<p>It’s possibly the fastest way you can get in touch with devs and other users and have your questions answered lightning fast.</p>
+<p>So, join <a href="https://t.me/ownerapi">OWNER API Users and Devs</a> Telegram Chat and let’s keep in touch!</p>
+<p>–Luigi</p>
+</div><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"><a href="https://github.com/matteobaccan/owner/edit/master/owner-site/web/src/content/docs/news.md" class="sl-flex print:hidden astro-xk5gmzsg"><svg aria-hidden="true" class="astro-xk5gmzsg astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>编辑此页</a><p>最近更新： <time datetime="2026-08-10T12:08:39.000Z">2026年8月10日</time></p></div><div class="pagination-links print:hidden astro-jgq3vlii" dir="ltr"><a href="/owner/zh-cn/docs/license/" rel="prev" class="astro-jgq3vlii"><svg aria-hidden="true" class="astro-jgq3vlii astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg><span class="astro-jgq3vlii">上一页<br class="astro-jgq3vlii"><span class="link-title astro-jgq3vlii">License</span></span></a><a href="https://matteobaccan.github.io/owner/apidocs/latest/index.html" rel="next" class="astro-jgq3vlii"><svg aria-hidden="true" class="astro-jgq3vlii astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg><span class="astro-jgq3vlii">下一页<br class="astro-jgq3vlii"><span class="link-title astro-jgq3vlii">Javadoc</span></span></a></div></footer><div class="owner-credits astro-jo6i4kqk"><p class="astro-jo6i4kqk">Project maintained by <a href="https://github.com/matteobaccan" class="astro-jo6i4kqk">Matteo Baccan</a>, and the <a href="https://github.com/matteobaccan/owner/graphs/contributors" class="astro-jo6i4kqk">awesome contributors</a>.</p><p class="astro-jo6i4kqk">Developed with <a href="https://www.jetbrains.com/idea/" class="astro-jo6i4kqk"><img src="/owner/img/ij-logo.png" alt="IntelliJ IDEA" width="30" height="30" class="astro-jo6i4kqk"></a></p><p class="astro-jo6i4kqk">Hosted on <a href="https://github.com" class="astro-jo6i4kqk"><img class="github-wordmark astro-jo6i4kqk" src="/owner/img/footer-logo.png" alt="GitHub" width="100" height="30"></a></p></div></div></div></main></div></div></div></div></body></html>
