@@ -221,31 +221,60 @@ decrypted entry by entry:
 group.url=http://${host}/api
 ```
 
-The map that comes back is the one you declared. A **class** is instantiated
-as itself, provided it has a no-argument constructor: declare a `HashMap` and
-you get a `HashMap`, nothing is substituted. An **interface** has no
-constructor to call, so one implementation is chosen for it, and it is always
-one that satisfies the interface:
+### Which map you get
 
-| Declared | You get |
-|---|---|
-| `Map` | `LinkedHashMap` |
-| `SortedMap`, `NavigableMap` | `TreeMap` |
-| `ConcurrentMap` | `ConcurrentHashMap` |
-| `ConcurrentNavigableMap` | `ConcurrentSkipListMap` |
-| `HashMap`, `TreeMap`, `Properties`, … | that exact class |
-| `EnumMap<YourEnum, …>` | an `EnumMap` over that enum |
+The map that comes back is the one you declared, and **nothing is ever
+substituted**. A class is instantiated as itself, provided it has a
+no-argument constructor: declare a `HashMap` and you get a `HashMap`. An
+interface has no constructor to call, so an implementation is chosen for
+it — and the one chosen always satisfies the interface, which is what the
+table below is really saying.
 
-`EnumMap` is worth a note: it is the one map in the JDK with no no-argument
-constructor, since it has to be told the class of its keys — which OWNER
-already knows, having read it off the return type in order to convert them.
-The keys of the group then have to name the enum constants exactly, `Enum`
-conversion being what it is: `group.GREEN`, not `group.green`.
+| You declare | You get | Ordering |
+|---|---|---|
+| `Map` | `LinkedHashMap` | the order the properties were read in |
+| `SortedMap` | `TreeMap` | sorted by key |
+| `NavigableMap` | `TreeMap` | sorted by key |
+| `ConcurrentMap` | `ConcurrentHashMap` | none |
+| `ConcurrentNavigableMap` | `ConcurrentSkipListMap` | sorted by key |
+| `EnumMap<E, …>` | `EnumMap` over `E` | the order the constants are declared |
+| `HashMap`, `TreeMap`, `LinkedHashMap`, `Hashtable`, `Properties`, `ConcurrentHashMap`, `WeakHashMap`, … | that exact class | whatever the class does |
+| any other class with a no-argument constructor, yours included | that exact class | whatever the class does |
 
-A map type nothing here can satisfy — an interface of your own, or a class
-whose only constructor takes arguments — is refused with its name in the
-message. A raw `Map`, and any type argument that is not a plain class such as
-a wildcard, is read as `String`.
+Two are refused rather than guessed at, each naming itself in the message: a
+**map interface OWNER does not know**, since nothing it can build would
+satisfy it, and a **class whose only constructor takes arguments**, since
+there is nothing to call.
+
+`EnumMap` is the one worth a note. It is the only map in the JDK with no
+no-argument constructor, having to be told the class of its keys — which
+OWNER already knows, having read it off the return type in order to convert
+them. A raw `EnumMap`, with no key type to read, is the one case that cannot
+work, and the message says so.
+
+### How each side is converted
+
+| Part | Comes from | Converted to |
+|---|---|---|
+| entry key | the part of the property name after `theKey.` | the first type argument, `K` |
+| entry value | the property value | the second type argument, `V` |
+
+Both go through the ordinary conversion, so neither side is limited to
+strings and both accept [anything OWNER can
+convert](#all-the-types-supported-by-owner) — including a `@ConverterClass`
+registered for the type. A raw
+`Map`, and any type argument that is not a plain class such as a wildcard or
+a type variable, is read as `String`.
+
+Whichever side fails, the message names **the property**, not the group:
+`Cannot convert 'alpha' to Colour for property 'group.alpha'`. With fifty
+properties under one prefix, that is the difference between a fix and a
+search.
+
+An enum key is worth knowing about, being the common case where the two do
+not line up by themselves: conversion is `Enum.valueOf` and folds nothing, so
+the properties have to name the constants exactly — `group.GREEN`, not
+`group.green`.
 
 The other shape: one property holding the pairs
 -----------------------------------------------
