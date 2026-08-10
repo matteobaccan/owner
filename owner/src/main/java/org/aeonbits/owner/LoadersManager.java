@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.aeonbits.owner.util.Util.hideCredentials;
 import static org.aeonbits.owner.util.Util.unsupported;
 
 
@@ -126,6 +127,10 @@ class LoadersManager implements Serializable {
 
     void load(Properties result, URI uri) throws IOException {
         Loader loader = findLoader(uri);
+        // which loader answered is a whole diagnosis in one line: a '.yaml' answered by PropertiesLoader is
+        // a file being read as properties, which produces no error and nearly no properties
+        LOGGER.log(Level.CONFIG, () -> String.format("Reading %s with %s",
+                hideCredentials(uri), loader.getClass().getSimpleName()));
         loader.load(result, uri);
     }
 

@@ -28,6 +28,11 @@ public class PropertiesLoader implements Loader {
 
     @Override
     public boolean accept(URI uri) {
+        // isAbsolute first: toURL throws IllegalArgumentException rather than MalformedURLException for a
+        // URI with no scheme, which a spec whose ${…} did not expand produces - and an accept() that throws
+        // aborts the search for a loader instead of letting the next one answer
+        if (uri == null || !uri.isAbsolute())
+            return false;
         try {
             uri.toURL();
             return true;

@@ -234,6 +234,10 @@ public class XMLLoader implements Loader {
 
     @Override
     public boolean accept(URI uri) {
+        // see PropertiesLoader.accept: a URI with no scheme makes toURL throw the wrong kind of exception,
+        // and an accept() that throws stops the search for a loader rather than declining
+        if (uri == null || !uri.isAbsolute())
+            return false;
         try {
             uri.toURL();
             // matched through SourceOptions rather than on URL.getFile(), which includes the query: an XML

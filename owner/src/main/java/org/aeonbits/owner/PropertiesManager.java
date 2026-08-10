@@ -269,13 +269,29 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         return value;
     }
 
+    /**
+     * Turns the declared sources into the URIs that will be tried, in order.
+     * <p>
+     * A spec that resolves to nothing is dropped here, which is right — that is how {@code @LoadPolicy}
+     * falls back on the next source — and is also the reason a configuration full of defaults can have no
+     * explanation whatever. Both halves are therefore said at {@code CONFIG}: what was looked for, and what
+     * of it was not there. Together with the line naming the loader that answered, that is most of "why is
+     * my property missing" without anyone having to guess.
+     * </p>
+     */
     private List<URI> toURIs(Sources sources, ConfigURIFactory uriFactory) {
         String[] specs = specs(sources, uriFactory);
+        LOGGER.log(Level.CONFIG, () -> String.format("%s: %s %s", clazz.getName(),
+                sources != null ? "sources declared:" : "no @Sources, looking for:", Arrays.toString(specs)));
+
         List<URI> result = new ArrayList<>();
         for (String spec : specs) {
             try {
                 URI uri = uriFactory.newURI(spec);
-                if (uri != null)
+                if (uri == null)
+                    LOGGER.log(Level.CONFIG, () -> String.format("%s: %s was not found, skipping it",
+                            clazz.getName(), spec));
+                else
                     result.add(uri);
             } catch (URISyntaxException e) {
                 throw unsupported(e, "Can't convert '%s' to a valid URI", spec);

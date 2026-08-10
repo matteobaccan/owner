@@ -92,7 +92,12 @@ public class HotReloadSurvivesAFailureTest {
         recorder = new Handler() {
             @Override
             public void publish(LogRecord record) {
-                log.add(record);
+                // what these tests are about is what the library says when something went wrong, and the
+                // level is set to ALL above so that nothing of that kind can be missed. Since 2.0.0 the same
+                // logger also reports what was decided, at CONFIG, which is a different subject and would
+                // otherwise be counted as if it were a failure
+                if (record.getLevel().intValue() >= Level.WARNING.intValue())
+                    log.add(record);
             }
 
             @Override

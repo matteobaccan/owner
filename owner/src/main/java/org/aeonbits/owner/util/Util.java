@@ -280,7 +280,7 @@ public abstract class Util {
      * @return the built exception.
      */
     public static UnsupportedOperationException unsupported(Throwable cause, String msg, Object... args) {
-        return new UnsupportedOperationException(format(msg, args), cause);
+        return new UnsupportedOperationException(format(msg, withoutCredentials(args)), cause);
     }
 
     /**
@@ -291,7 +291,49 @@ public abstract class Util {
      * @return the built exception.
      */
     public static UnsupportedOperationException unsupported(String msg, Object... args) {
-        return new UnsupportedOperationException(format(msg, args));
+        return new UnsupportedOperationException(format(msg, withoutCredentials(args)));
+    }
+
+    /**
+     * The text of a source, with any credentials in it replaced.
+     * <p>
+     * A URI may carry them — <code>https://user:secret@config/app.properties</code> is legal and used — and
+     * the source is exactly what a message about a source has to name. The rule that a value never reaches
+     * a log does not cover this, the secret being in the <b>source</b> rather than in a value, so it is
+     * covered here instead: everything between the scheme and the host becomes <code>***</code>.
+     * </p>
+     *
+     * @param uri the source, may be <code>null</code>.
+     * @return the source as text, with no credentials in it.
+     */
+    public static String hideCredentials(URI uri) {
+        if (uri == null) return "null";
+        String text = uri.toString();
+        // read from the text rather than from getUserInfo(), which is null on the opaque URIs a jar or a
+        // relative file path produce - the very ones a message is most likely to be about
+        int host = text.indexOf("//");
+        if (host < 0) return text;
+        int at = text.indexOf('@', host);
+        if (at < 0) return text;
+        return text.substring(0, host + 2) + "***" + text.substring(at);
+    }
+
+    /**
+     * Replaces every {@link URI} among the arguments of a message with its credential-free text.
+     * <p>
+     * Done here, once, rather than at each of the twenty-odd places that name a source in a message: it
+     * covers the ones written since as well, which is the property worth having.
+     * </p>
+     */
+    private static Object[] withoutCredentials(Object... args) {
+        if (args == null) return null;
+        Object[] safe = null;
+        for (int i = 0; i < args.length; i++) {
+            if (!(args[i] instanceof URI)) continue;
+            if (safe == null) safe = args.clone();
+            safe[i] = hideCredentials((URI) args[i]);
+        }
+        return safe == null ? args : safe;
     }
 
     /**
