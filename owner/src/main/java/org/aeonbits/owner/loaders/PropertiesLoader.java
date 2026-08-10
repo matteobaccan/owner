@@ -38,6 +38,7 @@ public class PropertiesLoader implements Loader {
 
     @Override
     public void load(Properties result, URI uri) throws IOException {
+        SourceOptions.of(uri).refuseUnknown();
         URL url = uri.toURL();
         try (InputStream input = url.openStream()) {
             load(result, input);

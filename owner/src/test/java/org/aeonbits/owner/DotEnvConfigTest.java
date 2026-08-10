@@ -66,12 +66,12 @@ public class DotEnvConfigTest {
         String name();
     }
 
-    @Sources("file:" + QUOTED + "?dialect=dotenv")
+    @Sources("file:" + QUOTED + "#dialect=dotenv")
     interface QuotedDotenvConfig extends Config {
         String name();
     }
 
-    @Sources("file:" + QUOTED + "?quotes=strip")
+    @Sources("file:" + QUOTED + "#quotes=strip")
     interface QuotedOneRuleConfig extends Config {
         String name();
     }

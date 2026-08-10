@@ -117,9 +117,9 @@ public class DotEnvLoaderTest {
         return result;
     }
 
-    private static Properties readWithQuery(String query, String... lines) throws IOException, URISyntaxException {
+    private static Properties readWithOptions(String options, String... lines) throws IOException, URISyntaxException {
         Properties result = new Properties();
-        new DotEnvLoader().load(result, new URI(writeEnv(lines).toURI() + "?" + query));
+        new DotEnvLoader().load(result, new URI(writeEnv(lines).toURI() + "#" + options));
         return result;
     }
 
@@ -141,8 +141,8 @@ public class DotEnvLoaderTest {
     }
 
     @Test
-    public void testAcceptsWhenTheDialectIsInTheQuery() throws URISyntaxException {
-        assertTrue(new DotEnvLoader().accept(new URI("file:/app/.env?dialect=dotenv")));
+    public void testAcceptsWhenTheDialectIsInTheFragment() throws URISyntaxException {
+        assertTrue(new DotEnvLoader().accept(new URI("file:/app/.env#dialect=dotenv")));
     }
 
     @Test
@@ -461,35 +461,35 @@ public class DotEnvLoaderTest {
         }
     }
 
-    // ---------------------------------------------------------------- the query on the source
+    // ---------------------------------------------------------------- the options on the source
 
     @Test
-    public void testTheQueryChoosesTheDialect() throws IOException, URISyntaxException {
-        assertEquals("Matteo", readWithQuery("dialect=dotenv", "NAME=\"Matteo\"").getProperty("NAME"));
+    public void testTheFragmentChoosesTheDialect() throws IOException, URISyntaxException {
+        assertEquals("Matteo", readWithOptions("dialect=dotenv", "NAME=\"Matteo\"").getProperty("NAME"));
     }
 
     @Test
-    public void testWithoutAQueryTheLoaderKeepsItsOwnDialect() throws IOException {
+    public void testWithoutOptionsTheLoaderKeepsItsOwnDialect() throws IOException {
         assertEquals("\"Matteo\"", read(EnvDialect.DOCKER, "NAME=\"Matteo\"").getProperty("NAME"));
     }
 
     @Test
-    public void testTheQueryCanAdjustASingleRule() throws IOException, URISyntaxException {
-        assertEquals("Matteo", readWithQuery("quotes=strip", "NAME=\"Matteo\"").getProperty("NAME"));
+    public void testTheFragmentCanAdjustASingleRule() throws IOException, URISyntaxException {
+        assertEquals("Matteo", readWithOptions("quotes=strip", "NAME=\"Matteo\"").getProperty("NAME"));
     }
 
     @Test
     public void testASingleRuleIsAppliedOverTheChosenDialect() throws IOException, URISyntaxException {
         // dotenv would strip them; the explicit setting must win, whichever order the two are written in
         assertEquals("\"Matteo\"",
-                readWithQuery("dialect=dotenv&quotes=literal", "NAME=\"Matteo\"").getProperty("NAME"));
+                readWithOptions("dialect=dotenv&quotes=literal", "NAME=\"Matteo\"").getProperty("NAME"));
         assertEquals("\"Matteo\"",
-                readWithQuery("quotes=literal&dialect=dotenv", "NAME=\"Matteo\"").getProperty("NAME"));
+                readWithOptions("quotes=literal&dialect=dotenv", "NAME=\"Matteo\"").getProperty("NAME"));
     }
 
     @Test
-    public void testEveryRuleCanBeSetFromTheQuery() throws IOException, URISyntaxException {
-        Properties props = readWithQuery(
+    public void testEveryRuleCanBeSetFromTheFragment() throws IOException, URISyntaxException {
+        Properties props = readWithOptions(
                 "quotes=strip&escapes=expand&export=strip&comments=inline&multiline=allow"
                         + "&continuation=deny&bare=ignore",
                 "export TEXT=\"one\\ntwo\" # a note", "BARE_NAME_WITH_NO_VALUE");
@@ -500,7 +500,7 @@ public class DotEnvLoaderTest {
     @Test
     public void testAnUnknownDialectIsRefused() throws IOException {
         try {
-            readWithQuery("dialect=yaml", "HOST=localhost");
+            readWithOptions("dialect=yaml", "HOST=localhost");
             fail("an unknown dialect should be refused");
         } catch (UnsupportedOperationException expected) {
             assertTrue(expected.getMessage(), expected.getMessage().contains("yaml"));
@@ -512,7 +512,7 @@ public class DotEnvLoaderTest {
     @Test
     public void testAnUnknownOptionIsRefused() throws IOException {
         try {
-            readWithQuery("flavour=spicy", "HOST=localhost");
+            readWithOptions("flavour=spicy", "HOST=localhost");
             fail("an unknown option should be refused");
         } catch (UnsupportedOperationException expected) {
             assertTrue(expected.getMessage(), expected.getMessage().contains("flavour"));
@@ -524,7 +524,7 @@ public class DotEnvLoaderTest {
     @Test
     public void testAnUnknownSettingIsRefused() throws IOException {
         try {
-            readWithQuery("quotes=maybe", "HOST=localhost");
+            readWithOptions("quotes=maybe", "HOST=localhost");
             fail("an unknown setting should be refused");
         } catch (UnsupportedOperationException expected) {
             assertTrue(expected.getMessage(), expected.getMessage().contains("maybe"));
@@ -534,10 +534,10 @@ public class DotEnvLoaderTest {
     }
 
     @Test
-    public void testAQueryTermThatIsNotAPairIsRefused() throws IOException {
+    public void testATermThatIsNotAPairIsRefused() throws IOException {
         try {
-            readWithQuery("dotenv", "HOST=localhost");
-            fail("a query term that is not option=setting should be refused");
+            readWithOptions("dotenv", "HOST=localhost");
+            fail("a term that is not option=setting should be refused");
         } catch (UnsupportedOperationException expected) {
             assertTrue(expected.getMessage(), expected.getMessage().contains("option=setting"));
         } catch (URISyntaxException e) {
@@ -651,7 +651,7 @@ public class DotEnvLoaderTest {
     @Test
     public void testAnUnknownBareNamePolicyIsRefused() throws IOException {
         try {
-            readWithQuery("bare=whatever", "HOST=localhost");
+            readWithOptions("bare=whatever", "HOST=localhost");
             fail("an unknown bare name policy should be refused");
         } catch (UnsupportedOperationException expected) {
             assertTrue(expected.getMessage(), expected.getMessage().contains("whatever"));
@@ -661,12 +661,12 @@ public class DotEnvLoaderTest {
     }
 
     @Test
-    public void testTheQueryCanSetEachBareNamePolicy() throws IOException, URISyntaxException {
+    public void testTheFragmentCanSetEachBareNamePolicy() throws IOException, URISyntaxException {
         String name = anEnvironmentVariable();
-        assertEquals(system().getenv().get(name), readWithQuery("bare=env", name).getProperty(name));
-        assertTrue(readWithQuery("bare=ignore", name).isEmpty());
+        assertEquals(system().getenv().get(name), readWithOptions("bare=env", name).getProperty(name));
+        assertTrue(readWithOptions("bare=ignore", name).isEmpty());
         try {
-            readWithQuery("bare=error", name);
+            readWithOptions("bare=error", name);
             fail("bare=error should refuse a name with no value");
         } catch (UnsupportedOperationException expected) {
             assertTrue(expected.getMessage(), expected.getMessage().contains(name));
@@ -674,8 +674,8 @@ public class DotEnvLoaderTest {
     }
 
     @Test
-    public void testAnEmptyTermInTheQueryIsSkipped() throws IOException, URISyntaxException {
-        assertEquals("Matteo", readWithQuery("dialect=dotenv&&quotes=strip", "NAME=\"Matteo\"").getProperty("NAME"));
+    public void testAnEmptyTermInTheFragmentIsSkipped() throws IOException, URISyntaxException {
+        assertEquals("Matteo", readWithOptions("dialect=dotenv&&quotes=strip", "NAME=\"Matteo\"").getProperty("NAME"));
     }
 
     // ---------------------------------------------------------------- the word said about kept quotes

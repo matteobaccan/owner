@@ -231,8 +231,11 @@ public class XMLLoader implements Loader {
     @Override
     public boolean accept(URI uri) {
         try {
-            URL url = uri.toURL();
-            return url.getFile().toLowerCase().endsWith(".xml");
+            uri.toURL();
+            // matched against the path rather than against URL.getFile(), which includes the query: an XML
+            // served over HTTP as config.xml?v=2 used to fail this test, fall through to PropertiesLoader -
+            // which accepts everything it can resolve - and be read as a properties file, in silence
+            return SourceOptions.path(uri).toLowerCase().endsWith(".xml");
         } catch (MalformedURLException ex) {
             return false;
         }
@@ -240,6 +243,7 @@ public class XMLLoader implements Loader {
 
     @Override
     public void load(Properties result, URI uri) throws IOException {
+        SourceOptions.of(uri).refuseUnknown();
         InputStream input = uri.toURL().openStream();
         try {
             SAXParser parser = factory().newSAXParser();

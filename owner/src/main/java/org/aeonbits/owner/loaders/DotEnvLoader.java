@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -39,16 +38,17 @@ import static org.aeonbits.owner.util.Util.unsupported;
  * <pre>
  *     ConfigFactory.registerLoader(new DotEnvLoader(EnvDialect.DOTENV));
  * </pre>
- * <p>and a query on the source sets it for that file alone, which is finer:</p>
+ * <p>and an option on the source sets it for that file alone, which is finer:</p>
  * <pre>
- *     &#64;Sources("file:.env?dialect=dotenv")
+ *     &#64;Sources("file:.env#dialect=dotenv")
  * </pre>
  * <p>
- * A query may also adjust one rule at a time, over the dialect or over the default:
+ * The options of a source live in the fragment, for every loader and every scheme - see
+ * {@link SourceOptions}. They may also adjust one rule at a time, over the dialect or over the default:
  * <code>quotes=strip|literal</code>, <code>escapes=expand|literal</code>, <code>export=strip|keep</code>,
  * <code>comments=inline|none</code>, <code>multiline=allow|deny</code>,
- * <code>continuation=allow|deny</code> and <code>bare=env|ignore|error</code>. An option or a setting that is
- * not one of these is refused rather than ignored.
+ * <code>continuation=allow|deny</code> and <code>bare=env|ignore|error</code>, separated by
+ * <code>&amp;</code>. An option or a setting that is not one of these is refused rather than ignored.
  * </p>
  *
  * <p>
@@ -104,16 +104,18 @@ public class DotEnvLoader implements Loader {
 
     @Override
     public boolean accept(URI uri) {
-        return uri != null && withoutQuery(uri.toString()).toLowerCase().endsWith(SUFFIX);
+        return uri != null && SourceOptions.path(uri).toLowerCase().endsWith(SUFFIX);
     }
 
     @Override
     public void load(Properties result, URI uri) throws IOException {
         EnvDialect effective = dialectFor(uri);
+        // the URI is opened as it stands: URL.getFile() excludes the fragment, so there is nothing to strip,
+        // and a query - which only a remote source can carry - reaches the server it belongs to.
         // the three are declared separately rather than nested: closing the outermost would be enough for the
         // stream underneath, but a constructor that failed halfway would leave what it had already wrapped
         // open, and this way each is closed whatever happens to the one after it
-        try (InputStream input = uriWithoutQuery(uri).toURL().openStream();
+        try (InputStream input = uri.toURL().openStream();
              InputStreamReader characters = new InputStreamReader(input, ENCODING);
              BufferedReader reader = new BufferedReader(characters)) {
             new Parser(readLines(reader), effective, uri, result).run();
@@ -133,38 +135,35 @@ public class DotEnvLoader implements Loader {
         return null;
     }
 
-    // ---------------------------------------------------------------- the query on the source
+    // ---------------------------------------------------------------- the options on the source
 
     private EnvDialect dialectFor(URI uri) {
-        String spec = uri.toString();
-        int mark = spec.indexOf('?');
-        if (mark < 0)
+        SourceOptions options = SourceOptions.of(uri);
+        if (options.isEmpty())
             return dialect;
 
-        String[] pairs = spec.substring(mark + 1).split("&");
-        EnvDialect result = baseDialect(pairs);
-        for (String pair : pairs) {
-            if (pair.isEmpty()) continue;
-            int equals = pair.indexOf('=');
-            if (equals < 1)
-                throw unsupported("'%s' in the query of %s is not an option=setting pair", pair, uri);
-            String option = pair.substring(0, equals).trim().toLowerCase();
-            if (!"dialect".equals(option))
-                result = apply(result, option, pair.substring(equals + 1).trim().toLowerCase(), uri);
-        }
+        options.refuseUnknown("dialect", "quotes", "escapes", "export", "comments", "multiline",
+                "continuation", "bare");
+        EnvDialect result = baseDialect(options);
+        for (SourceOptions.Option option : options.all())
+            if (!"dialect".equals(option.name()))
+                result = apply(result, option.name(), option.setting().toLowerCase(), uri);
         return result;
     }
 
     /** Read before everything else, so that {@code dialect} sets the starting point wherever it appears. */
-    private EnvDialect baseDialect(String[] pairs) {
-        for (String pair : pairs) {
-            int equals = pair.indexOf('=');
-            if (equals > 0 && "dialect".equals(pair.substring(0, equals).trim().toLowerCase()))
-                return EnvDialect.named(pair.substring(equals + 1));
-        }
+    private EnvDialect baseDialect(SourceOptions options) {
+        for (SourceOptions.Option option : options.all())
+            if ("dialect".equals(option.name()))
+                return EnvDialect.named(option.setting());
         return dialect;
     }
 
+    /**
+     * Applies one rule over a dialect. Every name reaching here is one of the eight, since
+     * {@link SourceOptions#refuseUnknown(String...)} has already turned the others away - which is why the
+     * last of them is the fall-through rather than an unreachable error.
+     */
     private static EnvDialect apply(EnvDialect target, String option, String setting, URI uri) {
         if ("quotes".equals(option))
             return target.withQuotesStripped(flag(option, setting, "strip", "literal", uri));
@@ -178,10 +177,7 @@ public class DotEnvLoader implements Loader {
             return target.withMultilineValues(flag(option, setting, "allow", "deny", uri));
         if ("continuation".equals(option))
             return target.withLineContinuation(flag(option, setting, "allow", "deny", uri));
-        if ("bare".equals(option))
-            return target.withBareNames(bareNames(setting, uri));
-        throw unsupported("Unknown .env option '%s' in the query of %s; the options are dialect, quotes, "
-                + "escapes, export, comments, multiline, continuation and bare", option, uri);
+        return target.withBareNames(bareNames(setting, uri));
     }
 
     private static boolean flag(String option, String setting, String whenTrue, String whenFalse, URI uri) {
@@ -197,22 +193,6 @@ public class DotEnvLoader implements Loader {
         if ("error".equals(setting)) return EnvDialect.BareNames.ERROR;
         throw unsupported("'%s' is not a setting for the .env option 'bare' in %s; use 'env', 'ignore' or "
                 + "'error'", setting, uri);
-    }
-
-    private static String withoutQuery(String spec) {
-        int mark = spec.indexOf('?');
-        return mark < 0 ? spec : spec.substring(0, mark);
-    }
-
-    private static URI uriWithoutQuery(URI uri) throws IOException {
-        String spec = uri.toString();
-        if (spec.indexOf('?') < 0)
-            return uri;
-        try {
-            return new URI(withoutQuery(spec));
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
-        }
     }
 
     private static List<String> readLines(BufferedReader reader) throws IOException {
