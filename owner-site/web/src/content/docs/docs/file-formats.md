@@ -11,11 +11,12 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [Properties](#properties) | anything the others turn down | `MyConfig.properties` | `java.util.Properties` |
 | [XML](#xml) | a path ending in `.xml` | `MyConfig.xml` | the JDK's SAX parser |
 | [`.env`](#env) | a path ending in `.env` | — never looked for on its own | ours |
+| [INI](#ini) | a path ending in `.ini` or `.cfg` | `MyConfig.ini`, `MyConfig.cfg` | ours |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
-Two of them are worth reading twice. **`.env` has no standard**, so which rules it is read by is something
-you choose; see [below](#env). And **XML is parsed with hardening turned on**, which in rare cases cannot be
-applied; see [below](#xml).
+Three of them are worth reading twice. **`.env` and INI have no standard**, so which rules they are read by
+is something you choose; see [below](#env) and [below](#ini). And **XML is parsed with hardening turned
+on**, which in rare cases cannot be applied; see [below](#xml).
 
 Nothing else is read yet — no YAML, JSON, TOML or HOCON. What that would take, and in which order it is
 coming, is in [what is not read yet](#what-is-not-read-yet).
@@ -432,6 +433,136 @@ That is the line to reach for when a format seems to be ignored, because a loade
 not fail: its file falls through to the properties loader and is read as properties, quietly. See
 [writing your own loader](/owner/docs/loading-strategies/#writing-your-own-loader).
 
+
+INI
+---
+
+*Since 2.0.0.*
+
+Sections in square brackets, `key = value` below them — the shape of `~/.aws/credentials`, `~/.gitconfig`,
+a systemd unit, and a great deal of what is already on a machine.
+
+```ini
+name = owner
+
+[server]
+host = localhost
+port = 8080
+```
+
+```properties
+name=owner
+server.host=localhost
+server.port=8080
+```
+
+**A section is the prefix of the keys below it**, and that needs no convention of its own: the dot is
+already what OWNER uses for [nesting](#how-a-tree-becomes-keys), so `[server.http]` and a nested structure
+land on the same keys. Keys written before any section have no prefix at all.
+
+A source whose path ends in `.ini` or `.cfg` is read this way, and both names are looked for beside the
+configuration class when no `@Sources` is declared.
+
+### A repeated key is a list
+
+```ini
+[servers]
+host = alpha
+host = beta
+```
+
+```properties
+servers.host[0]=alpha
+servers.host[1]=beta
+```
+
+Exactly as [repeated XML elements](#repeated-elements-are-a-list) are numbered, and for the same reason: a
+key occurring once keeps its plain key, and only a repeat is numbered — at which point the first moves to
+`[0]`. The same name under two different sections is two keys, not a repeat.
+
+This is the point on which the tools that read INI disagree most: Python's `configparser` refuses the file,
+git and systemd and Commons Configuration read a list, and the AWS SDK for Java keeps the last. A list is
+the answer here because it is the one this library already gives to a repeated XML element, and reading the
+same shape two ways would be the surprise. The other three answers are available as `duplicates=error`,
+`first` and `last`.
+
+### There is no INI format either
+
+So OWNER implements a **dialect**, as it does for [`.env`](#env), and the dialect is yours to choose.
+
+| | `ini` | `git` | `python` |
+|---|---|---|---|
+| separator | `=` | `=` | `=` or `:` |
+| `[a "b"]` | one section named `a "b"` | subsection → `a.b` | one section |
+| `key = "x"` | keeps the quotes | delimiters, escapes expanded | keeps the quotes |
+| comment after a value | part of the value | starts a comment | part of the value |
+| a line ending in `\` | its own line | joins the next | its own line |
+| a line indented further | an error | an error | continues the value |
+| a name with no `=` | an error | means `true` | an error |
+| a repeated key | a list | a list | an error |
+| `[DEFAULT]` | an ordinary section | an ordinary section | inherited by every section |
+| key case | as written | as written | lower case |
+
+**`ini` is the default**, and it is the conservative common denominator: everything in that column is
+something all five of the tools surveyed agree on. Inline comments are off for a reason worth knowing —
+the value most likely to contain a `#` is a password, and losing half of one in silence is worse than
+keeping a comment somebody meant.
+
+**`git` earns its name** by reading a subsection: `[remote "origin"]` holding a `url` becomes
+`remote.origin.url`, which is the key `git config` itself prints. A mapping interface written against it
+reads the same names the tool does.
+
+```java
+@Sources("file:${user.home}/.gitconfig#dialect=git")
+public interface GitConfig extends Config {
+    @Key("user.email")
+    String email();
+
+    @Key("remote.origin.url")
+    String originUrl();
+}
+```
+
+### One rule at a time
+
+Over any dialect, in the fragment, as for `.env`:
+
+| Option | Settings |
+|---|---|
+| `dialect` | `ini`, `git`, `python` |
+| `separator` | `equals`, `colon` |
+| `duplicates` | `list`, `error`, `first`, `last` |
+| `keys` | `literal`, `lower` |
+| `bare` | `error`, `ignore`, `true` |
+| `comments` | `inline`, `none` |
+| `quotes` | `strip`, `literal` |
+| `continuation` | `none`, `backslash`, `indent` |
+| `subsections` | `allow`, `deny` |
+| `default` | `inherit`, `section` |
+| `interpolation` | `refuse`, `literal` |
+
+```java
+@Sources("file:/etc/myapp.cfg#duplicates=last&comments=inline")
+```
+
+<div class="note warning">
+  <h5>The <code>python</code> dialect refuses what it would have interpolated</h5>
+  <p>
+    Python's <code>ConfigParser</code> expands <code>%(name)s</code> inside a value by default, and OWNER
+    never will: it expands <a href="/owner/docs/variables-expansion/"><code>${…}</code></a> itself, after
+    loading and across every source, so a loader doing its own would expand twice and the two syntaxes would
+    mean different things in one value. Handing back <code>%(home)s/log</code> as literal text would make
+    the same file mean one thing to Python and another here, quietly — so under this dialect it is an
+    <b>error</b> naming the key, and the message points at <code>${…}</code>. Under the other dialects a
+    <code>%</code> is an ordinary character.
+  </p>
+</div>
+
+### When the file is wrong
+
+Refused loudly, each naming the file and the line: a section header that never closes, a section with no
+name, an assignment with nothing on the left of the separator, and — unless `bare` says otherwise — a line
+that is neither a comment nor an assignment.
 
 System properties and the environment
 -------------------------------------

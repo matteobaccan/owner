@@ -290,6 +290,30 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    dialect that keeps quotes draws one `WARNING`. A `.env` is never looked for on its own: it is not named
    after the configuration interface, so it is always named explicitly, and configurations that do not use
    one pay no extra lookup. See the [documentation](/owner/docs/file-formats/#env).
+ * **INI files are read** — sections in square brackets and `key = value` below them, which is the shape of
+   `~/.aws/credentials`, `~/.gitconfig`, a systemd unit and a good deal of what is already on a machine. A
+   section becomes the prefix of the keys under it, needing no convention of its own since the dot is
+   already how OWNER nests, and `.ini` and `.cfg` are both recognised and both looked for beside the
+   configuration class.
+
+   **A repeated key is a list** — `servers.host[0]`, `servers.host[1]` — exactly as repeated XML elements
+   are numbered, a key occurring once keeping its plain key. This is the point the tools disagree on most:
+   Python's `configparser` refuses the file, git and systemd and Commons Configuration read a list, and the
+   AWS SDK for Java keeps the last. A list is the answer because it is the one this release already gives
+   to a repeated XML element, and reading the same shape two ways would be the surprise; the other three
+   are available as options.
+
+   There is no INI standard, so as with `.env` the rules are a **dialect**: `ini` by default — the
+   conservative common denominator every surveyed tool agrees with — plus `git`, which reads a subsection,
+   so `[remote "origin"]` holding a `url` becomes `remote.origin.url`, the very key `git config` prints;
+   and `python`, which folds keys, accepts `:`, refuses a duplicate, continues a value by indentation and
+   lets every section inherit `[DEFAULT]`. Eleven rules can be set one at a time over any of them.
+
+   One thing the `python` dialect **refuses** rather than half-honours: `ConfigParser` interpolates
+   `%(name)s` by default and OWNER never will, expanding `${…}` itself after loading and across every
+   source. A value holding `%(…)s` read under that dialect is an error naming the key and pointing at
+   `${…}`, because handing back the literal would make the same file mean one thing to Python and another
+   here, quietly. See the [documentation](/owner/docs/file-formats/#ini).
  * **A source can carry options, written in its fragment.** `@Sources("file:.env#dialect=dotenv")` sets the
    dialect for that file alone, several options separated by `&`. The rule is the same for every loader and
    every scheme: **the query belongs to the protocol and the fragment belongs to OWNER**. A query is never

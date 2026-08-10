@@ -141,11 +141,12 @@ Where the properties come from
 ------------------------------
 
 A `@Sources` entry is a URI, and the loader that reads it is the first one that declares it accepts it.
-Four are available out of the box, and they are consulted in this order:
+Five are available out of the box, and they are consulted in this order:
 
 | Loader | Accepts |
 |---|---|
 | `SystemLoader` | the `system:properties` and `system:env` pseudo-URIs, and nothing else |
+| `IniLoader` | a URI whose path ends in `.ini` or `.cfg` — see [File formats](/owner/docs/file-formats/#ini) |
 | `DotEnvLoader` | a URI whose path ends in `.env` — see [File formats](/owner/docs/file-formats/#env) |
 | `XMLLoader` | a URI whose path ends in `.xml` — see [File formats](/owner/docs/file-formats/#xml) |
 | `PropertiesLoader` | anything that is a valid URL, in the [standard properties format][props] |
@@ -153,9 +154,10 @@ Four are available out of the box, and they are consulted in this order:
 `PropertiesLoader` comes last because it accepts everything the others turned down: it is the
 fallback, not a candidate among equals.
 
-Only two of them offer a default file name, so a configuration with no `@Sources` looks for
-`MyConfig.properties` and `MyConfig.xml` and nothing more: `SystemLoader` and `DotEnvLoader` answer
-when they are named and cost nothing when they are not.
+Three of them offer default file names, so a configuration with no `@Sources` looks for
+`MyConfig.properties`, `MyConfig.xml`, `MyConfig.ini` and `MyConfig.cfg` and nothing more.
+`SystemLoader` and `DotEnvLoader` offer none: they answer when they are named and cost nothing when
+they are not, a `.env` being neither on the classpath nor named after the configuration class.
 
   [props]: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-
 

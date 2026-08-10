@@ -57,25 +57,69 @@ discovery was made to enable.
 that has a null decides in its own loader, as an option of that format. Two core rules already constrain
 that decision and are written down in `FORMATS.md` so the JSON loader does not rediscover them.
 
-WHAT IS NEXT: INI, AND WHY IT MOVED IN FRONT
---------------------------------------------
+INI IS DONE, AND WHAT IT PROVED
+------------------------------
 
-**INI is next**, ahead of JSON and YAML, which is a change from the order written in `FORMATS.md` and is
-argued there in full. The short version: ordering by demand was right while the data model risked freezing
-at the 2.0.0 release before anything with real nesting had tested it, and **2.0.0 now ships at the end of
-the format work**, so that race is off. Meanwhile C6 exists, is public, and has no consumer — nothing in
-the tree needs two extensions, a section, or a duplicate-key policy, and INI needs all three. It is also
-the cheapest format left, it belongs in the core so it does not force the `owner-formats` artifact
-question, and its repeated keys are the same shape as the repeated XML elements already shipped.
+**Shipped 2026-08-10**, `c3fab93b`. It went ahead of JSON and YAML for reasons argued in `FORMATS.md`, and
+the ones that were bets came good: C6 got its first consumer and held, C5 got the two extensions it was
+built for, and the duplicate-key question — **C9** — is now answered for YAML, TOML and HOCON as well.
 
-Against it, stated rather than buried: **nobody has ever asked for INI.** The issue tracker has YAML in
-four issues, JSON in three, TOML in two, HOCON in one and INI in none. That would decide it if INI shipped
-alone — it does not, every format goes out together in 2.0.0, so the order decides what we learn first
-rather than what anybody receives.
+The rules were settled against five implementations before a line was written, and they disagree three ways
+on the only question that matters. A repeated key is a **list** here, because that is what this library
+already does with a repeated XML element; reading the same shape two ways would have been the incoherence.
 
-Settle before writing, as was done for indexed keys: the dialects and what they disagree on, how a section
-becomes a prefix, what a duplicate key does (**C9**, and the answer serves YAML, TOML and HOCON later), and
-whether repeated keys become an indexed list.
+The `python` dialect answered a question worth remembering: **the rules were cheap and the name was
+expensive.** `ConfigParser` interpolates `%(name)s` and we never will, so the preset refuses such a value
+rather than handing back the literal — five lines that keep a file from meaning one thing to Python and
+another here.
+
+WHAT IS NEXT
+------------
+
+**JSON**, and it arrives with its own question already framed rather than open: `null` is its decision, not
+the core's, and the two rules the core imposes on that decision are written down in `FORMATS.md`. After it,
+**nested configuration interfaces** ([#129](https://github.com/matteobaccan/owner/issues/129)), without
+which a YAML or JSON source holding a list of objects flattens correctly to `servers[0].host` and is
+unreachable — so it has to land before YAML is worth having.
+
+Third, and the one that would close the most support questions: **a configuration that explains itself**.
+See below.
+
+A CONFIGURATION THAT EXPLAINS ITSELF
+-----------------------------------
+
+`WARNING` says something went wrong; `CONFIG` says what was decided. The four silent failures further down
+are the first kind. These are the second, and they matter more, because most of "it does not work" is not a
+failure at all — everything succeeded, just not on the file or the key somebody thought.
+
+One switch, `org.aeonbits.owner.level = CONFIG`, and the library says what it did. In the order of how many
+real questions each would close:
+
+- [ ] **Which sources were resolved, and which one answered.** `PropertiesManager.toURIs` builds the list
+      and `LoadType.FIRST` stops at the first that loads, and none of it is visible. This alone answers most
+      of "why is my property missing" — usually because it read `MyConfig.properties` from inside a jar. It
+      subsumes the second silent failure below, since a spec that `newURI` cannot resolve is dropped with
+      `if (uri != null)` and never reaches a loader.
+- [ ] **Which loader answered for each source.** `app.yaml → PropertiesLoader` is a diagnosis in one line,
+      and it is the only trace a loader that was not discovered leaves behind.
+- [ ] **The specs looked for when there is no `@Sources`.** Answers "I called the file `config.properties`
+      and the class is `MyConfig`".
+- [ ] **The effective key prefix**, from `KeyPrefix`, `@Prefix` or `@DisableFeature(PREFIX)`. A wrong prefix
+      makes *every* property vanish at once, which is the most disorienting failure there is and the least
+      visible: nothing errors.
+- [ ] **Hot reload: whether it is on, of which kind, how often, and on which sources.** "I changed the file
+      and nothing happened" — because `ASYNC` watches only `file:` sources, or the source is inside a jar.
+
+Two rules, and the first was nearly missed: **a URI can carry credentials.** `https://user:pass@host/app.properties`
+is legal and used, and it is exactly what these lines would print. Every URI that reaches a log goes through
+something that blanks the userinfo first — the existing rule about never logging a *value* does not cover
+this, because here the secret is in the *source*. And **at `CONFIG` the "say it once" rule inverts**: it is
+off unless somebody turned it on to look into something, so seeing every reload is the reason it was turned
+on. What is decided once — prefix, hot reload, discovery — is said at creation; what depends on the load is
+said per load.
+
+Worth doing together with the four `WARNING` items below: they are one reading of the same code paths and
+the same two rules.
 
 **Two small things left on the floor**, neither urgent:
 

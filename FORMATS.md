@@ -142,7 +142,7 @@ Line counts are estimates for a hand-written parser only; tests run another 1.5�
 | Format | Formal spec | Lines | Risk | What makes it hard |
 |---|---|---:|---|---|
 | `.env` | none | 150–250 | low | No standard at all; the dialects genuinely disagree. See below |
-| INI | none | 150–250 | low | Same: `;` or `#`, `=` or `:`, nested `[a.b]`, duplicates |
+| ~~INI~~ | none | **done 2026-08-10** | — | Same: `;` or `#`, `=` or `:`, nested `[a.b]`, duplicates. Three dialects; see below |
 | JSON | RFC 8259 | 350–450 | low | Nothing subtle: `\uXXXX`, surrogate pairs, numbers. JSONTestSuite exists to check against |
 | CBOR | RFC 8949 | 450–650 | low-medium | A small deterministic spec — easier to get right than YAML or TOML, for all that it is binary |
 | ~~TOON~~ | toonformat.dev | ~400 | — | **closed 2026-08-10.** Not a configuration format. See below |
@@ -222,7 +222,10 @@ A plan in phases
    3. **`512ab586`** — C5, several names per format, as additive default methods.
 2. ~~**C1 + C2, the data model.**~~ **Done 2026-08-09**, `aace753` and `d77165c`. Indexed lists, the
    flattening convention stated in `PropertyKeys`, and the XML hole repaired.
-3. **INI** — see the reordering below.
+3. ~~**INI.**~~ **Done 2026-08-10**, `c3fab93b`: `IniLoader` and `IniDialect`, three dialects, eleven rules,
+   34 tests. The rules were settled against five implementations before any of it was written — Python
+   `configparser`, git config, systemd, Commons Configuration, the AWS SDK for Java — and they disagree
+   three ways on the only question that matters, which is what a repeated key means. See below.
 4. **JSON, then YAML.**
 5. **TOML, then HOCON, CBOR, TOON if ever.**
 
@@ -252,6 +255,51 @@ issue tracker on 2026-08-10 — YAML appears in four issues (#14, #53, #34, #212
 #14), TOML in two, HOCON in one, and INI in **none, ever**. That objection would be decisive if INI shipped
 on its own. It does not: every format goes out together in 2.0.0, so the order decides what *we* learn
 first, not what anybody receives.
+
+### INI in detail
+
+Decided 2026-08-10 before writing any of it, and **shipped the same day**, as indexed keys were. The survey,
+because it is the evidence the decisions rest on:
+
+| | Comments | Separator | Duplicate key | Duplicate section | Key case |
+|---|---|---|---|---|---|
+| Python `configparser` | `#` `;`, inline **off** by default | `=` and `:` | **error** (`strict=True`) | **error** | folded to lower |
+| git config | `#` `;`, inline on | `=` | **list** | merged | sections insensitive |
+| systemd | `#` `;`, inline off | `=` | **list**, for the keys documented as such | merged | sensitive |
+| Commons Configuration | `#` `;` | `=` and `:` | **list** | merged | sensitive |
+| AWS SDK for Java 2.x | `#` `;` | `=` | **last wins** | merged | sensitive |
+
+**A repeated key is a list, and not by majority.** Three of the five say list, but the reason is nearer
+home: it is the answer this library gave to a repeated XML element on 2026-08-09, and reading the same
+shape two ways would be the incoherence. It takes the same form too — a key occurring once keeps its plain
+key, only a repeat is numbered, and the first moves to `[0]` when the second arrives — for the same reason,
+which is that a parser reading a stream cannot look ahead. `error`, `first` and `last` are available.
+
+**A section is the prefix**, which needed no invention: the dot is already `PropertyKeys.NESTING`, so
+`[a.b]` and a nested structure land on the same keys and a section costs one line. Keys before any section
+have no prefix; a section met twice is one section.
+
+**The default dialect is the column every tool agrees with**: `=`, `#` and `;` at the start of a line, no
+inline comments, quotes and backslashes kept, no continuation. Inline comments off is the one worth
+defending: the value most likely to hold a `#` is a password, and losing half of one silently is the trade
+this project keeps refusing.
+
+**`git` earns a preset** because of subsections. `[remote "origin"]` with a `url` becomes
+`remote.origin.url`, which is the key `git config` prints, so an interface written against it names what
+the tool names. Nothing else in the survey has that shape.
+
+**`python` was the interesting one, and the answer to "what does it cost".** The lexical rules are cheap and
+so is `[DEFAULT]` inheritance. What is not cheap is the name: `ConfigParser` interpolates `%(name)s` by
+default and we never will, since `${…}` is expanded after loading and across every source. A preset that
+handed the literal back would be the first place this library promised something it does not do. So a value
+holding `%(…)s` under that dialect is **refused**, naming the key and pointing at `${…}` — five lines that
+turn a silent divergence into a message, which is the standard already written down for parsers: *refuse
+what you do not understand rather than half-read it*.
+
+**INI is C5's first consumer**, `.ini` and `.cfg`, one day after C5 was built with none.
+
+Deliberately not built: partial quoting inside a value (git's `a" b"c`), and blank lines inside an indented
+Python value. Both are refusals rather than misreadings, and both can be added when somebody has a file.
 
 ### The two that are not formats
 
