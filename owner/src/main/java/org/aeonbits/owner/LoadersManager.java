@@ -8,6 +8,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.loaders.DotEnvLoader;
+import org.aeonbits.owner.loaders.IniLoader;
 import org.aeonbits.owner.loaders.Loader;
 import org.aeonbits.owner.loaders.PropertiesLoader;
 import org.aeonbits.owner.loaders.SystemLoader;
@@ -68,6 +69,7 @@ class LoadersManager implements Serializable {
         registerLoader(new PropertiesLoader());
         registerLoader(new XMLLoader());
         registerLoader(new DotEnvLoader());
+        registerLoader(new IniLoader());
         registerLoader(new SystemLoader());
         registerDiscovered(found);
     }
