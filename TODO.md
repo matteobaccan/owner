@@ -13,6 +13,19 @@ WEBSITE
       `owner-site/web/src/content/docs/news.md`, behind a notice saying the version is not out yet.
       When 2.0.0 is published, remove that notice and add the release date.
 
+RELEASING
+---------
+
+- [ ] Move publishing off OSSRH, once 2.0.0 is otherwise closed. Sonatype retired
+      `oss.sonatype.org` in favour of the Central Portal at `central.sonatype.com`, and three places in
+      `pom.xml` still point at the old one: both `distributionManagement` urls and the
+      `nexus-staging-maven-plugin`, which the Portal does not support at all — the replacement is
+      `central-publishing-maven-plugin`. As it stands the release would fail at the deploy step, which
+      is the worst moment to find out. `RELEASING.md` has the detail. Verify against Sonatype's current
+      documentation rather than that note: this moves.
+- [ ] While in there: `distributionManagement/site` still deploys over FTP to `newinstance.it`, a host
+      the project no longer controls. Harmless unless somebody runs `mvn site-deploy`.
+
 WHERE TO PICK UP
 ----------------
 

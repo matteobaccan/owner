@@ -25,6 +25,34 @@ In order to sign artifact jars, you need GnuPG.
 
 You can download GnuPG from [here](https://gnupg.org/download/) or try MacPorts; I've had issues with brew version of GnuPG on OS X so my recommendation is to download the most updated binaries built for OS X; that at the time of writing is from sourceforge project [gpgosx](https://sourceforge.net/p/gpgosx/docu/Download/).
 
+BEFORE 2.0.0: THE PUBLISHING TARGET HAS MOVED
+---------------------------------------------
+
+**The procedure below has not been run since 1.0.12, in June 2020, and it very
+likely no longer works as written.** Deal with this before starting a release,
+not in the middle of one.
+
+Sonatype retired OSSRH — the `oss.sonatype.org` Nexus this project deploys to —
+and moved publishing to the Central Portal at `central.sonatype.com`, which
+speaks a different API. Three things in `pom.xml` still point at the old one:
+
+- `distributionManagement/snapshotRepository`, at
+  `https://oss.sonatype.org/content/repositories/snapshots/`
+- `distributionManagement/repository`, at
+  `https://oss.sonatype.org/service/local/staging/deploy/maven2/`
+- `nexus-staging-maven-plugin`, whose `nexusUrl` is `https://oss.sonatype.org/`
+  and which the Central Portal does not support at all — the replacement is
+  `central-publishing-maven-plugin`
+
+Check the current Sonatype documentation rather than trusting this note: the
+migration has its own deadlines and its own account steps, and what is required
+may have moved again since this was written.
+
+While you are in there, `distributionManagement/site` deploys over FTP to
+`ftp://newinstance.it:/public_html/owner/${project.version}/`, which is not a
+host this project controls any more either. It only bites if somebody runs
+`mvn site-deploy`, which nothing in the release procedure does.
+
 RELEASE PROCEDURE
 -----------------
 
