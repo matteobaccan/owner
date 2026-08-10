@@ -82,6 +82,31 @@ public final class SourceOptions {
     }
 
     /**
+     * Whether a source ends in one of the given extensions, which is what most {@link Loader#accept(URI)}
+     * implementations amount to.
+     * <p>
+     * Built on {@link #path(URI)}, so it is not fooled by a query, by the options in the fragment, or by an
+     * opaque URI - the three things a hand-written <code>endsWith</code> gets wrong, and did. The comparison
+     * ignores case, because a file called <code>CONFIG.XML</code> is an XML file.
+     * </p>
+     * <p>
+     * A loader keeps the list in one constant and uses it here and in
+     * {@link Loader#defaultSpecsFor(String)}, so that the names a format goes by are written once.
+     * </p>
+     *
+     * @param uri        the source, may be <code>null</code>.
+     * @param extensions the extensions to match, dot included.
+     * @return whether the source ends in one of them.
+     */
+    public static boolean hasExtension(URI uri, String... extensions) {
+        String path = path(uri).toLowerCase();
+        for (String extension : extensions)
+            if (path.endsWith(extension.toLowerCase()))
+                return true;
+        return false;
+    }
+
+    /**
      * Reads the options written on a source.
      *
      * @param uri the source, may be <code>null</code>.

@@ -104,7 +104,7 @@ public class DotEnvLoader implements Loader {
 
     @Override
     public boolean accept(URI uri) {
-        return uri != null && SourceOptions.path(uri).toLowerCase().endsWith(SUFFIX);
+        return SourceOptions.hasExtension(uri, SUFFIX);
     }
 
     @Override

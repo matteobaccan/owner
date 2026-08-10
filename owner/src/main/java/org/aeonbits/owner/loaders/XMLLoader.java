@@ -41,6 +41,10 @@ import java.util.logging.Logger;
 public class XMLLoader implements Loader {
 
     private static final long serialVersionUID = -894351666332018767L;
+
+    /** The one place the name of the format is written: {@code accept} and the default spec both read it. */
+    private static final String SUFFIX = ".xml";
+
     private transient SAXParserFactory factory = null;
 
     private synchronized SAXParserFactory factory() {
@@ -232,10 +236,10 @@ public class XMLLoader implements Loader {
     public boolean accept(URI uri) {
         try {
             uri.toURL();
-            // matched against the path rather than against URL.getFile(), which includes the query: an XML
+            // matched through SourceOptions rather than on URL.getFile(), which includes the query: an XML
             // served over HTTP as config.xml?v=2 used to fail this test, fall through to PropertiesLoader -
             // which accepts everything it can resolve - and be read as a properties file, in silence
-            return SourceOptions.path(uri).toLowerCase().endsWith(".xml");
+            return SourceOptions.hasExtension(uri, SUFFIX);
         } catch (MalformedURLException ex) {
             return false;
         }
@@ -264,7 +268,7 @@ public class XMLLoader implements Loader {
 
     @Override
     public String defaultSpecFor(String urlPrefix) {
-        return urlPrefix + ".xml";
+        return urlPrefix + SUFFIX;
     }
 
 }

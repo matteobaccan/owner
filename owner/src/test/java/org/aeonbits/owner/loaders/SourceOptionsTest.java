@@ -64,6 +64,35 @@ public class SourceOptionsTest {
         assertEquals("", SourceOptions.path(null));
     }
 
+    // ---------------------------------------------------------------- matching an extension
+
+    @Test
+    public void testAnExtensionIsMatchedIgnoringCase() throws URISyntaxException {
+        assertTrue(SourceOptions.hasExtension(new URI("file:/app/CONFIG.XML"), ".xml"));
+        assertTrue(SourceOptions.hasExtension(new URI("file:/app/config.xml"), ".XML"));
+    }
+
+    @Test
+    public void testAnyOfSeveralExtensionsMatches() throws URISyntaxException {
+        assertTrue(SourceOptions.hasExtension(new URI("file:/app/config.yml"), ".yaml", ".yml"));
+        assertTrue(SourceOptions.hasExtension(new URI("file:/app/config.yaml"), ".yaml", ".yml"));
+        assertFalse(SourceOptions.hasExtension(new URI("file:/app/config.json"), ".yaml", ".yml"));
+    }
+
+    /** The three things a hand-written endsWith gets wrong, and did. */
+    @Test
+    public void testAnExtensionIsMatchedThroughAQueryAFragmentAndAnOpaqueURI() throws URISyntaxException {
+        assertTrue(SourceOptions.hasExtension(new URI("http://host/config.xml?v=2"), ".xml"));
+        assertTrue(SourceOptions.hasExtension(new URI("file:/app/.env#dialect=dotenv"), ".env"));
+        assertTrue(SourceOptions.hasExtension(new URI("file:.env"), ".env"));
+        assertTrue(SourceOptions.hasExtension(new URI("jar:file:/a.jar!/conf/app.env#quotes=strip"), ".env"));
+    }
+
+    @Test
+    public void testNothingMatchesNothing() {
+        assertFalse(SourceOptions.hasExtension(null, ".env"));
+    }
+
     // ---------------------------------------------------------------- reading the options
 
     @Test

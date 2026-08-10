@@ -201,9 +201,16 @@ class LoadersManager implements Serializable {
     private void addSpecs(Collection<String> specs, String prefix, boolean fromClasspath) {
         for (Loader loader : loaders) {
             if (isDiscovered(loader) != fromClasspath) continue;
-            String spec = loader.defaultSpecFor(prefix);
-            if (spec != null)
+            String[] offered = loader.defaultSpecsFor(prefix);
+            if (offered == null) continue;
+            for (String spec : offered) {
+                // a null among them is a mistake in the loader, not a way of saying "none" - that is an
+                // empty array - and only the author of the loader can put it right, so it is named
+                if (spec == null)
+                    throw unsupported("%s returned a null among its default specifications for '%s'",
+                            loader.getClass().getName(), prefix);
                 specs.add(spec);
+            }
         }
     }
 

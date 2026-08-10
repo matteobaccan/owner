@@ -114,9 +114,52 @@ public interface Loader extends Serializable {
 
     /**
      * Returns the default URI specification for a given URI resource, that can be handled by this loader.
+     * <p>
+     * Returning <code>null</code> means this loader adds nothing to the sources looked for in the absence of
+     * {@code @Sources} - which is what {@link SystemLoader} and {@link DotEnvLoader} both do, since neither
+     * is named after the configuration interface. That is also why this method has a default: it is a
+     * choice a loader is allowed to decline, and declining it should not require writing a method that
+     * returns nothing.
+     * </p>
+     * <p>
+     * A loader offering <b>more than one</b> name - a format spelled <code>.yaml</code> and <code>.yml</code>,
+     * or <code>.ini</code> and <code>.cfg</code> - overrides {@link #defaultSpecsFor(String)} instead. The
+     * two are not meant to be overridden together.
+     * </p>
      *
      * @param uriPrefix the prefix identifying the URI resource.
-     * @return the default URI specification for a given URI resource, that can be handled by this loader.
+     * @return the default URI specification for a given URI resource, or <code>null</code> for none.
      */
-    String defaultSpecFor(String uriPrefix);
+    default String defaultSpecFor(String uriPrefix) {
+        return null;
+    }
+
+    /**
+     * Returns every default URI specification this loader offers, and is <b>the one the library calls</b>.
+     * <p>
+     * The default answers with whatever {@link #defaultSpecFor(String)} returned, so a loader with a single
+     * name has nothing to do here and a loader written before this method existed keeps working unchanged.
+     * Override this one, and not that one, when a format goes by several names:
+     * </p>
+     * <pre>
+     *     &#64;Override
+     *     public String[] defaultSpecsFor(String uriPrefix) {
+     *         return new String[] { uriPrefix + ".yaml", uriPrefix + ".yml" };
+     *     }
+     * </pre>
+     * <p>
+     * The order matters: these are tried in the order given, and under {@link org.aeonbits.owner.Config.LoadType#FIRST}
+     * the first one that resolves is the one that answers. An empty array, like a <code>null</code> from the
+     * single-valued method, means this loader adds nothing.
+     * </p>
+     *
+     * @param uriPrefix the prefix identifying the URI resource.
+     * @return the default URI specifications, in the order they should be tried; never containing
+     *         <code>null</code>.
+     * @since 2.0.0
+     */
+    default String[] defaultSpecsFor(String uriPrefix) {
+        String single = defaultSpecFor(uriPrefix);
+        return single == null ? new String[0] : new String[]{single};
+    }
 }
