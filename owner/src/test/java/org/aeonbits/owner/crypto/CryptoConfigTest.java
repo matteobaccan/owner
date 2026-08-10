@@ -83,9 +83,8 @@ public class CryptoConfigTest {
     @Test
     public void passwordDecryptedTwiceTest() {
         SampleConfig config = ConfigFactory.create( SampleConfig.class );
-        String decryptedPassword = config.password();
-        decryptedPassword = config.password();
-        assertEquals( "May be property password was decrypted twice.", PASSWORD_EXPECTED, decryptedPassword );
+        assertEquals( "the first read", PASSWORD_EXPECTED, config.password() );
+        assertEquals( "May be property password was decrypted twice.", PASSWORD_EXPECTED, config.password() );
     }
 
     @Test
