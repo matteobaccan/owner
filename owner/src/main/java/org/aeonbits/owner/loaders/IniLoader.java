@@ -161,8 +161,8 @@ public class IniLoader implements Loader {
      */
     private static IniDialect apply(IniDialect target, String option, String setting, URI uri) {
         if ("separator".equals(option))
-            return target.withSeparator("colon".equals(setting) ? IniDialect.Separator.EQUALS_OR_COLON
-                    : IniDialect.Separator.EQUALS);
+            return target.withSeparator(flag(option, setting, "colon", "equals", uri)
+                    ? IniDialect.Separator.EQUALS_OR_COLON : IniDialect.Separator.EQUALS);
         if ("duplicates".equals(option))
             return target.withDuplicates(duplicates(setting, uri));
         if ("keys".equals(option))
