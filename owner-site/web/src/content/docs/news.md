@@ -488,9 +488,9 @@ OWNER v1.0.11 contains following enhancements and bug fixes.
  
 #### Site Enhancements
  * [#247](https://github.com/matteobaccan/owner/pull/247): Documentation for system:properties and system:env.
- * Fixed [Sonar](https://sonarcloud.io/dashboard?id=org.aeonbits.owner%3Aowner-parent) and 
-   [Travis](https://travis-ci.org/github/lviggiano/owner); but still it looks that 
-   [Coveralls](https://coveralls.io/github/lviggiano/owner) has issue to link source files to github, I need to look 
+ * Fixed [Sonar](https://sonarcloud.io/project/overview?id=matteobaccan_owner) and 
+   Travis; but still it looks that 
+   Coveralls has issue to link source files to github, I need to look 
    more into it.
  * [#274](https://github.com/matteobaccan/owner/pull/247): 
    Documentation for system:properties and system:env, Update importing-properties.md. 
@@ -739,7 +739,7 @@ v1.0.5.1 contains following enhancements and bug fixes.
  * Dyndns dropped free service, so updated links for Sonar, from sheldon.dyndns.tv ->  dev.aeonbits.org
  * Documentation website minor style/layout, updates and improvements.
  * Added [SlideShare presentation](https://www.slideshare.net/LuigiViggiano/owner-31716769) in home page.
- * Added [Coveralls](https://coveralls.io/r/lviggiano/owner). (See [#59](https://github.com/matteobaccan/owner/issues/59))
+ * Added Coveralls. (See [#59](https://github.com/matteobaccan/owner/issues/59))
 
 #### Bugs fixes
  * Code cleanup, removed warnings.
@@ -951,7 +951,7 @@ So, join [OWNER API Users and Devs](https://t.me/ownerapi) Telegram Chat and let
 [accessible-intf]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Accessible.html
 [reloadable-intf]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Reloadable.html
 [mutable-intf]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Mutable.html
-[travis-ci]: https://travis-ci.org/lviggiano/owner
+[travis-ci]: https://sonarcloud.io/project/overview?id=matteobaccan_owner
 [intr]: http://en.newinstance.it/2013/02/04/owner-1-0-3-whats-new-part-1-variable-expansion/
 [intr-2]: http://en.newinstance.it/2013/05/29/owner-1-0-3-whats-new-part-2/
 [properties]: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
