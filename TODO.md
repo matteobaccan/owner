@@ -229,10 +229,18 @@ an issue behind it, which is the point: what the others shipped is what our repo
       [#240](https://github.com/matteobaccan/owner/issues/240), and
       [#48](https://github.com/matteobaccan/owner/issues/48) is on the critical path rather than beside
       it.
-- [ ] **Origin tracking** — which source a merged property actually came from. Only Spring does this
-      decently, and with `@Sources` plus `LoadType.MERGE` it is a question our users really do ask.
-      Issue [#277](https://github.com/matteobaccan/owner/issues/277); related to
-      [#170](https://github.com/matteobaccan/owner/issues/170).
+- [x] **Origin tracking** — which source a merged property actually came from. **Done 2026-08-11**:
+      `Traceable`, a fourth interface of the `Accessible` family, and `Origin`, which says the kind
+      (`SOURCE`, `IMPORT`, `DEFAULT_VALUE`, `RUNTIME`) and names the source with its credentials masked.
+      `LoadType.load` now reads each source into a map of its own so that what each contributed is known
+      while it still can be, and under `MERGE` the origin recorded is the source whose value survived. The
+      set of purely-defaulted keys added the same day was the degenerate case of this and is gone.
+      Issue [#277](https://github.com/matteobaccan/owner/issues/277) **can be closed**; related to
+      [#170](https://github.com/matteobaccan/owner/issues/170), which asked for the same information as a
+      log rather than as an API.
+      **Not done, and the obvious next ask**: the line number a value came from, which Spring and Typesafe
+      both carry. It needs every loader to report positions, and `Origin` was made a type rather than a
+      `String` so that it can grow one without a second API.
 - [ ] **Configurable naming strategy / relaxed binding** — kebab-case, snake_case, verbatim, as SmallRye,
       Gestalt and Spring all offer. It hooks into the factory-prefix machinery built for 2.0.0.
       Issue [#116](https://github.com/matteobaccan/owner/issues/116).

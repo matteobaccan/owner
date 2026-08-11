@@ -311,6 +311,33 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    `@Mandatory` on the properties inside is the one that means something. Nothing can break: a method
    returning an interface extending `Config` had no meaning before. See the
    [documentation](/owner/docs/nested-configuration/).
+ * **A configuration can say where each property came from.** A new interface of the `Accessible` family,
+   `Traceable`, answers the question the merged properties cannot:
+
+   ```java
+   @LoadPolicy(LoadType.MERGE)
+   @Sources({"system:env", "file:config/app.properties"})
+   interface MyConfig extends Config, Traceable { ... }
+
+   cfg.originOf("port");            // file:config/app.properties
+   cfg.originOf("port").kind();     // SOURCE, IMPORT, DEFAULT_VALUE or RUNTIME
+   ```
+
+   Merging is exactly what destroys this: after it, a value read from a file is the same property as one
+   that came from the environment or from a `@DefaultValue`, and nothing in the map says which. So the
+   origin is recorded while each source is read, and under `MERGE` the one recorded is the source whose
+   value survived — the first declared. Under `FIRST` the sources after the one that answered are never
+   read, and nothing is attributed to them. The origins follow the properties afterwards: a reload works
+   them out again, `setProperty` makes a property one that was written at run time, and removing a property
+   removes its origin with it.
+
+   It was asked for by somebody whose `store()` wrote the whole environment back into the configuration
+   file, and whose workaround — removing the environment variables by name before saving — failed for a
+   property that was in both. Filtering by origin is the answer, and the recipe is in the
+   [documentation](/owner/docs/accessible-mutable/). **A source never carries its credentials** into an
+   origin: `https://user:secret@config/app.properties` appears as `https://***@config/app.properties`,
+   the same masking the log lines and the exception messages already use. Issue
+   [#277](https://github.com/matteobaccan/owner/issues/277).
  * **`.env` files are read**, which is how container tooling carries configuration into a process —
    `docker run --env-file`, `env_file` in Compose, `envFrom` in Kubernetes, the secrets of a CI pipeline. Any
    source whose path ends in `.env` is read this way, values go through the usual type conversion, and the

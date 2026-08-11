@@ -302,7 +302,7 @@ coincidence; it is evidence the demand is real.
 | Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
 | Indexed keys `list[0]` | SmallRye, Gestalt, Spring | — (**closed 2026-08-09**) |
-| "Which source provided this?" | Spring (origin tracking), Gestalt | #277 |
+| "Which source provided this?" | Spring (origin tracking), Gestalt | — (**closed 2026-08-11**) |
 | Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130, #143 |
 | DI integration | every framework | #222, #147 |
 | GraalVM native image | Coat, by construction | — |
@@ -376,7 +376,11 @@ Backlog, highest value first
    makes HOCON the most expensive item rather than the cheapest; and `.env`, not YAML, turned out to
    be the place to start — it is the most widespread format in container work and the only one
    needing none of the data-model work. It shipped on 2026-08-09, in the core.
-3. **Origin tracking** (#277).
+3. ~~**Origin tracking** (#277)~~ — **done 2026-08-11**, `Traceable` and `Origin`. Spring and Typesafe
+   both attach the origin to the *value*, which we cannot: ours are strings in a `Properties`, so it is a
+   lookup by key instead. Both of them also carry a file and a line number, which we do not — that needs
+   every loader to report positions, and `Origin` is a type rather than a `String` precisely so it can
+   grow one later without a second API.
 4. **Configurable naming strategy** (#116) — hooks into the factory-prefix machinery from 2.0.0.
 5. **Bean Validation** (#201) as an optional module, never in the core.
 6. **GraalVM reachability metadata** plus a documentation chapter — defensive: today people hit the

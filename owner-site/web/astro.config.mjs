@@ -90,7 +90,7 @@ export default defineConfig({
             { label: 'Type conversion', slug: 'docs/type-conversion' },
             { label: 'Variables expansion', slug: 'docs/variables-expansion' },
             { label: 'Reload and Hot Reload', slug: 'docs/reload' },
-            { label: 'Accessible and Mutable', slug: 'docs/accessible-mutable' },
+            { label: 'Accessible, Mutable and Traceable', slug: 'docs/accessible-mutable' },
             { label: 'Debugging and sensitive values', slug: 'docs/debugging' },
             { label: 'Disabling features', slug: 'docs/disabling-features' },
             { label: 'Metaconfiguring', slug: 'docs/configuring' },

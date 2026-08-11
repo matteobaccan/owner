@@ -21,7 +21,7 @@ OWNER API supports a long list of features:
 - [Type conversion](/owner/docs/type-conversion/)
 - [Variables expansion](/owner/docs/variables-expansion/)
 - [Reload and Hot Reload](/owner/docs/reload/)
-- [Accessible and Mutable](/owner/docs/accessible-mutable/)
+- [Accessible, Mutable and Traceable](/owner/docs/accessible-mutable/)
 - [Debugging and sensitive values](/owner/docs/debugging/)
 - [Disabling features](/owner/docs/disabling-features/)
 - [Metaconfiguring](/owner/docs/configuring/)
