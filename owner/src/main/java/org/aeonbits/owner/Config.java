@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -347,11 +348,14 @@ public interface Config extends Serializable {
          */
         FIRST {
             @Override
-            Properties load(List<URI> uris, LoadersManager loaders) {
+            Properties load(List<URI> uris, LoadersManager loaders, BiConsumer<URI, Properties> answered) {
                 Properties result = new Properties();
                 for (URI uri : uris)
                     try {
-                        loaders.load(result, uri);
+                        Properties loaded = new Properties();
+                        loaders.load(loaded, uri);
+                        answered.accept(uri, loaded);
+                        result.putAll(loaded);
                         break;
                     } catch (IOException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
@@ -367,11 +371,14 @@ public interface Config extends Serializable {
          */
         MERGE {
             @Override
-            Properties load(List<URI> uris, LoadersManager loaders) {
+            Properties load(List<URI> uris, LoadersManager loaders, BiConsumer<URI, Properties> answered) {
                 Properties result = new Properties();
                 for (URI uri :  reverse(uris))
                     try {
-                        loaders.load(result, uri);
+                        Properties loaded = new Properties();
+                        loaders.load(loaded, uri);
+                        answered.accept(uri, loaded);
+                        result.putAll(loaded);
                     } catch (IOException ex) {
                         // happens when a file specified in the sources is not found or cannot be read.
                         ignore();
@@ -380,7 +387,21 @@ public interface Config extends Serializable {
             }
         };
 
-        abstract Properties load(List<URI> uris, LoadersManager loaders);
+        /**
+         * Reads the sources, in the order this policy prescribes.
+         * <p>
+         * Each of them is read into a map of its own and then merged, rather than all of them into one, so
+         * that what each source contributed is known while it still can be: the merge is exactly what makes
+         * a value indistinguishable from the one it overwrote. That is handed to <code>answered</code> in
+         * merge order, so a caller recording where a key came from ends up with the source that won.
+         * </p>
+         *
+         * @param uris     the sources, in the order they were declared.
+         * @param loaders  the loaders to read them with.
+         * @param answered called with each source that produced something, and with what it produced.
+         * @return the properties, merged.
+         */
+        abstract Properties load(List<URI> uris, LoadersManager loaders, BiConsumer<URI, Properties> answered);
     }
 
     /**

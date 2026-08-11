@@ -38,7 +38,7 @@ import static org.aeonbits.owner.util.Util.*;
  *
  * @author Luigi R. Viggiano
  */
-class PropertiesManager implements Reloadable, Accessible, Mutable {
+class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
 
     private static final Logger LOGGER = Logger.getLogger(PropertiesManager.class.getName());
 
@@ -96,10 +96,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private final Set<String> sensitivePrefixes = new HashSet<>();
 
     /**
-     * The keys that are in {@link #properties} <b>only</b> because a {@link DefaultValue} put them there, no
-     * source having written them. See {@link #recordPurelyDefaulted}.
+     * Where each property came from, kept at the one moment it can still be known: the merge is exactly
+     * what makes a value indistinguishable from the one it overwrote, and from a default. See
+     * {@link Traceable}.
      */
-    private final Set<String> purelyDefaultedKeys = new HashSet<>();
+    private final Map<String, Origin> origins = new HashMap<>();
 
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
@@ -366,12 +367,18 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private Properties load(Properties props) {
         try {
             loading = true;
-            Set<String> defaulted = defaults(props, clazz, keyPrefix);
-            Properties loadedFromFile = doLoad();
+            origins.clear();
+            record(defaults(props, clazz, keyPrefix), Origin.ofDefaultValue());
+
+            // the origins are recorded as each source is read, so the last one to write a key is the one
+            // recorded against it - which is the source whose value survived the merge
+            merge(props, doLoad());
+
             Map<?, ?>[] imported = reverse(imports);
-            merge(props, loadedFromFile);
-            merge(props, imported);
-            recordPurelyDefaulted(defaulted, loadedFromFile, imported);
+            for (int i = 0; i < imported.length; i++) {
+                merge(props, imported[i]);
+                record(imported[i].keySet(), Origin.ofImport(imported.length - 1 - i));
+            }
             return props;
         } finally {
             loading = false;
@@ -379,34 +386,53 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     /**
-     * Remembers which keys are there only because an annotation put them there, the one moment at which a
-     * defaulted property can still be told from a written one: a line below they are the same property, and
-     * nothing in {@link #properties} distinguishes them ever again.
-     * <p>
-     * <b>What is kept is the defaults, not the values read</b>, and that is the whole economy of it: the
-     * defaults that no source overwrote number at most as many as the methods carrying a
-     * {@link DefaultValue} — a handful — while the values read number as many as the configuration has
-     * properties. The question is answered against {@link #properties}, which holds everything anyway, so
-     * the smaller of the two sets is the one worth storing.
-     * </p>
+     * Records where a set of keys came from. Called as each place is read, and later calls overwrite
+     * earlier ones for the same key, which is what makes the origin recorded the one that won the merge.
      * <p>
      * Always called holding the write lock, as both callers of {@link #load(Properties)} do.
      * </p>
      */
-    private void recordPurelyDefaulted(Set<String> defaulted, Properties loaded, Map<?, ?>[] imported) {
-        purelyDefaultedKeys.clear();
-        purelyDefaultedKeys.addAll(defaulted);
-        purelyDefaultedKeys.removeAll(loaded.keySet());
-        for (Map<?, ?> map : imported)
-            purelyDefaultedKeys.removeAll(map.keySet());
+    private void record(Collection<?> keys, Origin origin) {
+        for (Object key : keys)
+            if (key instanceof String)
+                origins.put((String) key, origin);
+    }
+
+    @Delegate
+    @Override
+    public Origin originOf(String key) {
+        readLock.lock();
+        try {
+            return properties.getProperty(key) == null ? null : origins.get(key);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Delegate
+    @Override
+    public Map<String, Origin> origins() {
+        readLock.lock();
+        try {
+            Map<String, Origin> result = new LinkedHashMap<>();
+            for (Enumeration<?> names = properties.propertyNames(); names.hasMoreElements(); ) {
+                String name = (String) names.nextElement();
+                Origin origin = origins.get(name);
+                if (origin != null)
+                    result.put(name, origin);
+            }
+            return result;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
      * Tells whether anything below the given prefix was written rather than merely defaulted.
      * <p>
-     * Nothing in the resolution of a property consults this. It answers the one question the merged
-     * properties cannot — <i>was this section written, or is it only the defaults of its own interface
-     * showing through?</i>
+     * The question the merged properties cannot answer on their own — <i>was this section written, or is it
+     * only the defaults of its own interface showing through?</i> — asked of the origins, which are what
+     * remembers.
      * </p>
      *
      * @param prefix the path to look below, separator included.
@@ -418,8 +444,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             for (Enumeration<?> names = properties.propertyNames(); names.hasMoreElements(); ) {
                 String name = (String) names.nextElement();
-                if (name.startsWith(prefix) && name.length() > prefix.length()
-                        && !purelyDefaultedKeys.contains(name))
+                if (!name.startsWith(prefix) || name.length() <= prefix.length())
+                    continue;
+                Origin origin = origins.get(name);
+                if (origin == null || origin.isWritten())
                     return true;
             }
             return false;
@@ -478,7 +506,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
             List<PropertyChangeEvent> events =
                     fireBeforePropertyChangeEvents(keys(properties, loaded), properties, loaded);
             ReloadEvent reloadEvent = fireBeforeReloadEvent(events, properties, loaded);
-            applyPropertyChangeEvents(events);
+            applyPropertyChangeEvents(events, null);
             firePropertyChangeEvents(events);
             fireReloadEvent(reloadEvent);
         } catch (RollbackBatchException e) {
@@ -495,9 +523,23 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         return keys;
     }
 
-    private void applyPropertyChangeEvents(List<PropertyChangeEvent> events) {
-        for (PropertyChangeEvent event : events)
+    /**
+     * Applies the changes, and says where the new values came from.
+     * <p>
+     * The origin is the caller's to state, because the three callers differ on exactly that point and the
+     * write itself cannot tell them apart. A reload has already recorded the sources that answered, so it
+     * passes <code>null</code> and leaves them alone — without which every key a reload changed would be
+     * attributed to whoever called <code>reload()</code>. A {@link Mutable#load(java.io.InputStream)} did
+     * write those values at run time and says so. A {@link #clear()} removes, and a removal takes the origin
+     * with it wherever it comes from.
+     * </p>
+     */
+    private void applyPropertyChangeEvents(List<PropertyChangeEvent> events, Origin origin) {
+        for (PropertyChangeEvent event : events) {
             performSetProperty(event.getPropertyName(), event.getNewValue());
+            if (origin != null && event.getNewValue() != null)
+                origins.put(event.getPropertyName(), origin);
+        }
     }
 
     private void fireReloadEvent(ReloadEvent reloadEvent) {
@@ -595,7 +637,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private Properties doLoad() {
-        return loadType.load(uris, loaders);
+        return loadType.load(uris, loaders, (uri, loaded) -> record(loaded.keySet(), Origin.of(uri)));
     }
 
     private static void merge(Properties results, Map<?, ?>... inputs) {
@@ -724,6 +766,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 PropertyChangeEvent event = new PropertyChangeEvent(proxy, key, oldValue, newValue);
                 fireBeforePropertyChange(event);
                 String result = performSetProperty(key, newValue);
+                if (newValue != null)
+                    origins.put(key, Origin.ofRuntime());
                 firePropertyChange(event);
                 return result;
             } catch (RollbackException e) {
@@ -735,11 +779,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private String performSetProperty(String key, Object value) {
-        if (value == null)
-            return performRemoveProperty(key);
-        // written by hand is written: a value set at run time is no more a default than one read from a file
-        purelyDefaultedKeys.remove(key);
-        return asString(properties.setProperty(key, asString(value)));
+        return (value == null) ?
+                performRemoveProperty(key) :
+                asString(properties.setProperty(key, asString(value)));
     }
 
     @Delegate
@@ -761,7 +803,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private String performRemoveProperty(String key) {
-        purelyDefaultedKeys.remove(key);
+        origins.remove(key);
         return asString(properties.remove(key));
     }
 
@@ -772,7 +814,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         try {
             List<PropertyChangeEvent> events =
                     fireBeforePropertyChangeEvents(keys(properties), properties, new Properties());
-            applyPropertyChangeEvents(events);
+            applyPropertyChangeEvents(events, null);
             firePropertyChangeEvents(events);
         } catch (RollbackBatchException e) {
             ignore();
@@ -798,7 +840,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
     private void performLoad(Set keys, Properties props) throws RollbackBatchException {
         List<PropertyChangeEvent> events = fireBeforePropertyChangeEvents(keys, properties, props);
-        applyPropertyChangeEvents(events);
+        applyPropertyChangeEvents(events, Origin.ofRuntime());
         firePropertyChangeEvents(events);
     }
 
