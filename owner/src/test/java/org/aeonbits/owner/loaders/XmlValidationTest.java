@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -173,6 +174,18 @@ public class XmlValidationTest {
         Properties props = read(OWN_DTD + "<config><host>alpha</host></config>", "#validate=true");
 
         assertEquals("alpha", props.getProperty("config.host"));
+    }
+
+    /**
+     * A relative URI has no scheme, and asking a {@link java.net.URL} for one throws the wrong kind of
+     * exception — which from an <code>accept</code> would stop the search for a loader rather than decline
+     * it. Declining is the whole contract of the method, so the guard is there and this holds it there.
+     */
+    @Test
+    public void aSourceThatIsNotAbsoluteIsDeclinedRatherThanRefused() throws URISyntaxException {
+        assertFalse(new XMLLoader().accept(new URI("app.xml")));
+        assertFalse(new XMLLoader().accept(null));
+        assertTrue(new XMLLoader().accept(new URI("file:/app/config.xml")));
     }
 
     @Test

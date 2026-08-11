@@ -14,9 +14,11 @@ import org.aeonbits.owner.crypto.Decryptor;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
@@ -74,6 +76,27 @@ public class PropertiesAggregatorTest {
     }
 
     // -- both sides go through the type conversion ---------------------------------------------------
+
+    interface ListValuedConfig extends Config {
+        Map<String, List<String>> something();
+    }
+
+    /**
+     * A value type that is itself parameterized. The raw type is what the conversion needs — a
+     * <code>List</code> is built from the value like any other collection — and reading it off a
+     * <code>ParameterizedType</code> rather than giving up on it is what makes this work.
+     */
+    @Test
+    public void theValuesOfAGroupMayThemselvesBeParameterized() {
+        Map<String, List<String>> map = ConfigFactory.create(ListValuedConfig.class, new Properties() {{
+            setProperty("something.foo", "a,b");
+            setProperty("something.bar", "c");
+        }}).something();
+
+        assertEquals(2, map.size());
+        assertEquals(Arrays.asList("a", "b"), map.get("foo"));
+        assertEquals(Arrays.asList("c"), map.get("bar"));
+    }
 
     interface StatusConfig extends Config {
         @Key("server.reasons")

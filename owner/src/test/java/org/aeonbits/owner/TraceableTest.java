@@ -31,6 +31,7 @@ import static org.aeonbits.owner.util.UtilTest.fileFromURI;
 import static org.aeonbits.owner.util.UtilTest.save;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -231,6 +232,33 @@ public class TraceableTest {
 
         assertFalse(origin.source(), origin.source().contains("secret"));
         assertEquals("https://***@config.example.com/app.properties", origin.source());
+    }
+
+    /**
+     * An origin is a value: two properties that came from the same place are the same origin, and that is
+     * what lets a caller group or filter by it without comparing strings by hand.
+     */
+    @Test
+    public void twoPropertiesFromTheSamePlaceHaveTheSameOrigin() throws Exception {
+        writeTheSources();
+        MergedConfig cfg = ConfigFactory.create(MergedConfig.class);
+
+        Origin one = cfg.originOf("fromOne");
+        Origin alsoOne = cfg.originOf("inBoth");
+        Origin two = cfg.originOf("fromTwo");
+
+        assertEquals(one, alsoOne);
+        assertEquals(one.hashCode(), alsoOne.hashCode());
+        assertEquals(one, one);
+        assertNotEquals(one, two);
+        assertNotEquals("a default came from nowhere", one, cfg.originOf("defaulted"));
+        assertNotEquals("and the source it names is not itself", one, ONE);
+    }
+
+    @Test
+    public void anOriginReadsAsTheSourceItNames() throws Exception {
+        writeTheSources();
+        assertEquals(ONE, ConfigFactory.create(MergedConfig.class).originOf("fromOne").toString());
     }
 
     @Test

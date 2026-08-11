@@ -109,6 +109,15 @@ public class WrittenOrDefaultedTest {
     }
 
     @Test
+    public void onlyWhatLiesBelowThePrefixIsLookedAt() {
+        AppConfig cfg = create(AppConfig.class, "elsewhere.host", "written over there");
+
+        assertFalse("the section has its default and nothing else",
+                managerOf(cfg).anythingWrittenUnder("server."));
+        assertTrue(managerOf(cfg).anythingWrittenUnder("elsewhere."));
+    }
+
+    @Test
     public void aValueWrittenAtRunTimeCountsAsWritten() {
         MutableAppConfig cfg = create(MutableAppConfig.class);
         assertFalse(managerOf(cfg).anythingWrittenUnder("server."));

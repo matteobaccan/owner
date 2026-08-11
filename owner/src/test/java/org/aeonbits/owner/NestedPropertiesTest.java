@@ -577,6 +577,14 @@ public class NestedPropertiesTest {
         assertTrue(create(NamedServersConfig.class, "servers.alpha", "one").servers().isEmpty());
     }
 
+    @Test
+    public void whatDoesNotLieUnderTheGroupIsNotInIt() {
+        NamedServersConfig cfg = create(NamedServersConfig.class,
+                "servers.alpha.host", "one", "elsewhere.beta.host", "two", "name", "app");
+
+        assertEquals(new LinkedHashSet<>(Arrays.asList("alpha")), cfg.servers().keySet());
+    }
+
     public interface TypedKeysConfig extends Config {
         @Key("servers")
         Map<Integer, ServerConfig> byNumber();
@@ -752,6 +760,43 @@ public class NestedPropertiesTest {
         assertEquals("hunter2", cfg.servers().get(0).password());
         assertEquals("hunter2", cfg.named().get("alpha").password());
         assertEquals("hunter2", cfg.byName("beta").password());
+    }
+
+    @DecryptorClass(Reverser.class)
+    public interface DecryptedElementsConfig extends Config {
+        List<PlainEncryptedConfig> servers();
+
+        Map<String, PlainEncryptedConfig> named();
+    }
+
+    /** As a plain section does: an element that names no decryptor uses the configuration's own. */
+    @Test
+    public void anElementInheritsTheDecryptorOfTheConfigurationHoldingIt() {
+        DecryptedElementsConfig cfg = create(DecryptedElementsConfig.class,
+                "servers[0].password", "2retnuh", "named.alpha.password", "2retnuh");
+
+        assertEquals("hunter2", cfg.servers().get(0).password());
+        assertEquals("hunter2", cfg.named().get("alpha").password());
+    }
+
+    public interface RootListConfig extends Config, Accessible {
+        @Key("")
+        List<SecretiveServerConfig> servers();
+    }
+
+    /**
+     * A list hanging from an empty key puts its elements at the top of the keyspace, <code>[0].host</code>,
+     * which is expressible and is read. What it has no room for is a group prefix, so a {@link Sensitive}
+     * property inside such an element cannot be masked: the prefix would be the empty string, and masking
+     * the whole configuration because one element declares a secret is not what anybody asked for. That the
+     * elements are read all the same is what this pins.
+     */
+    @Test
+    public void aListAtTheTopOfTheKeyspaceIsStillRead() {
+        RootListConfig cfg = create(RootListConfig.class, "[0].host", "alpha", "[0].password", "hunter2");
+
+        assertEquals("alpha", cfg.servers().get(0).host());
+        assertEquals("hunter2", cfg.servers().get(0).password());
     }
 
     // -------------------------------------------------------------------------------------------------
