@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
@@ -51,6 +53,8 @@ import static org.aeonbits.owner.util.Reflection.isDefault;
  * @author Luigi R. Viggiano
  */
 class PropertiesInvocationHandler implements InvocationHandler, Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(PropertiesInvocationHandler.class.getName());
 
     private static final long serialVersionUID = 5432212884255718342L;
     private transient List<DelegateMethodHandle> delegates;
@@ -477,12 +481,41 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
             // Do this to achieve property expansion
             return String.format(format, args);
             }
-        catch ( Exception e ) {
+        catch ( Exception notAFormat ) {
             // There's no guarantee that a property value from a config file
             // is a legal format string. When formatting doesn't work, let's
             // just return the original property value.
+            reportNotAFormat(method, notAFormat);
             return format;
             }
+    }
+
+    /**
+     * A value that was used as a format and is not one.
+     * <p>
+     * Returning it as it was written is the right answer and is documented: a method taking arguments makes
+     * its value a template, and a value has no obligation to be one — a password holding a <code>%</code>
+     * is the ordinary case, not a mistake. But the same silence covers a real mistake, a placeholder
+     * mistyped in a value that <b>was</b> meant as a format, and then the method quietly answers with the
+     * template instead of the text. Hence <code>FINE</code>: below the level anyone runs at, and there for
+     * whoever is looking.
+     * </p>
+     * <p>
+     * <b>Neither the value nor the exception message appears in the line.</b> The message of a formatting
+     * failure quotes the part of the format it choked on, which is a piece of the value, and a value never
+     * reaches a log — that is what {@link Config.Sensitive} exists for. The key and the name of the failure
+     * are enough to find it.
+     * </p>
+     */
+    private void reportNotAFormat(Method method, Exception notAFormat) {
+        if (!LOGGER.isLoggable(Level.FINE))
+            return;
+        String key = key(method, keyPrefix);
+        LOGGER.log(Level.FINE, () -> String.format(
+                "%s() takes arguments, so the value of '%s' was used as a format, and it is not one (%s). "
+                        + "It is returned as it was written. A value that was never meant as a format needs "
+                        + "nothing done about this; one that was has a placeholder in it that is not.",
+                method.getName(), key, notAFormat.getClass().getSimpleName()));
     }
 
     private String expandVariables(Method method, String value) {

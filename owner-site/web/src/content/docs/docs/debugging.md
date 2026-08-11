@@ -49,6 +49,21 @@ it is the only prefix written in no source file at all: an interface carries its
 reading it can see it, while this one is set on the factory and moves the keys of every configuration that
 factory creates.
 
+At the same level, one more line covers the other silence in this area. A method that takes arguments makes
+its value a [format](/owner/docs/parametrized-properties/), and a value that is not a legal one is returned
+as it was written — which is right, since a password holding a `%` is the ordinary case rather than a
+mistake. But the same silence covers a placeholder mistyped in a value that *was* meant as a format, and
+then the method quietly answers with the template instead of the text:
+
+```
+FINE  greeting() takes arguments, so the value of 'greeting' was used as a format, and it is not one
+      (UnknownFormatConversionException). It is returned as it was written.
+```
+
+Neither the value nor the reason quoting a piece of it appears in that line: **a value never reaches a
+log**, which is what [`@Sensitive`](#sensitive-values) is for, and the message of a formatting failure
+quotes the part of the format it choked on.
+
 <div class="note">
   <h5>The errors already name the key.</h5>
   <p>

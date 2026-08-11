@@ -148,6 +148,55 @@ public class WhichKeyDoesItReadTest {
     }
 
     // -------------------------------------------------------------------------------------------------
+    // a value used as a format that is not one
+    // -------------------------------------------------------------------------------------------------
+
+    public interface GreetingConfig extends Config {
+        String greeting(String name);
+
+        String password(String ignored);
+    }
+
+    private static GreetingConfig greetings() {
+        Properties props = new Properties();
+        props.setProperty("greeting", "hello %q");
+        props.setProperty("password", "secret%q");
+        return ConfigFactory.create(GreetingConfig.class, props);
+    }
+
+    /**
+     * Returning the value as written is the documented answer and stays: a method taking arguments makes
+     * its value a template, and a value has no obligation to be one. What was missing is a way to find out,
+     * for the case where it <b>was</b> meant as a format and a placeholder is mistyped.
+     */
+    @Test
+    public void aValueThatIsNotAFormatComesBackAsWrittenAndSaysSoAtFine() {
+        assertTrue("hello %q".equals(greetings().greeting("world")));
+
+        String fine = said(Level.FINE);
+        assertTrue(fine, fine.contains("greeting() takes arguments"));
+        assertTrue(fine, fine.contains("'greeting'"));
+        assertTrue("the kind of failure is named: " + fine,
+                fine.contains("UnknownFormatConversionException"));
+    }
+
+    /**
+     * The rule that outranks the diagnostic: a value never reaches a log. The message of a formatting
+     * failure quotes the piece of the format it choked on, which is a piece of the value, so neither it nor
+     * the value itself is in the line.
+     */
+    @Test
+    public void neitherTheValueNorTheReasonQuotingItIsLogged() {
+        greetings().password("x");
+
+        String fine = said(Level.FINE);
+        assertTrue(fine, fine.contains("password() takes arguments"));
+        assertFalse("the value was logged: " + fine, fine.contains("secret"));
+        assertFalse("the message, which quotes the piece it choked on, was logged: " + fine,
+                fine.contains("= 'q'"));
+    }
+
+    // -------------------------------------------------------------------------------------------------
     // the prefix nobody can read in the source
     // -------------------------------------------------------------------------------------------------
 

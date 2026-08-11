@@ -233,7 +233,13 @@ lived and `reload()` runs the whole load again, so anything reported per load ha
       not less. The rule now is whether the document **declares a grammar**, read off its `DOCTYPE`; an
       external DTD counts as none, since the hardening neutralizes it and a document cannot be held to a
       rule we refused to read. `#validate=false` on the source is the way out, for either kind of grammar.
-- [ ] **A `@Key` whose value is not a legal format string.** `PropertiesInvocationHandler` catches the
+- [x] **A `@Key` whose value is not a legal format string** — **done 2026-08-11**, at `FINE` and costing
+      nothing, the `catch` being already there. One thing the entry did not foresee: neither the value nor
+      the exception message can go in the line, since the message of a formatting failure quotes the piece
+      of the format it choked on, and that piece is the value. The key and the name of the failure are
+      what is left, and they are enough.
+      The original entry:
+- [x] **A `@Key` whose value is not a legal format string.** `PropertiesInvocationHandler` catches the
       failure from `String.format` and returns the template unexpanded, which is documented and probably the
       right behaviour — a property value has no obligation to be a format string. Worth a `FINE`, not a
       `WARNING`, and only if it costs nothing.
