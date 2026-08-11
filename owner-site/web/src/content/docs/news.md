@@ -275,6 +275,42 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    is refused rather than closed up, since a list quietly shorter than the file describes, with everything
    after the gap moved, is not something the caller can notice. Nothing can break, `servers[0]` having been a
    property nothing read. See the [documentation](/owner/docs/type-conversion/).
+ * **Nested configuration interfaces.** A method returning another interface that extends `Config` reads the
+   section of the configuration below its own key:
+
+   ```properties
+   server.host=localhost
+   server.port=8080
+   ```
+
+   ```java
+   ServerConfig server();                // server.host, server.port
+   ```
+
+   The accessor names the section rather than the type it returns, so `@Key` renames it and two methods can
+   return the same interface without colliding. The nested object **loads nothing of its own**: it is a view
+   over the properties its parent resolved, sharing one set of `@Sources`, one reload, one set of listeners
+   and one mutable state for the whole tree. The objects are built when the configuration is created, so a
+   `@Mandatory` property one level down is checked then like any other and a cycle in the types is refused
+   there rather than at the first call. A `@Prefix` on a nested interface **composes** with the path it hangs
+   from — unlike the prefix configured on a factory, which `@Prefix` overrides — because the path says where
+   the object was hung and the annotation says how it names its own keys.
+
+   Sections can be counted or named. `List<ServerConfig>` reads `servers[0].host`, `servers[1].host`, by the
+   rules of any indexed list, which is exactly the shape a tree-structured source flattens to: an XML
+   document with a repeated element is now read by an interface holding a list. A type holding a `List` of
+   itself is a tree and is allowed, where a type holding itself is refused — the keys say how deep it goes.
+   `Map<String, ServerConfig>` reads `servers.alpha.host` and `servers.beta.host`, the name of each section
+   becoming the key of the entry, and `@Key("servers.%s") ServerConfig server(String name)` asks for one by
+   name: together they answer the long-standing question of objects whose names are only known at run time.
+
+   An `Optional` section is present when anything at all was written below its path. A `@DefaultValue`
+   declared inside the nested interface is one such thing, so it makes the section permanently present: the
+   two say the opposite of each other and the default wins. For the same reason `@Mandatory` written on the
+   accessor of a section is refused when the configuration is created, since the check could never fail;
+   `@Mandatory` on the properties inside is the one that means something. Nothing can break: a method
+   returning an interface extending `Config` had no meaning before. See the
+   [documentation](/owner/docs/nested-configuration/).
  * **`.env` files are read**, which is how container tooling carries configuration into a process —
    `docker run --env-file`, `env_file` in Compose, `envFrom` in Kubernetes, the secrets of a CI pipeline. Any
    source whose path ends in `.env` is read this way, values go through the usual type conversion, and the

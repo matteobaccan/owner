@@ -196,15 +196,24 @@ From the comparison run on 2026-08-07. The evidence, the state of the field and 
 `COMPARISON.md`; this is only the list of work, in the order the value came out. Nearly every line has
 an issue behind it, which is the point: what the others shipped is what our reporters asked for.
 
-- [ ] **Nested configuration interfaces** — `ServerConfig server();` resolving `server.host`,
-      `server.port`. The largest visible gap: SmallRye, Gestalt and Coat all have it. `@Prefix` from
-      2.0.0 already does half the work — key composition exists, what is missing is a return type that
-      builds another proxy. **Gained a second reason on 2026-08-09**: the flattening convention now
-      produces `servers[0].host` out of any tree-shaped source and nothing can read it, so a JSON or YAML
-      file holding a list of objects — which is most of them — will flatten correctly and be unreachable
-      until this lands. Issues [#129](https://github.com/matteobaccan/owner/issues/129),
+- [x] **Nested configuration interfaces** — `ServerConfig server();` resolving `server.host`,
+      `server.port`. Was the largest visible gap: SmallRye, Gestalt and Coat all have it. **Done
+      2026-08-11**, `NestedProperties`: the accessor names the section, the nested object shares its
+      parent's `PropertiesManager` and loads nothing of its own, the objects are built when the
+      configuration is created so that `@Mandatory` one level down is checked then and a cycle is refused
+      there. Also `List<ServerConfig>` from `servers[0].host` — which closes the loop with the flattening
+      convention, an XML tree now being read end to end — `Map<String, ServerConfig>` from
+      `servers.alpha.host`, and `@Key("servers.%s") ServerConfig server(String name)`, which together
+      answer [#126](https://github.com/matteobaccan/owner/issues/126) and
+      [#209](https://github.com/matteobaccan/owner/issues/209) without the by-hand recipe.
+      Issues [#129](https://github.com/matteobaccan/owner/issues/129),
       [#2](https://github.com/matteobaccan/owner/issues/2),
-      [#72](https://github.com/matteobaccan/owner/issues/72).
+      [#72](https://github.com/matteobaccan/owner/issues/72) **can be closed**.
+      Two decisions to carry: a `@Prefix` on a nested interface **composes** with the path, where the
+      factory prefix is overridden by it (Gestalt composes, SmallRye and Archaius ignore the annotation
+      outright — see `COMPARISON.md`); and an `Optional` section is present as soon as anything is below
+      its path, defaults included, which is what SmallRye settled on in its version 3 after shipping the
+      opposite. `@Mandatory` on the accessor of a section is refused for the same reason.
 - [ ] **Further formats as `Loader`s, written by hand, with no external dependency.** The SPI has
       existed since 1.0.5, a loader is a three-method class, and two external projects have already
       hand-written a YAML loader and a JSON one against it. Being properties-only is the top reason

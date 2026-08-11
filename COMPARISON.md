@@ -296,7 +296,7 @@ coincidence; it is evidence the demand is real.
 
 | Gap | Who has it | Our issue |
 |---|---|---|
-| Nested config interfaces | SmallRye, Gestalt, Coat | #129, #2, #72 |
+| Nested config interfaces | SmallRye, Gestalt, Coat | — (**closed 2026-08-11**) |
 | YAML / JSON / HOCON / TOML | everyone but us | #14, #65, #240 |
 | `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
 | Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
@@ -306,6 +306,42 @@ coincidence; it is evidence the demand is real.
 | Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130, #143 |
 | DI integration | every framework | #222, #147 |
 | GraalVM native image | Coat, by construction | — |
+
+
+How the others nest
+-------------------
+
+Surveyed on 2026-08-11, before writing our own. Two questions had no obvious answer and the field turned
+out to disagree on both, so what each one does is recorded here rather than in a commit message.
+
+| | Segment of the key | Prefix declared by the nested type | Lists | Maps |
+|---|---|---|---|---|
+| **SmallRye / Quarkus** | the **method** name, kebab-cased | **ignored** | `server.environments[0].name` | `server."my-server".host` |
+| **Archaius** | the property name of the getter | **ignored** — `derivePrefix` reads `@Configuration` only when the prefix passed in is null | — | via parametrized getters |
+| **Coat** | written on the accessor: `@Coat.Embedded(key="mqtt")` | does not arise: an embedded type has no prefix of its own (it has a `keySeparator` instead) | — | — |
+| **Gestalt** | the field name | **composes**: base path + annotation prefix + field | `db.hosts[0].user` | yes |
+| **OWNER** | the key the accessor resolves to, `@Key` and all | **composes** | `servers[0].host` | `servers.alpha.host` |
+
+**The segment is the method, in all four.** Quarkus says it outright — *"The method name of a mapping
+group acts as sub-namespace to the configuration properties"* — and the alternative, taking the name of
+the type, makes a second accessor of the same type impossible to write. We do the same, except that ours
+is the *key* the accessor resolves to, so `@Key` renames a section and an empty `@Key("")` inlines it,
+which is what SmallRye spells `@WithParentName`.
+
+**On composing we are with Gestalt, against SmallRye and Archaius**, and it is a deliberate minority
+position: neither declaration is a default the other overrides, so ignoring one of them silently is the
+one outcome we refuse. The cost is that an interface which already carries a prefix keeps carrying it when
+nested, which is visible in the keys the first time it is tried.
+
+**On an absent section the field has moved twice, in opposite directions.** SmallRye [#945](https://github.com/smallrye/smallrye-config/issues/945)
+is the same bug report we would have received: a `@WithDefault` inside an `Optional` group. Its answer, in
+version 3, is that the default makes the group present — *"An `Optional` and a `default` are opposing
+concepts"* — and the behaviour it dropped to get there, presence decided only by what another property
+wrote, is precisely the one we would otherwise have built. Spring Boot went the other way in 3.2, building
+every absent nested object where 3.1 left it null, and
+[broke the validation](https://github.com/spring-projects/spring-boot/issues/21281) of everyone who
+relied on the absence. We took SmallRye's rule, and took Spring's accident as the reason to refuse
+`@Mandatory` on the accessor of a section outright rather than ship a check that cannot fail.
 
 
 Field evidence
@@ -328,12 +364,10 @@ Field evidence
 Backlog, highest value first
 ----------------------------
 
-1. **Nested config interfaces** (`ServerConfig server();`) — the largest visible gap against
-   SmallRye, and `@Prefix` from 2.0.0 already does half the work: key composition exists, what is
-   missing is a return type that builds another proxy. **It gained a second reason on 2026-08-09**: the
-   flattening convention now produces `servers[0].host` out of any tree-shaped source, and nothing can
-   read it. A JSON or YAML file holding a list of objects — which is most of them — will flatten
-   correctly and be unreachable until this lands.
+1. ~~**Nested config interfaces**~~ — **done 2026-08-11**, in the four shapes the others have between
+   them: a section, a list of sections from `servers[0].host`, a map of sections from
+   `servers.alpha.host`, and one asked for by name with a parametrized key. The survey that settled the
+   two contested decisions is below, under *How the others nest*.
 2. **Further formats** — a loader is a three-method class, the SPI has existed since 1.0.5, and people
    are already writing these by hand (see above). Removes the "properties only" objection, which is
    the top reason people pick Typesafe Config. **`FORMATS.md` supersedes this line**: it was written

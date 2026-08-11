@@ -171,6 +171,12 @@ several of them reads every property under the section it belongs to.
   </p>
 </div>
 
+Composing a configuration out of reusable pieces has a second form, in which
+the sections are objects of their own rather than interfaces to inherit from:
+see [Nested configuration](/owner/docs/nested-configuration/). A `@Prefix`
+declared on a nested interface **composes** with the path it hangs from,
+where the one configured on a factory is overridden by it.
+
 
 Variables in the prefix
 -----------------------

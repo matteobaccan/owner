@@ -83,6 +83,7 @@ export default defineConfig({
           translations: { it: 'Altre funzionalità', 'zh-CN': '更多功能' },
           items: [
             { label: 'Key prefix', slug: 'docs/key-prefix' },
+            { label: 'Nested configuration', slug: 'docs/nested-configuration' },
             { label: 'Loading strategies', slug: 'docs/loading-strategies' },
             { label: 'Importing properties', slug: 'docs/importing-properties' },
             { label: 'Parametrized properties', slug: 'docs/parametrized-properties' },

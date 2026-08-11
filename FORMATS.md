@@ -303,10 +303,13 @@ Python value. Both are refusals rather than misreadings, and both can be added w
 
 ### The two that are not formats
 
-- **Nested configuration interfaces**, [#129](https://github.com/matteobaccan/owner/issues/129). Bigger,
-  and not a format at all, but `servers[0].host` is already produced by the flattener and read by nobody.
-  Until it lands, a JSON or YAML source holding a list of objects flattens correctly and is unreachable.
-  It has to land before YAML is worth having, and it does not block INI at all.
+- ~~**Nested configuration interfaces**, [#129](https://github.com/matteobaccan/owner/issues/129)~~ —
+  **done 2026-08-11**. `servers[0].host` was produced by the flattener and read by nobody; a
+  `List<ServerConfig>` now reads it, and the end-to-end test that proves it starts from an XML document
+  with a repeated element and ends at the typed elements. A JSON or YAML source holding a list of objects
+  is therefore reachable on the day its loader is written, which was the condition for YAML being worth
+  having. Also `Map<String, ServerConfig>` for sections the file names, and a parametrized accessor for one
+  known by name.
 - **A configuration that explains itself** — the diagnostics, at `CONFIG` for what was decided and at
   `WARNING` for what went wrong. See `TODO.md`, where the two halves are listed together because they are
   one reading of the same code.
@@ -550,6 +553,12 @@ because the existing array conversion works the other way round. Type conversion
 `servers[0].host=a` is this plus [nested interfaces](https://github.com/matteobaccan/owner/issues/129),
 and belongs to that. But the flattening convention has to be chosen now so that it produces exactly that
 shape, so the two meet without either being reworked.
+
+**They met on 2026-08-11, and neither was reworked**: the list of sections reuses the index parsing and the
+rules written here — from zero, no gaps, index order rather than file order — and the only thing it had to
+add was telling `servers[0]`, an element that *is* a value, from `servers[0].`, an element that *holds*
+some. That distinction is the closing bracket at the end of the name, which is exactly what `indexIn`
+already checked for its own reasons.
 
 ### Two things to fix rather than inherit
 

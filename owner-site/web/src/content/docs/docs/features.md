@@ -14,6 +14,7 @@ OWNER is a features rich API, but while adding more features, we wanted to keep 
 OWNER API supports a long list of features:
 
 - [Key prefix](/owner/docs/key-prefix/)
+- [Nested configuration](/owner/docs/nested-configuration/)
 - [Loading strategies](/owner/docs/loading-strategies/)
 - [Importing properties](/owner/docs/importing-properties/)
 - [Parametrized properties](/owner/docs/parametrized-properties/)
