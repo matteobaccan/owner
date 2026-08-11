@@ -314,6 +314,107 @@ final class NestedProperties {
         }
     }
 
+    /**
+     * Walks every nested interface reachable through a section whose <b>path the properties decide</b> — an
+     * element of a list, a value of a map, the answer of an accessor taking arguments — handing each the
+     * prefix the whole group lives under.
+     * <p>
+     * These are the ones {@link #forEachNested} cannot reach, and they have to be reached all the same:
+     * what a method declares has to be read whether or not anybody can say in advance which key it will
+     * answer for. What can be done with them differs, though. A {@link Config.EncryptedValue} is registered
+     * against the <b>method</b>, so not knowing the key costs nothing. A {@link Config.Sensitive} is
+     * registered against the key, and there is none — so what is masked is the whole group, which is the
+     * rule this library already applies where a group and a key inside it disagree: a secret printed
+     * because nobody could name it in advance is the mistake that costs something, and a value masked that
+     * need not have been is read as over-caution and no more.
+     * </p>
+     *
+     * @param clazz  the interface to start from.
+     * @param prefix the prefix that interface resolves its own keys with.
+     * @param action what to do with each interface found, and the prefix its group lives under.
+     */
+    static void forEachNestedGroup(Class<?> clazz, KeyPrefix prefix, BiConsumer<Class<?>, String> action) {
+        walkGroups(clazz, prefix, null, action, singletonChain(clazz));
+    }
+
+    /**
+     * @param groupPrefix <code>null</code> while the walk is still on paths that are known — where it is
+     *                    only looking for the accessors that open a group — and the prefix of the group
+     *                    once it is inside one, since everything below an unknown segment is unknown too.
+     */
+    private static void walkGroups(Class<?> clazz, KeyPrefix prefix, String groupPrefix,
+                                   BiConsumer<Class<?>, String> action, List<Class<?>> ancestors) {
+        for (Method method : clazz.getMethods()) {
+            Class<?> opensGroup = groupElementOf(method);
+            if (opensGroup != null) {
+                String below = groupPrefix != null ? groupPrefix : groupPrefixOf(method, prefix);
+                if (below != null)
+                    enterGroup(opensGroup, below, action, ancestors);
+                continue;
+            }
+            if (!nests(method) || method.getParameterTypes().length > 0)
+                continue;
+
+            Class<?> type = OptionalSupport.valueClass(method);
+            if (ancestors.contains(type))
+                continue;
+            if (groupPrefix != null) {
+                enterGroup(type, groupPrefix, action, ancestors);
+                continue;
+            }
+            List<Class<?>> chain = new ArrayList<>(ancestors);
+            chain.add(type);
+            walkGroups(type, KeyPrefix.nestedIn(pathOf(PropertiesMapper.key(method, prefix))), null,
+                    action, chain);
+        }
+    }
+
+    private static void enterGroup(Class<?> type, String groupPrefix, BiConsumer<Class<?>, String> action,
+                                   List<Class<?>> ancestors) {
+        if (ancestors.contains(type))
+            return;
+        action.accept(type, groupPrefix);
+
+        List<Class<?>> chain = new ArrayList<>(ancestors);
+        chain.add(type);
+        walkGroups(type, KeyPrefix.NONE, groupPrefix, action, chain);
+    }
+
+    /**
+     * The interface behind a method that reads a group of sections, or <code>null</code> when the method
+     * reads something else: the element type of a list of sections, the value type of a map of them, or the
+     * type an accessor taking arguments answers with.
+     */
+    private static Class<?> groupElementOf(Method method) {
+        if (IndexedProperties.readsAList(method) && nestsElements(method))
+            return Converters.elementType(method);
+        if (PropertiesAggregator.aggregates(method) && nestsValues(method))
+            return PropertiesAggregator.typeArgument(method, 1);
+        if (nests(method) && method.getParameterTypes().length > 0)
+            return OptionalSupport.valueClass(method);
+        return null;
+    }
+
+    /**
+     * The prefix every key of a group starts with: the key of the accessor and the character that opens an
+     * index for a list, the separator for a map, and everything before the first placeholder for an
+     * accessor taking arguments.
+     *
+     * @return the prefix, or <code>null</code> when there is none worth having — a key that begins with its
+     *         placeholder gives an empty prefix, and masking everything is not what anybody asked for.
+     */
+    private static String groupPrefixOf(Method method, KeyPrefix prefix) {
+        String key = PropertiesMapper.key(method, prefix);
+        if (method.getParameterTypes().length > 0) {
+            int placeholder = key.indexOf('%');
+            key = placeholder < 0 ? key : key.substring(0, placeholder);
+            return key.isEmpty() ? null : key;
+        }
+        if (key.isEmpty())
+            return null;
+        return IndexedProperties.readsAList(method) ? key + PropertyKeys.INDEX_OPEN : pathOf(key);
+    }
+
     private static List<Class<?>> singletonChain(Class<?> clazz) {
         List<Class<?>> chain = new ArrayList<>();
         chain.add(clazz);

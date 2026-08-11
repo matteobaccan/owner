@@ -166,6 +166,32 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         scanAnnotations(clazz, keyPrefix, classDecryptor);
         NestedProperties.forEachNested(clazz, keyPrefix,
                 (nested, prefix) -> scanAnnotations(nested, prefix, declaredDecryptor(nested, classDecryptor)));
+        NestedProperties.forEachNestedGroup(clazz, keyPrefix,
+                (nested, group) -> scanGroupAnnotations(nested, group,
+                        declaredDecryptor(nested, classDecryptor)));
+    }
+
+    /**
+     * The same, for an interface reached through a group whose keys nobody can name in advance: an element
+     * of a list, a value of a map, the answer of an accessor taking arguments.
+     * <p>
+     * The decryptor is registered against the method and so does not care; what has to be masked has no key
+     * to be named by, and the whole group is masked instead. See
+     * {@link NestedProperties#forEachNestedGroup}.
+     * </p>
+     */
+    private void scanGroupAnnotations(Class<?> clazz, String groupPrefix, Decryptor classDecryptor) {
+        for (Method method : clazz.getMethods()) {
+            if (isSensitive(method))
+                sensitivePrefixes.add(groupPrefix);
+
+            if (PropertiesMapper.isEncryptedValue(method)) {
+                Class<? extends Decryptor> declared = method.getAnnotation(EncryptedValue.class).value();
+                encryptedKeys.put(method, declared != IdentityDecryptor.class
+                        ? Util.newInstance(declared)
+                        : classDecryptor);
+            }
+        }
     }
 
     /**

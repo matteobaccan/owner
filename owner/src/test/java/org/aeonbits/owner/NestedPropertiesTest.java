@@ -703,6 +703,57 @@ public class NestedPropertiesTest {
         assertEquals("hunter2", cfg.server().password());
     }
 
+    public interface SecretiveElementConfig extends Config, Accessible {
+        String name();
+
+        List<SecretiveServerConfig> servers();
+    }
+
+    /**
+     * An element of a list has no key anybody could name when the configuration is created, so there is
+     * nothing to put in the list of keys to mask. What is masked is the whole group — the same answer this
+     * library already gives where a group and a key inside it disagree, and the same reasoning: a secret
+     * printed because nobody could name it in advance is the mistake that costs something.
+     */
+    @Test
+    public void aSensitivePropertyInsideAnElementMasksTheWholeGroup() {
+        SecretiveElementConfig cfg = create(SecretiveElementConfig.class,
+                "name", "app", "servers[0].host", "localhost", "servers[0].password", "hunter2");
+
+        String printed = cfg.toString();
+        assertFalse("the password was printed", printed.contains("hunter2"));
+        assertTrue(printed.contains("servers[0].password=" + Sensitive.MASK));
+        assertTrue("the whole group goes, host included", printed.contains("servers[0].host=" + Sensitive.MASK));
+        assertTrue("and nothing outside it", printed.contains("name=app"));
+        assertEquals("hunter2", cfg.servers().get(0).password());
+    }
+
+    public interface EncryptedElementsConfig extends Config {
+        List<EncryptedServerConfig> servers();
+
+        Map<String, EncryptedServerConfig> named();
+
+        @Key("byName.%s")
+        EncryptedServerConfig byName(String name);
+    }
+
+    /**
+     * A decryptor is registered against the method, so an element of a group needs no key to be known: not
+     * decrypting would hand back the encrypted text as though it were the value, which is the kind of
+     * silence this project refuses.
+     */
+    @Test
+    public void anEncryptedValueIsDecryptedInEveryKindOfGroup() {
+        EncryptedElementsConfig cfg = create(EncryptedElementsConfig.class,
+                "servers[0].password", "2retnuh",
+                "named.alpha.password", "2retnuh",
+                "byName.beta.password", "2retnuh");
+
+        assertEquals("hunter2", cfg.servers().get(0).password());
+        assertEquals("hunter2", cfg.named().get("alpha").password());
+        assertEquals("hunter2", cfg.byName("beta").password());
+    }
+
     // -------------------------------------------------------------------------------------------------
     // what cannot be built
     // -------------------------------------------------------------------------------------------------
