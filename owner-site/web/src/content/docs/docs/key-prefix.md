@@ -171,6 +171,10 @@ several of them reads every property under the section it belongs to.
   </p>
 </div>
 
+When the keys are not the ones you expected — which a prefix makes happen to all of them at once, without
+an error anywhere — the library will tell you what it resolved: see
+[which key is my method reading](/owner/docs/debugging/#which-key-is-my-method-reading).
+
 Composing a configuration out of reusable pieces has a second form, in which
 the sections are objects of their own rather than interfaces to inherit from:
 see [Nested configuration](/owner/docs/nested-configuration/). A `@Prefix`

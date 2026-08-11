@@ -11,6 +11,7 @@ import org.aeonbits.owner.crypto.Decryptor;
 import org.aeonbits.owner.crypto.IdentityDecryptor;
 import org.aeonbits.owner.event.*;
 import org.aeonbits.owner.loaders.SourceOptions;
+import org.aeonbits.owner.util.Reflection;
 import org.aeonbits.owner.util.Util;
 
 import java.beans.PropertyChangeEvent;
@@ -197,6 +198,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         NestedProperties.forEachNestedGroup(clazz, keyPrefix,
                 (nested, group) -> scanGroupAnnotations(nested, group,
                         declaredDecryptor(nested, classDecryptor)));
+
+        reportTheKeys();
     }
 
     /**
@@ -715,6 +718,67 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                         + "other sources and its default values, so this is not an error - but a source "
                         + "that is merely absent is passed over in silence, and this one was not absent.",
                 clazz.getName(), hideCredentials(uri)));
+    }
+
+    /**
+     * Says what the keys of this configuration are, which is the question nothing else answers.
+     * <p>
+     * A wrong prefix is the most disorienting failure there is and the least visible: every property
+     * vanishes at once, nothing errors, and the file is full of values that look right. The errors this
+     * library raises already name the whole key — a missing mandatory property, a value that will not
+     * convert — so what is left to cover is the case where nothing goes wrong and nothing is found.
+     * </p>
+     * <p>
+     * Two lines of different weight. The prefix configured on the {@link Factory} goes at
+     * <code>CONFIG</code> because it is written in no source file and moves the keys of every configuration
+     * that factory creates. The key each method resolves to goes at <code>FINE</code>, being one line per
+     * method, and is the complete answer: it walks the nested interfaces too, since a section's keys are
+     * built from a path that appears nowhere on the method.
+     * </p>
+     */
+    private void reportTheKeys() {
+        String prefix = keyPrefix.describe();
+        if (prefix != null)
+            LOGGER.log(Level.CONFIG, () -> String.format("%s: every key is prefixed with %s",
+                    clazz.getName(), prefix));
+
+        if (!LOGGER.isLoggable(Level.FINE))
+            return;
+        reportTheKeysOf(clazz, keyPrefix);
+        NestedProperties.forEachNested(clazz, keyPrefix, this::reportTheKeysOf);
+    }
+
+    private void reportTheKeysOf(Class<?> owner, KeyPrefix prefix) {
+        for (Method method : owner.getMethods()) {
+            if (isLibraryMethod(method) || Reflection.isDefault(method))
+                continue;
+            String key = PropertiesMapper.key(method, prefix);
+            LOGGER.log(Level.FINE, () -> String.format("%s: %s.%s() %s", clazz.getName(),
+                    owner.getSimpleName(), method.getName(), reads(method, key)));
+        }
+    }
+
+    /** What the method does with the key it resolved to, which is not always "reads it". */
+    private static String reads(Method method, String key) {
+        if (NestedProperties.nests(method))
+            return "is the section under '" + NestedProperties.pathOf(key) + "'";
+        if (isFeatureDisabled(method, DisableableFeature.PREFIX))
+            return "reads '" + key + "', with no prefix at all: it disables the feature";
+        if (method.getParameterTypes().length > 0)
+            return "reads '" + key + "', its arguments formatted in at each call";
+        if (key.contains("${"))
+            return "reads '" + key + "', before the variables in it are expanded";
+        return "reads '" + key + "'";
+    }
+
+    /**
+     * Whether the method is one of ours rather than one of the configuration's: those resolve to no key,
+     * being answered by this very class.
+     */
+    private static boolean isLibraryMethod(Method method) {
+        Class<?> owner = method.getDeclaringClass();
+        return owner == Object.class || owner == Config.class || owner == Accessible.class
+                || owner == Mutable.class || owner == Reloadable.class || owner == Traceable.class;
     }
 
     /** The interface this configuration was created from, for whoever has to name it in a message. */

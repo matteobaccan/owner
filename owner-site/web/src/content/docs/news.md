@@ -311,6 +311,13 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    `@Mandatory` on the properties inside is the one that means something. Nothing can break: a method
    returning an interface extending `Config` had no meaning before. See the
    [documentation](/owner/docs/nested-configuration/).
+ * **The library says which key each method reads.** A wrong prefix makes every property vanish at once
+   with nothing to show for it — no error, every method answering `null` or its default, and a file full of
+   values that look right. At `FINE` every method now reports the key it resolves to, nested sections
+   walked with it, and a key that is not yet final says which kind it is: one whose prefix is disabled, one
+   whose arguments are formatted in at each call, one still holding variables. At `CONFIG`, one line names
+   the prefix configured on the factory, which is singled out because it is the only prefix written in no
+   source file at all. See the [documentation](/owner/docs/debugging/#which-key-is-my-method-reading).
  * **A source that hot reload cannot watch says so.** Watching means asking something whether it has
    changed, and only a file and `system:properties` can answer: a resource inside a jar served over the
    network, an `http:` source, `system:env` cannot. Those were dropped from the watch list in silence, which

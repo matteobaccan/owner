@@ -107,6 +107,27 @@ final class KeyPrefix implements Serializable {
         return !path.isEmpty();
     }
 
+    /**
+     * What this prefix does, for a person reading a log line, or <code>null</code> when it does nothing.
+     * <p>
+     * It is worth saying out loud precisely because it is the one prefix written nowhere in the source
+     * code: an interface carries its {@link Config.Prefix} where anyone can read it, while this one is
+     * configured on the factory and moves the keys of every configuration that factory creates.
+     * </p>
+     */
+    String describe() {
+        if (isNested())
+            return "the path '" + path + "'";
+        if (literalPrefix.isEmpty() && !fromPackage)
+            return null;
+        if (!fromPackage)
+            return "'" + literalPrefix + "', from " + LITERAL;
+        if (literalPrefix.isEmpty())
+            return "the package of the interface declaring each method, from " + FROM_PACKAGE;
+        return "'" + literalPrefix + "' followed by the package of the interface declaring each method, from "
+                + LITERAL + " and " + FROM_PACKAGE;
+    }
+
     /** The path a nested object hangs from, empty for a root one. */
     String path() {
         return path;

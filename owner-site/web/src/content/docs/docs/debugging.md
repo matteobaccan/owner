@@ -6,6 +6,58 @@ title: "Debugging"
 There are some debugging facilities that are available in Properties files that
 we wanted to keep in the OWNER API.
 
+Which key is my method reading?
+-------------------------------
+
+*Since 2.0.0.* It is the question behind most of "it does not work", and the failure that provokes it is
+the least visible one there is: a wrong prefix makes **every** property vanish at once. Nothing errors,
+every method answers with `null` or its default, and the file is full of values that look right.
+
+Turn the library's own logging up and it says so. In a `logging.properties`:
+
+```properties
+org.aeonbits.owner.level = FINE
+```
+
+and every method reports the key it resolves to, the nested sections walked with it:
+
+```
+FINE  MyConfig: ServerConfig.host() reads 'server.host'
+FINE  MyConfig: ServerConfig.maxThreads() reads 'server.max.threads'
+FINE  MyConfig: ServerConfig.section() is the section under 'server.section.'
+FINE  MyConfig: SectionConfig.name() reads 'server.section.name'
+```
+
+A key that is not yet what it will be says which kind it is, so that it does not read as a mistake:
+
+```
+FINE  MyConfig: ServerConfig.version() reads 'version', with no prefix at all: it disables the feature
+FINE  MyConfig: ServerConfig.pool() reads 'server.pool.%s', its arguments formatted in at each call
+FINE  MyConfig: ServerConfig.url() reads 'server.servers.${env}.url', before the variables in it are expanded
+```
+
+One line per method is a lot of lines, which is why this sits at `FINE` and costs nothing until it is
+asked for. At `CONFIG` — the level that says what the library *decided* — one line is worth having on its
+own:
+
+```
+CONFIG  MyConfig: every key is prefixed with 'myapp.', from owner.key.prefix
+```
+
+That one is the [prefix configured on the factory](/owner/docs/key-prefix/), and it is singled out because
+it is the only prefix written in no source file at all: an interface carries its `@Prefix` where anyone
+reading it can see it, while this one is set on the factory and moves the keys of every configuration that
+factory creates.
+
+<div class="note">
+  <h5>The errors already name the key.</h5>
+  <p>
+    A mandatory property that cannot be resolved is reported by its whole key, and so is a value that will
+    not convert — <code>Cannot convert 'abc' to int for property 'server.port'</code>. What these two lines
+    add is the case where nothing goes wrong: everything resolved, and to keys nobody expected.
+  </p>
+</div>
+
 The toString() method
 ---------------------
 

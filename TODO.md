@@ -126,7 +126,17 @@ real questions each would close — **the first three shipped with
       a line naming the loaders discovered on the classpath, including when none were.
 - [x] **The specs looked for when there is no `@Sources`** — **done**, the same line as the first: it says
       `no @Sources, looking for:` and lists them.
-- [ ] **The effective key prefix**, from `KeyPrefix`, `@Prefix` or `@DisableFeature(PREFIX)`. A wrong prefix
+- [x] **The effective key prefix** — **done 2026-08-11**, and the question turned out to have moved since
+      this was written. After nesting there is no single effective prefix: there is one per declaring
+      interface, one per section, and `@DisableFeature` is per method. So what is reported is the thing
+      actually wanted, **the key each method resolves to**, at `FINE`, walking the nested interfaces; a key
+      that is not yet final says which kind it is. At `CONFIG` one line names the factory prefix alone,
+      which earns it by being the only prefix written in no source file. The field was surveyed first:
+      Spring exposes the same through `/actuator/configprops`, Typesafe through `render()`, Coat by
+      generating readable code, and SmallRye has nothing (quarkus#8218 is still open) — none of them logs
+      "the prefix", all of them make the resolved mapping inspectable.
+      The original entry:
+- [x] **The effective key prefix**, from `KeyPrefix`, `@Prefix` or `@DisableFeature(PREFIX)`. A wrong prefix
       makes *every* property vanish at once, which is the most disorienting failure there is and the least
       visible: nothing errors.
 - [x] **Hot reload: whether it is on, of which kind, how often, and on which sources** — **done
