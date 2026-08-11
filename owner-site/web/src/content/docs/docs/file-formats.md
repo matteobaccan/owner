@@ -16,7 +16,8 @@ read out of the box, how each format is recognised, and where each one has a rul
 
 Three of them are worth reading twice. **`.env` and INI have no standard**, so which rules they are read by
 is something you choose; see [below](#env) and [below](#ini). And **XML is parsed with hardening turned
-on**, which in rare cases cannot be applied; see [below](#xml).
+on**, which in rare cases cannot be applied, and **a document that declares a grammar is held to it**; see
+[below](#xml).
 
 Nothing else is read yet — no YAML, JSON, TOML or HOCON. What that would take, and in which order it is
 coming, is in [what is not read yet](#what-is-not-read-yet).
@@ -209,6 +210,46 @@ chance of it would rename the keys of every XML configuration written against th
     logs a <code>WARNING</code> naming the feature, because the protection is then not in force. It does not
     refuse to read the file — that would be worse — so if the warning appears and the XML comes from
     somewhere you do not control, it is worth acting on.
+  </p>
+</div>
+
+### A document is held to the grammar it declares
+
+If the document carries a `<!DOCTYPE>`, it is validated against it and a violation is **refused**:
+
+```xml
+<!DOCTYPE config [<!ELEMENT config (host)><!ELEMENT host (#PCDATA)>]>
+<config>
+  <host>alpha</host>
+  <port>8080</port>     <!-- the DTD says config contains only host -->
+</config>
+```
+
+Reading this fails, naming `port`. The same holds for the Java XML properties format, which is what the
+JDK's own `loadFromXML` does, and it is the rule Commons Configuration follows too when it is asked to
+validate at all.
+
+A document that declares **no** grammar is read as it is — there is nothing to hold it to — and so is one
+naming an **external** DTD, which the hardening below neutralizes: the grammar never arrives, and a
+document cannot be held to a rule that was refused a reading.
+
+`#validate=false` on the source turns the checking off, for both kinds of grammar:
+
+```java
+@Sources("file:~/app.xml#validate=false")
+```
+
+It is worth having for a file that is out of step with a DTD nobody maintains any more, and it is written
+on the source rather than configured globally because it is a property of that file, not of the
+application.
+
+<div class="note warning">
+  <h5>This changed in 2.0.0.</h5>
+  <p>
+    Until 1.0.12 a violation of the document's own DTD was <b>ignored</b>, and the properties came back
+    including the part the grammar forbids — a validity error does not stop the parse, so nothing was
+    truncated and nothing was said. The Java properties format was already refused; what changes is that a
+    grammar of your own now counts the same way.
   </p>
 </div>
 

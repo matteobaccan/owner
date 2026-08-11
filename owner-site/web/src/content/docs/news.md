@@ -518,6 +518,23 @@ closed only when it has been understood.
    different variants; both are now uniform. The Maven wrapper sources are excluded, as they ship under Apache 2.0.
 
 #### Bugs fixes
+ * **An XML document that broke its own DTD was read past it.** `XMLLoader` validates — it must, the Java
+   XML properties format being defined by a DTD — and a validity error was refused for that format and
+   swallowed for every other. So a document of your own carrying a `<!DOCTYPE>` and then contradicting it
+   came back complete, the forbidden part included, with nothing said. It was never a truncated document:
+   a validity error is recoverable, the parse runs to the end, and what the caller got was *more* than the
+   grammar allows rather than less.
+
+   The swallowing was not gratuitous, which is why it survived so long: a validating parser reports a
+   validity error for **every** document that declares no grammar at all — *no grammar found* — and
+   ignoring that one is what makes reading ordinary XML possible. The test now is whether the document
+   declares a grammar, not whose grammar it is. One that declares none is read as it is, and so is one
+   naming an **external** DTD, which the XXE hardening neutralizes: the grammar never arrives, and a
+   document cannot be held to a rule that was refused a reading.
+
+   Where this refuses a file that 1.0.12 read, `#validate=false` on the source reads it again — for a
+   grammar of your own and for the Java properties one alike. See the
+   [documentation](/owner/docs/file-formats/#a-document-is-held-to-the-grammar-it-declares).
  * An XML source carrying a query string was not recognised as XML. `XMLLoader` decided from
    `URL.getFile()`, which by contract is the path **plus the query**, so
    `@Sources("https://config/app.xml?v=2")` failed its own test, fell through to `PropertiesLoader` — which
