@@ -90,18 +90,27 @@ final class PropertiesMapper {
      * Registers the {@link DefaultValue} of every method of the interface, and of every interface nested in
      * it under the key that nests it: a default written one level down is a default like any other, and one
      * that was not registered would leave the property missing rather than defaulted.
+     *
+     * @return the keys registered, which is the one moment at which a defaulted property can still be told
+     *         from one that was written; see {@link PropertiesManager#anythingWrittenUnder}.
      */
-    static void defaults(Properties properties, Class<? extends Config> clazz, KeyPrefix globalPrefix) {
-        declaredDefaults(properties, clazz, globalPrefix);
+    static Set<String> defaults(Properties properties, Class<? extends Config> clazz, KeyPrefix globalPrefix) {
+        Set<String> registered = new HashSet<>();
+        declaredDefaults(properties, clazz, globalPrefix, registered);
         NestedProperties.forEachNested(clazz, globalPrefix,
-                (nested, prefix) -> declaredDefaults(properties, nested, prefix));
+                (nested, prefix) -> declaredDefaults(properties, nested, prefix, registered));
+        return registered;
     }
 
-    private static void declaredDefaults(Properties properties, Class<?> clazz, KeyPrefix prefix) {
+    private static void declaredDefaults(Properties properties, Class<?> clazz, KeyPrefix prefix,
+                                         Set<String> registered) {
         for (Method method : clazz.getMethods()) {
             String value = defaultValue(method);
-            if (value != null)
-                properties.put(key(method, prefix), value);
+            if (value != null) {
+                String key = key(method, prefix);
+                properties.put(key, value);
+                registered.add(key);
+            }
         }
     }
 

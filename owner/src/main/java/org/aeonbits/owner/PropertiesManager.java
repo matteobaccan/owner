@@ -95,6 +95,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
      */
     private final Set<String> sensitivePrefixes = new HashSet<>();
 
+    /**
+     * The keys that are in {@link #properties} <b>only</b> because a {@link DefaultValue} put them there, no
+     * source having written them. See {@link #recordPurelyDefaulted}.
+     */
+    private final Set<String> purelyDefaultedKeys = new HashSet<>();
+
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
                 @Override
@@ -360,13 +366,65 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private Properties load(Properties props) {
         try {
             loading = true;
-            defaults(props, clazz, keyPrefix);
+            Set<String> defaulted = defaults(props, clazz, keyPrefix);
             Properties loadedFromFile = doLoad();
+            Map<?, ?>[] imported = reverse(imports);
             merge(props, loadedFromFile);
-            merge(props, reverse(imports));
+            merge(props, imported);
+            recordPurelyDefaulted(defaulted, loadedFromFile, imported);
             return props;
         } finally {
             loading = false;
+        }
+    }
+
+    /**
+     * Remembers which keys are there only because an annotation put them there, the one moment at which a
+     * defaulted property can still be told from a written one: a line below they are the same property, and
+     * nothing in {@link #properties} distinguishes them ever again.
+     * <p>
+     * <b>What is kept is the defaults, not the values read</b>, and that is the whole economy of it: the
+     * defaults that no source overwrote number at most as many as the methods carrying a
+     * {@link DefaultValue} — a handful — while the values read number as many as the configuration has
+     * properties. The question is answered against {@link #properties}, which holds everything anyway, so
+     * the smaller of the two sets is the one worth storing.
+     * </p>
+     * <p>
+     * Always called holding the write lock, as both callers of {@link #load(Properties)} do.
+     * </p>
+     */
+    private void recordPurelyDefaulted(Set<String> defaulted, Properties loaded, Map<?, ?>[] imported) {
+        purelyDefaultedKeys.clear();
+        purelyDefaultedKeys.addAll(defaulted);
+        purelyDefaultedKeys.removeAll(loaded.keySet());
+        for (Map<?, ?> map : imported)
+            purelyDefaultedKeys.removeAll(map.keySet());
+    }
+
+    /**
+     * Tells whether anything below the given prefix was written rather than merely defaulted.
+     * <p>
+     * Nothing in the resolution of a property consults this. It answers the one question the merged
+     * properties cannot — <i>was this section written, or is it only the defaults of its own interface
+     * showing through?</i>
+     * </p>
+     *
+     * @param prefix the path to look below, separator included.
+     * @return <code>true</code> when at least one key below it came from a source, an import, or a later
+     *         {@link Mutable#setProperty(String, String)}.
+     */
+    boolean anythingWrittenUnder(String prefix) {
+        readLock.lock();
+        try {
+            for (Enumeration<?> names = properties.propertyNames(); names.hasMoreElements(); ) {
+                String name = (String) names.nextElement();
+                if (name.startsWith(prefix) && name.length() > prefix.length()
+                        && !purelyDefaultedKeys.contains(name))
+                    return true;
+            }
+            return false;
+        } finally {
+            readLock.unlock();
         }
     }
 
@@ -677,9 +735,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private String performSetProperty(String key, Object value) {
-        return (value == null) ?
-                performRemoveProperty(key) :
-                asString(properties.setProperty(key, asString(value)));
+        if (value == null)
+            return performRemoveProperty(key);
+        // written by hand is written: a value set at run time is no more a default than one read from a file
+        purelyDefaultedKeys.remove(key);
+        return asString(properties.setProperty(key, asString(value)));
     }
 
     @Delegate
@@ -701,6 +761,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     }
 
     private String performRemoveProperty(String key) {
+        purelyDefaultedKeys.remove(key);
         return asString(properties.remove(key));
     }
 
