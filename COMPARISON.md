@@ -297,7 +297,7 @@ coincidence; it is evidence the demand is real.
 | Gap | Who has it | Our issue |
 |---|---|---|
 | Nested config interfaces | SmallRye, Gestalt, Coat | — (**closed 2026-08-11**) |
-| YAML / HOCON / TOML | everyone but us | #14, #65 (JSON, #240: **closed 2026-08-11**) |
+| HOCON / TOML | everyone but us | — (YAML #14 #65 and JSON #240: **closed 2026-08-11**) |
 | `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
 | Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
@@ -380,8 +380,11 @@ Backlog, highest value first
    `owner-formats`, which settles the other half of the question this line got wrong: the parsers we
    write ourselves do not go in `owner-extras` — that artifact is for sources needing somebody else's
    library — but in one of their own, because a hand-written parser is untrusted-input code and a defect
-   in it should not be a security release for people who never used the format. **Only YAML is left** of
-   the four named here.
+   in it should not be a security release for people who never used the format. **YAML followed the same
+   day**, a documented subset whose refusals are named one by one — and the Norway problem, which is what
+   makes YAML expensive for everybody else, never arose here: we keep the literal scalar and the mapping
+   interface declares the type. Of the four named on this line **only HOCON and TOML are left**, and HOCON
+   is a decision rather than a piece of work.
 3. ~~**Origin tracking** (#277)~~ — **done 2026-08-11**, `Traceable` and `Origin`. Spring and Typesafe
    both attach the origin to the *value*, which we cannot: ours are strings in a `Properties`, so it is a
    lookup by key instead. Both of them also carry a file and a line number, which we do not — that needs

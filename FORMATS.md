@@ -243,7 +243,21 @@ A plan in phases
    always read by something else as well. There is a test for each of the five JavaScript-isms now.
 
    **Then YAML**, with C1 and C2 validated end to end by a format that exercises both.
-5. **TOML, then HOCON, CBOR, TOON if ever.**
+5. ~~**YAML**~~ — **done 2026-08-11**. The three questions it arrived with are settled: it is called
+   YAML, with the list of what is missing given room of its own rather than a footnote; flow style is in,
+   because `ports: [80, 443]` is an everyday line and a JSON document is valid YAML, so a subset without
+   it would read as broken rather than restricted; and a second document is refused, a configuration being
+   one document.
+
+   The prediction in this file held exactly: the Norway problem never arose. We keep the literal scalar
+   and the mapping interface declares the types, so implicit type resolution — most of what a complete
+   implementation does — was work that did not exist. The parser is around 450 lines against the 700–1000
+   estimated, and the difference is all of it.
+
+   What had to be an error rather than a guess, and is: anchors, aliases, merge keys, tags, complex keys, a
+   tab in the indentation, and a value continued on the next line without `|` or `>` — that last one is
+   indistinguishable from a nested block, so reading it either way silently would be wrong half the time.
+6. **TOML, then HOCON, CBOR, TOON if ever.**
 
 ### Why INI moved in front of JSON and YAML
 
@@ -717,9 +731,15 @@ Open questions
 
 1. ~~**`.env` default dialect**~~ — **settled and shipped 2026-08-09: `docker`**, with `dotenv` and
    `compose` as presets, seven rules adjustable one at a time, and a warning when a value looks quoted.
-2. **Do we call a YAML subset "YAML"?** Proposed: yes in the title, no in the documentation — a
-   chapter listing exactly what is in and what is out, and a hard error on anchors and tags. **Still
-   open, with a precedent found 2026-08-10**: StrictYAML calls itself *"a restricted subset of the YAML
+2. ~~**Do we call a YAML subset "YAML"?**~~ — **settled 2026-08-11: yes, and what is missing got a table
+   of its own.** The loader answers for `.yaml` and `.yml`, and a reader looking for YAML will call it
+   that whatever we write on the page; the honesty is bought by naming precisely what is not there, where
+   nobody can miss it, rather than by refusing the word. The last sentence below is the part that decided
+   how it was written. The reasoning as it stood:
+
+   Proposed: yes in the title, no in the documentation — a
+   chapter listing exactly what is in and what is out, and a hard error on anchors and tags. **Precedent
+   found 2026-08-10**: StrictYAML calls itself *"a restricted subset of the YAML
    specification"*, does **not** call itself YAML, and gives the features it removes — implicit typing,
    tags, anchors, flow style — a documentation page of their own rather than a paragraph. Whichever way
    the name goes, the list of what is missing wants that much room.

@@ -13,6 +13,7 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [`.env`](#env) | a path ending in `.env` | — never looked for on its own | ours |
 | [INI](#ini) | a path ending in `.ini` or `.cfg` | `MyConfig.ini`, `MyConfig.cfg` | ours |
 | [JSON](#json) | a path ending in `.json` | `MyConfig.json` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core) |
+| [YAML](#yaml) | a path ending in `.yaml` or `.yml` | `MyConfig.yaml`, `MyConfig.yml` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core), and **a subset** |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
 Three of them are worth reading twice. **`.env` and INI have no standard**, so which rules they are read by
@@ -664,6 +665,79 @@ Three things the specification leaves to whoever reads it, decided as follows:
   </p>
 </div>
 
+YAML
+----
+
+*Since 2.0.0, in the [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core)
+artifact.* A source whose path ends in `.yaml` or `.yml` is read as YAML:
+
+```yaml
+server:
+  host: localhost
+  port: 8080
+servers:
+  - host: alpha
+  - host: beta
+ports: [80, 443]
+banner: |
+  welcome
+  to owner
+```
+
+```properties
+server.host=localhost
+server.port=8080
+servers[0].host=alpha
+servers[1].host=beta
+ports[0]=80
+ports[1]=443
+banner=welcome\nto owner\n
+```
+
+Which is the same flattening [described above](#how-a-tree-becomes-keys), so a YAML document is read by the
+same [nested interfaces](/owner/docs/nested-configuration/), indexed lists and grouped maps as anything
+else.
+
+### A subset, and this is the whole of it
+
+**Read:** block mappings and sequences nested by indentation; a mapping opened on the same line as its dash
+(`- host: alpha`); plain, single-quoted and double-quoted scalars with their escapes; the block scalars `|`
+and `>` with the chomping indicators `+` and `-`; flow collections, `[80, 443]` and `{A: 1}` — which also
+means a JSON document is read, being valid YAML; comments; a leading `---` and a trailing `...`.
+
+**Refused, by name and with the line it is on:**
+
+| | |
+|---|---|
+| anchors, aliases, merge keys | `&name`, `*name`, `<<:` — write the value where it is used, or merge the sources with `@LoadPolicy(MERGE)` |
+| tags | `!!str`, `!Ref` — the type of a value is decided by the method that reads it |
+| complex keys | `? ` — a name here is a plain scalar |
+| a value continued on the next line | without `|` or `>`; it is indistinguishable from a nested block, and guessing would be wrong half the time |
+| a second document | a configuration is one document |
+| a tab used as indentation | which YAML forbids, and which no two editors agree about |
+
+Nothing in that list is guessed at, quietly ignored or half-read. A parser that half-understood one of them
+would change the meaning of a file rather than decline to read it, which is the one outcome a configuration
+library cannot afford.
+
+<div class="note warning">
+  <h5>Types are not guessed, which is not what YAML 1.1 does.</h5>
+  <p>
+    A scalar is kept exactly as written and the method that reads it decides what it means. So
+    <code>enabled: yes</code> is the text <code>yes</code>, not a boolean — write <code>true</code> when a
+    boolean is meant — and <code>country: no</code> is the string <code>no</code> rather than
+    <code>false</code>, which is the famous "Norway problem" not arising.
+  </p>
+  <p>
+    It is also what makes this parser possible at all: implicit type resolution is most of what a complete
+    YAML implementation does, and none of it is needed when the interface is where the types are declared.
+  </p>
+</div>
+
+`host:` with nothing after it, `~` and `null` are the same thing and **write no key at all**, as in
+[JSON](#json) and for the same reason. An empty flow sequence writes an empty value, which is read as an
+empty collection; an empty mapping writes nothing.
+
 System properties and the environment
 -------------------------------------
 
@@ -683,16 +757,15 @@ See [importing properties](/owner/docs/importing-properties/) for the other ways
 What is not read yet
 --------------------
 
-**YAML, TOML and HOCON are not supported.** Being able to say what is *not* there is half the point of this
-page, so: there is no partial support, no experimental flag, nothing to turn on. A `.yaml` source given to
+**TOML and HOCON are not supported.** Being able to say what is *not* there is half the point of this page,
+so: there is no partial support, no experimental flag, nothing to turn on. A `.toml` source given to
 `@Sources` today falls through to the properties loader, which will read it as best it can and give you
 nonsense.
 
-They are coming, and they are being written by hand so that no artifact takes a dependency. **What used to
-hold them up no longer does**: a flattened key had no way of expressing a list, which was
-[issue #48](https://github.com/matteobaccan/owner/issues/48) and which every one of those formats needs, and
-2.0.0 settled it — the `list[0]` notation described [above](#how-a-tree-becomes-keys) works, the XML loader
-emits it, and [JSON](#json) is read end to end through it. What is left is the parsers themselves.
+Of the two, HOCON is the harder and it is not a question of size: its value is being able to read the
+`application.conf` files people already have, and its substitutions — `${foo}`, `${?foo}` — resolve after
+merging and may be self-referential. An implementation that resolved one differently would change the
+meaning of a configuration in silence, which is worse than not reading the format at all.
 
 In the meantime, two things work today:
 

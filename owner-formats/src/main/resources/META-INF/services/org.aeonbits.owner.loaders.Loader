@@ -1,1 +1,2 @@
 org.aeonbits.owner.formats.json.JsonLoader
+org.aeonbits.owner.formats.yaml.YamlLoader

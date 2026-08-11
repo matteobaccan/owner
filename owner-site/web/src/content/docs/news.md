@@ -275,6 +275,34 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    is refused rather than closed up, since a list quietly shorter than the file describes, with everything
    after the gap moved, is not something the caller can notice. Nothing can break, `servers[0]` having been a
    property nothing read. See the [documentation](/owner/docs/type-conversion/).
+ * **YAML is read**, by a parser of ours, in the same `owner-formats` artifact — and it is **a subset**,
+   which is said here rather than discovered later:
+
+   ```yaml
+   server:
+     host: localhost
+   servers:
+     - host: alpha
+     - host: beta
+   ports: [80, 443]
+   ```
+
+   Read: block mappings and sequences nested by indentation, a mapping opened on the same line as its dash,
+   plain and quoted scalars, the block scalars `|` and `>` with their chomping indicators, flow collections
+   — so a JSON document is read too, being valid YAML — comments, and a leading `---`.
+
+   Refused by name, with the line they are on: anchors, aliases and merge keys; tags; complex keys; a value
+   continued on the next line without `|` or `>`; a second document in the same file; and a tab used as
+   indentation. None of them is guessed at or quietly ignored, because a parser that half-understood one
+   would change the meaning of a file rather than decline to read it.
+
+   **Types are not guessed**, and that is what makes the parser possible at all. A scalar is kept as
+   written and the method that reads it decides what it means, so `enabled: yes` is the text `yes` and
+   `country: no` is the string `no` — the "Norway problem" simply does not arise. Implicit type resolution
+   is most of what a complete YAML implementation does, and none of it is needed when the interface is
+   where the types are declared. Write `true` when a boolean is meant. Issues
+   [#14](https://github.com/matteobaccan/owner/issues/14) and
+   [#65](https://github.com/matteobaccan/owner/issues/65).
  * **JSON is read**, by a parser of ours, in a new artifact:
 
    ```xml

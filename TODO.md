@@ -98,10 +98,17 @@ we write ourselves live. Its three open questions are answered and written down 
 writes no key, an empty array writes an empty value, a repeated name is refused. It reads end to end
 through the nested interfaces, which is what it was meant to validate.
 
-**YAML** is next, and now it is the only thing between us and the formats being done. It arrives with C1
-and C2 proven by JSON, and with its own question already known: the implicit typing, where `no` becomes
-`false` — the Norway problem — and the naming question of whether a subset may be called YAML, on which
-`FORMATS.md` has StrictYAML as a precedent.
+~~**YAML**~~ — **done 2026-08-11**, a documented subset: block mappings and sequences, a mapping opened on
+its dash, quoted and plain scalars, block scalars with chomping, flow collections and comments in; anchors,
+aliases, merge keys, tags, complex keys, a second document, a tab in the indentation and a value continued
+without `|` or `>` all refused by name and by line. The Norway problem never arose, exactly as `FORMATS.md`
+predicted it would not: the literal scalar is kept and the interface declares the type, which is why the
+parser is around 450 lines rather than 5000. Issues #14 and #65 **can be closed**.
+
+**The formats are done** but for TOML and HOCON. HOCON is the one that wants deciding rather than writing:
+its value is reading the `application.conf` files that already exist, and its substitutions resolve after
+merging and may be self-referential, so a partial implementation changes the meaning of somebody's
+configuration in silence — which is worse than not reading the format.
 
 Second, and the one that would close the most support questions: **the rest of a configuration that
 explains itself**. Three of its five lines shipped with #170; the two left are below.
