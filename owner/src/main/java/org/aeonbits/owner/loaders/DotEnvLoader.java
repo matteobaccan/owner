@@ -337,104 +337,104 @@ public class DotEnvLoader implements Loader {
                             + "new DotEnvLoader(EnvDialect.DOTENV).",
                     quotedButKeptVerbatim.size(), uri, dialect.name(), quotedButKeptVerbatim.get(0)));
         }
-    }
 
-    // ---------------------------------------------------------------- text
+        // ---------------------------------------------------------------- text
 
-    private static String leftTrim(String text) {
-        int start = 0;
-        while (start < text.length() && Character.isWhitespace(text.charAt(start)))
-            start++;
-        return start == 0 ? text : text.substring(start);
-    }
-
-    private static String withoutExportPrefix(String line) {
-        if (!line.startsWith(EXPORT) || line.length() <= EXPORT.length())
-            return line;
-        return Character.isWhitespace(line.charAt(EXPORT.length()))
-                ? line.substring(EXPORT.length() + 1)
-                : line;
-    }
-
-    private static boolean endsWithBackslash(String line) {
-        return trailingBackslashes(line, line.length()) % 2 == 1;
-    }
-
-    /** Counts the backslashes running back from {@code end}, which is what says whether the one before it escapes. */
-    private static int trailingBackslashes(String text, int end) {
-        int count = 0;
-        for (int i = end - 1; i >= 0 && text.charAt(i) == '\\'; i--)
-            count++;
-        return count;
-    }
-
-    /** True when the text both opens and closes with {@code quote}, the closing one not being escaped. */
-    private static boolean closesWith(String text, char quote) {
-        if (text.length() < 2 || text.charAt(text.length() - 1) != quote)
-            return false;
-        // nothing is escaped inside single quotes, in any of the dialects
-        return quote == '\'' || trailingBackslashes(text, text.length() - 1) % 2 == 0;
-    }
-
-    private static boolean looksQuoted(String text) {
-        return text.length() >= 2
-                && (text.charAt(0) == '"' || text.charAt(0) == '\'')
-                && text.charAt(text.length() - 1) == text.charAt(0);
-    }
-
-    private static boolean isQuoted(String text) {
-        return text.length() >= 2
-                && (text.charAt(0) == '"' || text.charAt(0) == '\'')
-                && closesWith(text, text.charAt(0));
-    }
-
-    /**
-     * Cuts a trailing comment: a <code>#</code> that is outside quotes and preceded by whitespace. Requiring
-     * the whitespace is what lets a value such as <code>abc#123</code> keep its hash, and it is the rule both
-     * Compose and the recent dotenv releases settled on.
-     */
-    private static String cutComment(String text) {
-        boolean inSingleQuotes = false;
-        boolean inDoubleQuotes = false;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == '\\' && inDoubleQuotes)
-                i++;
-            else if (c == '\'' && !inDoubleQuotes)
-                inSingleQuotes = !inSingleQuotes;
-            else if (c == '"' && !inSingleQuotes)
-                inDoubleQuotes = !inDoubleQuotes;
-            else if (c == '#' && !inSingleQuotes && !inDoubleQuotes
-                    && i > 0 && Character.isWhitespace(text.charAt(i - 1)))
-                return text.substring(0, i);
+        private static String leftTrim(String text) {
+            int start = 0;
+            while (start < text.length() && Character.isWhitespace(text.charAt(start)))
+                start++;
+            return start == 0 ? text : text.substring(start);
         }
-        return text;
-    }
 
-    /** An escape that is not one of these is left exactly as it was written, backslash included. */
-    private static String expandEscapes(String text) {
-        if (text.indexOf('\\') < 0)
+        private static String withoutExportPrefix(String line) {
+            if (!line.startsWith(EXPORT) || line.length() <= EXPORT.length())
+                return line;
+            return Character.isWhitespace(line.charAt(EXPORT.length()))
+                    ? line.substring(EXPORT.length() + 1)
+                    : line;
+        }
+
+        private static boolean endsWithBackslash(String line) {
+            return trailingBackslashes(line, line.length()) % 2 == 1;
+        }
+
+        /** Counts the backslashes running back from {@code end}, which is what says whether the one before it escapes. */
+        private static int trailingBackslashes(String text, int end) {
+            int count = 0;
+            for (int i = end - 1; i >= 0 && text.charAt(i) == '\\'; i--)
+                count++;
+            return count;
+        }
+
+        /** True when the text both opens and closes with {@code quote}, the closing one not being escaped. */
+        private static boolean closesWith(String text, char quote) {
+            if (text.length() < 2 || text.charAt(text.length() - 1) != quote)
+                return false;
+            // nothing is escaped inside single quotes, in any of the dialects
+            return quote == '\'' || trailingBackslashes(text, text.length() - 1) % 2 == 0;
+        }
+
+        private static boolean looksQuoted(String text) {
+            return text.length() >= 2
+                    && (text.charAt(0) == '"' || text.charAt(0) == '\'')
+                    && text.charAt(text.length() - 1) == text.charAt(0);
+        }
+
+        private static boolean isQuoted(String text) {
+            return text.length() >= 2
+                    && (text.charAt(0) == '"' || text.charAt(0) == '\'')
+                    && closesWith(text, text.charAt(0));
+        }
+
+        /**
+         * Cuts a trailing comment: a <code>#</code> that is outside quotes and preceded by whitespace. Requiring
+         * the whitespace is what lets a value such as <code>abc#123</code> keep its hash, and it is the rule both
+         * Compose and the recent dotenv releases settled on.
+         */
+        private static String cutComment(String text) {
+            boolean inSingleQuotes = false;
+            boolean inDoubleQuotes = false;
+            for (int i = 0; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c == '\\' && inDoubleQuotes)
+                    i++;
+                else if (c == '\'' && !inDoubleQuotes)
+                    inSingleQuotes = !inSingleQuotes;
+                else if (c == '"' && !inSingleQuotes)
+                    inDoubleQuotes = !inDoubleQuotes;
+                else if (c == '#' && !inSingleQuotes && !inDoubleQuotes
+                        && i > 0 && Character.isWhitespace(text.charAt(i - 1)))
+                    return text.substring(0, i);
+            }
             return text;
-        StringBuilder expanded = new StringBuilder(text.length());
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c != '\\' || i == text.length() - 1) {
-                expanded.append(c);
-                continue;
-            }
-            char escaped = text.charAt(++i);
-            switch (escaped) {
-                case 'n': expanded.append('\n'); break;
-                case 'r': expanded.append('\r'); break;
-                case 't': expanded.append('\t'); break;
-                case 'f': expanded.append('\f'); break;
-                case 'b': expanded.append('\b'); break;
-                case '"': expanded.append('"'); break;
-                case '\'': expanded.append('\''); break;
-                case '\\': expanded.append('\\'); break;
-                default: expanded.append('\\').append(escaped);
-            }
         }
-        return expanded.toString();
+
+        /** An escape that is not one of these is left exactly as it was written, backslash included. */
+        private static String expandEscapes(String text) {
+            if (text.indexOf('\\') < 0)
+                return text;
+            StringBuilder expanded = new StringBuilder(text.length());
+            for (int i = 0; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c != '\\' || i == text.length() - 1) {
+                    expanded.append(c);
+                    continue;
+                }
+                char escaped = text.charAt(++i);
+                switch (escaped) {
+                    case 'n': expanded.append('\n'); break;
+                    case 'r': expanded.append('\r'); break;
+                    case 't': expanded.append('\t'); break;
+                    case 'f': expanded.append('\f'); break;
+                    case 'b': expanded.append('\b'); break;
+                    case '"': expanded.append('"'); break;
+                    case '\'': expanded.append('\''); break;
+                    case '\\': expanded.append('\\'); break;
+                    default: expanded.append('\\').append(escaped);
+                }
+            }
+            return expanded.toString();
+        }
     }
 }

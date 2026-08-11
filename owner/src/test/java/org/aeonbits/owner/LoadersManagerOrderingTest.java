@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -116,7 +117,7 @@ public class LoadersManagerOrderingTest {
 
         List<String> specs = Arrays.asList(loaders.defaultSpecs(PREFIX));
         assertEquals(specs.toString(), PREFIX + ".kind", specs.get(0));
-        assertFalse(specs.toString(), specs.get(specs.size() - 1).equals(PREFIX + ".kind"));
+        assertNotEquals(specs.toString(), PREFIX + ".kind", specs.get(specs.size() - 1));
     }
 
     static class EqualToAnyOfItsKind implements Loader {

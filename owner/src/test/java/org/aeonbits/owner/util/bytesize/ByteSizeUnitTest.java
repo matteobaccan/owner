@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -106,7 +107,7 @@ public class ByteSizeUnitTest {
 
         for (ByteSizeUnit unit : ByteSizeUnit.values()) {
             // every unit belongs to exactly one standard
-            assertTrue(unit.isSI() != unit.isIEC());
+            assertNotEquals(unit.isSI(), unit.isIEC());
         }
     }
 

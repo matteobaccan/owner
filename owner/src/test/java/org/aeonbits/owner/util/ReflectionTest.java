@@ -93,17 +93,18 @@ public class ReflectionTest {
             try {
                 Reflection.invokeDefaultMethod(newProxy(), sumMethod(), new Object[] {3, 4}, true);
                 fail("the MethodHandles.Lookup constructor hack is unusable on Java 9+, a failure was expected");
-            } catch (IllegalAccessException expected) {
-                // JDK 9-13: the constructor is still there, but a Lookup created with
-                // PRIVATE-only modes is not allowed to unreflectSpecial() a public member.
-            } catch (NullPointerException expected) {
-                // JDK 14+: the Lookup(Class, int) constructor has been removed, so
-                // Reflection.Lookup.lookupConstructor() returns null.
-            } catch (ExceptionInInitializerError expected) {
-                // JDK 9-15 with --illegal-access=deny: setAccessible(true) fails while
-                // initializing the nested Lookup class.
-            } catch (NoClassDefFoundError expected) {
-                // Any subsequent access after the nested Lookup class failed to initialize.
+            } catch (IllegalAccessException | NullPointerException
+                    | ExceptionInInitializerError | NoClassDefFoundError expected) {
+                // Which one arrives says which JDK this is running on, and all four mean the same thing
+                // here - the hack is unusable - so they are caught together and told apart in writing:
+                //   IllegalAccessException      JDK 9-13: the constructor is still there, but a Lookup
+                //                               created with PRIVATE-only modes may not unreflectSpecial
+                //                               a public member.
+                //   NullPointerException        JDK 14+: the Lookup(Class, int) constructor is gone, so
+                //                               Reflection.Lookup.lookupConstructor() returns null.
+                //   ExceptionInInitializerError JDK 9-15 with --illegal-access=deny: setAccessible(true)
+                //                               fails while the nested Lookup class initializes.
+                //   NoClassDefFoundError        any later access, once that initialization has failed.
             }
         }
     }

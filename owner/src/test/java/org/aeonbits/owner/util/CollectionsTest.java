@@ -15,6 +15,7 @@ import static org.aeonbits.owner.util.Collections.entry;
 import static org.aeonbits.owner.util.Collections.map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -42,7 +43,7 @@ public class CollectionsTest {
     public void testMapsWithSameEntriesAreEqual() {
         Map<String, String> first = map(entry("foo", "bar"));
         Map<String, String> second = map(entry("foo", "bar"));
-        assertTrue(first.equals(second));
+        assertEquals(first, second);
         assertEquals(first.hashCode(), second.hashCode());
     }
 
@@ -50,6 +51,6 @@ public class CollectionsTest {
     public void testMapsWithDifferentEntriesAreNotEqual() {
         Map<String, String> first = map("foo", "bar");
         Map<String, String> second = map("foo", "baz");
-        assertFalse(first.equals(second));
+        assertNotEquals(first, second);
     }
 }

@@ -46,10 +46,16 @@ public class SystemVariableExpanderTest {
         assertEquals(expected, result);
     }
 
+    /**
+     * The same rule seen from the side that matters in practice: a tilde is expanded where a path begins,
+     * and a source spec begins after its scheme. This was a second copy of the test above, word for word,
+     * and this branch of {@code Util.expandUserHome} had no test of its own — although half the load
+     * strategy tests lean on it.
+     */
     @Test
-    public void shouldNotExpandTildesInTheMiddle() {
-        String result = expander.expand("foo-~-bar-~-baz");
-        String expected = "foo-~-bar-~-baz";
+    public void shouldExpandATildeThatOpensTheFileSpec() {
+        String result = expander.expand("file:~/app.properties");
+        String expected = "file:" + System.getProperty("user.home") + "/app.properties";
         assertEquals(expected, result);
     }
 

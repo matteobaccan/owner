@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class PropertiesLoaderTest {
@@ -43,6 +44,6 @@ public class PropertiesLoaderTest {
         loader.load(result, keyValueStream);
 
         assertTrue(result.containsKey(UTF_KEY));
-        assertTrue(result.getProperty(UTF_KEY).equals(UTF_VALUE));
+        assertEquals(UTF_VALUE, result.getProperty(UTF_KEY));
     }
 }

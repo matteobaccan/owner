@@ -7,7 +7,6 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;
 import org.aeonbits.owner.Config.Sources;
@@ -249,10 +248,10 @@ public class TraceableTest {
 
         assertEquals(one, alsoOne);
         assertEquals(one.hashCode(), alsoOne.hashCode());
-        assertEquals(one, one);
+        assertEquals("asked for twice, the same answer", one, cfg.originOf("fromOne"));
         assertNotEquals(one, two);
         assertNotEquals("a default came from nowhere", one, cfg.originOf("defaulted"));
-        assertNotEquals("and the source it names is not itself", one, ONE);
+        assertEquals("and it names the source it came from", ONE, one.source());
     }
 
     @Test

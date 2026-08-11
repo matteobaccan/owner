@@ -8,10 +8,6 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.DecryptorClass;
-import org.aeonbits.owner.Config.DefaultValue;
-import org.aeonbits.owner.Config.DisableFeature;
-import org.aeonbits.owner.Config.EncryptedValue;
-import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.Mandatory;
 import org.aeonbits.owner.Config.Prefix;
 import org.aeonbits.owner.Config.Sensitive;

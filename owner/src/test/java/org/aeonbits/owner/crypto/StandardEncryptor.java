@@ -40,8 +40,7 @@ public class StandardEncryptor extends AbstractEncryptor {
             Cipher c = Cipher.getInstance( this.algorithm );
             c.init(Cipher.ENCRYPT_MODE, key);
             byte[] encVal = c.doFinal( plainData.getBytes( this.encoding ) );
-            String encryptedValue = java.util.Base64.getEncoder().encodeToString( encVal );
-            return encryptedValue;
+            return java.util.Base64.getEncoder().encodeToString( encVal );
         } catch ( Exception cause ) {
             throw new IllegalArgumentException( cause.getMessage(), cause );
         }
@@ -55,8 +54,7 @@ public class StandardEncryptor extends AbstractEncryptor {
             c.init(Cipher.DECRYPT_MODE, key);
             byte[] decodedValue = java.util.Base64.getDecoder().decode(encryptedData);
             byte[] decValue = c.doFinal(decodedValue);
-            String decryptedValue = new String(decValue, this.encoding );
-            return decryptedValue;
+            return new String(decValue, this.encoding );
         } catch ( Exception cause ){
             throw new IllegalArgumentException( cause.getMessage(), cause );
         }

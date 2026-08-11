@@ -365,7 +365,9 @@ enum Converters {
     static Collection<Object> instantiateCollection(Method targetMethod, Class<?> targetType) {
         Class<?> element = elementType(targetMethod);
         if (element.isEnum() && targetType.equals(EnumSet.class))
-            return (Collection<Object>) instantiateEnumSet((Class<? extends Enum>) element);
+            // the raw Class erases the call, so what comes back is a raw Collection and the cast a
+            // compiler would need is not one: the @SuppressWarnings above is what covers this
+            return instantiateEnumSet((Class<? extends Enum>) element);
         if (!targetType.isInterface())
             return instantiateCollectionFromClass(targetType);
         if (SortedSet.class.isAssignableFrom(targetType))

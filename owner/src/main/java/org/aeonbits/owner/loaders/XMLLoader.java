@@ -70,16 +70,45 @@ public class XMLLoader implements Loader {
         return reading;
     }
 
+    /** The two features that close XXE. Named here because they are set twice: directly, and by name. */
+    private static final String EXTERNAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
+    private static final String EXTERNAL_PARAMETERS = "http://xml.org/sax/features/external-parameter-entities";
+
+    /**
+     * Builds a parser factory with the hardening this class is documented to give.
+     * <p>
+     * The internal Java properties DTD still works, its DOCTYPE being intercepted by
+     * {@link XmlToPropsHandler#resolveEntity}, but external DTDs and external entities are neutralized and
+     * secure processing caps entity expansion, which is the billion laughs.
+     * </p>
+     * <p>
+     * <b>The two features that close XXE are set here rather than through {@link #setFeature}</b>, and it
+     * is worth a word since the four lines then read unevenly. An external entity is the one thing in this
+     * class that can reach a file off the machine, and both a reader and a static analyser should be able
+     * to see it being closed on the factory as the factory is built, without following a helper to find
+     * out whether it happens at all. The helper still handles the two that harden without closing that
+     * door.
+     * </p>
+     * <p>
+     * They are two blocks rather than one because a parser that refuses the first must still be asked for
+     * the second, and each has to be named on its own when it is refused - which is what the helper does
+     * and what a single block would have quietly dropped.
+     * </p>
+     */
     private static SAXParserFactory newFactory(boolean validate) {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setValidating(validate);
         factory.setNamespaceAware(true);
-        // Hardening against XXE: the internal Java properties DTD still works
-        // (its DOCTYPE is intercepted by resolveEntity), but external DTDs and
-        // external entities are neutralized, and secure processing limits
-        // entity expansion (billion laughs).
-        setFeature(factory, "http://xml.org/sax/features/external-general-entities", false);
-        setFeature(factory, "http://xml.org/sax/features/external-parameter-entities", false);
+        try {
+            factory.setFeature(EXTERNAL_ENTITIES, false);
+        } catch (ParserConfigurationException | SAXException refused) {
+            reportUnavailable(EXTERNAL_ENTITIES, refused);
+        }
+        try {
+            factory.setFeature(EXTERNAL_PARAMETERS, false);
+        } catch (ParserConfigurationException | SAXException refused) {
+            reportUnavailable(EXTERNAL_PARAMETERS, refused);
+        }
         setFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         return factory;
@@ -98,10 +127,8 @@ public class XMLLoader implements Loader {
     static void setFeature(SAXParserFactory factory, String feature, boolean value) {
         try {
             factory.setFeature(feature, value);
-        } catch (ParserConfigurationException e) {
-            reportUnavailable(feature, e);
-        } catch (SAXException e) {
-            reportUnavailable(feature, e);
+        } catch (ParserConfigurationException | SAXException refused) {
+            reportUnavailable(feature, refused);
         }
     }
 

@@ -92,7 +92,7 @@ public class CacheConfigTest {
         assertTrue(keys.contains("MyConfig1"));
         assertTrue(keys.contains("MyConfig2"));
         assertTrue(keys.contains("MyConfig3"));
-        assertTrue(3 == keys.size());
+        assertEquals(3, keys.size());
     }
 
     @Test

@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -183,8 +184,8 @@ public class PropertiesManagerTest {
         PropertyChangeListener wrapper = manager.getPropertyChangeListeners().get(0);
 
         assertEquals(plainListener.hashCode(), wrapper.hashCode());
-        assertTrue(wrapper.equals(plainListener));
-        assertFalse(wrapper.equals(anotherListener));
+        assertEquals(wrapper, plainListener);
+        assertNotEquals(wrapper, anotherListener);
     }
 
     @Test
