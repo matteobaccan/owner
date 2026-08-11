@@ -330,6 +330,37 @@ public class IniLoaderTest {
         assertEquals("", read("[s]", "a =").getProperty("s.a"));
     }
 
+    /**
+     * The byte order mark is looked for on the first line, which means asking three things of a file that
+     * may have neither a first line nor anything in it. Both halves are here because a parser is read on the
+     * files nobody thinks to write.
+     */
+    @Test
+    public void aFileWithNothingInItIsAFileWithNothingInIt() throws IOException {
+        assertTrue(read().isEmpty());
+        assertTrue(read("").isEmpty());
+    }
+
+    @Test
+    public void aSemicolonEndsAValueWhereAHashWould() throws IOException {
+        Properties props = read(IniDialect.GIT, "[s]", "a = 1 ; and the rest is a comment",
+                "b = 2 # so is this");
+
+        assertEquals("1", props.getProperty("s.a"));
+        assertEquals("2", props.getProperty("s.b"));
+    }
+
+    @Test
+    public void aCommentCharacterInsideQuotesIsPartOfTheValue() throws IOException {
+        assertEquals("one ; two", read(IniDialect.GIT, "[s]", "a = \"one ; two\"").getProperty("s.a"));
+    }
+
+    /** A backslash escaping a backslash, which is the one way a value may end in one. */
+    @Test
+    public void aQuotedValueMayEndInABackslash() throws IOException {
+        assertEquals("c:\\", read(IniDialect.GIT, "[s]", "a = \"c:\\\\\"").getProperty("s.a"));
+    }
+
     @Test
     public void anUnknownDialectSaysWhichOnesExist() {
         try {

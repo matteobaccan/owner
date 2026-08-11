@@ -215,6 +215,61 @@ public class NestedPropertiesTest {
         assertNotEquals(cfg.server(), cfg);
     }
 
+    public interface OtherServerConfig extends Config {
+        String host();
+    }
+
+    public interface TwoKindsConfig extends Config {
+        ServerConfig server();
+
+        OtherServerConfig other();
+    }
+
+    /**
+     * The negative half of the contract, which is where an equals goes wrong and where nobody looks. A
+     * section is equal to itself; to nothing that is not a proxy; to no proxy that is not ours; to no
+     * configuration that is not a section, which is the case the shared manager would otherwise get wrong;
+     * and to no section of another interface, however alike the two look.
+     */
+    @Test
+    public void whatASectionIsNotEqualTo() {
+        AppConfig cfg = create(AppConfig.class, "server.host", "localhost");
+        ServerConfig section = cfg.server();
+
+        assertEquals("itself, which a proxy has to answer before anything else", section, section);
+        assertNotEquals(section, "server.");
+        assertNotEquals(section, java.lang.reflect.Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{Runnable.class}, (p, m, a) -> null));
+        assertNotEquals("the whole is not one of its sections", section, cfg);
+        assertNotEquals("nor is a section of the same name of another type",
+                section, create(TwoKindsConfig.class, "server.host", "localhost").other());
+    }
+
+    @Test
+    public void twoSectionsOfTheSameNameOverDifferentValuesAreNotEqual() {
+        assertNotEquals(create(AppConfig.class, "server.host", "one").server(),
+                create(AppConfig.class, "server.host", "two").server());
+    }
+
+    public interface AskingSectionConfig extends Config {
+        @Key("servers.%s")
+        ServerConfig named(String name);
+    }
+
+    /**
+     * A one-argument method on a section that is not {@code equals}: the identity path has to let it
+     * through rather than take it for one.
+     */
+    @Test
+    public void aSectionAnswersItsOwnMethodsThatTakeAnArgument() {
+        DeepAskingConfig cfg = create(DeepAskingConfig.class, "app.servers.alpha.host", "one");
+        assertEquals("one", cfg.app().named("alpha").host());
+    }
+
+    public interface DeepAskingConfig extends Config {
+        AskingSectionConfig app();
+    }
+
     @Test
     public void theSameSectionOfTwoEqualConfigurationsIsEqual() {
         AppConfig one = create(AppConfig.class, "server.host", "localhost");
