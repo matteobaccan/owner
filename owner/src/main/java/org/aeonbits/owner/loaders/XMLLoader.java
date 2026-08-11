@@ -30,6 +30,8 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.aeonbits.owner.util.Util.unsupported;
+
 /**
  * A {@link Loader loader} able to read properties from standard XML Java properties files, as well as user defined
  * XML properties files.
@@ -44,22 +46,42 @@ public class XMLLoader implements Loader {
     /** The one place the name of the format is written: {@code accept} and the default spec both read it. */
     private static final String SUFFIX = ".xml";
 
-    private transient SAXParserFactory factory = null;
+    /**
+     * The option that holds a document to the grammar it declares; see {@link #load(Properties, URI)}.
+     */
+    private static final String VALIDATE = "validate";
 
-    private synchronized SAXParserFactory factory() {
-        if (factory == null) {
-            factory = SAXParserFactory.newInstance();
-            factory.setValidating(true);
-            factory.setNamespaceAware(true);
-            // Hardening against XXE: the internal Java properties DTD still works
-            // (its DOCTYPE is intercepted by resolveEntity), but external DTDs and
-            // external entities are neutralized, and secure processing limits
-            // entity expansion (billion laughs).
-            setFeature(factory, "http://xml.org/sax/features/external-general-entities", false);
-            setFeature(factory, "http://xml.org/sax/features/external-parameter-entities", false);
-            setFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    private transient SAXParserFactory validating = null;
+    private transient SAXParserFactory reading = null;
+
+    /**
+     * Whether the parser is asked to validate is a setting of the <b>factory</b> and not of a single parse,
+     * so there are two of them rather than one. Both are built once and kept: a factory is expensive and a
+     * configuration is read again at every reload.
+     */
+    private synchronized SAXParserFactory factory(boolean validate) {
+        if (validate) {
+            if (validating == null)
+                validating = newFactory(true);
+            return validating;
         }
+        if (reading == null)
+            reading = newFactory(false);
+        return reading;
+    }
+
+    private static SAXParserFactory newFactory(boolean validate) {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setValidating(validate);
+        factory.setNamespaceAware(true);
+        // Hardening against XXE: the internal Java properties DTD still works
+        // (its DOCTYPE is intercepted by resolveEntity), but external DTDs and
+        // external entities are neutralized, and secure processing limits
+        // entity expansion (billion laughs).
+        setFeature(factory, "http://xml.org/sax/features/external-general-entities", false);
+        setFeature(factory, "http://xml.org/sax/features/external-parameter-entities", false);
+        setFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         return factory;
     }
 
@@ -106,6 +128,19 @@ public class XMLLoader implements Loader {
                         "<!ATTLIST entry key CDATA #REQUIRED>";
 
         private boolean isJavaPropertiesFormat = false;
+
+        /**
+         * Whether the document declares a grammar of its own, which is what decides whether a validity
+         * error is a real one. See {@link #error(SAXParseException)}.
+         */
+        private boolean declaresAGrammar = false;
+
+        /**
+         * Whether the grammar it declares is one this parser was allowed to read. An external DTD is
+         * neutralized by the hardening above, so the document declares a grammar that never arrives.
+         */
+        private boolean grammarWasNeutralized = false;
+
         private final Properties props;
         private final Stack<String> paths = new Stack<>();
         private final Stack<StringBuilder> value = new Stack<>();
@@ -115,6 +150,24 @@ public class XMLLoader implements Loader {
          * under the same parent can be told it is one of several.
          */
         private final Map<String, Integer> occurrences = new HashMap<>();
+
+        /**
+         * The document's own <code>DOCTYPE</code>, read here rather than inferred from anything else.
+         * <p>
+         * It says two things. That the document <b>declares a grammar</b>, which is what tells a real
+         * validity error from the one a parser reports for every document that has none. And which format
+         * this is: the Java properties one is recognised by its DTD, and recognising it here rather than in
+         * {@link #resolveEntity} keeps it working when the parser is not validating and therefore never
+         * asks for the DTD at all.
+         * </p>
+         */
+        @Override
+        public void startDTD(String name, String publicId, String systemId) throws SAXException {
+            declaresAGrammar = true;
+            if (PROPS_DTD_URI.equals(systemId))
+                isJavaPropertiesFormat = true;
+            super.startDTD(name, publicId, systemId);
+        }
 
         @Override
         public InputSource resolveEntity(String name, String publicId, String baseURI,
@@ -127,6 +180,7 @@ public class XMLLoader implements Loader {
             }
             // Any other external entity/DTD is neutralized by returning an empty
             // source instead of null (which would let the parser fetch it).
+            grammarWasNeutralized = true;
             return new InputSource(new StringReader(""));
         }
 
@@ -224,9 +278,33 @@ public class XMLLoader implements Loader {
             paths.pop();
         }
 
+        /**
+         * A validity error, which is recoverable and therefore ours to decide about.
+         * <p>
+         * <b>A document is held to the grammar it declares</b>, whosever grammar it is: the Java properties
+         * DTD and one written in the document's own internal subset are both a statement the file makes
+         * about itself, and reading past it would hand the caller exactly the part the file says is not
+         * allowed. Parsing does not stop at a recoverable error, so what would come back is not a truncated
+         * document but a complete one including what its own grammar forbids.
+         * </p>
+         * <p>
+         * A document that declares <b>no</b> grammar is a different matter, and this is why the test is
+         * needed at all: asking a validating parser to read one produces a validity error for the document
+         * as a whole - <i>no grammar found</i> - which says nothing about the document and everything about
+         * what was asked of the parser. That one is ignored.
+         * </p>
+         * <p>
+         * So is the same error when the grammar was declared but <b>neutralized</b>, which the hardening
+         * above does to every external DTD. There the document names a grammar and this parser was not
+         * allowed to fetch it, so every element in the file is undeclared as far as the parser can see. A
+         * document cannot be held to a rule we refused to read.
+         * </p>
+         *
+         * @see #VALIDATE
+         */
         @Override
         public void error(SAXParseException e) throws SAXException {
-            if (isJavaPropertiesFormat)
+            if (declaresAGrammar && !grammarWasNeutralized)
                 throw e;
         }
     }
@@ -248,12 +326,28 @@ public class XMLLoader implements Loader {
         }
     }
 
+    /**
+     * Reads the document, holding it to the grammar it declares.
+     * <p>
+     * A document carrying a <code>DOCTYPE</code> is validated against it and a violation is refused, which
+     * is what the JDK does for its own properties format and what Commons Configuration does when asked to
+     * validate at all. A document declaring no grammar is read as it is; there is nothing to hold it to.
+     * </p>
+     * <p>
+     * <code>#validate=false</code> on the source turns that off — <code>file:app.xml#validate=false</code> —
+     * and the document is then read whatever its own grammar says of it. It is worth having for a file that
+     * is out of step with a DTD nobody maintains any more, and it is written on the source rather than
+     * configured globally because it is a property of that file and not of the application.
+     * </p>
+     */
     @Override
     public void load(Properties result, URI uri) throws IOException {
-        SourceOptions.of(uri).refuseUnknown();
+        SourceOptions options = SourceOptions.of(uri);
+        options.refuseUnknown(VALIDATE);
+
         InputStream input = uri.toURL().openStream();
         try {
-            SAXParser parser = factory().newSAXParser();
+            SAXParser parser = factory(validates(options, uri)).newSAXParser();
             XmlToPropsHandler h = new XmlToPropsHandler();
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
             parser.parse(input, h);
@@ -267,6 +361,19 @@ public class XMLLoader implements Loader {
         } finally {
             input.close();
         }
+    }
+
+    /** The {@code validate} option, on unless the source says otherwise, and only ever the two words. */
+    private static boolean validates(SourceOptions options, URI uri) {
+        for (SourceOptions.Option option : options.all())
+            if (VALIDATE.equals(option.name())) {
+                String setting = option.setting().toLowerCase();
+                if ("true".equals(setting)) return true;
+                if ("false".equals(setting)) return false;
+                throw unsupported("'%s' is not a setting for the XML option '%s' in %s; use 'true' or "
+                        + "'false'", option.setting(), VALIDATE, uri);
+            }
+        return true;
     }
 
     @Override

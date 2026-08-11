@@ -74,9 +74,10 @@ public class LoaderOptionsTest {
                 + "<properties><entry key=\"host\">localhost</entry></properties>");
         try {
             new XMLLoader().load(new Properties(), new URI(file.toURI() + "#dialect=dotenv"));
-            fail("the XML loader takes no options and should refuse one");
+            fail("the XML loader does not take a dialect and should refuse one");
         } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage(), e.getMessage().contains("this source takes none"));
+            assertTrue(e.getMessage(), e.getMessage().contains("dialect"));
+            assertTrue(e.getMessage(), e.getMessage().contains("validate"));
         }
     }
 
