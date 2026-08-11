@@ -185,6 +185,50 @@ public class SourceThatDidNotArriveTest {
     }
 
     // -------------------------------------------------------------------------------------------------
+    // hot reload asked for on a source that cannot be watched
+    // -------------------------------------------------------------------------------------------------
+
+    @Sources({PRESENT, "classpath:org/aeonbits/owner/underneath.properties", UNREADABLE})
+    @Config.HotReload(1)
+    public interface WatchingTheUnwatchableConfig extends Config {
+        String host();
+    }
+
+    /**
+     * Watching means asking something whether it has changed, and only a file and the system properties can
+     * answer that. A source that cannot be watched is dropped — there is nothing else to do with it — but
+     * dropping it in silence is what produced "I changed the file and nothing happened". Unlike an absent
+     * source, this one was asked for: somebody wrote {@code @HotReload}.
+     */
+    @Test
+    public void aSourceThatCannotBeWatchedIsSaidOnce() throws Exception {
+        writeThePresentOne();
+
+        ConfigFactory.create(WatchingTheUnwatchableConfig.class);
+
+        String said = warningsAsText();
+        assertTrue(said, said.contains("hot reload"));
+        assertTrue(said, said.contains("cannot be watched"));
+        assertTrue("the remote source is one of them: " + said, said.contains("localhost:1"));
+    }
+
+    @Sources(PRESENT)
+    @Config.HotReload(1)
+    public interface WatchingAFileConfig extends Config {
+        String host();
+    }
+
+    @Test
+    public void aFileIsWatchedAndNothingIsSaid() throws Exception {
+        writeThePresentOne();
+
+        ConfigFactory.create(WatchingAFileConfig.class);
+
+        assertTrue("a file can be watched, so there is nothing to report: " + warningsAsText(),
+                warnings.isEmpty());
+    }
+
+    // -------------------------------------------------------------------------------------------------
     // the source that says it has to be there
     // -------------------------------------------------------------------------------------------------
 

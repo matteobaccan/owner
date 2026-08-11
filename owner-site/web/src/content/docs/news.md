@@ -311,6 +311,13 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    `@Mandatory` on the properties inside is the one that means something. Nothing can break: a method
    returning an interface extending `Config` had no meaning before. See the
    [documentation](/owner/docs/nested-configuration/).
+ * **A source that hot reload cannot watch says so.** Watching means asking something whether it has
+   changed, and only a file and `system:properties` can answer: a resource inside a jar served over the
+   network, an `http:` source, `system:env` cannot. Those were dropped from the watch list in silence, which
+   is where "I changed the file and nothing happened" comes from. It is now a `WARNING` naming them, once,
+   when the configuration is created — different from an absent source, which stays silent, because here
+   somebody wrote `@HotReload` and for that source it will never fire. What *is* being watched, of which
+   kind and how often, is written at `CONFIG` beside it.
  * **A source that was named and did not arrive is no longer passed over in silence.** Both load policies
    ended in `catch (IOException) { ignore() }`, with a comment admitting it covered two different things: a
    file legitimately absent, which is how a fallback chain works, and a file that is there and cannot be

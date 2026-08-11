@@ -55,9 +55,20 @@ public class HotReloadLogicTest {
     interface MyConfig extends Config {
     }
 
+    /**
+     * The manager here is a double, and the interface it was created from is part of what a double has to
+     * answer: the hot reload names it when it reports a source it cannot watch, and a mock returning null
+     * there would fail in the diagnostic rather than in what the test is about.
+     */
+    private static PropertiesManager managerOf(Class<? extends Config> clazz) {
+        PropertiesManager manager = mock(PropertiesManager.class);
+        when(manager.configuredClass()).thenAnswer(invocation -> clazz);
+        return manager;
+    }
+
     @Test
     public void shouldIgnoreURIsThatCannotBeResolvedToFiles() throws Exception {
-        PropertiesManager manager = mock(PropertiesManager.class);
+        PropertiesManager manager = managerOf(MyConfig.class);
         HotReload hotReload = MyConfig.class.getAnnotation(HotReload.class);
 
         HotReloadLogic logic = new HotReloadLogic(hotReload,
@@ -85,7 +96,7 @@ public class HotReloadLogicTest {
             setProperty("someValue", "1");
         }});
 
-        PropertiesManager manager = mock(PropertiesManager.class);
+        PropertiesManager manager = managerOf(MyConfig.class);
         // the manager is busy loading on the first check, done on the second one
         when(manager.isLoading()).thenReturn(true, false);
         HotReload hotReload = MyConfig.class.getAnnotation(HotReload.class);

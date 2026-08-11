@@ -95,6 +95,26 @@ modifications without actually check the content of the file for changes.
 This is the reason why OWNER implements "hot reload" only on filesystem based
 URLs.
 
+<div class="note warning">
+  <h5>A source that cannot be watched now says so.</h5>
+  <p>
+    <i>Since 2.0.0.</i> A source that resolves to no file — one inside a jar served over the network, an
+    <code>http:</code> URL, <code>system:env</code> — is dropped from the watch list, which is the only
+    thing that can be done with it. Until 2.0.0 it was dropped <b>in silence</b>, and the question that
+    followed was "I changed the file and nothing happened".
+  </p>
+  <p>
+    It is now a <code>WARNING</code> naming the sources concerned, once, when the configuration is created.
+    An absent source stays silent because a fallback chain is built out of absences; this one is different,
+    because somebody wrote <code>@HotReload</code> and for that source it will never fire. Those sources are
+    still read at every reload — they are simply never the reason for one.
+  </p>
+  <p>
+    What is being watched, and how often, is written at <code>CONFIG</code> beside it. See
+    <a href="/owner/docs/debugging/">Debugging</a> for the switch that turns those lines on.
+  </p>
+</div>
+
 
 The @HotReload annotation
 -------------------------

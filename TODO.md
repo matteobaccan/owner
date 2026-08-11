@@ -129,7 +129,14 @@ real questions each would close — **the first three shipped with
 - [ ] **The effective key prefix**, from `KeyPrefix`, `@Prefix` or `@DisableFeature(PREFIX)`. A wrong prefix
       makes *every* property vanish at once, which is the most disorienting failure there is and the least
       visible: nothing errors.
-- [ ] **Hot reload: whether it is on, of which kind, how often, and on which sources.** "I changed the file
+- [x] **Hot reload: whether it is on, of which kind, how often, and on which sources** — **done
+      2026-08-11**, and it turned out to be two things rather than one. The `CONFIG` line says what was
+      asked for and what is being watched; the half that mattered more is a `WARNING` for the sources that
+      **cannot** be watched, which were dropped from the list in silence. That one is not a diagnostic of
+      the usual kind: an absent source is a fallback working, while here somebody wrote `@HotReload` and for
+      that source it will never fire, which is a request that cannot be honoured.
+      The original entry:
+- [x] **Hot reload: whether it is on, of which kind, how often, and on which sources.** "I changed the file
       and nothing happened" — because `ASYNC` watches only `file:` sources, or the source is inside a jar.
 
 Two rules, and the first was nearly missed: **a URI can carry credentials.** `https://user:pass@host/app.properties`

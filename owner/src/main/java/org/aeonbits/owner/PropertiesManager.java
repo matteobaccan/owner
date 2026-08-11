@@ -717,6 +717,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 clazz.getName(), hideCredentials(uri)));
     }
 
+    /** The interface this configuration was created from, for whoever has to name it in a message. */
+    Class<? extends Config> configuredClass() {
+        return clazz;
+    }
+
     /** Whether the source was not there at all, as opposed to being there and refusing to be read. */
     private static boolean wasSimplyAbsent(URI uri, IOException failure) {
         File file = fileFromURI(uri);
