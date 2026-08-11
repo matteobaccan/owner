@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.crypto.Decryptor;
 import org.aeonbits.owner.crypto.IdentityDecryptor;
 import org.aeonbits.owner.event.*;
+import org.aeonbits.owner.loaders.SourceOptions;
 import org.aeonbits.owner.util.Util;
 
 import java.beans.PropertyChangeEvent;
@@ -102,6 +103,21 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
      */
     private final Map<String, Origin> origins = new HashMap<>();
 
+    /** Whether the interface asked for its sources by name, rather than letting the default probe look. */
+    private final boolean sourcesWereDeclared;
+
+    /** Whether any source answered during the load now running; see {@link #reportIfNothingAnswered}. */
+    private boolean somethingWasRead;
+
+    /**
+     * The failure already reported for each source, so that one which stays broken is named once rather
+     * than at every reload. Same reasoning as {@link #lastReportedReloadFailure}, per source.
+     */
+    private final Map<URI, String> reportedFailures = new HashMap<>();
+
+    /** Whether the load that read nothing at all has already been reported. */
+    private boolean reportedEmptyLoad;
+
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
                 @Override
@@ -127,11 +143,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         this.imports = imports;
         this.keyPrefix = keyPrefix;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
-        uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
+        Sources declared = clazz.getAnnotation(Sources.class);
+        uris = toURIs(declared, urlFactory);
 
+        boolean anyDeclared = declared != null;
         for (Class<?> inter : clazz.getInterfaces()) {
-            this.uris.addAll(toURIs(inter.getAnnotation(Sources.class), urlFactory));
+            Sources inherited = inter.getAnnotation(Sources.class);
+            anyDeclared |= inherited != null;
+            this.uris.addAll(toURIs(inherited, urlFactory));
         }
+        sourcesWereDeclared = anyDeclared;
 
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         if (loadPolicy == null) {
@@ -373,6 +394,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             // the origins are recorded as each source is read, so the last one to write a key is the one
             // recorded against it - which is the source whose value survived the merge
             merge(props, doLoad());
+            reportIfNothingAnswered();
 
             Map<?, ?>[] imported = reverse(imports);
             for (int i = 0; i < imported.length; i++) {
@@ -637,7 +659,101 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     }
 
     private Properties doLoad() {
-        return loadType.load(uris, loaders, (uri, loaded) -> record(loaded.keySet(), Origin.of(uri)));
+        somethingWasRead = false;
+        return loadType.load(uris, loaders, this);
+    }
+
+    /** A source that was read, whatever it held: an empty file answered too. */
+    void sourceAnswered(URI uri, Properties loaded) {
+        somethingWasRead = true;
+        reportedFailures.remove(uri);
+        record(loaded.keySet(), Origin.of(uri));
+    }
+
+    /**
+     * A source that was named and did not arrive.
+     * <p>
+     * <b>An absent one says nothing</b>, and that is not indulgence: {@link LoadType#FIRST} is a chain of
+     * fallbacks in which every miss but the last is how the feature works, and a configuration with no
+     * {@link Sources} probes four names for every interface. Warning there would be unbearable noise, and
+     * noise is how a real warning stops being read.
+     * </p>
+     * <p>
+     * <b>Anything else is a warning</b>, because nobody designs a fallback on a file that is there and
+     * cannot be read: a wrong permission, a directory where a file was meant, a network source refusing.
+     * Those produced a configuration full of defaults, and until now they produced it in silence.
+     * </p>
+     * <p>
+     * Which of the two it was is <b>not</b> read off the exception, and that was the first thing a test
+     * disproved here: {@link java.io.FileInputStream} throws {@link FileNotFoundException} for a file that
+     * is missing, for a directory named where a file was meant, and for one it may not open — the three
+     * things this rule exists to tell apart. For a file the filesystem is asked instead, and only a source
+     * that is not a file at all falls back on the exception, where a
+     * {@link FileNotFoundException} is a 404 or a missing entry in a jar.
+     * </p>
+     * <p>
+     * Said once per source, and again only if the failure changes, since a reload runs the whole load
+     * again and a hot reload runs it at its interval for as long as the process lives.
+     * </p>
+     */
+    void sourceFailed(URI uri, IOException failure) {
+        // a source that says it has to be there is the one case where absence is not a fallback but a
+        // mistake, and the caller said so themselves: see SourceOptions#REQUIRED
+        if (SourceOptions.isRequired(uri))
+            throw unsupported(failure, "%s: the source %s says it is required and could not be read",
+                    clazz.getName(), hideCredentials(uri));
+
+        if (wasSimplyAbsent(uri, failure))
+            return;
+
+        String signature = failure.getClass().getName() + ": " + failure.getMessage();
+        if (signature.equals(reportedFailures.get(uri)))
+            return;
+        reportedFailures.put(uri, signature);
+        LOGGER.log(Level.WARNING, failure, () -> String.format(
+                "%s: the source %s was named and could not be read. The configuration goes on with the "
+                        + "other sources and its default values, so this is not an error - but a source "
+                        + "that is merely absent is passed over in silence, and this one was not absent.",
+                clazz.getName(), hideCredentials(uri)));
+    }
+
+    /** Whether the source was not there at all, as opposed to being there and refusing to be read. */
+    private static boolean wasSimplyAbsent(URI uri, IOException failure) {
+        File file = fileFromURI(uri);
+        if (file != null)
+            return !file.exists();
+        return failure instanceof FileNotFoundException;
+    }
+
+    /**
+     * The case a mistyped path produces: sources were asked for by name and not one of them could be read,
+     * so what comes back is the default values and nothing else.
+     * <p>
+     * It is worth its own warning because the three above stay silent for exactly this: every one of those
+     * misses is legitimate on its own, and only their sum is not. A configuration that declares no
+     * {@link Sources} is left alone — probing four names and finding none is how a configuration made
+     * entirely of defaults is written.
+     * </p>
+     */
+    private void reportIfNothingAnswered() {
+        if (!sourcesWereDeclared || somethingWasRead) {
+            reportedEmptyLoad = false;
+            return;
+        }
+        if (reportedEmptyLoad)
+            return;
+        reportedEmptyLoad = true;
+        LOGGER.log(Level.WARNING, () -> String.format(
+                "%s: not one of the sources it declares could be read %s, so it holds its default values "
+                        + "and nothing else. A path that is spelt wrong looks exactly like this.",
+                clazz.getName(), specsOf(uris)));
+    }
+
+    private static String specsOf(List<URI> uris) {
+        List<String> specs = new ArrayList<>();
+        for (URI uri : uris)
+            specs.add(hideCredentials(uri));
+        return specs.toString();
     }
 
     private static void merge(Properties results, Map<?, ?>... inputs) {

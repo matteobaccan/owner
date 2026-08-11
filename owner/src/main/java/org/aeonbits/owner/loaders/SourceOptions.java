@@ -158,9 +158,42 @@ public final class SourceOptions {
     }
 
     private static boolean isKnown(String name, String... known) {
+        if (REQUIRED.equals(name))
+            return true;
         for (String candidate : known)
             if (candidate.equals(name))
                 return true;
+        return false;
+    }
+
+    /**
+     * The option that says a source has to be there, read by the library rather than by a loader.
+     * <p>
+     * It is the one name every loader accepts without declaring it, and that is the whole difference
+     * between the two kinds of option in a fragment. A dialect or a validation flag is a way of reading
+     * <b>that format</b> and belongs to the loader that understands it; whether a source is allowed to be
+     * missing is decided before any loader is chosen, and is the same question for all of them. A loader
+     * refusing it as unknown is what would happen otherwise, which is why it is here and not there.
+     * </p>
+     */
+    public static final String REQUIRED = "required";
+
+    /**
+     * Whether the source says it has to be there.
+     *
+     * @param uri the source, may be <code>null</code>.
+     * @return <code>true</code> only if the source carries <code>required=true</code>.
+     * @throws UnsupportedOperationException if it carries the option with anything but true or false.
+     */
+    public static boolean isRequired(URI uri) {
+        for (Option option : of(uri).all())
+            if (REQUIRED.equals(option.name())) {
+                String setting = option.setting().toLowerCase();
+                if ("true".equals(setting)) return true;
+                if ("false".equals(setting)) return false;
+                throw unsupported("'%s' is not a setting for '%s' in %s; use 'true' or 'false'",
+                        option.setting(), REQUIRED, uri);
+            }
         return false;
     }
 

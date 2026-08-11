@@ -348,18 +348,17 @@ public interface Config extends Serializable {
          */
         FIRST {
             @Override
-            Properties load(List<URI> uris, LoadersManager loaders, BiConsumer<URI, Properties> answered) {
+            Properties load(List<URI> uris, LoadersManager loaders, PropertiesManager report) {
                 Properties result = new Properties();
                 for (URI uri : uris)
                     try {
                         Properties loaded = new Properties();
                         loaders.load(loaded, uri);
-                        answered.accept(uri, loaded);
+                        report.sourceAnswered(uri, loaded);
                         result.putAll(loaded);
                         break;
                     } catch (IOException ex) {
-                        // happens when a file specified in the sources is not found or cannot be read.
-                        ignore();
+                        report.sourceFailed(uri, ex);
                     }
                 return result;
             }
@@ -371,17 +370,16 @@ public interface Config extends Serializable {
          */
         MERGE {
             @Override
-            Properties load(List<URI> uris, LoadersManager loaders, BiConsumer<URI, Properties> answered) {
+            Properties load(List<URI> uris, LoadersManager loaders, PropertiesManager report) {
                 Properties result = new Properties();
                 for (URI uri :  reverse(uris))
                     try {
                         Properties loaded = new Properties();
                         loaders.load(loaded, uri);
-                        answered.accept(uri, loaded);
+                        report.sourceAnswered(uri, loaded);
                         result.putAll(loaded);
                     } catch (IOException ex) {
-                        // happens when a file specified in the sources is not found or cannot be read.
-                        ignore();
+                        report.sourceFailed(uri, ex);
                     }
                 return result;
             }
@@ -392,16 +390,21 @@ public interface Config extends Serializable {
          * <p>
          * Each of them is read into a map of its own and then merged, rather than all of them into one, so
          * that what each source contributed is known while it still can be: the merge is exactly what makes
-         * a value indistinguishable from the one it overwrote. That is handed to <code>answered</code> in
-         * merge order, so a caller recording where a key came from ends up with the source that won.
+         * a value indistinguishable from the one it overwrote. Every source is announced as it is read, in
+         * merge order, so that what is recorded against a key is the source that won.
+         * </p>
+         * <p>
+         * A source that cannot be read does not stop the others — that is how a fallback chain works — but
+         * it is no longer swallowed either: it is announced too, and what to make of it is decided in one
+         * place rather than here.
          * </p>
          *
-         * @param uris     the sources, in the order they were declared.
-         * @param loaders  the loaders to read them with.
-         * @param answered called with each source that produced something, and with what it produced.
+         * @param uris    the sources, in the order they were declared.
+         * @param loaders the loaders to read them with.
+         * @param report  told about each source that answered and each that could not be read.
          * @return the properties, merged.
          */
-        abstract Properties load(List<URI> uris, LoadersManager loaders, BiConsumer<URI, Properties> answered);
+        abstract Properties load(List<URI> uris, LoadersManager loaders, PropertiesManager report);
     }
 
     /**

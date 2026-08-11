@@ -7,12 +7,15 @@
  */
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.loaders.SourceOptions;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 import static org.aeonbits.owner.util.Util.fixBackslashesToSlashes;
 import static org.aeonbits.owner.util.Util.fixSpacesToPercentTwenty;
+import static org.aeonbits.owner.util.Util.unsupported;
 
 /**
  * @author Luigi R. Viggiano
@@ -40,8 +43,14 @@ class ConfigURIFactory {
             int hash = rest.indexOf('#');
             String path = hash < 0 ? rest : rest.substring(0, hash);
             URL url = classLoader.getResource(path);
-            if (url == null)
+            if (url == null) {
+                // the one place a source disappears before any loader sees it, so the one place where a
+                // source that said it has to be there can still be answered for
+                if (hash >= 0 && requiredIn(rest.substring(hash)))
+                    throw unsupported("The source '%s' says it is required and there is no such resource on "
+                            + "the classpath", spec);
                 return null;
+            }
             URI resolved = url.toURI();
             return hash < 0 ? resolved : new URI(resolved.toString() + rest.substring(hash));
         } else if (fixed.startsWith(FILE_PROTOCOL)) {
@@ -56,6 +65,19 @@ class ConfigURIFactory {
             }
         } else {
             return new URI(fixed);
+        }
+    }
+
+    /**
+     * Asks the option parser about a fragment on its own, there being no resource to attach it to: what is
+     * handed over is a URI made of a placeholder and that fragment, since the fragment is the whole of the
+     * question and every other part of a URI would be invented.
+     */
+    private static boolean requiredIn(String fragment) {
+        try {
+            return SourceOptions.isRequired(new URI("owner:source" + fragment));
+        } catch (URISyntaxException notAFragmentWeCanRead) {
+            return false;
         }
     }
 
