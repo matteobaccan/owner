@@ -29,8 +29,25 @@ RELEASING
 WHERE TO PICK UP
 ----------------
 
-Updated at the end of 2026-08-10. `FORMATS.md` has the detail and the open questions; this is the short
-version.
+Updated at the end of 2026-08-11. `FORMATS.md` and `COMPARISON.md` have the detail and the open questions;
+this is the short version.
+
+**Two of the three largest gaps closed on 2026-08-11.**
+
+- **Nested configuration interfaces**, in the four shapes the other libraries have between them: a section,
+  a list of sections from `servers[0].host`, a map of them from `servers.alpha.host`, and one asked for by
+  name with a parametrized key. The flattening convention and the reader met without either being reworked,
+  which was the bet made when the convention was chosen: an XML tree is now read end to end into typed
+  elements. Issues #129, #2, #72, #126 and #209 are answered and **not yet closed**.
+- **Origin tracking**, `Traceable` and `Origin`: which source a merged property actually came from. Issue
+  #277 is answered and **not yet closed**.
+
+Both were preceded by a survey of what SmallRye, Archaius, Coat, Gestalt, Spring and Typesafe do, and both
+times it changed the design rather than confirming it — the survey is in `COMPARISON.md` so that the two
+minority positions we hold can be defended instead of remembered.
+
+**The queue below this line is now the whole of it**: JSON, then YAML; the two diagnostics still missing;
+the four silent failures; and the gaps against the other libraries further down.
 
 **C6 and C5 are done**, in three commits, and the day spent checking the open questions against Spring
 Boot, SmallRye/MicroProfile and Gestalt before writing any of it paid for itself: it cancelled a third of
@@ -76,14 +93,18 @@ another here.
 WHAT IS NEXT
 ------------
 
-**JSON**, and it arrives with its own question already framed rather than open: `null` is its decision, not
-the core's, and the two rules the core imposes on that decision are written down in `FORMATS.md`. After it,
-**nested configuration interfaces** ([#129](https://github.com/matteobaccan/owner/issues/129)), without
-which a YAML or JSON source holding a list of objects flattens correctly to `servers[0].host` and is
-unreachable — so it has to land before YAML is worth having.
+**JSON**, and it arrives with everything cleared out of its way. Its own question is framed rather than
+open — `null` is its decision, not the core's, and the two rules the core imposes on that decision are
+written down in `FORMATS.md`. The condition that stood behind it is met: a JSON or YAML source holding a
+list of objects flattens to `servers[0].host` and is now **read**, so YAML is worth having the day its
+loader is written. JSON first all the same, because it is the cheaper of the two and it tells us whether
+C1 and C2 were designed right while the reasoning is still fresh.
 
-Third, and the one that would close the most support questions: **a configuration that explains itself**.
-See below.
+Second, and the one that would close the most support questions: **the rest of a configuration that
+explains itself**. Three of its five lines shipped with #170; the two left are below.
+
+Third, **the five issues answered on 2026-08-11 and still open**: #129, #2, #72, #126, #209 and #277. Each
+wants the usual comment — what landed, what it does exactly, and what it deliberately does not do.
 
 A CONFIGURATION THAT EXPLAINS ITSELF
 -----------------------------------
@@ -93,17 +114,18 @@ are the first kind. These are the second, and they matter more, because most of 
 failure at all — everything succeeded, just not on the file or the key somebody thought.
 
 One switch, `org.aeonbits.owner.level = CONFIG`, and the library says what it did. In the order of how many
-real questions each would close:
+real questions each would close — **the first three shipped with
+[#170](https://github.com/matteobaccan/owner/issues/170); the last two are what is left**:
 
-- [ ] **Which sources were resolved, and which one answered.** `PropertiesManager.toURIs` builds the list
-      and `LoadType.FIRST` stops at the first that loads, and none of it is visible. This alone answers most
-      of "why is my property missing" — usually because it read `MyConfig.properties` from inside a jar. It
+- [x] **Which sources were resolved, and which one answered** — **done**, with the two lines
+      `PropertiesManager.toURIs` now writes: what was looked for, and which of those was not there. It
       subsumes the second silent failure below, since a spec that `newURI` cannot resolve is dropped with
-      `if (uri != null)` and never reaches a loader.
-- [ ] **Which loader answered for each source.** `app.yaml → PropertiesLoader` is a diagnosis in one line,
-      and it is the only trace a loader that was not discovered leaves behind.
-- [ ] **The specs looked for when there is no `@Sources`.** Answers "I called the file `config.properties`
-      and the class is `MyConfig`".
+      `if (uri != null)` and never reaches a loader; that one is therefore *visible* now, though still not
+      a warning.
+- [x] **Which loader answered for each source** — **done**, `Reading %s with %s` in `LoadersManager`, plus
+      a line naming the loaders discovered on the classpath, including when none were.
+- [x] **The specs looked for when there is no `@Sources`** — **done**, the same line as the first: it says
+      `no @Sources, looking for:` and lists them.
 - [ ] **The effective key prefix**, from `KeyPrefix`, `@Prefix` or `@DisableFeature(PREFIX)`. A wrong prefix
       makes *every* property vanish at once, which is the most disorienting failure there is and the least
       visible: nothing errors.
