@@ -311,6 +311,27 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    `@Mandatory` on the properties inside is the one that means something. Nothing can break: a method
    returning an interface extending `Config` had no meaning before. See the
    [documentation](/owner/docs/nested-configuration/).
+ * **A source that was named and did not arrive is no longer passed over in silence.** Both load policies
+   ended in `catch (IOException) { ignore() }`, with a comment admitting it covered two different things: a
+   file legitimately absent, which is how a fallback chain works, and a file that is there and cannot be
+   read. The second produced a configuration full of defaults and said nothing about it. Now an absent
+   source is still silent — with `FIRST` every miss but the last is the feature working, and a
+   configuration with no `@Sources` probes four names per interface — while a source that is there and
+   refuses is a `WARNING`, and **declared sources of which not one could be read** are a `WARNING` of their
+   own, that being what a mistyped path looks like. Each is said once, not at every reload.
+
+   Which of the two a failure was is deliberately not read off the exception: `FileInputStream` throws
+   `FileNotFoundException` for a file that is missing, for a directory named where a file was meant, and
+   for one it may not open — the three cases the rule exists to separate. For a file the filesystem is
+   asked; only a source that is not a file falls back on the exception.
+
+   And a source can now say that it has to be there: `@Sources("file:/etc/app.properties#required=true")`
+   refuses the configuration when that one is missing or unreadable, including a `classpath:` resource that
+   resolves to nothing — the case that never reaches a loader and would have been the one place the promise
+   was dropped. It is Spring's `optional:` the other way up, which is what keeps every fallback written so
+   far working unchanged. Unlike a dialect, `required` is read by the library rather than by a loader, so
+   no loader has to declare it. Issue [#170](https://github.com/matteobaccan/owner/issues/170) asked for
+   the visible half of this.
  * **A configuration can say where each property came from.** A new interface of the `Accessible` family,
    `Traceable`, answers the question the merged properties cannot:
 

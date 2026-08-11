@@ -183,7 +183,15 @@ a diagnostic that leaked a password would be a poor trade. And **say it once**: 
 lived and `reload()` runs the whole load again, so anything reported per load has to be guarded the way
 `PropertiesManager.lastReportedReloadFailure` is, or it repeats at the hot reload interval for ever.
 
-- [ ] **A source that was named and never arrived.** `Config.LoadType.FIRST` and `MERGE` both do
+- [x] ~~**A source that was named and never arrived.**~~ — **done 2026-08-11**, with the rule below and one
+      correction to it that a test found: the distinction cannot be read off the exception, because
+      `FileInputStream` throws `FileNotFoundException` for a file that is missing, for a directory named
+      where a file was meant, and for one it may not open. For a file the filesystem is asked instead; only
+      a source that is not a file falls back on the exception. Added beyond the rule: `#required=true` on a
+      source, which turns its absence into a refusal — Spring's `optional:` the other way up — and which
+      also covers the classpath case below, the one that never reaches a loader.
+      The original entry, which the rule came from:
+- [x] **A source that was named and never arrived.** `Config.LoadType.FIRST` and `MERGE` both do
       `catch (IOException) { ignore(); }`, with a comment admitting it covers two different things: a file
       legitimately absent, which is how the fallback is *meant* to work, and a file that is there but cannot
       be read — wrong permissions, a typo in the path, a network source down. In the second case the caller
@@ -194,11 +202,11 @@ lived and `reload()` runs the whole load again, so anything reported per load ha
       right: **`FileNotFoundException` stays silent, every other `IOException` is a warning**; and one
       further warning when `@Sources` was declared explicitly and *nothing at all* could be read, which is
       exactly the typo case and costs nothing in the normal one.
-- [ ] **A classpath source that disappears before any loader sees it.** `ConfigURIFactory.newURI` returns
-      `null` when `getResource` finds nothing, and `PropertiesManager.toURIs` drops it with
-      `if (uri != null)`. So `@Sources("classpath:missing.properties")` never reaches a loader at all: it is
-      simply not in the list. Same family as the item above but earlier, so a fix there would not cover it —
-      the two belong in one piece of work.
+- [x] ~~**A classpath source that disappears before any loader sees it.**~~ — **done 2026-08-11**, in the
+      same piece of work as the item above, as that entry said it had to be. It stays silent when it is
+      merely absent, is counted among the sources that did not answer, and is refused outright when it
+      carries `#required=true` — which had to be answered in `ConfigURIFactory`, since that is where such a
+      source stops existing.
 - [x] ~~**XML that is malformed and is not in the Java properties format.**~~ — **done 2026-08-11**, and
       the entry above described both the cause and the cure wrongly, which a probe found before a line was
       written. Throwing outright breaks **every** ordinary XML: with validation on, a parser reports a

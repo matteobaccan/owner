@@ -333,8 +333,64 @@ place the options can be written for a resource inside a jar, whose URI has no q
 understand, naming the offender, the source and what would have been accepted — because an option that is
 misspelt and ignored is a configuration that is wrong and says nothing.
 
-The only built-in loader with options of its own is the `.env` one; see
-[File formats](/owner/docs/file-formats/#one-rule-at-a-time).
+Two built-in loaders have options of their own: the `.env` one, whose
+[dialect](/owner/docs/file-formats/#one-rule-at-a-time) it is, and the XML one, which can be told
+[not to validate](/owner/docs/file-formats/#a-document-is-held-to-the-grammar-it-declares).
+
+One option is not a loader's at all. **`required` is read by the library**, before any loader is chosen,
+and every loader therefore accepts it without declaring it — see below.
+
+### A source that was named and did not arrive
+
+*Since 2.0.0.* A source that cannot be read does not stop the others: that is what a fallback chain is for.
+But not every failure is a fallback, and until 2.0.0 they were all treated as one and passed over in
+silence. Three cases are now distinguished:
+
+- **A source that is simply not there says nothing.** With `LoadType.FIRST` every miss but the last is how
+  the feature works, and a configuration with no `@Sources` probes four names for every interface. A
+  warning here would be noise, and noise is how a real warning stops being read.
+- **A source that is there and cannot be read is a `WARNING`.** A wrong permission, a network source
+  refusing, a host that does not answer: nobody designs a fallback on one of those, and what they produce
+  is a configuration full of defaults.
+- **Sources declared and not one of them readable is a `WARNING` of its own**, because that is what a
+  mistyped path looks like — every miss legitimate on its own, and only their sum wrong. A configuration
+  that declares no `@Sources` is left alone: finding no file among the four probed names is how a
+  configuration made entirely of defaults is written.
+
+Each is said **once**, and again only if the failure changes, since a reload runs the whole load again and
+a hot reload runs it at its interval for as long as the process lives.
+
+<div class="note">
+  <h5>Which of the two it is, is not read off the exception.</h5>
+  <p>
+    <code>FileInputStream</code> throws <code>FileNotFoundException</code> for a file that is missing, for
+    a directory named where a file was meant, and for one it may not open — the three things this rule
+    exists to tell apart. For a file the filesystem is asked instead; only a source that is not a file
+    falls back on the exception, where a <code>FileNotFoundException</code> is a 404 or a missing entry in
+    a jar.
+  </p>
+</div>
+
+### Saying that a source has to be there
+
+*Since 2.0.0.* `required=true` on a source turns its absence from a fallback into an error, refused when the
+configuration is created:
+
+```java
+@Sources({"file:/etc/myapp.properties#required=true", "classpath:defaults.properties"})
+```
+
+It is the counterpart of Spring's `optional:` prefix, the other way up: their sources must exist unless
+marked optional, ours may be missing unless marked required — which is what keeps every fallback chain
+written so far working as it did.
+
+It applies to a source that is absent, to one that cannot be read, and to a `classpath:` resource that
+resolves to nothing, which is the case that never reaches a loader at all and would otherwise have been the
+one place where the promise was quietly dropped.
+
+Unlike a dialect or a validation flag, `required` is **not** an option of a loader — whether a source may be
+missing is decided before a loader is chosen, and is the same question for all of them. That is why no
+loader has to declare it and none of them refuses it.
 
 ### What 2.0.0 added, and what it did not break
 
