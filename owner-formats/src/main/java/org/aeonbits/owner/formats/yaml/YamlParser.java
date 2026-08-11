@@ -428,13 +428,18 @@ final class YamlParser {
         return value.toString();
     }
 
+    /** The four digits of a <code>\ u</code> escape, read and added up in one pass: see JsonParser. */
     private char unicode(String text, int from) throws IOException {
         if (from + 4 > text.length())
             throw error("a \\u escape needs four hexadecimal digits");
-        for (int i = from; i < from + 4; i++)
-            if (Character.digit(text.charAt(i), 16) < 0)
+        int value = 0;
+        for (int i = from; i < from + 4; i++) {
+            int digit = Character.digit(text.charAt(i), 16);
+            if (digit < 0)
                 throw error("'" + text.substring(from, from + 4) + "' is not four hexadecimal digits");
-        return (char) Integer.parseInt(text.substring(from, from + 4), 16);
+            value = value * 16 + digit;
+        }
+        return (char) value;
     }
 
     // ---------------------------------------------------------------- lines

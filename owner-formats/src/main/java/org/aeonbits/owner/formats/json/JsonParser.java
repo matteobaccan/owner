@@ -205,15 +205,27 @@ final class JsonParser {
         }
     }
 
+    /**
+     * The four hexadecimal digits of a <code>\ u</code> escape, read and added up in the same pass.
+     * <p>
+     * Building the number here rather than handing the four characters to {@code Integer.parseInt} is not
+     * a micro-optimisation: it is what makes the absence of a failure visible. Four digits that have each
+     * been checked cannot overflow a <code>char</code> and cannot fail to parse, but a reader — and an
+     * analyser — has to follow the loop above to know it, and only one of the two ever does.
+     * </p>
+     */
     private char unicode() throws IOException {
         if (at + 4 > text.length())
             throw error("a \\u escape needs four hexadecimal digits");
-        String digits = text.substring(at, at + 4);
-        for (int i = 0; i < 4; i++)
-            if (Character.digit(digits.charAt(i), 16) < 0)
-                throw errorAt(at, "'" + digits + "' is not four hexadecimal digits");
+        int value = 0;
+        for (int i = 0; i < 4; i++) {
+            int digit = Character.digit(text.charAt(at + i), 16);
+            if (digit < 0)
+                throw errorAt(at, "'" + text.substring(at, at + 4) + "' is not four hexadecimal digits");
+            value = value * 16 + digit;
+        }
         at += 4;
-        return (char) Integer.parseInt(digits, 16);
+        return (char) value;
     }
 
     /**
