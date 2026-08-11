@@ -275,6 +275,36 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    is refused rather than closed up, since a list quietly shorter than the file describes, with everything
    after the gap moved, is not something the caller can notice. Nothing can break, `servers[0]` having been a
    property nothing read. See the [documentation](/owner/docs/type-conversion/).
+ * **JSON is read**, by a parser of ours, in a new artifact:
+
+   ```xml
+   <dependency>
+       <groupId>org.aeonbits.owner</groupId>
+       <artifactId>owner-formats</artifactId>
+   </dependency>
+   ```
+
+   Adding it is all there is to do — the loader declares itself, so a `.json` source is read as soon as the
+   artifact is on the class path. The document's shape becomes the keys, `server.host` and
+   `servers[0].host`, which is the flattening every loader here already uses: a JSON document is therefore
+   read by the same nested interfaces, indexed lists and grouped maps as anything else, and nothing about
+   the mapping is specific to JSON.
+
+   **RFC 8259 and no more**: no comments, no trailing commas, no unquoted names, no single quotes, no
+   leading zeros. Those are JSON5 and JavaScript, and a file we accepted and other tools refused would be
+   the worst of both. Every complaint names the line and the column, and a value is kept exactly as
+   written — `1e3` stays `1e3`, and a long past 2^53 keeps its last digits.
+
+   Three things the specification leaves open, decided and written down: a `null` writes no key at all,
+   `Properties` being unable to hold one; an empty array writes an empty value, which is already read as an
+   empty collection; and a repeated name is refused, because JSON has a real way to write a list and a
+   repetition is therefore a mistake rather than the shorthand it is in INI and XML.
+
+   **Why a separate artifact**: the core ships the formats the JDK can already parse — `Properties` for
+   properties, SAX for XML, and `.env` and INI are line-by-line variations on the first. A parser we write
+   is code that chews untrusted input, and a defect in one would be a security release for everybody,
+   including the majority who never load that format. It brings no dependency of its own. Issue
+   [#240](https://github.com/matteobaccan/owner/issues/240).
  * **Nested configuration interfaces.** A method returning another interface that extends `Config` reads the
    section of the configuration below its own key:
 

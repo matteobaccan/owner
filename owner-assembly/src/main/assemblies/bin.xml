@@ -45,6 +45,13 @@
             </includes>
         </fileSet>
         <fileSet>
+            <directory>${project.parent.basedir}/owner-formats/target</directory>
+            <outputDirectory/>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>${project.parent.basedir}/owner-examples</directory>
             <outputDirectory>examples</outputDirectory>
             <includes>

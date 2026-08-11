@@ -93,12 +93,15 @@ another here.
 WHAT IS NEXT
 ------------
 
-**JSON**, and it arrives with everything cleared out of its way. Its own question is framed rather than
-open — `null` is its decision, not the core's, and the two rules the core imposes on that decision are
-written down in `FORMATS.md`. The condition that stood behind it is met: a JSON or YAML source holding a
-list of objects flattens to `servers[0].host` and is now **read**, so YAML is worth having the day its
-loader is written. JSON first all the same, because it is the cheaper of the two and it tells us whether
-C1 and C2 were designed right while the reasoning is still fresh.
+~~**JSON**~~ — **done 2026-08-11**, in a new artifact `owner-formats`, which also settles where the parsers
+we write ourselves live. Its three open questions are answered and written down in `FORMATS.md`: a `null`
+writes no key, an empty array writes an empty value, a repeated name is refused. It reads end to end
+through the nested interfaces, which is what it was meant to validate.
+
+**YAML** is next, and now it is the only thing between us and the formats being done. It arrives with C1
+and C2 proven by JSON, and with its own question already known: the implicit typing, where `no` becomes
+`false` — the Norway problem — and the naming question of whether a subset may be called YAML, on which
+`FORMATS.md` has StrictYAML as a precedent.
 
 Second, and the one that would close the most support questions: **the rest of a configuration that
 explains itself**. Three of its five lines shipped with #170; the two left are below.
@@ -282,7 +285,12 @@ an issue behind it, which is the point: what the others shipped is what our repo
       three presets, `docker` by default (`d04c500`); indexed keys (`aace753`); and the flattening
       convention, `PropertyKeys`, with `XMLLoader` emitting indices for repeated elements (`d77165c`).
       **The data model is no longer the blocker** — what queued behind it can now be written. What is
-      left: loader enablement and per-loader options, then JSON, then YAML, then INI and TOML. Issues
+      left: loader enablement and per-loader options, then JSON, then YAML, then INI and TOML.
+      **Done 2026-08-10**: loader enablement, per-loader options and INI. **Done 2026-08-11**: JSON, in a
+      new `owner-formats` artifact, which is also where the parsers we write will live from now on — the
+      core keeps the formats the JDK can parse, a hand-written parser goes next door, and discovery makes
+      the split cost the reader nothing. **Only YAML is left of the four**, and issue #240 can be closed.
+      Issues
       [#14](https://github.com/matteobaccan/owner/issues/14),
       [#65](https://github.com/matteobaccan/owner/issues/65),
       [#240](https://github.com/matteobaccan/owner/issues/240), and

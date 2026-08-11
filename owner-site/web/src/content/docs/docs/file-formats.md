@@ -12,6 +12,7 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [XML](#xml) | a path ending in `.xml` | `MyConfig.xml` | the JDK's SAX parser |
 | [`.env`](#env) | a path ending in `.env` | — never looked for on its own | ours |
 | [INI](#ini) | a path ending in `.ini` or `.cfg` | `MyConfig.ini`, `MyConfig.cfg` | ours |
+| [JSON](#json) | a path ending in `.json` | `MyConfig.json` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core) |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
 Three of them are worth reading twice. **`.env` and INI have no standard**, so which rules they are read by
@@ -605,6 +606,64 @@ Refused loudly, each naming the file and the line: a section header that never c
 name, an assignment with nothing on the left of the separator, and — unless `bare` says otherwise — a line
 that is neither a comment nor an assignment.
 
+JSON
+----
+
+*Since 2.0.0, in the [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core)
+artifact.* A source whose path ends in `.json` is read as JSON, and the document's shape becomes the keys:
+
+```json
+{
+  "server": { "host": "localhost", "port": 8080 },
+  "servers": [ { "host": "alpha" }, { "host": "beta" } ]
+}
+```
+
+```properties
+server.host=localhost
+server.port=8080
+servers[0].host=alpha
+servers[1].host=beta
+```
+
+Which is the same flattening [described above](#how-a-tree-becomes-keys), so a JSON document is read by the
+same [nested interfaces](/owner/docs/nested-configuration/), indexed lists and grouped maps as anything
+else:
+
+```java
+public interface AppConfig extends Config {
+    ServerConfig server();
+
+    List<ServerConfig> servers();
+}
+```
+
+**RFC 8259 and no more.** No comments, no trailing commas, no unquoted names, no single quotes, no leading
+zeros: those are JSON5 and JavaScript, and a file this accepted would be one that other tools refuse —
+which is the failure a configuration library can least afford, since the same file is nearly always read by
+something else too. Every complaint names the line and the column.
+
+**A value is kept as it was written.** `1e3` stays `1e3` and a long past 2<sup>53</sup> keeps its last
+digits, because every value here is text until a converter is asked for a type.
+
+Three things the specification leaves to whoever reads it, decided as follows:
+
+| | |
+|---|---|
+| `"proxy": null` | **writes no key at all.** `Properties` cannot hold a null, so this is the only faithful reading available |
+| `"servers": []` | **writes an empty value**, `servers=`, which is already read as an empty collection — and which overrides a `@DefaultValue`, as the document says. An empty *object* writes nothing: a section with nothing in it has nothing to say |
+| `{"a": 1, "a": 2}` | **is refused.** JSON has a real way to write a list, so a repeated name is a mistake rather than a shorthand — unlike INI and XML, where a repetition *is* the list |
+
+<div class="note">
+  <h5>A null cannot be told from an absent key.</h5>
+  <p>
+    No method signature in this library distinguishes them: both are <code>null</code>, or an empty
+    <code>Optional</code>. So a <code>@DefaultValue</code> wins over a <code>null</code> written on
+    purpose, which is not what the author of <code>{"proxy": null}</code> meant. Where that matters, leave
+    the key out of the document, or give the method no default.
+  </p>
+</div>
+
 System properties and the environment
 -------------------------------------
 
@@ -624,17 +683,16 @@ See [importing properties](/owner/docs/importing-properties/) for the other ways
 What is not read yet
 --------------------
 
-**YAML, JSON, TOML and HOCON are not supported.** Being able to say what is *not* there is half the point of
-this page, so: there is no partial support, no experimental flag, nothing to turn on. A `.yaml` source given
-to `@Sources` today falls through to the properties loader, which will read it as best it can and give you
+**YAML, TOML and HOCON are not supported.** Being able to say what is *not* there is half the point of this
+page, so: there is no partial support, no experimental flag, nothing to turn on. A `.yaml` source given to
+`@Sources` today falls through to the properties loader, which will read it as best it can and give you
 nonsense.
 
-They are coming, in that order of demand rather than of ease, and they are being written by hand so that
-the core keeps its promise of no dependencies. **What used to hold them up no longer does**: a flattened key
-had no way of expressing a list, which was [issue #48](https://github.com/matteobaccan/owner/issues/48) and
-which every one of those formats needs, and 2.0.0 settled it — the `list[0]` notation described
-[above](#how-a-tree-becomes-keys) works, and the XML loader already emits it. What is left is the parsers
-themselves.
+They are coming, and they are being written by hand so that no artifact takes a dependency. **What used to
+hold them up no longer does**: a flattened key had no way of expressing a list, which was
+[issue #48](https://github.com/matteobaccan/owner/issues/48) and which every one of those formats needs, and
+2.0.0 settled it — the `list[0]` notation described [above](#how-a-tree-becomes-keys) works, the XML loader
+emits it, and [JSON](#json) is read end to end through it. What is left is the parsers themselves.
 
 In the meantime, two things work today:
 

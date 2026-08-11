@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2012-2026, Luigi R. Viggiano, Matteo Baccan
+  ~ All rights reserved.
+  ~
+  ~ This software is distributable under the BSD license.
+  ~ See the terms of the BSD license in the documentation provided with this software.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.aeonbits.owner</groupId>
+        <artifactId>owner-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+
+    <name>OWNER :: Formats</name>
+    <artifactId>owner-formats</artifactId>
+    <description>The file formats OWNER parses itself, kept out of the core: a parser chews untrusted input, and a defect in one is a security release for everybody who never used that format. Each loader is found on the class path and is on as soon as this artifact is there.</description>
+    <packaging>jar</packaging>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <!-- See the same instruction in the core module. This artifact shares no package
+                             with the core one or with the extras, which is what lets them sit together on
+                             the module path; SplitPackageTest is there to keep it that way. -->
+                        <Automatic-Module-Name>org.aeonbits.owner.formats</Automatic-Module-Name>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -226,7 +226,23 @@ A plan in phases
    34 tests. The rules were settled against five implementations before any of it was written — Python
    `configparser`, git config, systemd, Commons Configuration, the AWS SDK for Java — and they disagree
    three ways on the only question that matters, which is what a repeated key means. See below.
-4. **JSON, then YAML.**
+4. ~~**JSON**~~ — **done 2026-08-11**, and with it the question of where the parsers live: a **new artifact,
+   `owner-formats`**, following the line argued below. The core ships what the JDK can parse; a parser of
+   ours is code that chews untrusted input, and discovery makes the split cost the reader nothing — the
+   artifact on the class path is the format on.
+
+   The three questions RFC 8259 leaves open were answered as this file predicted they would have to be. A
+   `null` writes no key, which is what `Properties` allows and what Typesafe presents to whoever reads a
+   value. An empty array writes an empty value, exactly as *Null, and why it is not a core rule* argued. A
+   repeated name is **refused** — the one place JSON parts company with INI and XML, where a repetition
+   *is* the list, because JSON has a real way of writing a list and a repeated name is therefore a mistake.
+
+   What the writing taught, beyond the plan: a test caught the parser accepting `01`, which the grammar
+   forbids. Being **more permissive than the specification** is the one failure that matters for a format
+   this widely tooled, since it means reading a file every other tool refuses — and the same file is nearly
+   always read by something else as well. There is a test for each of the five JavaScript-isms now.
+
+   **Then YAML**, with C1 and C2 validated end to end by a format that exercises both.
 5. **TOML, then HOCON, CBOR, TOON if ever.**
 
 ### Why INI moved in front of JSON and YAML
@@ -682,8 +698,11 @@ The practical consequence is worth having: **`.env` in the core means phase 0 ne
 `ServiceLoader` nor a new artifact**, and can be done immediately. It was, and it did not: the loader
 and the dialect together are 742 lines of the core, against 6,852 before them.
 
-That settles half of question 4 below by doing it. The other half — a third artifact for the
-tree-shaped formats — is still open, and nothing so far commits us to it.
+That settles half of question 4 below by doing it. **The other half was settled on 2026-08-11 by JSON:
+`owner-formats` exists**, holding the parsers we write ourselves, and the argument that decided it is the
+one above — a defect in a hand-written parser is a security release for everybody, and in its own artifact
+it reaches only the people who asked for that format. Adding the dependency is the whole of the user's
+work, discovery doing the rest.
 
 **What C6 changed about that question, 2026-08-10.** Until discovery existed, a format in a separate
 artifact reached the user only if the user called `registerLoader` — so the split cost every one of them a

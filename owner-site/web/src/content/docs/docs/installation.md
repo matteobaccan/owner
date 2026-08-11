@@ -49,6 +49,39 @@ Many modern IDEs integrate well with maven, so after adding the above section
 in your pom file and refreshing your project in your IDE, you should be ready to
 use the library APIs.
 
+The formats that are not in the core
+------------------------------------
+
+*Since 2.0.0.* Properties, XML, `.env` and INI are read by the `owner` artifact itself. The formats OWNER
+parses with a parser of its own live in `owner-formats`:
+
+```xml
+<dependency>
+    <groupId>org.aeonbits.owner</groupId>
+    <artifactId>owner-formats</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
+
+Adding it is all there is to do: each loader declares itself, so the format is read as soon as the artifact
+is on the class path — no registration, no line of code. See
+[File formats](/owner/docs/file-formats/) for what it reads and
+[Loading strategies](/owner/docs/loading-strategies/#letting-it-be-found-instead) for how it is found.
+
+<div class="note">
+  <h5>Why a separate artifact.</h5>
+  <p>
+    The core ships the formats the JDK can already parse: <code>Properties</code> reads properties, SAX
+    reads XML, and <code>.env</code> and INI are line-by-line variations on the first. A parser we write
+    ourselves is different in kind — it is code that chews on untrusted input, and a defect in one would be
+    a security release for everybody, including the majority who never load that format. In its own artifact
+    it reaches the people who asked for it, and can be fixed and released on its own.
+  </p>
+  <p>
+    It brings no dependency of its own either: the parsers are ours.
+  </p>
+</div>
+
 Java 8 and superior
 -------------------
 
@@ -89,6 +122,7 @@ module com.example.myapp {
 |---|---|
 | `owner` | `org.aeonbits.owner` |
 | `owner-extras` | `org.aeonbits.owner.extras` |
+| `owner-formats` | `org.aeonbits.owner.formats` |
 
 The name matters because without it the module system derives one from the file name, which carries the
 version: a `requires` written against `owner-2.0.0.jar` would stop resolving against the next release.
