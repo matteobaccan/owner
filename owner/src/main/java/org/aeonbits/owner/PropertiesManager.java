@@ -158,38 +158,50 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
 
         // We try to identify the DecryptorClass annotation, to assign the Decryptor to this configuration.
         // If it isn't present then we assign the IdentityDecryptor.
-        DecryptorClass decryptorManager = clazz.getAnnotation(DecryptorClass.class);
-        Class<? extends Decryptor> decryptorClazz;
-        if (decryptorManager != null) {
-            decryptorClazz = decryptorManager.value();
-        } else {
-            decryptorClazz = IdentityDecryptor.class;
-        }
-        Decryptor classDecryptor = Util.newInstance(decryptorClazz);
+        Decryptor classDecryptor = declaredDecryptor(clazz, null);
 
-        // Reflection is slow, so we will cache all methods with EncryptedValue annotation.
-        Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
+        // the same is read off the nested interfaces, under the key that nests them: a configuration object
+        // one level down is part of this configuration, and a rule that stopped at the root would mask and
+        // decrypt only half of it
+        scanAnnotations(clazz, keyPrefix, classDecryptor);
+        NestedProperties.forEachNested(clazz, keyPrefix,
+                (nested, prefix) -> scanAnnotations(nested, prefix, declaredDecryptor(nested, classDecryptor)));
+    }
+
+    /**
+     * The decryptor an interface declares with {@link DecryptorClass}. A nested interface that declares none
+     * uses the one of the configuration holding it, the tree being a single configuration; the root falls
+     * back on the {@link IdentityDecryptor}.
+     */
+    private static Decryptor declaredDecryptor(Class<?> clazz, Decryptor fallback) {
+        DecryptorClass declared = clazz.getAnnotation(DecryptorClass.class);
+        if (declared != null)
+            return Util.newInstance(declared.value());
+        return fallback != null ? fallback : Util.newInstance(IdentityDecryptor.class);
+    }
+
+    /** Reflection is slow, so what the methods of an interface declare is read once, when it is created. */
+    private void scanAnnotations(Class<?> clazz, KeyPrefix prefix, Decryptor classDecryptor) {
+        for (Method method : clazz.getMethods()) {
             // a key that depends on the invocation arguments is not known in advance: those methods
             // are skipped rather than masked under a key that would never match
             if (isSensitive(method) && method.getParameterTypes().length == 0) {
-                String key = PropertiesMapper.key(method, keyPrefix);
-                // a method reading a group resolves to a prefix, not to a property: there is no key of that
-                // name in the file, and masking it alone would hide nothing at all
-                if (PropertiesAggregator.aggregates(method))
+                String key = PropertiesMapper.key(method, prefix);
+                // a method reading a group, or a whole nested object, resolves to a prefix and not to a
+                // property: there is no key of that name in the file, and masking it alone would hide nothing
+                if (NestedProperties.nests(method))
+                    sensitivePrefixes.add(NestedProperties.pathOf(key));
+                else if (PropertiesAggregator.aggregates(method))
                     sensitivePrefixes.add(PropertiesAggregator.prefixOf(key));
                 else
                     sensitiveKeys.add(key);
             }
 
             if (PropertiesMapper.isEncryptedValue(method)) {
-                EncryptedValue encriptedKey = method.getAnnotation(EncryptedValue.class);
-                decryptorClazz = encriptedKey.value();
-                if (decryptorClazz != IdentityDecryptor.class) {
-                    encryptedKeys.put(method, Util.newInstance(decryptorClazz));
-                } else {
-                    encryptedKeys.put(method, classDecryptor);
-                }
+                Class<? extends Decryptor> declared = method.getAnnotation(EncryptedValue.class).value();
+                encryptedKeys.put(method, declared != IdentityDecryptor.class
+                        ? Util.newInstance(declared)
+                        : classDecryptor);
             }
         }
     }
@@ -783,6 +795,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         if (!(handler instanceof PropertiesInvocationHandler))
             return false;
         PropertiesInvocationHandler propsInvocationHandler = (PropertiesInvocationHandler) handler;
+        // a nested object is a view of part of this same configuration, sharing this very manager: comparing
+        // the properties would find them identical and report the whole as equal to one of its sections
+        if (propsInvocationHandler.isNested())
+            return false;
         PropertiesManager that = propsInvocationHandler.propertiesManager;
         return this.hasSamePropertiesAs(that);
     }
@@ -794,6 +810,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
     private boolean hasSamePropertiesAs(PropertiesManager that) {
         if (!this.isAssignationCompatibleWith(that))
             return false;
+        return sameValuesAs(that);
+    }
+
+    /** Whether the two hold the same properties, the interfaces they were built on not being considered. */
+    boolean sameValuesAs(PropertiesManager that) {
         this.readLock.lock();
         try {
             that.readLock.lock();

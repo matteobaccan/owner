@@ -36,6 +36,15 @@ import static org.aeonbits.owner.util.Util.reverse;
  * Sub-interfaces may also extend {@link Accessible} to allow some debugging facility, or {@link Reloadable} to allow the
  * user to programmatically reload properties.
  * </p>
+ * <p>
+ * <b>A method whose return type is another interface extending this one reads the section of the configuration
+ * below its own key</b>, as a configuration object of its own: <code>ServerConfig server()</code> resolves
+ * <code>server.host</code> and <code>server.port</code>. A {@link java.util.List} or an array of them reads
+ * <code>servers[0].host</code>, a {@link java.util.Map} of them reads <code>servers.alpha.host</code>, and a
+ * method taking arguments asks for one by name. There is no annotation for any of this: the return type is the
+ * whole of the declaration. See {@link org.aeonbits.owner.Config.Prefix} for how the keys compose, and the
+ * documentation for the rest.
+ * </p>
  *
  * @author Luigi R. Viggiano
  * @see java.util.Properties
@@ -222,6 +231,13 @@ public interface Config extends Serializable {
      * <code>owner.key.prefix.from.package</code> properties, for the interfaces that do not declare one of
      * their own. This annotation, being the explicit statement of the two, <b>wins</b> over it rather than
      * being appended to it, while <code>@DisableFeature(PREFIX)</code> switches off both.
+     * </p>
+     * <p>
+     * On a <b>nested</b> configuration interface the two <b>compose</b> instead, the path the object hangs
+     * from coming first: the path says where the object was hung and this annotation says how that object
+     * names its own keys, so neither is a default the other overrides. An interface carrying a prefix
+     * therefore carries it along when nested, and <code>@DisableFeature(PREFIX)</code> switches off the
+     * path too.
      * </p>
      *
      * @since 2.0.0

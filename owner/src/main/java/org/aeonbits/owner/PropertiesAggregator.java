@@ -17,6 +17,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -92,11 +93,7 @@ final class PropertiesAggregator {
      * @return the map, empty when no property matches; never <code>null</code>.
      */
     static Object aggregate(Method method, String prefix, PropertiesManager manager, UnaryOperator<String> value) {
-        if (method.getAnnotation(DefaultValue.class) != null)
-            throw unsupported(
-                    "@DefaultValue cannot be used on '%s', which reads the group of properties under '%s' "
-                            + "rather than a single one; give a default to the individual properties instead",
-                    method.getName(), prefix);
+        rejectDefaultValue(method, prefix);
 
         Class<?> keyType = typeArgument(method, 0);
         Class<?> valueType = typeArgument(method, 1);
@@ -115,12 +112,60 @@ final class PropertiesAggregator {
         return result;
     }
 
+    private static void rejectDefaultValue(Method method, String prefix) {
+        if (method.getAnnotation(DefaultValue.class) != null)
+            throw unsupported(
+                    "@DefaultValue cannot be used on '%s', which reads the group of properties under '%s' "
+                            + "rather than a single one; give a default to the individual properties instead",
+                    method.getName(), prefix);
+    }
+
+    /**
+     * Collects the group of <b>nested configuration objects</b> below a prefix, one for each section:
+     * <pre>
+     *     servers.alpha.host=one
+     *     servers.beta.host=two
+     * </pre>
+     * <pre>
+     *     Map&lt;String, ServerConfig&gt; servers();     // {alpha=…, beta=…}
+     * </pre>
+     * <p>
+     * The name of the section is the key of the entry and goes through the ordinary conversion, so the map
+     * need not be keyed by strings; the value is the configuration object reading everything below that
+     * name. This is the answer to "objects whose names are only known at run time", which until now had to
+     * be assembled by hand out of a <code>Map</code> and a parametrized key.
+     * </p>
+     *
+     * @param method    the method being resolved, which provides the map and value types.
+     * @param prefix    the key the method resolves to; the sections collected are the ones below it.
+     * @param parent    the configuration object holding the group.
+     * @param ancestors the interfaces from the root down to and including the parent's.
+     * @return the map, empty when no section matches; never <code>null</code>.
+     */
+    static Object aggregateSections(Method method, String prefix, PropertiesInvocationHandler parent,
+                                    List<Class<?>> ancestors) {
+        rejectDefaultValue(method, prefix);
+
+        Class<?> keyType = typeArgument(method, 0);
+        Class<?> valueType = typeArgument(method, 1);
+        String start = prefixOf(prefix);
+
+        Map<Object, Object> result = instantiate(method.getReturnType(), keyType);
+        for (String section : NestedProperties.sectionNamesUnder(start, parent.propertiesManager)) {
+            // the key to report on a failure is the section, not the group: the reader has to know which
+            // one of them would not convert
+            result.put(convert(method, keyType, section, start + section),
+                    NestedProperties.sectionAt(valueType, start + section + SEPARATOR, parent, ancestors));
+        }
+        return result;
+    }
+
     /**
      * Returns the class behind the type argument at the given position of the map, defaulting to
      * <code>String</code> for a raw <code>Map</code> and for anything that is not a plain class, such as a
      * wildcard or a type variable.
      */
-    private static Class<?> typeArgument(Method method, int position) {
+    static Class<?> typeArgument(Method method, int position) {
         Type returnType = method.getGenericReturnType();
         if (!(returnType instanceof ParameterizedType))
             return String.class;

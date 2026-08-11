@@ -13,7 +13,9 @@ import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.Prefix;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PREFIX;
 import static org.aeonbits.owner.util.Util.isFeatureDisabled;
@@ -57,16 +59,17 @@ final class PropertiesMapper {
      * <p>
      * A {@link Prefix} written on the interface wins over the one configured on the factory: it is the
      * explicit statement of the two, and letting them concatenate would push the keys of everybody who
-     * already uses the annotation one level deeper. {@code @DisableFeature(PREFIX)} switches off both.
+     * already uses the annotation one level deeper. Inside a nested configuration object the same two
+     * compose instead; {@link KeyPrefix#of(Class, String)} holds that rule and says why.
+     * {@code @DisableFeature(PREFIX)} switches off every one of them, the nesting path included: the
+     * annotation says the method takes no prefix at all, and half of one would be a third meaning.
      * </p>
      */
     private static String prefix(Method method, KeyPrefix globalPrefix) {
         if (isFeatureDisabled(method, PREFIX))
             return "";
         Prefix prefix = method.getDeclaringClass().getAnnotation(Prefix.class);
-        if (prefix != null)
-            return prefix.value();
-        return globalPrefix.of(method.getDeclaringClass());
+        return globalPrefix.of(method.getDeclaringClass(), prefix == null ? null : prefix.value());
     }
 
     static String defaultValue(Method method) {
@@ -83,13 +86,22 @@ final class PropertiesMapper {
         return defaultValue != null && defaultValue.useOnEmpty() ? defaultValue.value() : null;
     }
 
+    /**
+     * Registers the {@link DefaultValue} of every method of the interface, and of every interface nested in
+     * it under the key that nests it: a default written one level down is a default like any other, and one
+     * that was not registered would leave the property missing rather than defaulted.
+     */
     static void defaults(Properties properties, Class<? extends Config> clazz, KeyPrefix globalPrefix) {
-        Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
-            String key = key(method, globalPrefix);
+        declaredDefaults(properties, clazz, globalPrefix);
+        NestedProperties.forEachNested(clazz, globalPrefix,
+                (nested, prefix) -> declaredDefaults(properties, nested, prefix));
+    }
+
+    private static void declaredDefaults(Properties properties, Class<?> clazz, KeyPrefix prefix) {
+        for (Method method : clazz.getMethods()) {
             String value = defaultValue(method);
             if (value != null)
-                properties.put(key, value);
+                properties.put(key(method, prefix), value);
         }
     }
 

@@ -171,15 +171,69 @@ final class IndexedProperties {
 
     /** Checks the sequence and returns the names in index order. */
     private static List<String> inOrder(TreeMap<Integer, String> names, String key) {
-        List<String> ordered = new ArrayList<>(names.size());
+        checkSequence(names, key);
+        return new ArrayList<>(names.values());
+    }
+
+    /** Refuses indices that do not start at zero and run consecutively; see {@link #gap}. */
+    private static void checkSequence(TreeMap<Integer, String> names, String key) {
         int expected = 0;
         for (Integer index : names.navigableKeySet()) {
             if (index != expected)
                 throw gap(key, expected, names.get(index));
-            ordered.add(names.get(index));
             expected++;
         }
-        return ordered;
+    }
+
+    /**
+     * The paths of the elements of a list whose elements are <b>sections</b> rather than values:
+     * <pre>
+     *     servers[0].host=alpha
+     *     servers[1].host=beta
+     * </pre>
+     * yields <code>servers[0].</code> and <code>servers[1].</code>, in index order. The element is not a
+     * property of its own — there is no key named <code>servers[0]</code> — so what is collected is where
+     * each element lives, and the properties below it are read by the nested configuration object built
+     * there.
+     * <p>
+     * The rules are the ones of an ordinary indexed list, deliberately: the indices start at zero and run
+     * consecutively, and a gap is refused. A list of sections is a list.
+     * </p>
+     *
+     * @param key     the key the method resolves to.
+     * @param manager the properties to read from.
+     * @return the paths, empty when the list is not written this way.
+     */
+    static List<String> sectionsOf(String key, PropertiesManager manager) {
+        String start = key + OPEN;
+        TreeMap<Integer, String> found = new TreeMap<>();
+        for (String name : manager.propertyNames()) {
+            Integer index = sectionIndexIn(name, start);
+            // the name kept is only there to be named in the message of a gap: the first one seen will do
+            if (index != null)
+                found.putIfAbsent(index, name);
+        }
+        checkSequence(found, key);
+
+        List<String> paths = new ArrayList<>(found.size());
+        for (Integer index : found.navigableKeySet())
+            paths.add(start + index + CLOSE + NestedProperties.SEPARATOR);
+        return paths;
+    }
+
+    /**
+     * The index in <code>key[n].something</code>, or <code>null</code> when the name is not one of those.
+     * The separator after the closing bracket is what tells this apart from {@link #indexIn}: there the
+     * bracket ends the name and the element <b>is</b> the value, here something lives below it.
+     */
+    private static Integer sectionIndexIn(String name, String start) {
+        if (!name.startsWith(start))
+            return null;
+        int close = name.indexOf(CLOSE, start.length());
+        if (close < 0 || !name.startsWith(NestedProperties.SEPARATOR, close + 1)
+                || name.length() <= close + 1 + NestedProperties.SEPARATOR.length())
+            return null;
+        return indexIn(name.substring(0, close + 1), start);
     }
 
     private static UnsupportedOperationException gap(String key, int expected, String found) {

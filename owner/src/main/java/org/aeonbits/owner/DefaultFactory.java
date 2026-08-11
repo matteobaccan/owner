@@ -45,8 +45,8 @@ class DefaultFactory implements Factory {
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
                 KeyPrefix.from(props), imports);
         Object jmxSupport = getJMXSupport(clazz, manager);
-        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(manager, jmxSupport);
-        handler.validateMandatoryProperties(clazz);
+        PropertiesInvocationHandler handler = new PropertiesInvocationHandler(clazz, manager, jmxSupport);
+        handler.validateMandatoryProperties();
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
         return proxy;

@@ -47,11 +47,17 @@ public class PropertiesInvocationHandlerTest {
 
     interface Dummy extends Config {}
 
+    private PropertiesManager loader;
+
     @Before
     public void before() {
-        PropertiesManager loader =
-                new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders, KeyPrefix.NONE);
-        handler = new PropertiesInvocationHandler(loader, null);
+        loader = new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders, KeyPrefix.NONE);
+        handler = new PropertiesInvocationHandler(Dummy.class, loader, null);
+    }
+
+    /** A handler over another interface, sharing this manager: it is the interface that is being validated. */
+    private PropertiesInvocationHandler handlerFor(Class<? extends Config> type) {
+        return new PropertiesInvocationHandler(type, loader, null);
     }
 
     @Test
@@ -85,13 +91,14 @@ public class PropertiesInvocationHandlerTest {
         Method method = MandatoryConfig.class.getDeclaredMethod("mandatoryValue");
         try (MockedStatic<Reflection> reflection = mockStatic(Reflection.class)) {
             reflection.when(() -> Reflection.isDefault(method)).thenReturn(true);
-            handler.validateMandatoryProperties(MandatoryConfig.class); // must not throw: default methods are skipped
+            // must not throw: default methods are skipped
+            handlerFor(MandatoryConfig.class).validateMandatoryProperties();
         }
     }
 
     @Test(expected = MissingMandatoryPropertyException.class)
     public void testValidateMandatoryPropertiesFailsOnMissingAbstractProperty() {
-        handler.validateMandatoryProperties(MandatoryConfig.class);
+        handlerFor(MandatoryConfig.class).validateMandatoryProperties();
     }
 
     @Test
