@@ -335,13 +335,11 @@ an issue behind it, which is the point: what the others shipped is what our repo
       carried HOCON in its body, which is what made it the argument for doing HOCON now rather than a debt
       against JSON. **TOML the same day**, written here rather than delegated, and with it **the format
       list is finished**: properties, XML, `.env`, INI, JSON, YAML, TOML, HOCON.
-      **TOML is not yet at conformance and that is the one open thread here.** `toml-test` runs in every
-      build with the score as a ratchet — 201 of 210 documents read, 407 of 499 refused. The gap is almost
-      entirely refusals, and most of it is one missing check: a date-time is recognised by its shape and
-      never asked whether the thirtieth of February exists. **Range-checking the four date-time types is
-      the next piece of work on this item**, and it should land before the release note claims the format
-      without a caveat. `FORMATS.md` has the rest, including the one part that may not be fixable — TOML
-      allows an empty key and the flattening convention cannot name an empty segment.
+      **TOML is held to `toml-test` in every build, and the refusals are complete**: 499 of 499 documents
+      that must be refused are refused, and 204 of the 210 that must be read are read as the suite expects.
+      The six left are an empty key and a dot inside a quoted key — the two places TOML and the flattening
+      convention disagree — so they are a decision about the convention, for the whole library, and not a
+      fix to this parser. `FORMATS.md` has the reasoning.
       The rule in `FORMATS.md` gained its one exception and a criterion to contain it: a format whose
       specification *is* an implementation is delegated. See there, and `COMPARISON.md` for the field
       evidence that settled it — nobody hand-writes a HOCON parser, and Gestalt hand-writes no parser at

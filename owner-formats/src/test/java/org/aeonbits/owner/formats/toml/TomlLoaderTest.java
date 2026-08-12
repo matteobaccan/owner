@@ -240,6 +240,121 @@ public class TomlLoaderTest {
         refuses("a = 1\nb = 2\na = 3", "Line 3");
     }
 
+    // ------------------------------------------------- dates that do not exist
+
+    @Test
+    public void aDayThatIsNotInTheMonthIsRefused() throws Exception {
+        // java.time is asked rather than the month lengths written out again, so a leap year is right
+        refuses("d = 2026-02-29", "is not a date that exists");
+        refuses("d = 1988-02-30", "is not a date that exists");
+        refuses("d = 2026-04-31", "is not a date that exists");
+        assertEquals("1988-02-29", read("d = 1988-02-29").get("d"));
+    }
+
+    @Test
+    public void aMonthOrADayOutsideItsRangeIsRefused() throws Exception {
+        refuses("d = 2026-13-01", "is not a date that exists");
+        refuses("d = 2026-00-01", "is not a date that exists");
+        refuses("d = 2026-01-00", "is not a date that exists");
+    }
+
+    @Test
+    public void anHourMinuteOrSecondOutsideItsRangeIsRefused() throws Exception {
+        refuses("d = 2026-01-01T24:00:00Z", "hour 24");
+        refuses("d = 2026-01-01T00:60:00Z", "minute 60");
+        refuses("d = 2026-01-01T00:00:61Z", "second 61");
+    }
+
+    @Test
+    public void aLeapSecondIsAllowed() throws Exception {
+        // 60 and not 59: TOML says a document may write one, and this is the one range java.time refuses
+        assertEquals("1987-07-05T17:45:60Z", read("d = 1987-07-05T17:45:60Z").get("d"));
+    }
+
+    @Test
+    public void aYearOutsideFourDigitsIsRefused() throws Exception {
+        // five digits is not a year, so it is not a date at all and never reaches the date rules
+        refuses("d = 10000-01-01", "is not a number TOML can read");
+    }
+
+    @Test
+    public void aDateWithoutItsTimeSeparatorIsRefused() throws Exception {
+        // with a digit where the T belongs there is no date to complain about, only a value that is not
+        // anything TOML has: what matters is that neither is read
+        refuses("d = 1987-07-0517:45:00Z", "is not a number TOML can read");
+        refuses("d = 2020-01-01x", "no T between its date and its time");
+    }
+
+    @Test
+    public void anOffsetOutsideItsRangeOrWronglyWrittenIsRefused() throws Exception {
+        refuses("d = 2026-01-01T00:00:00+24:00", "offset hour 24");
+        refuses("d = 2026-01-01T00:00:00+00:60", "offset minute 60");
+        refuses("d = 2026-01-01T00:00:00+07", "offset that is not Z or +hh:mm");
+    }
+
+    @Test
+    public void aTimeWithoutSecondsOrWithATrailingDotIsRefused() throws Exception {
+        refuses("d = 2026-01-01T17:45Z", "not written as hh:mm:ss");
+        refuses("d = 2026-01-01T17:45:00.Z", "not a fraction");
+    }
+
+    @Test
+    public void aLowerCaseTOrZIsTheSameInstant() throws Exception {
+        assertEquals("1987-07-05T17:45:00Z", read("d = 1987-07-05t17:45:00z").get("d"));
+    }
+
+    // ------------------------------------------ numbers that are not numbers
+
+    @Test
+    public void aFloatWithoutDigitsOnBothSidesOfItsDotIsRefused() throws Exception {
+        // Double.parseDouble reads all four of these; TOML reads none of them
+        refuses("a = .5", "digits on both sides");
+        refuses("a = 5.", "digits on both sides");
+        refuses("a = 1.e2", "digits on both sides");
+        refuses("a = 1e2.3", "exponent that is not a whole number");
+    }
+
+    @Test
+    public void anUnderscoreInAnExponentOrBesideTheEIsRefused() throws Exception {
+        refuses("a = 1e_2", "underscore");
+        refuses("a = 1e2_", "underscore");
+    }
+
+    @Test
+    public void aSignedOrDoubleSignedRadixIntegerIsRefused() throws Exception {
+        refuses("a = +0xFF", "cannot be signed");
+        refuses("a = 0x-1", "sign after its prefix");
+    }
+
+    @Test
+    public void anEscapeBeyondTheLastCharacterIsRefusedAsSuch() throws Exception {
+        // eight hexadecimal digits overflow an int, and the overflow used to walk past the range check
+        refuses("s = \"\\UFFFFFFFF\"", "does not name a character");
+        refuses("s = \"\\U0011FFFF\"", "does not name a character");
+    }
+
+    @Test
+    public void aBareCarriageReturnIsRefused() throws Exception {
+        refuses("a = 1\r", "carriage return has to be followed by a newline");
+    }
+
+    @Test
+    public void aDottedKeyCannotAddToATableAlreadyWrittenOut() throws Exception {
+        refuses("[a.b.c]\nz = 9\n\n[a]\nb.c.t = \"no\"", "cannot add to it");
+    }
+
+    @Test
+    public void anArrayOfTablesCannotBeReopenedAsATable() throws Exception {
+        refuses("[[tbl]]\n[tbl]", "array of tables");
+    }
+
+    @Test
+    public void anArrayNestedInAnArrayOfTablesCountsWithinItsElement() throws Exception {
+        Properties read = read("[[a]]\n[[a.b]]\nn = 1\n\n[[a]]\n[[a.b]]\nn = 2");
+        assertEquals("1", read.get("a[0].b[0].n"));
+        assertEquals("2", read.get("a[1].b[0].n"));
+    }
+
     // ------------------------------------------------------------- plumbing
 
     private void refuses(String document, String expected) throws IOException {

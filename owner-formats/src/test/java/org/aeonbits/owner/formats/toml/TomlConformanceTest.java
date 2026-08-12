@@ -90,28 +90,34 @@ public class TomlConformanceTest {
     private static final int SHOWN = 12;
 
     /**
-     * Where the parser stands, and a ratchet rather than a target.
+     * Where the parser stands against the suite, as a ratchet: the test fails if a number rises and also
+     * if one falls without being edited here, so neither can drift.
      *
      * <p>
-     * <b>These numbers are not conformance and are not written here to be lived with.</b> They are the
-     * count of suite cases the parser does not yet get right, recorded so that the suite runs in the build
-     * from the day it arrived rather than on the day it finally passes — which is how a conformance suite
-     * ends up sitting in a branch for a year. The test fails if a number goes up, and it also fails if a
-     * number goes <i>down</i> without being edited here, so improving the parser forces the record to be
-     * corrected and the count cannot drift.
+     * <b>Every one of the 499 documents TOML forbids is refused.</b> Six of the 210 it says to read are
+     * not read as it expects, and they are not a to-do list: both groups are the flattening convention
+     * meeting the format, not the parser failing to keep up.
      * </p>
      *
+     * <ul>
+     *   <li><b>An empty key</b> — <code>"" = "blank"</code>, which TOML allows. A key with an empty
+     *       segment cannot be named by {@link org.aeonbits.owner.loaders.PropertyKeys}, and no interface
+     *       could declare a method to read it if it could.</li>
+     *   <li><b>A dot inside a quoted key</b> — <code>[a.b.c]</code> and <code>[a."b.c"]</code> are two
+     *       tables in TOML and one key here. This is the ambiguity the library documents on purpose: the
+     *       alternative is an escaping scheme paid for by every reader of an ordinary key.</li>
+     * </ul>
+     *
      * <p>
-     * What is left is written up in <code>FORMATS.md</code>. In outline: the invalid half is mostly
-     * range-checking a date-time — the parser recognises the shape of one and does not ask whether the
-     * thirtieth of February exists — and a handful of lexical refusals; the valid half is empty keys,
-     * which the flattening convention has no way to name, and one CRLF case.
+     * Both are decisions taken for the whole library before this format existed, so closing them is a
+     * change to the convention rather than to this parser, and it is written up in
+     * <code>FORMATS.md</code> as that.
      * </p>
      */
-    private static final int INVALID_NOT_YET_REFUSED = 92;
+    private static final int INVALID_NOT_YET_REFUSED = 0;
 
     /** @see #INVALID_NOT_YET_REFUSED */
-    private static final int VALID_NOT_YET_READ = 9;
+    private static final int VALID_NOT_YET_READ = 6;
 
     private static File corpus;
 

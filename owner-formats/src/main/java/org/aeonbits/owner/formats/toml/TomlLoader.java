@@ -14,6 +14,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -46,23 +50,22 @@ import java.util.Properties;
  * read by the same nested interfaces, indexed lists and grouped maps as anything else.
  * </p>
  *
- * <h2>Held to the conformance suite, and not yet passing all of it</h2>
+ * <h2>Held to the conformance suite</h2>
  *
  * <p>
  * YAML ships here as a documented subset because a complete YAML implementation is out of reach without a
  * dependency. TOML is held to a different standard, its specification being a document rather than an
  * implementation and <a href="https://github.com/toml-lang/toml-test">toml-test</a> a conformance suite
- * anyone can run — which is the reason this format is written here rather than delegated. So the target is
- * the whole of v1.0.0, and the suite rather than we decide when that is reached.
+ * anyone can run — which is the reason this format is written here rather than delegated.
  * </p>
  *
  * <p>
- * <b>It is not reached yet.</b> The suite runs in the build with the current score recorded as a ratchet —
- * see {@code TomlConformanceTest} — because a conformance suite that only runs on the day it passes is a
- * suite that sits in a branch for a year. What is missing is written up there and in
- * <code>FORMATS.md</code>, and it is mostly refusals rather than readings: a date-time is recognised by its
- * shape and not yet checked for being a date that exists, so this parser accepts some documents TOML
- * forbids. It does not misread a document it accepts.
+ * <b>Every one of the 499 documents that suite says to refuse is refused, and 204 of the 210 it says to
+ * read are read as it expects.</b> The six are not a to-do list: they are an empty key and a dot inside a
+ * quoted key, both of which the flattening convention cannot name and neither of which an interface could
+ * declare a method for. Closing them would be a change to a convention chosen for the whole library rather
+ * than to this parser. See {@code TomlConformanceTest}, which runs the whole suite in every build with the
+ * score as a ratchet.
  * </p>
  *
  * <h2>Values are kept as written, with one exception that is a rule</h2>
@@ -123,10 +126,19 @@ public class TomlLoader implements Loader {
 
     /**
      * The whole document, as text.
+     *
      * <p>
      * <b>UTF-8, and not the platform encoding</b>: TOML v1.0.0 says a document is a valid UTF-8 encoded
      * Unicode document, which leaves nothing to guess. A byte order mark is dropped, since a file written
      * by a Windows editor may carry one and it is not part of the document.
+     * </p>
+     *
+     * <p>
+     * <b>And strictly, which {@code new String(bytes, UTF_8)} is not.</b> That constructor replaces a
+     * malformed byte with U+FFFD and reads on, so a truncated or mis-encoded file would come back as a
+     * configuration with a replacement character sitting in a value — the format says the document is UTF-8,
+     * so a document that is not is refused rather than repaired. It is the same rule the rest of this
+     * parser follows: refuse what cannot be understood instead of half-reading it.
      * </p>
      */
     private static String read(InputStream input) throws IOException {
@@ -135,7 +147,16 @@ public class TomlLoader implements Loader {
         for (int count = input.read(buffer); count > 0; count = input.read(buffer))
             bytes.write(buffer, 0, count);
 
-        String text = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT);
+        String text;
+        try {
+            text = decoder.decode(ByteBuffer.wrap(bytes.toByteArray())).toString();
+        } catch (CharacterCodingException notUtf8) {
+            throw new IOException("the document is not valid UTF-8, which TOML requires: "
+                    + notUtf8.getMessage(), notUtf8);
+        }
         return text.startsWith("﻿") ? text.substring(1) : text;
     }
 

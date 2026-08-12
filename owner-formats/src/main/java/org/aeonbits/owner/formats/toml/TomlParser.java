@@ -10,6 +10,8 @@ package org.aeonbits.owner.formats.toml;
 import org.aeonbits.owner.loaders.PropertyKeys;
 
 import java.io.IOException;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -116,6 +118,9 @@ final class TomlParser {
 
     private void openTable(List<String> path, int headerAt) throws IOException {
         String key = resolve(path);
+        if (arrays.containsKey(unindexed(path)))
+            throw errorAt(headerAt, "[" + dot(path) + "] is an array of tables, so it cannot also be a "
+                    + "table: write [[" + dot(path) + "]] to add another element");
         if (!explicit.add(key))
             throw errorAt(headerAt, "the table [" + dot(path) + "] is defined twice");
         if (values.contains(key))
@@ -131,20 +136,24 @@ final class TomlParser {
     }
 
     private void openArrayOfTables(List<String> path, int headerAt) throws IOException {
-        String declared = join(path);
         // only the path above it is resolved: the last segment is the array being written, and indexing it
         // here as well as below would give products[0][1] for the second [[products]]
-        String key = PropertyKeys.child(resolveParent(path), path.get(path.size() - 1));
-        if (explicit.contains(key) || (tables.contains(key) && !arrays.containsKey(declared)))
+        String key = unindexed(path);
+        if (explicit.contains(key) || (tables.contains(key) && !arrays.containsKey(key)))
             throw errorAt(headerAt, "[[" + dot(path) + "]] is already a table, so it cannot also be an "
                     + "array of tables");
         if (values.contains(key))
             throw errorAt(headerAt, "[[" + dot(path) + "]] is already a value");
         claimParents(path, headerAt);
-        int index = arrays.containsKey(declared) ? arrays.get(declared) : 0;
-        arrays.put(declared, index + 1);
+        int index = arrays.containsKey(key) ? arrays.get(key) : 0;
+        arrays.put(key, index + 1);
         tables.add(key);
         table = PropertyKeys.element(key, index);
+    }
+
+    /** The resolved key of a header's path with its own last segment left un-indexed. */
+    private String unindexed(List<String> path) {
+        return PropertyKeys.child(resolveParent(path), path.get(path.size() - 1));
     }
 
     /**
@@ -157,7 +166,7 @@ final class TomlParser {
         String resolved = "";
         for (int i = 0; i < path.size() - 1; i++) {
             walked = PropertyKeys.child(walked, path.get(i));
-            resolved = index(PropertyKeys.child(resolved, path.get(i)), walked);
+            resolved = index(PropertyKeys.child(resolved, path.get(i)));
             if (values.contains(resolved))
                 throw errorAt(headerAt, "'" + walked + "' is a value, so it cannot also hold a table");
             if (inline.contains(resolved))
@@ -173,12 +182,9 @@ final class TomlParser {
      * belongs to that element rather than sitting beside the array.
      */
     private String resolve(List<String> path) {
-        String walked = "";
         String resolved = "";
-        for (String part : path) {
-            walked = PropertyKeys.child(walked, part);
-            resolved = index(PropertyKeys.child(resolved, part), walked);
-        }
+        for (String part : path)
+            resolved = index(PropertyKeys.child(resolved, part));
         return resolved;
     }
 
@@ -187,9 +193,18 @@ final class TomlParser {
         return resolve(path.subList(0, path.size() - 1));
     }
 
-    /** Adds the current element's index to a prefix, if the path it came from is an array of tables. */
-    private String index(String resolved, String declared) {
-        Integer written = arrays.get(declared);
+    /**
+     * Adds the current element's index to a prefix, if that prefix is an array of tables.
+     *
+     * <p>
+     * The count is kept against the <b>resolved</b> key rather than the declared path, which is what makes
+     * an array inside an array work: <code>[[fruits.varieties]]</code> under the second
+     * <code>[[fruits]]</code> counts as <code>fruits[1].varieties</code> and starts again at zero, where
+     * counting against <code>fruits.varieties</code> would carry the first fruit's total into the second.
+     * </p>
+     */
+    private String index(String resolved) {
+        Integer written = arrays.get(resolved);
         return written == null ? resolved : PropertyKeys.element(resolved, written - 1);
     }
 
@@ -218,6 +233,16 @@ final class TomlParser {
                 throw errorAt(keyAt, "'" + walked + "' is a value, so it cannot also hold a key");
             if (inline.contains(walked))
                 throw errorAt(keyAt, "'" + walked + "' is an inline table, which cannot be extended");
+            // a dotted key may bring a table into being, but it may not reach into one that a [header]
+            // already wrote out. TOML calls this too confusing to allow rather than ambiguous, and says so:
+            // see toml-lang/toml#846. It is also what stops [a.b.c] and then [a] with b.c.t from meaning
+            // something the reader has to scroll to work out
+            if (explicit.contains(walked))
+                throw errorAt(keyAt, "[" + walked + "] is written out as a table of its own, so a dotted "
+                        + "key here cannot add to it");
+            if (arrays.containsKey(walked))
+                throw errorAt(keyAt, "[[" + walked + "]] is an array of tables, and a dotted key cannot "
+                        + "add to one: write another [[" + walked + "]] element");
             tables.add(walked);
             if (topLevel)
                 dotted.add(walked);
@@ -288,15 +313,16 @@ final class TomlParser {
      */
     private void array(String key) throws IOException {
         expect('[');
+        // taken whether or not anything is written under it: an array is a value, so a second
+        // arr = [2] and a later [arr.x] are both redefinitions even though the properties are arr[0]
+        values.add(key);
         int index = 0;
         while (true) {
             skipArrayWhitespace();
             if (peekIs(']')) {
                 at++;
-                if (index == 0) {
-                    values.add(key);
+                if (index == 0)
                     into.setProperty(key, "");
-                }
                 return;
             }
             value(PropertyKeys.element(key, index++));
@@ -506,7 +532,9 @@ final class TomlParser {
      * compiler resolves one inside a comment as readily as inside a string.)
      */
     private int codePoint(int length) throws IOException {
-        int value = 0;
+        // a long, because eight hexadecimal digits overflow an int and the overflowed value walks straight
+        // through the range check below and out into appendCodePoint, which throws the wrong exception
+        long value = 0;
         for (int i = 0; i < length; i++) {
             if (!more())
                 throw error("an escape needs " + length + " hexadecimal digits");
@@ -518,7 +546,7 @@ final class TomlParser {
         }
         if (value > 0x10FFFF || (value >= 0xD800 && value <= 0xDFFF))
             throw errorAt(at - length, "an escape does not name a character");
-        return value;
+        return (int) value;
     }
 
     /**
@@ -590,29 +618,147 @@ final class TomlParser {
      * ISO form.
      */
     private String asDateTime(String raw, int start) throws IOException {
-        if (!looksLikeDate(raw) && !looksLikeTime(raw))
-            return null;
-        if (raw.indexOf(' ') >= 0 && !(raw.length() > 10 && raw.charAt(10) == ' '))
-            throw errorAt(start, "'" + raw + "' is not a date or a time TOML can read");
+        if (looksLikeDate(raw))
+            return dateAndWhateverFollowsIt(raw, start);
+        if (looksLikeTime(raw))
+            return localTime(raw, start);
+        return null;
+    }
 
-        // TOML allows a lower-case t, z and the space in place of the T, and java.time reads none of the
-        // three: they are spellings of one instant, so they are canonicalised like the numbers above
-        StringBuilder out = new StringBuilder(raw);
-        if (out.length() > 10 && (out.charAt(10) == ' ' || out.charAt(10) == 't'))
-            out.setCharAt(10, 'T');
-        if (out.charAt(out.length() - 1) == 'z')
-            out.setCharAt(out.length() - 1, 'Z');
-        return out.toString();
+    /**
+     * A local date, a local date-time or an offset date-time - which is to say a date, and then whichever
+     * of them the rest of the text turns it into.
+     *
+     * <p>
+     * <b>Once it starts like a date it has to be one.</b> Answering <code>null</code> here would hand
+     * <code>2020-01-01x</code> to the number reader and have it refused for not being a number, which is
+     * true and unhelpful; the document meant a date and the complaint should say what is wrong with it.
+     * </p>
+     */
+    private String dateAndWhateverFollowsIt(String raw, int start) throws IOException {
+        refuseImpossibleDate(raw, start);
+        if (raw.length() == 10)
+            return raw;
+
+        char delimiter = raw.charAt(10);
+        if (delimiter != 'T' && delimiter != 't' && delimiter != ' ')
+            throw errorAt(start, "'" + raw + "' has no T between its date and its time");
+
+        // the whole of the rest is the time, so it is measured before the offset is taken off it
+        String rest = raw.substring(11);
+        String offset = "";
+        int offsetAt = offsetStartsAt(rest);
+        if (offsetAt >= 0) {
+            offset = rest.substring(offsetAt);
+            rest = rest.substring(0, offsetAt);
+            refuseImpossibleOffset(offset, raw, start);
+        }
+        refuseImpossibleTime(rest, raw, start);
+
+        // TOML writes the delimiter as T, t or a space and the zone as Z or z; java.time reads only the
+        // upper-case forms, and these are spellings of one instant rather than values of their own
+        return raw.substring(0, 10) + 'T' + rest + ("z".equals(offset) ? "Z" : offset);
+    }
+
+    /** A local time, which in TOML carries no offset: <code>07:32:00</code> or <code>07:32:00.999</code>. */
+    private String localTime(String raw, int start) throws IOException {
+        refuseImpossibleTime(raw, raw, start);
+        return raw;
+    }
+
+    /**
+     * Where the offset begins in the text after the delimiter, or <code>-1</code> for a local date-time.
+     * The <code>-</code> of a negative offset cannot be confused with anything, a time holding none.
+     */
+    private static int offsetStartsAt(String time) {
+        for (int i = 0; i < time.length(); i++) {
+            char c = time.charAt(i);
+            if (c == 'Z' || c == 'z' || c == '+' || c == '-')
+                return i;
+        }
+        return -1;
+    }
+
+    /**
+     * The date is real. <code>java.time</code> is asked rather than the month lengths written out again:
+     * it knows that February has 29 days in 2000 and not in 2100, which is the whole of what these cases
+     * are about.
+     */
+    private void refuseImpossibleDate(String raw, int start) throws IOException {
+        try {
+            LocalDate.of(number(raw, 0, 4), number(raw, 5, 2), number(raw, 8, 2));
+        } catch (DateTimeException noSuchDay) {
+            throw errorAt(start, "'" + raw.substring(0, 10) + "' is not a date that exists: "
+                    + noSuchDay.getMessage());
+        }
+    }
+
+    /**
+     * The time is real, and is written the one way TOML writes one: two digits for each of the hour, the
+     * minute and the second, and an optional fraction of at least one digit.
+     *
+     * <p>
+     * The second may be <b>60</b>, which is not a mistake: TOML allows it for a leap second, and it is the
+     * one place these ranges are not the ones {@link java.time.LocalTime} would accept.
+     * </p>
+     */
+    private void refuseImpossibleTime(String time, String raw, int start) throws IOException {
+        if (!looksLikeTime(time))
+            throw errorAt(start, "'" + raw + "' has no time, or one not written as hh:mm:ss");
+        refuseOutOfRange(number(time, 0, 2), 23, "hour", raw, start);
+        refuseOutOfRange(number(time, 3, 2), 59, "minute", raw, start);
+        // 60 and not 59: a leap second is a second TOML lets a document write
+        refuseOutOfRange(number(time, 6, 2), 60, "second", raw, start);
+
+        if (time.length() == 8)
+            return;
+        if (time.charAt(8) != '.' || time.length() == 9)
+            throw errorAt(start, "'" + raw + "' has something after its seconds that is not a fraction");
+        for (int i = 9; i < time.length(); i++)
+            if (!isDigit(time.charAt(i)))
+                throw errorAt(start, "'" + raw + "' has a fraction of a second that is not all digits");
+    }
+
+    /** An offset is <code>Z</code>, or a sign and an hour and a minute, and nothing else. */
+    private void refuseImpossibleOffset(String offset, String raw, int start) throws IOException {
+        if (offset.equals("Z") || offset.equals("z"))
+            return;
+        boolean signed = offset.charAt(0) == '+' || offset.charAt(0) == '-';
+        if (!signed || offset.length() != 6 || !digitsAt(offset, 1, 2) || offset.charAt(3) != ':'
+                || !digitsAt(offset, 4, 2))
+            throw errorAt(start, "'" + raw + "' has an offset that is not Z or +hh:mm");
+        refuseOutOfRange(number(offset, 1, 2), 23, "offset hour", raw, start);
+        refuseOutOfRange(number(offset, 4, 2), 59, "offset minute", raw, start);
+    }
+
+    private void refuseOutOfRange(int value, int highest, String what, String raw, int start)
+            throws IOException {
+        if (value > highest)
+            throw errorAt(start, "'" + raw + "' has " + what + " " + value + ", and the highest there is "
+                    + "is " + highest);
+    }
+
+    private static int number(String text, int from, int count) {
+        int value = 0;
+        for (int i = from; i < from + count; i++)
+            value = value * 10 + (text.charAt(i) - '0');
+        return value;
     }
 
     private static boolean looksLikeDate(String raw) {
         return raw.length() >= 10 && digitsAt(raw, 0, 4) && raw.charAt(4) == '-'
-                && digitsAt(raw, 5, 2) && raw.charAt(7) == '-' && digitsAt(raw, 8, 2);
+                && digitsAt(raw, 5, 2) && raw.charAt(7) == '-' && digitsAt(raw, 8, 2)
+                // exactly four digits of year: 10000-01-01 is a year RFC 3339 has no room for
+                && (raw.length() == 10 || !isDigit(raw.charAt(10)));
     }
 
     private static boolean looksLikeTime(String raw) {
         return raw.length() >= 8 && digitsAt(raw, 0, 2) && raw.charAt(2) == ':'
                 && digitsAt(raw, 3, 2) && raw.charAt(5) == ':' && digitsAt(raw, 6, 2);
+    }
+
+    private static boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
     }
 
     private static boolean digitsAt(String raw, int from, int count) {
@@ -628,10 +774,10 @@ final class TomlParser {
     private String asNumber(String raw, int start) throws IOException {
         String sign = "";
         String body = raw;
-        if (body.startsWith("+")) {
-            body = body.substring(1);
-        } else if (body.startsWith("-")) {
-            sign = "-";
+        boolean signed = body.startsWith("+") || body.startsWith("-");
+        if (signed) {
+            if (body.startsWith("-"))
+                sign = "-";
             body = body.substring(1);
         }
 
@@ -643,14 +789,14 @@ final class TomlParser {
         if (body.length() > 2 && body.charAt(0) == '0') {
             char radix = body.charAt(1);
             if (radix == 'x' || radix == 'o' || radix == 'b') {
-                if (!sign.isEmpty())
+                if (signed)
                     throw errorAt(start, "'" + raw + "' cannot be signed: a hexadecimal, octal or binary "
                             + "integer has no sign in TOML");
                 return radixInteger(body.substring(2), radix == 'x' ? 16 : radix == 'o' ? 8 : 2, raw, start);
             }
         }
 
-        String digits = withoutUnderscores(body, raw, start);
+        String digits = withoutUnderscores(body, raw, start, 10);
         refuseLeadingZero(digits, raw, start);
         try {
             if (isInteger(digits)) {
@@ -658,6 +804,7 @@ final class TomlParser {
                 // answered back through toString so that -0 comes out as the zero it is
                 return Long.toString(Long.parseLong(sign + digits));
             }
+            refuseMalformedFloat(digits, raw, start);
             double parsed = Double.parseDouble(digits);
             if (Double.isInfinite(parsed) || Double.isNaN(parsed))
                 throw errorAt(start, "'" + raw + "' is not a number TOML can read");
@@ -668,9 +815,12 @@ final class TomlParser {
     }
 
     private String radixInteger(String body, int radix, String raw, int start) throws IOException {
-        String digits = withoutUnderscores(body, raw, start);
+        String digits = withoutUnderscores(body, raw, start, radix);
         if (digits.isEmpty())
             throw errorAt(start, "'" + raw + "' has no digits after its prefix");
+        // Long.parseLong would read 0x-1 as -1: the sign belongs before the prefix, and TOML allows none
+        if (digits.charAt(0) == '+' || digits.charAt(0) == '-')
+            throw errorAt(start, "'" + raw + "' has a sign after its prefix");
         try {
             return Long.toString(Long.parseLong(digits, radix));
         } catch (NumberFormatException notANumber) {
@@ -682,7 +832,7 @@ final class TomlParser {
      * TOML lets an underscore separate digits, and it must lie between two of them: a leading, trailing or
      * doubled one is a mistake rather than decoration.
      */
-    private String withoutUnderscores(String body, String raw, int start) throws IOException {
+    private String withoutUnderscores(String body, String raw, int start, int radix) throws IOException {
         if (body.indexOf('_') < 0)
             return body;
         StringBuilder out = new StringBuilder(body.length());
@@ -693,12 +843,59 @@ final class TomlParser {
                 continue;
             }
             boolean between = i > 0 && i < body.length() - 1
-                    && Character.digit(body.charAt(i - 1), 16) >= 0
-                    && Character.digit(body.charAt(i + 1), 16) >= 0;
+                    && Character.digit(body.charAt(i - 1), radix) >= 0
+                    && Character.digit(body.charAt(i + 1), radix) >= 0;
             if (!between)
                 throw errorAt(start, "'" + raw + "' has an underscore that is not between two digits");
         }
         return out.toString();
+    }
+
+    /**
+     * A float is written the one way TOML writes one: digits, then a fraction or an exponent or both, and
+     * digits on <b>both</b> sides of every dot and after the <code>e</code>.
+     *
+     * <p>
+     * {@link Double#parseDouble} is far more permissive - it reads <code>.5</code>, <code>5.</code> and
+     * <code>1e2.3</code> - and being more permissive than the specification is the one failure that matters
+     * for a format this widely tooled: it means reading a file every other tool refuses, and such a file is
+     * nearly always read by something else too.
+     * </p>
+     */
+    private void refuseMalformedFloat(String digits, String raw, int start) throws IOException {
+        String mantissa = digits;
+        int e = indexOfExponent(digits);
+        if (e >= 0) {
+            String exponent = digits.substring(e + 1);
+            mantissa = digits.substring(0, e);
+            if (exponent.startsWith("+") || exponent.startsWith("-"))
+                exponent = exponent.substring(1);
+            if (!allDigits(exponent))
+                throw errorAt(start, "'" + raw + "' has an exponent that is not a whole number");
+        }
+
+        int dot = mantissa.indexOf('.');
+        if (dot < 0) {
+            if (!allDigits(mantissa))
+                throw errorAt(start, "'" + raw + "' is not a number TOML can read");
+            return;
+        }
+        if (!allDigits(mantissa.substring(0, dot)) || !allDigits(mantissa.substring(dot + 1)))
+            throw errorAt(start, "'" + raw + "' has a dot without digits on both sides of it");
+    }
+
+    private static int indexOfExponent(String digits) {
+        int e = digits.indexOf('e');
+        return e >= 0 ? e : digits.indexOf('E');
+    }
+
+    private static boolean allDigits(String digits) {
+        if (digits.isEmpty())
+            return false;
+        for (int i = 0; i < digits.length(); i++)
+            if (!isDigit(digits.charAt(i)))
+                return false;
+        return true;
     }
 
     private void refuseLeadingZero(String digits, String raw, int start) throws IOException {
@@ -722,7 +919,13 @@ final class TomlParser {
     private void skipToNextExpression() throws IOException {
         while (more()) {
             char c = peek();
-            if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+            if (c == '\r') {
+                // a carriage return is half of a line ending, never whitespace on its own: a bare one is a
+                // control character loose in the document, and TOML says so
+                if (at + 1 >= text.length() || text.charAt(at + 1) != '\n')
+                    throw error("a carriage return has to be followed by a newline");
+                at++;
+            } else if (c == ' ' || c == '\t' || c == '\n') {
                 at++;
             } else if (c == '#') {
                 comment();
@@ -749,9 +952,11 @@ final class TomlParser {
     private void comment() throws IOException {
         at++;
         while (more() && peek() != '\n') {
-            char c = peek();
-            if (c < 0x20 && c != '\t')
-                throw error("a comment cannot hold a control character");
+            // a CR that ends the line ends the comment; a bare one is a control character like any other
+            if (peek() == 0x0D && at + 1 < text.length() && text.charAt(at + 1) == '\n')
+                return;
+            // the same rule as inside a string, DEL included: a comment is text, not a place to hide bytes
+            refuseControl(peek());
             at++;
         }
     }

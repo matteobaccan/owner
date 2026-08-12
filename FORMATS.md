@@ -372,7 +372,7 @@ A plan in phases
    over-estimating stopped: TOML genuinely is the biggest of the four, and the extra came from the
    redefinition rules rather than from the lexing.
 
-   ### Where it stands against the suite, which is not conformance yet
+   ### Where it stands against the suite
 
    Recorded 2026-08-12, from `TomlConformanceTest`, which runs in every build with the score as a ratchet —
    it fails if a count rises and also if one falls without the record being edited, so the number cannot
@@ -380,25 +380,38 @@ A plan in phases
 
    | | Passing | Of |
    |---|---|---|
-   | documents that must be **read** | 201 | 210 |
-   | documents that must be **refused** | 407 | 499 |
+   | documents that must be **refused** | **499** | 499 |
+   | documents that must be **read** | 204 | 210 |
 
-   **The gap is almost entirely refusals, and that is the good half to be wrong on**: a document this
-   parser accepts is not misread — the failures are files that ought to have been rejected. Most of them
-   are one missing check: a date-time is recognised by its *shape*, so the thirtieth of February and the
-   twenty-fifth hour are read as dates. Adding real range validation is the single largest step left and it
-   is worth doing before the release note claims the format.
+   **The refusals are complete.** Getting there took date-time range validation — the largest piece, and
+   worth 51 cases on its own — and then four smaller groups the suite named one by one: a float grammar of
+   its own, because `Double.parseDouble` reads `.5`, `5.` and `1e2.3` and TOML reads none of them; a `+`
+   counting as a sign, so `+0xFF` is refused like `-0xFF`; strict UTF-8 decoding, `new String(bytes, UTF_8)`
+   having quietly replaced a malformed byte with U+FFFD and read on; and the rule that a dotted key may not
+   reach into a table a `[header]` already wrote out.
 
-   On the reading side what is left is smaller and one piece of it may be permanent: TOML allows an
-   **empty key**, `"" = "blank"`, and the flattening convention has no way to name a key with an empty
-   segment. That is a collision between the format and a convention chosen for the whole library, so it
-   wants deciding rather than fixing.
+   **The six that remain are not a backlog.** They are the two places the format and the flattening
+   convention disagree, and the convention predates TOML by a week:
+
+   - **An empty key**, `"" = "blank"`, which TOML allows and `PropertyKeys` cannot name. Even if it could,
+     no interface could declare a method to read it.
+   - **A dot inside a quoted key**: `[a.b.c]` and `[a."b.c"]` are two tables in TOML and one key here. This
+     is exactly the ambiguity documented on the site as deliberate, whose alternative is an escaping scheme
+     paid for by everybody reading an ordinary key.
+
+   So closing them is a decision about the convention, for the whole library, and not a fix to this parser.
+   Neither is worth making for TOML alone.
 
    Running the suite from the first day rather than from the day it passes was deliberate, and it earned
    its keep immediately: it found the array-of-tables sub-table bug — `[fruits.physical]` after
-   `[[fruits]]` was writing `fruits.physical` beside the array instead of `fruits[0].physical` — and then a
-   double-indexing bug in the fix for it, `products[1][2]`. Neither was in any hand-written test, and
-   neither would have been.
+   `[[fruits]]` was writing `fruits.physical` beside the array instead of `fruits[0].physical` — then a
+   double-indexing bug in the fix for it, `products[1][2]`, and then a third in the same area, an array
+   nested inside an array of tables counting globally rather than within its element, so the varieties of
+   the second fruit were numbered after the first's. Also `Long.MIN_VALUE` refused, `-0` kept as `-0`,
+   lower-case `t` and `z` left where `java.time` will not read them, control characters accepted inside
+   multi-line strings, a bare CR passed over as whitespace, and an eight-digit escape overflowing an `int`
+   and walking through the range check. **Not one of these was in a hand-written test, and not one would
+   have been.**
 
 8. **CBOR, TOON if ever.**
 
