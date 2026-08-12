@@ -115,7 +115,7 @@ final class TomlParser {
     }
 
     private void openTable(List<String> path, int headerAt) throws IOException {
-        String key = join(path);
+        String key = resolve(path);
         if (!explicit.add(key))
             throw errorAt(headerAt, "the table [" + dot(path) + "] is defined twice");
         if (values.contains(key))
@@ -131,15 +131,18 @@ final class TomlParser {
     }
 
     private void openArrayOfTables(List<String> path, int headerAt) throws IOException {
-        String key = join(path);
-        if (explicit.contains(key) || (tables.contains(key) && !arrays.containsKey(key)))
+        String declared = join(path);
+        // only the path above it is resolved: the last segment is the array being written, and indexing it
+        // here as well as below would give products[0][1] for the second [[products]]
+        String key = PropertyKeys.child(resolveParent(path), path.get(path.size() - 1));
+        if (explicit.contains(key) || (tables.contains(key) && !arrays.containsKey(declared)))
             throw errorAt(headerAt, "[[" + dot(path) + "]] is already a table, so it cannot also be an "
                     + "array of tables");
         if (values.contains(key))
             throw errorAt(headerAt, "[[" + dot(path) + "]] is already a value");
         claimParents(path, headerAt);
-        int index = arrays.containsKey(key) ? arrays.get(key) : 0;
-        arrays.put(key, index + 1);
+        int index = arrays.containsKey(declared) ? arrays.get(declared) : 0;
+        arrays.put(declared, index + 1);
         tables.add(key);
         table = PropertyKeys.element(key, index);
     }
@@ -151,14 +154,43 @@ final class TomlParser {
      */
     private void claimParents(List<String> path, int headerAt) throws IOException {
         String walked = "";
+        String resolved = "";
         for (int i = 0; i < path.size() - 1; i++) {
             walked = PropertyKeys.child(walked, path.get(i));
-            if (values.contains(walked))
+            resolved = index(PropertyKeys.child(resolved, path.get(i)), walked);
+            if (values.contains(resolved))
                 throw errorAt(headerAt, "'" + walked + "' is a value, so it cannot also hold a table");
-            if (inline.contains(walked))
+            if (inline.contains(resolved))
                 throw errorAt(headerAt, "'" + walked + "' is an inline table, which cannot be extended");
-            tables.add(walked);
+            tables.add(resolved);
         }
+    }
+
+    /**
+     * The flattened prefix a header's path names, which is not simply the path: a segment that is an
+     * <code>[[array of tables]]</code> carries the index of the element being written, so
+     * <code>[fruits.physical]</code> after <code>[[fruits]]</code> is <code>fruits[0].physical</code> and
+     * belongs to that element rather than sitting beside the array.
+     */
+    private String resolve(List<String> path) {
+        String walked = "";
+        String resolved = "";
+        for (String part : path) {
+            walked = PropertyKeys.child(walked, part);
+            resolved = index(PropertyKeys.child(resolved, part), walked);
+        }
+        return resolved;
+    }
+
+    /** As {@link #resolve}, stopping before the last segment. */
+    private String resolveParent(List<String> path) {
+        return resolve(path.subList(0, path.size() - 1));
+    }
+
+    /** Adds the current element's index to a prefix, if the path it came from is an array of tables. */
+    private String index(String resolved, String declared) {
+        Integer written = arrays.get(declared);
+        return written == null ? resolved : PropertyKeys.element(resolved, written - 1);
     }
 
     // ---------------------------------------------------------- key/values
@@ -387,7 +419,7 @@ final class TomlParser {
                 }
                 escape(out);
             } else {
-                out.append(c);
+                out.append(refuseControlInMultiLine(c));
             }
         }
     }
@@ -414,7 +446,7 @@ final class TomlParser {
                 }
                 return out.toString();
             }
-            out.append(text.charAt(at++));
+            out.append(refuseControlInMultiLine(text.charAt(at++)));
         }
     }
 
@@ -489,6 +521,16 @@ final class TomlParser {
         return value;
     }
 
+    /**
+     * The same rule as {@link #refuseControl}, but a multi-line string may hold the newlines that end its
+     * lines - and nothing else that is a control character.
+     */
+    private char refuseControlInMultiLine(char c) throws IOException {
+        if (c == 0x0A || c == 0x0D)
+            return c;
+        return refuseControl(c);
+    }
+
     private char refuseControl(char c) throws IOException {
         if (c < 0x20 && c != '\t')
             throw errorAt(at - 1, "a control character has to be written as an escape");
@@ -548,15 +590,19 @@ final class TomlParser {
      * ISO form.
      */
     private String asDateTime(String raw, int start) throws IOException {
-        String candidate = raw;
-        if (candidate.length() > 10 && candidate.charAt(10) == ' ' && looksLikeDate(candidate))
-            candidate = candidate.substring(0, 10) + 'T' + candidate.substring(11);
-        if (looksLikeDate(candidate) || looksLikeTime(candidate)) {
-            if (candidate.indexOf(' ') >= 0)
-                throw errorAt(start, "'" + raw + "' is not a date or a time TOML can read");
-            return candidate;
-        }
-        return null;
+        if (!looksLikeDate(raw) && !looksLikeTime(raw))
+            return null;
+        if (raw.indexOf(' ') >= 0 && !(raw.length() > 10 && raw.charAt(10) == ' '))
+            throw errorAt(start, "'" + raw + "' is not a date or a time TOML can read");
+
+        // TOML allows a lower-case t, z and the space in place of the T, and java.time reads none of the
+        // three: they are spellings of one instant, so they are canonicalised like the numbers above
+        StringBuilder out = new StringBuilder(raw);
+        if (out.length() > 10 && (out.charAt(10) == ' ' || out.charAt(10) == 't'))
+            out.setCharAt(10, 'T');
+        if (out.charAt(out.length() - 1) == 'z')
+            out.setCharAt(out.length() - 1, 'Z');
+        return out.toString();
     }
 
     private static boolean looksLikeDate(String raw) {
@@ -608,8 +654,9 @@ final class TomlParser {
         refuseLeadingZero(digits, raw, start);
         try {
             if (isInteger(digits)) {
-                Long.parseLong(digits);
-                return sign + digits;
+                // parsed with the sign attached, Long.MIN_VALUE having no positive counterpart, and
+                // answered back through toString so that -0 comes out as the zero it is
+                return Long.toString(Long.parseLong(sign + digits));
             }
             double parsed = Double.parseDouble(digits);
             if (Double.isInfinite(parsed) || Double.isNaN(parsed))

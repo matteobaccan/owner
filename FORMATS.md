@@ -366,6 +366,40 @@ A plan in phases
    sensitivity. **700–1000 is the honest figure**, and unusually we will know when we are done rather than
    deciding it.
 
+   **Written 2026-08-12, and the estimate held for once: 786 lines** for the parser and 137 for the loader.
+   The commit that landed it said 347, which was `JsonParser`'s figure misread off a `wc -l` — corrected
+   here rather than left in the log. So the revision down from 1200–1800 was right and the run of
+   over-estimating stopped: TOML genuinely is the biggest of the four, and the extra came from the
+   redefinition rules rather than from the lexing.
+
+   ### Where it stands against the suite, which is not conformance yet
+
+   Recorded 2026-08-12, from `TomlConformanceTest`, which runs in every build with the score as a ratchet —
+   it fails if a count rises and also if one falls without the record being edited, so the number cannot
+   drift in either direction.
+
+   | | Passing | Of |
+   |---|---|---|
+   | documents that must be **read** | 201 | 210 |
+   | documents that must be **refused** | 407 | 499 |
+
+   **The gap is almost entirely refusals, and that is the good half to be wrong on**: a document this
+   parser accepts is not misread — the failures are files that ought to have been rejected. Most of them
+   are one missing check: a date-time is recognised by its *shape*, so the thirtieth of February and the
+   twenty-fifth hour are read as dates. Adding real range validation is the single largest step left and it
+   is worth doing before the release note claims the format.
+
+   On the reading side what is left is smaller and one piece of it may be permanent: TOML allows an
+   **empty key**, `"" = "blank"`, and the flattening convention has no way to name a key with an empty
+   segment. That is a collision between the format and a convention chosen for the whole library, so it
+   wants deciding rather than fixing.
+
+   Running the suite from the first day rather than from the day it passes was deliberate, and it earned
+   its keep immediately: it found the array-of-tables sub-table bug — `[fruits.physical]` after
+   `[[fruits]]` was writing `fruits.physical` beside the array instead of `fruits[0].physical` — and then a
+   double-indexing bug in the fix for it, `products[1][2]`. Neither was in any hand-written test, and
+   neither would have been.
+
 8. **CBOR, TOON if ever.**
 
 ### Why INI moved in front of JSON and YAML

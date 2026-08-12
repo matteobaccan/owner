@@ -46,14 +46,23 @@ import java.util.Properties;
  * read by the same nested interfaces, indexed lists and grouped maps as anything else.
  * </p>
  *
- * <h2>The whole of v1.0.0, not a subset</h2>
+ * <h2>Held to the conformance suite, and not yet passing all of it</h2>
  *
  * <p>
  * YAML ships here as a documented subset because a complete YAML implementation is out of reach without a
- * dependency. TOML is different and is held to a different standard: its specification is a document rather
- * than an implementation, and <a href="https://github.com/toml-lang/toml-test">toml-test</a> is a
- * conformance suite anyone can run — which is the reason this format is written here rather than delegated,
- * so shipping a subset would empty that argument. The suite is what says when it is finished.
+ * dependency. TOML is held to a different standard, its specification being a document rather than an
+ * implementation and <a href="https://github.com/toml-lang/toml-test">toml-test</a> a conformance suite
+ * anyone can run — which is the reason this format is written here rather than delegated. So the target is
+ * the whole of v1.0.0, and the suite rather than we decide when that is reached.
+ * </p>
+ *
+ * <p>
+ * <b>It is not reached yet.</b> The suite runs in the build with the current score recorded as a ratchet —
+ * see {@code TomlConformanceTest} — because a conformance suite that only runs on the day it passes is a
+ * suite that sits in a branch for a year. What is missing is written up there and in
+ * <code>FORMATS.md</code>, and it is mostly refusals rather than readings: a date-time is recognised by its
+ * shape and not yet checked for being a date that exists, so this parser accepts some documents TOML
+ * forbids. It does not misread a document it accepts.
  * </p>
  *
  * <h2>Values are kept as written, with one exception that is a rule</h2>

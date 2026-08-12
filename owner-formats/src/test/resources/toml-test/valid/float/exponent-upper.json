@@ -1,0 +1,10 @@
+{
+    "exp":       {"type": "float", "value": "300"},
+    "frac":      {"type": "float", "value": "310"},
+    "neg":       {"type": "float", "value": "-0.1"},
+    "neg-exp":   {"type": "float", "value": "0.03"},
+    "pos-exp":   {"type": "float", "value": "300"},
+    "zero":      {"type": "float", "value": "0"},
+    "zero-exp":  {"type": "float", "value": "3"},
+    "zero-plus": {"type": "float", "value": "0"}
+}

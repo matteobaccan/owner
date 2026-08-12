@@ -1,0 +1,10 @@
+# Please keep exponent-upper.toml in sync with this.
+
+exp       = 3e2
+pos-exp   = 3e+2
+neg-exp   = 3e-2
+zero-exp  = 3e0
+frac      = 3.1e2
+neg       = -1e-1
+zero      = 0e2
+zero-plus = +0e2

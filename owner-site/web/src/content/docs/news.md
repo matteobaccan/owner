@@ -108,9 +108,13 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
 
 #### Enhancements
  * **TOML is read**, from a source whose path ends in `.toml`, and `MyConfig.toml` joins the names tried
-   when a configuration declares no `@Sources`. It is **all of v1.0.0** rather than a subset: unlike YAML,
-   TOML has a written specification and a conformance suite anyone can run, which is why it is parsed here
-   rather than delegated the way HOCON is — and shipping a subset would have emptied that argument.
+   when a configuration declares no `@Sources`. Unlike YAML, TOML has a written specification and a
+   conformance suite anyone can run, which is why it is parsed here rather than delegated the way HOCON is
+   — and why the target is the whole of v1.0.0 rather than a subset we choose. `toml-test` runs in every
+   build: 201 of its 210 documents that must be read are read correctly, and 407 of its 499 that must be
+   refused are refused. **The gap is almost entirely refusals** — a date-time is recognised by its shape
+   and not yet checked for naming a date that exists — so some documents TOML forbids are accepted, while
+   a document that is accepted is not misread.
 
    TOML is the format this library's flattening convention was already shaped like: an `[[array of tables]]`
    *is* `servers[0].host`, a dotted key *is* the flattening, and a `[table]` is a prefix, so nothing had to

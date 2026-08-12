@@ -14,7 +14,7 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [INI](#ini) | a path ending in `.ini` or `.cfg` | `MyConfig.ini`, `MyConfig.cfg` | ours |
 | [JSON](#json) | a path ending in `.json` | `MyConfig.json` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core) |
 | [YAML](#yaml) | a path ending in `.yaml` or `.yml` | `MyConfig.yaml`, `MyConfig.yml` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core), and **a subset** |
-| [TOML](#toml) | a path ending in `.toml` | `MyConfig.toml` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core), **all of v1.0.0** |
+| [TOML](#toml) | a path ending in `.toml` | `MyConfig.toml` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core), **v1.0.0, held to its conformance suite** |
 | [HOCON](#hocon) | a path ending in `.conf` | `MyConfig.conf` | **not ours**, and the only one: see [below](#hocon) |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
@@ -779,14 +779,21 @@ public interface ClusterConfig extends Config {
 `servers[0].host`, a dotted key *is* the [flattening](#how-a-tree-becomes-keys), and a `[table]` is a
 prefix — nothing had to be adapted on either side.
 
-### All of v1.0.0, not a subset
+### Held to the conformance suite
 
 [YAML](#yaml) ships as a documented subset because a complete YAML implementation is out of reach without
 a dependency. TOML is held to a different standard, and deliberately: its specification is a document
 rather than an implementation, and [`toml-test`](https://github.com/toml-lang/toml-test) is a conformance
 suite anyone can run — which is the reason this format is written here rather than delegated the way
-[HOCON](#hocon) is. Shipping a subset would empty that argument, so the suite is what decides when it is
-finished rather than us.
+[HOCON](#hocon) is. So the target is the whole of v1.0.0, and the suite decides when that is reached
+rather than us.
+
+**It is not reached yet, and this page would rather say so than let you find out.** The suite runs in every
+build, with the current score recorded so that it can only improve. Of its 210 documents that must be read,
+201 are read correctly; of its 499 that must be refused, 407 are refused. **The gap is almost entirely
+refusals**: a date-time is recognised by its shape and not yet checked for naming a date that exists, so
+some documents TOML forbids are accepted. A document that is accepted is not misread — the failures are
+files that ought to have been rejected, not values that come out wrong.
 
 ### Values are kept as written, except where TOML writes one value several ways
 
