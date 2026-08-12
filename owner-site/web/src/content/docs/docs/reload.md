@@ -119,13 +119,14 @@ URLs.
 The @HotReload annotation
 -------------------------
 
-The `@HotReload` annotation accepts 3 optional parameters.
+The `@HotReload` annotation accepts 4 optional parameters.
 
 And is defined as:
 
 ```java
 @interface HotReload {
     long value() default 5;
+    String interval() default "";   // since 2.0.0
     TimeUnit unit() default SECONDS;
     HotReloadType type() default SYNC;
 }
@@ -178,6 +179,52 @@ interface MyConfig extends Config { ... }
 ```
 
 The difference between SYNC and ASYNC hot reload will be explained below.
+
+### An interval decided outside the source file
+
+`value` and `unit` are constants, so the interval they express is fixed when the interface is compiled:
+checking every five seconds in development and every five minutes in production meant two interfaces, or
+two builds. Since 2.0.0 the interval can be written as text instead, and a `${variable}` in it is expanded:
+
+```java
+@HotReload(interval = "${owner.reload.interval}", type = HotReloadType.ASYNC)
+@Sources("file:/etc/myapp/myapp.properties")
+interface MyConfig extends Config, Reloadable { }
+```
+
+```java
+ConfigFactory.setProperty("owner.reload.interval", "5m");
+MyConfig cfg = ConfigFactory.create(MyConfig.class);
+```
+
+The variable is looked up in the properties given to the `ConfigFactory`, in the system properties and in
+the environment — the same three sources, in the same order, that expand a
+[`@Sources` spec](/owner/docs/configuring/), so `-Downer.reload.interval=30s` on the command line works
+just as well and no code has to change between one deployment and the next.
+
+The value **carries its own unit**, and `unit` is not consulted:
+
+| written | means |
+|---|---|
+| `500ms` | 500 milliseconds |
+| `30s` | 30 seconds |
+| `5m` | 5 minutes |
+| `2h`, `1d` | 2 hours, 1 day |
+| `PT1H30M` | ISO-8601: an hour and a half |
+
+**A bare number is refused**, and on purpose. The duration syntax reads a number with no unit as
+milliseconds, while `@HotReload(5)` — the attribute next door — means five *seconds*. Two neighbouring
+attributes cannot mean different things by the same digits, so `interval = "5"` is refused with a message
+that says to write `5s` or `5ms`.
+
+Everything that cannot be read is refused **when the configuration object is created**, not at the first
+check that would have used it: a value that is not a duration, a variable nobody set — which arrives at
+the parser as the literal `${...}` — and an interval that is zero or negative. The message names the
+interface, what was written, and what it expanded to when the two differ.
+
+When `interval` is set it decides, and `value` is ignored. The two are not merged, because an annotation
+attribute cannot be told apart from its default once compiled: a `value` left out and a `value` written as
+`5` look identical from inside. Configurations that do not use `interval` are untouched.
 
 As explained before the [last modified] date of the file will be used to detect
 changes on the files.

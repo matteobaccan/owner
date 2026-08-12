@@ -107,6 +107,27 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **The hot reload interval can come from outside the interface.** `@HotReload(interval = "${ttl}")` takes
+   the time between two checks as text, with a `${variable}` expanded from the properties of the
+   `ConfigFactory`, the system properties and the environment — the same three, in the same order, that
+   expand a `@Sources` spec. Five seconds in development and five minutes in production stop being two
+   interfaces, or two builds:
+
+   ```java
+   @HotReload(interval = "${owner.reload.interval}", type = ASYNC)
+   @Sources("file:/etc/myapp/myapp.properties")
+   interface MyConfig extends Config, Reloadable { }
+   ```
+
+   The value carries its own unit — `500ms`, `30s`, `5m`, `PT1H30M` — so `unit` is not consulted, and a
+   **bare number is refused**: the duration syntax reads one as milliseconds while `@HotReload(5)` next
+   door means five *seconds*, and two neighbouring attributes cannot mean different things by the same
+   digits. A value that is not a duration, a variable nobody set, and an interval that is not positive are
+   all refused when the configuration object is created rather than at the first check. `value` and `unit`
+   are untouched and still decide when `interval` is not written, so no existing configuration changes.
+   Asked for in [#179](https://github.com/matteobaccan/owner/issues/179) in 2016, where the shape it took
+   — a new attribute rather than a change to the type of `value` — was already the one Luigi Viggiano
+   argued for. See [Hot reload](/owner/docs/reload/).
  * **TOML is read**, from a source whose path ends in `.toml`, and `MyConfig.toml` joins the names tried
    when a configuration declares no `@Sources`. Unlike YAML, TOML has a written specification and a
    conformance suite anyone can run, which is why it is parsed here rather than delegated the way HOCON is

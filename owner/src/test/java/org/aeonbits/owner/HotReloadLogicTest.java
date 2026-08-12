@@ -78,7 +78,7 @@ public class HotReloadLogicTest {
         PropertiesManager manager = managerOf(MyConfig.class);
         HotReload hotReload = MyConfig.class.getAnnotation(HotReload.class);
 
-        HotReloadLogic logic = new HotReloadLogic(hotReload,
+        HotReloadLogic logic = new HotReloadLogic(hotReload, SECONDS.toMillis(5),
                 singletonList(new URI("http://localhost/non-watchable.properties")), manager);
 
         // the http URI cannot be resolved to a file, hence no watchable resource is registered.
@@ -107,7 +107,8 @@ public class HotReloadLogicTest {
         // the manager is busy loading on the first check, done on the second one
         when(manager.isLoading()).thenReturn(true, false);
         HotReload hotReload = MyConfig.class.getAnnotation(HotReload.class);
-        HotReloadLogic logic = new HotReloadLogic(hotReload, singletonList(watched.toURI()), manager);
+        HotReloadLogic logic =
+                new HotReloadLogic(hotReload, SECONDS.toMillis(5), singletonList(watched.toURI()), manager);
 
         // the file changes and the hot reload interval of 5 seconds expires...
         assertTrue(watched.setLastModified(watched.lastModified() + 10000));
@@ -139,7 +140,7 @@ public class HotReloadLogicTest {
 
         List<LogRecord> records = listen(Level.CONFIG);
         try {
-            new HotReloadLogic(MyConfig.class.getAnnotation(HotReload.class),
+            new HotReloadLogic(MyConfig.class.getAnnotation(HotReload.class), SECONDS.toMillis(5),
                     Arrays.asList(watched.toURI(), new URI("system:properties")),
                     managerOf(MyConfig.class));
         } finally {

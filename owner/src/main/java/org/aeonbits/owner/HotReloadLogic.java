@@ -9,6 +9,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.HotReloadType;
+import org.aeonbits.owner.util.DurationParser;
 
 import java.io.File;
 import java.io.Serializable;
@@ -17,6 +18,7 @@ import java.util.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
@@ -24,6 +26,7 @@ import static org.aeonbits.owner.util.Util.fileFromURI;
 import static org.aeonbits.owner.util.Util.hideCredentials;
 import static org.aeonbits.owner.util.Util.now;
 import static org.aeonbits.owner.util.Util.system;
+import static org.aeonbits.owner.util.Util.unsupported;
 
 /**
  * @author Luigi R. Viggiano
@@ -31,6 +34,9 @@ import static org.aeonbits.owner.util.Util.system;
 class HotReloadLogic implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(HotReloadLogic.class.getName());
+
+    /** A number with no unit after it, which {@link #intervalMillis} refuses rather than guess about. */
+    private static final Pattern BARE_NUMBER = Pattern.compile("[+-]?\\d+");
 
     private final PropertiesManager manager;
     private final long interval;
@@ -81,11 +87,76 @@ class HotReloadLogic implements Serializable {
         }
     }
 
-    HotReloadLogic(HotReload hotReload, List<URI> uris, PropertiesManager manager) {
+    HotReloadLogic(HotReload hotReload, long interval, List<URI> uris, PropertiesManager manager) {
         this.manager = manager;
-        type = hotReload.type();
-        interval = hotReload.unit().toMillis(hotReload.value());
+        this.type = hotReload.type();
+        this.interval = interval;
         setupWatchableResources(uris);
+    }
+
+    /**
+     * How long to wait between two checks, in milliseconds, read off the annotation.
+     * <p>
+     * {@link HotReload#interval()} decides it when it is set, expanded first through the same variables a
+     * {@link Config.Sources} spec is expanded with, so that the interval can come from outside the source
+     * file: an annotation takes constants, and five seconds in development and five minutes in production
+     * used to mean two interfaces. {@link HotReload#value()} and {@link HotReload#unit()} answer when it
+     * is not, which is what every existing configuration has.
+     * </p>
+     * <p>
+     * The two are not merged: an annotation attribute cannot be told apart from its default once
+     * compiled, so a <code>value</code> left out and a <code>value</code> written as 5 look the same
+     * here. What can be told apart is which of the two forms was used, and that is what decides.
+     * </p>
+     *
+     * @param hotReload the annotation as written.
+     * @param clazz     the interface carrying it, for the message.
+     * @param expander  the expander of the factory this configuration is being created by.
+     * @return the interval in milliseconds.
+     * @throws UnsupportedOperationException if the text does not read as a positive duration.
+     */
+    static long intervalMillis(HotReload hotReload, Class<?> clazz, VariablesExpander expander) {
+        String declared = hotReload.interval().trim();
+        if (declared.isEmpty())
+            return hotReload.unit().toMillis(hotReload.value());
+
+        String expanded = expander.expand(declared).trim();
+        // the parser reads a bare number as milliseconds, and the attribute next door reads a bare number
+        // as seconds: whoever moves @HotReload(5) to @HotReload(interval = "5") would get a check every
+        // five milliseconds. Two neighbouring attributes cannot mean different things by the same digits,
+        // so this one is not answered by a default
+        if (BARE_NUMBER.matcher(expanded).matches())
+            throw unsupported(
+                    "@HotReload(interval = \"%s\") on '%s'%s carries no unit. A bare number is read as "
+                            + "milliseconds here, while @HotReload(%s) means seconds: write the unit, as in "
+                            + "'%ss' or '%sms'",
+                    declared, clazz.getName(), expandedInto(declared, expanded),
+                    expanded, expanded, expanded);
+
+        long millis;
+        try {
+            millis = DurationParser.parse(expanded).toMillis();
+        } catch (RuntimeException itDoesNotReadAsOne) {
+            throw unsupported(itDoesNotReadAsOne,
+                    "@HotReload(interval = \"%s\") on '%s'%s does not read as a duration: %s. Write the unit "
+                            + "with the value, as in 500ms, 30s, 5m or PT1H30M",
+                    declared, clazz.getName(), expandedInto(declared, expanded),
+                    itDoesNotReadAsOne.getMessage());
+        }
+        if (millis <= 0)
+            throw unsupported(
+                    "@HotReload(interval = \"%s\") on '%s'%s is %d ms: the time between two checks has to "
+                            + "be a positive amount",
+                    declared, clazz.getName(), expandedInto(declared, expanded), millis);
+        return millis;
+    }
+
+    private static String expandedInto(String declared, String expanded) {
+        return declared.equals(expanded) ? "" : ", which expands to '" + expanded + "',";
+    }
+
+    long interval() {
+        return interval;
     }
 
     /**

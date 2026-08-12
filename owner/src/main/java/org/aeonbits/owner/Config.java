@@ -460,8 +460,47 @@ public interface Config extends Serializable {
         long value() default 5;
 
         /**
+         * The same interval written as text, so that it can come from outside the source file: a
+         * <code>${variable}</code> here is expanded from the properties given to the {@link Factory}, the
+         * system properties and the environment — the same three, in the same order, that expand a
+         * {@link Sources} spec.
+         *
          * <p>
-         * The time unit for the interval. By default it is {@link TimeUnit#SECONDS}.
+         * An annotation takes constants, so the interval used to be fixed at compile time and could not
+         * differ between one deployment and the next; five seconds in development and five minutes in
+         * production had to be two interfaces. This is the way to say it once:
+         * </p>
+         *
+         * <pre>
+         * &#64;HotReload(interval = "${owner.reload.interval}", type = ASYNC)
+         * interface MyConfig extends Config, Reloadable { }
+         * </pre>
+         *
+         * <p>
+         * The value carries its own unit — <code>500ms</code>, <code>30s</code>, <code>5m</code>,
+         * <code>PT1H30M</code> and the other forms {@link org.aeonbits.owner.util.DurationParser} reads —
+         * so {@link #unit()} does not enter into it. A bare number is refused, and deliberately: the
+         * parser reads one as milliseconds while <code>@HotReload(5)</code> next door means five
+         * <em>seconds</em>, so whoever moved the one to the other would get a check every five
+         * milliseconds. Two neighbouring attributes cannot mean different things by the same digits.
+         * </p>
+         * <p>
+         * When this is set it decides the interval and {@link #value()} is not consulted, the two being
+         * indistinguishable from their defaults once compiled. A value that does not read as a duration,
+         * a variable that expands to nothing, or an interval that is not positive, are refused when the
+         * configuration object is created rather than left to fail at the first check.
+         * </p>
+         *
+         * @return the interval as text; default is the empty string, which leaves {@link #value()} and
+         *         {@link #unit()} in charge.
+         * @since 2.0.0
+         */
+        String interval() default "";
+
+        /**
+         * <p>
+         * The time unit for the interval. By default it is {@link TimeUnit#SECONDS}. Not consulted when
+         * {@link #interval()} is set, that one carrying its own unit.
          * </p>
          * <p>
          * Date resolution vary from filesystem to filesystem.<br>

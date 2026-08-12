@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.Collections.synchronizedList;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.util.Util.*;
@@ -176,11 +177,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             }
         }
         if (hotReload != null) {
-            hotReloadLogic = new HotReloadLogic(hotReload, uris, this);
+            long interval = HotReloadLogic.intervalMillis(hotReload, clazz, expander);
+            hotReloadLogic = new HotReloadLogic(hotReload, interval, uris, this);
 
             if (hotReloadLogic.isAsync())
                 scheduler.scheduleAtFixedRate(this::checkAndReloadKeepingTheSchedule,
-                        hotReload.value(), hotReload.value(), hotReload.unit());
+                        interval, interval, MILLISECONDS);
         } else {
             hotReloadLogic = null;
         }
