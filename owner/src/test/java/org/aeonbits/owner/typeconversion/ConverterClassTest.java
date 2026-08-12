@@ -104,7 +104,13 @@ public class ConverterClassTest {
         }
     }
 
-    private static class CantBeAccessed implements Converter<Server> { // private
+    /**
+     * Private, which used to be a reason on its own: the converter was built with
+     * <code>Class.newInstance()</code>, which demands a public class and a public constructor. It is
+     * built like every other class named in an annotation now, so what this one shows is that being
+     * private is not one - see issue #186, and Issue186Test for the whole family.
+     */
+    private static class OnlyVisibleHere implements Converter<Server> {
         @Override
         public Server convert(Method method, String input) {
             return null;
@@ -137,8 +143,8 @@ public class ConverterClassTest {
         Server converterClassCantBeInstantiated();
 
         @DefaultValue("foobar:80")
-        @ConverterClass(CantBeAccessed.class)
-        Server converterClassCantBeAccessed();
+        @ConverterClass(OnlyVisibleHere.class)
+        Server converterThatIsOnlyVisibleWhereItIsUsed();
 
         @DefaultValue("10")
         @ConverterClass(OverridesIntegerConversion.class)
@@ -196,14 +202,10 @@ public class ConverterClassTest {
         }
     }
 
+    /** A converter needs no visibility beyond the interface that names it: issue #186. */
     @Test
-    public void testConverterCantBeAccessed() {
-        try {
-            cfg.converterClassCantBeAccessed();
-            fail("exception expected");
-        } catch (UnsupportedOperationException ex) {
-            assertEquals(IllegalAccessException.class, ex.getCause().getClass());
-        }
+    public void testAConverterThatIsOnlyVisibleWhereItIsUsedIsStillCalled() {
+        assertNull(cfg.converterThatIsOnlyVisibleWhereItIsUsed());
     }
 
     public static class OverridesIntegerConversion implements Converter {

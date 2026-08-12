@@ -107,6 +107,31 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **A class named in an annotation no longer has to be public.** A `Preprocessor`, a `Converter`, a
+   `Tokenizer` and a decryptor may now be package-private, or a `private static` class nested inside the
+   interface that names them, and their constructor may be private too:
+
+   ```java
+   public interface MyConfig extends Config {
+       @DefaultValue("a")
+       @PreprocessorClasses(ToUpperCase.class)
+       String propA();
+   }
+
+   private static class ToUpperCase implements Preprocessor {
+       @Override
+       public String process(String input) { return input.toUpperCase(); }
+   }
+   ```
+
+   Each of these is an implementation detail of the configuration that names it, and requiring them to be
+   public meant that a library using OWNER had to widen its own published API to satisfy ours. The class was
+   not being asked to be visible *to OWNER*, which would be fair: the instantiation lives in
+   `org.aeonbits.owner.util`, so "the same package" was never true of anybody else's code and even a
+   package-private class beside the interface was refused. What has not changed is that the class needs a
+   constructor taking no arguments, which is still refused with its name in the message. Asked for in
+   [#186](https://github.com/matteobaccan/owner/issues/186) in 2016. The converter also stops being built
+   with `Class.newInstance()`, deprecated since Java 9, which swallowed the constructor's own exception.
  * **The hot reload interval can come from outside the interface.** `@HotReload(interval = "${ttl}")` takes
    the time between two checks as text, with a `${variable}` expanded from the properties of the
    `ConfigFactory`, the system properties and the environment — the same three, in the same order, that

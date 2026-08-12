@@ -28,14 +28,24 @@ public class InvalidAnnotationTest {
     }
 
     public static interface InvalidAnnotationConfig extends Config {
-        // it throws an exception since the Tokenizer class is declared as private
+        // it throws an exception since the Tokenizer class cannot be built with no arguments
         @TokenizerClass(NonInstantiableTokenizer.class)
         @DefaultValue("1,2,3")
         public int[] nonInstantiableTokenizer();
     }
 
-    // it's private, it cannot be instantiated by the OWNER library
+    /**
+     * There is no constructor to call without knowing what to pass, which is a reason no annotation can
+     * work around. Being <b>private</b> was a reason too until 2.0.0, and is not one any more: a class
+     * named in an annotation is an implementation detail of the interface that names it and needs no
+     * visibility beyond it. See
+     * <a href="https://github.com/matteobaccan/owner/issues/186">#186</a> and
+     * {@code Issue186Test}, where a private tokenizer of this same kind is used.
+     */
     private static class NonInstantiableTokenizer extends CustomCommaTokenizer implements Tokenizer {
+        @SuppressWarnings("unused")
+        NonInstantiableTokenizer(String separator) {
+        }
     }
 
     @Test
@@ -44,8 +54,8 @@ public class InvalidAnnotationTest {
             cfg.nonInstantiableTokenizer();
             fail("UnsupportedOperationException expected");
         } catch (UnsupportedOperationException ex) {
-            // since NonInstantiableTokenizer is private and IllegalAccessException is expected.
-            assertTrue(ex.getCause() instanceof IllegalAccessException);
+            // there is no no-argument constructor to find, which is what reflection reports
+            assertTrue(String.valueOf(ex.getCause()), ex.getCause() instanceof NoSuchMethodException);
         }
     }
 }

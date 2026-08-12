@@ -32,6 +32,7 @@ import static java.lang.reflect.Modifier.isStatic;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.SpecialValue.SKIP;
 import static org.aeonbits.owner.util.Util.expandUserHome;
+import static org.aeonbits.owner.util.Util.newInstance;
 import static org.aeonbits.owner.util.Util.unreachableButCompilerNeedsThis;
 import static org.aeonbits.owner.util.Util.unsupported;
 import static org.aeonbits.owner.util.Reflection.isClassAvailable;
@@ -488,18 +489,17 @@ enum Converters {
         }
     }
 
+    /**
+     * Built through {@link org.aeonbits.owner.util.Util#newInstance(Class)}, which is what every other
+     * class named in an annotation goes through — a preprocessor, a tokenizer, a decryptor. This one used
+     * <code>Class.newInstance()</code>, which demands that both the class and its constructor be public
+     * and swallows the constructor's own exception into an <code>InstantiationException</code>; the
+     * shared method asks for the declared constructor and lifts the access check, so a converter may be
+     * package-private or private like the rest of them.
+     */
     private static Object convertWithConverterClass(
             Method targetMethod, String text, Class<? extends Converter> converterClass) {
-        Converter<?> converter;
-        try {
-            converter = converterClass.newInstance();
-        } catch (InstantiationException e) {
-            throw unsupported(e, "Converter class %s can't be instantiated: %s",
-                    converterClass.getCanonicalName(), e.getMessage());
-        } catch (IllegalAccessException e) {
-            throw unsupported(e, "Converter class %s can't be accessed: %s",
-                    converterClass.getCanonicalName(), e.getMessage());
-        }
+        Converter<?> converter = newInstance(converterClass);
         Object result = converter.convert(targetMethod, text);
         if (result == null) return NULL;
         return result;

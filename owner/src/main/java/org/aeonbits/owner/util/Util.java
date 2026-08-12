@@ -9,6 +9,7 @@ package org.aeonbits.owner.util;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -405,7 +406,22 @@ public abstract class Util {
     }
 
     /**
-     * Instantiates the given class using its no-argument constructor.
+     * Instantiates the given class using its no-argument constructor, whatever its visibility and
+     * whatever the visibility of the class itself.
+     * <p>
+     * A {@link org.aeonbits.owner.Preprocessor}, a {@link org.aeonbits.owner.Converter}, a
+     * {@link org.aeonbits.owner.Tokenizer} or a decryptor is an implementation detail of the
+     * configuration that names it, and until 2.0.0 all four had to be <code>public</code> — which meant
+     * a library using OWNER had to widen its own API to satisfy ours. The class was not being asked to
+     * be visible <em>to us</em>, which would be fair: it was being asked to be visible to everybody,
+     * since this method lives in a package of its own and "the same package" is therefore never true of
+     * anyone else's code. Even a package-private class next to the interface that named it was refused.
+     * </p>
+     * <p>
+     * The access check is lifted for the length of the call. Where it cannot be — a security manager
+     * that says no, or a module that does not open the package — the constructor is called as it is and
+     * the refusal that follows is the one that was raised before.
+     * </p>
      *
      * @param clazz the class to instantiate.
      * @param <T>   the type of the instance.
@@ -414,11 +430,27 @@ public abstract class Util {
      */
     public static <T> T newInstance(Class<T> clazz) {
         try {
-            return clazz.getDeclaredConstructor().newInstance();
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            makeAccessible(constructor);
+            return constructor.newInstance();
         } catch (Exception e) {
             throw unsupported(e,
                     "Class '%s' cannot be instantiated; see the cause below in the stack trace",
                     clazz.getCanonicalName());
+        }
+    }
+
+    /**
+     * Lifts the access check on a constructor, and says nothing when it cannot: the refusal that
+     * matters is the one the caller gets when it goes on to use it, which names the class and carries
+     * the original cause. Failing here instead would replace a message about the class somebody wrote
+     * with one about a reflection call they did not.
+     */
+    private static void makeAccessible(Constructor<?> constructor) {
+        try {
+            constructor.setAccessible(true);
+        } catch (RuntimeException notAllowedToLiftIt) {
+            // a security manager, or a module that does not open its package to us
         }
     }
 

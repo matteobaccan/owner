@@ -575,6 +575,13 @@ In the above example, when calling the method `servers()` that returns an array 
 will be used several times to convert every single element. In any case the ServerConverter in the above example always
 works with a single element.
 
+Since 2.0.0 the converter class does not have to be public, and neither does its constructor: it may be
+package-private beside the interface that names it, or a `private static` class nested inside it. A converter is
+an implementation detail of the configuration that uses it, and requiring it to be public meant widening your
+own API to satisfy this library's — see [#186](https://github.com/matteobaccan/owner/issues/186), which applies
+equally to [preprocessors](/owner/docs/preprocessors/), tokenizers and [decryptors](/owner/docs/crypto/). What
+is still required is a constructor taking no arguments.
+
 To see the complete test cases supported by owner see [ConverterClassTest] on GitHub.
 
   [ConverterClassTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/ConverterClassTest.java

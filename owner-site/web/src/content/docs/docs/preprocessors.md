@@ -48,6 +48,42 @@ public class ToLowerCase implements Preprocessor {
 }
 ```
 
+A preprocessor does not have to be public
+-----------------------------------------
+
+Since 2.0.0 the class named in the annotation may have any visibility, and so may its constructor: it can be
+package-private next to the interface that uses it, or a `private static` class nested inside it.
+
+```java
+public class Example {
+
+    public interface MyConfig extends Config {
+        @Key("prop.a")
+        @DefaultValue("a")
+        @PreprocessorClasses(ToUpperCase.class)
+        String propA();
+    }
+
+    private static class ToUpperCase implements Preprocessor {
+        @Override
+        public String process(String input) {
+            return input.toUpperCase();
+        }
+    }
+}
+```
+
+A preprocessor is an implementation detail of the configuration that names it, and until 2.0.0 it had to be
+`public` — so a library using OWNER had to widen its own published API to satisfy ours. It was not being asked
+to be visible *to OWNER*, which would be fair: it was being asked to be visible to everyone, and even a
+package-private class sitting beside the interface was refused.
+
+The same now holds for every class named in an annotation: a [`Converter`](/owner/docs/type-conversion/), a
+`Tokenizer` and a [decryptor](/owner/docs/crypto/). What has not changed is that the class needs a constructor
+taking no arguments — that is a reason no annotation can work around, and it is still refused with the class
+named in the message. Asked for in
+[#186](https://github.com/matteobaccan/owner/issues/186).
+
 Order of execution
 ------------------
 
