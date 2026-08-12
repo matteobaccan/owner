@@ -4,3 +4,10 @@
 mvnw                                   text eol=lf
 mvnw.cmd                               text eol=crlf
 .mvn/wrapper/maven-wrapper.properties  text eol=lf
+
+# The vendored toml-test corpus is data, not source, and several of its cases are
+# *about* line endings: invalid/control/bare-cr.toml, string-lf.toml,
+# valid/string/multiline-escaped-crlf.toml and a dozen more. Letting core.autocrlf
+# rewrite them would change what each case tests and quietly move the conformance
+# score, so the bytes are kept exactly as the suite published them.
+owner-formats/src/test/resources/toml-test/** -text
