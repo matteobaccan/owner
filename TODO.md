@@ -38,9 +38,10 @@ this is the short version.
   a list of sections from `servers[0].host`, a map of them from `servers.alpha.host`, and one asked for by
   name with a parametrized key. The flattening convention and the reader met without either being reworked,
   which was the bet made when the convention was chosen: an XML tree is now read end to end into typed
-  elements. Issues #129, #2, #72, #126 and #209 are answered and **not yet closed**.
+  elements. Issues #129, #2, #126 and #209 were **closed on 2026-08-12**. **#72 is not one of them** —
+  see below.
 - **Origin tracking**, `Traceable` and `Origin`: which source a merged property actually came from. Issue
-  #277 is answered and **not yet closed**.
+  #277 was **closed on 2026-08-12**.
 
 Both were preceded by a survey of what SmallRye, Archaius, Coat, Gestalt, Spring and Typesafe do, and both
 times it changed the design rather than confirming it — the survey is in `COMPARISON.md` so that the two
@@ -113,8 +114,11 @@ configuration in silence — which is worse than not reading the format.
 Second, and the one that would close the most support questions: **the rest of a configuration that
 explains itself**. Three of its five lines shipped with #170; the two left are below.
 
-Third, **the five issues answered on 2026-08-11 and still open**: #129, #2, #72, #126, #209 and #277. Each
-wants the usual comment — what landed, what it does exactly, and what it deliberately does not do.
+Third, ~~**the five issues answered on 2026-08-11 and still open**~~ — **done 2026-08-12**: #129, #2, #126,
+#209 and #277 are closed, each with the usual comment, and #48 turned out to have been closed already on
+2026-08-10. Reading them one by one before writing corrected the list twice, which is the argument for
+doing that rather than trusting this file: **#72 is not answered** and stays open, and **#240 is only half
+answered** — the snippet in it is HOCON, not JSON.
 
 A CONFIGURATION THAT EXPLAINS ITSELF
 -----------------------------------
@@ -292,14 +296,26 @@ an issue behind it, which is the point: what the others shipped is what our repo
       `servers.alpha.host`, and `@Key("servers.%s") ServerConfig server(String name)`, which together
       answer [#126](https://github.com/matteobaccan/owner/issues/126) and
       [#209](https://github.com/matteobaccan/owner/issues/209) without the by-hand recipe.
-      Issues [#129](https://github.com/matteobaccan/owner/issues/129),
-      [#2](https://github.com/matteobaccan/owner/issues/2),
-      [#72](https://github.com/matteobaccan/owner/issues/72) **can be closed**.
+      Issues [#129](https://github.com/matteobaccan/owner/issues/129) and
+      [#2](https://github.com/matteobaccan/owner/issues/2) **closed 2026-08-12**, with #126 and #209.
       Two decisions to carry: a `@Prefix` on a nested interface **composes** with the path, where the
       factory prefix is overridden by it (Gestalt composes, SmallRye and Archaius ignore the annotation
       outright — see `COMPARISON.md`); and an `Optional` section is present as soon as anything is below
       its path, defaults included, which is what SmallRye settled on in its version 3 after shipping the
       opposite. `@Mandatory` on the accessor of a section is refused for the same reason.
+- [ ] **A composite object of a type we cannot proxy** — [#72](https://github.com/matteobaccan/owner/issues/72),
+      which this file wrongly listed as answered by the nested interfaces until it was read on 2026-08-12.
+      It is not. The request is `DataSource getDataSource()`, assembled by a provider class out of several
+      properties, and `NestedProperties.nests` requires `type.isInterface() && Config.class.isAssignableFrom(type)`
+      — a `DataSource` is neither. Nesting gives you `JdbcConfig jdbc()` and you still build the
+      `DataSource` yourself, which is the assembly the reporter wanted to be rid of.
+      **The design was already decided in 2014 and never built**, by lviggiano on the issue itself: not a
+      new annotation, but a `Converter` able to see the properties. Today `Converter.convert(Method, String)`
+      receives one value, and `Converters.convertWithConverterClass` builds it with `converterClass.newInstance()`,
+      so a no-argument constructor is the only one there is. His proposal was to try a constructor taking a
+      `Properties`, or one taking the `Config` subclass, before falling back to that. Both hooks are in one
+      method, which is what makes this small; the questions to settle are which of the two forms to offer,
+      and whether the converter sees the raw or the expanded properties.
 - [ ] **Further formats as `Loader`s, written by hand, with no external dependency.** The SPI has
       existed since 1.0.5, a loader is a three-method class, and two external projects have already
       hand-written a YAML loader and a JSON one against it. Being properties-only is the top reason
@@ -313,7 +329,11 @@ an issue behind it, which is the point: what the others shipped is what our repo
       **Done 2026-08-10**: loader enablement, per-loader options and INI. **Done 2026-08-11**: JSON, in a
       new `owner-formats` artifact, which is also where the parsers we write will live from now on — the
       core keeps the formats the JDK can parse, a hand-written parser goes next door, and discovery makes
-      the split cost the reader nothing. **Only YAML is left of the four**, and issue #240 can be closed.
+      the split cost the reader nothing. **Done 2026-08-11 as well**: YAML, a documented subset, which was
+      the last of the four.
+      **#240 is only half answered, found on 2026-08-12** and it is an argument for HOCON: the title asks
+      for JSON, but the snippet in the body is HOCON — `site { url { uat: ... } }` — so the reporter's own
+      file still does not load. Close it only alongside the HOCON decision, or close it saying both things.
       Issues
       [#14](https://github.com/matteobaccan/owner/issues/14),
       [#65](https://github.com/matteobaccan/owner/issues/65),
