@@ -16,6 +16,7 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -303,6 +304,36 @@ enum Converters {
         }
     },
 
+    /**
+     * A <code>public static T of(String)</code> factory, as MicroProfile Config's implicit converters
+     * define it. {@link java.time.ZoneId} is one, and it is the naming newer JDK types tend to use where
+     * older ones wrote <code>valueOf</code>.
+     *
+     * @since 2.0.0
+     */
+    CLASS_WITH_OF_METHOD {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
+            return invokeStaticFactory(targetType, "of", String.class, text, key);
+        }
+    },
+
+    /**
+     * A <code>public static T parse(CharSequence)</code> factory, which is how every
+     * <code>java.time</code> type is built from text: {@link java.time.LocalDate},
+     * {@link java.time.LocalTime}, {@link java.time.LocalDateTime} and
+     * {@link java.time.OffsetDateTime} have no <code>String</code> constructor and no
+     * <code>valueOf</code>, so before 2.0.0 not one of them could be read.
+     *
+     * @since 2.0.0
+     */
+    CLASS_WITH_PARSE_METHOD {
+        @Override
+        Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
+            return invokeStaticFactory(targetType, "parse", CharSequence.class, text, key);
+        }
+    },
+
     CLASS_WITH_OBJECT_CONSTRUCTOR {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key) {
@@ -342,6 +373,38 @@ enum Converters {
         if (type instanceof ParameterizedType)
             return erase(((ParameterizedType) type).getActualTypeArguments()[0]);
         return String.class;
+    }
+
+    /**
+     * Calls a public static single-argument factory on the target type, if it has one.
+     *
+     * @param targetType the type being converted to.
+     * @param name       the factory's name, <code>of</code> or <code>parse</code>.
+     * @param argument   the parameter type the factory must declare, exactly.
+     * @param text       the value to convert.
+     * @param key        the property being read, for the message.
+     * @return what the factory answered, or {@link #SKIP} if the type has no such factory.
+     */
+    private static Object invokeStaticFactory(Class<?> targetType, String name, Class<?> argument,
+                                              String text, String key) {
+        Method factory;
+        try {
+            factory = targetType.getMethod(name, argument);
+        } catch (NoSuchMethodException thereIsNoSuchFactory) {
+            return SKIP;
+        }
+        if (!isStatic(factory.getModifiers()))
+            return SKIP;
+        try {
+            return factory.invoke(null, text);
+        } catch (IllegalAccessException cannotBeCalled) {
+            return SKIP;
+        } catch (InvocationTargetException theFactoryRefusedTheText) {
+            // the type has the factory and it said no, which is a value that is wrong rather than a type
+            // that cannot be read. Skipping would hand the text to the next link and end in the generic
+            // refusal, losing the DateTimeParseException that says which character was unexpected
+            throw unsupportedConversion(theFactoryRefusedTheText, key, targetType, text);
+        }
     }
 
     private static Class<?> erase(Type type) {

@@ -60,6 +60,55 @@ public interface SpecialTypes extends Config {
 OWNER API will take the value "example" and pass it to the CustomType
 constructor then return it.
 
+### Types built by a static factory
+
+*Since 2.0.0.* A `String` constructor is not the only way in. A type is also read
+when it has a public static factory taking the text, which is how most types
+written since Java 8 are built:
+
+| The type has | Example |
+|---|---|
+| `public static T valueOf(String)` | every `enum`, `Integer`, `Boolean` |
+| `public static T of(String)` | `ZoneId`, `Year` |
+| `public static T parse(CharSequence)` | `LocalDate`, `LocalTime`, `LocalDateTime`, `OffsetDateTime`, `Instant` |
+
+So the `java.time` types read out of the box, with nothing to register:
+
+```java
+public interface ScheduleConfig extends Config {
+    @DefaultValue("2026-08-12")
+    LocalDate releaseDate();
+
+    @DefaultValue("1979-05-27T07:32:00Z")
+    OffsetDateTime createdAt();
+
+    @DefaultValue("Europe/Rome")
+    ZoneId zone();
+
+    @DefaultValue("2026-01-01, 2026-06-15")
+    List<LocalDate> milestones();
+}
+```
+
+None of these worked before 2.0.0: they have no `String` constructor and no
+`valueOf`, so the chain ran out and refused them. The names come from
+[MicroProfile Config][mpconfig], which settled the question for the ecosystem —
+its implicit converters are `of`, `valueOf`, `parse` and the `String`
+constructor, and those are exactly the four now understood here.
+
+We differ from it in one respect, deliberately: MicroProfile tries the `String`
+constructor **last**, and we try it **first**, as this library always has.
+Changing that would silently move a type that has both a constructor and a
+factory from one to the other, which is not worth doing to a configuration that
+already works.
+
+When the factory exists and rejects the text, what it said is kept:
+`@DefaultValue("the thirty-first of never")` on a `LocalDate` refuses with the
+`DateTimeParseException` underneath, naming the character it did not expect,
+rather than a bare *cannot convert*.
+
+  [mpconfig]: https://download.eclipse.org/microprofile/microprofile-config-3.0.1/apidocs/org/eclipse/microprofile/config/spi/Converter.html
+
 Arrays and Collections
 ----------------------
 

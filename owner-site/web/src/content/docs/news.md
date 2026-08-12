@@ -107,6 +107,20 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **The `java.time` types are read out of the box** — `LocalDate`, `LocalTime`, `LocalDateTime`,
+   `OffsetDateTime`, `Instant`, `ZoneId`, `Year` and the rest — with nothing to register. The conversion
+   chain now understands two more ways of building a type from text: a public static `of(String)` and a
+   public static `parse(CharSequence)`, alongside the `String` constructor and `valueOf(String)` it already
+   knew. Those four are the implicit converters
+   [MicroProfile Config](https://download.eclipse.org/microprofile/microprofile-config-3.0.1/apidocs/org/eclipse/microprofile/config/spi/Converter.html)
+   defines, so the naming is the ecosystem's rather than ours.
+
+   None of the `java.time` types worked before: they have no `String` constructor and no `valueOf`, so the
+   chain ran out and refused them. Where MicroProfile tries the `String` constructor last we keep trying it
+   first, as this library always has — changing that would silently move a type that has both from one to
+   the other. When a factory exists and rejects the text, its own exception is kept as the cause, so a bad
+   date says which character was unexpected instead of only *cannot convert*. See
+   [Type conversion](/owner/docs/type-conversion/#types-built-by-a-static-factory).
  * **HOCON is read**, from a source whose path ends in `.conf`, and `MyConfig.conf` joins the names tried
    when a configuration declares no `@Sources`. The document becomes the same keys every other format
    flattens to, so nested interfaces, indexed lists and maps of sections read it unchanged — substitutions,
