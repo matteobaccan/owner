@@ -10,17 +10,15 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.util.LogCapture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import static org.aeonbits.owner.TestConstants.RESOURCES_DIR;
 import static org.aeonbits.owner.util.UtilTest.fileFromURI;
@@ -53,38 +51,24 @@ public class SourceThatDidNotArriveTest {
      */
     private static final String UNREADABLE = "http://localhost:1/app.properties";
 
-    private final List<LogRecord> warnings = new ArrayList<>();
-    private final Logger logger = Logger.getLogger("org.aeonbits.owner");
-    private Handler collector;
+    private LogCapture capture;
 
     @Before
     public void collectTheWarnings() {
-        collector = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                if (record.getLevel().intValue() >= Level.WARNING.intValue())
-                    warnings.add(record);
-            }
-
-            @Override
-            public void flush() { }
-
-            @Override
-            public void close() { }
-        };
-        logger.addHandler(collector);
+        capture = LogCapture.ofLibrary(Level.WARNING);
     }
 
     @After
     public void stopCollecting() {
-        logger.removeHandler(collector);
+        capture.close();
+    }
+
+    private List<LogRecord> warnings() {
+        return capture.linesFrom(Level.WARNING);
     }
 
     private String warningsAsText() {
-        StringBuilder text = new StringBuilder();
-        for (LogRecord record : warnings)
-            text.append(record.getMessage()).append('\n');
-        return text.toString();
+        return capture.messagesFrom(Level.WARNING);
     }
 
     private static void writeThePresentOne() throws Exception {
@@ -109,7 +93,7 @@ public class SourceThatDidNotArriveTest {
 
         assertEquals("alpha", ConfigFactory.create(FallbackConfig.class).host());
         assertTrue("the fallback worked and should have been quiet: " + warningsAsText(),
-                warnings.isEmpty());
+                warnings().isEmpty());
     }
 
     public interface NoSourcesConfig extends Config {
@@ -121,7 +105,7 @@ public class SourceThatDidNotArriveTest {
     @Test
     public void aConfigurationThatDeclaresNoSourceSaysNothingEither() {
         assertEquals(8080, ConfigFactory.create(NoSourcesConfig.class).port());
-        assertTrue(warningsAsText(), warnings.isEmpty());
+        assertTrue(warningsAsText(), warnings().isEmpty());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -142,7 +126,7 @@ public class SourceThatDidNotArriveTest {
                 ConfigFactory.create(UnreadableConfig.class).host());
 
         String said = warningsAsText();
-        assertFalse("nothing was said about a source that could not be read", warnings.isEmpty());
+        assertFalse("nothing was said about a source that could not be read", warnings().isEmpty());
         assertTrue(said, said.contains("localhost:1"));
         assertTrue(said, said.contains("could not be read"));
     }
@@ -163,7 +147,7 @@ public class SourceThatDidNotArriveTest {
                 ConfigFactory.create(AllAbsentConfig.class).port());
 
         String said = warningsAsText();
-        assertFalse("a configuration that read nothing at all said nothing at all", warnings.isEmpty());
+        assertFalse("a configuration that read nothing at all said nothing at all", warnings().isEmpty());
         assertTrue(said, said.contains("not one of the sources"));
         assertTrue(said, said.contains("default values"));
     }
@@ -174,7 +158,7 @@ public class SourceThatDidNotArriveTest {
         cfg.reload();
         cfg.reload();
 
-        assertEquals("said once, not three times: " + warningsAsText(), 1, warnings.size());
+        assertEquals("said once, not three times: " + warningsAsText(), 1, warnings().size());
     }
 
     @Sources({ABSENT, "file:" + RESOURCES_DIR + "/nor-this-one.properties"})
@@ -224,7 +208,7 @@ public class SourceThatDidNotArriveTest {
         ConfigFactory.create(WatchingAFileConfig.class);
 
         assertTrue("a file can be watched, so there is nothing to report: " + warningsAsText(),
-                warnings.isEmpty());
+                warnings().isEmpty());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -278,7 +262,7 @@ public class SourceThatDidNotArriveTest {
         writeThePresentOne();
 
         assertEquals("alpha", ConfigFactory.create(RequiredAndPresentConfig.class).host());
-        assertTrue(warningsAsText(), warnings.isEmpty());
+        assertTrue(warningsAsText(), warnings().isEmpty());
     }
 
     @Sources(ABSENT + "#required=maybe")

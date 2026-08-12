@@ -8,6 +8,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.loaders.DiscoverableLoader;
+import org.aeonbits.owner.util.LogCapture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,10 +21,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -108,34 +107,9 @@ public class LoaderDiscoveryClassLoaderTest {
 
     /** Collects what the manager says about discovery while one is being built. */
     private static String recordWhileBuildingAManager() {
-        Logger logger = Logger.getLogger(LoadersManager.class.getName());
-        final StringBuilder said = new StringBuilder();
-        Handler collector = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                if (record.getLevel() == Level.CONFIG)
-                    said.append(record.getMessage());
-            }
-
-            @Override
-            public void flush() {
-                // nothing is buffered
-            }
-
-            @Override
-            public void close() {
-                // nothing to release
-            }
-        };
-        Level before = logger.getLevel();
-        logger.setLevel(Level.CONFIG);
-        logger.addHandler(collector);
-        try {
+        try (LogCapture capture = LogCapture.of(LoadersManager.class, Level.CONFIG)) {
             new LoadersManager();
-            return said.toString();
-        } finally {
-            logger.removeHandler(collector);
-            logger.setLevel(before);
+            return capture.messagesAt(Level.CONFIG);
         }
     }
 

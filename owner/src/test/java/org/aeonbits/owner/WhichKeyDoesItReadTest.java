@@ -8,17 +8,13 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Prefix;
+import org.aeonbits.owner.util.LogCapture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static org.aeonbits.owner.Config.DisableableFeature.PREFIX;
@@ -38,43 +34,20 @@ import static org.junit.Assert.assertTrue;
  */
 public class WhichKeyDoesItReadTest {
 
-    private final List<LogRecord> records = new ArrayList<>();
-    private final Logger logger = Logger.getLogger("org.aeonbits.owner");
-    private Handler collector;
-    private Level before;
+    private LogCapture capture;
 
     @Before
     public void listen() {
-        before = logger.getLevel();
-        logger.setLevel(Level.FINE);
-        collector = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                records.add(record);
-            }
-
-            @Override
-            public void flush() { }
-
-            @Override
-            public void close() { }
-        };
-        collector.setLevel(Level.FINE);
-        logger.addHandler(collector);
+        capture = LogCapture.ofLibrary(Level.FINE);
     }
 
     @After
     public void stopListening() {
-        logger.removeHandler(collector);
-        logger.setLevel(before);
+        capture.close();
     }
 
     private String said(Level level) {
-        StringBuilder text = new StringBuilder();
-        for (LogRecord record : records)
-            if (record.getLevel().equals(level))
-                text.append(record.getMessage()).append('\n');
-        return text.toString();
+        return capture.messagesAt(level);
     }
 
     @Prefix("server.")

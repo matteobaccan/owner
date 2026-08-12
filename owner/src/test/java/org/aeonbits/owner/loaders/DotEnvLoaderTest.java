@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner.loaders;
 
+import org.aeonbits.owner.util.LogCapture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +19,8 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -46,7 +45,7 @@ public class DotEnvLoaderTest {
 
     private Level originalLevel;
     private boolean originalUseParentHandlers;
-    private Handler recorder;
+    private LogCapture capture;
 
     /**
      * Several tests below read a quoted value under a dialect that keeps the quotes, which the loader is meant
@@ -62,35 +61,18 @@ public class DotEnvLoaderTest {
 
     @After
     public void restoreTheLoaderLog() {
-        if (recorder != null) {
-            LOADER_LOG.removeHandler(recorder);
-            recorder = null;
+        if (capture != null) {
+            capture.close();
+            capture = null;
         }
         LOADER_LOG.setLevel(originalLevel);
         LOADER_LOG.setUseParentHandlers(originalUseParentHandlers);
     }
 
     /** Collects what the loader logs, without letting it reach the console. */
-    private List<LogRecord> recordLog() {
-        final List<LogRecord> records = new ArrayList<>();
-        recorder = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                records.add(record);
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() {
-                // nothing to release
-            }
-        };
-        LOADER_LOG.setLevel(Level.ALL);
-        LOADER_LOG.addHandler(recorder);
-        return records;
+    private LogCapture recordLog() {
+        capture = LogCapture.of(DotEnvLoader.class, Level.ALL);
+        return capture;
     }
 
     private static File writeEnv(String... lines) throws IOException {
@@ -684,9 +666,10 @@ public class DotEnvLoaderTest {
      */
     @Test
     public void testQuotedValuesKeptVerbatimAreReportedOnce() throws IOException {
-        List<LogRecord> log = recordLog();
+        LogCapture recorded = recordLog();
         read(EnvDialect.DOCKER, "NAME=\"Matteo\"", "CITY='Cuneo'", "HOST=localhost");
 
+        List<LogRecord> log = recorded.lines();
         assertEquals(1, log.size());
         String message = log.get(0).getMessage();
         assertEquals(Level.WARNING, log.get(0).getLevel());
@@ -700,23 +683,23 @@ public class DotEnvLoaderTest {
 
     @Test
     public void testNothingIsSaidWhenNoValueLooksQuoted() throws IOException {
-        List<LogRecord> log = recordLog();
+        LogCapture recorded = recordLog();
         read(EnvDialect.DOCKER, "HOST=localhost", "PORT=8080");
-        assertTrue(log.toString(), log.isEmpty());
+        assertTrue(recorded.lines().toString(), recorded.lines().isEmpty());
     }
 
     @Test
     public void testNothingIsSaidWhenTheDialectStripsTheQuotesAnyway() throws IOException {
-        List<LogRecord> log = recordLog();
+        LogCapture recorded = recordLog();
         read(EnvDialect.DOTENV, "NAME=\"Matteo\"");
-        assertTrue(log.toString(), log.isEmpty());
+        assertTrue(recorded.lines().toString(), recorded.lines().isEmpty());
     }
 
     @Test
     public void testAValueThatOpensWithAQuoteWithoutClosingIsNotReported() throws IOException {
-        List<LogRecord> log = recordLog();
+        LogCapture recorded = recordLog();
         read(EnvDialect.DOCKER, "TEXT=\"unbalanced", "JSON={\"a\": 1}");
-        assertTrue(log.toString(), log.isEmpty());
+        assertTrue(recorded.lines().toString(), recorded.lines().isEmpty());
     }
 
     // ---------------------------------------------------------------- failures that must stay visible

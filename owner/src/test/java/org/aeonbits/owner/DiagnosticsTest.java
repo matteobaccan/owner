@@ -8,6 +8,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.util.LogCapture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,12 +20,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aeonbits.owner.util.Util.hideCredentials;
@@ -45,41 +41,16 @@ import static org.junit.Assert.assertTrue;
  */
 public class DiagnosticsTest {
 
-    private static final String LIBRARY = "org.aeonbits.owner";
-
-    private Logger logger;
-    private Handler collector;
-    private Level before;
-    private final List<LogRecord> said = new ArrayList<>();
+    private LogCapture capture;
 
     @Before
     public void before() {
-        logger = Logger.getLogger(LIBRARY);
-        before = logger.getLevel();
-        collector = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                said.add(record);
-            }
-
-            @Override
-            public void flush() {
-                // nothing is buffered
-            }
-
-            @Override
-            public void close() {
-                // nothing to release
-            }
-        };
-        logger.setLevel(Level.CONFIG);
-        logger.addHandler(collector);
+        capture = LogCapture.ofLibrary(Level.CONFIG);
     }
 
     @After
     public void after() {
-        logger.removeHandler(collector);
-        logger.setLevel(before);
+        capture.close();
     }
 
     // ---------------------------------------------------------------- a source may carry credentials
@@ -156,12 +127,14 @@ public class DiagnosticsTest {
 
     @Test
     public void itSaysNothingAtAllWhenNobodyAsked() throws IOException {
-        logger.setLevel(Level.INFO);
-        said.clear();
+        // the capture this class installs listens from CONFIG, which is the switch being turned on. This
+        // test is about it being off, so it listens from INFO instead, for the length of one load
+        capture.close();
+        try (LogCapture nobodyAsked = LogCapture.ofLibrary(Level.INFO)) {
+            readTheIni();
 
-        readTheIni();
-
-        assertTrue(said(), said.isEmpty());
+            assertTrue(nobodyAsked.messagesWithTheirLevel(), nobodyAsked.lines().isEmpty());
+        }
     }
 
     @Sources("${source}")
@@ -195,10 +168,7 @@ public class DiagnosticsTest {
     }
 
     private String said() {
-        StringBuilder text = new StringBuilder();
-        for (LogRecord record : said)
-            text.append(record.getLevel()).append(' ').append(record.getMessage()).append('\n');
-        return text.toString();
+        return capture.messagesWithTheirLevel();
     }
 
     private static File write(String suffix, String content) throws IOException {

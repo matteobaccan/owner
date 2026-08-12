@@ -137,6 +137,8 @@ public class LoaderManagerTest {
 
         @Override
         public void load(Properties result, URI uri) throws IOException {
+            // nothing: this loader accepts nothing, so what it would do with a source is not part of the
+            // test. It exists to be registered and then found, or not found, among the others
         }
 
         @Override

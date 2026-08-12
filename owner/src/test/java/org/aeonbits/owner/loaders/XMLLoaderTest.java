@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner.loaders;
 
+import org.aeonbits.owner.util.LogCapture;
 import org.junit.Test;
 import org.xml.sax.SAXNotRecognizedException;
 
@@ -17,13 +18,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -116,34 +114,10 @@ public class XMLLoaderTest {
      */
     @Test
     public void testAFeatureTheParserRefusesIsReported() {
-        Logger log = Logger.getLogger(XMLLoader.class.getName());
-        final List<LogRecord> records = new ArrayList<>();
-        Handler recorder = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                records.add(record);
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() {
-                // nothing to release
-            }
-        };
-        boolean useParentHandlers = log.getUseParentHandlers();
-        Level level = log.getLevel();
-        log.setUseParentHandlers(false);
-        log.setLevel(Level.ALL);
-        log.addHandler(recorder);
-        try {
+        List<LogRecord> records;
+        try (LogCapture capture = LogCapture.of(XMLLoader.class, Level.ALL)) {
             XMLLoader.setFeature(new ParserRefusingEveryFeature(), SOME_FEATURE, true);
-        } finally {
-            log.removeHandler(recorder);
-            log.setLevel(level);
-            log.setUseParentHandlers(useParentHandlers);
+            records = capture.lines();
         }
 
         assertEquals(1, records.size());
@@ -155,29 +129,11 @@ public class XMLLoaderTest {
 
     @Test
     public void testAFeatureTheParserAcceptsIsNotReported() {
-        Logger log = Logger.getLogger(XMLLoader.class.getName());
-        final List<LogRecord> records = new ArrayList<>();
-        Handler recorder = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                records.add(record);
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() {
-                // nothing to release
-            }
-        };
-        log.addHandler(recorder);
-        try {
+        List<LogRecord> records;
+        try (LogCapture capture = LogCapture.of(XMLLoader.class, Level.ALL)) {
             XMLLoader.setFeature(SAXParserFactory.newInstance(),
                     "http://xml.org/sax/features/external-general-entities", false);
-        } finally {
-            log.removeHandler(recorder);
+            records = capture.lines();
         }
 
         assertTrue(records.toString(), records.isEmpty());

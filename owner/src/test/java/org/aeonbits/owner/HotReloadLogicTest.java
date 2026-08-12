@@ -8,6 +8,7 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.util.LogCapture;
 import org.aeonbits.owner.util.TimeProviderForTest;
 import org.aeonbits.owner.util.UtilTest;
 import org.junit.After;
@@ -18,14 +19,10 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -138,16 +135,14 @@ public class HotReloadLogicTest {
         File watched = Files.createTempFile("owner-hotreload", ".properties").toFile();
         watched.deleteOnExit();
 
-        List<LogRecord> records = listen(Level.CONFIG);
-        try {
+        String said;
+        try (LogCapture capture = LogCapture.ofLibrary(Level.CONFIG)) {
             new HotReloadLogic(MyConfig.class.getAnnotation(HotReload.class), SECONDS.toMillis(5),
                     Arrays.asList(watched.toURI(), new URI("system:properties")),
                     managerOf(MyConfig.class));
-        } finally {
-            stopListening();
+            said = capture.messagesAt(Level.CONFIG);
         }
 
-        String said = onlyLineAt(records, Level.CONFIG);
         assertTrue(said, said.contains("hot reload is on"));
         assertTrue("the file it watches is not named: " + said, said.contains(watched.getPath()));
         assertTrue("system:properties is watchable and is not named: " + said,
@@ -155,42 +150,4 @@ public class HotReloadLogicTest {
         assertTrue("the interval belongs in the line: " + said, said.contains("5000"));
     }
 
-    private Logger logger;
-    private Handler collector;
-    private Level previousLevel;
-
-    private List<LogRecord> listen(Level level) {
-        List<LogRecord> records = new ArrayList<>();
-        logger = Logger.getLogger("org.aeonbits.owner");
-        previousLevel = logger.getLevel();
-        logger.setLevel(level);
-        collector = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                records.add(record);
-            }
-
-            @Override
-            public void flush() { }
-
-            @Override
-            public void close() { }
-        };
-        collector.setLevel(level);
-        logger.addHandler(collector);
-        return records;
-    }
-
-    private void stopListening() {
-        logger.removeHandler(collector);
-        logger.setLevel(previousLevel);
-    }
-
-    private static String onlyLineAt(List<LogRecord> records, Level level) {
-        StringBuilder said = new StringBuilder();
-        for (LogRecord record : records)
-            if (record.getLevel() == level)
-                said.append(record.getMessage()).append('\n');
-        return said.toString();
-    }
 }

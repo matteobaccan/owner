@@ -95,6 +95,8 @@ public class TestSerialization {
     private static class MyPropertyChangeListener implements PropertyChangeListener, Serializable {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
+            // nothing: what is being tested is that a listener survives serialization, not what it does
+            // when the property changes
         }
     }
 }

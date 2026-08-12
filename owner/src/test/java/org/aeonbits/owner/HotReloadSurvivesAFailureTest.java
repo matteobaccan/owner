@@ -9,6 +9,7 @@ package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.util.LogCapture;
 import org.aeonbits.owner.util.TimeProviderForTest;
 import org.junit.After;
 import org.junit.Before;
@@ -20,15 +21,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -66,19 +64,14 @@ public class HotReloadSurvivesAFailureTest {
      */
     private static final String BROKEN = "this line assigns nothing";
 
-    private static final Logger MANAGER_LOG = Logger.getLogger(PropertiesManager.class.getName());
-
     @Sources("file:" + SOURCE)
     @HotReload(value = 1, unit = SECONDS, type = ASYNC)
     interface WatchedConfig extends Config {
         String host();
     }
 
-    private final List<LogRecord> log = new ArrayList<>();
+    private LogCapture capture;
     private TimeProviderForTest time;
-    private Handler recorder;
-    private Level originalLevel;
-    private boolean originalUseParentHandlers;
     private long lastModified;
 
     @Before
@@ -90,40 +83,21 @@ public class HotReloadSurvivesAFailureTest {
         time = new TimeProviderForTest();
         time.setup();
 
-        recorder = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
-                // what these tests are about is what the library says when something went wrong, and the
-                // level is set to ALL above so that nothing of that kind can be missed. Since 2.0.0 the same
-                // logger also reports what was decided, at CONFIG, which is a different subject and would
-                // otherwise be counted as if it were a failure
-                if (record.getLevel().intValue() >= Level.WARNING.intValue())
-                    log.add(record);
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() {
-                // nothing to release
-            }
-        };
-        originalLevel = MANAGER_LOG.getLevel();
-        originalUseParentHandlers = MANAGER_LOG.getUseParentHandlers();
-        MANAGER_LOG.setLevel(Level.ALL);
-        MANAGER_LOG.setUseParentHandlers(false);
-        MANAGER_LOG.addHandler(recorder);
+        // what these tests are about is what the library says when something went wrong, so the capture
+        // listens from WARNING: since 2.0.0 the same logger also reports what was decided, at CONFIG,
+        // which is a different subject and would otherwise be counted as if it were a failure
+        capture = LogCapture.of(PropertiesManager.class, Level.ALL);
     }
 
     @After
     public void after() {
-        MANAGER_LOG.removeHandler(recorder);
-        MANAGER_LOG.setLevel(originalLevel);
-        MANAGER_LOG.setUseParentHandlers(originalUseParentHandlers);
+        capture.close();
         time.tearDown();
         new File(SOURCE).delete();
+    }
+
+    private List<LogRecord> warnings() {
+        return capture.linesFrom(Level.WARNING);
     }
 
     private void write(String line) throws IOException {
@@ -169,10 +143,10 @@ public class HotReloadSurvivesAFailureTest {
         check.run();
 
         assertEquals("the values already held must survive a failed reload", "first", configuration.host());
-        assertEquals(1, log.size());
-        assertEquals(Level.WARNING, log.get(0).getLevel());
-        assertTrue(log.get(0).getMessage(),
-                log.get(0).getMessage().contains(WatchedConfig.class.getName()));
+        assertEquals(1, warnings().size());
+        assertEquals(Level.WARNING, warnings().get(0).getLevel());
+        assertTrue(warnings().get(0).getMessage(),
+                warnings().get(0).getMessage().contains(WatchedConfig.class.getName()));
 
         // the schedule is intact, so a source that comes right is picked up
         rewrite("host=second");
@@ -190,7 +164,7 @@ public class HotReloadSurvivesAFailureTest {
             check.run();
         }
 
-        assertEquals("the same failure should be named once", 1, log.size());
+        assertEquals("the same failure should be named once", 1, warnings().size());
     }
 
     /** Once it has cleared, the same fault returning is news again. */
@@ -206,7 +180,7 @@ public class HotReloadSurvivesAFailureTest {
         check.run();
 
         assertEquals("recovered", configuration.host());
-        assertEquals(2, log.size());
+        assertEquals(2, warnings().size());
     }
 
     @Test
@@ -217,6 +191,6 @@ public class HotReloadSurvivesAFailureTest {
         check.run();
 
         assertEquals("second", configuration.host());
-        assertTrue(log.toString(), log.isEmpty());
+        assertTrue(warnings().toString(), warnings().isEmpty());
     }
 }
