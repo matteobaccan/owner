@@ -17,6 +17,7 @@ import org.junit.Test;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -131,7 +132,9 @@ public class HotReloadLogicTest {
      */
     @Test
     public void itSaysWhichFilesItIsWatchingAndThatSystemPropertiesAreAmongThem() throws Exception {
-        File watched = File.createTempFile("owner-hotreload", ".properties");
+        // Files.createTempFile rather than File.createTempFile: it creates the file with owner-only
+        // permissions, which is the same reason #325 changed the ones in the library itself
+        File watched = Files.createTempFile("owner-hotreload", ".properties").toFile();
         watched.deleteOnExit();
 
         List<LogRecord> records = listen(Level.CONFIG);
