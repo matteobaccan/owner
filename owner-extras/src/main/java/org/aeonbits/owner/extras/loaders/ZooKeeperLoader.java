@@ -32,9 +32,17 @@ public class ZooKeeperLoader implements Loader {
     private static final String ZOOKEEPER_CONNECTION_TIMEOUT_SECONDS = "owner.zookeeper.connection.timeout.seconds";
 
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The constant is on the left of the comparison because a URI need not have a scheme: a source written
+     * without one, and the empty URI that a blank <code>file:</code> produces, both answer <code>null</code>
+     * here, and every registered loader is asked about every source.
+     * </p>
+     */
     @Override
     public boolean accept(URI uri) {
-        return uri.getScheme().equals(SCHEME);
+        return SCHEME.equals(uri.getScheme());
     }
 
     @Override
