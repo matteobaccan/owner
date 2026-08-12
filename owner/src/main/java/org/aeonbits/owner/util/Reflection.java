@@ -22,6 +22,17 @@ public final class Reflection {
     private static final boolean IS_JAVA_8 =
             ManagementFactory.getRuntimeMXBean().getSpecVersion().startsWith("1.8");
 
+    /** {@link MethodHandles}<code>.privateLookupIn(Class, Lookup)</code>, absent on Java 8. */
+    private static final Method PRIVATE_LOOKUP_IN = privateLookupInMethod();
+
+    private static Method privateLookupInMethod() {
+        try {
+            return MethodHandles.class.getMethod("privateLookupIn", Class.class, MethodHandles.Lookup.class);
+        } catch (NoSuchMethodException notOnJava8) {
+            return null;
+        }
+    }
+
     // Suppresses default constructor, ensuring no one instantiate this class.
     private Reflection() {}
 
@@ -86,12 +97,51 @@ public final class Reflection {
                     .unreflectSpecial(method, declaringClass)
                     .bindTo(proxy)
                     .invokeWithArguments(args);
-        } else {
-            MethodType rt = MethodType.methodType(method.getReturnType(), method.getParameterTypes());
-            return MethodHandles.lookup()
-                    .findSpecial(declaringClass, method.getName(), rt, declaringClass)
+        }
+
+        MethodHandles.Lookup lookup = privateLookupIn(declaringClass);
+        if (lookup != null)
+            return lookup.unreflectSpecial(method, declaringClass)
                     .bindTo(proxy)
                     .invokeWithArguments(args);
+
+        MethodType rt = MethodType.methodType(method.getReturnType(), method.getParameterTypes());
+        return MethodHandles.lookup()
+                .findSpecial(declaringClass, method.getName(), rt, declaringClass)
+                .bindTo(proxy)
+                .invokeWithArguments(args);
+    }
+
+    /**
+     * A lookup with private access on the interface that declares the method, which is what it takes to
+     * invoke a <code>default</code> method on an interface that is not <code>public</code>.
+     * <p>
+     * The lookup taken below belongs to this class, in <code>org.aeonbits.owner.util</code>, and
+     * <code>findSpecial</code> checks the declaring interface against it: a configuration interface that
+     * is package-private anywhere else is not accessible from here, and the call failed with
+     * <em>symbolic reference class is not accessible</em> at the first invocation. Java 8 never had the
+     * problem, since the constructor hack above builds the lookup <em>on the declaring interface</em>;
+     * this is the same thing said in the supported way, and it exists from Java 9 on.
+     * </p>
+     * <p>
+     * Called by reflection because the bytecode targets Java 8, where the method does not exist. A
+     * <code>null</code> answer means it is not there, or that it refused — a module that does not open
+     * the package to us — and the caller falls back on what was done before, which is enough for the
+     * public interfaces that used to be the only ones that worked.
+     * </p>
+     *
+     * @param declaringClass the interface declaring the default method.
+     * @return a lookup with private access on it, or <code>null</code> if there can be none.
+     */
+    private static MethodHandles.Lookup privateLookupIn(Class<?> declaringClass) {
+        if (PRIVATE_LOOKUP_IN == null) return null;
+        try {
+            return (MethodHandles.Lookup)
+                    PRIVATE_LOOKUP_IN.invoke(null, declaringClass, MethodHandles.lookup());
+        } catch (IllegalAccessException notAllowedToLookThere) {
+            return null;
+        } catch (InvocationTargetException itRefused) {
+            return null;
         }
     }
 
