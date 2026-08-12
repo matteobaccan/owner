@@ -74,12 +74,14 @@ public class NestedCollectionsTest {
     }
 
     public static class OneListPerElement implements Converter<List<String>> {
+        @Override
         public List<String> convert(Method method, String input) {
             return asList(input.split("\\|"));
         }
     }
 
     public static class TheWholeListOfLists implements Converter<List<List<String>>> {
+        @Override
         public List<List<String>> convert(Method method, String input) {
             List<List<String>> result = new ArrayList<List<String>>();
             for (String chunk : input.split(","))
