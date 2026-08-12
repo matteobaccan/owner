@@ -8,29 +8,46 @@
 package org.aeonbits.owner.extras.loaders;
 
 import org.aeonbits.owner.loaders.Loader;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.utils.ZKPaths;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.Properties;
 
-import static java.lang.Integer.parseInt;
-import static java.lang.System.getProperty;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.aeonbits.owner.util.Util.hideCredentials;
+import static org.aeonbits.owner.util.Util.unsupported;
 
 /**
+ * A {@link Loader loader} that reads the properties from the children of a ZooKeeper node, addressed with
+ * the <code>zookeeper</code> scheme:
+ *
+ * <pre>
+ *     &#64;Sources("zookeeper://zookeeper.example.com:2181/config/myapp")
+ * </pre>
+ *
+ * <p>
+ * The name of each child is the key and its data, read as a string, is the value. The port may be omitted,
+ * in which case the client's default is used. Connecting is given thirty seconds before it gives up, which
+ * the <code>owner.zookeeper.connection.timeout.seconds</code> System Property changes.
+ * </p>
+ *
+ * <p>
+ * <b>It needs <a href="https://curator.apache.org">Apache Curator</a>, which this artifact declares as an
+ * optional dependency and therefore does not bring along.</b> Nothing here names Curator: every call that
+ * does lives in {@link ZooKeeperReader}, which is not touched until a <code>zookeeper:</code> source is
+ * actually read. So this loader can be discovered and instantiated on a class path without Curator, a
+ * configuration that reads any other source is unaffected, and only a configuration that names a
+ * <code>zookeeper:</code> source is told - by name, and with what to add - that the dependency is missing.
+ * See {@link ZooKeeperReader} for why that separation must not be undone.
+ * </p>
+ *
  * @author Koray Sariteke
  * @author Luigi R. Viggiano
- *
  */
 public class ZooKeeperLoader implements Loader {
 
-    private static final String SCHEME = "zookeeper";
-    private static final String ZOOKEEPER_CONNECTION_TIMEOUT_SECONDS = "owner.zookeeper.connection.timeout.seconds";
+    private static final long serialVersionUID = -8541229366311874254L;
 
+    private static final String SCHEME = "zookeeper";
 
     /**
      * {@inheritDoc}
@@ -47,42 +64,16 @@ public class ZooKeeperLoader implements Loader {
 
     @Override
     public void load(Properties result, URI uri) throws IOException {
-        CuratorFramework client = getClient(uri);
         try {
-            connect(client);
-
-            String basePath = uri.getPath();
-
-            for (String key : client.getChildren().forPath(basePath))
-                result.put(key, getValue(client, basePath, key));
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw (IOException) new InterruptedIOException().initCause(e);
-        } catch (Exception e) {
-            throw new IOException(e);
-        } finally {
-            client.close();
+            ZooKeeperReader.read(result, uri);
+        } catch (NoClassDefFoundError curatorIsNotOnTheClassPath) {
+            // said here rather than left to propagate: a NoClassDefFoundError names the class that could
+            // not be found, which is Curator's, and not the thing to do about it
+            throw unsupported(curatorIsNotOnTheClassPath,
+                    "Reading %s needs Apache Curator, which is an optional dependency of owner-extras and is "
+                            + "not on the class path. Add org.apache.curator:curator-framework to read a "
+                            + "zookeeper: source.", hideCredentials(uri));
         }
-    }
-
-    private String getValue(CuratorFramework client, String basePath, String key) throws Exception {
-        return new String(client.getData().forPath(ZKPaths.makePath(basePath, key)));
-    }
-
-    private void connect(CuratorFramework client) throws InterruptedException {
-        client.start();
-        int timeout = parseInt(getProperty(ZOOKEEPER_CONNECTION_TIMEOUT_SECONDS, "30"));
-        client.blockUntilConnected(timeout, SECONDS);
-    }
-
-    private CuratorFramework getClient(URI uri) {
-        String host = uri.getHost();
-        int port = uri.getPort();
-
-        String connectString = (port == -1) ? host : host + ":" + port;
-        return CuratorFrameworkFactory.newClient(connectString,
-                (retryCount, elapsedTimeMs, sleeper) -> false);
     }
 
     @Override

@@ -93,10 +93,10 @@ public class ZooKeeperLoaderTest {
 
     @Test
     public void shouldUseHostOnlyConnectStringAndDisallowRetriesWhenPortIsNotSpecified() throws Exception {
-        ZooKeeperLoader loader = new ZooKeeperLoader();
-        Method getClient = ZooKeeperLoader.class.getDeclaredMethod("getClient", URI.class);
+        // getClient lives in ZooKeeperReader since 2.0.0, with everything else that names Curator
+        Method getClient = ZooKeeperReader.class.getDeclaredMethod("getClient", URI.class);
         getClient.setAccessible(true);
-        CuratorFramework client = (CuratorFramework) getClient.invoke(loader, new URI("zookeeper://127.0.0.1/test"));
+        CuratorFramework client = (CuratorFramework) getClient.invoke(null, new URI("zookeeper://127.0.0.1/test"));
         try {
             RetryPolicy retryPolicy = client.getZookeeperClient().getRetryPolicy();
             assertFalse(retryPolicy.allowRetry(0, 0L, null));
