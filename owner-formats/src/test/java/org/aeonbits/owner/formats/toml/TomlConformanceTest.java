@@ -11,8 +11,11 @@ import org.aeonbits.owner.formats.json.JsonLoader;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -26,8 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -307,6 +312,94 @@ public class TomlConformanceTest {
         if (problems.size() > SHOWN)
             message.append("  ... and ").append(problems.size() - SHOWN).append(" more\n");
         fail(message.toString());
+    }
+
+    /**
+     * The corpus still carries the line endings the suite published, which is not something to leave to
+     * <code>.gitattributes</code> alone.
+     *
+     * <p>
+     * Several of these cases are <i>about</i> carriage returns, so a checkout that helpfully turned every
+     * LF into CRLF would leave a corpus that still parses, still counts 210 and 499, and no longer tests
+     * what its file names say. The score would move and nothing would point at why. It has already
+     * happened once here, on the way in, which is the reason this exists: git said so in a warning, in a
+     * commit of 920 files, where a warning is not a mechanism.
+     * </p>
+     *
+     * <p>
+     * The invariant is exact rather than approximate. <b>Seven documents contain a carriage return, and
+     * this is which and how many</b>; in the three whose names end in <code>-crlf</code> every newline is
+     * one, so the counts match; and no other file in the corpus holds one at all.
+     * </p>
+     */
+    @Test
+    public void theCorpusStillHasTheLineEndingsItWasPublishedWith() throws IOException {
+        Map<String, Integer> expected = new LinkedHashMap<>();
+        expected.put("invalid/control/bare-cr.toml", 2);
+        expected.put("invalid/control/comment-cr.toml", 1);
+        expected.put("invalid/control/rawstring-cr.toml", 1);
+        expected.put("invalid/control/string-cr.toml", 1);
+        expected.put("valid/empty-crlf.toml", 1);
+        expected.put("valid/newline-crlf.toml", 2);
+        expected.put("valid/string/multiline-escaped-crlf.toml", 4);
+
+        Map<String, Integer> found = new LinkedHashMap<>();
+        List<String> notPaired = new ArrayList<>();
+        for (File file : everyFileUnder(corpus)) {
+            byte[] bytes = bytesOf(file);
+            int carriageReturns = 0;
+            int newlines = 0;
+            for (int i = 0; i < bytes.length; i++) {
+                if (bytes[i] == '\r')
+                    carriageReturns++;
+                if (bytes[i] == '\n')
+                    newlines++;
+            }
+            String name = relative(file);
+            if (carriageReturns > 0)
+                found.put(name, carriageReturns);
+            // in a CRLF document every newline is one: a mixture means something rewrote part of it
+            if (name.contains("-crlf.toml") && carriageReturns != newlines)
+                notPaired.add(name + " has " + carriageReturns + " CR and " + newlines + " LF");
+        }
+
+        // the whole picture first, so a corpus rewritten in both directions at once is diagnosed in one go
+        // rather than one assertion at a time
+        assertEquals("the carriage returns in the corpus are not the ones the suite published. A checkout "
+                        + "that rewrote line endings would do exactly this, and would silently change what "
+                        + "the cases named after CR and LF are testing. See .gitattributes.",
+                new TreeMap<>(expected), new TreeMap<>(found));
+        assertTrue("these documents were published as CRLF and are no longer entirely CRLF: " + notPaired,
+                notPaired.isEmpty());
+    }
+
+    private static List<File> everyFileUnder(File directory) {
+        List<File> found = new ArrayList<>();
+        collectEverything(directory, found);
+        Collections.sort(found);
+        return found;
+    }
+
+    private static void collectEverything(File directory, List<File> found) {
+        File[] children = directory.listFiles();
+        if (children == null)
+            return;
+        for (File child : children) {
+            if (child.isDirectory())
+                collectEverything(child, found);
+            else
+                found.add(child);
+        }
+    }
+
+    private static byte[] bytesOf(File file) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (InputStream in = new FileInputStream(file)) {
+            byte[] buffer = new byte[8192];
+            for (int read; (read = in.read(buffer)) != -1; )
+                bytes.write(buffer, 0, read);
+        }
+        return bytes.toByteArray();
     }
 
     /** The corpus has to be the version we claim to read, not whatever was copied in last. */
