@@ -160,7 +160,7 @@ Line counts are estimates for a hand-written parser only; tests run another 1.5�
 | CBOR | RFC 8949 | 450–650 | low-medium | A small deterministic spec — easier to get right than YAML or TOML, for all that it is binary |
 | ~~TOON~~ | toonformat.dev | ~400 | — | **closed 2026-08-10.** Not a configuration format. See below |
 | YAML (subset) | large | 700–1000 | medium | See below |
-| TOML | v1.0.0 | 1200–1800 | medium-high | Dotted keys, four string forms, `_`/hex/oct/bin integers, inf/nan floats, four date-time types, inline tables, `[[arrays of tables]]`, strict redefinition rules. `toml-test` exists |
+| TOML | v1.0.0 | ~~1200–1800~~ **700–1000**, revised 2026-08-12 | medium-high | Dotted keys, four string forms, `_`/hex/oct/bin integers, inf/nan floats, four date-time types, inline tables, `[[arrays of tables]]`, strict redefinition rules. `toml-test` exists |
 | HOCON | Lightbend | 1500–2500 | high | See below |
 | YAML (complete) | — | 5000+ | out of reach | SnakeYAML is around 20k lines |
 | CDDL | RFC 8610 | — | — | **Not a data format**: a schema language for CBOR and JSON. It belongs with validation, issue #201, not with loaders |
@@ -310,7 +310,63 @@ A plan in phases
    a class loader that withholds the dependency and drives the real discovery. Neither is redundant and
    nothing else in the suite can catch either, the suite running with both libraries present.
 
-7. **TOML, then CBOR, TOON if ever.** TOML is written here, not delegated — see the criterion at the top.
+7. **TOML**, written here and not delegated — see the criterion at the top. Decided on 2026-08-12, before
+   any code, because two of these change what the parser emits and the third changes what "done" means.
+
+   ### TOML is the format our convention was already shaped like
+
+   Nothing has to be adapted. `[[array of tables]]` **is** `servers[0].host`, dotted keys **are** the
+   flattening, and `[table]` is a prefix. TOML also **forbids redefinition**, which is the decision already
+   taken for JSON and the opposite of HOCON's, so **C9 needs no option here** — a repeated key is refused
+   because the format says so and because we say so, for once agreeing without effort. And unlike YAML it
+   is not indentation-sensitive: no block state, no chomping, no ambiguous continuation. The difficulty is
+   entirely lexical, which is the easy kind.
+
+   ### Numbers are canonicalised, and that is not a hole in the rule
+
+   The rule elsewhere is that the text is kept as written — our JSON reader answers `1e3` for `1e3`. TOML
+   cannot follow it, and the reason is worth stating exactly, because "we made an exception" is how a rule
+   dies.
+
+   > **The text is kept where the text is the value. It is canonicalised where the format offers several
+   > spellings of one value.**
+
+   `1e3` is JSON's only way to write that number, so keeping it loses nothing and inventing `1000.0` would
+   lose the author's intent. TOML deliberately offers **four spellings of the same integer** — `1_000`,
+   `0xDEADBEEF`, `0o755`, `0b1101` — and they are lexical, not semantic. `Converters` reads an `int` with
+   `Integer.parseInt`, which accepts none of the four, so keeping the text would emit values that convert
+   to nothing at all. Canonicalising to plain decimal is the faithful reading, not a compromise.
+
+   The same applies to floats: TOML writes `inf`, `+inf`, `-inf` and `nan`, where Java writes `Infinity`,
+   `-Infinity` and `NaN`. Emitting TOML's spelling would produce a `Double` that never parses.
+
+   What is *not* canonicalised: strings, which are the value; and the four date-time types, whose TOML form
+   is already ISO-8601 and therefore already what `LocalDate.parse` and its relatives want. Those convert
+   with no TOML-specific code since 2026-08-12, when `of(String)` and `parse(CharSequence)` joined the
+   conversion chain — which is the whole of what TOML needed from the core.
+
+   ### The target is conformance, not a documented subset
+
+   This is where TOML parts company with YAML, and the criterion at the top forces it: TOML is written
+   *because* its specification is a document with an independent conformance suite. Shipping a subset would
+   empty that argument. So the target is v1.0.0 entire.
+
+   `toml-test` is **MIT**, its corpus is usable without the Go binary, and it holds roughly **205 valid
+   cases and 460 invalid ones**. The invalid half is the valuable one: it tests refusing rather than
+   half-reading, which is this project's stated standard and the thing our own tests are worst at
+   imagining. Its expected files are tagged JSON — `{"type":"integer","value":"42"}` — where **the value is
+   a string**, so the suite states the canonical text of every value and our model lines up with it almost
+   exactly.
+
+   ### The estimate above is too high
+
+   The table says 1200–1800 lines. Our estimates have run high for the same reason every time: the
+   keep-the-text rule deletes the part everyone else pays for. YAML was estimated at 700–1000 and came in
+   at **520**; JSON at **347**. TOML has more lexical variety but a simpler structure and no indentation
+   sensitivity. **700–1000 is the honest figure**, and unusually we will know when we are done rather than
+   deciding it.
+
+8. **CBOR, TOON if ever.**
 
 ### Why INI moved in front of JSON and YAML
 
