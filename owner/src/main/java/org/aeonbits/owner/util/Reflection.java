@@ -138,9 +138,9 @@ public final class Reflection {
         try {
             return (MethodHandles.Lookup)
                     PRIVATE_LOOKUP_IN.invoke(null, declaringClass, MethodHandles.lookup());
-        } catch (IllegalAccessException notAllowedToLookThere) {
-            return null;
-        } catch (InvocationTargetException itRefused) {
+        // the two are one answer here: the reflective call being refused, and the call itself refusing.
+        // Either way there is no such lookup and the caller has somewhere else to go
+        } catch (IllegalAccessException | InvocationTargetException thereIsNoLookingThere) {
             return null;
         }
     }
