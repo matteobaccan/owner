@@ -189,12 +189,29 @@ CODE
       parsing now lives in `org.aeonbits.owner.util.DurationParser`, which both the core and
       `DurationConverter` call; the converter is the public adapter and the core no longer imports the
       `converters` package.
-- [ ] **Break the remaining package cycle, between `org.aeonbits.owner` and `org.aeonbits.owner.util`.**
-      Older than the one above and the last one left: `Util.isFeatureDisabled` reads
-      `Config.DisableFeature`, so `util` points back at the core while most of the core points at `util`.
-      The method is the only edge. Moving it into the core would break the cycle for good, but `Util` is
-      public, so it is an API removal and belongs to a major version — decide it alongside the
-      `module-info` question below rather than on its own.
+- [x] **Break the remaining package cycle, between `org.aeonbits.owner` and `org.aeonbits.owner.util`.**
+      **Done 2026-08-12.** It was the older of the two and the last one left: `Util.isFeatureDisabled`
+      read `Config.DisableFeature`, so `util` pointed back at the core while most of the core points at
+      `util` — and those two imports in `Util.java` were the whole of the edge. **There are now no
+      cycles between the packages of the core.**
+      The method moved onto the enum it reads, as `Config.DisableableFeature.isDisabledFor(Method)`, so
+      that `PREFIX.isDisabledFor(method)` replaces `isFeatureDisabled(method, PREFIX)` at all six call
+      sites — three classes, all in the core, which is where the method's only callers already were.
+      Two things worth carrying:
+      **the usual softening was not available.** An API is normally removed in two steps, the body
+      moved and the old method left `@Deprecated` delegating to it. Not here: a delegating
+      `Util.isFeatureDisabled` still imports `Config`, and the import *is* the cycle. It was remove or
+      keep, which is why this waited for a major version.
+      **It is not a net removal of API.** A public method left `Util` and a public method arrived on
+      `DisableableFeature`, a type that was already public — which is both easier to write in the
+      release note and a better home, since the knowledge of `@DisableFeature` now sits next to the
+      annotation it reads. It also stopped being callable on a method that is not reached through a
+      `Config`, so `DisableFeatureTest` now tests it directly rather than only through a configuration
+      object: four tests, one of them on an interface that does not extend `Config` at all.
+      **This does not unblock `module-info`** and was not done for it — JPMS forbids cycles between
+      *modules*, and these two packages would share one. What it unblocks is moving a package: while
+      `util` pointed at the core, `util` could not go anywhere, and `owner-formats` has just made that
+      freedom concrete.
 
 SILENT FAILURES STILL TO LOOK AT
 --------------------------------

@@ -18,7 +18,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.aeonbits.owner.Config.DisableableFeature.PREFIX;
-import static org.aeonbits.owner.util.Util.isFeatureDisabled;
 
 /**
  * Maps methods to properties keys and defaultValues. Maps a class to default property values.
@@ -66,7 +65,7 @@ final class PropertiesMapper {
      * </p>
      */
     private static String prefix(Method method, KeyPrefix globalPrefix) {
-        if (isFeatureDisabled(method, PREFIX))
+        if (PREFIX.isDisabledFor(method))
             return "";
         Prefix prefix = method.getDeclaringClass().getAnnotation(Prefix.class);
         return globalPrefix.of(method.getDeclaringClass(), prefix == null ? null : prefix.value());

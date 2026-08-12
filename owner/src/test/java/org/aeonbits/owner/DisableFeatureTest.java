@@ -10,9 +10,14 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.DisableFeature;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
+import static org.aeonbits.owner.Config.DisableableFeature.PREFIX;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Luigi R. Viggiano
@@ -125,5 +130,45 @@ public class DisableFeatureTest {
                 ConfigFactory.create(ConfigWithDisabledFormattingAndExpansionOnClass.class);
         assertEquals("Hello %s, welcome on ${planet}!", cfg.helloEnabled("Luigi"));
         assertEquals("Hello %s, welcome on ${planet}!", cfg.helloDisabled("Luigi"));
+    }
+
+    // DisableableFeature.isDisabledFor is public API since 2.0.0, where it replaced
+    // Util.isFeatureDisabled. Every test above reaches it through a configuration object; these
+    // read it the way a caller outside the library now can, directly on a Method.
+
+    @Test
+    public void isDisabledForReadsTheAnnotationOnTheMethod() throws Exception {
+        Method disabled = ConfigWithSubstitutionDisabledOnMethod.class.getMethod("sayHelloDisabled");
+        Method enabled = ConfigWithSubstitutionDisabledOnMethod.class.getMethod("sayHelloEnabled");
+        assertTrue(VARIABLE_EXPANSION.isDisabledFor(disabled));
+        assertFalse(VARIABLE_EXPANSION.isDisabledFor(enabled));
+    }
+
+    @Test
+    public void isDisabledForReadsTheAnnotationOnTheDeclaringInterface() throws Exception {
+        Method notAnnotated = ConfigWithSubstitutionDisabledOnClass.class.getMethod("sayHelloEnabled");
+        assertTrue(VARIABLE_EXPANSION.isDisabledFor(notAnnotated));
+    }
+
+    @Test
+    public void isDisabledForAnswersOnlyForTheFeatureItIsAskedAbout() throws Exception {
+        Method disabled = ConfigWithSubstitutionDisabledOnMethod.class.getMethod("sayHelloDisabled");
+        assertTrue(VARIABLE_EXPANSION.isDisabledFor(disabled));
+        assertFalse(PARAMETER_FORMATTING.isDisabledFor(disabled));
+        assertFalse(PREFIX.isDisabledFor(disabled));
+    }
+
+    /** Not a {@link Config}: the method reads an annotation, and asks nothing else of the type. */
+    public interface NotAConfigAtAll {
+        @DisableFeature(PREFIX)
+        String annotated();
+
+        String bare();
+    }
+
+    @Test
+    public void isDisabledForDoesNotRequireAConfigInterface() throws Exception {
+        assertTrue(PREFIX.isDisabledFor(NotAConfigAtAll.class.getMethod("annotated")));
+        assertFalse(PREFIX.isDisabledFor(NotAConfigAtAll.class.getMethod("bare")));
     }
 }

@@ -762,7 +762,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     private static String reads(Method method, String key) {
         if (NestedProperties.nests(method))
             return "is the section under '" + NestedProperties.pathOf(key) + "'";
-        if (isFeatureDisabled(method, DisableableFeature.PREFIX))
+        if (DisableableFeature.PREFIX.isDisabledFor(method))
             return "reads '" + key + "', with no prefix at all: it disables the feature";
         if (method.getParameterTypes().length > 0)
             return "reads '" + key + "', its arguments formatted in at each call";

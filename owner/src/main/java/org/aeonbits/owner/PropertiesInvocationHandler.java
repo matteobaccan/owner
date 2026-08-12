@@ -34,7 +34,6 @@ import static org.aeonbits.owner.OptionalSupport.valueClass;
 import static org.aeonbits.owner.PreprocessorResolver.resolvePreprocessors;
 import static org.aeonbits.owner.PropertiesMapper.defaultValueOnEmpty;
 import static org.aeonbits.owner.PropertiesMapper.key;
-import static org.aeonbits.owner.util.Util.isFeatureDisabled;
 import static org.aeonbits.owner.util.Util.unsupported;
 import static org.aeonbits.owner.util.Reflection.invokeDefaultMethod;
 import static org.aeonbits.owner.util.Reflection.isDefault;
@@ -337,7 +336,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         String value = propertiesManager.getProperty(key);
 
         // TODO: this if should go away! See #84 and #86
-        if (value == null && !isFeatureDisabled(method, VARIABLE_EXPANSION)) {
+        if (value == null && !VARIABLE_EXPANSION.isDisabledFor(method)) {
             String unexpandedKey = key(method, keyPrefix);
             value = propertiesManager.getProperty(unexpandedKey);
         }
@@ -461,13 +460,13 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
     private String expandKey(Method method, Object... args) {
         String key = key(method, keyPrefix);
-        if (isFeatureDisabled(method, VARIABLE_EXPANSION))
+        if (VARIABLE_EXPANSION.isDisabledFor(method))
             return key;
         return substitutor.replace(key, args);
     }
 
     private String format(Method method, String format, Object... args) {
-        if (isFeatureDisabled(method, PARAMETER_FORMATTING))
+        if (PARAMETER_FORMATTING.isDisabledFor(method))
             return format;
 
         // If there are no arguments to format, we can just return.
@@ -519,7 +518,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     }
 
     private String expandVariables(Method method, String value) {
-        if (isFeatureDisabled(method, VARIABLE_EXPANSION))
+        if (VARIABLE_EXPANSION.isDisabledFor(method))
             return value;
         return substitutor.replace(value);
     }

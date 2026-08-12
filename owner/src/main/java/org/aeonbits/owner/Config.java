@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.function.BiConsumer;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
@@ -544,7 +546,30 @@ public interface Config extends Serializable {
          *
          * @since 2.0.0
          */
-        PREFIX
+        PREFIX;
+
+        /**
+         * Tells whether this feature is disabled for the given method, considering the
+         * {@link DisableFeature} annotation on the method itself and on the interface declaring it.
+         * <p>
+         * This method replaces <code>org.aeonbits.owner.util.Util.isFeatureDisabled(Method,
+         * DisableableFeature)</code>, removed in 2.0.0: the knowledge of {@link DisableFeature} now
+         * sits next to the annotation it reads.
+         * </p>
+         *
+         * @param method the method to inspect.
+         * @return <code>true</code> if this feature is disabled for the given method,
+         *         <code>false</code> otherwise.
+         * @since 2.0.0
+         */
+        public boolean isDisabledFor(Method method) {
+            return isDisabledBy(method.getDeclaringClass().getAnnotation(DisableFeature.class)) ||
+                    isDisabledBy(method.getAnnotation(DisableFeature.class));
+        }
+
+        private boolean isDisabledBy(DisableFeature annotation) {
+            return annotation != null && asList(annotation.value()).contains(this);
+        }
     }
 
     /**

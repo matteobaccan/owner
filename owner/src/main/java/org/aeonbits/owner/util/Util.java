@@ -7,12 +7,8 @@
  */
 package org.aeonbits.owner.util;
 
-import org.aeonbits.owner.Config.DisableFeature;
-import org.aeonbits.owner.Config.DisableableFeature;
-
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -251,24 +247,6 @@ public abstract class Util {
      * no operation
      */
     public static void ignore() {
-    }
-
-    /**
-     * Tells whether the given feature is disabled for the given method, considering both the method
-     * and its declaring class {@link DisableFeature} annotations.
-     *
-     * @param method  the method to inspect.
-     * @param feature the feature to check.
-     * @return <code>true</code> if the feature is disabled, <code>false</code> otherwise.
-     */
-    public static boolean isFeatureDisabled(Method method, DisableableFeature feature) {
-        Class<DisableFeature> annotation = DisableFeature.class;
-        return isFeatureDisabled(feature, method.getDeclaringClass().getAnnotation(annotation)) ||
-                isFeatureDisabled(feature, method.getAnnotation(annotation));
-    }
-
-    private static boolean isFeatureDisabled(DisableableFeature feature, DisableFeature annotation) {
-        return annotation != null && asList(annotation.value()).contains(feature);
     }
 
     /**
