@@ -107,6 +107,20 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **TOML is read**, from a source whose path ends in `.toml`, and `MyConfig.toml` joins the names tried
+   when a configuration declares no `@Sources`. It is **all of v1.0.0** rather than a subset: unlike YAML,
+   TOML has a written specification and a conformance suite anyone can run, which is why it is parsed here
+   rather than delegated the way HOCON is — and shipping a subset would have emptied that argument.
+
+   TOML is the format this library's flattening convention was already shaped like: an `[[array of tables]]`
+   *is* `servers[0].host`, a dotted key *is* the flattening, and a `[table]` is a prefix, so nothing had to
+   be adapted on either side. A key written twice is refused, as TOML requires and as JSON already did.
+
+   Values are kept as written, with one rule: where TOML offers **several spellings of one value** they are
+   canonicalised, because otherwise they would convert to nothing. `1_000`, `0xDEADBEEF`, `0o755` and
+   `0b1101` become plain decimals; `inf` and `nan` become `Infinity` and `NaN`; and the space TOML allows in
+   place of a date-time's `T` becomes a `T`. Strings and ordinary decimals are untouched. The four date-time
+   types need nothing registered. See [File formats](/owner/docs/file-formats/#toml).
  * **The `java.time` types are read out of the box** — `LocalDate`, `LocalTime`, `LocalDateTime`,
    `OffsetDateTime`, `Instant`, `ZoneId`, `Year` and the rest — with nothing to register. The conversion
    chain now understands two more ways of building a type from text: a public static `of(String)` and a

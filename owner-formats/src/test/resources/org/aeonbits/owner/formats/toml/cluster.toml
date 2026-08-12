@@ -1,0 +1,29 @@
+# A TOML document exercising the shapes the library reads: a table, an array of
+# tables, a map of tables named by the file, an indexed list, and the four
+# date-time types.
+
+datacentre = "eu-west"
+ports = [80, 443]
+released = 2026-08-12
+opensAt = 07:32:00
+maintenance = 2026-08-12 03:00:00
+createdAt = 1979-05-27T07:32:00Z
+
+[server]
+host = "localhost"
+port = 8080
+timeout = "PT30S"
+
+[[servers]]
+host = "alpha"
+weight = 0x10
+
+[[servers]]
+host = "beta"
+weight = 0b1000
+
+[pools.small]
+size = 4
+
+[pools.large]
+size = 6_4

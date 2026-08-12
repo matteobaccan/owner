@@ -14,6 +14,7 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [INI](#ini) | a path ending in `.ini` or `.cfg` | `MyConfig.ini`, `MyConfig.cfg` | ours |
 | [JSON](#json) | a path ending in `.json` | `MyConfig.json` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core) |
 | [YAML](#yaml) | a path ending in `.yaml` or `.yml` | `MyConfig.yaml`, `MyConfig.yml` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core), and **a subset** |
+| [TOML](#toml) | a path ending in `.toml` | `MyConfig.toml` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core), **all of v1.0.0** |
 | [HOCON](#hocon) | a path ending in `.conf` | `MyConfig.conf` | **not ours**, and the only one: see [below](#hocon) |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
@@ -22,8 +23,6 @@ is something you choose; see [below](#env) and [below](#ini). **XML is parsed wi
 which in rare cases cannot be applied, and **a document that declares a grammar is held to it**; see
 [below](#xml). And **HOCON is the one format that needs a dependency**, which you add and we do not ship;
 see [below](#hocon).
-
-TOML is not read. What that would take is in [what is not read yet](#what-is-not-read-yet).
 
 <div class="note info">
   <h5>Nothing here is on your classpath unless you ask for it</h5>
@@ -745,6 +744,89 @@ library cannot afford.
 [JSON](#json) and for the same reason. An empty flow sequence writes an empty value, which is read as an
 empty collection; an empty mapping writes nothing.
 
+TOML
+----
+
+*Since 2.0.0.* A source whose path ends in `.toml` is read as
+[TOML v1.0.0](https://toml.io/en/v1.0.0), and `MyConfig.toml` is one of the names tried when a
+configuration declares no `@Sources`.
+
+```toml
+datacentre = "eu-west"
+ports = [80, 443]
+
+[server]
+host = "localhost"
+port = 8080
+
+[[servers]]
+host = "alpha"
+
+[[servers]]
+host = "beta"
+```
+
+```java
+public interface ClusterConfig extends Config {
+    String datacentre();
+    List<Integer> ports();
+    ServerConfig server();
+    List<ServerConfig> servers();
+}
+```
+
+**TOML is the format this library's convention was already shaped like.** An `[[array of tables]]` *is*
+`servers[0].host`, a dotted key *is* the [flattening](#how-a-tree-becomes-keys), and a `[table]` is a
+prefix — nothing had to be adapted on either side.
+
+### All of v1.0.0, not a subset
+
+[YAML](#yaml) ships as a documented subset because a complete YAML implementation is out of reach without
+a dependency. TOML is held to a different standard, and deliberately: its specification is a document
+rather than an implementation, and [`toml-test`](https://github.com/toml-lang/toml-test) is a conformance
+suite anyone can run — which is the reason this format is written here rather than delegated the way
+[HOCON](#hocon) is. Shipping a subset would empty that argument, so the suite is what decides when it is
+finished rather than us.
+
+### Values are kept as written, except where TOML writes one value several ways
+
+Everywhere else the text is handed over exactly — our JSON reader answers `1e3` for `1e3`, that being
+JSON's only way of writing the number. TOML deliberately offers **several spellings of one value**, and
+those are canonicalised, because otherwise they would convert to nothing at all:
+
+| Written | Read as | Why |
+|---|---|---|
+| `1_000`, `0xDEADBEEF`, `0o755`, `0b1101` | `1000`, `3735928559`, `493`, `13` | four spellings of an integer, and `Integer.parseInt` accepts none of them |
+| `inf`, `-inf`, `nan` | `Infinity`, `-Infinity`, `NaN` | how Java writes the same values |
+| `1979-05-27 07:32:00` | `1979-05-27T07:32:00` | TOML allows the space; `LocalDateTime.parse` wants the `T` |
+
+Strings are untouched, being the value rather than a spelling of it, and so are ordinary decimals: `3.1415`
+and `5e+22` arrive as written.
+
+The four date-time types need nothing registered — `LocalDate`, `LocalTime`, `LocalDateTime` and
+`OffsetDateTime` are built by the
+[static factory](/owner/docs/type-conversion/#types-built-by-a-static-factory) the conversion chain learnt
+in 2.0.0:
+
+```toml
+released = 2026-08-12
+createdAt = 1979-05-27T07:32:00Z
+```
+
+```java
+LocalDate released();
+OffsetDateTime createdAt();
+```
+
+### A key written twice is refused
+
+As for [JSON](#json), and as TOML itself requires: a table defined twice, a table that is already a value,
+an inline table something tries to extend, a `[header]` reopening a path a dotted key already created. This
+is the opposite of what [HOCON](#hocon) does, and both are right — HOCON says a repetition merges, TOML
+says it is a mistake, and each format is read by its own rule.
+
+Every complaint carries the line and the column.
+
 HOCON
 -----
 
@@ -856,16 +938,18 @@ See [importing properties](/owner/docs/importing-properties/) for the other ways
 What is not read yet
 --------------------
 
-**TOML is not supported.** Being able to say what is *not* there is half the point of this page, so: there
-is no partial support, no experimental flag, nothing to turn on. A `.toml` source given to `@Sources` today
-falls through to the properties loader, which will read it as best it can and give you nonsense.
+**Nothing on the usual list is missing any more.** Properties, XML, `.env`, INI, JSON, YAML, TOML and HOCON
+are all read, which is the whole of what a Java configuration library is normally asked for. Being able to
+say what is *not* there is half the point of this page, so what is genuinely absent: binary formats such as
+CBOR, and anything else nobody has asked for.
 
-Unlike HOCON, TOML will be written here rather than delegated when it is written: its specification is a
-document, it has a conformance suite anyone can run, and several independent implementations agree on what
-it means. That is the test — a format is delegated only when its specification *is* an implementation, and
-so far HOCON is the only one that qualifies.
+The rule that decides how a new one would arrive is worth stating, since the two most recent went opposite
+ways. **A format is written here unless its specification *is* an implementation**, in which case it is
+delegated and the dependency is optional and yours to add. HOCON is the only one that qualifies so far;
+TOML did not, having a written specification, a conformance suite anyone can run, and several independent
+implementations that agree on what it means — so TOML is ours and HOCON is Lightbend's.
 
-In the meantime, two things work today:
+Two other routes work whatever the format:
 
 - **A loader of your own**, and 2.0.0 made that easier in two ways: it can be **found on the classpath**
   rather than registered by hand, and it can read options off the source it was given. See
