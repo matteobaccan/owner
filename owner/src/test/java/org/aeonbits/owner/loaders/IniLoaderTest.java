@@ -371,6 +371,39 @@ public class IniLoaderTest {
         }
     }
 
+    // -------------------------------------------- the two the coverage report asked for
+
+    /**
+     * Under a dialect that takes either separator, a line holding both is split at whichever comes first.
+     * Nothing reached that decision before: every test wrote one separator or the other.
+     */
+    @Test
+    public void whicheverSeparatorComesFirstIsTheOne() throws IOException {
+        Properties both = read(IniDialect.PYTHON, "url = http://example.org:8080/a");
+        assertEquals("the equals is first, so the colon is part of the value",
+                "http://example.org:8080/a", both.getProperty("url"));
+
+        Properties colonFirst = read(IniDialect.PYTHON, "note: a = b");
+        assertEquals("the colon is first, so the equals is part of the value",
+                "a = b", colonFirst.getProperty("note"));
+    }
+
+    /** The escapes a quoted value knows, two of which had never been resolved. */
+    @Test
+    public void aQuotedValueResolvesEveryEscapeItKnows() throws IOException {
+        // GIT is the preset whose quotes delimit a value and expand what is inside it
+        Properties props = read(IniDialect.GIT, "a = \"one\\ntwo\"", "b = \"one\\ttwo\"", "c = \"one\\btwo\"",
+                "d = \"a \\\"quoted\\\" word\"", "e = \"C:\\\\path\"", "f = \"left \\q alone\"");
+
+        assertEquals("one\ntwo", props.getProperty("a"));
+        assertEquals("one\ttwo", props.getProperty("b"));
+        assertEquals("one\btwo", props.getProperty("c"));
+        assertEquals("a \"quoted\" word", props.getProperty("d"));
+        assertEquals("C:\\path", props.getProperty("e"));
+        assertEquals("an escape it does not know is left as written, a backslash in a path being likelier",
+                "left \\q alone", props.getProperty("f"));
+    }
+
     // ---------------------------------------------------------------- helpers
 
     private static Properties read(String... lines) throws IOException {

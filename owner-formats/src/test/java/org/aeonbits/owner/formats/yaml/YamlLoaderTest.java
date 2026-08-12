@@ -437,4 +437,10 @@ public class YamlLoaderTest {
     public void aUnicodeEscapeThatIsNotHexadecimalIsRefused() {
         assertTrue(refused("a: \"\\uZZZZ\"").contains("is not four hexadecimal digits"));
     }
+    @Test
+    public void theSingleDefaultSpecIsTheFirstOfTheTwo() {
+        // defaultSpecFor is what a Loader written before 2.0.0 overrides, and the library asks
+        // defaultSpecsFor instead - so this stayed public, correct and unexecuted
+        assertEquals("classpath:MyConfig.yaml", new YamlLoader().defaultSpecFor("classpath:MyConfig"));
+    }
 }
