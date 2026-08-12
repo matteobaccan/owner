@@ -14,9 +14,7 @@ import java.util.Map;
 import static org.aeonbits.owner.util.Collections.entry;
 import static org.aeonbits.owner.util.Collections.map;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Matteo Baccan

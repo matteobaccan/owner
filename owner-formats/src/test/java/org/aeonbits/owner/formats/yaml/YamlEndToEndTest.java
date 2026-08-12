@@ -25,7 +25,6 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * A YAML file of the shape people actually write — a Compose file, a Kubernetes manifest, an application
