@@ -354,4 +354,87 @@ public class YamlLoaderTest {
     public void aByteOrderMarkIsNotPartOfTheDocument() throws IOException {
         assertEquals("1", read("\uFEFFa: 1").getProperty("a"));
     }
+    // ------------------------------------------------- the refusals nothing reached yet
+
+    /**
+     * The lines below are each the only way into a complaint this parser can make. They were written
+     * against the coverage report rather than from imagination: a refusal that has never been executed is
+     * a refusal nobody has read, and the message is the whole of what it does.
+     */
+
+    // Two complaints in YamlParser have no test and are left without one deliberately, both being
+    // shadowed by a more specific check that fires first: "this line is outside everything above it"
+    // (a block at column 0 consumes the rest of the file, and a '...' marker does not end it) and
+    // "indented further than the one above it" (the value-on-the-previous-line check gets there first).
+    // They may well be unreachable. Contorting a document into them would prove nothing about either.
+
+    @Test
+    public void aSequenceItemWhereANameWasExpectedIsRefused() {
+        assertTrue(refused("a: 1", "- b").contains("sequence item where a name was expected"));
+    }
+
+    @Test
+    public void anEmptyNameIsRefused() {
+        assertTrue(refused("\"\": 1").contains("a name here is empty"));
+    }
+
+    @Test
+    public void anItemIndentedFurtherThanTheOneAboveItIsRefused() {
+        assertTrue(refused("a:", "  - one", "      - two").contains("indented further than the item above"));
+    }
+
+    @Test
+    public void aBlockScalarWithSomethingOtherThanPlusOrMinusIsRefused() {
+        assertTrue(refused("a: >x", "  text").contains("only '+' to keep the blank lines"));
+    }
+
+    @Test
+    public void aFlowMappingEntryWithoutAColonIsRefused() {
+        assertTrue(refused("a: {b}").contains("needs a colon"));
+    }
+
+    // ------------------------------------------------------- the escapes in a quoted scalar
+
+    @Test
+    public void everyEscapeADoubleQuotedScalarKnows() throws IOException {
+        Properties read = read(
+                "newline: \"a\\nb\"",
+                "tab: \"a\\tb\"",
+                "carriageReturn: \"a\\rb\"",
+                "backspace: \"a\\bb\"",
+                "formFeed: \"a\\fb\"",
+                "nul: \"a\\0b\"",
+                "quote: \"a\\\"b\"",
+                "backslash: \"a\\\\b\"");
+        assertEquals("a\nb", read.getProperty("newline"));
+        assertEquals("a\tb", read.getProperty("tab"));
+        assertEquals("a\rb", read.getProperty("carriageReturn"));
+        assertEquals("a\bb", read.getProperty("backspace"));
+        assertEquals("a\fb", read.getProperty("formFeed"));
+        assertEquals("a\0b", read.getProperty("nul"));
+        assertEquals("a\"b", read.getProperty("quote"));
+        assertEquals("a\\b", read.getProperty("backslash"));
+    }
+
+    @Test
+    public void anEscapeThisParserDoesNotKnowIsKeptAsWritten() throws IOException {
+        // not a refusal on purpose: YAML has escapes we do not read, and handing the text back unchanged
+        // is the reading least likely to be wrong about what the author meant
+        assertEquals("a\\qb", read("a: \"a\\qb\"").getProperty("a"));
+    }
+
+    @Test
+    public void aUnicodeEscapeIsResolved() throws IOException {
+        assertEquals("\u00E9\u20AC", read("a: \"\\u00E9\\u20AC\"").getProperty("a"));
+    }
+
+    @Test
+    public void aUnicodeEscapeCutShortIsRefused() {
+        assertTrue(refused("a: \"\\u00\"").contains("needs four hexadecimal digits"));
+    }
+
+    @Test
+    public void aUnicodeEscapeThatIsNotHexadecimalIsRefused() {
+        assertTrue(refused("a: \"\\uZZZZ\"").contains("is not four hexadecimal digits"));
+    }
 }
