@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 
 import static java.lang.String.format;
 import static java.net.URLDecoder.decode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 
 /**
@@ -356,10 +357,14 @@ public abstract class Util {
         if ("file".equalsIgnoreCase(uri.getScheme())) {
             String path = uri.getSchemeSpecificPart();
             try {
-                path = decode(path, "utf-8");
+                path = decode(path, UTF_8.name());
                 return new File(path);
-            } catch (UnsupportedEncodingException e) {
-                return unreachableButCompilerNeedsThis(/* utf-8 is supported in jre libraries */);
+            } catch (UnsupportedEncodingException cannotHappen) {
+                // URLDecoder.decode(String, Charset) does not declare this and would remove the whole
+                // try, but it arrived in Java 10 and this library is built for Java 8. Until the baseline
+                // moves, the name of a charset that is always present is the closest we get - and it is
+                // taken from StandardCharsets rather than written out, so it cannot be misspelt
+                return unreachableButCompilerNeedsThis();
             }
         } else if ("jar".equalsIgnoreCase(uri.getScheme())) {
             String path = uri.getSchemeSpecificPart();
