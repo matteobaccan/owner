@@ -136,4 +136,44 @@ public class StaticFactoryConversionTest {
         assertEquals("built by the constructor",
                 ConfigFactory.create(NotAFactoryConfig.class).value().text());
     }
+    // ------------------------------- the ways a factory can be there and unusable
+
+    /**
+     * A type whose <code>of</code> is not static. It has no <code>String</code> constructor and no
+     * <code>valueOf</code> either, so the chain really does reach the factory links and has to decide that
+     * this is not one of them rather than call it on nothing.
+     */
+    public static class InstanceFactoryOnly {
+        @SuppressWarnings("unused")
+        public InstanceFactoryOnly of(String text) {
+            throw new AssertionError("an instance method is not a static factory");
+        }
+    }
+
+    public interface InstanceFactoryConfig extends Config {
+        @DefaultValue("anything")
+        InstanceFactoryOnly value();
+    }
+
+    @Test
+    public void aFactoryThatIsNotStaticIsNotAFactory() {
+        try {
+            ConfigFactory.create(InstanceFactoryConfig.class).value();
+            fail("a type with only an instance of() was expected to be refused");
+        } catch (UnsupportedOperationException refused) {
+            assertTrue(refused.getMessage(), refused.getMessage().contains("Cannot convert"));
+        }
+    }
+
+    // Two more of Converters' uncovered lines were tried and are left alone, with what was learnt.
+    //
+    // A public static factory on a NON-public type would exercise the IllegalAccessException arm, but the
+    // proxy cannot return such a type at all: the failure is an IllegalAccessError from the proxy itself,
+    // before any conversion is attempted, so that arm cannot be reached from a configuration interface.
+    //
+    // A method returning List<String>[] would exercise the GenericArrayType arm of elementType - and it
+    // does not merely fail, it ends in a StackOverflowError: elementType erases the component to List,
+    // ARRAY hands that to COLLECTION, and COLLECTION asks elementType about the same method again. That is
+    // a defect rather than a coverage gap and it is recorded in TODO.md; a test asserting the overflow
+    // would only fix the bug in place.
 }

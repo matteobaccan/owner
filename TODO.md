@@ -217,6 +217,14 @@ CODE
       `util` pointed at the core, `util` could not go anywhere, and `owner-formats` has just made that
       freedom concrete.
 
+- [ ] **`List<String>[]` ends in a `StackOverflowError`**, found on 2026-08-12 while covering
+      `Converters`. `elementType` erases the component of a `GenericArrayType` to `List`, `ARRAY` hands
+      that to `COLLECTION`, and `COLLECTION` asks `elementType` about the same method again. An array of a
+      generic type is an unusual return type and this is not a regression — but a stack overflow is the
+      worst way to say no, and the fix is to refuse the shape where the recursion starts. The reasoning is
+      in `StaticFactoryConversionTest`, where the test that found it is not, because a test asserting the
+      overflow would fix the bug in place.
+
 SILENT FAILURES STILL TO LOOK AT
 --------------------------------
 
