@@ -217,13 +217,39 @@ CODE
       `util` pointed at the core, `util` could not go anywhere, and `owner-formats` has just made that
       freedom concrete.
 
-- [ ] **`List<String>[]` ends in a `StackOverflowError`**, found on 2026-08-12 while covering
-      `Converters`. `elementType` erases the component of a `GenericArrayType` to `List`, `ARRAY` hands
-      that to `COLLECTION`, and `COLLECTION` asks `elementType` about the same method again. An array of a
-      generic type is an unusual return type and this is not a regression — but a stack overflow is the
-      worst way to say no, and the fix is to refuse the shape where the recursion starts. The reasoning is
-      in `StaticFactoryConversionTest`, where the test that found it is not, because a test asserting the
-      overflow would fix the bug in place.
+- [x] **`List<String>[]` ended in a `StackOverflowError`** — **done 2026-08-12**, and a probe first showed
+      the defect was three times larger than the entry said. `elementType` erases the component of a
+      `GenericArrayType` to `List`, `ARRAY` hands that to `COLLECTION`, and `COLLECTION` asks `elementType`
+      about the same method again: `List<List<String>>` reaches the same loop, and so does a
+      `@ConverterClass` on either shape, whose converter was never even called because `COLLECTION` is
+      consulted before it. All three now refuse the shape where the recursion started, with a message that
+      sends the reader to `@CollectionConverterClass` — which is checked *before* `COLLECTION` and is
+      therefore the one way that did work and still does. `NestedCollectionsTest`.
+      The refusal is not a limitation waiting to be lifted: a property value is tokenized once, by one
+      separator, so it carries no second level for the inner collections to be told apart by.
+
+- [x] **`ByteSize.equals` compared the *rounded* byte count** — **done 2026-08-12**. `getBytes()` rounds
+      towards positive infinity so a buffer sized from it is never too small; identity was built on that,
+      so `0.4 B` equalled `0.6 B` and a `HashSet` of the two held one element. Identity is now decided on
+      the exact number of bytes, `compareTo` with it.
+      **What the fix uncovered**, which is the half that reported a wrong size rather than merging two
+      right ones: `convertTo` rounded the same way *before dividing*, so `1.5 B` came back as `2 B` — from
+      a method that changes the unit and nothing else, and even when the unit asked for was the one the
+      size was already written in. It is exact now, which is also what the javadoc of `in()` already
+      claimed. `in()` keeps its canonical form by dropping the trailing zeros a division inherits from its
+      operands, so `1000.0 KB` still reads `1 MB` and not `1.0 MB`.
+
+- [x] **A `default` method on a non-`public` interface failed with `IllegalAccessException`** — **done
+      2026-08-12**, the bug promised "tracked separately" in the comment closing #41 and never tracked.
+      `Reflection.invokeDefaultMethod` looked the method up with a lookup belonging to
+      `org.aeonbits.owner.util`, so an interface that is package-private anywhere else was not accessible
+      from it and the call died at the first invocation with *symbolic reference class is not accessible*.
+      It now takes `MethodHandles.privateLookupIn` on the declaring interface — reflectively, the bytecode
+      targeting Java 8 — and falls back on the old path when there is none. Java 8 was never affected: its
+      constructor hack already built the lookup on the declaring interface, which is the same thing said
+      the unsupported way. The only test there was used a public top-level interface, the one shape that
+      could not catch it; `DefaultMethodOnNonPublicInterfaceTest` uses a package-private one and a private
+      nested one.
 
 SILENT FAILURES STILL TO LOOK AT
 --------------------------------
