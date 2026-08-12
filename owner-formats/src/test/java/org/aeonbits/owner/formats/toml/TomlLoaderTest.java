@@ -355,6 +355,72 @@ public class TomlLoaderTest {
         assertEquals("2", read.get("a[1].b[0].n"));
     }
 
+    // ------------------------------------------- the ends nothing reached yet
+
+    /**
+     * Written against the coverage report rather than from imagination. Each of these is the only way into
+     * a line the conformance suite never touches, because the suite's documents all end tidily — a file
+     * that stops in the middle of a key or an escape is a truncated download or a half-written editor
+     * buffer, which is the moment a parser most needs to say something rather than fall over.
+     */
+
+    @Test
+    public void aDocumentThatEndsWhereAKeyShouldBeIsRefused() throws Exception {
+        refuses("[", "a key was expected");
+        refuses("a = 1\n[", "a key was expected");
+    }
+
+    @Test
+    public void aDocumentThatEndsInsideAnEscapeIsRefused() throws Exception {
+        refuses("s = \"\"\"a\\", "unfinished escape");
+    }
+
+    @Test
+    public void aDocumentThatEndsInsideAUnicodeEscapeIsRefused() throws Exception {
+        refuses("s = \"\"\"a\\u00", "hexadecimal digits");
+    }
+
+    @Test
+    public void aMultiLineStringMayOpenOnACarriageReturnAndNewline() throws Exception {
+        // the newline straight after the delimiter is not part of the string, and on a file written under
+        // Windows that newline is two characters
+        assertEquals("one", read("s = \"\"\"\r\none\"\"\"").get("s"));
+    }
+
+    @Test
+    public void aRadixPrefixWithNothingAfterItIsRefused() throws Exception {
+        // 0x is two characters, so it never reaches the radix branch and is judged as a decimal
+        refuses("a = 0x", "cannot begin with a zero");
+        // "has no digits after its prefix" is left without a test: radixInteger is only called for a
+        // body longer than the prefix, and withoutUnderscores either refuses or answers with at least one
+        // digit, so the empty case it guards against cannot arise. It is dead and this says so.
+    }
+
+    @Test
+    public void anIntegerTooLargeForItsTypeIsRefused() throws Exception {
+        // every digit is a digit and the shape is right, so only the parse can say no
+        refuses("a = 99999999999999999999", "is not a value TOML can read");
+    }
+
+    @Test
+    public void aFloatThatOverflowsIsRefused() throws Exception {
+        // TOML has inf, and a number that merely rounds to it is a different thing: the document says a
+        // finite value and no finite value is what it says
+        refuses("a = 1e400", "is not a number TOML can read");
+    }
+
+    @Test
+    public void aSignWithNoNumberAfterItIsRefused() throws Exception {
+        refuses("a = -", "not a number TOML can read");
+    }
+
+    @Test
+    public void somethingShorterThanADateIsNotOne() throws Exception {
+        // digitsAt has to answer for a string too short to hold what it is being asked about
+        refuses("a = 2026-08", "is not a number TOML can read");
+        refuses("a = 12:34", "is not a number TOML can read");
+    }
+
     // ------------------------------------------------------------- plumbing
 
     private void refuses(String document, String expected) throws IOException {
