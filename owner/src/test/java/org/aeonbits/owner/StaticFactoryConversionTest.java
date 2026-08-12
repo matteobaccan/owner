@@ -173,8 +173,8 @@ public class StaticFactoryConversionTest {
     // before any conversion is attempted, so that arm cannot be reached from a configuration interface.
     //
     // A method returning List<String>[] would exercise the GenericArrayType arm of elementType - and it
-    // does not merely fail, it ends in a StackOverflowError: elementType erases the component to List,
-    // ARRAY hands that to COLLECTION, and COLLECTION asks elementType about the same method again. That is
-    // a defect rather than a coverage gap and it is recorded in TODO.md; a test asserting the overflow
-    // would only fix the bug in place.
+    // did not merely fail, it ended in a StackOverflowError: elementType erases the component to List,
+    // ARRAY hands that to COLLECTION, and COLLECTION asks elementType about the same method again. That
+    // was a defect rather than a coverage gap, and it is fixed: the shape is refused where the recursion
+    // used to start. NestedCollectionsTest has that, and the two other shapes that reached the same loop.
 }

@@ -120,6 +120,7 @@ enum Converters {
             if (!Collection.class.isAssignableFrom(targetType)) return SKIP;
 
             Class<?> type = elementType(targetMethod);
+            refuseCollectionOfCollections(targetMethod, type);
             Object stub = Array.newInstance(type, 0);
             Object[] array = (Object[]) ARRAY.tryConvert(targetMethod, stub.getClass(), text, key);
 
@@ -373,6 +374,36 @@ enum Converters {
         if (type instanceof ParameterizedType)
             return erase(((ParameterizedType) type).getActualTypeArguments()[0]);
         return String.class;
+    }
+
+    /**
+     * Refuses a collection whose elements are themselves collections, which is a shape this chain cannot
+     * read and used to end in a {@link StackOverflowError} rather than in an answer.
+     * <p>
+     * {@link #COLLECTION} builds its elements out of the element type read off the <em>method</em>, so when
+     * that element type is another collection it hands {@link #ARRAY} an array of collections, whose
+     * component sends the very same method back to {@link #COLLECTION}: the recursion has no smaller case
+     * to reach. That is what <code>List&lt;List&lt;String&gt;&gt;</code>, <code>List&lt;String&gt;[]</code>
+     * and a <code>&#64;ConverterClass</code> on either of them all did.
+     * </p>
+     * <p>
+     * There is nothing to read here even in principle: a property value is tokenized once, by one
+     * separator, so it carries no second level for the inner collections to be told apart by.
+     * {@link CollectionConverterClass} is how a value with a shape of its own becomes a collection, and it
+     * is checked before this link precisely so that it keeps working on these types.
+     * </p>
+     *
+     * @param targetMethod the method being resolved, for the message.
+     * @param elementType  the element type read off that method.
+     */
+    private static void refuseCollectionOfCollections(Method targetMethod, Class<?> elementType) {
+        if (!Collection.class.isAssignableFrom(elementType)) return;
+        throw unsupported(
+                "The elements of '%s' are themselves collections (%s), which cannot be read from a property "
+                        + "value: the value is tokenized once, so there is no second separator to tell the "
+                        + "inner collections apart. Use @CollectionConverterClass to build the whole "
+                        + "collection from the raw value instead",
+                targetMethod.getName(), targetMethod.getGenericReturnType());
     }
 
     /**
