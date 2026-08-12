@@ -68,6 +68,15 @@
             <version>5.9.0</version>
             <optional>true</optional>
         </dependency>
+        <!-- HOCON is the one format whose specification is an implementation, so HoconLoader adapts the
+             reference one instead of parsing it. Optional, and not transitive: nothing of this reaches
+             anyone who does not ask for it. See HoconLoader for why it is not written by hand. -->
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.4.9</version>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>

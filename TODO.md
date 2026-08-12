@@ -331,9 +331,13 @@ an issue behind it, which is the point: what the others shipped is what our repo
       core keeps the formats the JDK can parse, a hand-written parser goes next door, and discovery makes
       the split cost the reader nothing. **Done 2026-08-11 as well**: YAML, a documented subset, which was
       the last of the four.
-      **#240 is only half answered, found on 2026-08-12** and it is an argument for HOCON: the title asks
-      for JSON, but the snippet in the body is HOCON — `site { url { uat: ... } }` — so the reporter's own
-      file still does not load. Close it only alongside the HOCON decision, or close it saying both things.
+      **Done 2026-08-12**: HOCON, and #240 closed with it — the issue asked for JSON in its title and
+      carried HOCON in its body, which is what made it the argument for doing HOCON now rather than a debt
+      against JSON. **Only TOML is left**, and TOML is written here rather than delegated.
+      The rule in `FORMATS.md` gained its one exception and a criterion to contain it: a format whose
+      specification *is* an implementation is delegated. See there, and `COMPARISON.md` for the field
+      evidence that settled it — nobody hand-writes a HOCON parser, and Gestalt hand-writes no parser at
+      all.
       Issues
       [#14](https://github.com/matteobaccan/owner/issues/14),
       [#65](https://github.com/matteobaccan/owner/issues/65),

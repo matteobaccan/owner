@@ -297,7 +297,7 @@ coincidence; it is evidence the demand is real.
 | Gap | Who has it | Our issue |
 |---|---|---|
 | Nested config interfaces | SmallRye, Gestalt, Coat | — (**closed 2026-08-11**) |
-| HOCON / TOML | everyone but us | — (YAML #14 #65 and JSON #240: **closed 2026-08-11**) |
+| TOML | Gestalt, Micronaut, avaje, Spring via Jackson | — (YAML #14 #65 **closed 2026-08-11**; HOCON and #240 **closed 2026-08-12**) |
 | `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
 | Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
@@ -383,8 +383,22 @@ Backlog, highest value first
    in it should not be a security release for people who never used the format. **YAML followed the same
    day**, a documented subset whose refusals are named one by one — and the Norway problem, which is what
    makes YAML expensive for everybody else, never arose here: we keep the literal scalar and the mapping
-   interface declares the type. Of the four named on this line **only HOCON and TOML are left**, and HOCON
-   is a decision rather than a piece of work.
+   interface declares the type. **HOCON followed on 2026-08-12**, and it was indeed a decision rather than
+   a piece of work — but not the decision expected here. It is the one format we delegate, to
+   `com.typesafe:config`, because HOCON's specification *is* an implementation. **Only TOML is left**, and
+   that one will be written.
+
+   Checking the field first changed the answer, as it keeps doing. What stood here was that HOCON is a gap
+   against *everyone*, and that is false: Spring Boot has no native HOCON — only `.properties` and `.yaml`
+   loaders, the rest being third-party starters — and avaje-config has none at all. **Gestalt and
+   Micronaut have it, and both delegate**: `gestalt-hocon` declares `com.typesafe:config`, and Micronaut
+   reaches it through Config4k, which is a Kotlin wrapper over the same library. **Nobody hand-writes a
+   HOCON parser**, and the unanimity is the argument.
+
+   The wider finding is worth keeping, because it is unflattering: Gestalt writes no parser for *any*
+   format — `gestalt-json` declares Jackson, `gestalt-yaml` and `gestalt-toml` the Jackson dataformats. So
+   its artifact-per-format split, which this file cites as precedent for ours, splits *dependencies* where
+   ours splits *code*. On hand-written parsing we are not a minority; we are alone.
 3. ~~**Origin tracking** (#277)~~ — **done 2026-08-11**, `Traceable` and `Origin`. Spring and Typesafe
    both attach the origin to the *value*, which we cannot: ours are strings in a `Properties`, so it is a
    lookup by key instead. Both of them also carry a file and a line number, which we do not — that needs

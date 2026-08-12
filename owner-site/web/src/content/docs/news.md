@@ -107,6 +107,24 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **HOCON is read**, from a source whose path ends in `.conf`, and `MyConfig.conf` joins the names tried
+   when a configuration declares no `@Sources`. The document becomes the same keys every other format
+   flattens to, so nested interfaces, indexed lists and maps of sections read it unchanged — substitutions,
+   object merging and `include` included, those being the reference implementation's to perform.
+
+   **It is the one format this project does not parse itself, and the reason is that it already has a
+   parser.** HOCON's specification *is* an implementation, and the value of the format is reading the
+   `application.conf` files that already exist; a hand-written subset would refuse substitutions, merging
+   and `include`, which is to say it would be JSON with comments. Worse, OWNER already reads `${...}` with
+   different semantics, so an approximation would not fail on the files it could not handle — it would read
+   them and quietly mean something else.
+
+   It costs nothing to anyone who does not use it. `com.typesafe:config` is an **optional** dependency of
+   `owner-extras`: it is not transitive, this project does not ship it, and you add it yourself. Nothing in
+   the loader refers to it, so the loader is discovered and created like any other on a classpath without
+   it, and only reading a `.conf` fails — naming the source and the artifact to add. See
+   [File formats](/owner/docs/file-formats/#hocon). Closes
+   [#240](https://github.com/matteobaccan/owner/issues/240).
  * **The ZooKeeper loader no longer has to be registered.** `ZooKeeperLoader` is now found on the classpath
    like every other loader, so `@Sources("zookeeper://…")` works with `ConfigFactory.create` and there is no
    `registerLoader` call and no factory of your own to write. Code that still registers it keeps working.

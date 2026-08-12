@@ -14,21 +14,28 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [INI](#ini) | a path ending in `.ini` or `.cfg` | `MyConfig.ini`, `MyConfig.cfg` | ours |
 | [JSON](#json) | a path ending in `.json` | `MyConfig.json` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core) |
 | [YAML](#yaml) | a path ending in `.yaml` or `.yml` | `MyConfig.yaml`, `MyConfig.yml` | ours, in [`owner-formats`](/owner/docs/installation/#the-formats-that-are-not-in-the-core), and **a subset** |
+| [HOCON](#hocon) | a path ending in `.conf` | `MyConfig.conf` | **not ours**, and the only one: see [below](#hocon) |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
-Three of them are worth reading twice. **`.env` and INI have no standard**, so which rules they are read by
-is something you choose; see [below](#env) and [below](#ini). And **XML is parsed with hardening turned
-on**, which in rare cases cannot be applied, and **a document that declares a grammar is held to it**; see
-[below](#xml).
+Four of them are worth reading twice. **`.env` and INI have no standard**, so which rules they are read by
+is something you choose; see [below](#env) and [below](#ini). **XML is parsed with hardening turned on**,
+which in rare cases cannot be applied, and **a document that declares a grammar is held to it**; see
+[below](#xml). And **HOCON is the one format that needs a dependency**, which you add and we do not ship;
+see [below](#hocon).
 
-Nothing else is read yet — no YAML, JSON, TOML or HOCON. What that would take, and in which order it is
-coming, is in [what is not read yet](#what-is-not-read-yet).
+TOML is not read. What that would take is in [what is not read yet](#what-is-not-read-yet).
 
 <div class="note info">
-  <h5>The core has no dependencies, and these do not change that</h5>
+  <h5>Nothing here is on your classpath unless you ask for it</h5>
   <p>
-    Properties and XML are read with parsers the JDK already ships, and <code>.env</code> with one of ours
-    that is a few hundred lines. Adding a format has never meant adding a jar, and it is not going to.
+    The core has no dependencies at all: Properties and XML are read with parsers the JDK already ships,
+    and <code>.env</code> and INI with ones of ours. JSON and YAML live in
+    <code>owner-formats</code>, which has no dependencies either — they are parsers we wrote.
+  </p>
+  <p>
+    HOCON is the single exception in the whole project, for the reason given <a href="#hocon">below</a>,
+    and it is arranged so that it costs nothing to anybody else: the dependency is optional, it is not
+    transitive, we do not ship it, and only reading a <code>.conf</code> source needs it.
   </p>
 </div>
 
@@ -738,6 +745,98 @@ library cannot afford.
 [JSON](#json) and for the same reason. An empty flow sequence writes an empty value, which is read as an
 empty collection; an empty mapping writes nothing.
 
+HOCON
+-----
+
+*Since 2.0.0.* A source whose path ends in `.conf` is read as
+[HOCON](https://github.com/lightbend/config/blob/main/HOCON.md), and `MyConfig.conf` is one of the names
+tried when a configuration declares no `@Sources`.
+
+```hocon
+datacentre = "eu-west"
+
+server {
+  host = localhost      // comments, and no quotes needed
+  port = 8080
+}
+
+servers = [
+  { host = alpha, region = ${datacentre} },   # substitutions
+  { host = beta,  region = ${datacentre} }
+]
+```
+
+```java
+public interface ClusterConfig extends Config {
+    ServerConfig server();
+    List<ServerConfig> servers();
+}
+```
+
+The document becomes the [same keys every format here flattens to](#how-a-tree-becomes-keys), so nested
+interfaces, indexed lists and maps of sections read it the way they read anything else.
+
+### It is the one format we do not parse ourselves
+
+Every other format on this page has a parser written in this project, with no dependency. HOCON has one
+too — Lightbend's — and **that is exactly the reason we do not write a second one**. HOCON's specification
+*is* an implementation, and the point of the format is reading the `application.conf` files that already
+exist. Its substitutions resolve after merging and may refer to the key they are defining; objects written
+twice merge instead of replacing one another; `include` pulls in another document mid-parse. A subset
+without those would be JSON with comments, which is nobody's reason for choosing HOCON.
+
+Worse, this library already reads `${...}`, with different semantics and at a different moment. An
+approximation would not fail on the files it could not handle — it would read them and quietly mean
+something else. So the reference implementation is what reads a `.conf`, and a HOCON document means here
+what it means everywhere.
+
+### Adding it
+
+`owner-extras` declares the dependency as optional, which means it is yours to add and nobody else
+receives it:
+
+```xml
+<dependency>
+    <groupId>org.aeonbits.owner</groupId>
+    <artifactId>owner-extras</artifactId>
+    <version>2.0.0</version>
+</dependency>
+<dependency>
+    <groupId>com.typesafe</groupId>
+    <artifactId>config</artifactId>
+    <version>1.4.9</version>
+</dependency>
+```
+
+There is nothing to register: the loader is found on the classpath like every other. It brings no
+dependencies of its own — Typesafe Config is a single jar — and it is Apache 2.0.
+
+<div class="note">
+  <h5>Nothing is loaded until a <code>.conf</code> source is read.</h5>
+  <p>
+    The loader is created in every application carrying <code>owner-extras</code>, most of which will not
+    have Typesafe Config. Nothing in it refers to Typesafe Config, so that costs nothing: a configuration
+    reading any other source is unaffected. Only reading a <code>.conf</code> without the dependency
+    fails, and it fails by naming the source and the artifact to add.
+  </p>
+</div>
+
+### Two rules of its own
+
+**A value comes back as the reference implementation understood it, not as it was written.** Everywhere
+else here the text is kept exactly — our JSON reader answers `1e3` for `1e3` — because those parsers hand
+over the characters. Typesafe Config parses eagerly into typed values and does not keep the original text,
+so `1e3` arrives as `1000` and `1.50` as `1.5`. Nothing a converter needs is lost, and strings, durations
+like `10s` and sizes like `512K` are untouched, those being strings in HOCON's own model.
+
+**Substitutions are looked up in the document, then in the system properties, then in the environment** —
+and only looked up: not one system property or environment variable becomes a property of your
+configuration. A required `${foo}` that resolves to nothing is refused, as HOCON refuses it; an optional
+`${?foo}` leaves its key out, which is what a missing key does everywhere here.
+
+`proxy = null` **writes no key at all**, as in [JSON](#json) and [YAML](#yaml) and for the same reason. An
+empty list writes an empty value, which is read as an empty collection.
+
 System properties and the environment
 -------------------------------------
 
@@ -757,15 +856,14 @@ See [importing properties](/owner/docs/importing-properties/) for the other ways
 What is not read yet
 --------------------
 
-**TOML and HOCON are not supported.** Being able to say what is *not* there is half the point of this page,
-so: there is no partial support, no experimental flag, nothing to turn on. A `.toml` source given to
-`@Sources` today falls through to the properties loader, which will read it as best it can and give you
-nonsense.
+**TOML is not supported.** Being able to say what is *not* there is half the point of this page, so: there
+is no partial support, no experimental flag, nothing to turn on. A `.toml` source given to `@Sources` today
+falls through to the properties loader, which will read it as best it can and give you nonsense.
 
-Of the two, HOCON is the harder and it is not a question of size: its value is being able to read the
-`application.conf` files people already have, and its substitutions — `${foo}`, `${?foo}` — resolve after
-merging and may be self-referential. An implementation that resolved one differently would change the
-meaning of a configuration in silence, which is worse than not reading the format at all.
+Unlike HOCON, TOML will be written here rather than delegated when it is written: its specification is a
+document, it has a conformance suite anyone can run, and several independent implementations agree on what
+it means. That is the test — a format is delegated only when its specification *is* an implementation, and
+so far HOCON is the only one that qualifies.
 
 In the meantime, two things work today:
 

@@ -39,6 +39,19 @@ constraint reorders the whole list: HOCON, which is nearly free if we are willin
 Typesafe Config, becomes the most expensive and the riskiest thing on it, while `.env` — which needs
 no dependency in any scenario — moves to the front.
 
+**Amended 2026-08-12, and the amendment has a test so that it cannot spread.** The rule stands with one
+exception: **a format whose specification *is* an implementation is delegated, not written.** HOCON is the
+only one that qualifies today and it is now read that way. TOML does not qualify — its specification is a
+document, `toml-test` is a conformance suite anyone can run, and several independent implementations agree
+on what it means — so TOML will still be written here. The criterion is what keeps this from becoming an
+excuse: it is checkable, and it says no to the next format that asks.
+
+The arrangement is that the exception costs nothing to anybody who does not use it, and that is
+structural rather than a promise. `com.typesafe:config` is optional in `owner-extras`, so it is not
+transitive and we never ship it; the loader names it nowhere, so `ServiceLoader` creates the loader on a
+class path without it exactly as it creates any other; and only reading a `.conf` source fails, saying
+which artifact to add. See *Where a delegated format lives* below.
+
 It also sets the standard of honesty we owe: a hand-written parser for a large format is a
 *documented subset*, and it must refuse what it does not understand rather than half-read it.
 
@@ -161,13 +174,31 @@ scalars, and we keep the literal scalar text. That is the difference between 700
 5000. The price is that we would ship a subset: no anchors or aliases, no tags, no complex keys.
 Those must raise an error, never be guessed at.
 
-**HOCON.** The hard part is not the omitted braces or the `//` comments, it is **substitutions**:
-`${foo}` and `${?foo}` resolve *after* merging, may be self-referential, and have an algorithm of
-their own. And HOCON's value is compatibility with the `application.conf` files people already have,
-so a partial implementation that resolves a substitution differently changes the meaning of their
-configuration in silence — worse than not supporting it. We do have `${}` expansion already, in
-`VariablesExpander`, but with different semantics from HOCON's, which is one more trap rather than a
-head start.
+**HOCON.** ~~The hard part is not the omitted braces or the `//` comments, it is **substitutions**~~ —
+**done 2026-08-12, by delegating rather than by writing.** Everything this paragraph said was right and
+led to the opposite conclusion from the one it implied: `${foo}` and `${?foo}` resolve after merging and
+may be self-referential, objects merge, `include` runs mid-parse, and we already read `${}` with different
+semantics. A subset would therefore not fail on the files it could not handle — it would read them and
+mean something else. That is not an argument for a careful subset; it is an argument for not writing one.
+
+The field agreed unanimously and that is what settled it: **nobody hand-writes a HOCON parser.**
+`gestalt-hocon` declares `com.typesafe:config`, Micronaut reaches the same library through Config4k,
+Spring Boot has no native HOCON at all, and avaje-config has none. HOCON is the one format where the
+specification and the implementation are the same artifact, so everyone delegates and so do we.
+
+Three facts checked before committing to it, each of which could have killed it: `com.typesafe:config`
+declares **no compile or runtime dependencies** — its three are `test`, so it is one self-contained jar,
+nothing like Curator's tree; it is **Apache 2.0** (the GitHub API reports no licence only because the file
+is named `LICENSE-2.0.txt`); and it is **maintained against Java 8**, our baseline, with the last push on
+2026-07-01.
+
+What the adapter had to decide, since these do not follow from the format: a value arrives as Typesafe
+understood it rather than as written — `1e3` becomes `1000` — because it parses eagerly and does not keep
+the text, which is the one place a HOCON source differs from every other source here. Substitutions are
+resolved in **two passes**, the document against itself first and the system properties and environment
+after; one pass with `resolveWith` alone refuses a self-referential substitution outright, which is an
+everyday line in these files. And only the *lookup* falls back, so not one system property becomes a
+property of the configuration.
 
 **TOON.** Token-Oriented Object Notation, aimed at cutting token counts when structured data is put
 in an LLM prompt, optimised for uniform tabular arrays. **Verified 2026-08-10 and closed** — and half
@@ -257,7 +288,29 @@ A plan in phases
    What had to be an error rather than a guess, and is: anchors, aliases, merge keys, tags, complex keys, a
    tab in the indentation, and a value continued on the next line without `|` or `>` — that last one is
    indistinguishable from a nested block, so reading it either way silently would be wrong half the time.
-6. **TOML, then HOCON, CBOR, TOON if ever.**
+6. ~~**HOCON**~~ — **done 2026-08-12**, in `owner-extras` rather than `owner-formats`, and the placement is
+   the criterion made visible. `owner-formats` is *parsers we wrote, no dependencies, discovered*;
+   `owner-extras` is *adapters onto somebody else's library, optional dependency, discovered*. HOCON is an
+   adapter, so it sits beside `ZooKeeperLoader`, which was brought to the same mechanism the same day and
+   became the first user of it rather than the exception it had been.
+
+   ### Where a delegated format lives
+
+   The shape is forced, not chosen. `ServiceLoader` instantiates every loader it discovers before anybody
+   asks for one, and `LoadersManager` deliberately lets a `ServiceConfigurationError` propagate — so a
+   discovered loader that cannot be created breaks **every** configuration in the application, not the one
+   that wanted the format. Hence: the loader class names the third-party library nowhere, and everything
+   that names it lives in a second class reached only from `load()`. Then the loader is created on a class
+   path without the dependency, and only reading a source of that format fails.
+
+   The line is **execution, not mention**, and it was measured rather than assumed: a `CuratorFramework`
+   local left null changes nothing, while one class literal in a static initialiser turns discovery into a
+   `ServiceConfigurationError`. Two tests hold it per loader — a constant-pool guard that refuses any
+   mention, deliberately stricter than the JVM because a mention added today is next year's execution, and
+   a class loader that withholds the dependency and drives the real discovery. Neither is redundant and
+   nothing else in the suite can catch either, the suite running with both libraries present.
+
+7. **TOML, then CBOR, TOON if ever.** TOML is written here, not delegated — see the criterion at the top.
 
 ### Why INI moved in front of JSON and YAML
 

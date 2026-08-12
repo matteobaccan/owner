@@ -9,9 +9,6 @@ package org.aeonbits.owner.extras.loaders;
 
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertTrue;
@@ -30,10 +27,8 @@ import static org.junit.Assert.assertTrue;
  * </p>
  *
  * <p>
- * The absence is simulated with a class loader that loads <code>org.aeonbits.owner</code> itself rather than
- * delegating - so that the classes under test are the ones it defines - and refuses
- * <code>org.apache.curator</code> outright. Everything else, the JDK included, goes to the parent, so
- * {@link Callable} is the same class on both sides and the probe can answer through it.
+ * The absence is simulated by {@link WithholdingClassLoader}, shared with the HOCON loader, which faces the
+ * same problem with the same shape.
  * </p>
  *
  * @author Matteo Baccan
@@ -44,7 +39,7 @@ public class ZooKeeperDiscoveryWithoutCuratorTest {
     @SuppressWarnings("unchecked")
     public void theLoaderIsDiscoveredAndSaysWhatIsMissingOnlyWhenItIsAsked() throws Exception {
         String report;
-        try (CuratorlessClassLoader loader = new CuratorlessClassLoader()) {
+        try (WithholdingClassLoader loader = new WithholdingClassLoader("org.apache.curator")) {
             Class<?> probe = loader.loadClass(WithoutCuratorProbe.class.getName());
             report = ((Callable<String>) probe.getDeclaredConstructor().newInstance()).call();
         }
@@ -66,57 +61,5 @@ public class ZooKeeperDiscoveryWithoutCuratorTest {
                 report.contains("reading: java.lang.UnsupportedOperationException"));
         assertTrue("the failure does not say what to add:\n" + report,
                 report.contains("curator-framework"));
-    }
-
-    /**
-     * Child-first for <code>org.aeonbits.owner</code>, closed for <code>org.apache.curator</code>, parent for
-     * everything else.
-     */
-    private static final class CuratorlessClassLoader extends ClassLoader implements AutoCloseable {
-
-        private CuratorlessClassLoader() {
-            super(ZooKeeperDiscoveryWithoutCuratorTest.class.getClassLoader());
-        }
-
-        @Override
-        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-            if (name.startsWith("org.apache.curator"))
-                throw new ClassNotFoundException(name + " (withheld by " + getClass().getSimpleName() + ")");
-            if (!name.startsWith("org.aeonbits.owner"))
-                return super.loadClass(name, resolve);
-
-            synchronized (getClassLoadingLock(name)) {
-                Class<?> already = findLoadedClass(name);
-                if (already != null)
-                    return already;
-                byte[] bytes = bytecodeOf(name);
-                if (bytes == null)
-                    return super.loadClass(name, resolve);
-                Class<?> defined = defineClass(name, bytes, 0, bytes.length);
-                if (resolve)
-                    resolveClass(defined);
-                return defined;
-            }
-        }
-
-        private byte[] bytecodeOf(String name) {
-            String resource = name.replace('.', '/') + ".class";
-            try (InputStream in = getParent().getResourceAsStream(resource)) {
-                if (in == null)
-                    return null;
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                byte[] buffer = new byte[8192];
-                for (int read; (read = in.read(buffer)) != -1; )
-                    bytes.write(buffer, 0, read);
-                return bytes.toByteArray();
-            } catch (IOException cannotRead) {
-                return null;
-            }
-        }
-
-        @Override
-        public void close() {
-            // nothing to release: the bytes are read and closed one class at a time
-        }
     }
 }
