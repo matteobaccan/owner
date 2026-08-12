@@ -114,7 +114,23 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
      * @return number of bytes this byte size represents after factoring in the unit.
      */
     public BigInteger getBytes(){
-        return value.multiply(unit.getFactor()).setScale(0, RoundingMode.CEILING).toBigIntegerExact();
+        return exactBytes().setScale(0, RoundingMode.CEILING).toBigIntegerExact();
+    }
+
+    /**
+     * The number of bytes this size represents, with nothing rounded away: the value multiplied by the
+     * factor of its unit, and no more.
+     * <p>
+     * This is what identity is built on — {@link #equals(Object)}, {@link #hashCode()} and
+     * {@link #compareTo(ByteSize)} — while {@link #getBytes()} keeps rounding towards positive infinity,
+     * which is what a caller allocating a buffer needs. Deciding identity on the rounded count made
+     * <code>0.4 B</code> equal to <code>0.6 B</code>, and a {@link java.util.HashSet} of the two hold one
+     * element; a fraction of a byte is an odd thing to write, but two different numbers are two different
+     * numbers, and a rounding meant to keep a buffer large enough has no business merging them.
+     * </p>
+     */
+    private BigDecimal exactBytes() {
+        return value.multiply(unit.getFactor());
     }
 
     /**
@@ -147,6 +163,15 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
      * Scale of the value (number of decimal points) is handled automatically but if a non-terminating decimal expansion
      * occurs, an {@link ArithmeticException} is thrown.
      *
+     * <p>
+     * The conversion changes nothing but the unit: what comes back {@link #equals(Object)} what went in, in
+     * every unit and for every value. It used to round the byte count towards positive infinity first, the
+     * way {@link #getBytes()} does, which turned <code>1.5 B</code> into <code>2 B</code> — a conversion
+     * that reports a size other than the one it was given, and it did so even when the unit asked for was
+     * the one the size was already written in. The rounding belongs to {@link #getBytes()}, whose caller
+     * wants a whole number of bytes; it does not belong here.
+     * </p>
+     *
      * @param unit the unit for the new {@link ByteSize}.
      *
      * @throws ArithmeticException if a non-terminating decimal expansion occurs during calculation.
@@ -154,8 +179,7 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
      * @return a new {@link ByteSize} instance representing the same byte size as this but using the specified unit.
      */
     public ByteSize convertTo(ByteSizeUnit unit){
-        BigDecimal bytes = this.value.multiply(this.unit.getFactor()).setScale(0, RoundingMode.CEILING);
-        return new ByteSize(bytes.divide(unit.getFactor()), unit);
+        return new ByteSize(exactBytes().divide(unit.getFactor()), unit);
     }
 
     /**
@@ -188,7 +212,27 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
      */
     public ByteSize in(ByteSizeStandard standard) {
         requireNonNull(standard, "the standard to express a ByteSize in cannot be null");
-        return convertTo(unitFor(getBytes().abs(), standard));
+        ByteSize converted = convertTo(unitFor(getBytes().abs(), standard));
+        return new ByteSize(canonicalScale(converted.value), converted.unit);
+    }
+
+    /**
+     * The same number written the one way this method answers in. The scale of a division is inherited
+     * from its operands — <code>1000.0 KB</code> gives <code>1.0 MB</code> where <code>1000 KB</code>
+     * gives <code>1 MB</code> — and {@link #in(ByteSizeStandard)} promises that two equal sizes read
+     * alike, so the trailing zeros that record nothing but how the operand was written are dropped. It
+     * changes the spelling and not the size: {@link #equals(Object)} and {@link #compareTo(ByteSize)}
+     * ignore the scale.
+     * <p>
+     * Stripping alone would go one step too far, since it is free to answer with a negative scale and
+     * <code>1000</code> would then read <code>1E+3</code> — which happens for a size past the largest
+     * unit there is. The scale is brought back to zero in that case, which is where a whole number
+     * belongs.
+     * </p>
+     */
+    private static BigDecimal canonicalScale(BigDecimal value) {
+        BigDecimal stripped = value.stripTrailingZeros();
+        return stripped.scale() < 0 ? stripped.setScale(0) : stripped;
     }
 
     /**
@@ -229,7 +273,7 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
     @Override
     public int compareTo(ByteSize other) {
         requireNonNull(other, "cannot compare a ByteSize with null");
-        return getBytes().compareTo(other.getBytes());
+        return exactBytes().compareTo(other.exactBytes());
     }
 
     @Override
@@ -244,7 +288,9 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
 
         ByteSize byteSize = (ByteSize) o;
 
-        return getBytes().equals(byteSize.getBytes());
+        // compareTo rather than equals: the scale is how the size was written, not part of what it is, so
+        // 1 KB and 1.0 KB are the same size and BigDecimal.equals would say otherwise
+        return exactBytes().compareTo(byteSize.exactBytes()) == 0;
     }
 
     /**
@@ -252,10 +298,15 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
      * sizes that are equal because they are the same amount written in different units, or with a different
      * number of decimals, have to agree on the hash code as well, or the type does not work as a key of a
      * {@link java.util.HashMap} nor as an element of a {@link java.util.HashSet}.
+     * <p>
+     * The trailing zeros are stripped first because that is exactly what {@link BigDecimal#equals(Object)}
+     * counts and {@link BigDecimal#compareTo(BigDecimal)} does not: <code>1000</code> and
+     * <code>1.000E+3</code> are the same size written twice, and they have to hash alike.
+     * </p>
      */
     @Override
     public int hashCode() {
-        return getBytes().hashCode();
+        return exactBytes().stripTrailingZeros().hashCode();
     }
 
     /**

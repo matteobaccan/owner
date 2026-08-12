@@ -67,6 +67,21 @@ public class ByteSizeTest {
         assertEquals(new ByteSize(1, ByteSizeUnit.BYTES), bs.convertTo(ByteSizeUnit.BYTES));
     }
 
+    /**
+     * The other half of the rounding defect, and the one that reported a wrong size rather than merging
+     * two right ones: <code>convertTo</code> rounded the byte count towards positive infinity before
+     * dividing, so a size with a fraction of a byte in it came back larger than it went in — even when
+     * the unit asked for was the one it was already written in.
+     */
+    @Test
+    public void convertingAFractionOfAByteKeepsTheSize(){
+        ByteSize oneAndAHalf = new ByteSize("1.5", ByteSizeUnit.BYTES);
+
+        assertEquals("1.5 B", oneAndAHalf.convertTo(ByteSizeUnit.BYTES).toString());
+        assertEquals(oneAndAHalf, oneAndAHalf.convertTo(ByteSizeUnit.KILOBYTES));
+        assertEquals(oneAndAHalf, oneAndAHalf.convertTo(ByteSizeUnit.KIBIBYTES).convertTo(ByteSizeUnit.BYTES));
+    }
+
     @Test
     public void testEquality(){
         assertEquals(new ByteSize(500, ByteSizeUnit.MEGABYTES), new ByteSize(0.5, ByteSizeUnit.GIGABYTES));
@@ -174,6 +189,68 @@ public class ByteSizeTest {
         assertNotEquals(new ByteSize(1, ByteSizeUnit.MEGABYTES), new ByteSize(1, ByteSizeUnit.MEBIBYTES));
         assertNotEquals(new ByteSize(1, ByteSizeUnit.MEGABYTES).hashCode(),
                 new ByteSize(1, ByteSizeUnit.MEBIBYTES).hashCode());
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // identity is decided on the exact number of bytes, not on the rounded one
+    //
+    // getBytes() rounds towards positive infinity so that a buffer sized from it is never too small, and
+    // equals used to be built on that: below one byte every value rounded to the same 1, so 0.4 B and
+    // 0.6 B were the same size, a HashSet of the two held one element, and compareTo agreed with all of
+    // it. A fraction of a byte is an odd thing to write - which is why this went unnoticed - but the
+    // rounding exists to keep an allocation safe and has no business deciding what is the same value.
+    // -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void twoFractionsOfAByteThatRoundAlikeAreStillDifferentSizes(){
+        ByteSize smaller = new ByteSize("0.4", ByteSizeUnit.BYTES);
+        ByteSize larger = new ByteSize("0.6", ByteSizeUnit.BYTES);
+
+        assertEquals("both still round up to the one byte a caller would allocate",
+                BigInteger.ONE, smaller.getBytes());
+        assertEquals(BigInteger.ONE, larger.getBytes());
+
+        assertNotEquals(smaller, larger);
+        assertTrue("and they are ordered by what they are, not by what they round to",
+                smaller.compareTo(larger) < 0);
+    }
+
+    @Test
+    public void aSetOfFractionsOfAByteHoldsEachOfThem(){
+        Set<ByteSize> sizes = new HashSet<>();
+        sizes.add(new ByteSize("0.4", ByteSizeUnit.BYTES));
+        sizes.add(new ByteSize("0.6", ByteSizeUnit.BYTES));
+        sizes.add(new ByteSize("1", ByteSizeUnit.BYTES));
+
+        assertEquals(3, sizes.size());
+    }
+
+    /**
+     * The same fraction reached from two directions: a unit divides exactly here, so this is one size
+     * written twice and not two sizes that happen to be close.
+     */
+    @Test
+    public void theSameFractionOfAByteIsTheSameSizeWhicheverUnitItIsWrittenIn(){
+        ByteSize half = new ByteSize("0.5", ByteSizeUnit.BYTES);
+        ByteSize theSameHalfInKilobytes = new ByteSize("0.0005", ByteSizeUnit.KILOBYTES);
+
+        assertEquals(half, theSameHalfInKilobytes);
+        assertEquals("equal objects must have equal hash codes",
+                half.hashCode(), theSameHalfInKilobytes.hashCode());
+    }
+
+    /**
+     * Zero is the one value whose scale a {@link java.math.BigDecimal} keeps and whose hash code depends
+     * on it, so the two spellings of nothing are worth pinning down on their own.
+     */
+    @Test
+    public void everySpellingOfZeroIsTheSameSize(){
+        ByteSize noBytes = new ByteSize(0L, ByteSizeUnit.BYTES);
+        ByteSize noKilobytes = new ByteSize("0.000", ByteSizeUnit.KILOBYTES);
+
+        assertEquals(noBytes, noKilobytes);
+        assertEquals("equal objects must have equal hash codes",
+                noBytes.hashCode(), noKilobytes.hashCode());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -307,6 +384,8 @@ public class ByteSizeTest {
                 new ByteSize("1000.0", ByteSizeUnit.KILOBYTES),
                 new ByteSize(1, ByteSizeUnit.MEBIBYTES),
                 new ByteSize(0L, ByteSizeUnit.BYTES),
+                new ByteSize("0.4", ByteSizeUnit.BYTES),
+                new ByteSize("0.6", ByteSizeUnit.BYTES),
                 new ByteSize(-1L, ByteSizeUnit.BYTES));
 
         for (ByteSize a : sizes)
@@ -430,8 +509,10 @@ public class ByteSizeTest {
     public void zeroAndSubByteSizesReadInBytes(){
         assertEquals("0 B", new ByteSize(0L, ByteSizeUnit.BYTES).in(SI).toString());
         assertEquals("0 B", new ByteSize(0L, ByteSizeUnit.BYTES).in(IEC).toString());
-        // half a byte is already rounded up to one by getBytes(), and reads as such
-        assertEquals("1 B", new ByteSize("0.5", ByteSizeUnit.BYTES).in(SI).toString());
+        // bytes is the unit half a byte reads in, there being no smaller one - and it reads as the half
+        // it is: the rounding up to a whole byte is getBytes()'s, for a caller who has to allocate one,
+        // and a conversion that borrowed it reported a size other than the one it was given
+        assertEquals("0.5 B", new ByteSize("0.5", ByteSizeUnit.BYTES).in(SI).toString());
     }
 
     @Test
