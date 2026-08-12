@@ -49,14 +49,14 @@ public class ZooKeeperLoaderTest {
     private TestingServer server;
     private Factory configFactory;
 
-    @Sources("zookeeper://127.0.0.1:65403/test")
+    @Sources("zookeeper://127.0.0.1:${zookeeper.test.port}/test")
     public static interface ZooKeeperConfig extends Config {
         String thanks();
         List<String> greetings();
         String notAvailable();
     }
 
-    @Sources("zookeeper://127.0.0.1:65403/wrong")
+    @Sources("zookeeper://127.0.0.1:${zookeeper.test.port}/wrong")
     public static interface ZooKeeperWrongPathConfig extends Config {
         String thanks();
         List<String> greetings();
@@ -115,7 +115,13 @@ public class ZooKeeperLoaderTest {
 
     @Before
     public void before() throws Exception {
-        server = new TestingServer(65403);
+        // no port of our own choosing. A fixed one here was 65403, which lies in the dynamic range
+        // Windows hands out (49152-65535) and, worse, inside a block Windows reserves for Hyper-V and
+        // WSL: netsh int ipv4 show excludedportrange tcp. A reserved port cannot be bound and does not
+        // show as in use, so the server failed to start, ZooKeeper answered that with System.exit(0),
+        // and the whole JVM went with it - no failure, no stack trace, and a suite that had been green
+        // an hour earlier. TestingServer picks a free one and getPort says which
+        server = new TestingServer();
         server.start();
 
         String connectString = server.getConnectString();
@@ -137,7 +143,8 @@ public class ZooKeeperLoaderTest {
         }
 
         configFactory = ConfigFactory.newInstance();
-        configFactory.registerLoader(new ZooKeeperLoader());
+        // the port reaches @Sources through the variable expansion the specs already go through
+        configFactory.setProperty("zookeeper.test.port", String.valueOf(server.getPort()));
     }
 
     private void setDataInZookeperServer(CuratorFramework client,
