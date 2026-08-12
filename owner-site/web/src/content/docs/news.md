@@ -107,6 +107,21 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **The ZooKeeper loader no longer has to be registered.** `ZooKeeperLoader` is now found on the classpath
+   like every other loader, so `@Sources("zookeeper://…")` works with `ConfigFactory.create` and there is no
+   `registerLoader` call and no factory of your own to write. Code that still registers it keeps working.
+   [Apache Curator][curator-news] is still an optional dependency and is still yours to declare — what
+   changed is only that declaring it is now the whole of the setup.
+
+   Being discovered means the loader is created in every application carrying `owner-extras`, most of which
+   will not have Curator, so nothing in it refers to Curator any more: everything that does moved to a
+   separate class reached only when a `zookeeper:` source is read. A configuration reading any other source
+   is unaffected, and the loader contributes no file name to the ones tried when a configuration declares no
+   `@Sources`. Reading a `zookeeper:` source without Curator now names the source and the artifact to add,
+   where it used to be a `NoClassDefFoundError`.
+
+  [curator-news]: https://curator.apache.org
+
  * `default` methods in config interfaces work out of the box with the core `owner` artifact: no extra
    dependency is needed anymore (see Removals above).
  * New `Accessible.store(Writer, String)` overload, mirroring `Properties.store(Writer, String)`; the old
@@ -611,6 +626,13 @@ closed only when it has been understood.
    different variants; both are now uniform. The Maven wrapper sources are excluded, as they ship under Apache 2.0.
 
 #### Bugs fixes
+ * **A source with no scheme made the ZooKeeper loader throw.** `ZooKeeperLoader.accept` compared the URI's
+   scheme against its own without allowing for a URI that has none, so it raised a `NullPointerException`
+   rather than answering. Every registered loader is asked about every source, so this bit anyone following
+   the ZooKeeper documentation who also had a source written without a scheme —
+   `@Sources("myconfig.properties")` — or a blank `file:`, which the library turns into an empty URI on
+   purpose, that being what a source path built from an unset environment variable comes to. What such a
+   source does is unchanged: no loader accepts it, so the library still says it cannot resolve one.
  * **An XML document that broke its own DTD was read past it.** `XMLLoader` validates — it must, the Java
    XML properties format being defined by a DTD — and a validity error was refused for that format and
    swallowed for every other. So a document of your own carrying a `<!DOCTYPE>` and then contradicting it

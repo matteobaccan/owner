@@ -35,10 +35,20 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * </p>
  *
  * <p>
- * So no reference to Curator may move into <code>ZooKeeperLoader</code>, in a method body, a signature or a
- * field. <code>ZooKeeperLoaderIsolationTest</code> reads the compiled class and fails if one does, because
- * nothing else would: with Curator on the class path, which is how the suite runs, inlining this class back
- * into the loader passes every other test.
+ * <b>The line that actually matters is execution, not mention</b>, and it was measured rather than assumed:
+ * a <code>CuratorFramework</code> local left null in <code>ZooKeeperLoader.accept</code> changes nothing,
+ * because the constant pool entry is never resolved, while a single <code>CuratorFramework.class</code> in a
+ * static initialiser turns discovery into a <code>ServiceConfigurationError</code> - which is not one
+ * configuration failing but all of them, in every application carrying this artifact.
+ * </p>
+ *
+ * <p>
+ * Two tests hold the line, and they catch different things. <code>ZooKeeperLoaderIsolationTest</code> reads
+ * the compiled class and refuses <em>any</em> mention of Curator: deliberately stricter than the JVM, because
+ * the boundary between a mention that gets resolved and one that does not is subtle, and a mention added
+ * today is what becomes an execution next year. <code>ZooKeeperDiscoveryWithoutCuratorTest</code> runs the
+ * discovery on a class path without Curator and catches the real failure. Neither is redundant, and with
+ * Curator present - which is how the suite runs - no other test in the project notices either problem.
  * </p>
  *
  * @author Koray Sariteke

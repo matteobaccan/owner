@@ -24,10 +24,18 @@ import static org.junit.Assert.assertTrue;
  * lives in {@link ZooKeeperReader}, which is reached only when a <code>zookeeper:</code> source is read.
  *
  * <p>
- * <b>Nothing else can catch this.</b> The suite runs with Curator on the class path, so inlining the reader
- * back into the loader leaves every other test passing and breaks only for the users who do not have it.
- * The check therefore reads the compiled class rather than running it: a class file names every type it
- * refers to, in a method body, a signature or a field, in its constant pool as plain UTF-8.
+ * The check reads the compiled class rather than running it: a class file names every type it refers to, in
+ * a method body, a signature or a field, in its constant pool as plain UTF-8.
+ * </p>
+ *
+ * <p>
+ * <b>This is deliberately stricter than the JVM.</b> Measured, not assumed: a <code>CuratorFramework</code>
+ * local left null does not stop the class being loaded, since the constant pool entry is never resolved.
+ * What breaks discovery is a mention that gets <em>executed</em> - a static initialiser, a constructor, a
+ * call - and {@link ZooKeeperDiscoveryWithoutCuratorTest} is what catches that. Refusing every mention here
+ * is the cheaper guard and the one that holds over time, because a mention added today is what becomes an
+ * execution next year. The suite runs with Curator present, so without these two nothing in the project
+ * notices either problem.
  * </p>
  *
  * @author Matteo Baccan

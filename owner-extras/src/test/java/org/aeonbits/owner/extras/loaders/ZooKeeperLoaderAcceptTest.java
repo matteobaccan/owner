@@ -10,14 +10,17 @@ package org.aeonbits.owner.extras.loaders;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Factory;
+import org.aeonbits.owner.loaders.Loader;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.ServiceLoader;
 
 import static org.aeonbits.owner.Config.Sources;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * What {@link ZooKeeperLoader#accept(URI)} answers, and above all what it does when the URI has no scheme
@@ -79,6 +82,27 @@ public class ZooKeeperLoaderAcceptTest {
     @Test
     public void aSourceWithoutASchemeFailsTheSameWayWithTheLoaderRegistered() {
         assertEquals(refusalFor(SchemelessConfig.class, false), refusalFor(SchemelessConfig.class, true));
+    }
+
+    /**
+     * The service file does its job: the loader is on the list {@link ServiceLoader} hands over, so the
+     * library registers it without anybody calling <code>registerLoader</code>.
+     *
+     * <p>
+     * This stops at discovery rather than reading a source. Going further would mean pointing at a
+     * <code>zookeeper:</code> host that is not there, and Curator spends tens of seconds establishing that
+     * - its own retries outlast <code>owner.zookeeper.connection.timeout.seconds</code> - to prove
+     * something this test does not ask about. That a discovered loader is then registered and consulted is
+     * the core's behaviour, exercised by every JSON and YAML test in <code>owner-formats</code>.
+     * </p>
+     */
+    @Test
+    public void theLoaderIsFoundOnTheClassPathWithoutBeingRegistered() {
+        for (Loader found : ServiceLoader.load(Loader.class, getClass().getClassLoader()))
+            if (found instanceof ZooKeeperLoader)
+                return;
+        fail("ZooKeeperLoader was not among the loaders declared for ServiceLoader; check "
+                + "META-INF/services/org.aeonbits.owner.loaders.Loader in owner-extras");
     }
 
     /**

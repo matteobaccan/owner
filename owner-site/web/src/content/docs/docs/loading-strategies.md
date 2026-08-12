@@ -186,9 +186,9 @@ Reading from ZooKeeper
 ----------------------
 
 The `owner-extras` artifact ships a further loader, `ZooKeeperLoader`, which reads the properties from
-the children of a ZooKeeper node. It is not registered by default, since it needs
-[Apache Curator][curator] on the classpath: declare that dependency, register the loader on a factory of
-your own, and address the source with the `zookeeper` scheme.
+the children of a ZooKeeper node. It needs [Apache Curator][curator], which `owner-extras` declares as an
+optional dependency and therefore does not bring along: declare that dependency yourself, and address the
+source with the `zookeeper` scheme.
 
 ```xml
 <dependency>
@@ -212,11 +212,25 @@ public interface ServerConfig extends Config {
 ```
 
 ```java
-Factory factory = ConfigFactory.newInstance();
-factory.registerLoader(new ZooKeeperLoader());
-
-ServerConfig cfg = factory.create(ServerConfig.class);
+ServerConfig cfg = ConfigFactory.create(ServerConfig.class);
 ```
+
+*Since 2.0.0* the loader is found on the classpath like every other, so there is nothing to register and
+no factory of your own to create. Before then it had to be registered by hand, and code that still does
+keeps working — registering a loader that was also discovered changes only where it sits in the order,
+and it is already ahead of everything that could compete for a `zookeeper:` source.
+
+<div class="note">
+  <h5>Nothing is loaded until a <code>zookeeper:</code> source is read.</h5>
+  <p>
+    Being discovered means the loader is created in every application that carries
+    <code>owner-extras</code>, most of which will not have Curator. Nothing in it refers to Curator, so
+    that costs nothing and breaks nothing: a configuration reading any other source is unaffected, and it
+    contributes no file name to the ones tried when a configuration declares no <code>@Sources</code>.
+    Only reading a <code>zookeeper:</code> source without Curator fails, and it fails by naming the source
+    and the artifact to add rather than with a <code>NoClassDefFoundError</code>.
+  </p>
+</div>
 
 Each child of the node named by the path becomes a property: the name of the child is the key and its
 data, read as a string, is the value. The port may be omitted, in which case the default of the client is
