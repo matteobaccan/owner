@@ -271,4 +271,31 @@ public class JsonLoaderTest {
             assertTrue(expected.getMessage(), expected.getMessage().contains("takes none"));
         }
     }
+    // ------------------------------------------- a document that stops in the middle
+
+    /**
+     * Written against the coverage report. A JSON document that simply ends where something was expected
+     * is a truncated download or a half-written buffer, and every one of these complaints existed without
+     * ever having been executed.
+     */
+
+    @Test
+    public void aDocumentThatEndsWhereAValueShouldBeIsRefused() {
+        assertTrue(refused("{\"a\":").contains("a value was expected"));
+    }
+
+    @Test
+    public void aDocumentThatEndsInsideAnEscapeIsRefused() {
+        assertTrue(refused("{\"a\":\"x\\").contains("ends in the middle of an escape"));
+    }
+
+    @Test
+    public void aDocumentThatEndsInsideAUnicodeEscapeIsRefused() {
+        assertTrue(refused("{\"a\":\"\\u00").contains("four hexadecimal digits"));
+    }
+
+    @Test
+    public void aDocumentThatEndsWhereANumberShouldBeIsRefused() {
+        assertTrue(refused("{\"a\":-").contains("a number needs a digit after its sign"));
+    }
 }

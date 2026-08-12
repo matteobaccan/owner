@@ -17,8 +17,14 @@ import org.junit.Test;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -116,4 +122,71 @@ public class HotReloadLogicTest {
         verify(manager).reload();
     }
 
+    // --------------------------------------------------- what it says it is watching
+
+    /**
+     * The CONFIG line naming what is watched is built inside a lazy supplier, so none of it runs unless
+     * something is listening at that level - which nothing was, and the list it builds had never been
+     * executed. A diagnostic nobody has read is a diagnostic nobody can rely on.
+     */
+    @Test
+    public void itSaysWhichFilesItIsWatchingAndThatSystemPropertiesAreAmongThem() throws Exception {
+        File watched = File.createTempFile("owner-hotreload", ".properties");
+        watched.deleteOnExit();
+
+        List<LogRecord> records = listen(Level.CONFIG);
+        try {
+            new HotReloadLogic(MyConfig.class.getAnnotation(HotReload.class),
+                    Arrays.asList(watched.toURI(), new URI("system:properties")),
+                    managerOf(MyConfig.class));
+        } finally {
+            stopListening();
+        }
+
+        String said = onlyLineAt(records, Level.CONFIG);
+        assertTrue(said, said.contains("hot reload is on"));
+        assertTrue("the file it watches is not named: " + said, said.contains(watched.getPath()));
+        assertTrue("system:properties is watchable and is not named: " + said,
+                said.contains("system:properties"));
+        assertTrue("the interval belongs in the line: " + said, said.contains("5000"));
+    }
+
+    private Logger logger;
+    private Handler collector;
+    private Level previousLevel;
+
+    private List<LogRecord> listen(Level level) {
+        List<LogRecord> records = new ArrayList<>();
+        logger = Logger.getLogger("org.aeonbits.owner");
+        previousLevel = logger.getLevel();
+        logger.setLevel(level);
+        collector = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() { }
+
+            @Override
+            public void close() { }
+        };
+        collector.setLevel(level);
+        logger.addHandler(collector);
+        return records;
+    }
+
+    private void stopListening() {
+        logger.removeHandler(collector);
+        logger.setLevel(previousLevel);
+    }
+
+    private static String onlyLineAt(List<LogRecord> records, Level level) {
+        StringBuilder said = new StringBuilder();
+        for (LogRecord record : records)
+            if (record.getLevel() == level)
+                said.append(record.getMessage()).append('\n');
+        return said.toString();
+    }
 }
