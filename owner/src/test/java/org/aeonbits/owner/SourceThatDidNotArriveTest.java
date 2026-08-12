@@ -7,7 +7,6 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;
 import org.aeonbits.owner.Config.Sources;

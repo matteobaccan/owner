@@ -8,7 +8,6 @@
 package org.aeonbits.owner.formats.yaml;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.BeforeClass;
@@ -148,7 +147,7 @@ public class YamlEndToEndTest {
         try (OutputStream out = Files.newOutputStream(file.toPath())) {
             out.write("name: owner\n".getBytes(UTF_8));
         }
-        assertTrue(ConfigFactory.create(ShortSuffixConfig.class).name().equals("owner"));
+        assertEquals("owner", ConfigFactory.create(ShortSuffixConfig.class).name());
     }
 
     @Sources("file:target/test-generated-resources/YamlEndToEnd.yml")

@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -31,7 +30,6 @@ import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
-import static org.aeonbits.owner.util.Util.ignore;
 import static org.aeonbits.owner.util.Util.reverse;
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.

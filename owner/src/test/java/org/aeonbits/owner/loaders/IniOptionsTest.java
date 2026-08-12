@@ -17,6 +17,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -268,7 +269,7 @@ public class IniOptionsTest {
         for (String line : lines)
             text.append(line).append('\n');
         try (OutputStream out = new FileOutputStream(file)) {
-            out.write(text.toString().getBytes("UTF-8"));
+            out.write(text.toString().getBytes(UTF_8));
         }
         return file;
     }

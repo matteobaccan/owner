@@ -19,7 +19,9 @@ import java.nio.file.Files;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.nio.charset.Charset;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +34,7 @@ import static org.junit.Assert.fail;
  */
 public class LoaderOptionsTest {
 
-    private static final String ENCODING = "UTF-8";
+    private static final Charset ENCODING = UTF_8;
 
     // ---------------------------------------------------------------- a query no longer hides a source
 

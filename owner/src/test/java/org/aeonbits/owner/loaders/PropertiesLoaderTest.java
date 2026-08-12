@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -30,7 +31,7 @@ public class PropertiesLoaderTest {
 
     @Before
     public void before() throws IOException {
-        keyValueStream = new ByteArrayInputStream(UTF_KEY_VALUE.getBytes("UTF-8"));
+        keyValueStream = new ByteArrayInputStream(UTF_KEY_VALUE.getBytes(UTF_8));
     }
 
     @After

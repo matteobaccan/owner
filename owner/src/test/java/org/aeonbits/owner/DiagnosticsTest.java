@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aeonbits.owner.util.Util.hideCredentials;
 import static org.aeonbits.owner.util.Util.unsupported;
 import static org.junit.Assert.assertEquals;
@@ -204,7 +205,7 @@ public class DiagnosticsTest {
         File file = Files.createTempFile("owner-diagnostics", suffix).toFile();
         file.deleteOnExit();
         try (OutputStream out = new FileOutputStream(file)) {
-            out.write(content.getBytes("UTF-8"));
+            out.write(content.getBytes(UTF_8));
         }
         return file;
     }

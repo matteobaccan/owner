@@ -686,7 +686,10 @@ final class TomlParser {
      */
     private void refuseImpossibleDate(String raw, int start) throws IOException {
         try {
-            LocalDate.of(number(raw, 0, 4), number(raw, 5, 2), number(raw, 8, 2));
+            // the answer is discarded on purpose: what is wanted is what this refuses, and the date is
+            // kept as the document wrote it. Rebuilding it from the LocalDate would canonicalise a value
+            // that is already canonical, and lose a leading zero somebody typed deliberately
+            LocalDate.of(number(raw, 0, 4), number(raw, 5, 2), number(raw, 8, 2)); // NOSONAR
         } catch (DateTimeException noSuchDay) {
             throw errorAt(start, "'" + raw.substring(0, 10) + "' is not a date that exists: "
                     + noSuchDay.getMessage());

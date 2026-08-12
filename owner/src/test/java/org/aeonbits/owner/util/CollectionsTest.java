@@ -26,17 +26,17 @@ public class CollectionsTest {
     @Test
     public void testMapEqualsItself() {
         Map<String, String> map = map("foo", "bar");
-        assertTrue(map.equals(map));
+        assertEquals("a map is equal to itself", map, map);
     }
 
     @Test
     public void testMapNotEqualsNull() {
-        assertFalse(map("foo", "bar").equals(null));
+        assertNotEquals(map("foo", "bar"), null);
     }
 
     @Test
     public void testMapNotEqualsObjectOfDifferentClass() {
-        assertFalse(map("foo", "bar").equals("foo=bar"));
+        assertNotEquals(map("foo", "bar"), "foo=bar");
     }
 
     @Test

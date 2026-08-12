@@ -64,7 +64,10 @@ public class WithoutTypesafeProbe implements Callable<String> {
 
     private static Loader findHoconLoader() {
         for (Loader loader : ServiceLoader.load(Loader.class, WithoutTypesafeProbe.class.getClassLoader()))
-            if (loader.getClass().getName().equals(HoconLoader.class.getName()))
+            // by name, and isAssignableFrom would be exactly wrong here: this runs in a class
+            // loader of its own, so the two classes share a name and nothing else. instanceof
+            // would answer false for the very object being looked for
+            if (loader.getClass().getName().equals(HoconLoader.class.getName())) // NOSONAR
                 return loader;
         return null;
     }

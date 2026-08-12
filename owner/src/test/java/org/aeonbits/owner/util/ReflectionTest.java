@@ -90,9 +90,15 @@ public class ReflectionTest {
             Object result = Reflection.invokeDefaultMethod(newProxy(), sumMethod(), new Object[] {3, 4}, true);
             assertEquals(Integer.valueOf(7), result);
         } else {
+            // built outside the try, so that only the call under test can be what throws
+            Object proxy = newProxy();
+            Method sum = sumMethod();
+            boolean itWorked = false;
             try {
-                Reflection.invokeDefaultMethod(newProxy(), sumMethod(), new Object[] {3, 4}, true);
-                fail("the MethodHandles.Lookup constructor hack is unusable on Java 9+, a failure was expected");
+                Reflection.invokeDefaultMethod(proxy, sum, new Object[] {3, 4}, true);
+                // not fail() here: the catch below takes Errors, and the AssertionError that fail() throws
+                // is one of them - it would be swallowed by the very clause meant to prove the opposite
+                itWorked = true;
             } catch (IllegalAccessException | NullPointerException
                     | ExceptionInInitializerError | NoClassDefFoundError expected) {
                 // Which one arrives says which JDK this is running on, and all four mean the same thing
@@ -106,6 +112,8 @@ public class ReflectionTest {
                 //                               fails while the nested Lookup class initializes.
                 //   NoClassDefFoundError        any later access, once that initialization has failed.
             }
+            assertFalse("the MethodHandles.Lookup constructor hack is unusable on Java 9+, "
+                    + "and this JDK let it work", itWorked);
         }
     }
 

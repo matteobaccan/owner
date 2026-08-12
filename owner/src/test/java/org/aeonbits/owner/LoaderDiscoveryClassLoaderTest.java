@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -150,7 +151,7 @@ public class LoaderDiscoveryClassLoaderTest {
         jar.deleteOnExit();
         try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(jar))) {
             zip.putNextEntry(new ZipEntry(SERVICE_FILE));
-            zip.write((loaderClassName + "\n").getBytes("UTF-8"));
+            zip.write((loaderClassName + "\n").getBytes(UTF_8));
             zip.closeEntry();
         }
         return jar;

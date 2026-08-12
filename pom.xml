@@ -115,9 +115,17 @@
             got. S106 is right about production code and wrong about a demonstration, so it is turned off
             there rather than obeyed there.
         -->
-        <sonar.issue.ignore.multicriteria>consoleInExamples</sonar.issue.ignore.multicriteria>
+        <!--
+            The default package is what that one test fixture is testing. A configuration interface with no
+            package of its own is a real thing to write, the key prefix machinery has to answer for it, and
+            the only way to test it is to have one - so S1220 is right about production code and describes
+            the fixture's whole reason for existing.
+        -->
+        <sonar.issue.ignore.multicriteria>consoleInExamples,defaultPackageFixture</sonar.issue.ignore.multicriteria>
         <sonar.issue.ignore.multicriteria.consoleInExamples.ruleKey>java:S106</sonar.issue.ignore.multicriteria.consoleInExamples.ruleKey>
         <sonar.issue.ignore.multicriteria.consoleInExamples.resourceKey>**/examples/**</sonar.issue.ignore.multicriteria.consoleInExamples.resourceKey>
+        <sonar.issue.ignore.multicriteria.defaultPackageFixture.ruleKey>java:S1220</sonar.issue.ignore.multicriteria.defaultPackageFixture.ruleKey>
+        <sonar.issue.ignore.multicriteria.defaultPackageFixture.resourceKey>**/DefaultPackageConfig.java</sonar.issue.ignore.multicriteria.defaultPackageFixture.resourceKey>
     </properties>
 
     <profiles>

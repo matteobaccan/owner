@@ -69,7 +69,10 @@ public class WithoutCuratorProbe implements Callable<String> {
 
     private static Loader findZooKeeperLoader() {
         for (Loader loader : ServiceLoader.load(Loader.class, WithoutCuratorProbe.class.getClassLoader()))
-            if (loader.getClass().getName().equals(ZooKeeperLoader.class.getName()))
+            // by name, and isAssignableFrom would be exactly wrong here: this runs in a class
+            // loader of its own, so the two classes share a name and nothing else. instanceof
+            // would answer false for the very object being looked for
+            if (loader.getClass().getName().equals(ZooKeeperLoader.class.getName())) // NOSONAR
                 return loader;
         return null;
     }

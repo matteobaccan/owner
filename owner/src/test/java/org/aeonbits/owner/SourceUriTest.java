@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -247,7 +248,7 @@ public class SourceUriTest {
         File file = Files.createTempFile("owner-source", suffix).toFile();
         file.deleteOnExit();
         try (OutputStream out = new FileOutputStream(file)) {
-            out.write(content.getBytes("UTF-8"));
+            out.write(content.getBytes(UTF_8));
         }
         return file;
     }

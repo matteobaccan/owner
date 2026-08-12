@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -423,7 +424,7 @@ public class IniLoaderTest {
         for (String line : lines)
             text.append(line).append('\n');
         try (OutputStream out = new FileOutputStream(file)) {
-            out.write(text.toString().getBytes("UTF-8"));
+            out.write(text.toString().getBytes(UTF_8));
         }
         return file;
     }

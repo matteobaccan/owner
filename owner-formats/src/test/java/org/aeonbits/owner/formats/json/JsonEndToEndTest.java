@@ -8,7 +8,6 @@
 package org.aeonbits.owner.formats.json;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.BeforeClass;

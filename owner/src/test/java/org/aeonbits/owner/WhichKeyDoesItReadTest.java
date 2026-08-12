@@ -7,8 +7,6 @@
  */
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.Config.DisableFeature;
-import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.Prefix;
 import org.junit.After;
 import org.junit.Before;
@@ -22,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import static org.junit.Assert.assertEquals;
 import static org.aeonbits.owner.Config.DisableableFeature.PREFIX;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -171,7 +170,7 @@ public class WhichKeyDoesItReadTest {
      */
     @Test
     public void aValueThatIsNotAFormatComesBackAsWrittenAndSaysSoAtFine() {
-        assertTrue("hello %q".equals(greetings().greeting("world")));
+        assertEquals("hello %q", greetings().greeting("world"));
 
         String fine = said(Level.FINE);
         assertTrue(fine, fine.contains("greeting() takes arguments"));

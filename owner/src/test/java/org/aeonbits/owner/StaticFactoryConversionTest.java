@@ -17,6 +17,7 @@ import java.time.Year;
 import java.time.ZoneId;
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -104,7 +105,7 @@ public class StaticFactoryConversionTest {
             Throwable cause = refused.getCause();
             while (cause != null && !(cause instanceof java.time.format.DateTimeParseException))
                 cause = cause.getCause();
-            assertTrue("the DateTimeParseException was lost", cause != null);
+            assertNotNull("the DateTimeParseException was lost", cause);
         }
     }
 
