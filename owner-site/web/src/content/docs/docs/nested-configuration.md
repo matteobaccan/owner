@@ -255,3 +255,63 @@ reads like a guarantee it does not give. Write `@Mandatory` on the properties
 inside that are really required — those are checked at creation, section by
 section, and reported by their whole key. `@Mandatory` on an *interface* keeps
 its meaning and leaves the nested accessors alone.
+
+A section is not read by key
+----------------------------
+
+  [Accessible]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Accessible.html
+  [Mutable]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Mutable.html
+  [Traceable]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Traceable.html
+  [Reloadable]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/Reloadable.html
+
+A nested interface **may not extend [Accessible], [Mutable] or [Traceable]**,
+and a configuration that declares one is refused when it is created:
+
+```java
+public interface ServerConfig extends Config, Accessible {  // refused
+    String host();
+}
+```
+
+Those three interfaces address properties **by key**, and a section has no key
+space of its own. It is a view over the properties of the whole configuration —
+that is what makes it share the reload, the listeners and the sources instead of
+being a copy — so `server.getProperty("host")` would answer with the `host` of
+the root and not with `server.host`, a different property and no error, while
+`server.clear()` would empty the entire configuration.
+
+**Everything a section could have offered is available from the configuration
+object itself**, where keys are the ones written in the file:
+
+```java
+public interface AppConfig extends Config, Accessible, Mutable {
+    ServerConfig server();       // ServerConfig extends Config, and nothing else
+}
+
+cfg.getProperty("server.host");                  // nested.example.org
+cfg.setProperty("server.host", "elsewhere");
+cfg.server().host();                             // elsewhere — the section sees the write
+```
+
+The root may extend all three, as above, and `@Sensitive` inside a section is
+masked in the root's `list()` under its whole key: the masking was always
+computed over the tree.
+
+[Reloadable] is the exception and may be extended by a nested interface: it acts
+on the configuration as a whole, there is exactly one of those, and so it means
+the same thing called from any point of the tree.
+
+<div class="note info">
+  <h5>Why refused, rather than made relative to the section.</h5>
+  <p>
+    Reading a section's keys <em>relative to the section</em> is a reasonable
+    feature, and the shape it would take is well established: Typesafe Config
+    gives it with <code>getConfig("section")</code>, which returns a
+    configuration rooted at that path, and Commons Configuration with
+    <code>subset(prefix)</code>, which strips the prefix from the keys. This
+    library may well grow it. Refusing now is what keeps that door open:
+    allowing later breaks nobody, whereas shipping the root's answers under the
+    section's name and correcting them afterwards would break everyone who had
+    come to rely on them.
+  </p>
+</div>

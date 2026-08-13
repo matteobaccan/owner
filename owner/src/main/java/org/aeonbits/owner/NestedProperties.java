@@ -396,6 +396,96 @@ final class NestedProperties {
     }
 
     /**
+     * The interface a method reads a section as, whichever of the four shapes it uses: a plain accessor, a
+     * list of sections, a map of them, or an accessor taking arguments. <code>null</code> when the method
+     * reads no section at all.
+     */
+    private static Class<?> sectionTypeOf(Method method) {
+        if (nests(method))
+            return OptionalSupport.valueClass(method);
+        return groupElementOf(method);
+    }
+
+    /**
+     * The interfaces whose methods are addressed <b>by key</b>, and which a nested interface may therefore
+     * not extend.
+     *
+     * @see #rejectKeyedSection(Method)
+     */
+    private static final Class<?>[] KEYED = {Accessible.class, Mutable.class, Traceable.class};
+
+    /**
+     * Refuses a section declared as an {@link Accessible}, a {@link Mutable} or a {@link Traceable}.
+     * <p>
+     * Those interfaces are addressed by key, and <b>a section has no key space of its own</b>: it shares
+     * one {@link PropertiesManager} with the whole configuration, which is what makes it a view rather
+     * than a copy, and what makes a reload reach it. Left to inherit them, a section would answer
+     * <code>getProperty("host")</code> with the <code>host</code> of the root rather than with its own
+     * <code>server.host</code> — a different property, silently — and <code>clear()</code> called on a
+     * section would empty the entire configuration.
+     * </p>
+     * <p>
+     * It is refused rather than scoped because refusing is the decision that can be taken back: reading a
+     * section's keys relative to the section is a feature this library may well grow, in the shape
+     * Typesafe Config gives it with <code>getConfig</code> and Commons Configuration with
+     * <code>subset</code>, and allowing it later breaks nobody. Shipping the root's answers under the
+     * section's name and correcting them afterwards would break everybody who had come to rely on them.
+     * </p>
+     * <p>
+     * {@link Reloadable} is deliberately <b>not</b> in the list: it acts on the configuration as a whole,
+     * there is exactly one of those, and so it means the same thing called from anywhere in the tree.
+     * </p>
+     *
+     * @param accessor the method reading the section.
+     * @throws UnsupportedOperationException if the section is declared as one of {@link #KEYED}.
+     */
+    /**
+     * Walks the configuration interface and everything it nests, at any depth and through all four shapes,
+     * refusing every section declared as one of {@link #KEYED}.
+     * <p>
+     * It is a walk of its own rather than a line added to the check of the mandatory properties, because
+     * that one descends into the plain sections only: a section reachable solely as the element of a list
+     * is never among its children, and a rule with a hole in it is not a rule. Interfaces already visited
+     * are skipped, which also makes it terminate on a configuration that nests itself.
+     * </p>
+     *
+     * @param configClass the interface to walk.
+     */
+    static void rejectKeyedSections(Class<?> configClass) {
+        rejectKeyedSections(configClass, new ArrayList<Class<?>>());
+    }
+
+    private static void rejectKeyedSections(Class<?> configClass, List<Class<?>> visited) {
+        if (visited.contains(configClass))
+            return;
+        visited.add(configClass);
+        for (Method method : configClass.getMethods()) {
+            rejectKeyedSection(method);
+            Class<?> section = sectionTypeOf(method);
+            if (section != null)
+                rejectKeyedSections(section, visited);
+        }
+    }
+
+    static void rejectKeyedSection(Method accessor) {
+        Class<?> section = sectionTypeOf(accessor);
+        if (section == null)
+            return;
+        for (Class<?> keyed : KEYED)
+            if (keyed.isAssignableFrom(section))
+                throw unsupported("Method '%s' reads the nested configuration object '%s', which extends "
+                                + "%s. A section is a view over the properties of the whole configuration "
+                                + "and has no key space of its own, so getProperty(\"x\") on it would read "
+                                + "'x' and not '%s.x', and clear() on it would empty everything. Read the "
+                                + "properties by name from the configuration object the factory created, "
+                                + "where the keys are the ones written in the file, and leave '%s' with its "
+                                + "mapping methods. Reloadable may be extended: there is one configuration, "
+                                + "so reload() means the same thing from anywhere in it.",
+                        accessor.getName(), section.getSimpleName(), keyed.getSimpleName(),
+                        accessor.getName(), section.getSimpleName());
+    }
+
+    /**
      * The prefix every key of a group starts with: the key of the accessor and the character that opens an
      * index for a list, the separator for a map, and everything before the first placeholder for an
      * accessor taking arguments.

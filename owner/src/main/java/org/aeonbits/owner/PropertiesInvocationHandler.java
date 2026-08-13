@@ -471,6 +471,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
      * checked on access instead.
      */
     void validateMandatoryProperties() {
+        NestedProperties.rejectKeyedSections(configClass);
         List<String> missingKeys = new LinkedList<>();
         collectMissingMandatory(missingKeys);
         if (!missingKeys.isEmpty())

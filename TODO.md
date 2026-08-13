@@ -337,6 +337,27 @@ an issue behind it, which is the point: what the others shipped is what our repo
       outright — see `COMPARISON.md`); and an `Optional` section is present as soon as anything is below
       its path, defaults included, which is what SmallRye settled on in its version 3 after shipping the
       opposite. `@Mandatory` on the accessor of a section is refused for the same reason.
+- [ ] **A section read by key, relative to the section.** Deliberately **not** an issue: nobody has asked
+      for it, and opening one advertises a feature to people who do not need it. It lives here until
+      somebody does ask, and then the note already written on the `nested-configuration.md` page is the
+      text to open it with.
+      The shape is settled and has two precedents: Typesafe Config's `getConfig("section")` returns a
+      configuration **rooted at that path**, Commons Configuration's `subset(prefix)` returns one with the
+      **prefix stripped from the keys**. The other camp — SmallRye, Spring, Coat, Gestalt — puts no
+      key-based API on a nested object at all, the key-based view being a separate object with absolute
+      keys, one per application.
+      A nested interface may not extend `Accessible`, `Mutable` or `Traceable` since 2.0.0, refused when
+      the configuration is created, precisely so that this stays possible: **allowing it later breaks
+      nobody, correcting it later would break everybody.** Without the refusal a section answered
+      `getProperty("host")` with the root's `host` — a different property, no error — and `clear()` on a
+      section emptied the whole configuration.
+      What has to be decided before writing it, and what the refusal bought the time for: what `store()`
+      on a section writes and whether it can be read back, what `clear()` clears, what `load(InputStream)`
+      merges, and which key `originOf` is asked with. `@Sensitive` needs nothing: the masking is already
+      computed over the whole tree from the root. **The one thing genuinely missing today** is that there
+      is no public way to ask a nested object for its own path — `KeyPrefix` is package-private — so a
+      section reached through a list or through an accessor taking arguments has a path only the caller can
+      reconstruct. That is the gap this would close, and the argument for doing it one day.
 - [ ] **A composite object of a type we cannot proxy** — [#72](https://github.com/matteobaccan/owner/issues/72),
       which this file wrongly listed as answered by the nested interfaces until it was read on 2026-08-12.
       It is not. The request is `DataSource getDataSource()`, assembled by a provider class out of several
