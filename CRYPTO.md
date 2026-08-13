@@ -142,6 +142,39 @@ The last line is the only constraint the format has to respect, and base64 never
 fourth is a free property worth keeping in mind: a name that is itself a variable is one way a key
 rotation could be driven from outside the file.
 
+### Who owns the payload
+
+Asked on 2026-08-13: could the marker carry options too, `${$aes-gcm::…#salt=xxx}`, the way a source
+carries them in its fragment? **Syntactically yes** — probed, `#`, `&` and `=` all survive inside
+`${…}`, and a `#` in the middle of a value is not a comment in a `.properties` file, where only a
+line may start one.
+
+**For cryptographic parameters, no**, for three reasons that are worth keeping written down:
+
+- **The salt belongs inside the token.** GCM's tag authenticates the cipher text; a salt sitting
+  outside it in a fragment is not covered and can be edited on its own. The damage is bounded — a
+  wrong key gets derived and decryption fails — so it is denial of service rather than forgery, but
+  the principle holds: everything decryption depends on goes inside the authenticated envelope, or is
+  bound to it. Outside is strictly worse for nothing gained.
+- **A knob is what we decided not to have.** The Jasypt finding above is exactly this: their CLI
+  produces deterministic cipher text because the IV generator is an option one can forget. If
+  `#iterations=1000` is expressible, somebody will write it or copy it from a blog post.
+- **The salt is an output, not a choice.** It is produced by the tool and reproduced verbatim; making
+  it look like a parameter invites somebody to pick one.
+
+**And it is not needed, because the payload is opaque to the library.** OWNER dispatches on the name
+and hands the rest to the handler as text — there is nothing here for us to interpret. A handler that
+genuinely wants parameters defines them inside its own payload, in whatever syntax suits it. So:
+**the library owns the envelope, the handler owns the payload.**
+
+That is the mirror image of `SourceOptions`, where the fragment *is* ours — because there OWNER
+interprets it, reading `required` itself and routing `dialect` to a loader. The one rule a payload
+must respect is the one the earlier probe found: **no `}`**.
+
+What legitimately varies — *which key* — is already covered by the handler **name**: register
+`aes-gcm-2024` alongside `aes-gcm-2025` and a key rotation becomes an edit to the file, one value at a
+time. Which is the argument that removed the scheme number, applied a second time.
+
 ### What it does not settle
 
 `@EncryptedValue` and `@DecryptorClass` **stay**, for everybody who already has them, with the
