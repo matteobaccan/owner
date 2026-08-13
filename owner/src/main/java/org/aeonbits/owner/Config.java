@@ -300,13 +300,22 @@ public interface Config extends Serializable {
      * annotation is how a property says that it should not end up in a log.
      * </p>
      * <p>
-     * <b>Only the human-readable output is masked.</b> {@link Accessible#getProperty(String)},
-     * {@link Accessible#fill(java.util.Map)}, {@link Accessible#store(java.io.OutputStream, String)},
-     * {@link Accessible#storeToXML(java.io.OutputStream, String)}, the JMX attributes and of course the
-     * method itself keep returning the real value: those are how a configuration is read and written back,
-     * and masking them would replace the value in the file the next time it is saved. Masking is not
-     * encryption — see {@link EncryptedValue} for that — it only keeps a value from being printed by
-     * accident.
+     * <b>Only the human-readable output is masked</b>, and for two distinct reasons that happen to point
+     * the same way. {@link Accessible#store(java.io.OutputStream, String)} and
+     * {@link Accessible#storeToXML(java.io.OutputStream, String)} write the configuration <i>back</i>:
+     * masking them would replace the value in the file the next time it is saved. The method itself,
+     * {@link Accessible#getProperty(String)}, {@link Accessible#fill(java.util.Map)} and the JMX attributes
+     * hand the value to <i>code that asked for it</i>, which is the whole purpose of a configuration
+     * library. Masking is not encryption — see {@link EncryptedValue} for that — it only keeps a value from
+     * being printed by accident.
+     * </p>
+     * <p>
+     * <b>The mask is per key, and a reference goes around it.</b> With <code>password</code> masked and
+     * <code>jdbc.url=...&amp;password=${password}</code> not, the listing shows the second line as it was
+     * written, <code>${password}</code> included, and the secret does not appear. This is one of the
+     * reasons {@link Accessible#list(java.io.PrintStream)} does not expand the variables where
+     * {@link Accessible#getProperty(String)} does: an expanded listing would print the masked value in
+     * clear inside the line that refers to it.
      * </p>
      * <p>
      * When applied to an interface, all the properties declared in that interface are masked.
@@ -600,8 +609,27 @@ public interface Config extends Serializable {
          * @since 2.0.0
          */
         public boolean isDisabledFor(Method method) {
-            return isDisabledBy(method.getDeclaringClass().getAnnotation(DisableFeature.class)) ||
+            return isDisabledFor(method.getDeclaringClass()) ||
                     isDisabledBy(method.getAnnotation(DisableFeature.class));
+        }
+
+        /**
+         * Tells whether this feature is disabled for the given interface as a whole.
+         * <p>
+         * The methods of {@link Accessible} are asked this question rather than
+         * {@link #isDisabledFor(Method)}: they are declared on <code>Accessible</code> and not on the
+         * configuration interface, so the annotation that concerns them is never on their declaring
+         * class. A <code>@DisableFeature(VARIABLE_EXPANSION)</code> written on a configuration interface
+         * has to reach <code>getProperty</code> and <code>fill</code> as well, and this is how.
+         * </p>
+         *
+         * @param clazz the interface to inspect.
+         * @return <code>true</code> if this feature is disabled for the given interface,
+         *         <code>false</code> otherwise.
+         * @since 2.0.0
+         */
+        public boolean isDisabledFor(Class<?> clazz) {
+            return isDisabledBy(clazz.getAnnotation(DisableFeature.class));
         }
 
         private boolean isDisabledBy(DisableFeature annotation) {

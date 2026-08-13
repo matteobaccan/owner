@@ -107,7 +107,35 @@ public interface Sample extends Config {
 
 The `@DisabledFeature` annotation can be applied on method level and/or on
 interface level. When applied on interface level, the annotation will apply to
-all methods defined in that interface.
+all methods defined in that interface, and to `getProperty()` and `fill()` with
+them.
+
+Reading a property by name
+--------------------------
+
+*Since 2.0.0.*
+
+Everything on this page describes what happens when a property is read through
+the method that maps it. A property can also be read *by name*, through the
+[Accessible](/owner/docs/accessible-mutable/) interface, and since version 2.0.0
+that expands the variables too:
+
+```properties
+s     = say
+hello = ${s} HELLO
+b     = ${hello} AGAIN!
+```
+
+```java
+cfg.getProperty("b");       // say HELLO AGAIN!
+cfg.getRawProperty("b");    // ${hello} AGAIN!
+```
+
+The methods that write the properties out — `list()`, `store()`, `storeToXML()`
+— leave the variables where they are instead, so that a configuration saved
+back to a file keeps them. Which method does what, and what happens to
+`@Sensitive` and `@EncryptedValue` on each path, is set out in one table:
+[which methods process the value](/owner/docs/accessible-mutable/#which-methods-process-the-value).
 
 Variable expansion for the @Key
 ---------------------------------

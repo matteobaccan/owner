@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -832,7 +833,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             results.putAll(input);
     }
 
-    @Delegate
+    /**
+     * The value as it was written, variables unexpanded.
+     * <p>
+     * There is deliberately <b>no {@link Delegate}</b> on this method nor on the three below it, although
+     * they implement {@link Accessible}: this is the method
+     * {@link PropertiesInvocationHandler#lookupValue} reads every property with, so it has to stay raw,
+     * and a Config object answers <code>getProperty</code> from the handler instead, which expands. See
+     * {@link PropertiesInvocationHandler#readsValue}.
+     * </p>
+     */
     @Override
     public String getProperty(String key) {
         readLock.lock();
@@ -848,7 +858,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             hotReloadLogic.checkAndReload();
     }
 
-    @Delegate
     @Override
     public String getProperty(String key, String defaultValue) {
         readLock.lock();
@@ -857,6 +866,20 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         } finally {
             readLock.unlock();
         }
+    }
+
+    /**
+     * On the manager the raw pair and the ordinary one are the same thing, the manager <i>being</i> the raw
+     * layer. They part company one level up, in the handler, which expands the ordinary one.
+     */
+    @Override
+    public String getRawProperty(String key) {
+        return getProperty(key);
+    }
+
+    @Override
+    public String getRawProperty(String key, String defaultValue) {
+        return getProperty(key, defaultValue);
     }
 
     @Delegate
@@ -928,14 +951,22 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         }
     }
 
-    @Delegate
-    @SuppressWarnings("unchecked")
     @Override
     public void fill(Map map) {
+        fill(map, UnaryOperator.<String>identity());
+    }
+
+    /**
+     * Fills the given map with the properties, each value passed through the given transformation, which
+     * is how a Config object fills a map with the values expanded. The transformation runs <b>under the
+     * read lock</b>, so that a reload cannot change the properties halfway through the map being built.
+     */
+    @SuppressWarnings("unchecked")
+    void fill(Map map, UnaryOperator<String> process) {
         readLock.lock();
         try {
             for (String propertyName : propertyNames())
-                map.put(propertyName, getProperty(propertyName));
+                map.put(propertyName, process.apply(getProperty(propertyName)));
         } finally {
             readLock.unlock();
         }

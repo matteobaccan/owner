@@ -88,6 +88,67 @@ cfg.store(new FileOutputStream(tmp), "no comments");
 As you can see, [Accessible] is not limited to the `getProperty()` method, but you can also use this
 interface to `list()` or `store()` the properties.
 
+Which methods process the value
+-------------------------------
+
+A configuration is read in two ways — through the mapping methods, and through the methods of
+[Accessible] — and the two do not do the same amount of work to the value. **The rule is that a method
+answering with a value processes it, and a method writing the properties out does not**, because what
+goes out has to be able to come back: a `${...}` expanded on the way out is a `${...}` lost from the file
+at the next save.
+
+| | expands `${...}` | masks [`@Sensitive`](/owner/docs/debugging/#keeping-a-property-out-of-the-output) | applies `@EncryptedValue`, `@ConverterClass`, preprocessors |
+|---|:---:|:---:|:---:|
+| `String url();` — a mapping method | yes | no, it returns the real value | yes |
+| `getProperty(key)`, `getProperty(key, default)` | **yes** | no | no |
+| `fill(map)` | **yes** | no | no |
+| `getRawProperty(key)`, `getRawProperty(key, default)` | no | no | no |
+| `list(out)` and `toString()` | no | **yes** | no |
+| `store(out, comments)`, `storeToXML(out, comment)` | no | no | no |
+| the JMX attributes | no | no | no |
+
+Only the expansion crosses from one column of methods to the other, and the reason is worth knowing
+because it is what makes the table predictable rather than arbitrary: **a variable lives in the value, so
+it is resolved wherever the value is read; `@EncryptedValue`, `@ConverterClass` and the preprocessors are
+declared on a method, and a property asked for by name has no method to read the declaration from.**
+
+```java
+// config.properties
+//   s     = say
+//   hello = ${s} HELLO
+//   b     = ${hello} AGAIN!
+
+cfg.getProperty("b");       // say HELLO AGAIN!   — the value, ready to use
+cfg.getRawProperty("b");    // ${hello} AGAIN!    — the value, as it was written
+```
+
+<div class="note warning">
+  <h5>This changed in 2.0.0.</h5>
+  <p>
+    Up to 1.0.12 <code>getProperty()</code> and <code>fill()</code> returned the text as it was written,
+    which meant that the same property answered differently depending on whether it was read through its
+    method or by name (issue
+    <a href="https://github.com/matteobaccan/owner/issues/319">#319</a>). If you were relying on the old
+    behaviour — typically to write the properties back to a file — <code>getRawProperty()</code> is that
+    behaviour under a name that says what it does.
+  </p>
+</div>
+
+<div class="note info">
+  <h5>Masking is per key, and that is why a listing is not expanded.</h5>
+  <p>
+    With <code>password</code> masked and <code>jdbc.url=…&amp;password=${password}</code> not, the
+    listing shows the second line as it was written and the secret does not appear anywhere. Expanding it
+    would print the masked value in clear inside the line referring to it: the mask is applied to a key,
+    and a reference goes around it.
+  </p>
+</div>
+
+Variable expansion can be switched off, for a single method or for the whole interface, with
+`@DisableFeature(VARIABLE_EXPANSION)` — see
+[Variables expansion](/owner/docs/variables-expansion/#disabling-variables-expansion). Written on the
+interface it reaches `getProperty()` and `fill()` as well, and they then behave like the `getRaw` pair.
+
 The Traceable interface
 -----------------------
 
@@ -145,10 +206,15 @@ interface MyConfig extends Config, Accessible, Traceable { ... }
 Properties mine = new Properties();
 for (Map.Entry<String, Origin> entry : cfg.origins().entrySet())
     if ("file:config/app.properties".equals(entry.getValue().source()))
-        mine.setProperty(entry.getKey(), cfg.getProperty(entry.getKey()));
+        mine.setProperty(entry.getKey(), cfg.getRawProperty(entry.getKey()));
 
 mine.store(new FileOutputStream("config/app.properties"), null);
 ```
+
+`getRawProperty()` and not `getProperty()`, for the reason given in the table
+above: this value is on its way back to a file, and saving `http://prod-host:80`
+where the file said `http://${host}:${port}` would resolve the configuration
+once and for all, silently.
 
 `origins()` hands back a snapshot taken under the same lock as
 `propertyNames()`, so it does not change underneath while a reload runs.

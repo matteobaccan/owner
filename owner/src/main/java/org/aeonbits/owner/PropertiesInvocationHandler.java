@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -172,11 +173,75 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         if (isNested() && isIdentity(invokedMethod))
             return identity(proxy, invokedMethod, args);
 
+        // before the delegates: these are Accessible methods the manager also implements, and the
+        // manager's implementations are the raw ones - see readsValue
+        if (readsValue(invokedMethod))
+            return readValue(invokedMethod, args);
+
         DelegateMethodHandle delegate = getDelegateMethod(invokedMethod);
         if (delegate != null)
             return delegate.invoke(args);
 
         return resolveProperty(invokedMethod, args);
+    }
+
+    /**
+     * The {@link Accessible} methods that answer with a <b>value</b> rather than writing the properties
+     * out, and which therefore expand the variables as a mapping method does.
+     * <p>
+     * They are answered here and not through a {@link Delegate} on the {@link PropertiesManager}, and that
+     * is not an arrangement but a necessity: <code>PropertiesManager.getProperty</code> is the very method
+     * {@link #lookupValue} reads a property with, so an expansion added to it would run twice on every
+     * mapping method and would stop the defaults being found, since those are registered under the
+     * unexpanded key. The manager is the raw layer, and it has to stay one.
+     * </p>
+     */
+    private static boolean readsValue(Method method) {
+        if (!Accessible.class.isAssignableFrom(method.getDeclaringClass()))
+            return false;
+        Class<?>[] parameters = method.getParameterTypes();
+        if ("fill".equals(method.getName()))
+            return parameters.length == 1 && parameters[0] == Map.class;
+        if ("getProperty".equals(method.getName()) || "getRawProperty".equals(method.getName()))
+            return parameters.length >= 1 && parameters[0] == String.class;
+        return false;
+    }
+
+    /**
+     * Answers one of the methods {@link #readsValue} recognises.
+     * <p>
+     * The expansion is skipped for the <code>getRaw*</code> pair, which exists to skip it, and when the
+     * configuration interface carries <code>@DisableFeature(VARIABLE_EXPANSION)</code>: that annotation is
+     * read off {@link #configClass} rather than off the invoked method, because these methods are declared
+     * on {@link Accessible} and never on the interface the user wrote.
+     * </p>
+     */
+    @SuppressWarnings("unchecked")
+    private Object readValue(Method method, Object... args) {
+        boolean raw = method.getName().startsWith("getRaw")
+                || VARIABLE_EXPANSION.isDisabledFor(configClass);
+
+        if ("fill".equals(method.getName())) {
+            Map<Object, Object> map = (Map<Object, Object>) args[0];
+            if (raw)
+                propertiesManager.fill(map);
+            else
+                propertiesManager.fill(map, this::expand);
+            return null;
+        }
+
+        // always read raw and expand here: the manager is the raw layer, and which of the two the caller
+        // asked for is this object's decision, not its
+        String key = (String) args[0];
+        String value = (args.length > 1)
+                ? propertiesManager.getRawProperty(key, (String) args[1])
+                : propertiesManager.getRawProperty(key);
+        return raw ? value : expand(value);
+    }
+
+    /** Expands the variables of a value read by key, where there is no method whose annotations to read. */
+    private String expand(String value) {
+        return substitutor.replace(value);
     }
 
     private static boolean isIdentity(Method method) {
@@ -520,7 +585,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private String expandVariables(Method method, String value) {
         if (VARIABLE_EXPANSION.isDisabledFor(method))
             return value;
-        return substitutor.replace(value);
+        return expand(value);
     }
 
     private List<DelegateMethodHandle> findDelegates(Object... targets) {

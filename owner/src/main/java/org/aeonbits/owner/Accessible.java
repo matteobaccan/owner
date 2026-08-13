@@ -32,6 +32,23 @@ import java.util.Set;
  * <p>These methods will print the list of properties, see {@link java.util.Properties#list(java.io.PrintStream)} and
  * {@link java.util.Properties#list(java.io.PrintWriter)}.</p>
  *
+ * <h2>Which of these methods expand the variables</h2>
+ * <p>
+ * The methods that answer with a <b>value</b> expand it, exactly as the mapping methods do:
+ * {@link #getProperty(String)}, {@link #getProperty(String, String)} and {@link #fill(Map)}. The methods
+ * that write the properties <b>out</b> do not: {@link #list(PrintStream)}, {@link #list(PrintWriter)},
+ * {@link #store(OutputStream, String)}, {@link #store(Writer, String)} and
+ * {@link #storeToXML(OutputStream, String)} reproduce the properties as they were written, because that
+ * is what makes them round-trip &mdash; a <code>${...}</code> expanded on the way out is a
+ * <code>${...}</code> lost from the file on the next save. {@link #getRawProperty(String)} is the way to
+ * read a single value the same way.
+ * </p>
+ * <p>
+ * Only the expansion crosses over. A {@link Config.EncryptedValue}, a {@link Config.ConverterClass} or a
+ * preprocessor is declared <i>on a method</i>, and a property asked for by name has no method to read the
+ * declaration from; the expansion lives in the value itself, and so applies wherever the value is read.
+ * </p>
+ *
  * @author Luigi R. Viggiano
  * @since 1.0.4
  */
@@ -85,6 +102,14 @@ public interface Accessible extends Config {
      * <p>
      * Notice that you can specify a properties object as parameter instead of a map,
      * since {@link java.util.Properties} implements the {@link java.util.Map} interface.
+     * </p>
+     * <p>
+     * <b>The values are expanded</b>, as they are for {@link #getProperty(String)} and for the mapping
+     * methods: this hands out the configuration to be used, not to be written back. A map filled here and
+     * then stored to a file would save the expanded values and lose the <code>${...}</code> that produced
+     * them &mdash; use {@link #store(java.io.OutputStream, String)} to write the properties back, or
+     * {@link #getRawProperty(String)} over {@link #propertyNames()} to choose key by key.
+     * </p>
      *
      * @param map the {@link java.util.Map} to fill.
      * @since 1.0.9
@@ -96,10 +121,24 @@ public interface Accessible extends Config {
      * If the key is not found in this property list, the default property list,
      * and its defaults, recursively, are then checked. The method returns
      * <code>null</code> if the property is not found.
+     * <p>
+     * <b>Since 2.0.0 the value is expanded</b>: a <code>${...}</code> in it is resolved exactly as it is
+     * for the method that maps the same key, so that a property read by name and the same property read
+     * through its method no longer answer differently. Up to 1.0.12 the text was returned as written.
+     * {@link #getRawProperty(String)} returns it as written.
+     * </p>
+     * <p>
+     * What is <i>declared</i> on a mapping method is not applied here, and cannot be: a
+     * {@link Config.EncryptedValue}, a {@link Config.ConverterClass} or a preprocessor belongs to a
+     * method, and a key asked for by name has none. Variable expansion belongs to the value, which is why
+     * it is the one thing that applies to both.
+     * </p>
      *
      * @param   key   the property key.
-     * @return  the value in this property list with the specified key value.
+     * @return  the value in this property list with the specified key value, expanded.
+     * @throws  IllegalArgumentException if the value holds a circular variable reference.
      * @see     java.util.Properties#getProperty(String)
+     * @see     #getRawProperty(String)
      * @since 1.0.4
      */
     String getProperty(String key);
@@ -109,15 +148,53 @@ public interface Accessible extends Config {
      * If the key is not found in this property list, the default property list,
      * and its defaults, recursively, are then checked. The method returns the
      * default value argument if the property is not found.
+     * <p>
+     * The value is expanded, as it is for {@link #getProperty(String)}, and <b>so is the given default</b>:
+     * it is text supplied by the caller at the call, so expanding it can surprise nobody, and a default
+     * that could not carry a <code>${...}</code> would be the odd one out.
+     * </p>
      *
      * @param   key            the property key.
      * @param   defaultValue   a default value.
-     * @return  the value in this property list with the specified key value.
+     * @return  the value in this property list with the specified key value, expanded; the given default,
+     *          expanded, when there is no such property.
+     * @throws  IllegalArgumentException if the value holds a circular variable reference.
      * @see java.util.Properties#getProperty(String, String)
+     * @see #getRawProperty(String, String)
      *
      * @since 1.0.4
      */
     String getProperty(String key, String defaultValue);
+
+    /**
+     * Searches for the property with the specified key and returns its value <b>as it was written</b>,
+     * with the variables left unexpanded.
+     * <p>
+     * This is what {@link #getProperty(String)} returned up to 1.0.12, and it is what a caller wants when
+     * the value is on its way back to a file rather than on its way to being used: expanding a
+     * <code>${...}</code> and saving the result destroys the reference that produced it.
+     * </p>
+     *
+     * @param   key   the property key.
+     * @return  the value in this property list with the specified key value, as it was written;
+     *          <code>null</code> if the property is not found.
+     * @see     #getProperty(String)
+     * @since 2.0.0
+     */
+    String getRawProperty(String key);
+
+    /**
+     * Searches for the property with the specified key and returns its value <b>as it was written</b>,
+     * with the variables left unexpanded, or the given default when there is no such property.
+     *
+     * @param   key            the property key.
+     * @param   defaultValue   a default value, returned as it is given.
+     * @return  the value in this property list with the specified key value, as it was written; the given
+     *          default when there is no such property.
+     * @see     #getProperty(String, String)
+     * @since 2.0.0
+     */
+    String getRawProperty(String key, String defaultValue);
 
     /**
      * Emits an XML document representing all of the properties contained
