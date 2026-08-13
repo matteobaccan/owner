@@ -308,6 +308,48 @@ String cacheDir();       // C:\temp on a machine where cache.dir is not set
   </p>
 </div>
 
+A variable that resolves to nothing
+-----------------------------------
+
+An expression that nothing resolves — no property, no system property, no environment variable — is
+replaced by the **empty string**, and always has been:
+
+```properties
+url=jdbc:h2:mem:${db.name}
+```
+
+With nothing called `db.name`, `url` reads `jdbc:h2:mem:`. The trouble is that `${db.nmae}`, misspelt,
+gives exactly the same thing: a value that looks almost right, and no version of OWNER has ever said a
+word about it.
+
+The default is unchanged, because a configuration may lean on the empty string on purpose. **There are two
+ways to stop guessing**, and the first one is free:
+
+```properties
+url=jdbc:h2:mem:${db.name:}          # the empty string, said deliberately
+url=jdbc:h2:mem:${db.name:testdb}    # or a real fallback
+```
+
+A default value — even an empty one — says that the author considered the case. And since 2.0.0, setting
+[`owner.strict`](/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning)
+on the factory refuses the variable that has neither a value nor a default, naming it:
+
+```
+The variable ${db.name} resolves to nothing: no property, no system property and no
+environment variable goes by that name, and no default value was written for it.
+```
+
+<div class="note">
+  <h5>It covers the <code>@Sources</code> specification too, which is where it bites hardest.</h5>
+  <p>
+    A spec is expanded before there is a Config object at all, so
+    <code>file:${app.home}/app.properties</code> with nothing setting <code>app.home</code> quietly becomes
+    <code>file:/app.properties</code> and the configuration then holds nothing but its default values.
+    Strict names <code>app.home</code>, which is the cause; without it the only complaint available is that
+    no source could be read, which names <code>file:/app.properties</code> — the symptom.
+  </p>
+</div>
+
 Nested variables
 ----------------
 

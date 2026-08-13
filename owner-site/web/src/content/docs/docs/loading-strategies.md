@@ -406,6 +406,61 @@ Unlike a dialect or a validation flag, `required` is **not** an option of a load
 missing is decided before a loader is chosen, and is the same question for all of them. That is why no
 loader has to declare it and none of them refuses it.
 
+### Refusing everything that would only have been a warning
+
+*Since 2.0.0.* `required=true` says it for one source. **`owner.strict` says it for the whole
+configuration**, on the [factory](/owner/docs/configuring/):
+
+```java
+Factory factory = ConfigFactory.newInstance();
+factory.setProperty("owner.strict", "true");
+
+ServerConfig cfg = factory.create(ServerConfig.class);   // refuses instead of warning
+```
+
+The default is off, and off is how OWNER has always behaved. It is worth knowing why the switch exists at
+all: **this library's way of failing is to keep working.** A source that cannot be read is passed over, the
+object is built out of default values, and the caller gets something that works and lies. That is a
+deliberate choice — a fallback is meant to work — but it is invisible until somebody reads the wrong value
+in production. Most of the field either throws or refuses to start; OWNER carries on, so the warnings above
+carry more weight here than they would elsewhere, and until 2.0.0 they were all a caller could get.
+
+**What counts as a failure is not a list of its own: it is the warnings.** They were already chosen to
+leave the legitimate cases alone, so strict inherits that care instead of restating it and drifting from
+it. Five things are refused:
+
+| refused under `owner.strict` | |
+|---|---|
+| a source that was named and could not be read | the second bullet above |
+| not one of the declared sources could be read | the third bullet above |
+| `@HotReload` over a source nobody can watch | see [Reload](/owner/docs/reload/) |
+| a value built out of an encrypted one | see [Crypto support](/owner/docs/crypto/) |
+| a variable that resolves to nothing | see [Variables expansion](/owner/docs/variables-expansion/#a-variable-that-resolves-to-nothing) |
+
+And what it leaves alone matters as much:
+
+- **A source that is merely absent stays silent**, strict or not. `LoadType.FIRST` expects misses by
+  design, and refusing them would make the property unusable with the commonest shape a configuration has.
+- **A configuration made entirely of defaults** declares no sources, so nothing failed to be read.
+- **A reload that fails** is outside this on purpose: it happens later, on a scheduled thread with nobody
+  to refuse, and turning a transient failure into a crash is worse than the warning. The
+  [event API](/owner/docs/event-support/) is where a reload problem is answered.
+
+It raises the `UnsupportedOperationException` that `required=true` already raises for the identical case,
+and it belongs to the **factory** rather than to the JVM: an application turning it on does not make a
+library that happens to use OWNER strict as a side effect.
+
+<div class="note info">
+  <h5>Two loaders warn and are not covered.</h5>
+  <p>
+    The XML one when the parser will not support the hardening, and the <code>.env</code> one when values
+    are quoted under a dialect that keeps quotes. <code>Loader.load(Properties, URI)</code> is a public SPI
+    with no way to reach the factory, so strictness cannot be handed to a loader without changing it. Both
+    already have a per-source answer in the fragment — <code>#validate=false</code> and
+    <code>#dialect=</code> — so neither is left without one.
+  </p>
+</div>
+
 ### What 2.0.0 added, and what it did not break
 
 Everything above is additive. `defaultSpecsFor` and a default `defaultSpecFor` are `default` methods, so a

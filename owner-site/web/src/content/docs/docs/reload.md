@@ -111,7 +111,21 @@ URLs.
   </p>
   <p>
     What is being watched, and how often, is written at <code>CONFIG</code> beside it. See
-    <a href="/owner/docs/debugging/">Debugging</a> for the switch that turns those lines on.
+    <a href="/owner/docs/debugging/">Debugging</a> for the switch that turns those lines on, and
+    <a href="/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning"><code>owner.strict</code></a>
+    to have it refused rather than reported.
+  </p>
+</div>
+
+<div class="note info">
+  <h5>A reload that fails is a warning and stays one.</h5>
+  <p>
+    <i>Since 2.0.0.</i> When a reload cannot read a source, the configuration keeps the values it already
+    had and tries again at the next check, saying so once and again only if the failure changes or clears.
+    <code>owner.strict</code> deliberately does <b>not</b> reach this: a reload happens on a scheduled
+    thread with nobody to refuse, and turning a transient failure into a crash would be worse than the
+    warning. A reload that has to be acted on is what the
+    <a href="/owner/docs/event-support/">event API</a> is for.
   </p>
 </div>
 

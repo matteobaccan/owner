@@ -81,6 +81,52 @@ List<String> cryptoList();
 ```
 
 
+A value that refers to an encrypted one gets the cipher text
+------------------------------------------------------------
+
+*Since 2.0.0 this is reported.* Composing a value out of an encrypted property does **not** work, and it
+used to fail in silence:
+
+```properties
+crypto.password = tzH7IKLCVc0AC72fh5DiZA==
+jdbc.url        = jdbc:h2:mem:test?password=${crypto.password}
+```
+
+```java
+cfg.password();   // the secret       — the method that declares @EncryptedValue decrypts
+cfg.jdbcUrl();    // …?password=tzH7IKLCVc0AC72fh5DiZA==   — the cipher text
+```
+
+The same password reads two ways depending on how it is asked for. The connection then fails with a wrong
+password, or the cipher text travels somewhere a secret was meant to go.
+
+**It is where the annotation is written, not a defect in the substitution.** The properties hold the
+cipher text — they have to, or [`store()`](/owner/docs/accessible-mutable/) would write the file back
+decrypted — and decryption happens per method, chosen by the `@EncryptedValue` on it. A variable names a
+*key*, so the substitution has nothing to read a decryptor from and inserts what it finds.
+
+Since 2.0.0 the library says so when the configuration is created, naming both keys and neither value:
+
+```
+WARNING: the value of 'jdbc.url' refers to 'crypto.password', which is declared
+         @EncryptedValue. […] Compose the value in Java from the method that
+         decrypts it.
+```
+
+and [`owner.strict`](/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning)
+turns that into a refusal. **The remedy is to compose the value in Java**, from the method that decrypts,
+rather than in the properties file.
+
+<div class="note info">
+  <h5>The same is true of a converter, and there it cannot be fixed.</h5>
+  <p>
+    A <code>@ConverterClass</code> is not applied either when a value is read through a variable, and that
+    half has no cure at all: a converter answers with a typed object, and there is no room for one inside a
+    string. Decryption is text to text, so only the missing decryptor is a question of where the
+    declaration sits.
+  </p>
+</div>
+
 Can you show me an example implementation of Decryptor?
 -------------------------------------------------------
 

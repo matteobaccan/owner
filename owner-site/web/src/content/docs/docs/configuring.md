@@ -61,3 +61,22 @@ MyConfig cfg = ConfigFactory.create(MyConfig.class);
 ```
 
 You are completely free to define the sources of your configuration at runtime.
+
+The properties the factory understands itself
+---------------------------------------------
+
+Everything you set on the factory is available for expanding `@Sources`, as above. A few names are read by
+the factory itself, and all of them arrived in 2.0.0:
+
+| property | effect |
+|---|---|
+| [`owner.key.prefix`](/owner/docs/key-prefix/) | a literal, prepended to the key of every property |
+| [`owner.key.prefix.from.package`](/owner/docs/key-prefix/) | `true` derives that prefix from the package of the interface declaring the method |
+| [`owner.strict`](/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning) | `true` turns the library's warnings into refusals, so that a configuration which would have carried on with its default values is not created at all |
+
+They are read when a Config object is **created**, and the object keeps them for the rest of its life —
+changing one afterwards does not move a configuration that already exists, which is what keeps its keys
+from shifting under it and lets the mapping travel with the object when it is serialized.
+
+They belong to the factory and not to the JVM, which matters most for `owner.strict`: an application that
+turns it on does not thereby make a library which happens to use OWNER strict as a side effect.
