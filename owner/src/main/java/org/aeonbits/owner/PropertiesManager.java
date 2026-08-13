@@ -93,6 +93,19 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     private final Set<String> sensitiveKeys = new HashSet<>();
 
     /**
+     * The keys a method declares {@link EncryptedValue}, by name rather than by method.
+     * <p>
+     * {@link #encryptedKeys} answers "which decryptor does this method use", which is what decryption
+     * needs. This answers "is the property behind this key an encrypted one", which is what
+     * {@link #reportReferencesToEncryptedValues} needs, and no map keyed by method can: a variable names a
+     * key and nothing else. Only the methods taking no arguments are here, for the same reason
+     * {@link #sensitiveKeys} holds only those — a key that depends on the invocation is not known in
+     * advance.
+     * </p>
+     */
+    private final Set<String> encryptedKeyNames = new HashSet<>();
+
+    /**
      * The prefixes below which every key is masked, one for each {@link Sensitive} method that reads a group
      * of properties rather than a single one. Such a method resolves to a prefix and not to a property, so
      * there is no single name to put in {@link #sensitiveKeys}: what has to be hidden is everything under it.
@@ -151,6 +164,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
 
     /** Whether the load that read nothing at all has already been reported. */
     private boolean reportedEmptyLoad;
+
+    /**
+     * Whether the values referring to an encrypted property have been looked for yet. Looked for on the
+     * <b>first</b> load only, and not because saying it twice would be noise: under
+     * {@link #strict} this refuses, and a refusal belongs to the moment the object is created rather than
+     * to a reload happening on a scheduled thread. See {@link #reportReferencesToEncryptedValues}.
+     */
+    private boolean lookedForCipherReferences;
 
     final List<PropertyChangeListener> propertyChangeListeners = synchronizedList(
             new LinkedList<PropertyChangeListener>() {
@@ -294,6 +315,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 encryptedKeys.put(method, declared != IdentityDecryptor.class
                         ? Util.newInstance(declared)
                         : classDecryptor);
+                if (method.getParameterTypes().length == 0)
+                    encryptedKeyNames.add(PropertiesMapper.key(method, prefix));
             }
         }
     }
@@ -439,6 +462,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 merge(props, imported[i]);
                 record(imported[i].keySet(), Origin.ofImport(imported.length - 1 - i));
             }
+            reportReferencesToEncryptedValues(props);
             return props;
         } finally {
             loading = false;
@@ -873,6 +897,83 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     /** Whether this configuration refuses what it would otherwise warn about. See {@link #strict}. */
     boolean isStrict() {
         return strict;
+    }
+
+    /**
+     * A value that refers to an encrypted property through a variable, which gets the <b>encrypted</b> text
+     * and not the secret.
+     * <pre>
+     *     crypto.password = tzH7IKLCVc0AC72fh5DiZA==
+     *     jdbc.url        = jdbc:h2:mem:test?password=${crypto.password}
+     * </pre>
+     * <p>
+     * <code>password()</code> answers with the secret and <code>jdbcUrl()</code> answers with the cipher
+     * text, so the same password reads two ways depending on how it is asked for, and nothing says so. The
+     * connection then fails with a wrong password, or the cipher text travels somewhere a secret was meant
+     * to go.
+     * </p>
+     * <p>
+     * <b>It is where the annotation is written, not an oversight in the substitution.</b> The properties
+     * hold the cipher text - they have to, or {@link #store} would write the file back decrypted -
+     * and decryption happens per method, chosen by the {@link EncryptedValue} on it. A variable names a
+     * <i>key</i>, so the substitution has nothing to read the decryptor from and inserts what it finds.
+     * Issue #287 reports the same thing about a {@link Config.ConverterClass}, where it cannot be fixed at
+     * all: a converter answers with a typed object, and there is no room for one inside a string.
+     * </p>
+     * <p>
+     * The cure is a marker in the <i>value</i> rather than on the method, the shape SmallRye and Jasypt
+     * both use, which makes decryption part of the expansion and therefore the same on every path. Until
+     * there is one, composing the value in Java out of the method that decrypts is what works.
+     * </p>
+     * <p>
+     * The search is flat on purpose. With <code>a=${crypto.password}</code> and <code>jdbc.url=${a}</code>
+     * only <code>a</code> matches, and that is enough: the point is that the reference exists, and naming
+     * the value that holds it is more use than naming the one at the end of the chain. No value appears in
+     * the message, encrypted or not - two key names do.
+     * </p>
+     */
+    private void reportReferencesToEncryptedValues(Properties props) {
+        if (encryptedKeyNames.isEmpty() || lookedForCipherReferences)
+            return;
+        lookedForCipherReferences = true;
+
+        for (Enumeration<?> names = props.propertyNames(); names.hasMoreElements(); ) {
+            String name = (String) names.nextElement();
+            if (encryptedKeyNames.contains(name))
+                continue;
+            String referred = encryptedKeyReferredBy(props.getProperty(name));
+            if (referred == null)
+                continue;
+
+            if (strict)
+                throw unsupported("%s: the value of '%s' refers to '%s', which is declared "
+                                + "@EncryptedValue, and %s is on. A variable is resolved against the "
+                                + "properties, which hold the encrypted text, so '%s' would be built with "
+                                + "the cipher text and not with the secret. Compose the value in Java from "
+                                + "the method that decrypts it.",
+                        clazz.getName(), name, referred, STRICT, name);
+
+            LOGGER.log(Level.WARNING, () -> String.format(
+                    "%s: the value of '%s' refers to '%s', which is declared @EncryptedValue. A variable is "
+                            + "resolved against the properties, which hold the encrypted text, so '%s' is "
+                            + "built with the cipher text and not with the secret - while the method reading "
+                            + "'%s' answers with the secret. Compose the value in Java from the method that "
+                            + "decrypts it.",
+                    clazz.getName(), name, referred, name, referred));
+        }
+    }
+
+    /**
+     * The first encrypted key the given value refers to, or <code>null</code>. Both forms of a reference
+     * count, the plain <code>${key}</code> and the one carrying a default, <code>${key:...}</code>.
+     */
+    private String encryptedKeyReferredBy(String value) {
+        if (value == null)
+            return null;
+        for (String encrypted : encryptedKeyNames)
+            if (value.contains("${" + encrypted + "}") || value.contains("${" + encrypted + ":"))
+                return encrypted;
+        return null;
     }
 
     private static String specsOf(List<URI> uris) {
