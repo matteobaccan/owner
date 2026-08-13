@@ -269,6 +269,16 @@
                     <version>3.12.0</version>
                     <configuration>
                         <notimestamp>true</notimestamp>
+                        <!--
+                            Off because the URL it invents does not exist. The plugin builds it from
+                            ${project.url} plus the artifactId, which gives
+                            https://matteobaccan.github.io/owner/owner/apidocs/ - a 404 - so every link
+                            from owner-extras or owner-formats to a class of the core would be published
+                            broken. The apidocs really live under ${project.url}/apidocs/latest/; pointing
+                            <links> there is a decision for the release, since that path currently still
+                            serves 1.0.12.
+                        -->
+                        <detectOfflineLinks>false</detectOfflineLinks>
                     </configuration>
                     <executions>
                         <execution>
