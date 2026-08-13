@@ -415,31 +415,6 @@ final class NestedProperties {
     private static final Class<?>[] KEYED = {Accessible.class, Mutable.class, Traceable.class};
 
     /**
-     * Refuses a section declared as an {@link Accessible}, a {@link Mutable} or a {@link Traceable}.
-     * <p>
-     * Those interfaces are addressed by key, and <b>a section has no key space of its own</b>: it shares
-     * one {@link PropertiesManager} with the whole configuration, which is what makes it a view rather
-     * than a copy, and what makes a reload reach it. Left to inherit them, a section would answer
-     * <code>getProperty("host")</code> with the <code>host</code> of the root rather than with its own
-     * <code>server.host</code> — a different property, silently — and <code>clear()</code> called on a
-     * section would empty the entire configuration.
-     * </p>
-     * <p>
-     * It is refused rather than scoped because refusing is the decision that can be taken back: reading a
-     * section's keys relative to the section is a feature this library may well grow, in the shape
-     * Typesafe Config gives it with <code>getConfig</code> and Commons Configuration with
-     * <code>subset</code>, and allowing it later breaks nobody. Shipping the root's answers under the
-     * section's name and correcting them afterwards would break everybody who had come to rely on them.
-     * </p>
-     * <p>
-     * {@link Reloadable} is deliberately <b>not</b> in the list: it acts on the configuration as a whole,
-     * there is exactly one of those, and so it means the same thing called from anywhere in the tree.
-     * </p>
-     *
-     * @param accessor the method reading the section.
-     * @throws UnsupportedOperationException if the section is declared as one of {@link #KEYED}.
-     */
-    /**
      * Walks the configuration interface and everything it nests, at any depth and through all four shapes,
      * refusing every section declared as one of {@link #KEYED}.
      * <p>
@@ -467,6 +442,31 @@ final class NestedProperties {
         }
     }
 
+    /**
+     * Refuses a section declared as an {@link Accessible}, a {@link Mutable} or a {@link Traceable}.
+     * <p>
+     * Those interfaces are addressed by key, and <b>a section has no key space of its own</b>: it shares
+     * one {@link PropertiesManager} with the whole configuration, which is what makes it a view rather
+     * than a copy, and what makes a reload reach it. Left to inherit them, a section would answer
+     * <code>getProperty("host")</code> with the <code>host</code> of the root rather than with its own
+     * <code>server.host</code> — a different property, silently — and <code>clear()</code> called on a
+     * section would empty the entire configuration.
+     * </p>
+     * <p>
+     * It is refused rather than scoped because refusing is the decision that can be taken back: reading a
+     * section's keys relative to the section is a feature this library may well grow, in the shape
+     * Typesafe Config gives it with <code>getConfig</code> and Commons Configuration with
+     * <code>subset</code>, and allowing it later breaks nobody. Shipping the root's answers under the
+     * section's name and correcting them afterwards would break everybody who had come to rely on them.
+     * </p>
+     * <p>
+     * {@link Reloadable} is deliberately <b>not</b> in the list: it acts on the configuration as a whole,
+     * there is exactly one of those, and so it means the same thing called from anywhere in the tree.
+     * </p>
+     *
+     * @param accessor the method reading the section.
+     * @throws UnsupportedOperationException if the section is declared as one of {@link #KEYED}.
+     */
     static void rejectKeyedSection(Method accessor) {
         Class<?> section = sectionTypeOf(accessor);
         if (section == null)
