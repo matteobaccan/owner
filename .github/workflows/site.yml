@@ -1,27 +1,39 @@
 name: Publish site
 
-# Builds the documentation website with Astro/Starlight and syncs the result
-# onto the gh-pages branch, from which GitHub Pages serves
-# https://matteobaccan.github.io/owner/
+# Builds the documentation website with Astro/Starlight, renders the Marp decks
+# under presentation/ into it, and syncs the result onto the gh-pages branch, from
+# which GitHub Pages serves https://matteobaccan.github.io/owner/
+#
+# The deck is part of this build and not a workflow of its own, because it is
+# documentation like the rest and publishing it separately bought nothing and cost
+# two things: a second job pushing to the same branch, which two runs landing
+# together would have turned into a rejected push, and a deck that had to be
+# checked for external references by a step of its own instead of by the check
+# that already runs over the whole site.
 #
 # The sync deletes files that the build no longer produces, so that the leftover
 # Jekyll sources (_layouts, _includes, _posts, css, js …) do not linger on the
 # branch forever. Two directories are excluded from that deletion because they
 # are not ours to manage and cannot be regenerated from this build:
 #
-#   apidocs/      the Javadoc, published separately by `ant javadoc publish`
-#   presentation/ the slide deck as HTML, published by presentation.yml
-#   .well-known/  holds brave-rewards-verification.txt; deleting it silently
-#                 breaks the verification
+#   apidocs/     the Javadoc, published separately by `ant javadoc publish`
+#   .well-known/ holds brave-rewards-verification.txt; deleting it silently
+#                breaks the verification
+#
+# presentation/ is deliberately NOT among them: this build produces it now, so
+# excluding it would stop rsync from copying it rather than protect it.
 #
 # The build also refuses to publish anything that would load a resource from an
-# external host — see owner-site/web/scripts/check-external-references.mjs.
+# external host — see owner-site/web/scripts/check-external-references.mjs. That
+# check covers the deck too, which is not a formality: Marp turns emoji into <img>
+# tags pointing at a CDN, and it caught exactly that the first time it ran.
 
 on:
   push:
     branches: [ master ]
     paths:
       - 'owner-site/web/**'
+      - 'presentation/**'
       - '.github/workflows/site.yml'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -44,13 +56,30 @@ jobs:
         cache: npm
         cache-dependency-path: owner-site/web/package-lock.json
 
+    - name: Install Marp
+      # At the repository root and with --no-save, so that it stays out of the
+      # site's dependency tree: the site declares three dependencies and rendering
+      # a slide deck is no reason for a documentation edit to install a hundred
+      # and fifty more. --ignore-scripts for the reason given below; verified that
+      # the renderer works when installed this way. The version is pinned, as every
+      # other version in this repository is.
+      run: npm install --no-save --ignore-scripts --no-audit --no-fund @marp-team/marp-cli@4.5.0
+
+    - name: Render the decks into the site
+      # public/ is copied into the build verbatim, so the deck arrives in dist/ as
+      # an ordinary asset and is covered by the external-reference check below
+      # without a step of its own.
+      run: npx marp --input-dir presentation --output owner-site/web/public/presentation --html
+
     - name: Install dependencies
       working-directory: owner-site/web
-      # --ignore-scripts: a lifecycle script runs arbitrary code from a transitive dependency, with the
-      # workflow's token in the environment. Only two packages in the tree declare one - fsevents, which is
-      # macOS only, and esbuild, whose binary comes from the platform package @esbuild/linux-x64 rather than
-      # from its script. sharp and pagefind ship theirs as ordinary packages too, so nothing here needs a
-      # script to work: verified by installing this lock file with the flag and building the site from it.
+      # --ignore-scripts: a lifecycle script runs arbitrary code from a transitive
+      # dependency, with the workflow's token in the environment. Only two packages
+      # in the tree declare one - fsevents, which is macOS only, and esbuild, whose
+      # binary comes from the platform package @esbuild/linux-x64 rather than from
+      # its script. sharp and pagefind ship theirs as ordinary packages too, so
+      # nothing here needs a script to work: verified by installing this lock file
+      # with the flag and building the site from it.
       run: npm ci --ignore-scripts
 
     - name: Build the site
@@ -72,7 +101,6 @@ jobs:
         rsync -av --delete \
           --exclude '.git/' \
           --exclude 'apidocs/' \
-          --exclude 'presentation/' \
           --exclude '.well-known/' \
           owner-site/web/dist/ gh-pages/
 

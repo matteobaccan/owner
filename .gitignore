@@ -19,3 +19,7 @@ target/
 node_modules/
 owner-site/web/dist/
 owner-site/web/.astro/
+
+# The slide deck rendered into the site by the publish workflow; the source is
+# presentation/*.md and the built page is served from gh-pages.
+owner-site/web/public/presentation/
