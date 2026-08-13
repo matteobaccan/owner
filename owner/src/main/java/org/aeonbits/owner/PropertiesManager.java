@@ -109,6 +109,37 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     /** Whether the interface asked for its sources by name, rather than letting the default probe look. */
     private final boolean sourcesWereDeclared;
 
+    /**
+     * The name of the {@link Factory} property that turns this library's warnings into refusals:
+     * <code>owner.strict</code>, read when the Config object is created and kept for its life.
+     */
+    static final String STRICT = "owner.strict";
+
+    /**
+     * Whether this configuration refuses what it would otherwise only warn about.
+     * <p>
+     * The default is <b>off</b>, and off is the behaviour this library has always had: a source that
+     * cannot be read is passed over, the configuration carries on with what it did read and with its
+     * default values, and a warning says so. That is useful — a fallback is meant to work — but it means
+     * the way this library fails is to keep working and answer with a default, which is invisible until
+     * somebody notices the wrong value in production.
+     * </p>
+     * <p>
+     * Turned on, every warning that has a caller to refuse becomes an
+     * {@link UnsupportedOperationException} when the Config object is created. <b>What counts as a failure
+     * is not a new list</b>: it is the warnings, which were already chosen to leave the legitimate cases
+     * alone. A source that is merely absent stays silent under strict too, because
+     * {@link Config.LoadType#FIRST} expects misses by design and refusing them would break the commonest
+     * shape a configuration has.
+     * </p>
+     * <p>
+     * A reload that fails is deliberately outside this: it happens later, on a scheduled thread with
+     * nobody to refuse, and turning a transient failure into a crash is worse than the warning. The
+     * event API is where a reload problem is answered.
+     * </p>
+     */
+    private final boolean strict;
+
     /** Whether any source answered during the load now running; see {@link #reportIfNothingAnswered}. */
     private boolean somethingWasRead;
 
@@ -138,13 +169,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             });
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
-                      VariablesExpander expander, LoadersManager loaders, KeyPrefix keyPrefix,
+                      VariablesExpander expander, LoadersManager loaders, KeyPrefix keyPrefix, boolean strict,
                       Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.loaders = loaders;
         this.imports = imports;
         this.keyPrefix = keyPrefix;
+        this.strict = strict;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
         Sources declared = clazz.getAnnotation(Sources.class);
         uris = toURIs(declared, urlFactory);
@@ -709,8 +741,18 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             throw unsupported(failure, "%s: the source %s says it is required and could not be read",
                     clazz.getName(), hideCredentials(uri));
 
+        // ...and under owner.strict every source says it, except that a source which is merely absent is
+        // still passed over: see #strict
         if (wasSimplyAbsent(uri, failure))
             return;
+
+        if (strict)
+            throw unsupported(failure, "%s: the source %s was named and could not be read, and %s is on. "
+                            + "Read as it is written, the source is there and something else is wrong with "
+                            + "it - a permission, a directory where a file was meant, a server refusing. "
+                            + "Without %s this is a warning and the configuration goes on with its default "
+                            + "values.",
+                    clazz.getName(), hideCredentials(uri), STRICT, STRICT);
 
         String signature = failure.getClass().getName() + ": " + failure.getMessage();
         if (signature.equals(reportedFailures.get(uri)))
@@ -812,6 +854,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             reportedEmptyLoad = false;
             return;
         }
+        if (strict)
+            throw unsupported("%s: not one of the sources it declares could be read %s, and %s is on. A "
+                            + "path that is spelt wrong looks exactly like this. Without %s the "
+                            + "configuration holds its default values and nothing else, and says so as a "
+                            + "warning.",
+                    clazz.getName(), specsOf(uris), STRICT, STRICT);
+
         if (reportedEmptyLoad)
             return;
         reportedEmptyLoad = true;
@@ -819,6 +868,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 "%s: not one of the sources it declares could be read %s, so it holds its default values "
                         + "and nothing else. A path that is spelt wrong looks exactly like this.",
                 clazz.getName(), specsOf(uris)));
+    }
+
+    /** Whether this configuration refuses what it would otherwise warn about. See {@link #strict}. */
+    boolean isStrict() {
+        return strict;
     }
 
     private static String specsOf(List<URI> uris) {

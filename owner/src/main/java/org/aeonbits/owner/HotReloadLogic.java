@@ -24,6 +24,7 @@ import static org.aeonbits.owner.Config.HotReloadType.ASYNC;
 import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.util.Util.fileFromURI;
 import static org.aeonbits.owner.util.Util.hideCredentials;
+import static org.aeonbits.owner.util.Util.unsupported;
 import static org.aeonbits.owner.util.Util.now;
 import static org.aeonbits.owner.util.Util.system;
 import static org.aeonbits.owner.util.Util.unsupported;
@@ -205,6 +206,14 @@ class HotReloadLogic implements Serializable {
         List<String> named = new ArrayList<>();
         for (URI uri : unwatchable)
             named.add(hideCredentials(uri));
+
+        if (manager.isStrict())
+            throw unsupported("%s asks for hot reload, %d of its sources cannot be watched: %s, and %s is "
+                            + "on. Only a file and 'system:properties' can be watched. Without %s this is a "
+                            + "warning and those sources are simply never the reason a reload happens.",
+                    manager.configuredClass().getName(), unwatchable.size(), named,
+                    PropertiesManager.STRICT, PropertiesManager.STRICT);
+
         LOGGER.log(Level.WARNING, () -> String.format(
                 "%s asks for hot reload, and %d of its sources cannot be watched: %s. Only a file and "
                         + "'system:properties' can be, a change being something they can be asked about; a "

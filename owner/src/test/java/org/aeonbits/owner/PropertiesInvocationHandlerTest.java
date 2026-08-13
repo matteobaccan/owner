@@ -51,7 +51,7 @@ public class PropertiesInvocationHandlerTest {
 
     @Before
     public void before() {
-        loader = new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders, KeyPrefix.NONE);
+        loader = new PropertiesManager(Dummy.class, properties, scheduler, expander, loaders, KeyPrefix.NONE, false);
         handler = new PropertiesInvocationHandler(Dummy.class, loader, null);
     }
 

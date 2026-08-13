@@ -56,6 +56,12 @@ public interface Factory {
      *     interfaces that do not declare a {@link Config.Prefix} of their own.</li>
      *     <li><code>owner.key.prefix.from.package</code>: <code>true</code> derives that prefix from the
      *     package of the interface declaring the method, followed by a dot.</li>
+     *     <li><code>owner.strict</code>: <code>true</code> turns this library's warnings into refusals, so
+     *     that a configuration which would have carried on with its default values does not get created at
+     *     all. The default is <code>false</code>, which is how OWNER has always behaved. What it covers is
+     *     not a list of its own — it is the warnings, and those already leave the legitimate cases alone: a
+     *     source that is merely absent stays silent under it too, since
+     *     {@link Config.LoadType#FIRST} expects misses by design.</li>
      * </ul>
      * <p>
      * They are read when a Config object is created, and the object keeps them for the rest of its life.
