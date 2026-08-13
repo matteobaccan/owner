@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
 import static org.aeonbits.owner.util.Util.system;
+import static org.aeonbits.owner.util.Util.unsupported;
 
 /**
  * <p>
@@ -70,13 +71,29 @@ class StrSubstitutor implements Serializable {
     private final boolean nested;
 
     /**
+     * Whether an expression that resolves to nothing is refused rather than replaced by the empty string.
+     * See {@link #resolve}.
+     */
+    private final boolean strict;
+
+    /**
      * Creates a new instance and initializes it. Uses defaults for variable prefix and suffix and the escaping
      * character.
      *
      * @param values the variables' values, may be null
      */
     StrSubstitutor(Properties values) {
+        this(values, false);
+    }
+
+    /**
+     * @param values the variables' values, may be null
+     * @param strict <code>true</code> to refuse an expression that resolves to nothing, rather than
+     *               replacing it with the empty string. See <code>owner.strict</code> on {@link Factory}.
+     */
+    StrSubstitutor(Properties values, boolean strict) {
         this.values = values;
+        this.strict = strict;
         this.nested = !"false".equalsIgnoreCase(system().getProperty(NESTED_VARIABLE_EXPANSION));
     }
 
@@ -198,8 +215,19 @@ class StrSubstitutor implements Serializable {
                 return replace(value, resolving);
 
             int separator = expression.indexOf(DEFAULT_VALUE_SEPARATOR);
-            if (separator == -1)
+            if (separator == -1) {
+                // nothing to resolve it to and no default offered: the empty string is what this library
+                // has always answered, and it is also what a misspelt variable answers. Only a
+                // configuration that asked to be strict is told the two apart - see owner.strict
+                if (strict)
+                    throw unsupported("The variable ${%s} resolves to nothing: no property, no system "
+                                    + "property and no environment variable goes by that name, and no "
+                                    + "default value was written for it. Without %s this is the empty "
+                                    + "string, which is also what a misspelt name gives. Write ${%s:} if "
+                                    + "the empty string is what is meant.",
+                            expression, PropertiesManager.STRICT, expression);
                 return "";
+            }
 
             value = values.getProperty(expression.substring(0, separator));
             return (value != null) ? replace(value, resolving) : expression.substring(separator + 1);

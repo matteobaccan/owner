@@ -108,7 +108,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         this.ancestors = ancestors;
         this.defaultsRegistered = defaultsRegistered;
         delegates = findDelegates(manager, jmxSupport);
-        this.substitutor = new StrSubstitutor(manager.load());
+        this.substitutor = new StrSubstitutor(manager.load(), manager.isStrict());
         this.parameterized = new ConcurrentHashMap<>();
         this.children = NestedProperties.childrenOf(this, ancestors);
     }

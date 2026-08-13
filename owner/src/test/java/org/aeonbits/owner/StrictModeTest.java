@@ -143,6 +143,70 @@ public class StrictModeTest {
                 strictFactory().create(FallsBackToTheSecond.class).value());
     }
 
+    // ------------------------------------------- a variable that resolves to nothing
+
+    public interface ReadsAnUnsetVariable extends Config {
+        @DefaultValue("jdbc:h2:mem:${db.name}")
+        String url();
+    }
+
+    /**
+     * The oldest silence in the library, and the one strict was worth having for. An expression nothing
+     * resolves is replaced by the empty string, which is also exactly what a misspelt name gives — so
+     * <code>${db.nmae}</code> has always produced a value that looks almost right.
+     */
+    @Test
+    public void aVariableThatResolvesToNothingIsEmptyByDefaultAndARefusalUnderStrict() {
+        assertEquals("by default it is the empty string", "jdbc:h2:mem:",
+                ConfigFactory.newInstance().create(ReadsAnUnsetVariable.class).url());
+
+        try {
+            strictFactory().create(ReadsAnUnsetVariable.class).url();
+            fail("expected the unresolvable variable to be refused");
+        } catch (UnsupportedOperationException refused) {
+            assertTrue(refused.getMessage(), refused.getMessage().contains("db.name"));
+            assertTrue(refused.getMessage(), refused.getMessage().contains("owner.strict"));
+        }
+    }
+
+    public interface SaysItMeansEmpty extends Config {
+        @DefaultValue("jdbc:h2:mem:${db.name:}")
+        String url();
+    }
+
+    /**
+     * The way to mean it: a default value that is itself empty. Strict refuses the variable nobody wrote a
+     * default for, not the one whose default happens to be nothing.
+     */
+    @Test
+    public void anExplicitlyEmptyDefaultIsNotARefusal() {
+        assertEquals("jdbc:h2:mem:", strictFactory().create(SaysItMeansEmpty.class).url());
+    }
+
+    @Config.Sources("file:${owner.strict.test.home}/app.properties")
+    public interface ExpandsItsSourceSpec extends Config {
+        @DefaultValue("fallback")
+        String value();
+    }
+
+    /**
+     * The same rule where it bites hardest: a <code>@Sources</code> spec is expanded before there is a
+     * Config object at all, so an unset variable there turns <code>file:${app.home}/app.properties</code>
+     * into <code>file:/app.properties</code> and the configuration then holds nothing but its defaults.
+     */
+    @Test
+    public void anUnsetVariableInASourceSpecIsARefusalUnderStrict() {
+        assertEquals("by default the spec expands to nonsense and the defaults answer",
+                "fallback", ConfigFactory.newInstance().create(ExpandsItsSourceSpec.class).value());
+
+        try {
+            strictFactory().create(ExpandsItsSourceSpec.class);
+            fail("expected the unresolvable variable in the spec to be refused");
+        } catch (UnsupportedOperationException refused) {
+            assertTrue(refused.getMessage(), refused.getMessage().contains("owner.strict.test.home"));
+        }
+    }
+
     public interface NoSourcesAtAll extends Config {
         @DefaultValue("all defaults")
         String value();
