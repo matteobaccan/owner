@@ -335,6 +335,10 @@ complex things should be possible."*
 | Sensitive values — `@Sensitive` | 2.0.0 |
 | `Optional` and `Map` return types | 2.0.0 |
 | `.env` files, and options on a source | 2.0.0 |
+| Nested configuration interfaces | 2.0.0 |
+| INI, JSON, YAML, TOML — `owner-formats` | 2.0.0 |
+| Where a value came from — `Traceable` | 2.0.0 |
+| Diagnostics, and `owner.strict` | 2.0.0 |
 
 The rest of this deck is the 2014 talk; the last section covers 2.0.0.
 
@@ -1329,9 +1333,11 @@ public interface SampleConfig extends Config {
 
 - **Java 8 is the minimum runtime.** `owner-java8` and `owner-java8-extras` are gone: `default` methods, `DurationConverter`, `ByteSize` are all in the core `owner` artifact now.
 - **New annotations:** `@Prefix`, `@Mandatory`, `@Sensitive`, `@CollectionConverterClass`, `@DefaultValue(useOnEmpty = true)`.
-- **New return types:** `Optional<T>`, and `Map` — which used to throw on every access.
-- **New format:** `.env`, read by a parser of ours, so the core still has **no dependencies**.
-- **Three behaviour changes** that earned the major number.
+- **New return types:** `Optional<T>`, `Map`— which used to throw on every access — and **a nested interface**, for a configuration that is not flat.
+- **New formats:** `.env` in the core, and INI, JSON, YAML, TOML in `owner-formats`. Every parser written by hand, so the core still has **no dependencies**.
+- **New interface:** `Traceable`, which says where a value came from.
+- **It stopped failing in silence:** warnings where there were none, and `owner.strict` to refuse instead.
+- **A handful of behaviour changes** that earned the major number.
 
 ---
 
@@ -1627,6 +1633,174 @@ Declared there, a loader is picked up when a factory is created — no `register
 
 ---
 
+# Nested configuration
+
+A configuration is rarely flat, and since 2.0.0 an interface can have the shape the file has.
+
+<div class="columns">
+<div>
+
+```properties
+server.host=localhost
+server.port=8080
+```
+
+```java
+public interface AppConfig extends Config {
+    ServerConfig server();
+}
+
+public interface ServerConfig extends Config {
+    String host();
+    int port();
+}
+```
+
+The section shares its parent's sources, its reload and its listeners — it is a **view**, not a copy.
+
+</div>
+<div>
+
+<p class="step">four shapes, one convention</p>
+
+```properties
+servers[0].host=alpha     # a list
+servers.beta.host=beta    # a map
+```
+
+```java
+List<ServerConfig> servers();
+Map<String, ServerConfig> servers();
+
+@Key("servers.%s")
+ServerConfig server(String name);
+```
+
+Which closes requests open since 2013 and 2015 — and reads an XML tree end to end, because that is the shape every tree-structured format flattens to.
+
+</div>
+</div>
+
+---
+
+<!-- _class: tight -->
+
+# Four more formats, still no dependencies
+
+`.env` in the core; **INI, JSON, YAML and TOML** in a new `owner-formats` artifact — every parser written by hand.
+
+<div class="columns">
+<div>
+
+```java
+@Sources("classpath:app.yaml")
+public interface AppConfig extends Config {
+    ServerConfig server();
+}
+```
+
+```yaml
+server:
+  host: localhost
+  port: 8080
+```
+
+They flatten to the same keys nesting reads, so a format is a way of writing the file and nothing more.
+
+</div>
+<div>
+
+<p class="step">a documented subset, refused by name</p>
+
+The YAML parser is ~450 lines rather than 5000: anchors, aliases, merge keys, tags and a second document are **refused, naming the line**, instead of half-supported.
+
+The Norway problem never arises — the literal scalar is kept and the **interface** declares the type.
+
+A repeated key is a **list**, because that is already what a repeated XML element is here.
+
+</div>
+</div>
+
+---
+
+# Where did this value come from?
+
+<div class="columns">
+<div>
+
+```java
+interface AppConfig extends Config, Traceable {
+    int port();
+}
+```
+
+```java
+cfg.originOf("port").kind();     // SOURCE
+cfg.originOf("port").source();   // file:app.properties
+```
+
+A merge is exactly what makes a value indistinguishable from the one it overwrote and from a default. `Traceable` keeps the distinction that the merged properties can no longer make.
+
+</div>
+<div>
+
+<p class="step">what it was asked for</p>
+
+```java
+Properties mine = new Properties();
+for (Map.Entry<String, Origin> e : cfg.origins().entrySet())
+    if ("file:app.properties".equals(e.getValue().source()))
+        mine.setProperty(e.getKey(),
+                cfg.getRawProperty(e.getKey()));
+```
+
+Saving back **only what you own**, instead of writing the whole environment into your configuration file.
+
+A source never carries its credentials into an origin: `https://***@config/app.properties`.
+
+</div>
+</div>
+
+---
+
+<!-- _class: tight -->
+
+# It works and it lies
+
+OWNER's way of failing is to keep working: a source that cannot be read is passed over, the object is built out of defaults, and the caller gets something that answers every question. That is a fallback doing its job — and it is also what a misspelt path looks like.
+
+<div class="columns">
+<div>
+
+<p class="step">2.0.0 says what happened</p>
+
+- a source **named** and unreadable
+- **not one** declared source readable
+- `@HotReload` over what cannot be watched
+- a value built out of an **encrypted** one
+- and, at `CONFIG`, what was *decided*: which sources, which loader, which key each method reads
+
+Never a value: that is what `@Sensitive` is for. And said **once** — a hot reload runs the load again at its interval.
+
+</div>
+<div>
+
+<p class="step">or refuses outright</p>
+
+```java
+Factory f = ConfigFactory.newInstance();
+f.setProperty("owner.strict", "true");
+```
+
+Every warning becomes a refusal when the object is created.
+
+**What counts as a failure is not a list of its own — it is the warnings**, which already leave the legitimate cases alone. A source that is merely absent stays silent under strict too: `LoadType.FIRST` expects misses by design.
+
+</div>
+</div>
+
+---
+
 # The smaller things that add up
 
 - **`java.time.Duration` is converted out of the box**, like a `File` or a `URL`.
@@ -1635,6 +1809,7 @@ Declared there, a loader is picked up when a factory is created — no `register
 - **`@DefaultValue(useOnEmpty = true)`** — for the value left empty by a template, as in `port=${PORT}` with `PORT` unset. Opt-in and per method: an empty value falls back on the default, while a value that is *wrong* keeps failing.
 - **`@CollectionConverterClass`** hands the raw value to a single converter instead of tokenizing first.
 - **`Accessible.store(Writer, String)`**, mirroring `Properties.store(Writer, String)`.
+- **`Accessible.getRawProperty(key)`** — the value as it was written, for whatever is on its way back to a file.
 - The jars declare an `Automatic-Module-Name`.
 
 ---
@@ -1643,14 +1818,25 @@ Declared there, a loader is picked up when a factory is created — no `register
 
 # Why the major number
 
-Everything else is additive. Three changes alter the result of a configuration that used to work, and a patch number would have been a quiet place to put them.
+Everything else is additive. Four changes alter the result of a configuration that used to work, and a patch number would have been a quiet place to put them. Two are about variables:
 
 - **Braces are matched, not counted from the left.** Up to 1.0.12 a `${` was closed by the first `}` that followed it; now by the one that matches it, which is what makes **nested variables** possible.
   `-Downer.nested.variable.expansion=false` restores the old behaviour for the whole JVM.
 
 - **A circular variable reference is an error.** It used to exhaust the stack, or — for `a=${a:default}` — to produce an empty string. Now it throws, naming the chain. No cycle ever produced a useful value, but a configuration that quietly resolved to `""` will now fail loudly, which is the point.
 
+---
+
+<!-- _class: tight -->
+
+# Why the major number — the other two
+
+- **`getProperty` and `fill` expand the variables now.** They returned the text as written, so the same property answered two ways depending on whether it was read through its method or by name — which somebody reported in 2022, and worked around by reaching our private substitutor field with reflection.
+  The line is drawn where the value is **going**: what writes the properties out — `list`, `store`, `storeToXML` — still leaves them exactly as written, because what goes out has to be able to come back. `getRawProperty` is the old behaviour under a name that says what it does.
+
 - **Repeated sibling elements in an XML source are numbered.** Two elements of the same name under the same parent used to write the same key, so every value but the last was lost without a word. They now become `parent.tag[0]` and `parent.tag[1]` — which is what a list is read from. An element occurring once keeps its plain key.
+
+`Accessible` also gains two abstract methods, so an implementation of it written by hand needs them — the interface is meant for the proxy, but it is a public type and that is a break like any other.
 
 ---
 
@@ -1684,7 +1870,7 @@ Everything else is additive. Three changes alter the result of a configuration t
 | Variable Expansion in `@Key` | ✔ since 1.0.6 |
 | JMX bean | ✔ every `Config` is a `DynamicMBean` |
 | Singleton mechanism | ✔ `ConfigCache` |
-| More file formats | ~ `.env` in the core; INI, JSON, YAML, HOCON still open |
+| More file formats | ✔ `.env` in the core; INI, JSON, YAML, TOML in `owner-formats` — HOCON still open |
 | Validation | - still open |
 
 Arrived without being asked for: `@Prefix`, Preprocessors, `@Sensitive` masking, transactional event listeners.
