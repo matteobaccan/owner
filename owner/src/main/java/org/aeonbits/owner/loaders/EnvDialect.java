@@ -86,13 +86,21 @@ public final class EnvDialect implements Serializable {
             .withEscapesExpanded(true)
             .withInlineComments(true);
 
+    /** The name this dialect goes by, used by the messages that have to say which rules were in force. */
     private final String name;
+    /** @see #isQuotesStripped() */
     private final boolean quotesStripped;
+    /** @see #isEscapesExpanded() */
     private final boolean escapesExpanded;
+    /** @see #isExportPrefixStripped() */
     private final boolean exportPrefixStripped;
+    /** @see #isInlineComments() */
     private final boolean inlineComments;
+    /** @see #isMultilineValues() */
     private final boolean multilineValues;
+    /** @see #isLineContinuation() */
     private final boolean lineContinuation;
+    /** @see #bareNames() */
     private final BareNames bareNames;
 
     private EnvDialect(String name, boolean quotesStripped, boolean escapesExpanded, boolean exportPrefixStripped,

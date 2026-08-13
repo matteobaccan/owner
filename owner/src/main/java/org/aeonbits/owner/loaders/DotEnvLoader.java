@@ -90,6 +90,7 @@ public class DotEnvLoader implements Loader {
      */
     private static final String DIALECT = "dialect";
 
+    /** The rules this loader reads by, fixed when it is created and overridable on a single source. */
     private final EnvDialect dialect;
 
     /** Creates a loader reading in the {@link EnvDialect#DOCKER} dialect. */

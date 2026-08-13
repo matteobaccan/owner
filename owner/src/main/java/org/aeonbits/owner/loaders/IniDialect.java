@@ -150,16 +150,27 @@ public final class IniDialect implements Serializable {
             .withDefaultSectionInherited(true)
             .withInterpolationRefused(true);
 
+    /** The name this dialect goes by, used by the messages that have to say which rules were in force. */
     private final String name;
+    /** @see #separator() */
     private final Separator separator;
+    /** @see #duplicates() */
     private final Duplicates duplicates;
+    /** @see #keyCase() */
     private final KeyCase keyCase;
+    /** @see #bareKeys() */
     private final BareKeys bareKeys;
+    /** @see #quotes() */
     private final Quotes quotes;
+    /** @see #continuation() */
     private final Continuation continuation;
+    /** @see #isInlineComments() */
     private final boolean inlineComments;
+    /** @see #isSubsections() */
     private final boolean subsections;
+    /** @see #isDefaultSectionInherited() */
     private final boolean defaultSectionInherited;
+    /** @see #isInterpolationRefused() */
     private final boolean interpolationRefused;
 
     private IniDialect(String name, Separator separator, Duplicates duplicates, KeyCase keyCase,
@@ -316,7 +327,7 @@ public final class IniDialect implements Serializable {
                 subsections, defaultSectionInherited, value);
     }
 
-    /** The name of this dialect, for a message that has to say which rules were in force. */
+    /** @return the name of this dialect, for a message that has to say which rules were in force. */
     public String name() {
         return name;
     }

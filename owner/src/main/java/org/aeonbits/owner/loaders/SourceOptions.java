@@ -124,7 +124,7 @@ public final class SourceOptions {
         return new SourceOptions(uri, parse(fragment, uri));
     }
 
-    /** Whether the source carries no option at all. */
+    /** @return whether the source carries no option at all. */
     public boolean isEmpty() {
         return options.isEmpty();
     }
@@ -269,7 +269,7 @@ public final class SourceOptions {
             this.setting = setting;
         }
 
-        /** The option name, trimmed and lower case, since a name is a keyword. */
+        /** @return the option name, trimmed and lower case, since a name is a keyword. */
         public String name() {
             return name;
         }
@@ -279,6 +279,8 @@ public final class SourceOptions {
          * decoding. Decoding would have to happen before the pairs are split, so a <code>%26</code> inside a
          * setting would turn into a separator and silently split one option into two. A loader whose setting
          * is a keyword folds the case itself.
+         *
+         * @return the setting, as written.
          */
         public String setting() {
             return setting;

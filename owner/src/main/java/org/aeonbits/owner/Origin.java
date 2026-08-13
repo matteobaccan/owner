@@ -59,7 +59,9 @@ public final class Origin implements Serializable {
         RUNTIME
     }
 
+    /** @see #kind() */
     private final Kind kind;
+    /** @see #source() */
     private final String source;
 
     private Origin(Kind kind, String source) {

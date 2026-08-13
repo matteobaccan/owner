@@ -43,7 +43,9 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /** The size as written, in {@link #unit}: the exact number, before any rounding to whole bytes. */
     private final BigDecimal value;
+    /** The unit {@link #value} is expressed in, which is also the one {@link #toString()} writes back. */
     private final ByteSizeUnit unit;
 
     /**
@@ -313,6 +315,10 @@ public final class ByteSize implements Comparable<ByteSize>, Serializable {
      * Deserialization builds an instance without running any constructor, so the check that rejects a
      * missing part has to be made again here: a stream is an input like any other, and one that does not
      * describe a byte size is refused rather than turned into an object that fails later.
+     *
+     * @param in the stream being read.
+     * @throws IOException if the stream cannot be read, or does not describe a byte size.
+     * @throws ClassNotFoundException if a class named by the stream cannot be found.
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
