@@ -66,10 +66,16 @@ jobs:
       run: npm install --no-save --ignore-scripts --no-audit --no-fund @marp-team/marp-cli@4.5.0
 
     - name: Render the decks into the site
+      # The binary installed by the step above, called directly rather than through
+      # npx. npx would run the same renderer here, but it can also fetch a package
+      # on demand - unpinned, and running the lifecycle scripts the step above takes
+      # care to skip - so the one path that could undo that precaution is closed
+      # rather than merely unused. Code scanning reported it as S6505 and S8543.
+      #
       # public/ is copied into the build verbatim, so the deck arrives in dist/ as
       # an ordinary asset and is covered by the external-reference check below
       # without a step of its own.
-      run: npx marp --input-dir presentation --output owner-site/web/public/presentation --html
+      run: ./node_modules/.bin/marp --input-dir presentation --output owner-site/web/public/presentation --html
 
     - name: Install dependencies
       working-directory: owner-site/web
