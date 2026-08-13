@@ -93,23 +93,67 @@ construction, and no way to reach a weaker one by leaving something out.
 The design
 ----------
 
-### The token
+### The form: a marker, with the token inside it
 
-One base64 string, so that a value in a properties file stays a single unquoted token:
+**Amended 2026-08-13, before anything was built.** This section first proposed a value prefix,
+`ENC:1:<base64>`, and called it and the `${$handler::…}` marker of `TODO.md` two ways of saying the
+same thing. They are not, and the difference is the whole design:
+
+- **A prefix is the format of the cipher text.** It makes the cipher text self-describing and leaves
+  decryption exactly where it is — chosen by `@EncryptedValue`, on a method. It therefore fixes
+  neither #285 nor a value that refers to an encrypted one.
+- **A marker is where decryption is decided**, moved out of the declaration and into the value.
+
+So the question was never which of the two. It is whether the token belongs *inside* the marker, and
+it does — minus one thing:
 
 ```
-ENC:1:<base64 of  salt(16) ‖ iv(12) ‖ ciphertext ‖ tag(16)>
+${$aes-gcm::<base64 of  salt(16) ‖ iv(12) ‖ ciphertext ‖ tag(16)>}
 ```
 
-- **A scheme number**, `1`. It costs two characters now and is what lets a second scheme — an
-  asymmetric one, a different KDF, a changed iteration count — be added later without ambiguity and
-  without a flag day: a decryptor reads the number and dispatches, and an unknown number is refused
-  by name rather than mis-parsed. This is the same instinct as refusing a keyed nested section:
-  **the decision that can be taken back**.
-- **Salt and IV travel with the value.** Nothing else to configure, nothing to keep in step, and no
-  second property to lose.
-- The prefix also makes an encrypted value **recognisable on sight**, which matters for the warning
-  described in `TODO.md` and for anybody reading the file.
+**The scheme number is gone, because the handler name is the scheme identifier.** `aes-gcm` is what
+scheme `1` was going to be; an asymmetric one is `${$rsa::…}` — a different name, not a different
+number. That removes a registry we would have had to own and hand out: a third party shipping a
+cipher would have to ask us for a number, or take one and collide. A name has no such problem, which
+is the same reason loaders are found by class and formats by extension rather than by an integer we
+assign.
+
+What the marker settles by construction, rather than by a second mechanism:
+
+| | why |
+|---|---|
+| **#285**, `fill()` does not decrypt | the marker *is* expansion, and `fill` expands since 2.0.0 |
+| a value that refers to an encrypted one | `crypto.password=${$aes-gcm::…}` and `jdbc.url=…${crypto.password}`: expansion recurses into the value |
+| the round trip of `store()` | the properties hold the marker text, so `store` writes the marker back |
+| `@Sensitive` | a marker in a listing is unreadable already |
+
+**Probed on 2026-08-13, against the parser as it stands**, since all of this rests on the expression
+surviving intact:
+
+```
+${$aes-gcm::k7Hn+/x=}               reaches resolve() whole — base64's + / = are safe
+${$vault::secret/data/app:v2}       colons in the payload survive
+…password=${$aes-gcm::k7Hn+/x=}&z=1 substitutes inline
+${$${env}::inner}  with env=aes-gcm resolves — the handler name may itself be a variable
+${$aes-gcm::has}brace}              BREAKS — } is the one character a payload may not hold
+```
+
+The last line is the only constraint the format has to respect, and base64 never produces a `}`. The
+fourth is a free property worth keeping in mind: a name that is itself a variable is one way a key
+rotation could be driven from outside the file.
+
+### What it does not settle
+
+`@EncryptedValue` and `@DecryptorClass` **stay**, for everybody who already has them, with the
+limitations they have and the warning 2.0.0 now gives about the referring case. Two mechanisms
+coexist, which is the cost of not breaking anybody, and it is the same cost SmallRye pays.
+
+One conflict has to be closed with them: **a method carrying `@EncryptedValue` whose value is a
+marker.** Expansion runs before `decryptIfNecessary`, so the marker would yield plain text and the
+decryptor would then be handed plain text to decrypt. The two say the opposite of each other and
+should be **refused together**, the way `@Mandatory` and `Optional` on one method are. It is
+computable when the configuration is created: the keys carrying `@EncryptedValue` are already
+collected in a set, and a value beginning `${$` is visible.
 
 ### The construction
 
@@ -205,11 +249,22 @@ Open questions
    is.
 4. **Does `StandardEncryptor` stay in the test suite** as a demonstration of the SPI, clearly labelled
    as not a cipher to use, or does it go?
-5. **The relationship with the value-level marker.** `TODO.md` records the idea of `${$handler::…}`,
-   which would make decryption part of the expansion and fix the referring-value defect. The token
-   designed here and that marker are two ways of saying the same thing, and they should not both
-   exist in different shapes. Decide which is the form before either is built.
+5. ~~**The relationship with the value-level marker.**~~ Answered — see below.
 6. **Whether the warning about a weak construction is ours to give.** A decryptor somebody wrote
    themselves may be anything, and we cannot inspect it. But an `@EncryptedValue` property whose
-   value does not carry a scheme prefix is at least *not* using what we ship, which is something we
-   could say once at `CONFIG`. It may also be noise.
+   value is not a marker is at least *not* using what we ship, which is something we could say once
+   at `CONFIG`. It may also be noise.
+7. **Where a handler is registered, and what a name may be.** The loaders are the precedent —
+   `registerLoader(new DotEnvLoader(dialect))` on the factory, plus `ServiceLoader` discovery — and
+   registering a *configured instance* is also what dissolves the question of where the passphrase
+   comes from: the caller brings it. Left to decide: whether discovery applies to handlers at all
+   (a cipher found on the classpath and silently enabled is a different proposition from a file
+   format), and what shape a name may take, since it has to be told apart from an ordinary key.
+8. **What an unknown handler does.** Settled in principle on 2026-08-13 and recorded in `TODO.md`:
+   an expression beginning `$` and containing `::` **is** a handler reference, and one naming a
+   handler that is not registered is an error rather than a fallback — otherwise a misspelt name
+   resolves to the empty string, which for a password is the worst answer available. What is left is
+   where that refusal is raised and what it says.
+
+Question 5 was **answered on 2026-08-13** and is folded into the design above: the marker is the
+form, the token is what goes inside it, and the scheme number is gone.

@@ -358,6 +358,30 @@ an issue behind it, which is the point: what the others shipped is what our repo
       is no public way to ask a nested object for its own path — `KeyPrefix` is package-private — so a
       section reached through a list or through an accessor taking arguments has a path only the caller can
       reconstruct. That is the gap this would close, and the argument for doing it one day.
+- [ ] **Ship a cipher, and a marker that says a value is one.** `CRYPTO.md` holds the whole analysis —
+      what `@EncryptedValue` is worth today, what the field does, the design and the open questions.
+      The short version: **the library ships no cipher at all.** `org.aeonbits.owner.crypto` is an SPI
+      and a no-op; the only concrete implementation lives in the test suite, and `crypto.md` reproduces
+      its source for the reader to copy — so that class is what people run. It is AES/ECB with the
+      passphrase used as the raw key, which was probed rather than assumed: the same plaintext gives
+      the same cipher text every time, so a file discloses which secrets are equal.
+      The form was settled on 2026-08-13: **`${$aes-gcm::<base64>}`**, a marker resolved by the
+      substitutor through a handler registered by **name** — the name being the scheme identifier, so
+      there is no registry of numbers for us to own. Inside it, AES-256/GCM with a random IV per value
+      and PBKDF2 over a passphrase of any length, salt and IV travelling in the token. It goes in the
+      core, since AES-GCM and PBKDF2 are in the JDK and the no-dependency rule does not bite.
+      Being expansion, it settles by construction what two open issues ask for:
+      [#285](https://github.com/matteobaccan/owner/issues/285) (`fill()` does not decrypt) and the
+      decryptor half of [#287](https://github.com/matteobaccan/owner/issues/287) (a value that refers
+      to an encrypted one gets the cipher text — which 2.0.0 warns about and `owner.strict` refuses,
+      but does not cure). The converter half of #287 cannot be cured at all: a converter answers with a
+      typed object and there is no room for one inside a string.
+      Two rules already decided and not to be re-derived: an expression beginning `$` and containing
+      `::` **is** a handler reference, and an unregistered name is an **error** rather than a fallback,
+      because a misspelt handler would otherwise resolve to the empty string — the worst possible
+      answer for a password; and `@EncryptedValue` on a method whose value is a marker is a
+      contradiction to be **refused**, since expansion runs first and the decryptor would be handed
+      plain text.
 - [ ] **A composite object of a type we cannot proxy** — [#72](https://github.com/matteobaccan/owner/issues/72),
       which this file wrongly listed as answered by the nested interfaces until it was read on 2026-08-12.
       It is not. The request is `DataSource getDataSource()`, assembled by a provider class out of several
