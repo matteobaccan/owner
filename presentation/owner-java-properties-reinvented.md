@@ -162,10 +162,10 @@ https://matteobaccan.github.io/owner
 
 </div>
 
-☢️ This presentation contains source code.
+This presentation contains source code.
 Non technical people may experience confusional states, dizziness, sleepiness and fainting.
 
-⚠️ The author is not good in putting colors together.
+The author is not good in putting colors together.
 
 ---
 
@@ -1680,12 +1680,12 @@ Everything else is additive. Three changes alter the result of a configuration t
 
 | 2014 | today |
 |---|---|
-| Encryptable Properties | ✅ `@EncryptedValue`, since 1.0.10 |
-| Variable Expansion in `@Key` | ✅ since 1.0.6 |
-| JMX bean | ✅ every `Config` is a `DynamicMBean` |
-| Singleton mechanism | ✅ `ConfigCache` |
-| More file formats | 🟡 `.env` in the core; INI, JSON, YAML, HOCON still open |
-| Validation | ⬜ still open |
+| Encryptable Properties | ✔ `@EncryptedValue`, since 1.0.10 |
+| Variable Expansion in `@Key` | ✔ since 1.0.6 |
+| JMX bean | ✔ every `Config` is a `DynamicMBean` |
+| Singleton mechanism | ✔ `ConfigCache` |
+| More file formats | ~ `.env` in the core; INI, JSON, YAML, HOCON still open |
+| Validation | - still open |
 
 Arrived without being asked for: `@Prefix`, Preprocessors, `@Sensitive` masking, transactional event listeners.
 

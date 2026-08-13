@@ -1,0 +1,82 @@
+name: Publish presentation
+
+# Renders the Marp decks under presentation/ to self-contained HTML and publishes
+# them on the gh-pages branch, from which GitHub Pages serves
+# https://matteobaccan.github.io/owner/presentation/
+#
+# HTML and not PDF: the deck is meant to be read, and a page you can arrow through
+# in the browser beats a download. It also keeps the markdown the single source -
+# nothing is committed twice - and it costs no browser, since only printing needs
+# one. The generated file carries its own CSS and its own navigation script inline.
+#
+# The output is not committed to master. It is a build artifact, it changes
+# wholesale on every edit of the deck, and a generated file does not belong in the
+# branch that holds the sources. It sits next to apidocs/ on gh-pages for the same
+# reason the Javadoc does, and site.yml excludes both directories from the
+# rsync --delete that keeps the published site in step with its sources.
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'presentation/**'
+      - '.github/workflows/presentation.yml'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v7
+
+    - name: Set up Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24
+
+    - name: Install Marp
+      # --ignore-scripts for the reason site.yml gives: a lifecycle script runs
+      # arbitrary code from a transitive dependency with this workflow's token in
+      # the environment. Verified that the renderer works when installed this way.
+      # The version is pinned, as every other version in this repository is.
+      run: npm install --no-save --ignore-scripts --no-audit --no-fund @marp-team/marp-cli@4.5.0
+
+    - name: Render the decks
+      run: npx marp --input-dir presentation --output out --html
+
+    - name: Check that nothing is loaded from an external host
+      # The site guards itself with this script; the deck is published to the same
+      # domain and must be held to the same rule, or it becomes the one page that
+      # gets to phone home. It is not a hypothetical: Marp turns emoji into <img>
+      # tags pointing at a CDN, which is exactly what this caught the first time.
+      run: node owner-site/web/scripts/check-external-references.mjs out matteobaccan.github.io
+
+    - name: Checkout gh-pages
+      uses: actions/checkout@v7
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Put the decks on the branch
+      run: |
+        mkdir -p gh-pages/presentation
+        cp out/*.html gh-pages/presentation/
+
+    - name: Commit and push
+      working-directory: gh-pages
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A presentation
+        if git diff --cached --quiet; then
+          echo "No changes to publish"
+        else
+          git commit -m "Publish presentation from ${GITHUB_SHA}"
+          git push origin gh-pages
+        fi

@@ -16,7 +16,10 @@ INTRODUCTION
 The goal of OWNER API is to minimize the code required to handle
 application configuration through Java properties files.
 
-Full documentation available on [project website][website].
+**In a hurry?** The [slide deck][presentation] is the whole library in one
+pass — what it does, what it looks like, and what is new in 2.0.0 — without
+reading the documentation. It opens in the browser; use the arrow keys. Full
+documentation is on the [project website][website].
 
 BASIC USAGE
 -----------
@@ -81,6 +84,7 @@ Chinese documentation is provided by [Yunfeng Cheng](https://github.com/cyfonly)
 [this address][chinese-docs].
 
   [website]: https://matteobaccan.github.io/owner
+  [presentation]: https://matteobaccan.github.io/owner/presentation/owner-java-properties-reinvented.html
   [chinese-docs]: https://github.com/cyfonly/owner-doc
 
 QUESTIONS AND DOCUMENTATION

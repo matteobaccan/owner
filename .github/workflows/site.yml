@@ -9,9 +9,10 @@ name: Publish site
 # branch forever. Two directories are excluded from that deletion because they
 # are not ours to manage and cannot be regenerated from this build:
 #
-#   apidocs/     the Javadoc, published separately by `ant javadoc publish`
-#   .well-known/ holds brave-rewards-verification.txt; deleting it silently
-#                breaks the verification
+#   apidocs/      the Javadoc, published separately by `ant javadoc publish`
+#   presentation/ the slide deck as HTML, published by presentation.yml
+#   .well-known/  holds brave-rewards-verification.txt; deleting it silently
+#                 breaks the verification
 #
 # The build also refuses to publish anything that would load a resource from an
 # external host — see owner-site/web/scripts/check-external-references.mjs.
@@ -71,6 +72,7 @@ jobs:
         rsync -av --delete \
           --exclude '.git/' \
           --exclude 'apidocs/' \
+          --exclude 'presentation/' \
           --exclude '.well-known/' \
           owner-site/web/dist/ gh-pages/
 
