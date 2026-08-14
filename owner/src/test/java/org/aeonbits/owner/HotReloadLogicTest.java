@@ -8,7 +8,9 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.HotReload;
+import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.util.LogCapture;
+import org.aeonbits.owner.util.SystemProviderForTest;
 import org.aeonbits.owner.util.TimeProviderForTest;
 import org.aeonbits.owner.util.UtilTest;
 import org.junit.After;
@@ -29,6 +31,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +87,66 @@ public class HotReloadLogicTest {
         time.elapse(10, SECONDS);   // make the hot reload interval of 5 seconds expire.
         logic.checkAndReload();
         verify(manager, never()).reload();
+    }
+
+    @Sources("system:properties")
+    @HotReload(5)
+    interface WatchingSystemProperties extends Config {
+    }
+
+    /**
+     * One change of the system properties is one reload, and a check that follows with nothing changed is
+     * not another — which is what <a href="https://github.com/matteobaccan/owner/issues/278">#278</a>
+     * reported and what the surrounding tests could not see.
+     * <p>
+     * The report was precise: the hash of the system properties was computed on every check and never
+     * stored, so after the first change every later check compared against the hash taken when the
+     * configuration was created and answered "changed" forever. Nothing was <em>missed</em> by that — the
+     * values did arrive — so a test asserting that a new value is picked up passes either way, which is
+     * why {@code SystemPropertiesReloadTest} did not catch it. What was wrong was the cost: a reload at
+     * every interval, for the life of the process, after any single change.
+     * </p>
+     * <p>
+     * So this asserts the count and not the value, and it asserts it with time under the test's control
+     * rather than with a wait.
+     * </p>
+     */
+    @Test
+    public void oneChangeOfTheSystemPropertiesIsOneReload() throws Exception {
+        SystemProviderForTest systemForTest =
+                new SystemProviderForTest(new Properties(), new java.util.HashMap<>());
+        Object save = UtilTest.setSystem(systemForTest);
+        try {
+            PropertiesManager manager = managerOf(WatchingSystemProperties.class);
+            HotReload hotReload = WatchingSystemProperties.class.getAnnotation(HotReload.class);
+            HotReloadLogic logic = new HotReloadLogic(hotReload, SECONDS.toMillis(5),
+                    singletonList(new URI("system:properties")), manager);
+
+            // nothing has changed yet, so an expired interval is still not a reload
+            time.elapse(10, SECONDS);
+            logic.checkAndReload();
+            verify(manager, never()).reload();
+
+            systemForTest.setProperty("someValue", "20");
+            time.elapse(10, SECONDS);
+            logic.checkAndReload();
+            verify(manager, times(1)).reload();
+
+            // and now the part that was broken: nothing changed since, so nothing reloads
+            time.elapse(10, SECONDS);
+            logic.checkAndReload();
+            time.elapse(10, SECONDS);
+            logic.checkAndReload();
+            verify(manager, times(1)).reload();
+
+            // a second change is a second reload, so the watch is still watching
+            systemForTest.setProperty("someValue", "30");
+            time.elapse(10, SECONDS);
+            logic.checkAndReload();
+            verify(manager, times(2)).reload();
+        } finally {
+            UtilTest.setSystem(save);
+        }
     }
 
     private List<?> watchableResourcesOf(HotReloadLogic logic) throws Exception {
