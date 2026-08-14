@@ -111,10 +111,15 @@
             <version>6.0.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- Apache BVal 2 and NOT 3, and this is a version that must not be bumped: 2.x serves
+             javax.validation and 3.x serves jakarta.validation, which is the whole reason this
+             dependency is here. Renovate raised it to 3.1.0 on 14 August 2026 and the build went red
+             within the minute - two jakarta providers on one class path and nothing left testing the
+             javax half. There is a rule in renovate.json to stop it happening again. -->
         <dependency>
             <groupId>org.apache.bval</groupId>
             <artifactId>bval-jsr</artifactId>
-            <version>3.1.0</version>
+            <version>2.0.6</version>
             <scope>test</scope>
         </dependency>
         <!-- declared by BVal as provided, which means the user has to bring it -->
