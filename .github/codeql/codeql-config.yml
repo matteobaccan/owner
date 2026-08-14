@@ -1,0 +1,22 @@
+name: "OWNER CodeQL configuration"
+
+queries:
+  - uses: security-and-quality
+
+# The test sources are not scanned.
+#
+# They are not shipped: nothing in src/test/java reaches the jar, so a finding
+# there is not a finding in the product. What it is instead is a finding about a
+# test, and a test's job is regularly to do the wrong thing on purpose - the
+# clearest case being RsaHandlerTest, which generates a 1024-bit RSA key so that
+# it can check the handler refuses one. Scanned, that is a high-severity alert
+# for code whose only reason to exist is to prove the weakness is rejected.
+#
+# The cost of leaving such alerts standing is not the alerts themselves. It is
+# that a real finding later arrives into a list people have already learned to
+# scroll past, and on a library that now ships a cipher that is the wrong list to
+# have. Every alert this repository has ever raised from src/test/java has been of
+# this kind.
+paths-ignore:
+  - "**/src/test/java/**"
+  - "**/src/test/resources/**"
