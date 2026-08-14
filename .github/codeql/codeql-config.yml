@@ -5,6 +5,12 @@ queries:
 
 # The test sources are not scanned.
 #
+# For Java this is done by the workflow and not here: paths-ignore filters
+# interpreted languages, while a compiled language puts into the database whatever
+# the build compiled, so the exclusion has to happen at the build. The CodeQL job
+# runs `mvn compile -Dmaven.test.skip=true`, which never compiles src/test/java.
+# The entries below cover the interpreted half and document the intent for both.
+#
 # They are not shipped: nothing in src/test/java reaches the jar, so a finding
 # there is not a finding in the product. What it is instead is a finding about a
 # test, and a test's job is regularly to do the wrong thing on purpose - the

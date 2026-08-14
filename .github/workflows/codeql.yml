@@ -33,9 +33,26 @@ jobs:
           # the queries live in the config file with the paths they run over
           config-file: ./.github/codeql/codeql-config.yml
 
+      # Java is built by hand rather than by autobuild, and for one reason: what a
+      # compiled language puts in the CodeQL database is whatever the build compiles.
+      # paths-ignore cannot take it back out afterwards - it filters interpreted
+      # languages only - so `maven.test.skip` is the mechanism, not the shortcut.
+      # See .github/codeql/codeql-config.yml for why the tests are out of scope.
+      - name: Set up JDK 17
+        if: ${{ matrix.language == 'java' }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: maven
+
+      - name: Build the main sources only
+        if: ${{ matrix.language == 'java' }}
+        run: mvn -B compile -Dmaven.test.skip=true --file pom.xml
+
       - name: Autobuild
         uses: github/codeql-action/autobuild@v4
-        if: ${{ matrix.language == 'java' || matrix.language == 'javascript' }}
+        if: ${{ matrix.language == 'javascript' }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
