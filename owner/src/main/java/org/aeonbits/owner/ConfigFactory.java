@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.handlers.ValueHandler;
 import org.aeonbits.owner.loaders.Loader;
 
 import java.util.Map;
@@ -132,6 +133,24 @@ public final class ConfigFactory {
      */
     public static void registerLoader(Loader loader) {
         INSTANCE.registerLoader(loader);
+    }
+
+    /**
+     * Registers a handler a value can name, as <code>${$name::payload}</code>, instead of holding its own
+     * text.
+     * <p>
+     * See {@link Factory#registerValueHandler(ValueHandler)}. Registering is the only way a handler gets in
+     * - there is no discovery on the classpath - and a configuration keeps the handlers registered when it
+     * was created, so this comes before {@link #create(Class, Map[])}.
+     * </p>
+     *
+     * @param handler the handler to register.
+     * @throws IllegalArgumentException if the handler is <code>null</code>, or its name is null, empty or
+     *                                  contains whitespace or any of <code>$ : { }</code>.
+     * @since 2.0.0
+     */
+    public static void registerValueHandler(ValueHandler handler) {
+        INSTANCE.registerValueHandler(handler);
     }
 
     /**

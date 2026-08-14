@@ -71,6 +71,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     private final LoadersManager loaders;
 
     /**
+     * The handlers a <code>${$name::payload}</code> marker may name, kept for the same reason
+     * {@link #keyPrefix} is: they belong to the factory that created this configuration, and a
+     * configuration keeps answering the way it was born even if the factory is reconfigured afterwards.
+     */
+    private final HandlersManager handlers;
+
+    /**
      * The prefix configured on the factory, captured when this object is created rather than looked up later:
      * that is what keeps the keys of a live Config object from moving when the factory is reconfigured, keeps
      * a reload resolving the same keys, and lets the mapping travel with the object when it is serialized.
@@ -192,9 +199,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
                       VariablesExpander expander, LoadersManager loaders, KeyPrefix keyPrefix, boolean strict,
                       Map<?, ?>... imports) {
+        this(clazz, properties, scheduler, expander, loaders, new HandlersManager(), keyPrefix, strict, imports);
+    }
+
+    PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
+                      VariablesExpander expander, LoadersManager loaders, HandlersManager handlers,
+                      KeyPrefix keyPrefix, boolean strict, Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.loaders = loaders;
+        this.handlers = handlers;
         this.imports = imports;
         this.keyPrefix = keyPrefix;
         this.strict = strict;
@@ -462,6 +476,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 merge(props, imported[i]);
                 record(imported[i].keySet(), Origin.ofImport(imported.length - 1 - i));
             }
+            refuseEncryptedValuesHoldingAMarker(props);
             reportReferencesToEncryptedValues(props);
             return props;
         } finally {
@@ -899,6 +914,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         return strict;
     }
 
+    /** The handlers a <code>${$name::payload}</code> marker may name. See {@link #handlers}. */
+    HandlersManager handlers() {
+        return handlers;
+    }
+
     /**
      * A value that refers to an encrypted property through a variable, which gets the <b>encrypted</b> text
      * and not the secret.
@@ -922,8 +942,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
      * </p>
      * <p>
      * The cure is a marker in the <i>value</i> rather than on the method, the shape SmallRye and Jasypt
-     * both use, which makes decryption part of the expansion and therefore the same on every path. Until
-     * there is one, composing the value in Java out of the method that decrypts is what works.
+     * both use, which makes decryption part of the expansion and therefore the same on every path. That is
+     * what {@link org.aeonbits.owner.handlers.ValueHandler} is: written as
+     * <code>crypto.password=${$aes-gcm::...}</code>, the reference above resolves to the secret and this
+     * warning has nothing to report, because the property is no longer an <code>@EncryptedValue</code> one.
+     * The warning stays for the configurations that keep the annotation, which is all of them until they
+     * are rewritten.
      * </p>
      * <p>
      * The search is flat on purpose. With <code>a=${crypto.password}</code> and <code>jdbc.url=${a}</code>
@@ -961,6 +985,67 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                             + "decrypts it.",
                     clazz.getName(), name, referred, name, referred));
         }
+    }
+
+    /**
+     * Refuses a method that declares {@link EncryptedValue} and whose value is a
+     * <code>${$name::payload}</code> marker, which are two ways of asking for the same thing that cannot
+     * both happen.
+     * <pre>
+     *     &#064;EncryptedValue
+     *     String password();          // db.password = ${$aes-gcm::...}
+     * </pre>
+     * <p>
+     * The marker wins by construction, because expansion runs before {@link #decryptIfNecessary}: the value
+     * reaching the decryptor is already the plain secret, and the decryptor is then asked to decrypt plain
+     * text. What comes out is nonsense or an exception, and neither says which of the two declarations was
+     * the one meant.
+     * </p>
+     * <p>
+     * <b>Refused rather than warned about, and refused whether or not {@link #strict} is on</b>, which is
+     * the treatment {@code @Mandatory} and {@link java.util.Optional} on one method already get: this is
+     * not a configuration that works less well, it is one that says two contradictory things about a
+     * password. Removing the annotation is what was meant - a marker carries the name of what decrypts it.
+     * </p>
+     * <p>
+     * Only the keys of methods taking no arguments are checked, for the reason
+     * {@link #encryptedKeyNames} exists at all: a key that depends on the invocation is not known here.
+     * </p>
+     */
+    private void refuseEncryptedValuesHoldingAMarker(Properties props) {
+        for (String encrypted : encryptedKeyNames) {
+            String handler = markerOf(props.getProperty(encrypted));
+            if (handler == null)
+                continue;
+            throw unsupported("%s: '%s' is declared @EncryptedValue and its value is the marker "
+                            + "${$%s::...}, which are two ways of asking for the same thing. Expansion runs "
+                            + "first, so the marker decrypts the value and the decryptor named by the "
+                            + "annotation is then handed the plain secret to decrypt again. Keep one: a "
+                            + "marker names what decrypts it, so with a marker the annotation has nothing "
+                            + "left to say.",
+                    clazz.getName(), encrypted, handler);
+        }
+    }
+
+    /**
+     * The name of the handler the given value hands itself to, when the whole value is a marker.
+     * <p>
+     * The whole value: a marker <i>inside</i> a larger value - <code>jdbc:h2:...?password=${$aes-gcm::x}
+     * </code> - is not this case. There the property is a composed string that happens to contain a secret,
+     * and it is not the one an <code>@EncryptedValue</code> decryptor could ever have decrypted either, so
+     * there is no contradiction to refuse.
+     * </p>
+     *
+     * @return the handler name, or <code>null</code> when the value is not a marker.
+     */
+    private static String markerOf(String value) {
+        if (value == null)
+            return null;
+        String trimmed = value.trim();
+        if (!trimmed.startsWith("${") || !trimmed.endsWith("}") || trimmed.indexOf("${", 2) != -1)
+            return null;
+        String expression = trimmed.substring(2, trimmed.length() - 1);
+        return HandlersManager.isMarker(expression) ? HandlersManager.nameOf(expression) : null;
     }
 
     /**

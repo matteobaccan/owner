@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.handlers.ValueHandler;
 import org.aeonbits.owner.loaders.Loader;
 
 import javax.management.DynamicMBean;
@@ -28,11 +29,13 @@ class DefaultFactory implements Factory {
     private final ScheduledExecutorService scheduler;
     private Properties props;
     final LoadersManager loadersManager;
+    final HandlersManager handlersManager;
 
     DefaultFactory(ScheduledExecutorService scheduler, Properties props) {
         this.scheduler = scheduler;
         this.props = props;
         this.loadersManager = new LoadersManager();
+        this.handlersManager = new HandlersManager();
     }
 
     @SuppressWarnings("unchecked")
@@ -40,10 +43,11 @@ class DefaultFactory implements Factory {
     public <T extends Config> T create(Class<? extends T> clazz, Map<?, ?>... imports) {
         validateImports(imports);
         Class<?>[] interfaces = interfaces(clazz);
-        VariablesExpander expander = new VariablesExpander(props);
+        VariablesExpander expander = new VariablesExpander(props, handlersManager);
         // read once, here: from now on the Config object keeps the prefix it was born with
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
-                KeyPrefix.from(props), Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT)), imports);
+                handlersManager, KeyPrefix.from(props),
+                Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT)), imports);
         Object jmxSupport = getJMXSupport(clazz, manager);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(clazz, manager, jmxSupport);
         handler.validateMandatoryProperties();
@@ -114,6 +118,11 @@ class DefaultFactory implements Factory {
     @Override
     public void registerLoader(Loader loader) {
         loadersManager.registerLoader(loader);
+    }
+
+    @Override
+    public void registerValueHandler(ValueHandler handler) {
+        handlersManager.registerValueHandler(handler);
     }
 
     @Override

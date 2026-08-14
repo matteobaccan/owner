@@ -34,12 +34,25 @@ class VariablesExpander implements Serializable {
      * nothing setting <code>app.home</code> quietly becomes <code>file:/app.properties</code>.
      */
     VariablesExpander(Properties props) {
+        this(props, new HandlersManager());
+    }
+
+    /**
+     * A <code>@Sources</code> spec sees the handlers as a value does, which is not a convenience but the
+     * absence of an exception: the marker is expansion, and this is the expansion that runs on a spec. It
+     * is also the one place a handler earns its keep twice over — <code>file:${$vault::…}</code> keeps a
+     * path out of the file, and a spec naming a handler nobody registered is refused here rather than
+     * quietly becoming <code>file:</code>.
+     *
+     * @param handlers the handlers registered on the factory creating the configuration.
+     */
+    VariablesExpander(Properties props, HandlersManager handlers) {
         Properties variables = new Properties();
         variables.putAll(Util.system().getenv());
         variables.putAll(Util.system().getProperties());
         variables.putAll(props);
         substitutor = new StrSubstitutor(variables,
-                Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT)));
+                Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT)), handlers);
     }
 
     String expand(String path) {

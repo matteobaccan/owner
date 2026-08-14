@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.handlers.ValueHandler;
 import org.aeonbits.owner.loaders.Loader;
 
 import java.util.Map;
@@ -119,6 +120,30 @@ public interface Factory {
      * @since 1.0.5
      */
     void registerLoader(Loader loader);
+
+    /**
+     * Registers a handler a value can name, as <code>${$name::payload}</code>, instead of holding its own
+     * text.
+     * <p>
+     * A handler is registered under {@link ValueHandler#name() its own name}, and registering one under a
+     * name already taken replaces it - which is what makes a key rotation an ordinary thing to do.
+     * </p>
+     * <p>
+     * Registration is the <b>only</b> way in: unlike a {@link Loader}, a handler is not discovered on the
+     * classpath. It is also what settles where a handler's own configuration comes from, since the caller
+     * constructs the instance and hands it over already holding its passphrase, token or endpoint.
+     * </p>
+     * <p>
+     * A configuration keeps the handlers the factory held when it was created, so register before
+     * {@link #create(Class, Map[])}.
+     * </p>
+     *
+     * @param handler the handler to register.
+     * @throws IllegalArgumentException if the handler is <code>null</code>, or its name is null, empty or
+     *                                  contains whitespace or any of <code>$ : { }</code>.
+     * @since 2.0.0
+     */
+    void registerValueHandler(ValueHandler handler);
 
     /**
      * Sets a converter for the given type. Setting a converter via this method will override any default converters

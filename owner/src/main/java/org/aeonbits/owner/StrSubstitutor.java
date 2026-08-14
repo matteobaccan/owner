@@ -71,6 +71,13 @@ class StrSubstitutor implements Serializable {
     private final boolean nested;
 
     /**
+     * The handlers a <code>${$name::payload}</code> marker can name. Never <code>null</code>: an empty
+     * one is what a substitution with no handlers registered uses, so that a marker written against a
+     * factory that has none is refused by the same path as a misspelt name, and says so.
+     */
+    private final HandlersManager handlers;
+
+    /**
      * Whether an expression that resolves to nothing is refused rather than replaced by the empty string.
      * See {@link #resolve}.
      */
@@ -92,8 +99,19 @@ class StrSubstitutor implements Serializable {
      *               replacing it with the empty string. See <code>owner.strict</code> on {@link Factory}.
      */
     StrSubstitutor(Properties values, boolean strict) {
+        this(values, strict, new HandlersManager());
+    }
+
+    /**
+     * @param values   the variables' values, may be null
+     * @param strict   <code>true</code> to refuse an expression that resolves to nothing, rather than
+     *                 replacing it with the empty string. See <code>owner.strict</code> on {@link Factory}.
+     * @param handlers the handlers a <code>${$name::payload}</code> marker may name.
+     */
+    StrSubstitutor(Properties values, boolean strict, HandlersManager handlers) {
         this.values = values;
         this.strict = strict;
+        this.handlers = handlers;
         this.nested = !"false".equalsIgnoreCase(system().getProperty(NESTED_VARIABLE_EXPANSION));
     }
 
@@ -201,12 +219,21 @@ class StrSubstitutor implements Serializable {
      * make the reference resolvable, so it does not rescue it either: <code>db.host=${db.host:localhost}</code>
      * is circular, and writing <code>db.host=localhost</code> is what was meant.</p>
      *
+     * <p>
+     * An expression that begins with <code>$</code> and contains <code>::</code> is not a key at all: it
+     * names a {@link org.aeonbits.owner.handlers.ValueHandler} and is answered by it. That is decided
+     * before the key lookup, and what the handler answers is returned <b>as it is</b> - see
+     * {@link #resolveMarker}.</p>
+     *
      * @param expression the text between <code>${</code> and <code>}</code>.
      * @param resolving  the expressions being resolved further up the recursion, in order.
      * @return the replacement text; the empty string when nothing can be resolved and no default is given.
      * @throws IllegalArgumentException if the expression is already being resolved further up the recursion.
      */
     private String resolve(String expression, Set<String> resolving) {
+        if (HandlersManager.isMarker(expression))
+            return resolveMarker(expression);
+
         if (!resolving.add(expression))
             throw circularReference(expression, resolving);
         try {
@@ -234,6 +261,23 @@ class StrSubstitutor implements Serializable {
         } finally {
             resolving.remove(expression);
         }
+    }
+
+    /**
+     * Answers a marker through the handler it names.
+     * <p>
+     * Two things this deliberately does not do. It does not put the expression in the set of what is being
+     * resolved, because a payload is not a reference: nothing it contains is looked up here, so there is no
+     * cycle to detect - and a second value legitimately encrypted to the same cipher text would otherwise
+     * be reported as one.</p>
+     * <p>
+     * And it does <b>not</b> expand what comes back. A value read from a property is expanded again,
+     * because that is how <code>a=${b}</code> works; what a handler answers is a secret, a token or a file,
+     * and text arriving from outside the configuration is exactly the text that must not be read as a
+     * template. A password that happens to contain <code>${</code> is a password.</p>
+     */
+    private String resolveMarker(String expression) {
+        return handlers.resolve(expression);
     }
 
     private static IllegalArgumentException circularReference(String expression, Set<String> resolving) {
