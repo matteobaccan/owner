@@ -127,14 +127,36 @@ public abstract class Util {
         if (text.equals("~"))
             return getUserHome();
         if (text.indexOf("~/") == 0 || text.indexOf("file:~/") == 0 || text.indexOf("jar:file:~/") == 0)
-            return text.replaceFirst("~/", Matcher.quoteReplacement(getUserHome()) + "/");
+            return text.replaceFirst("~/", Matcher.quoteReplacement(userHomeWithoutTrailingSeparator()) + "/");
         if (text.indexOf("~\\") == 0 || text.indexOf("file:~\\") == 0 || text.indexOf("jar:file:~\\") == 0)
-            return text.replaceFirst("~\\\\", Matcher.quoteReplacement(getUserHome()) + "\\\\");
+            return text.replaceFirst("~\\\\", Matcher.quoteReplacement(userHomeWithoutTrailingSeparator()) + "\\\\");
         return text;
     }
 
     private static String getUserHome() {
         return system.getProperty("user.home");
+    }
+
+    /**
+     * The user home with any separator it ends in removed, because the caller is about to add one.
+     * <p>
+     * On a desktop JVM <code>user.home</code> never ends in a separator and this changes nothing. On
+     * <b>Android it is <code>/</code></b>, and there the missing subtraction was
+     * <a href="https://github.com/matteobaccan/owner/issues/154">#154</a>: <code>file:~/app.properties</code>
+     * became <code>file://app.properties</code>, where <code>//</code> opens an <b>authority</b> — so
+     * <code>app.properties</code> was read as a host name and the path was empty. It failed as a
+     * malformed source rather than as a path that does not exist, which is why it looked like a bug in
+     * the URI and not in the expansion.
+     * </p>
+     *
+     * @return the user home, guaranteed not to end in <code>/</code> or <code>\</code>.
+     */
+    private static String userHomeWithoutTrailingSeparator() {
+        String home = getUserHome();
+        int end = home.length();
+        while (end > 0 && (home.charAt(end - 1) == '/' || home.charAt(end - 1) == '\\'))
+            end--;
+        return home.substring(0, end);
     }
 
     /**

@@ -617,7 +617,15 @@ public interface Config extends Serializable {
     enum DisableableFeature {
         /** Disables variable expansion, i.e. <code>${...}</code> substitution in property values. */
         VARIABLE_EXPANSION,
-        /** Disables parameter formatting, i.e. positional <code>{0}</code> argument substitution. */
+        /**
+         * Disables parameter formatting, i.e. the {@link java.util.Formatter} substitution of a method's
+         * arguments into its value — <code>%s</code> and <code>%d</code>, as {@link String#format} does.
+         * <p>
+         * <b>Not</b> {@link java.text.MessageFormat}'s <code>{0}</code>, which this javadoc claimed until
+         * 2.0.0 and which the library has never supported; asking for it is
+         * <a href="https://github.com/matteobaccan/owner/issues/118">#118</a>, still open.
+         * </p>
+         */
         PARAMETER_FORMATTING,
         /**
          * Disables the {@link Prefix} declared on the interface, so that the annotated method — or every

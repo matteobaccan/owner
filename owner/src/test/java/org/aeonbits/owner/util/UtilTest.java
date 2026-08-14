@@ -360,6 +360,61 @@ public class UtilTest {
         }
     }
 
+    /**
+     * <a href="https://github.com/matteobaccan/owner/issues/154">#154</a>: on Android
+     * <code>user.home</code> is <code>/</code>, and the expansion used to add a separator to a value that
+     * already ended in one. <code>file:~/app.properties</code> became
+     * <code>file://app.properties</code>, where the <code>//</code> opens an <b>authority</b> — so
+     * <code>app.properties</code> was read as a host name and the path came out empty. That is why it
+     * was reported as an invalid URI rather than as a wrong path.
+     * <p>
+     * Nothing here is Android-specific: any <code>user.home</code> ending in a separator did it.
+     * </p>
+     */
+    @Test
+    public void testExpandUserHomeWhenTheHomeIsARootThatAlreadyEndsInASeparator() {
+        SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("user.home", "/");
+                }}, new HashMap<>()
+        ));
+
+        try {
+            assertEquals("the separator is not doubled", "/obehave/obehave.properties",
+                    Util.expandUserHome("~/obehave/obehave.properties"));
+            assertEquals("file:/obehave/obehave.properties",
+                    Util.expandUserHome("file:~/obehave/obehave.properties"));
+            assertEquals("jar:file:/obehave/obehave.properties",
+                    Util.expandUserHome("jar:file:~/obehave/obehave.properties"));
+
+            // and the URI it produces has a path and no host, which is the whole of what #154 reported
+            URI uri = URI.create(Util.expandUserHome("file:~/obehave/obehave.properties"));
+            assertNull("no authority was opened", uri.getAuthority());
+            assertEquals("/obehave/obehave.properties", uri.getPath());
+
+            assertEquals("a bare ~ is still the home itself", "/", Util.expandUserHome("~"));
+        } finally {
+            UtilTest.setSystem(save);
+        }
+    }
+
+    /** The same subtraction on a Windows home that was written with a trailing separator. */
+    @Test
+    public void testExpandUserHomeWhenTheHomeWasWrittenWithATrailingSeparator() {
+        SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
+                new Properties() {{
+                    setProperty("user.home", "C:\\Users\\john\\");
+                }}, new HashMap<>()
+        ));
+
+        try {
+            assertEquals("C:\\Users\\john/foo/bar", Util.expandUserHome("~/foo/bar"));
+            assertEquals("C:\\Users\\john\\foo\\bar", Util.expandUserHome("~\\foo\\bar"));
+        } finally {
+            UtilTest.setSystem(save);
+        }
+    }
+
     @Test
     public void testExpandUserHomeOnWindows() {
         SystemProvider save = UtilTest.setSystem(new SystemProviderForTest(
