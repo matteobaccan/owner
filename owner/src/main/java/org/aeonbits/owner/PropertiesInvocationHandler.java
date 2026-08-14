@@ -301,7 +301,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                     ? PropertiesAggregator.aggregateSections(method, key, this, ancestors)
                     : PropertiesAggregator.aggregate(method, key, propertiesManager,
                             entry -> propertiesManager.decryptIfNecessary(method,
-                                    expandVariables(method, preProcess(method, entry))));
+                                    expandVariables(method, preProcess(method, key, entry))));
 
         boolean optional = isOptional(method);
 
@@ -313,25 +313,27 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                     ? NestedProperties.list(method, key, this, ancestors)
                     : IndexedProperties.collect(method, key, propertiesManager,
                             element -> propertiesManager.decryptIfNecessary(method,
-                                    expandVariables(method, preProcess(method, element))));
+                                    expandVariables(method, preProcess(method, key, element))));
             if (indexed != null)
                 return optional ? Optional.of(indexed) : indexed;
         }
 
-        String value = lookupValue(method, key);
-        if (value == null) {
+        // the preprocessors run before the property is declared absent, so that one of them may supply a
+        // value — and so that @Mandatory judges what the chain produced rather than what the sources had
+        String preprocessed = preProcess(method, key, lookupValue(method, key));
+        if (preprocessed == null) {
             if (isMandatory(method))
                 throw new MissingMandatoryPropertyException(key);
             return optional ? Optional.empty() : null;
         }
-        String text = process(method, value, args);
+        String text = afterPreprocessing(method, preprocessed, args);
 
         // an empty value is a value like any other, unless the method explicitly asked for the default to
         // cover it too: see Config.DefaultValue#useOnEmpty
         if (isEmpty(text)) {
             String onEmpty = defaultValueOnEmpty(method);
             if (onEmpty != null)
-                text = process(method, onEmpty, args);
+                text = process(method, key, onEmpty, args);
         }
 
         Object result = convert(method, valueClass(method), text, key);
@@ -412,10 +414,17 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
      * arguments. Running the default value through the very same steps is what makes it indistinguishable from
      * a property that was not there, since a missing property is already resolved to its registered default.
      */
-    private String process(Method method, String value, Object... args) {
+    private String process(Method method, String key, String value, Object... args) {
+        return afterPreprocessing(method, preProcess(method, key, value), args);
+    }
+
+    /**
+     * Everything {@link #process} does after the preprocessors, so that a value one of them supplied for
+     * an absent property is not sent back through them a second time.
+     */
+    private String afterPreprocessing(Method method, String value, Object... args) {
         return format(method,
-                propertiesManager.decryptIfNecessary(method,
-                        expandVariables(method, preProcess(method, value))),
+                propertiesManager.decryptIfNecessary(method, expandVariables(method, value)),
                 args);
     }
 
@@ -545,7 +554,10 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
             if (!isMandatory(method)) continue;
             if (method.getParameterTypes().length > 0) continue;
             String key = expandKey(method);
-            if (lookupValue(method, key) == null)
+            // the sources first, and only if they are silent the preprocessors — so a chain that has
+            // never heard of absence costs nothing here, and one that supplies a value satisfies
+            // @Mandatory at startup instead of failing it for a property that would have worked
+            if (lookupValue(method, key) == null && preProcess(method, key, null) == null)
                 missingKeys.add(key);
         }
     }
@@ -707,11 +719,21 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         }
     }
 
-    private String preProcess(Method method, String value) {
+    /**
+     * Runs the preprocessors, with one rule applied all the way down the chain: <b>a value goes to
+     * {@link Preprocessor#process}, an absence goes to {@link Preprocessor#processAbsent}</b>.
+     * <p>
+     * So a preprocessor that supplies a value for an absent property does not short-circuit the rest —
+     * the ones after it process what it supplied, exactly as they would a value read from a file. And
+     * since {@code processAbsent} answers {@code null} unless somebody overrode it, a chain that has
+     * never heard of absence returns {@code null} and nothing downstream can tell the difference.
+     * </p>
+     */
+    private String preProcess(Method method, String key, String value) {
         List<Preprocessor> preprocessors = resolvePreprocessors(method);
         String result = value;
         for (Preprocessor preprocessor : preprocessors)
-            result = preprocessor.process(result);
+            result = result == null ? preprocessor.processAbsent(key) : preprocessor.process(result);
         return result;
     }
 

@@ -96,11 +96,51 @@ Preprocessing happens on the raw property value, *before* [variables expansion](
 [type conversion](/owner/docs/type-conversion/): whatever your preprocessors return is what the rest of the
 pipeline will see.
 
+When the property is not there
+------------------------------
+
+`process(String)` is never handed a `null`. If a property cannot be resolved to any value, a preprocessor
+is asked through a different method instead — `processAbsent(String key)`, which is given **the key** and
+answers `null` by default, leaving the property absent exactly as before:
+
+```java
+public class FromTheVault implements Preprocessor {
+
+    public String process(String input) {
+        return input;
+    }
+
+    @Override
+    public String processAbsent(String key) {
+        return vault.lookup(key);   // null if the vault has not got it either
+    }
+}
+```
+
+The key comes with the call because without it there would be nothing useful to do: a preprocessor that
+only learned of the absence could answer with a constant, and a constant is what `@DefaultValue` already
+is. With it, a preprocessor can look the value up somewhere OWNER knows nothing about, or name the
+property in what it throws.
+
+What it returns carries on through the rest of the chain — the preprocessors after it see it through
+`process(String)` — and then through expansion, decryption, formatting and conversion, exactly like a
+value read from a file. What supplied it is not asked to process it again.
+
+Asked for in [#188](https://github.com/matteobaccan/owner/issues/188).
+
 <div class="note">
-  <h5>Undefined properties are not preprocessed</h5>
+  <h5>To require a value, use @Mandatory instead</h5>
   <p>
-    If a property cannot be resolved to any value, preprocessors are not invoked: the method returns
-    <code>null</code> as explained in <a href="/owner/docs/usage/">Basic usage</a>.
+    <code>processAbsent</code> is for <em>computing</em> a value, not for insisting on one. A property that
+    must be set is <a href="/owner/docs/usage/#mandatory-properties"><code>@Mandatory</code></a>: it throws
+    <code>MissingMandatoryPropertyException</code> naming the key, needs no code, and reports every
+    missing property at once when the configuration is created.
+  </p>
+  <p>
+    The two compose. <code>@Mandatory</code> is checked at creation, and a preprocessor that supplies a
+    value <strong>satisfies</strong> it rather than failing startup for a property that would have
+    worked — which costs one call to <code>processAbsent</code> then, and another when the property is
+    first read.
   </p>
 </div>
 
