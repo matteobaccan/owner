@@ -58,12 +58,20 @@ public class ZooKeeperLoader implements Loader {
     private static final String SCHEME = "zookeeper";
 
     /**
-     * {@inheritDoc}
+     * Accepts a source whose scheme is <code>zookeeper</code>, and no other.
+     * <p>
+     * Written out rather than inherited with <code>{&#64;inheritDoc}</code>: this artifact sees
+     * {@link org.aeonbits.owner.loaders.Loader} as a jar and not as source, so there is no comment there
+     * for javadoc to copy - which JDK 25 is the first to say out loud.
+     * </p>
      * <p>
      * The constant is on the left of the comparison because a URI need not have a scheme: a source written
      * without one, and the empty URI that a blank <code>file:</code> produces, both answer <code>null</code>
      * here, and every registered loader is asked about every source.
      * </p>
+     *
+     * @param uri the source being offered to this loader.
+     * @return true when the scheme is <code>zookeeper</code>.
      */
     @Override
     public boolean accept(URI uri) {
