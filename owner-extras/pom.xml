@@ -81,6 +81,12 @@
              from a class this artifact loads before it is asked: see BeanValidator for why both are here
              rather than one, and JakartaBeanValidation for what keeps them off everybody else's class path.
              The API only - a provider is the user's choice, and the tests below make both choices. -->
+        <!-- Kept in step with its provider by hand, and already a spec revision ahead of it: Hibernate
+             Validator 8.0.5 declares jakarta.validation-api 3.0.2 in its own pom and the tests below run
+             it against 3.1.1. That works, and it is not free to keep drifting - the provider is held
+             below 9 for the Java it is compiled for, so an API that moves on has nothing left here to
+             implement it. Worth saying because an API bump is a minor, and renovate.json automerges
+             minors: this one is not held by a rule, it is held by whoever reads the failure. -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>

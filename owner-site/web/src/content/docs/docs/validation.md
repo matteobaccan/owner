@@ -50,9 +50,23 @@ Two things on the class path: `owner-extras`, and a validation provider.
 <dependency>
     <groupId>org.hibernate.validator</groupId>
     <artifactId>hibernate-validator</artifactId>
-    <version>8.0.1.Final</version>
+    <version>8.0.5.Final</version>
 </dependency>
 ```
+
+<div class="note info">
+  <h5>Which provider, and which version</h5>
+  <p>
+    Any provider of the specification will do — the two the tests run against are <b>Hibernate Validator
+    8.0.5</b> for <code>jakarta.validation</code> and <b>Apache BVal 2.0.6</b> for
+    <code>javax.validation</code>. Those are the versions written above and the ones under test, not a
+    ceiling on yours: this library names the API and never a provider, so an application on <b>Java 17 or
+    later is free to use Hibernate Validator 9</b>, which our own tests cannot because they still run on
+    JDK 11. Hibernate Validator also needs an expression language implementation to interpolate its
+    messages — <code>org.glassfish.expressly</code> 5 on Java 11, 6 on 17 — and says so loudly with
+    <code>HV000183</code> if it is missing.
+  </p>
+</div>
 
 There is nothing to register and nothing to call. `owner-extras` declares a `ConfigValidator` in its
 `META-INF/services`, the core finds it, and a configuration whose methods carry constraints is checked as it
