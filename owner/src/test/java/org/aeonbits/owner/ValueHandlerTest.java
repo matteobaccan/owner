@@ -285,4 +285,97 @@ public class ValueHandlerTest {
             assertTrue(expected.getMessage(), expected.getMessage().contains("nothing"));
         }
     }
+
+    /** Answers to no name at all, which is the shape a handler reading its name from a config file has. */
+    static class NamelessHandler implements ValueHandler {
+        @Override
+        public String name() {
+            return null;
+        }
+
+        @Override
+        public String resolve(String payload) {
+            return payload;
+        }
+    }
+
+    /**
+     * A null name is not the same mistake as an empty one - it is what a handler whose name came from
+     * somewhere else hands over when that somewhere had nothing - and it has to be caught at registration
+     * for the same reason: the name is what a value reaches the handler by, so a handler without one is
+     * registered and unreachable.
+     * <p>
+     * Registered on a manager of its own rather than on the factory, because the factory is a singleton for
+     * the whole JVM and this test has no business leaving anything in it.
+     * </p>
+     */
+    @Test
+    public void aHandlerWithNoNameAtAllIsRefusedAtRegistration() {
+        try {
+            new HandlersManager().registerValueHandler(new NamelessHandler());
+            fail("a handler that answers to nothing cannot be reached");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("null name"));
+            assertTrue("and names the class, which is all there is to go on",
+                    expected.getMessage().contains(NamelessHandler.class.getName()));
+        }
+    }
+
+    /**
+     * Clearing leaves a marker unresolvable rather than resolving it to the empty string, which is the
+     * whole rule about unregistered names applied to a name that used to be registered.
+     */
+    @Test
+    public void clearingLeavesNothingBehindThatAMarkerCouldStillReach() {
+        HandlersManager manager = new HandlersManager();
+        manager.registerValueHandler(new ReversingHandler());
+        assertEquals("secret", manager.resolve("$reverse::terces"));
+
+        manager.clear();
+        try {
+            manager.resolve("$reverse::terces");
+            fail("nothing is registered any more");
+        } catch (UnsupportedOperationException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("nothing"));
+        }
+    }
+
+    // --- @EncryptedValue over a marker: what is refused, and what deliberately is not -----------------
+
+    public interface WithAMarkerInsideALargerEncryptedValue extends Config {
+        @DefaultValue("jdbc:h2:mem:test?password=${$reverse::terces}")
+        @EncryptedValue
+        String url();
+    }
+
+    /** Opens with a marker and closes with one, and is still not a marker: there are two of them. */
+    public interface WithTwoMarkersInOneEncryptedValue extends Config {
+        @DefaultValue("${$reverse::resu}:${$reverse::terces}")
+        @EncryptedValue
+        String credentials();
+    }
+
+    public interface WithAnUnclosedMarker extends Config {
+        @DefaultValue("${$reverse::terces")
+        @EncryptedValue
+        String password();
+    }
+
+    /**
+     * The refusal is for a value that <b>is</b> a marker, and only that. A value that merely contains one
+     * is a composed string that happens to hold a secret - it was never something an
+     * <code>@EncryptedValue</code> decryptor could have decrypted whole either, so there are no two
+     * contradictory declarations to refuse. Nor is a value that opens a marker and never closes it one.
+     * <p>
+     * What is pinned down is that creating these configurations is allowed, since the refusal happens when
+     * the properties are loaded and would otherwise reject a file for the wrong reason.
+     * </p>
+     */
+    @Test
+    public void aMarkerInsideALargerValueIsNotTheContradictionThatGetsRefused() {
+        ConfigFactory.registerValueHandler(new ReversingHandler());
+        ConfigFactory.create(WithAMarkerInsideALargerEncryptedValue.class);
+        ConfigFactory.create(WithTwoMarkersInOneEncryptedValue.class);
+        ConfigFactory.create(WithAnUnclosedMarker.class);
+    }
 }

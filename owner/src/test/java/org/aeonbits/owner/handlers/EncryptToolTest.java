@@ -7,10 +7,23 @@
  */
 package org.aeonbits.owner.handlers;
 
+import org.junit.After;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -248,5 +261,202 @@ public class EncryptToolTest {
             assertTrue(expected.getMessage(), expected.getMessage().contains("aes-gcm"));
             assertTrue(expected.getMessage(), expected.getMessage().contains("rsa-oaep"));
         }
+    }
+
+    @Test
+    public void helpIsSpelledBothWays() {
+        assertTrue(EncryptTool.parse(new String[]{"--help"}).help);
+        assertTrue(EncryptTool.parse(new String[]{"-h"}).help);
+    }
+
+    /** A handler that cannot encrypt says so on standard error and exits one, without a stack trace. */
+    @Test
+    public void aHandlerThatCannotEncryptIsReportedAndNothingIsWritten() {
+        EncryptTool.Options options = EncryptTool.parse(new String[]{"--handler", "rsa-oaep"});
+        int status = EncryptTool.encrypt(new RsaHandler(pair.getPrivate()), options,
+                Arrays.asList("s3cr3t"), new PrintStream(out), new PrintStream(err));
+        assertEquals(1, status);
+        assertEquals("nothing was written", "", stdout());
+        assertTrue(stderr(), stderr().contains("only a private key"));
+        assertFalse("and not the value it was asked to encrypt", stderr().contains("s3cr3t"));
+    }
+
+    // --- the whole tool, from a command line to markers ----------------------------------------------
+
+    /** One key pair for the asymmetric runs: generating one is the slowest thing in this class. */
+    private static KeyPair pair;
+
+    @BeforeClass
+    public static void generateKeys() throws Exception {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(2048);
+        pair = generator.generateKeyPair();
+    }
+
+    @Rule
+    public final TemporaryFolder folder = new TemporaryFolder();
+
+    private final InputStream originalIn = System.in;
+
+    @After
+    public void restoreStandardInput() {
+        System.setIn(originalIn);
+    }
+
+    private File publicKeyFile() throws Exception {
+        File file = folder.newFile("app.pub");
+        StringBuilder pem = new StringBuilder("-----BEGIN PUBLIC KEY-----\n");
+        String base64 = Base64.getEncoder().encodeToString(pair.getPublic().getEncoded());
+        for (int i = 0; i < base64.length(); i += 64)
+            pem.append(base64, i, Math.min(i + 64, base64.length())).append('\n');
+        pem.append("-----END PUBLIC KEY-----\n");
+        try (OutputStream out = new FileOutputStream(file)) {
+            out.write(pem.toString().getBytes("UTF-8"));
+        }
+        return file;
+    }
+
+    private int run(String... args) {
+        return EncryptTool.run(args, new PrintStream(out), new PrintStream(err));
+    }
+
+    private static void standardInputHolding(String text) {
+        System.setIn(new ByteArrayInputStream(text.getBytes()));
+    }
+
+    /**
+     * The documented asymmetric invocation, end to end and in one process: a path to a public key on the
+     * command line, the values on standard input, and markers the deployment's private key reads back.
+     * This is the run that needs no passphrase, which is what makes it the one that can be driven here.
+     */
+    @Test
+    public void aRunWithAPublicKeyTurnsPipedValuesIntoMarkersTheDeploymentCanRead() throws Exception {
+        standardInputHolding("s3cr3t\nhunter2\n");
+        assertEquals(0, run("--public-key", publicKeyFile().getAbsolutePath()));
+
+        String[] markers = stdout().trim().split("\\R");
+        assertEquals(2, markers.length);
+        RsaHandler deployment = new RsaHandler(pair.getPrivate());
+        assertEquals("s3cr3t", deployment.resolve(payloadOf(markers[0])));
+        assertEquals("hunter2", deployment.resolve(payloadOf(markers[1])));
+        assertTrue(markers[0], markers[0].startsWith("${$rsa-oaep::"));
+        assertTrue(stderr(), stderr().contains("2 values encrypted"));
+        assertTrue("and says what it did rather than talking about a salt it does not have",
+                stderr().contains("each with its own key"));
+    }
+
+    @Test
+    public void aBlankLineEndsTheValuesAndTheNameOnTheCommandLineIsTheOneWritten() throws Exception {
+        standardInputHolding("s3cr3t\n\nnever read\n");
+        assertEquals(0, run("--public-key", publicKeyFile().getAbsolutePath(), "--name", "rsa-2025"));
+        assertEquals("one marker and no more", 1, stdout().trim().split("\\R").length);
+        assertTrue(stdout(), stdout().startsWith("${$rsa-2025::"));
+    }
+
+    @Test
+    public void nothingOnStandardInputIsSaidRatherThanReportedAsSuccess() throws Exception {
+        standardInputHolding("");
+        assertEquals(1, run("--public-key", publicKeyFile().getAbsolutePath()));
+        assertEquals("", stdout());
+        assertTrue(stderr(), stderr().contains("Nothing to encrypt"));
+    }
+
+    /** Standard input can fail rather than end, and that is a message and a status, not a stack trace. */
+    @Test
+    public void standardInputThatCannotBeReadIsReportedAsSuch() throws Exception {
+        System.setIn(new FailingInputStream());
+        assertEquals(1, run("--public-key", publicKeyFile().getAbsolutePath()));
+        assertEquals("", stdout());
+        assertTrue(stderr(), stderr().contains("Could not read the values"));
+    }
+
+    /** A stream that fails instead of ending, to prove the failure is caught rather than thrown out. */
+    static final class FailingInputStream extends InputStream {
+        @Override
+        public int read() throws IOException {
+            throw new IOException("the pipe went away");
+        }
+    }
+
+    @Test
+    public void theAsymmetricCipherWithoutAKeyExitsOneAndSaysWhichOptionIsMissing() {
+        standardInputHolding("s3cr3t\n");
+        assertEquals(1, run("--handler", "rsa-oaep"));
+        assertEquals("", stdout());
+        assertTrue(stderr(), stderr().contains("--public-key"));
+    }
+
+    /**
+     * The hazard the tool is built around, and the reason it asks <code>Console.isTerminal()</code> rather
+     * than only <code>System.console() != null</code>. Under redirected streams - which is what a pipeline
+     * is, and what this test is - a JDK 22 and later hands back a Console all the same, and
+     * <code>readPassword</code> on it would read the <b>first piped value</b> and take it for the
+     * passphrase. Silently: the value would then be missing from the output and the file would be
+     * encrypted under a passphrase nobody chose.
+     * <p>
+     * So with no passphrase in the environment and no terminal to ask on, the tool must refuse and name
+     * the variable, and above all must not have written anything.
+     * </p>
+     */
+    @Test
+    public void withStreamsRedirectedAndNoEnvironmentVariableThePipedValueIsNotTakenForThePassphrase() {
+        Assume.assumeTrue("this machine has " + EncryptTool.PASSPHRASE_VARIABLE + " set",
+                System.getenv(EncryptTool.PASSPHRASE_VARIABLE) == null);
+        standardInputHolding("s3cr3t\nhunter2\n");
+
+        assertEquals(1, run());
+        assertEquals("nothing was encrypted", "", stdout());
+        assertTrue(stderr(), stderr().contains(EncryptTool.PASSPHRASE_VARIABLE));
+        assertFalse("and the value that was piped in was not taken for anything",
+                stderr().contains("s3cr3t"));
+    }
+
+    /**
+     * The symmetric run, which is the invocation the documentation leads with, and the only one that can be
+     * driven nowhere else: the passphrase comes from the environment, and an environment belongs to a
+     * process. So this one is a process - the command from the class javadoc, run as written.
+     * <p>
+     * What it pins down is the whole of it and not only the cipher: that <code>OWNER_PASSPHRASE</code> is
+     * honoured, that {@link EncryptTool#main} exits <b>0</b> rather than merely returning, that the markers
+     * arrive on standard output where a redirect collects them and the summary does not, and that what
+     * comes out reads back under the same passphrase.
+     * </p>
+     */
+    @Test
+    public void thePassphraseComesFromTheEnvironmentAndTheMarkersFromStandardOutput() throws Exception {
+        File java = new File(new File(System.getProperty("java.home"), "bin"),
+                System.getProperty("os.name", "").toLowerCase().startsWith("win") ? "java.exe" : "java");
+        Assume.assumeTrue("no java to run: " + java, java.canExecute());
+
+        ProcessBuilder builder = new ProcessBuilder(java.getAbsolutePath(),
+                "-cp", System.getProperty("java.class.path"), EncryptTool.class.getName(),
+                "--iterations", String.valueOf(AesGcmHandler.MINIMUM_ITERATIONS));
+        builder.environment().put(EncryptTool.PASSPHRASE_VARIABLE, PASSPHRASE);
+        Process process = builder.start();
+
+        try (OutputStream toIt = process.getOutputStream()) {
+            toIt.write("s3cr3t\nhunter2\n".getBytes("UTF-8"));
+        }
+        String markers = read(process.getInputStream());
+        String summary = read(process.getErrorStream());
+        assertEquals("it should have said it was happy: " + summary, 0, process.waitFor());
+
+        String[] lines = markers.trim().split("\\R");
+        assertEquals("standard output holds markers and nothing else", 2, lines.length);
+        AesGcmHandler handler = new AesGcmHandler(PASSPHRASE);
+        assertEquals("s3cr3t", handler.resolve(payloadOf(lines[0])));
+        assertEquals("hunter2", handler.resolve(payloadOf(lines[1])));
+        assertTrue(summary, summary.contains("2 values encrypted"));
+        assertFalse("the passphrase is never printed", (markers + summary).contains(PASSPHRASE));
+    }
+
+    private static String read(InputStream from) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        try (InputStream in = from) {
+            for (int got; (got = in.read(buffer)) != -1; )
+                bytes.write(buffer, 0, got);
+        }
+        return new String(bytes.toByteArray(), "UTF-8");
     }
 }

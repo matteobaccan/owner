@@ -121,6 +121,29 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      */
     public static final int MINIMUM_ITERATIONS = 100_000;
 
+    /**
+     * The highest count a token may carry, which is a bound on damage rather than on cryptography.
+     * <p>
+     * The count is read out of the token and the key is derived from it <b>before</b> GCM can authenticate
+     * anything - it has to be, since the derivation is what produces the key the tag is checked with. And
+     * because the count is inside the authenticated header, a token whose count was edited can never
+     * authenticate: the derivation is then guaranteed to be wasted, and its cost is whatever the edit says.
+     * </p>
+     * <p>
+     * Measured, because the shape of the problem is not obvious: PBKDF2 is linear, so 20 million iterations
+     * cost 4.2 seconds on JDK 24 and rather more on the Java 8 baseline. Half of all four-byte corruptions
+     * are negative and refused instantly by {@link #MINIMUM_ITERATIONS}; the other half land in the
+     * positive range and average around 1.07 billion, which is minutes of CPU inside
+     * <code>ConfigFactory.create</code> - an application that looks hung, and then says the value could not
+     * be decrypted.
+     * </p>
+     * <p>
+     * Ten million is roughly fifty times current guidance, so it is not a limit anybody deriving a key in
+     * earnest can reach, and it caps a corrupted file at a few seconds instead of a few minutes.
+     * </p>
+     */
+    public static final int MAXIMUM_ITERATIONS = 10_000_000;
+
     private static final String KDF = "PBKDF2WithHmacSHA256";
     private static final String CIPHER = "AES/GCM/NoPadding";
     private static final int KEY_BITS = 256;
@@ -196,6 +219,13 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
                     "%d iterations is below the %d this handler accepts. The count is what makes a "
                             + "passphrase expensive to guess, and a low one is worth less than it looks.",
                     iterations, MINIMUM_ITERATIONS));
+        // refused here as well as when reading, or this would write tokens it could not read back
+        if (iterations > MAXIMUM_ITERATIONS)
+            throw new IllegalArgumentException(String.format(
+                    "%,d iterations is above the %,d this handler accepts. PBKDF2 is linear, so this is a "
+                            + "wait rather than a strength: the ceiling is about fifty times current "
+                            + "guidance already.",
+                    iterations, MAXIMUM_ITERATIONS));
         this.name = name;
         this.iterations = iterations;
         this.passphrase = passphrase.clone();
@@ -230,9 +260,16 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
 
         ByteBuffer buffer = ByteBuffer.wrap(token);
         int tokenIterations = buffer.getInt();
+        // both bounds are checked before keyFor, and that order is the whole point: the derivation is
+        // what a wrong count costs, and no tag can be verified until it has already been paid for
         if (tokenIterations < MINIMUM_ITERATIONS)
             throw notAToken(String.format("it asks to be read with %d iterations, below the %d this "
                     + "handler accepts", tokenIterations, MINIMUM_ITERATIONS));
+        if (tokenIterations > MAXIMUM_ITERATIONS)
+            throw notAToken(String.format("it asks to be read with %,d iterations, above the %,d this "
+                            + "handler accepts - which is what an edited or truncated header looks like, "
+                            + "and deriving a key for it would cost minutes before failing anyway",
+                    tokenIterations, MAXIMUM_ITERATIONS));
         byte[] salt = new byte[SALT_BYTES];
         buffer.get(salt);
         byte[] iv = new byte[IV_BYTES];

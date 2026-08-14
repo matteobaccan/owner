@@ -150,6 +150,50 @@ public class AesGcmHandlerTest {
         }
     }
 
+    /**
+     * The other end of the same guard, and the one that is about availability rather than strength.
+     * <p>
+     * The count is read out of the token and the key derived from it <b>before</b> GCM can authenticate
+     * anything, and because the count is inside the authenticated header an edited one can never
+     * authenticate — so the derivation is guaranteed waste, at whatever price the edit names. Half of all
+     * four-byte corruptions are negative and refused by the minimum; the other half average around a
+     * billion, which was minutes of CPU inside <code>ConfigFactory.create</code> before this refusal
+     * existed. The assertion on the clock is the point of the test: it is not that it fails, it is that it
+     * fails <em>at once</em>.
+     * </p>
+     */
+    @Test
+    public void aTokenAskingForAnAbsurdCountIsRefusedBeforeAnyKeyIsDerived() {
+        AesGcmHandler handler = handler();
+        byte[] token = Base64.getDecoder().decode(handler.encrypt("s3cr3t"));
+        int absurd = AesGcmHandler.MAXIMUM_ITERATIONS + 1;
+        token[0] = (byte) (absurd >>> 24);
+        token[1] = (byte) (absurd >>> 16);
+        token[2] = (byte) (absurd >>> 8);
+        token[3] = (byte) absurd;
+
+        long start = System.nanoTime();
+        try {
+            handler.resolve(Base64.getEncoder().encodeToString(token));
+            fail("a token asking for more iterations than the ceiling should be refused");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("above the"));
+        }
+        long millis = (System.nanoTime() - start) / 1_000_000;
+        assertTrue("refused after " + millis + " ms, so a key was derived first", millis < 1_000);
+    }
+
+    /** A count nobody can read back is a count nobody should be able to write. */
+    @Test
+    public void aCountAboveTheCeilingIsRefusedAtConstructionToo() {
+        try {
+            new AesGcmHandler("aes-gcm", PASSPHRASE.toCharArray(), AesGcmHandler.MAXIMUM_ITERATIONS + 1);
+            fail("this would write tokens it could not read back");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("above the"));
+        }
+    }
+
     @Test
     public void aCountBelowTheMinimumIsRefusedAtConstruction() {
         try {
@@ -193,6 +237,39 @@ public class AesGcmHandlerTest {
         }
     }
 
+    /**
+     * The <code>String</code> constructor exists because a passphrase read from the environment is one,
+     * and <code>System.getenv</code> answers <code>null</code> when the variable is not set. That is the
+     * shape the mistake arrives in, so it has to be refused where it is made rather than turned into a
+     * <code>NullPointerException</code> inside the key derivation.
+     */
+    @Test
+    public void aPassphraseThatIsNullIsRefusedInBothConstructors() {
+        try {
+            new AesGcmHandler((String) null);
+            fail("null is not a passphrase");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("passphrase"));
+        }
+        try {
+            new AesGcmHandler((char[]) null);
+            fail("null is not a passphrase");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("passphrase"));
+        }
+    }
+
+    /** There is nothing to encrypt, and the empty token that would come back is not the answer. */
+    @Test
+    public void encryptingNullIsRefusedRatherThanEncryptingTheWordNull() {
+        try {
+            handler().encrypt(null);
+            fail("null is not a value to encrypt");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("nothing to encrypt"));
+        }
+    }
+
     @Test
     public void thePassphraseIsCopiedSoTheCallerCanBlankItsOwn() {
         char[] mine = PASSPHRASE.toCharArray();
@@ -212,6 +289,47 @@ public class AesGcmHandlerTest {
         } catch (IllegalArgumentException expected) {
             assertFalse(expected.getMessage(), expected.getMessage().contains(PASSPHRASE));
         }
+    }
+
+    /**
+     * The derived keys are cached by salt so that one file costs one derivation, and the cache is capped so
+     * that a handler fed many salts cannot grow without bound. What the cap must not do is lose a value:
+     * the seventeenth salt evicts the first, and the token written under the first still reads back - it is
+     * derived again. Sixteen is the cap in {@link AesGcmHandler}, so seventeen salts is the smallest number
+     * that evicts anything.
+     * <p>
+     * At the minimum count rather than the default, because this is the one test here that pays for a
+     * key derivation eighteen times and the property under test is the eviction, not the cost of it.
+     * </p>
+     */
+    @Test
+    public void anEvictedKeyIsDerivedAgainRatherThanLost() {
+        AesGcmHandler handler = new AesGcmHandler("aes-gcm", PASSPHRASE.toCharArray(),
+                AesGcmHandler.MINIMUM_ITERATIONS);
+        String[] tokens = new String[17];
+        for (int i = 0; i < tokens.length; i++)
+            tokens[i] = handler.encrypt("value " + i); // a fresh salt each time, so a fresh cache entry
+        assertEquals("value 0", handler.resolve(tokens[0]));
+        assertEquals("value 16", handler.resolve(tokens[16]));
+    }
+
+    /**
+     * Two handlers are the same handler when they answer to the same name and write at the same count. The
+     * passphrase is deliberately not part of it: registering a name again with another passphrase is how a
+     * key rotation is done, and it has to replace what was there rather than sit beside it.
+     */
+    @Test
+    public void aHandlerIsToldApartByItsNameAndItsCountAndNeverByItsPassphrase() {
+        AesGcmHandler one = new AesGcmHandler("aes-gcm-2025", "one passphrase".toCharArray());
+        AesGcmHandler other = new AesGcmHandler("aes-gcm-2025", "quite another".toCharArray());
+        assertEquals(one, other);
+        assertEquals(one.hashCode(), other.hashCode());
+
+        assertNotEquals(one, new AesGcmHandler("aes-gcm-2024", "one passphrase".toCharArray()));
+        assertNotEquals(one, new AesGcmHandler("aes-gcm-2025", "one passphrase".toCharArray(), 400_000));
+        assertNotEquals(one, null);
+        assertNotEquals(one, "not a handler at all");
+        assertEquals(one, one);
     }
 
     /** A Config object is serializable and a handler is reachable from one: the passphrase must not go. */
