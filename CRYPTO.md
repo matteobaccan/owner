@@ -242,7 +242,9 @@ Two things make it more than a variation:
 - **Key material stops being a passphrase** and becomes a keystore, with its own path, type and
   password. That is a second thing to configure and a second thing to get wrong.
 
-Scheme `2` is where it goes when it is wanted. Nothing about scheme `1` has to change for it.
+A second handler name — `${$rsa::…}`, or whatever the construction ends up being called — is where it
+goes when it is wanted. Nothing about `aes-gcm` has to change for it, which is the point of dispatching
+on a name.
 
 
 Retiring the example in `crypto.md`
@@ -273,10 +275,13 @@ Open questions
 1. **The iteration count.** OWASP's current guidance for PBKDF2-HMAC-SHA256 is 210,000, which on the
    Java 8 baseline is a noticeable pause. Deriving once per salt makes it once per configuration
    rather than once per value, which probably settles it — but it wants measuring on the oldest JDK
-   we support before it is fixed in a scheme number.
-2. **The name.** `AesGcmDecryptor` says the construction, which is honest but ages badly if scheme 2
-   arrives; something like `StandardDecryptor` ages better and says less. The class implements both
-   `Decryptor` and `Encryptor`, or two classes?
+   we support before it is fixed, because once a token is written the count is not a knob the reader
+   can change: it is part of what `aes-gcm` means.
+2. **The name.** `AesGcmDecryptor` says the construction, which is honest and matches the handler
+   name; something like `StandardDecryptor` says less and ages differently. Since the handler name is
+   the identifier, a second construction arrives as a second name and a second class rather than as a
+   version of this one — which argues for naming the class after what it does. The class implements
+   both `Decryptor` and `Encryptor`, or two classes?
 3. **The tool's shape.** A `main()` in the core jar, reachable with `java -cp owner.jar …`, or a
    separate artifact? The core has no `main` today, and adding one is a small change to what the jar
    is.
