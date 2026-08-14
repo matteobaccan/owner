@@ -434,7 +434,7 @@ it. Five things are refused:
 | a source that was named and could not be read | the second bullet above |
 | not one of the declared sources could be read | the third bullet above |
 | `@HotReload` over a source nobody can watch | see [Reload](/owner/docs/reload/) |
-| a value built out of an encrypted one | see [Crypto support](/owner/docs/crypto/) |
+| a value built out of an `@EncryptedValue` one | see [Crypto support](/owner/docs/crypto/) — and note that a [marker](/owner/docs/crypto/) does not have this problem at all, so this refusal is about the older annotation |
 | a variable that resolves to nothing | see [Variables expansion](/owner/docs/variables-expansion/#a-variable-that-resolves-to-nothing) |
 
 And what it leaves alone matters as much:

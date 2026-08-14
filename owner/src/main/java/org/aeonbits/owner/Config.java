@@ -256,9 +256,39 @@ public interface Config extends Serializable {
     }
 
     /**
-     * When a value should be decrypted this annotation is needed.
-     * If value is not supplied it is assumed that the {@link Decryptor} set in {@link DecryptorClass} will be used.
-     * This overrides the {@link EncryptedValue} decryptor defined for the class.
+     * Declares that this method's value is encrypted, and is to be decrypted by the {@link Decryptor} named
+     * here or, when none is, by the one the interface declares with {@link DecryptorClass}.
+     *
+     * <h2>Since 2.0.0 there is a second way, and it is the one to prefer</h2>
+     * <p>
+     * A value can name what decrypts it, instead of the method declaring it:
+     * </p>
+     * <pre>
+     *     db.password = ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlmMpp4RxRWoHOoDUGjJ...}
+     * </pre>
+     * <p>
+     * That is a {@link org.aeonbits.owner.handlers.ValueHandler}, registered on the factory by name, and it
+     * differs from this annotation in three ways that matter:
+     * </p>
+     * <ul>
+     *   <li><b>a cipher is shipped</b> - {@link org.aeonbits.owner.handlers.AesGcmHandler} for a passphrase
+     *   and {@link org.aeonbits.owner.handlers.RsaHandler} for a key pair - where this annotation asks you
+     *   to supply the class;</li>
+     *   <li><b>it is expansion</b>, so {@link Accessible#fill(java.util.Map)} answers with the secret, and
+     *   so does a value that refers to it. Neither is true here: see
+     *   {@link org.aeonbits.owner.Accessible} and the warning this library gives about it;</li>
+     *   <li><b>{@link Accessible#store(java.io.OutputStream, String)} writes the marker back</b>, because
+     *   the properties hold its text rather than its answer.</li>
+     * </ul>
+     * <p>
+     * This annotation is <b>not deprecated</b> and is not going anywhere: it is what every configuration
+     * written before 2.0.0 uses, and somebody who brought their own decryptor has no reason to change.
+     * </p>
+     * <p>
+     * <b>The two may not be combined on one method.</b> A method carrying this annotation whose value is a
+     * marker is refused when the configuration is created: expansion runs first, so the marker would
+     * decrypt the value and the decryptor would then be handed the plain secret to decrypt a second time.
+     * </p>
      */
     @Retention(RUNTIME)
     @Target(METHOD)
@@ -274,9 +304,12 @@ public interface Config extends Serializable {
     }
 
     /**
-     * When a value should be decrypted this annotation is needed.
-     * This is the class {@link Decryptor}, the default <code>Decryptor</code> used to decrypt a key when none is
-     * defined at {@link EncryptedValue}. This allows share the same decryptor for all encrypted keys.
+     * The default {@link Decryptor} for every {@link EncryptedValue} of this interface that does not name
+     * one of its own, so that a whole configuration can share a decryptor.
+     * <p>
+     * A value that names what decrypts it needs neither this nor {@link EncryptedValue} - see there for the
+     * difference, and for why both remain.
+     * </p>
      */
     @Retention(RUNTIME)
     @Target(TYPE)

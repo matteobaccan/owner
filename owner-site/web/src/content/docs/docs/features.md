@@ -28,7 +28,7 @@ OWNER API supports a long list of features:
 - [File formats](/owner/docs/file-formats/)
 - [Event support](/owner/docs/event-support/)
 - [Singleton](/owner/docs/singleton/)
-- [Crypto support](/owner/docs/crypto/)
+- [Crypto support](/owner/docs/crypto/) — a value that names what decrypts it, with two ciphers shipped
 - [Preprocessors](/owner/docs/preprocessors/)
 - [JMX support](/owner/docs/jmx/)
 

@@ -375,8 +375,9 @@ Open questions
 3. ~~**The tool's shape.**~~ Answered above — a `main()` in the core jar. A `main()` in the core jar, reachable with `java -cp owner.jar …`, or a
    separate artifact? The core has no `main` today, and adding one is a small change to what the jar
    is.
-4. ~~**Does `StandardEncryptor` stay in the test suite**~~ Answered above — it stays, as a fixture; what it stopped being is published. as a demonstration of the SPI, clearly labelled
-   as not a cipher to use, or does it go?
+4. ~~**Does `StandardEncryptor` stay in the test suite**~~ Answered above — it stays, as a fixture; what it
+   stopped being is *published*. As it was posed: does it stay as a demonstration of the SPI, clearly
+   labelled as not a cipher to use, or does it go?
 5. ~~**The relationship with the value-level marker.**~~ Answered — see below.
 6. ~~**Whether the warning about a weak construction is ours to give.**~~ Answered above — not given. A decryptor somebody wrote
    themselves may be anything, and we cannot inspect it. But an `@EncryptedValue` property whose

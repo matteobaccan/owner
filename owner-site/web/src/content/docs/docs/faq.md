@@ -27,12 +27,32 @@ meaningful exception: see [Mandatory properties](/owner/docs/usage/#mandatory-pr
 
 ## How about the security of storing password in properties? Does OWNER support encryptable properties like in [Jasypt](http://www.jasypt.org/encrypting-configuration.html) ?
 
-Yes. Since version 1.0.10 OWNER supports encrypted properties out of the box through the `@EncryptedValue` and
-`@DecryptorClass` annotations: see the [Encrypted properties](/owner/docs/crypto/) chapter
-(this was tracked in [#49](https://github.com/matteobaccan/owner/issues/49)).
+Yes, and since 2.0.0 with a cipher we actually ship — which is the part Jasypt has and we used not to.
 
-Before 1.0.10, OWNER APIs were flexible enough to let the user implement that: an example is [here][enc-props].
+```properties
+db.password = ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlmMpp4RxRWoHOoDUGjJ...}
+jdbc.url    = jdbc:h2:mem:test?password=${db.password}
+```
 
+```java
+ConfigFactory.registerValueHandler(new AesGcmHandler(passphrase));
+```
+
+AES-256/GCM over PBKDF2 at 210,000 iterations, in the core jar, with no dependency and no framework; the
+tool that produces the marker is in the same jar. Jasypt derives at 1,000 iterations and encrypts with CBC,
+which has no integrity check, and needs Spring for the property-source integration. There is also
+`${$rsa-oaep::...}`, a key pair, so that whoever adds a secret to the file **cannot read the ones already
+there** — which Jasypt cannot do at all, being a passphrase by construction.
+
+See the [Crypto support](/owner/docs/crypto/) chapter, and [`ValueHandlerExample`][handler-example] for a
+runnable one covering both ciphers and a handler of your own.
+
+The older `@EncryptedValue` and `@DecryptorClass` annotations, from 1.0.10, still work and are not going
+anywhere — you supply the `Decryptor` there (this was tracked in
+[#49](https://github.com/matteobaccan/owner/issues/49)). Before 1.0.10 the API was already flexible enough
+to do it by hand: an example is [here][enc-props].
+
+  [handler-example]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/examples/ValueHandlerExample.java
   [enc-props]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/examples/EncryptedPropertiesExample.java
 
 ## Why OWNER API doesn't implement this ${pretty.neat.feature} ?

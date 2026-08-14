@@ -112,6 +112,18 @@ because it is what makes the table predictable rather than arbitrary: **a variab
 it is resolved wherever the value is read; `@EncryptedValue`, `@ConverterClass` and the preprocessors are
 declared on a method, and a property asked for by name has no method to read the declaration from.**
 
+<div class="note info">
+  <h5>Which is exactly why an encrypted value is better written in the value.</h5>
+  <p>
+    Since 2.0.0 a value can name what decrypts it —
+    <a href="/owner/docs/crypto/"><code>db.password=${$aes-gcm::…}</code></a> — and being expansion rather
+    than a declaration on a method, it is in the first column and not the third: <code>fill()</code> and
+    <code>getProperty()</code> answer with the <em>secret</em>, and so does a value that refers to it.
+    <code>store()</code> still writes the marker back, because the properties hold its text rather than its
+    answer, so the round trip the whole table exists to protect is intact.
+  </p>
+</div>
+
 ```java
 // config.properties
 //   s     = say

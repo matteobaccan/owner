@@ -192,9 +192,10 @@ those are how a configuration is read and written back, and masking them would r
   <p>
   <code>@Sensitive</code> keeps a value from being printed by accident; it does nothing to protect the value
   where it is stored, and anyone who can read the properties file can read the password. To keep the value
-  itself unreadable use <a href="/owner/docs/crypto/"><code>@EncryptedValue</code></a>, which stores
-  it encrypted and decrypts it on access — and note that an encrypted property is already printed as its
-  ciphertext, so it does not need this annotation, unless even the ciphertext should stay out of the log.
+  itself unreadable, write it as a <a href="/owner/docs/crypto/">marker</a> —
+  <code>db.password=${$aes-gcm::…}</code> — which stores it encrypted and decrypts it on access. Such a
+  property does not need this annotation either: what is printed is the marker, and a marker in a listing
+  is unreadable already.
   </p>
 </div>
 

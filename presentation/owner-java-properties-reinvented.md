@@ -328,6 +328,7 @@ complex things should be possible."*
 |---|---|
 | Preprocessors — `@PreprocessorClasses` | 1.0.9 |
 | Crypto — `@EncryptedValue`, `@DecryptorClass` | 1.0.10 |
+| Crypto — `${$aes-gcm::…}`, `${$rsa-oaep::…}`, and a cipher shipped | 2.0.0 |
 | JMX — every `Config` is a `DynamicMBean` | 1.0.10 |
 | Singleton — `ConfigCache` | 1.0.10 |
 | Key prefix — `@Prefix` | 2.0.0 |
@@ -1512,7 +1513,7 @@ cfg.list(System.out);
 
 Only the output **meant to be read by a human** is masked — `list()` and `toString()`. The method itself, `getProperty()`, `fill()`, `store()`, `storeToXML()` and the JMX attributes keep returning the real value: those are how a configuration is written back, and masking them would save `********` into the file.
 
-> Masking is not encryption. For that there is `@EncryptedValue`, whose values are already printed as ciphertext.
+> Masking is not encryption. For that there is a marker — `db.password=${$aes-gcm::…}` — whose values are printed as the marker and unreadable already.
 
 ---
 
@@ -1777,7 +1778,7 @@ OWNER's way of failing is to keep working: a source that cannot be read is passe
 - a source **named** and unreadable
 - **not one** declared source readable
 - `@HotReload` over what cannot be watched
-- a value built out of an **encrypted** one
+- a value built out of an **`@EncryptedValue`** one (a marker has no such problem)
 - and, at `CONFIG`, what was *decided*: which sources, which loader, which key each method reads
 
 Never a value: that is what `@Sensitive` is for. And said **once** — a hot reload runs the load again at its interval.
@@ -1795,6 +1796,48 @@ f.setProperty("owner.strict", "true");
 Every warning becomes a refusal when the object is created.
 
 **What counts as a failure is not a list of its own — it is the warnings**, which already leave the legitimate cases alone. A source that is merely absent stays silent under strict too: `LoadType.FIRST` expects misses by design.
+
+</div>
+</div>
+
+---
+
+# A password in the file, and a cipher to put it there
+
+<div class="columns">
+<div>
+
+```properties
+db.password = ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZ...}
+jdbc.url    = jdbc:h2:mem:test?password=${db.password}
+```
+
+```java
+ConfigFactory.registerValueHandler(
+        new AesGcmHandler(passphrase));
+```
+
+Nothing on the interface. `password()` is an ordinary `String` method, and `jdbcUrl()` gets **the secret**, because a marker *is* expansion.
+
+Until 2.0.0 this library shipped **no cipher at all** — and the documentation published an AES/ECB example for the reader to copy, under which two equal passwords have equal ciphertext.
+
+</div>
+<div>
+
+<p class="step">and the one that changes who can do what</p>
+
+```properties
+api.token = ${$rsa-oaep::7VcoaAGAX+3tbyARpqJRCyZ4...}
+```
+
+With a key pair, whoever *writes* a secret holds only the public key: a CI job can add one **without being able to read the others**.
+
+- AES-256/GCM, PBKDF2 at 210,000 — measured, not guessed
+- `store()` writes the marker back; `fill()` gets the secret
+- `EncryptTool` in the same jar; the passphrase is never an argument
+- no discovery: a cipher on the classpath is not a decision anybody took
+
+`${$vault::…}`, `${$file::…}` — the envelope knows nothing about cryptography.
 
 </div>
 </div>
@@ -1866,11 +1909,11 @@ Everything else is additive. Four changes alter the result of a configuration th
 
 | 2014 | today |
 |---|---|
-| Encryptable Properties | ✔ `@EncryptedValue`, since 1.0.10 |
+| Encryptable Properties | ✔ `@EncryptedValue` since 1.0.10 — and since 2.0.0 a cipher we actually ship, named in the value |
 | Variable Expansion in `@Key` | ✔ since 1.0.6 |
 | JMX bean | ✔ every `Config` is a `DynamicMBean` |
 | Singleton mechanism | ✔ `ConfigCache` |
-| More file formats | ✔ `.env` in the core; INI, JSON, YAML, TOML in `owner-formats` — HOCON still open |
+| More file formats | ✔ `.env` in the core; INI, JSON, YAML, TOML in `owner-formats`; HOCON in `owner-extras` |
 | Validation | - still open |
 
 Arrived without being asked for: `@Prefix`, Preprocessors, `@Sensitive` masking, transactional event listeners.

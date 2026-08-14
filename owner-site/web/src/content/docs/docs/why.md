@@ -61,8 +61,14 @@ that has not moved yet is not left without an option.
 `KB` is a thousand bytes and `KiB` is 1024, each named for what it is. It is a small thing until the day
 the size in your configuration file and the size your monitoring reports disagree by 2.4%.
 
-**The things you would otherwise write by hand.** Values that are
-[encrypted](/owner/docs/crypto/) at rest and decrypted on access; properties
+**A password in a configuration file, without writing the cipher yourself.** Since 2.0.0 a value can name
+what decrypts it — `db.password=${$aes-gcm::…}` — and the [cipher is shipped](/owner/docs/crypto/):
+AES-256/GCM over PBKDF2, in the core jar, with no dependency and no framework. Or a key pair, so that
+whoever adds a secret to the file cannot read the ones already there, which no other Java configuration
+library offers without a server. Values that refer to it get the secret, `store()` writes the marker back,
+and the tool that produces one is in the same jar.
+
+**The things you would otherwise write by hand.** Properties
 [required](/owner/docs/usage/#mandatory-properties) to be present, checked when the object is
 created rather than when it is first read; passwords
 [kept out of your logs](/owner/docs/debugging/); a configuration

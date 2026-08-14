@@ -137,6 +137,43 @@ back to a file keeps them. Which method does what, and what happens to
 `@Sensitive` and `@EncryptedValue` on each path, is set out in one table:
 [which methods process the value](/owner/docs/accessible-mutable/#which-methods-process-the-value).
 
+An expression that names a handler
+----------------------------------
+
+*Since 2.0.0.* One shape of expression is not a key at all. An expression that begins with `$` and
+contains `::` names a **handler**, and everything after the first `::` is handed to it as text:
+
+```properties
+db.password = ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlmMpp4RxRWoHOoDUGjJ...}
+api.token   = ${$vault::secret/data/app:v2}
+tls.key     = ${$file::/run/secrets/tls.key}
+```
+
+The library owns the envelope — the `$`, the name, the `::` — and the handler owns the payload, which is
+never interpreted here. The `$` is what tells a marker from an ordinary key, and it is what lets the two
+mix: a marker substitutes inside a larger value, and a value that refers to one gets the handler's answer.
+
+Two consequences of it being expansion rather than something bolted on beside it:
+
+- it resolves wherever a value is read, `fill()` and `getProperty()` included, and `store()` writes the
+  marker back — the same rules as any other `${...}`, read off the same table;
+- **what a handler answers is not expanded again**. A secret that happens to contain `${` is a secret, not
+  a template.
+
+A marker naming a handler nobody registered is an **error**, not the empty string. That is deliberate and
+it is the one place this page's usual rule is reversed: a misspelt variable resolving to the empty string
+is a nuisance, and a misspelt *handler* resolving to the empty string is a password that silently became
+nothing.
+
+Registering one is a line, and there is no discovery on the class path:
+
+```java
+ConfigFactory.registerValueHandler(new AesGcmHandler(passphrase));
+```
+
+See [Crypto support](/owner/docs/crypto/) for the two ciphers that ship with the library, and for writing
+a handler of your own.
+
 Variable expansion for the @Key
 ---------------------------------
 

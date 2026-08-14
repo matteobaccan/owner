@@ -107,6 +107,70 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **A value can name what decrypts it, and a cipher is finally shipped.** Until now this library shipped
+   none: `org.aeonbits.owner.crypto` was an SPI and a no-op, and the only concrete implementation lived in
+   the test suite, where the documentation reproduced its source for you to copy. That class is AES/ECB
+   with the passphrase used as the raw key, so the same plaintext always gave the same ciphertext and a file
+   disclosed which of its secrets were equal. **If you copied it, the [Crypto support](/owner/docs/crypto/)
+   page now says what to do about it.**
+
+   In its place, a marker in the *value*:
+
+   ```properties
+   db.password = ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlmMpp4RxRWoHOoDUGjJ...}
+   jdbc.url    = jdbc:h2:mem:test?password=${db.password}
+   ```
+
+   ```java
+   ConfigFactory.registerValueHandler(new AesGcmHandler(passphrase));
+   ```
+
+   Nothing goes on the interface, and the passphrase never comes from the properties — which would be the
+   secret protecting the file, kept in the file. Two ciphers come with it:
+
+   - **`${$aes-gcm::…}`** — AES-256/GCM with a random IV per value, PBKDF2-HMAC-SHA256 at 210,000
+     iterations, salt and iteration count travelling in the token. One passphrase, which both writes and
+     reads.
+   - **`${$rsa-oaep::…}`** — a key pair, so that whoever adds a secret to a configuration **cannot read the
+     ones already there**. RSA-OAEP wrapping a per-value AES-256/GCM key, since RSA cannot encrypt an
+     arbitrary value.
+
+   `EncryptTool`, in the same jar, turns values into markers:
+
+   ```
+   $ printf 's3cr3t
+hunter2
+' | OWNER_PASSPHRASE='…'        java -cp owner-2.0.0.jar org.aeonbits.owner.handlers.EncryptTool > markers.txt
+   ```
+
+   Neither the passphrase nor the values may be command-line arguments, and the tool refuses them there: a
+   command line stays in the shell history and is visible in `ps`.
+
+   **Being expansion is what makes it worth having.** `fill()` gets the secret, a value that refers to it
+   gets the secret rather than the ciphertext, and `store()` writes the marker back because the properties
+   hold its text and not its answer. Those last two are exactly what
+   [#285](https://github.com/matteobaccan/owner/issues/285) and half of
+   [#287](https://github.com/matteobaccan/owner/issues/287) reported, and they are settled by construction
+   rather than by a second mechanism.
+
+   `@EncryptedValue` and `@DecryptorClass` are **not deprecated** and still work as they always did — they
+   are what every configuration written before 2.0.0 uses. The one thing refused is carrying both on one
+   method, since expansion runs first and the decryptor would then be handed the plain secret.
+
+ * **`ValueHandler`, the mechanism underneath it, is not about cryptography.** OWNER reads the envelope —
+   the `$`, the name, the `::` — and hands everything after it to the handler as text. So a handler of your
+   own is a two-method class:
+
+   ```properties
+   api.token = ${$vault::secret/data/app:v2}
+   tls.key   = ${$file::/run/secrets/tls.key}
+   ```
+
+   Handlers are registered and **never discovered on the class path**: a file format found there reads files
+   that are already yours, while a handler found there would answer for the values inside them. A marker
+   naming a handler nobody registered is an error rather than the empty string, which for a password is the
+   worst answer available. See [`ValueHandlerExample`](https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/examples/ValueHandlerExample.java).
+
  * **A class named in an annotation no longer has to be public.** A `Preprocessor`, a `Converter`, a
    `Tokenizer` and a decryptor may now be package-private, or a `private static` class nested inside the
    interface that names them, and their constructor may be private too:
