@@ -104,11 +104,17 @@
             <scope>test</scope>
         </dependency>
         <!-- Hibernate Validator interpolates its messages with an expression language and refuses to start
-             without an implementation of one -->
+             without an implementation of one.
+
+             Expressly 5 and NOT 6, and this is the second version here that must not be bumped: 6.0.0
+             declares Require-Capability JavaSE 17 in its manifest, and this build runs on every LTS from
+             11. Renovate raised it on 14 August 2026 and only the three JDK 11 legs went red, with
+             HV000183 - which is the matrix earning its keep, since a build on one JDK would have shipped
+             it. There is a rule in renovate.json. -->
         <dependency>
             <groupId>org.glassfish.expressly</groupId>
             <artifactId>expressly</artifactId>
-            <version>6.0.0</version>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
         <!-- Apache BVal 2 and NOT 3, and this is a version that must not be bumped: 2.x serves
