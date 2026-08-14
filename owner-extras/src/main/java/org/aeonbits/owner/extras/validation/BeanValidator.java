@@ -95,12 +95,23 @@ public class BeanValidator implements ConfigValidator {
     private static final String JAVAX_API = "javax.validation.Validation";
 
     /**
-     * {@inheritDoc}
+     * Checks the given properties against the constraints their methods declare, with whichever of the two
+     * validation namespaces is present and has a provider — both, when both are.
+     * <p>
+     * Written out rather than inherited with <code>{&#64;inheritDoc}</code>: this artifact sees
+     * {@link ConfigValidator} as a jar and not as source, so there is no comment there for javadoc to
+     * copy. JDK 25 is the first to say so, and it is the second time this trap has been walked into —
+     * {@code ZooKeeperLoader.accept} was the first.
+     * </p>
      * <p>
      * The <code>&amp;&amp;</code> below is doing real work: a class path holding one namespace and not the
      * other must never load the class that names the missing one, and a method body is only resolved when
      * it runs. See {@link JakartaBeanValidation} for why that separation must not be undone.
      * </p>
+     *
+     * @param properties the properties to check, never empty.
+     * @return the violations found, in no particular order; an empty list when every constraint holds.
+     * @throws UnsupportedOperationException if no validation provider is on the class path at all.
      */
     @Override
     public List<Violation> validate(List<ConstrainedProperty> properties) {
