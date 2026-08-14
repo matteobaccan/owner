@@ -111,7 +111,7 @@ public final class AesGcmTool {
 
         char[] passphrase;
         try {
-            passphrase = passphrase(err);
+            passphrase = passphrase();
         } catch (IllegalStateException e) {
             err.println(e.getMessage());
             return 1;
@@ -163,8 +163,12 @@ public final class AesGcmTool {
      * confirming it would be theatre, while a passphrase mistyped at a prompt produces a file that cannot
      * be read and no sign of why until it is.
      * </p>
+     * <p>
+     * Nothing is printed from here, which is why it takes no stream: the prompts belong to the console
+     * that reads them, and going through one of ours would echo the passphrase back.
+     * </p>
      */
-    private static char[] passphrase(PrintStream err) {
+    private static char[] passphrase() {
         String fromEnvironment = System.getenv(PASSPHRASE_VARIABLE);
         if (fromEnvironment != null && !fromEnvironment.isEmpty())
             return fromEnvironment.toCharArray();

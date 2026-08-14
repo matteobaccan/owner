@@ -45,10 +45,12 @@ public class ValueHandlerTest {
             this.name = name;
         }
 
+        @Override
         public String name() {
             return name;
         }
 
+        @Override
         public String resolve(String payload) {
             return new StringBuilder(payload).reverse().toString();
         }
@@ -161,10 +163,12 @@ public class ValueHandlerTest {
     @Test
     public void whatAHandlerAnswersIsNotExpandedAgain() {
         ConfigFactory.registerValueHandler(new ValueHandler() {
+            @Override
             public String name() {
                 return "echo";
             }
 
+            @Override
             public String resolve(String payload) {
                 return "${elsewhere}";
             }
@@ -195,10 +199,12 @@ public class ValueHandlerTest {
     public void registeringTheSameNameAgainReplacesIt() {
         ConfigFactory.registerValueHandler(new ReversingHandler());
         ConfigFactory.registerValueHandler(new ValueHandler() {
+            @Override
             public String name() {
                 return "reverse";
             }
 
+            @Override
             public String resolve(String payload) {
                 return "rotated";
             }
