@@ -9,7 +9,8 @@ which records what the other libraries do, `FORMATS.md`, which is the same kind 
 file formats, and `TODO.md`, which holds the ordered backlog.
 
 **Built on 2026-08-14.** `ValueHandler`, `HandlersManager` and the hook in `StrSubstitutor` are the
-envelope; `AesGcmHandler` is the cipher; `AesGcmTool` is the tool; the site page was rewritten. What the
+envelope; `AesGcmHandler` and `RsaHandler` are the two ciphers; `EncryptTool` is the tool; the site page
+was rewritten. What the
 building decided, and where it departed from what is written below, is in **What the construction
 settled** at the bottom, ahead of the open questions — which are now one.
 
@@ -229,7 +230,10 @@ environment variable.
 Asymmetric keys
 ---------------
 
-**Not in the first version, and the format is what keeps the door open.**
+**Built on 2026-08-14, in the same release**, after the symmetric one and on the same envelope. This
+section was written expecting to postpone it; what changed is that the envelope turned out to cost the
+asymmetric case nothing — a second handler name and a second class, with no change to `aes-gcm` and none
+to the substitution. `RsaHandler`, name `rsa-oaep`.
 
 The use case is real and is not the same as the symmetric one: with a key pair, whoever *writes* the
 configuration needs only the **public** key, and only the application holds the private one. A
@@ -245,9 +249,31 @@ Two things make it more than a variation:
 - **Key material stops being a passphrase** and becomes a keystore, with its own path, type and
   password. That is a second thing to configure and a second thing to get wrong.
 
-A second handler name — `${$rsa::…}`, or whatever the construction ends up being called — is where it
-goes when it is wanted. Nothing about `aes-gcm` has to change for it, which is the point of dispatching
-on a name.
+**How both were answered.** The hybrid construction is what shipped, exactly as anticipated: a fresh
+AES-256 key per value, wrapped with RSA-OAEP, both in the token. On key material the prediction was wrong
+in a useful way — **it is not a keystore.** The constructor takes `PublicKey` and `PrivateKey`, which is
+the same rule as everywhere else here (the caller brings the material), and the two static readers
+`publicKeyFrom` / `privateKeyFrom` take the PEM that `openssl` writes, which is what people actually
+have. A keystore is then three lines of JDK on the caller's side rather than four settings on ours.
+`publicKeyFrom` also accepts a `CERTIFICATE` block, which is what a keystore exports; PKCS#1
+(`BEGIN RSA PRIVATE KEY`) is refused with the one `openssl` command that converts it, because the JDK has
+no `KeySpec` for it and an ASN.1 reader does not belong in a configuration library.
+
+Three things the building added that this section did not foresee:
+
+- **A four-byte fingerprint of the modulus, at the head of the token.** Not security — a public key is
+  public — but the diagnosis for the mistake this arrangement *invites*: encrypting against the wrong
+  public key is silent to whoever does it, since they cannot read back what they wrote. Without it the
+  deployment fails with "could not be decrypted"; with it, the message names both key pairs. Both halves
+  of an RSA pair expose the modulus, which is why the fingerprint can be computed from either.
+- **OAEP is given an explicit `OAEPParameterSpec`.** Naming the transformation alone leaves MGF1 on SHA-1
+  in the JDK, which is self-consistent but is not what the name says.
+- **A modulus below 2048 bits is refused**, and so is a public and a private key that are not two halves
+  of one pair.
+
+The name is `rsa-oaep` and not the `${$rsa::…}` written above: the marker name is what a token must be
+read with, so it pins down the padding, while the class is just a Java identifier. Nothing about
+`aes-gcm` changed for any of it, which was the point of dispatching on a name.
 
 
 Retiring the example in `crypto.md`
@@ -295,7 +321,7 @@ arrives as a second name and a second class rather than as a version of this one
 decryption are in it together: they share a token format, and a format written down in two places
 disagrees with itself.
 
-**3, the tool — a `main()` in the core jar**, `java -cp owner.jar org.aeonbits.owner.handlers.AesGcmTool`,
+**3, the tool — a `main()` in the core jar**, `java -cp owner.jar org.aeonbits.owner.handlers.EncryptTool`,
 with no `Main-Class` in the manifest, so the jar gains a class and not an identity as an executable. A
 separate artifact would be one more thing to release and one more thing to fetch before you can put a
 password in a file. The constraint held: neither the passphrase nor the values may be arguments, and a
@@ -372,6 +398,5 @@ Question 5 was **answered on 2026-08-13** and is folded into the design above: t
 form, the token is what goes inside it, and the scheme number is gone. The other seven were answered by
 building it, on 2026-08-14, and the verdicts are in the section before this one.
 
-**The only question left open is not in this list**: the asymmetric case, which has a section of its own
-above and arrives as a second handler name whenever somebody wants it. Nothing about `aes-gcm` has to
-change for it.
+**And the question that was not in this list — the asymmetric case — was answered the same day**, by
+building it. See the section above. There is nothing open in this document any more.

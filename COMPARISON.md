@@ -97,12 +97,16 @@ Checked against all of the above:
 - **Zero runtime dependencies in the core** — verified in the pom: test scope only.
 - **Java 8 baseline.** Coat needs 11, Gestalt 11, SmallRye 17. We are the only modern option for
   anyone still on 8.
-- **Encryption of values with a cipher actually shipped** (`${$aes-gcm::…}`, added 2026-08-14): AES-256/GCM
-  over PBKDF2 at 210,000 iterations, in the core, with no dependency and no framework, on the Java 8
-  baseline — and the tool that encrypts a value in the same jar. The *marker* is not ours, SmallRye has
-  the same shape; the construction, the absence of a dependency and the fact that the key does not come
-  from a configuration property are. See "Encrypting a value against the equivalents" below. The older
-  `@EncryptedValue` / `@DecryptorClass` remain, for whoever brought their own decryptor.
+- **Encryption of values with a cipher actually shipped** (added 2026-08-14): `${$aes-gcm::…}`,
+  AES-256/GCM over PBKDF2 at 210,000 iterations, in the core, with no dependency and no framework, on the
+  Java 8 baseline — and the tool that encrypts a value in the same jar. The *marker* is not ours, SmallRye
+  has the same shape; the construction, the absence of a dependency and the fact that the key does not
+  come from a configuration property are.
+- **And a key pair, `${$rsa-oaep::…}`**, so that whoever writes a secret into a configuration cannot read
+  the ones already there. **No other Java configuration library has this in the library**: Spring Cloud
+  Config has it behind a config server, and the rest are symmetric only. See "Encrypting a value against
+  the equivalents" below. The older `@EncryptedValue` / `@DecryptorClass` remain, for whoever brought
+  their own decryptor.
 - **JMX**, **preprocessors**, **`Mutable`/`Accessible`** (we write, the others mostly only read),
   **parametrized properties**, **`@DisableFeature`** granularity, **prefix derived from the package**.
 - BSD licence, no framework lock-in.
@@ -219,7 +223,7 @@ flattering: **the marker is not our idea, and SmallRye got there first with almo
 
 | | How a value says it is encrypted | The cipher | Where the key comes from | Mixes with ordinary expansion |
 |---|---|---|---|---|
-| **OWNER 2.0.0** | `${$aes-gcm::…}` in the value | AES-256/GCM, PBKDF2-HMAC-SHA256 at 210,000, random IV per value, in the core | an instance the caller registers, holding the passphrase | **yes** |
+| **OWNER 2.0.0** | `${$aes-gcm::…}` or `${$rsa-oaep::…}` in the value | AES-256/GCM, PBKDF2-HMAC-SHA256 at 210,000, random IV per value; **and** RSA-OAEP over AES-256/GCM. Both in the core | an instance the caller registers, holding the passphrase or the key | **yes** |
 | **SmallRye Config** | `${aes-gcm-nopadding::…}` in the value | AES/GCM, key of **128 bits**, base64, **no key derivation** | the configuration property `smallrye.config.secret-handler.aes-gcm-nopadding.encryption-key` | **no** — "it is not possible to mix Secret Keys Expressions with Property Expressions" |
 | **Jasypt** (`jasypt-spring-boot`) | `ENC(…)` prefix on the value | PBEWITHHMACSHA512ANDAES_256 since 3.0.0: PBKDF2-HMAC-SHA512 at **1,000** iterations, AES-256-**CBC** | `jasypt.encryptor.password`, a property or an environment variable | a prefix is not an expression at all |
 | **Spring Cloud Config** | `{cipher}` prefix, decrypted **server side** | symmetric `encrypt.key`, or a keystore for the asymmetric case | `encrypt.key` / `ENCRYPT_KEY`, or a keystore | server side, before the client sees anything |
@@ -248,6 +252,15 @@ generated rather than chosen. Jasypt derives properly but at **1,000 iterations*
 default and 210 times below current OWASP guidance, and encrypts with **CBC**, which has no integrity: an
 edited value decrypts to something else instead of failing. Ours is AES-256/GCM at 210,000 iterations
 with the whole header authenticated.
+
+**Only Spring Cloud Config has the asymmetric case, and it needs a server for it.** That is the second
+place we are alone: `${$rsa-oaep::…}` gives a developer or a CI job the **public** key, so they can add a
+secret to a configuration without being able to read the ones already there. SmallRye has one symmetric
+handler and no key pair; Jasypt is symmetric by construction, since PBE *is* a passphrase; Spring Cloud
+Config does offer a keystore, but through a config server with `/encrypt` and `/decrypt` endpoints rather
+than in the library reading the file. `sops` and `age`, which are built around exactly this, are not Java
+configuration libraries at all. Ours is a second handler name and no new mechanism, which is the dividend
+of having dispatched on names in the first place.
 
 **And it costs nothing to reach.** SmallRye's needs `smallrye-config-crypto` and Java 17; Jasypt needs
 Spring; Spring Cloud Config needs a config server. Ours is in the core jar, on the Java 8 baseline, with
@@ -360,6 +373,7 @@ coincidence; it is evidence the demand is real.
 | "Which source provided this?" | Spring (origin tracking), Gestalt | — (**closed 2026-08-11**) |
 | Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130, #143 — **partly answered 2026-08-14**: a `ValueHandler` makes `${$vault::secret/data/app}` a per-value reference anybody can write, with no module and no dependency from us. What is still missing is a *source* — a whole tree read from S3 or Consul — which is a `Loader`, not a handler |
 | An encrypted value in the file | SmallRye, Jasypt, Spring Cloud Config | — (**closed 2026-08-14**, and we ship the cipher, which SmallRye half does and Jasypt does at 1,000 iterations) |
+| An encrypted value only the deployment can read | Spring Cloud Config, and only through a server | — (**closed 2026-08-14**: `${$rsa-oaep::…}`. The one row here where no library is level with us) |
 | DI integration | every framework | #222, #147 |
 | GraalVM native image | Coat, by construction | — |
 

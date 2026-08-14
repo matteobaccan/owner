@@ -94,7 +94,7 @@ import java.util.Map;
  * @author Matteo Baccan
  * @since 2.0.0
  */
-public class AesGcmHandler implements ValueHandler {
+public class AesGcmHandler implements ValueHandler, Encrypting {
 
     private static final long serialVersionUID = 5091737290176155516L;
 
@@ -264,6 +264,7 @@ public class AesGcmHandler implements ValueHandler {
      * @param plainTexts the values to encrypt.
      * @return the base64 tokens, in the same order.
      */
+    @Override
     public String[] encryptAll(String... plainTexts) {
         byte[] salt = newSalt();
         String[] tokens = new String[plainTexts.length];
@@ -284,6 +285,7 @@ public class AesGcmHandler implements ValueHandler {
     }
 
     /** The marker wrapping an already encrypted token. */
+    @Override
     public String marker(String token) {
         return "${$" + name + "::" + token + "}";
     }

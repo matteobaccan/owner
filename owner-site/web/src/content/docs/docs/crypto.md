@@ -16,13 +16,19 @@ title: "Crypto support"
 Since 2.0.0 there are two ways of putting an encrypted value in a configuration, and they are not
 equivalent. **Write the marker.** The annotation stays for the configurations that already use it.
 
-|                        | `${$aes-gcm::…}` since 2.0.0 | `@EncryptedValue` since 1.0.10 |
+|                        | a marker, since 2.0.0        | `@EncryptedValue` since 1.0.10 |
 |---|---|---|
 | Where it is declared    | in the value                 | on the method                  |
-| A cipher is shipped     | yes, AES-256/GCM             | no — you supply the class      |
+| A cipher is shipped     | yes, two of them             | no — you supply the class      |
 | `fill()` gets the secret| yes                          | no                             |
 | A value referring to it | gets the secret              | gets the cipher text           |
 | `store()` writes back   | the marker                   | the cipher text                |
+
+Two ciphers come with it, and which one you want is a question about people rather than about algorithms:
+
+- **`${$aes-gcm::…}`** — one passphrase, which both writes and reads. The simple case.
+- **`${$rsa-oaep::…}`** — a key pair, so that whoever adds a secret to the file **cannot read the ones
+  already there**. See [A key pair](#a-key-pair-so-that-writing-a-secret-is-not-reading-them-all) below.
 
 
 The marker
@@ -66,7 +72,7 @@ The tool is in the core jar and needs nothing else on the classpath:
 
 ```
 $ printf 's3cr3t\nhunter2\n' | OWNER_PASSPHRASE='…' \
-    java -cp owner-2.0.0.jar org.aeonbits.owner.handlers.AesGcmTool
+    java -cp owner-2.0.0.jar org.aeonbits.owner.handlers.EncryptTool
 
 ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlmMpp4RxRWoHOoDUGjJI2AYd1o9qYPK}
 ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlkT++B4i4OY/U+ozDWUAM4GLcG2l1wW}
@@ -77,14 +83,15 @@ output and everything else to standard error, so `> markers.txt` collects marker
 
 **Neither the passphrase nor the values may be command-line arguments**, and the tool refuses them there
 rather than accepting them: a command line stays in the shell history and is visible in `ps` to every user
-on the machine. `--name` and `--iterations` are arguments, because neither is secret.
+on the machine. `--handler`, `--name`, `--iterations` and `--public-key` are arguments, because none of
+them is secret — a public key least of all.
 
 Encrypt a whole file's worth of values **in one run**. Every value of one run shares a salt and gets its
 own IV, so reading them back costs one key derivation between them instead of one per property.
 
 
-What the construction is
-------------------------
+What `aes-gcm` is
+-----------------
 
 `base64( iterations(4) | salt(16) | iv(12) | ciphertext | tag(16) )`, where
 
@@ -116,6 +123,59 @@ api.token    = ${$aes-gcm-2024::…}   # not yet
 ```
 
 Both are readable while the rotation is under way, and it proceeds one value at a time.
+
+
+A key pair, so that writing a secret is not reading them all
+------------------------------------------------------------
+
+With one passphrase, whoever can add a value to the file can read every other value in it. Often that is
+fine. When it is not — a developer adding an API key, a CI job writing a generated password — a key pair
+separates the two permissions:
+
+```java
+// the deployment, and only the deployment
+ConfigFactory.registerValueHandler(
+        new RsaHandler(RsaHandler.privateKeyFrom(Paths.get("/etc/app/app.key"))));
+```
+
+```
+$ openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out app.key
+$ openssl rsa -in app.key -pubout -out app.pub          # this half is shareable
+
+$ java -cp owner-2.0.0.jar org.aeonbits.owner.handlers.EncryptTool \
+      --public-key app.pub < values.txt
+
+${$rsa-oaep::7VcoaAGAX+3tbyARpqJRCyZ4rwan5sbVRIdut15ZaTC/Oh1m9UulHn+Q…}
+```
+
+The public key goes to everyone who writes; the private key stays where the configuration is read. A
+handler holding only one half says so when asked for the other, which is the point rather than a
+limitation. `publicKeyFrom` also reads a `CERTIFICATE` block, which is what a keystore exports.
+
+**The construction is hybrid, because RSA cannot encrypt a value.** RSA-2048 with OAEP takes about 190
+bytes and then falls off a cliff — enough for a password, not for a certificate or a connection string. So
+a fresh AES-256 key is drawn per value, the value is encrypted with it under GCM, and RSA wraps the key:
+
+`base64( fingerprint(4) | wrapped key length(2) | wrapped key(n) | iv(12) | ciphertext | tag(16) )`
+
+The fingerprint is four bytes of SHA-256 over the RSA modulus, which both halves of a pair expose. It is
+not a security measure — a public key is public — it is a diagnosis for **the mistake this arrangement
+invites**: encrypting against the wrong public key, which the person doing it cannot notice, because they
+cannot read back what they wrote. Without it the deployment fails with "could not be decrypted"; with it,
+it names both key pairs.
+
+<div class="note info">
+  <h5>OAEP is given its parameters explicitly.</h5>
+  <p>
+    Naming the transformation alone — <code>RSA/ECB/OAEPWithSHA-256AndMGF1Padding</code> — leaves MGF1 on
+    SHA-1 in the JDK, which is self-consistent but is not what the name says and does not interoperate
+    with an <code>openssl</code> that was told SHA-256. This handler passes an
+    <code>OAEPParameterSpec</code> with SHA-256 on both sides.
+  </p>
+</div>
+
+Rotation works the same way, by name: `rsa-2024` beside `rsa-2025`. A private key of 1024 bits is refused,
+and so is a pair whose halves do not belong together.
 
 
 Other things a marker can name

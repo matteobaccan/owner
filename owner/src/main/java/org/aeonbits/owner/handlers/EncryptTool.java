@@ -12,20 +12,27 @@ import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Turns a value into the marker that goes in a configuration file.
+ * Turns values into the markers that go in a configuration file, with either of the two ciphers.
  * <pre>
- *     java -cp owner.jar org.aeonbits.owner.handlers.AesGcmTool
+ *     java -cp owner.jar org.aeonbits.owner.handlers.EncryptTool [options]
  * </pre>
  * <p>
- * It prints one <code>${$aes-gcm::...}</code> per value on standard output, and everything else -
- * prompts, warnings, the summary - on standard error, so that redirecting the output collects markers and
- * nothing else.
+ * It prints one marker per value on standard output, and everything else - prompts, warnings, the summary
+ * - on standard error, so that redirecting the output collects markers and nothing else.
  * </p>
+ * <pre>
+ *     $ printf 's3cr3t\nhunter2\n' | OWNER_PASSPHRASE=... \
+ *           java -cp owner.jar org.aeonbits.owner.handlers.EncryptTool &gt; markers.txt
+ *
+ *     $ java -cp owner.jar org.aeonbits.owner.handlers.EncryptTool \
+ *           --public-key app.pub &lt; values.txt
+ * </pre>
  *
  * <h2>Nothing secret is an argument</h2>
  * <p>
@@ -40,37 +47,47 @@ import java.util.List;
  *   <li>the <b>values</b> come from standard input, one per line, whether typed or piped.</li>
  * </ul>
  * <p>
- * What may be an argument is what is not secret: which handler name to write, and how many iterations to
- * derive with.
+ * What may be an argument is what is not secret: which cipher to use, the name to write in the marker,
+ * how many iterations to derive with, and <b>the path of a public key</b> - which is public.
  * </p>
  *
- * <h2>One run, one salt</h2>
+ * <h2>One run, one salt — for the symmetric cipher</h2>
  * <p>
- * Every value given in one run is encrypted under the same salt and its own IV. That is what makes reading
- * the file back cost one key derivation instead of one per property, and it is the reason to encrypt a
- * whole file's worth of values in one go rather than a value at a time.
+ * With {@link AesGcmHandler}, every value of one run is encrypted under the same salt and its own IV,
+ * which makes reading them back cost one key derivation instead of one per property. That is the reason
+ * to encrypt a whole file's worth of values in one go rather than a value at a time.
+ * {@link RsaHandler} shares nothing between values, because there is no passphrase to derive from and so
+ * nothing to amortise.
  * </p>
  *
  * @author Matteo Baccan
  * @see AesGcmHandler
+ * @see RsaHandler
  * @since 2.0.0
  */
-public final class AesGcmTool {
+public final class EncryptTool {
 
     /** Where the passphrase is read from when it is not typed. */
     static final String PASSPHRASE_VARIABLE = "OWNER_PASSPHRASE";
 
+    /** What <code>--handler</code> accepts, which is the name of a cipher and not of a marker. */
+    static final String SYMMETRIC = "aes-gcm";
+    static final String ASYMMETRIC = "rsa-oaep";
+
     private static final String USAGE = ""
-            + "Usage: java -cp owner.jar org.aeonbits.owner.handlers.AesGcmTool [options]%n"
+            + "Usage: java -cp owner.jar org.aeonbits.owner.handlers.EncryptTool [options]%n"
             + "%n"
             + "Reads values from standard input, one per line, and writes one marker per line on%n"
-            + "standard output. All the values of one run share a salt, so reading them back costs%n"
-            + "one key derivation between them.%n"
+            + "standard output.%n"
             + "%n"
             + "Options:%n"
-            + "  --name NAME          the handler name to write in the marker (default: %s).%n"
-            + "                       Two names with two passphrases is how a key rotation is done.%n"
-            + "  --iterations COUNT   PBKDF2 iterations, at least %d (default: %d).%n"
+            + "  --handler CIPHER     %s (default) or %s. Giving --public-key%n"
+            + "                       chooses the second one on its own.%n"
+            + "  --public-key FILE    the PEM public key to encrypt to, for %s. A path is not%n"
+            + "                       secret and a public key is not either, so both may be here.%n"
+            + "  --name NAME          the handler name to write in the marker (default: the cipher's%n"
+            + "                       own). Two names with two keys is how a rotation is done.%n"
+            + "  --iterations COUNT   PBKDF2 iterations for %s, at least %d (default: %d).%n"
             + "  --help               this text.%n"
             + "%n"
             + "The passphrase is never an argument. It is taken from %s, or asked for on the%n"
@@ -78,9 +95,12 @@ public final class AesGcmTool {
             + "kept in the shell history.%n"
             + "%n"
             + "  $ printf 's3cr3t\\nhunter2\\n' | OWNER_PASSPHRASE=... \\%n"
-            + "      java -cp owner.jar org.aeonbits.owner.handlers.AesGcmTool > markers.txt%n";
+            + "      java -cp owner.jar org.aeonbits.owner.handlers.EncryptTool > markers.txt%n"
+            + "%n"
+            + "  $ java -cp owner.jar org.aeonbits.owner.handlers.EncryptTool \\%n"
+            + "      --public-key app.pub < values.txt%n";
 
-    private AesGcmTool() {
+    private EncryptTool() {
     }
 
     public static void main(String[] args) {
@@ -99,22 +119,26 @@ public final class AesGcmTool {
             options = parse(args);
         } catch (IllegalArgumentException e) {
             err.println(e.getMessage());
-            err.format(USAGE, AesGcmHandler.DEFAULT_NAME, AesGcmHandler.MINIMUM_ITERATIONS,
-                    AesGcmHandler.DEFAULT_ITERATIONS, PASSPHRASE_VARIABLE);
+            usage(err);
             return 2;
         }
         if (options.help) {
-            out.format(USAGE, AesGcmHandler.DEFAULT_NAME, AesGcmHandler.MINIMUM_ITERATIONS,
-                    AesGcmHandler.DEFAULT_ITERATIONS, PASSPHRASE_VARIABLE);
+            usage(out);
             return 0;
         }
 
-        char[] passphrase;
+        char[] passphrase = null;
+        Encrypting handler;
         try {
-            passphrase = passphrase();
-        } catch (IllegalStateException e) {
+            if (options.isSymmetric())
+                passphrase = passphrase();
+            handler = handlerFor(options, passphrase);
+        } catch (IllegalStateException | IllegalArgumentException e) {
             err.println(e.getMessage());
             return 1;
+        } finally {
+            if (passphrase != null)
+                Arrays.fill(passphrase, '\0');
         }
 
         try {
@@ -123,36 +147,53 @@ public final class AesGcmTool {
                 err.println("Nothing to encrypt: no value arrived on standard input.");
                 return 1;
             }
-            return encrypt(options, passphrase, values, out, err);
+            return encrypt(handler, options, values, out, err);
         } catch (IOException e) {
             err.println("Could not read the values: " + e.getMessage());
             return 1;
-        } finally {
-            Arrays.fill(passphrase, '\0');
         }
     }
 
+    private static void usage(PrintStream to) {
+        to.format(USAGE, SYMMETRIC, ASYMMETRIC, ASYMMETRIC, SYMMETRIC,
+                AesGcmHandler.MINIMUM_ITERATIONS, AesGcmHandler.DEFAULT_ITERATIONS, PASSPHRASE_VARIABLE);
+    }
+
     /**
-     * Encrypts every value under one salt and prints the markers.
+     * Builds the cipher the options ask for, out of the key material each one needs.
      * <p>
-     * Separated from {@link #run} so that what the tool does can be exercised without a terminal, an
-     * environment variable or a process to exit.
+     * Kept apart from {@link #encrypt} so that what the tool <i>does</i> can be exercised without key
+     * material, a terminal or an environment variable — and so that the two ciphers meet in exactly one
+     * place.
      * </p>
      */
-    static int encrypt(Options options, char[] passphrase, List<String> values, PrintStream out,
+    static Encrypting handlerFor(Options options, char[] passphrase) {
+        if (options.isSymmetric())
+            return new AesGcmHandler(options.markerName(), passphrase, options.iterations);
+        if (options.publicKey == null)
+            throw new IllegalArgumentException(ASYMMETRIC + " encrypts to a public key, so --public-key "
+                    + "is not optional here. It is the half that may be handed to whoever writes values, "
+                    + "which is the arrangement a key pair exists for.");
+        return new RsaHandler(options.markerName(),
+                RsaHandler.publicKeyFrom(Paths.get(options.publicKey)), null);
+    }
+
+    /** Encrypts every value and prints the markers. */
+    static int encrypt(Encrypting handler, Options options, List<String> values, PrintStream out,
                        PrintStream err) {
-        AesGcmHandler handler;
+        String[] tokens;
         try {
-            handler = new AesGcmHandler(options.name, passphrase, options.iterations);
+            tokens = handler.encryptAll(values.toArray(new String[0]));
         } catch (IllegalArgumentException e) {
             err.println(e.getMessage());
             return 1;
         }
-        String[] tokens = handler.encryptAll(values.toArray(new String[0]));
         for (String token : tokens)
             out.println(handler.marker(token));
-        err.format("%d value%s encrypted as '%s', under one salt, at %,d iterations.%n",
-                tokens.length, tokens.length == 1 ? "" : "s", options.name, options.iterations);
+        err.format("%d value%s encrypted as '%s'%s.%n", tokens.length, tokens.length == 1 ? "" : "s",
+                options.markerName(), options.isSymmetric()
+                        ? String.format(", under one salt, at %,d iterations", options.iterations)
+                        : ", each with its own key");
         return 0;
     }
 
@@ -254,10 +295,17 @@ public final class AesGcmTool {
             String arg = args[i];
             if ("--help".equals(arg) || "-h".equals(arg)) {
                 options.help = true;
+            } else if ("--handler".equals(arg)) {
+                options.handler = cipherNamed(valueOf(args, ++i, "--handler"));
+            } else if ("--public-key".equals(arg)) {
+                options.publicKey = valueOf(args, ++i, "--public-key");
+                if (options.handler == null)
+                    options.handler = ASYMMETRIC;
             } else if ("--name".equals(arg)) {
                 options.name = valueOf(args, ++i, "--name");
             } else if ("--iterations".equals(arg)) {
                 options.iterations = iterationsOf(valueOf(args, ++i, "--iterations"));
+                options.iterationsWereAsked = true;
             } else if (arg.startsWith("-")) {
                 throw new IllegalArgumentException("Unknown option: " + arg);
             } else {
@@ -267,7 +315,22 @@ public final class AesGcmTool {
                                 + "standard input, one per line.");
             }
         }
+        if (options.handler == null)
+            options.handler = SYMMETRIC;
+        if (options.iterationsWereAsked && !options.isSymmetric())
+            throw new IllegalArgumentException("--iterations belongs to " + SYMMETRIC + ", which derives "
+                    + "a key from a passphrase. " + ASYMMETRIC + " encrypts to a key and derives nothing.");
+        if (options.publicKey != null && options.isSymmetric())
+            throw new IllegalArgumentException("--public-key belongs to " + ASYMMETRIC + ". " + SYMMETRIC
+                    + " has one passphrase that both writes and reads.");
         return options;
+    }
+
+    private static String cipherNamed(String asked) {
+        if (SYMMETRIC.equals(asked) || ASYMMETRIC.equals(asked))
+            return asked;
+        throw new IllegalArgumentException("--handler is " + SYMMETRIC + " or " + ASYMMETRIC
+                + ", not '" + asked + "'");
     }
 
     private static String valueOf(String[] args, int index, String option) {
@@ -286,8 +349,22 @@ public final class AesGcmTool {
 
     /** What the command line may say, which is everything about the marker except what goes inside it. */
     static final class Options {
-        String name = AesGcmHandler.DEFAULT_NAME;
+        String handler;
+        String name;
+        String publicKey;
         int iterations = AesGcmHandler.DEFAULT_ITERATIONS;
+        boolean iterationsWereAsked;
         boolean help;
+
+        boolean isSymmetric() {
+            return !ASYMMETRIC.equals(handler);
+        }
+
+        /** The name written in the marker: the one asked for, or the cipher's own. */
+        String markerName() {
+            if (name != null)
+                return name;
+            return isSymmetric() ? AesGcmHandler.DEFAULT_NAME : RsaHandler.DEFAULT_NAME;
+        }
     }
 }

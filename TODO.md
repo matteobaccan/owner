@@ -33,12 +33,13 @@ Updated at the end of 2026-08-14. `FORMATS.md`, `COMPARISON.md` and `CRYPTO.md` 
 open questions; this is the short version.
 
 **The cipher shipped on 2026-08-14**, which was the last of the three largest gaps. `${$aes-gcm::…}`, a
-`ValueHandler` registered by name, AES-256/GCM over PBKDF2 at 210,000 iterations, and `AesGcmTool` in the
+`ValueHandler` registered by name, AES-256/GCM over PBKDF2 at 210,000 iterations, and `EncryptTool` in the
 same jar to produce a marker. It closes #285 and the decryptor half of #287 by construction, retires the
 AES/ECB example the site used to publish, and — because the envelope knows nothing about cryptography —
 gives `${$vault::…}` and `${$file::…}` to anybody who wants them, which is part of #130 and #143 with no
-module of ours. `CRYPTO.md` has what is still open; the short answer is the asymmetric case and nothing
-else.
+module of ours. **The asymmetric case shipped the same day**: `${$rsa-oaep::…}`, `RsaHandler`, RSA-OAEP
+wrapping AES-256/GCM, so whoever writes a secret into a configuration cannot read the ones already there.
+`CRYPTO.md` has no open question left.
 
 **Two of the three largest gaps closed on 2026-08-11.**
 
@@ -368,7 +369,8 @@ an issue behind it, which is the point: what the others shipped is what our repo
       reconstruct. That is the gap this would close, and the argument for doing it one day.
 - [x] **Ship a cipher, and a marker that says a value is one** — **done 2026-08-14**, in three commits:
       the envelope (`ValueHandler`, `HandlersManager`, the hook in `StrSubstitutor`), the cipher
-      (`AesGcmHandler`), and the tool (`AesGcmTool`). The site page was rewritten with it, and says what
+      (`AesGcmHandler`), the tool (`EncryptTool`) and, the same day, the asymmetric cipher
+      (`RsaHandler`, `rsa-oaep`). The site page was rewritten with it, and says what
       changed to whoever copied the old example. What the build settled beyond the design below:
       **210,000 iterations**, measured rather than guessed — 38 ms on JDK 24, 49 ms on JDK 17, once per
       salt and not once per value. **The count travels in the token**, four bytes ahead of the salt, so
@@ -378,7 +380,10 @@ an issue behind it, which is the point: what the others shipped is what our repo
       format, and a format written down twice disagrees with itself. **No discovery**, and the tool goes
       in the core jar with no `Main-Class`. The passphrase and the derived keys are `transient`, because a
       Config object is serializable and a handler is reachable from one.
-      What is left is only the asymmetric case, which is a second handler name and was never in this one.
+      The asymmetric case was expected to be postponed and was not: on this envelope it cost a second
+      handler name and a second class, with no change to `aes-gcm` and none to the substitution. Its key
+      material is **not** a keystore, which is where the analysis below guessed wrong — the caller brings
+      `PublicKey` / `PrivateKey`, and two readers take the PEM that `openssl` writes.
       The analysis below is kept because it is the reasoning, not the plan.
       `CRYPTO.md` holds the whole of it —
       what `@EncryptedValue` is worth today, what the field does, the design and the open questions.
