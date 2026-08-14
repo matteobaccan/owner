@@ -722,6 +722,72 @@ public interface Config extends Serializable {
      *
      * @since 1.0.4
      */
+    /**
+     * What this property is for, in a sentence, written where the property is declared.
+     * <p>
+     * It is not read when a configuration is loaded — it costs a running application nothing. It is used
+     * when one is <b>written</b>, by {@link Accessible#save(java.io.File)}, which puts it above the key
+     * as a comment:
+     * </p>
+     * <pre>
+     *     &#064;Description("The database we talk to. A host name or an address; the port is separate.")
+     *     &#064;DefaultValue("localhost")
+     *     String host();
+     * </pre>
+     * <pre>
+     *     # The database we talk to. A host name or an address; the port is separate.
+     *     host = db.internal
+     * </pre>
+     * <p>
+     * <b>The interface is the source of truth, and that has a cost worth knowing.</b> A description
+     * edited in the file is replaced the next time the file is written — because the recurring failure of
+     * configuration documentation is that it drifts: a key is renamed, a default changes, and the
+     * sentence beside it goes on saying what used to be true. Beside the method it moves with the thing
+     * it describes.
+     * </p>
+     * <p>
+     * Only the comment above a key that <i>has</i> a description is rewritten. A comment above a key
+     * without one, and any comment that is not immediately above a key, belongs to whoever wrote it and
+     * is left alone.
+     * </p>
+     * <p>
+     * <b>So there is one convention worth following, and it is the whole of it: a note you mean to keep
+     * goes above a blank line.</b> The block that gets replaced is the contiguous one touching the key,
+     * so a blank line ends it — which makes a banner at the top of the file, or a heading over a group
+     * of keys, permanent by construction:
+     * </p>
+     * <pre>
+     *     # ----------------------------------------------
+     *     # checkout service - staging
+     *     # the box moved to Frankfurt in March
+     *     # ----------------------------------------------
+     *
+     *     # The database we talk to.       &lt;- ours, rewritten every time
+     *     host = db-fra-01.internal
+     * </pre>
+     * <p>
+     * That is one rule rather than a mechanism: no marker to learn, nothing in the file that only OWNER
+     * understands, and a person who never reads this page still keeps their banner, because a blank line
+     * under a heading is what everybody writes anyway.
+     * </p>
+     * <p>
+     * On the interface rather than on a method, it is the header of the file.
+     * </p>
+     *
+     * @since 2.0.0
+     */
+    @Retention(RUNTIME)
+    @Target({METHOD, TYPE})
+    @Documented
+    @interface Description {
+        /**
+         * The sentence to write above the key.
+         *
+         * @return the description; several lines become several comment lines.
+         */
+        String value();
+    }
+
     @Retention(RUNTIME)
     @Target({METHOD, TYPE})
     @Documented

@@ -8,7 +8,9 @@ properties file?") and [#16](https://github.com/matteobaccan/owner/issues/16) ("
 value without destroying the file", open since 2013, seventeen comments — the most discussed thing we
 have). The companion documents are `CRYPTO.md`, `FORMATS.md` and `COMPARISON.md`.
 
-Nothing here is built. The open questions are collected at the bottom.
+**Built 2026-08-14**: `@Description`, `Accessible.save(File)`, `PropertiesFileWriter`,
+`SavingTheFileTest`. Properties files only — see *One format* below. The open questions that remain are
+collected at the bottom.
 
 
 Where we are, measured
@@ -107,6 +109,92 @@ sentence moves with the thing it describes, and the compiler is watching.
 - **It answers [#3](https://github.com/matteobaccan/owner/issues/3)** — "a tool that generates a
   properties file from the Config interfaces", open since 2013 — with the same machinery and no second
   feature. A configuration with no file yet is the same code path with nothing to merge.
+
+### Who owns the order: the file does
+
+Settled 2026-08-14, and it is not one of the three answers the question seemed to have. Declaration
+order is unavailable (see the measurement below), alphabetical is stable and dull, and an
+`@Description(order = ...)` is a knob somebody has to keep right. **None of them is needed, because the
+file already has an order — the one a person put it in.**
+
+| | order |
+|---|---|
+| the file exists | **its own**, key by key |
+| keys that are new | appended at the end, alphabetical among themselves |
+| the file does not exist yet | alphabetical |
+
+The property that decides it is the **diff**. Change one value, one line changes. Alphabetical would
+reorder a hand-written file wholesale on the first save — a diff nobody reads, after which nobody trusts
+the tool; declaration order, as measured, differs between JDK 17 and JDK 24, so the same file regenerated
+on the build machine would differ from the developer's in nothing but the arrangement of its blocks.
+
+**It does not contradict the decision above, it sharpens it.** The code owns the *descriptions*; the file
+owns the *arrangement*. That division holds because of what each thing is: a description has a truth
+value and goes stale — a key is renamed, a default changes, and the sentence beside it keeps saying what
+used to be true — so it belongs where the compiler is watching. An order has no truth value at all. There
+is no wrong order to defend against, so there is nothing to take away from the person who chose one.
+
+And it recovers half of #16 without setting out to: somebody with a curated file gets it back arranged as
+they left it. What they lose is the comments, which is precisely the trade this design made on purpose.
+
+### Which comments are ours to replace
+
+That division has one consequence which has to be decided rather than discovered, because a preserved
+file brings its comments with it and we cannot tell ours from a person's by looking.
+
+The rule that follows from "the code owns the description" without extending it:
+
+- a comment block **immediately above a key we have a `@Description` for** is ours, and is replaced;
+- a comment block above a key we have **no** description for is theirs, and is kept;
+- a comment that is not immediately above any key — a section header, a licence, a note between blocks —
+  is theirs, and is kept.
+
+So a hand-written note above a described key is lost, and only there. That is the decision applied
+narrowly rather than a licence to rewrite the file, and it is the one case where somebody could be
+surprised: it wants saying in the documentation, in the sentence that introduces `@Description`.
+
+### Keeping a comment: the banner, and no mechanism
+
+Settled 2026-08-14 by the user, after looking at a rewritten file rather than at the rule.
+
+The demonstration lost two comments worth keeping — `# the box in Frankfurt, moved there in March` and
+`# bumped from 2000 after the incident on the 3rd`. Neither is a description: they are notes about *this*
+deployment, which no `@Description` could ever hold. The obvious fix is a **marker** on the lines we
+generate, so we replace only our own. It was rejected, and rightly:
+
+> *If there is something to keep we have the banner at the top; let us say that is the best practice and
+> see whether people like it — otherwise we have too many rules and I do not want to weigh down the
+> algorithm.*
+
+The convention is already implied by the rule and needs no code: **a note you mean to keep goes above a
+blank line.** The block that is replaced is the contiguous one touching the key, so a blank line ends it.
+A banner at the top of the file, or a heading over a group of keys, is permanent by construction.
+
+What that buys is the absence of a mechanism. No marker to learn, nothing in the file that only OWNER
+understands, no second syntax to explain, and no branch in the writer. Somebody who never reads this
+still keeps their banner, because a blank line under a heading is what everybody writes anyway. If it
+turns out not to be enough, the marker is still available and nothing here forecloses it.
+
+### One format, and the measurement that decided it
+
+Settled 2026-08-14. Writing was going to cover INI and `.env` as well — both are line-oriented with `#`
+comments, so the walk is the same one. It stops at properties, on the user's rule that *the feature is
+worth it if there is little code*, and the reading of the loaders is what showed there is not:
+
+| | why not |
+|---|---|
+| **INI** | seven dialect axes (separator, duplicates, key case, bare keys, quotes, continuation, subsections); the default has `Duplicates.LIST`, so a repeated key becomes a **list** and the mapping is not invertible; sections mean a new key has to be *placed*, not appended |
+| **`.env`** | three dialects, differing in quoting, escapes, `export`, inline comments and multiline; the default `docker` dialect does **not** strip quotes, so quoting a value with a space corrupts it on the way back |
+| **XML** | `XMLLoader` is streaming SAX into dotted keys. Keeping the comments needs a full DOM round trip — namespaces, attributes, CDATA, entities — and element→key is many-to-one, so it does not invert |
+
+And the fact underneath all three, which is not a matter of effort: **the dialect is chosen by options on
+the source URI, and `save(File)` does not know which one read the file.** Writing INI or `.env` means
+writing a dialect that may not be the one that reads it back — a file we read differently from how we
+wrote it, which is worse than no feature at all. Properties has one dialect and `Properties.store`'s
+escaping is a closed set, which is why it is the one that can be done in a single class.
+
+If somebody asks for INI, the answer is a dialect carried on the write, and that is a design, not an
+afternoon.
 
 ### What it does not settle, and must be decided
 

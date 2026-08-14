@@ -7,6 +7,7 @@
  */
 package org.aeonbits.owner;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -215,6 +216,52 @@ public interface Accessible extends Config {
      *         <code>Strings</code>.
      * @since 1.0.5
      */
+    /**
+     * Writes this configuration to a properties file, <b>keeping the file that is already there</b>.
+     * <p>
+     * Unlike {@link #store(OutputStream, String)}, which serialises a map and so loses the comments, the
+     * blank lines and the order, this rewrites the file in place:
+     * </p>
+     * <ul>
+     * <li>every key the file already has stays <b>where it is</b>, with its value brought up to date;</li>
+     * <li>keys the file does not have are <b>appended</b>, in alphabetical order among themselves;</li>
+     * <li>keys the file has and this interface has never heard of are <b>left alone</b> — an
+     *     <code>application.properties</code> is usually read by more than one thing;</li>
+     * <li>the comment above a key with a {@link Config.Description} is <b>rewritten from the code</b>;
+     *     every other comment is left as it was.</li>
+     * </ul>
+     * <p>
+     * If the file does not exist it is created, keys in alphabetical order — which is how a template is
+     * generated from an interface that has never been configured.
+     * </p>
+     * <p>
+     * <b>Only what belongs in the file is written.</b> A configuration merging system properties, the
+     * environment and a file holds all of them, and <code>store()</code> writes all of them — so saving
+     * it puts your environment in your file. This writes what came from a file, what was set through
+     * {@link Mutable#setProperty}, and the defaults, and leaves the environment where it is.
+     * </p>
+     * <p>
+     * A {@link Config.Sensitive} value is written <b>in the clear</b>, exactly as
+     * {@link #store(OutputStream, String)} does, because masking it here would replace the password in
+     * your file with asterisks. Masking applies to {@link #list} and <code>toString</code>, not to
+     * writing.
+     * </p>
+     *
+     * <p>
+     * <b>Properties files only.</b> OWNER reads INI, <code>.env</code> and XML too, and this does not
+     * write them: each is a family of dialects chosen by options on the source, and the dialect that
+     * read a file is not known here — an INI written in the wrong one, or an XML rebuilt from keys its
+     * elements were flattened into, would be a file we read back differently from how we wrote it. That
+     * is worse than not writing it.
+     * </p>
+     *
+     * @param file the file to write; created if it does not exist
+     * @throws IOException if the file cannot be read or written
+     * @see Config.Description
+     * @since 2.0.0
+     */
+    void save(File file) throws IOException;
+
     void storeToXML(OutputStream os, String comment) throws IOException;
 
     /**

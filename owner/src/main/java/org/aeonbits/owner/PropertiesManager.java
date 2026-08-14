@@ -1357,6 +1357,43 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         }
     }
 
+    /**
+     * Writes the configuration to a file, keeping the file that is already there. The rule and its
+     * reasons are on {@link Accessible#save(File)}; this assembles the three things the writer needs —
+     * the descriptions declared in the code, the keys the interface owns, and the values as they stand.
+     */
+    @Delegate
+    @Override
+    public void save(File file) throws IOException {
+        Map<String, String> descriptions = new HashMap<>();
+        Set<String> known = new HashSet<>();
+        for (Method method : clazz.getMethods()) {
+            String key = PropertiesMapper.key(method, keyPrefix);
+            known.add(key);
+            Config.Description description = method.getAnnotation(Config.Description.class);
+            if (description != null)
+                descriptions.put(key, description.value());
+        }
+
+        Config.Description onTheInterface = clazz.getAnnotation(Config.Description.class);
+
+        readLock.lock();
+        try {
+            // what the interface owns, and nothing else: a configuration that merges system:properties
+            // holds hundreds of keys that have no business being written into somebody's file. Keys the
+            // file already had are kept by the writer itself, whether we know them or not.
+            Properties mine = new Properties();
+            for (String key : properties.stringPropertyNames())
+                if (known.contains(key))
+                    mine.setProperty(key, properties.getProperty(key));
+
+            new PropertiesFileWriter(descriptions, onTheInterface == null ? null : onTheInterface.value())
+                    .write(file, mine, known);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
     @Delegate
     @Override
     public void store(OutputStream out, String comments) throws IOException {

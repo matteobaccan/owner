@@ -1,0 +1,262 @@
+/*
+ * Copyright (c) 2012-2026, Luigi R. Viggiano, Matteo Baccan
+ * All rights reserved.
+ *
+ * This software is distributable under the BSD license.
+ * See the terms of the BSD license in the documentation provided with this software.
+ */
+package org.aeonbits.owner;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+
+/**
+ * Writes a properties file, keeping the one that is already there.
+ * <p>
+ * The division it implements is decided in <code>WRITING.md</code>: <b>the code owns the descriptions,
+ * the file owns the arrangement</b>. So the existing file supplies the order of its keys, its blank
+ * lines, and every comment except the ones sitting immediately above a key the interface describes —
+ * those are ours and are rewritten. Keys the file has and the interface has never heard of go through
+ * untouched, because an <code>application.properties</code> is usually read by more than one thing.
+ * </p>
+ * <p>
+ * The escaping is {@link java.util.Properties#store}'s, done here because doing it ourselves is the
+ * price of not calling it: a file we wrote differently from how we read it would be worse than no
+ * feature at all.
+ * </p>
+ *
+ * @author Matteo Baccan
+ * @since 2.0.0
+ */
+final class PropertiesFileWriter {
+
+    /**
+     * The encoding {@link java.util.Properties#load(java.io.InputStream)} reads, which is the only
+     * defensible one to write: anything outside it is escaped as <code>&#92;uXXXX</code> instead.
+     */
+    private static final Charset LATIN_1 = StandardCharsets.ISO_8859_1;
+
+    private final Map<String, String> descriptions;
+    private final String header;
+
+    PropertiesFileWriter(Map<String, String> descriptions, String header) {
+        this.descriptions = descriptions;
+        this.header = header;
+    }
+
+    /**
+     * @param file   the file to rewrite, which may not exist yet
+     * @param values what to write, key by key
+     * @param known  the keys the interface declares; anything else in the file is somebody else's
+     */
+    void write(File file, Properties values, Set<String> known) throws IOException {
+        List<String> existing = file.isFile()
+                ? Files.readAllLines(file.toPath(), LATIN_1)
+                : Collections.emptyList();
+
+        List<String> out = new ArrayList<>();
+        Set<String> placed = new LinkedHashSet<>();
+
+        if (existing.isEmpty() && header != null)
+            addComment(out, header);
+
+        keepWhatTheFileArranged(existing, values, known, out, placed);
+        appendWhatTheFileDidNotHave(values, known, out, placed);
+
+        OutputStream stream = Files.newOutputStream(file.toPath());
+        try {
+            Writer writer = new OutputStreamWriter(stream, LATIN_1);
+            for (String line : out) {
+                writer.write(line);
+                // \n rather than the platform separator: a configuration file travels between machines,
+                // and a rewrite that flips every line ending is a diff with no content in it
+                writer.write('\n');
+            }
+            writer.flush();
+        } finally {
+            stream.close();
+        }
+    }
+
+    /** Walks the file as it stands, replacing values in place and leaving everything else alone. */
+    private void keepWhatTheFileArranged(List<String> existing, Properties values, Set<String> known,
+                                         List<String> out, Set<String> placed) {
+        for (int i = 0; i < existing.size(); i++) {
+            String raw = existing.get(i);
+            if (raw.trim().length() == 0 || isComment(raw)) {
+                // blank lines and comments are the file's, and pass through before anything is parsed
+                out.add(raw);
+                continue;
+            }
+            // a line ending in an odd number of backslashes continues onto the next one, and the key is
+            // only readable once they are joined
+            String logical = raw;
+            while (continuesOntoTheNextLine(logical) && i + 1 < existing.size())
+                logical = logical.substring(0, logical.length() - 1) + existing.get(++i).replaceAll("^\\s+", "");
+
+            String key = keyOf(logical);
+            if (key == null) {
+                out.add(logical);
+                continue;
+            }
+            if (!values.containsKey(key)) {
+                if (!known.contains(key)) {
+                    // not ours to touch: the file is read by more than this interface, and a key we have
+                    // never heard of is somebody else's line, kept exactly as it was written
+                    out.add(logical);
+                    continue;
+                }
+                // declared, and no longer there: removed through Mutable, so the key goes and so does
+                // the comment we wrote for it
+                if (descriptions.containsKey(key))
+                    dropTheCommentBlockAbove(out);
+                continue;
+            }
+            if (descriptions.containsKey(key)) {
+                dropTheCommentBlockAbove(out);
+                addComment(out, descriptions.get(key));
+            }
+            out.add(escapeKey(key) + " = " + escapeValue(values.getProperty(key)));
+            placed.add(key);
+        }
+    }
+
+    /** New keys go at the end, alphabetical among themselves, so the diff is an addition and nothing else. */
+    private void appendWhatTheFileDidNotHave(Properties values, Set<String> known, List<String> out,
+                                             Set<String> placed) {
+        Set<String> missing = new TreeSet<>();
+        for (String key : values.stringPropertyNames())
+            if (!placed.contains(key) && known.contains(key))
+                missing.add(key);
+
+        for (String key : missing) {
+            if (!out.isEmpty() && out.get(out.size() - 1).length() > 0)
+                out.add("");
+            if (descriptions.containsKey(key))
+                addComment(out, descriptions.get(key));
+            out.add(escapeKey(key) + " = " + escapeValue(values.getProperty(key)));
+        }
+    }
+
+    /**
+     * Removes the comment block immediately above what is about to be written — contiguous, so a blank
+     * line stops it and a banner two lines up survives.
+     * <p>
+     * That is the whole of the convention documented on {@link Config.Description}: a note you mean to
+     * keep goes above a blank line. It is one rule instead of a mechanism — no marker in the file that
+     * only this library understands — and it costs this method its one <code>while</code>.
+     * </p>
+     */
+    private static void dropTheCommentBlockAbove(List<String> out) {
+        while (!out.isEmpty() && isComment(out.get(out.size() - 1)))
+            out.remove(out.size() - 1);
+    }
+
+    private static void addComment(List<String> out, String text) {
+        for (String line : text.split("\n", -1))
+            out.add("# " + line);
+    }
+
+    private static boolean isComment(String line) {
+        String trimmed = line.trim();
+        return trimmed.startsWith("#") || trimmed.startsWith("!");
+    }
+
+    private static boolean continuesOntoTheNextLine(String line) {
+        int backslashes = 0;
+        for (int i = line.length() - 1; i >= 0 && line.charAt(i) == '\\'; i--)
+            backslashes++;
+        return backslashes % 2 == 1;
+    }
+
+    /**
+     * The key a line declares, or <code>null</code> if it declares none — a comment or a blank line.
+     * The separator is the first unescaped <code>=</code>, <code>:</code> or run of whitespace, which is
+     * what {@link java.util.Properties} reads.
+     */
+    static String keyOf(String line) {
+        String trimmed = line.trim();
+        if (trimmed.length() == 0 || isComment(trimmed))
+            return null;
+
+        StringBuilder key = new StringBuilder();
+        for (int i = 0; i < trimmed.length(); i++) {
+            char c = trimmed.charAt(i);
+            if (c == '\\' && i + 1 < trimmed.length()) {
+                key.append(unescape(trimmed, ++i));
+                i += trimmed.charAt(i) == 'u' ? 4 : 0;
+                continue;
+            }
+            if (c == '=' || c == ':' || Character.isWhitespace(c))
+                break;
+            key.append(c);
+        }
+        return key.length() == 0 ? null : key.toString();
+    }
+
+    private static char unescape(String s, int at) {
+        char c = s.charAt(at);
+        switch (c) {
+            case 'n': return '\n';
+            case 'r': return '\r';
+            case 't': return '\t';
+            case 'f': return '\f';
+            case 'u': return (char) Integer.parseInt(s.substring(at + 1, at + 5), 16);
+            default: return c;
+        }
+    }
+
+    static String escapeKey(String key) {
+        return escape(key, true);
+    }
+
+    static String escapeValue(String value) {
+        return escape(value, false);
+    }
+
+    /**
+     * Exactly what {@link java.util.Properties#store} escapes. A key escapes its spaces everywhere,
+     * because a space in a key is the separator; a value escapes only a leading one.
+     */
+    private static String escape(String text, boolean isKey) {
+        StringBuilder escaped = new StringBuilder(text.length() * 2);
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            switch (c) {
+                case ' ':
+                    if (isKey || i == 0)
+                        escaped.append('\\');
+                    escaped.append(' ');
+                    break;
+                case '\\': escaped.append("\\\\"); break;
+                case '\t': escaped.append("\\t"); break;
+                case '\n': escaped.append("\\n"); break;
+                case '\r': escaped.append("\\r"); break;
+                case '\f': escaped.append("\\f"); break;
+                case '=': case ':': case '#': case '!':
+                    escaped.append('\\').append(c);
+                    break;
+                default:
+                    if (c < 0x20 || c > 0x7e)
+                        escaped.append(String.format("\\u%04x", (int) c));
+                    else
+                        escaped.append(c);
+            }
+        }
+        return escaped.toString();
+    }
+}
