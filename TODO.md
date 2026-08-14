@@ -519,7 +519,23 @@ an issue behind it, which is the point: what the others shipped is what our repo
       The other thing settled: **a binding that is not a scalar is skipped, not refused**, because a real
       `java:comp/env` holds a `DataSource` beside the settings and refusing the context over it would make
       the loader useless in the container it exists for.
-- [ ] **GraalVM native image**: ship reachability metadata for the dynamic proxies and write the chapter.
+- [x] **GraalVM native image** — **the chapter is written, 2026-08-14**, and the other half of that line
+      was struck out rather than done: *"ship reachability metadata for the dynamic proxies"* is not
+      something this project can do. Every entry a native build needs is the **user's** code — their
+      interface is the proxy's interface list, their classes are named in `@ConverterClass` and its
+      relatives, their return types own the `String` constructors, their files are the resources. A
+      `META-INF/native-image` directory inside our jar would cover none of it while looking as though it
+      did. And with no native build in CI we could not verify what we shipped anyway, so it would be
+      untestable as well as useless.
+      What the chapter says instead is: use the tracing agent, and here is what it should find so you can
+      check. It names the one entry that is easy to hand-write wrongly — the proxy is over **two**
+      interfaces, yours and `DynamicMBean`, whenever JMX is on the class path — and the one most often
+      forgotten, which is that a native image contains no resources unless told, so
+      `classpath:app.properties` silently becomes the default values.
+      **Reopen this when somebody opens an issue about native image**, not before: that is the point at
+      which a GraalVM job in CI would start paying for itself, and only then could anything we ship be
+      verified. An annotation processor emitting metadata for the user's interfaces is the shape that
+      would work — and is a build plugin to maintain, not a file to write.
       Defensive rather than competitive — the proxy is our design and Coat wins on this ground by
       construction — but today someone trying it hits the wall unaided and leaves.
 - [ ] **Dependency injection**: a documented, supported way to obtain a Config from Spring, CDI or Guice.

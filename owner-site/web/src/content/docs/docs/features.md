@@ -31,6 +31,7 @@ OWNER API supports a long list of features:
 - [Crypto support](/owner/docs/crypto/) — a value that names what decrypts it, with two ciphers shipped
 - [Preprocessors](/owner/docs/preprocessors/)
 - [JMX support](/owner/docs/jmx/)
+- [GraalVM native image](/owner/docs/graalvm/) — what a native build needs, and why we ship none of it
 
 The design of the new features is intended not to make existing things more complicated: you can pick what you need and
 ignore what you don't need. Backward compatibility between versions is also in our goals.

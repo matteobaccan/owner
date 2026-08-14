@@ -108,6 +108,7 @@ export default defineConfig({
           items: [
             { label: 'Features', slug: 'docs/features' },
             { label: 'Why OWNER?', slug: 'docs/why' },
+            { label: 'GraalVM native image', slug: 'docs/graalvm' },
             { label: 'FAQ', slug: 'docs/faq' },
             { label: 'Getting support', slug: 'docs/support' },
           ],
