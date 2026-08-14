@@ -196,13 +196,51 @@ Two cases are worth telling apart, and the library does:
     A URL is all the authentication there is. A token in the query string works —
     <code>?token=abc</code> is left alone, since the query belongs to the protocol — but anything needing
     a signature or a header does not: <code>s3://bucket/key</code> signed with SigV4, a Vault token, Google
-    Application Default Credentials. For those, teach the <em>JVM</em> the protocol rather than teaching
-    OWNER: a <code>URLStreamHandlerProvider</code> (a service, since Java 9) makes
-    <code>@Sources("s3://bucket/app.properties")</code> work with no change here at all. On the Java 8
-    baseline the equivalent is <code>URL.setURLStreamHandlerFactory</code>, which may be called once per
-    JVM. Writing a <a href="#where-a-loader-of-your-own-sits-among-them">loader of your own</a> is the
-    other way, and the right one when the source is not a file at all — a key/value API rather than a
-    document.
+    Application Default Credentials.
+  </p>
+  <p>
+    For those, <b>teach the JVM the protocol rather than teaching OWNER</b> — see below. Writing a
+    <a href="#where-a-loader-of-your-own-sits-among-them">loader of your own</a> is the other way, and the
+    right one when the source is not a file at all: a key/value API rather than a document.
+  </p>
+</div>
+
+### A protocol the JVM does not know
+
+`@Sources` names a URI and every loader opens it with `uri.toURL()`, so **the question is never whether
+OWNER speaks a protocol — it is whether the JVM does**. And that is extensible, by the application rather
+than by us:
+
+```java
+URL.setURLStreamHandlerFactory(protocol -> {
+    if (!"s3".equals(protocol)) return null;   // everything else: the JVM's own handlers, untouched
+    return new S3UrlStreamHandler(s3Client);   // yours, holding whatever credentials it needs
+});
+```
+
+```java
+@Sources("s3://bucket/app.properties")
+public interface MyConfig extends Config { }
+```
+
+Nothing is registered with OWNER and no loader is written. The source merges like any other, the format is
+still chosen from the extension after the stream is open, and a handler that cannot produce the object
+takes the same path as any unreadable source — a warning, or a refusal under `owner.strict`.
+
+All of that is pinned down in
+[`UnknownProtocolSourceTest`](https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/UnknownProtocolSourceTest.java),
+which teaches the test JVM a made-up scheme and reads a configuration over it.
+
+<div class="note info">
+  <h5>Once per JVM, which is why it is yours and not ours</h5>
+  <p>
+    <code>URL.setURLStreamHandlerFactory</code> may be called <b>once</b> for the life of a JVM. That is
+    exactly why a library must not call it on your behalf: it is a decision that belongs to the
+    application, next to the credentials such a handler needs — the same rule this library applies to an
+    <a href="/owner/docs/crypto/">encryption passphrase</a>. Since Java 9 there is a tidier route with no
+    such limit, the <code>java.net.spi.URLStreamHandlerProvider</code> service, and a reader on 9 or later
+    should prefer it; the example above uses the older call because it works on the Java 8 baseline this
+    library still supports.
   </p>
 </div>
 
