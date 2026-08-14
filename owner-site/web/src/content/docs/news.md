@@ -157,6 +157,33 @@ hunter2
    are what every configuration written before 2.0.0 uses. The one thing refused is carrying both on one
    method, since expansion runs first and the decryptor would then be handed the plain secret.
 
+ * **JNDI is readable as a source**, in the `owner-extras` artifact, which closes
+   [#143](https://github.com/matteobaccan/owner/issues/143) — what a container binds, taking part in a
+   `MERGE` like any other source:
+
+   ```java
+   @LoadPolicy(LoadType.MERGE)
+   @Sources({
+       "jndi:comp/env/myconfig",
+       "file:~/myconfig.properties",
+       "classpath:myconfig.properties" })
+   public interface MyConfig extends Config { }
+   ```
+
+   A relative name is resolved against `java:comp/env/`, a `java:` name is used as written, and
+   subcontexts are flattened with a dot like every other tree-shaped format. It needs no dependency, since
+   JNDI is in the JDK. A binding that is not a scalar — a `DataSource`, a `UserTransaction` — is skipped
+   and named at `CONFIG` rather than refused, because refusing a whole context over one of them would make
+   the loader useless in the container it exists for. For a single entry rather than a context there is
+   `${$jndi::comp/env/db/password}`.
+
+   **Only `java:` names are accepted, and there is deliberately no setting to allow others.** A JNDI name
+   carries its own scheme and `InitialContext` follows it over the network, so `jndi:ldap://somewhere/x`
+   would be a configuration file turning into a request to somebody else's server — and a `@Sources` spec
+   is expanded before it is read, so it need not even be a constant. To reach a provider elsewhere,
+   construct `new JndiLoader(environment)` in Java, where the decision sits next to the credentials it
+   needs. That is the same rule this release applies to an encryption passphrase.
+
  * **`ValueHandler`, the mechanism underneath it, is not about cryptography.** OWNER reads the envelope —
    the `$`, the name, the `::` — and hands everything after it to the handler as text. So a handler of your
    own is a two-method class:

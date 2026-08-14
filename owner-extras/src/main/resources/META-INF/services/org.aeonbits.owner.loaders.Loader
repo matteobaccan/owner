@@ -1,2 +1,3 @@
 org.aeonbits.owner.extras.loaders.HoconLoader
 org.aeonbits.owner.extras.loaders.ZooKeeperLoader
+org.aeonbits.owner.extras.jndi.JndiLoader

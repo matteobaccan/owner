@@ -371,7 +371,8 @@ coincidence; it is evidence the demand is real.
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
 | Indexed keys `list[0]` | SmallRye, Gestalt, Spring | — (**closed 2026-08-09**) |
 | "Which source provided this?" | Spring (origin tracking), Gestalt | — (**closed 2026-08-11**) |
-| Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130, #143 — **partly answered 2026-08-14**: a `ValueHandler` makes `${$vault::secret/data/app}` a per-value reference anybody can write, with no module and no dependency from us. What is still missing is a *source* — a whole tree read from S3 or Consul — which is a `Loader`, not a handler |
+| Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130 — **partly answered 2026-08-14**: a `ValueHandler` makes `${$vault::secret/data/app}` a per-value reference anybody can write, with no module and no dependency from us. What is still missing is a *source* — a whole tree read from S3 or Consul — which is a `Loader`, not a handler |
+| JNDI as a source | Spring (`JndiPropertySource`), Commons Configuration (`JNDIConfiguration`) | — (**closed 2026-08-14**: `jndi:comp/env/myconfig` in `@Sources`, plus `${$jndi::…}` per value. Ours refuses a non-`java:` name outright, which neither of theirs does) |
 | An encrypted value in the file | SmallRye, Jasypt, Spring Cloud Config | — (**closed 2026-08-14**, and we ship the cipher, which SmallRye half does and Jasypt does at 1,000 iterations) |
 | An encrypted value only the deployment can read | Spring Cloud Config, and only through a server | — (**closed 2026-08-14**: `${$rsa-oaep::…}`. The one row here where no library is level with us) |
 | DI integration | every framework | #222, #147 |

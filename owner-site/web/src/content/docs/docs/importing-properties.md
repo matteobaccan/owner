@@ -171,9 +171,13 @@ In particular, to refer to system properties or environment variables,
 you can use (since version 1.0.10) `system:properties` or `system:env` (respectively).
 
 Other typical usage of importing properties might involve loading them from other sources directly
-provided by the execution environment, e.g. [servlet context](https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletContext.html) attributes, [context or servlet initialization parameters](https://docs.oracle.com/cd/E19226-01/820-7627/bnaes/index.html), [JNDI](https://docs.oracle.com/javase/tutorial/jndi/index.html) application environment resources (i.e. entries under `java:comp/env/`), [Java preferences](https://docs.oracle.com/javase/8/docs/technotes/guides/preferences/index.html), or any other environment-dependent property sources. However, none of these sources direcly provide an API to access their contents as a `Map` object;
+provided by the execution environment, e.g. [servlet context](https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletContext.html) attributes, [context or servlet initialization parameters](https://docs.oracle.com/cd/E19226-01/820-7627/bnaes/index.html), [Java preferences](https://docs.oracle.com/javase/8/docs/technotes/guides/preferences/index.html), or any other environment-dependent property sources. However, none of these sources direcly provide an API to access their contents as a `Map` object;
 hence the programmer would need in that case to implement first their own method to convert from lists of names
 plus individual values to `Map` object (therefore compatible with Owner API).
+
+**[JNDI](https://docs.oracle.com/javase/tutorial/jndi/index.html) no longer needs any of that.** Since
+2.0.0 the `owner-extras` artifact reads `java:comp/env/` as a source, so it goes in `@Sources` with
+everything else and takes part in `MERGE` — see [JNDI](/owner/docs/file-formats/#jndi).
 </div>
 
 Interactions with loading strategies

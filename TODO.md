@@ -492,10 +492,22 @@ an issue behind it, which is the point: what the others shipped is what our repo
       Issue [#48](https://github.com/matteobaccan/owner/issues/48) **can be closed**, saying why the 2013
       refusal no longer holds: it was right while properties was the only format, and JSON or YAML cannot
       express a list without this.
-- [ ] **Remote and cloud sources** — S3, Vault, Consul, JNDI — as loaders in `owner-extras`, which is
-      what that artifact is for now that it holds nothing else. Gestalt covers all of these. Issues
-      [#130](https://github.com/matteobaccan/owner/issues/130),
-      [#143](https://github.com/matteobaccan/owner/issues/143).
+- [ ] **Remote and cloud sources** — S3, Vault, Consul — as loaders in `owner-extras`, which is
+      what that artifact is for now that it holds nothing else. Gestalt covers all of these. Issue
+      [#130](https://github.com/matteobaccan/owner/issues/130).
+      **JNDI is done, 2026-08-14**, [#143](https://github.com/matteobaccan/owner/issues/143):
+      `jndi:comp/env/myconfig` as a source plus `${$jndi::…}` per value, no dependency since JNDI is in the
+      JDK. The design decision worth not re-deriving is that **only `java:` names are accepted and there is
+      no option to allow others**: a JNDI name carries its own scheme, `InitialContext` follows it over the
+      network, and a `@Sources` spec is expanded before it is read — so `jndi:ldap://…` is a configuration
+      file turning into a request to somebody else's server, which is the shape of Log4Shell. The
+      deliberate way out is `new JndiLoader(environment)` in Java, which is the same rule as the encryption
+      passphrase. Spring's `JndiPropertySource` prefixes `java:comp/env/` by default for a related reason;
+      neither it nor Commons Configuration refuses a remote name outright, so this is stricter than the
+      field.
+      The other thing settled: **a binding that is not a scalar is skipped, not refused**, because a real
+      `java:comp/env` holds a `DataSource` beside the settings and refusing the context over it would make
+      the loader useless in the container it exists for.
 - [ ] **GraalVM native image**: ship reachability metadata for the dynamic proxies and write the chapter.
       Defensive rather than competitive — the proxy is our design and Coat wins on this ground by
       construction — but today someone trying it hits the wall unaided and leaves.

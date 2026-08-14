@@ -329,6 +329,7 @@ complex things should be possible."*
 | Preprocessors — `@PreprocessorClasses` | 1.0.9 |
 | Crypto — `@EncryptedValue`, `@DecryptorClass` | 1.0.10 |
 | Crypto — `${$aes-gcm::…}`, `${$rsa-oaep::…}`, and a cipher shipped | 2.0.0 |
+| JNDI as a source — `jndi:comp/env/…` in `owner-extras` | 2.0.0 |
 | JMX — every `Config` is a `DynamicMBean` | 1.0.10 |
 | Singleton — `ConfigCache` | 1.0.10 |
 | Key prefix — `@Prefix` | 2.0.0 |
@@ -1913,7 +1914,7 @@ Everything else is additive. Four changes alter the result of a configuration th
 | Variable Expansion in `@Key` | ✔ since 1.0.6 |
 | JMX bean | ✔ every `Config` is a `DynamicMBean` |
 | Singleton mechanism | ✔ `ConfigCache` |
-| More file formats | ✔ `.env` in the core; INI, JSON, YAML, TOML in `owner-formats`; HOCON in `owner-extras` |
+| More file formats | ✔ `.env` in the core; INI, JSON, YAML, TOML in `owner-formats`; HOCON and JNDI in `owner-extras` |
 | Validation | - still open |
 
 Arrived without being asked for: `@Prefix`, Preprocessors, `@Sensitive` masking, transactional event listeners.

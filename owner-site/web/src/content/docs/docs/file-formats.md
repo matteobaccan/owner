@@ -969,7 +969,71 @@ Two other routes work whatever the format:
   this one have been reading YAML and JSON through the [`Loader`][loader] interface for years, which has
   been stable since 1.0.5 and stays that way — everything added in 2.0.0 is a default method, so an
   implementation written against the old interface needs no change and no recompilation.
-- **[ZooKeeper](/owner/docs/loading-strategies/)**, in the `owner-extras` artifact, for
+- **[ZooKeeper](/owner/docs/loading-strategies/)** and **JNDI**, in the `owner-extras` artifact, for
   configuration that does not come from a file at all.
 
   [loader]: https://matteobaccan.github.io/owner/apidocs/latest/org/aeonbits/owner/loaders/Loader.html
+
+
+JNDI
+----
+
+*Since 2.0.0, in the `owner-extras` artifact.* What a Java EE or servlet container binds — an
+`env-entry`, a Tomcat `<Environment>` — read as a source, which is what makes it override the file that
+ships inside the application:
+
+```java
+@LoadPolicy(LoadType.MERGE)
+@Sources({
+    "jndi:comp/env/myconfig",
+    "file:~/myconfig.properties",
+    "classpath:myconfig.properties" })
+public interface MyConfig extends Config { }
+```
+
+`jndi:myconfig` and `jndi:comp/env/myconfig` are the same name written two ways: a relative name is
+resolved against `java:comp/env/`, which is where a container binds. A `java:` name is used as written, so
+`java:global/…` goes in `@Sources` directly.
+
+The name must be bound to a **context**, and every binding under it becomes a property; subcontexts are
+read too and their names joined with a dot, so `comp/env/myconfig/db/host` is read as `db.host`. It needs
+no dependency — JNDI is in the JDK — and it lives in `owner-extras` rather than in the core because a JNDI
+lookup is a capability, not a file format, and one an application should carry only if it asked for it.
+
+**A binding that is not a scalar is skipped rather than refused.** A real `java:comp/env` holds a
+`DataSource` or a `UserTransaction` beside the settings, and a loader that refused the whole context over
+one of them would be useless in the container it exists for. What is taken is a `String`, a `Number`, a
+`Boolean` or a `Character` — the types an `env-entry` declares — and what is skipped is named at `CONFIG`,
+so a property that quietly did not arrive can be found.
+
+<div class="note warning">
+  <h5>Only local names, and there is no option to change that.</h5>
+  <p>
+    A JNDI name can carry its own scheme, and <code>InitialContext</code> follows it over the network:
+    <code>jndi:ldap://somewhere/x</code> is a valid source spec and is exactly the shape of Log4Shell. It
+    is reachable from a configuration file, because a <code>@Sources</code> spec is expanded before it is
+    read and therefore need not even be a constant. So a name whose scheme is not <code>java</code> is
+    <b>refused</b>, and there is deliberately no setting to allow it: where the provider lives is a
+    decision that belongs in Java, next to the credentials it needs. Construct
+    <code>new JndiLoader(environment)</code> with a JNDI environment of your own and register it — the
+    same rule this library applies to an encryption passphrase.
+  </p>
+</div>
+
+### A single entry, rather than a context
+
+A source is a set of keys, so a name bound to one value has no place in `@Sources` — there would be no key
+for it. That is the [value handler](/owner/docs/crypto/) form of the same thing:
+
+```java
+ConfigFactory.registerValueHandler(new JndiHandler());
+```
+
+```properties
+db.password = ${$jndi::comp/env/db/password}
+jdbc.url    = jdbc:h2:mem:test?password=${db.password}
+```
+
+The loader reads a context, the handler reads an entry, and each refuses the other's case with a pointer
+to it. The handler accepts the same names and applies the same refusal — more urgently, if anything, since
+a value is an easier place to write into than a source spec.
