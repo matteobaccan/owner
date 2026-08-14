@@ -29,8 +29,16 @@ RELEASING
 WHERE TO PICK UP
 ----------------
 
-Updated at the end of 2026-08-11. `FORMATS.md` and `COMPARISON.md` have the detail and the open questions;
-this is the short version.
+Updated at the end of 2026-08-14. `FORMATS.md`, `COMPARISON.md` and `CRYPTO.md` have the detail and the
+open questions; this is the short version.
+
+**The cipher shipped on 2026-08-14**, which was the last of the three largest gaps. `${$aes-gcm::…}`, a
+`ValueHandler` registered by name, AES-256/GCM over PBKDF2 at 210,000 iterations, and `AesGcmTool` in the
+same jar to produce a marker. It closes #285 and the decryptor half of #287 by construction, retires the
+AES/ECB example the site used to publish, and — because the envelope knows nothing about cryptography —
+gives `${$vault::…}` and `${$file::…}` to anybody who wants them, which is part of #130 and #143 with no
+module of ours. `CRYPTO.md` has what is still open; the short answer is the asymmetric case and nothing
+else.
 
 **Two of the three largest gaps closed on 2026-08-11.**
 
@@ -358,10 +366,25 @@ an issue behind it, which is the point: what the others shipped is what our repo
       is no public way to ask a nested object for its own path — `KeyPrefix` is package-private — so a
       section reached through a list or through an accessor taking arguments has a path only the caller can
       reconstruct. That is the gap this would close, and the argument for doing it one day.
-- [ ] **Ship a cipher, and a marker that says a value is one.** `CRYPTO.md` holds the whole analysis —
+- [x] **Ship a cipher, and a marker that says a value is one** — **done 2026-08-14**, in three commits:
+      the envelope (`ValueHandler`, `HandlersManager`, the hook in `StrSubstitutor`), the cipher
+      (`AesGcmHandler`), and the tool (`AesGcmTool`). The site page was rewritten with it, and says what
+      changed to whoever copied the old example. What the build settled beyond the design below:
+      **210,000 iterations**, measured rather than guessed — 38 ms on JDK 24, 49 ms on JDK 17, once per
+      salt and not once per value. **The count travels in the token**, four bytes ahead of the salt, so
+      that raising it later leaves files already written readable; it is not a knob, since no syntax
+      offers it to whoever edits the file, the whole header is GCM-authenticated, and a token asking for
+      fewer than 100,000 iterations is refused. **One class, not two** — encryption and decryption share a
+      format, and a format written down twice disagrees with itself. **No discovery**, and the tool goes
+      in the core jar with no `Main-Class`. The passphrase and the derived keys are `transient`, because a
+      Config object is serializable and a handler is reachable from one.
+      What is left is only the asymmetric case, which is a second handler name and was never in this one.
+      The analysis below is kept because it is the reasoning, not the plan.
+      `CRYPTO.md` holds the whole of it —
       what `@EncryptedValue` is worth today, what the field does, the design and the open questions.
-      The short version: **the library ships no cipher at all.** `org.aeonbits.owner.crypto` is an SPI
-      and a no-op; the only concrete implementation lives in the test suite, and `crypto.md` reproduces
+      The short version: **the library shipped no cipher at all until 2026-08-14.**
+      `org.aeonbits.owner.crypto` is an SPI
+      and a no-op; the only concrete implementation lived in the test suite, and `crypto.md` reproduced
       its source for the reader to copy — so that class is what people run. It is AES/ECB with the
       passphrase used as the raw key, which was probed rather than assumed: the same plaintext gives
       the same cipher text every time, so a file discloses which secrets are equal.

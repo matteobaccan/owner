@@ -8,7 +8,10 @@ looks, and what shipping a real one would have to be. The companion documents ar
 which records what the other libraries do, `FORMATS.md`, which is the same kind of document for the
 file formats, and `TODO.md`, which holds the ordered backlog.
 
-Nothing here is built. The open questions are collected at the bottom.
+**Built on 2026-08-14.** `ValueHandler`, `HandlersManager` and the hook in `StrSubstitutor` are the
+envelope; `AesGcmHandler` is the cipher; `AesGcmTool` is the tool; the site page was rewritten. What the
+building decided, and where it departed from what is written below, is in **What the construction
+settled** at the bottom, ahead of the open questions — which are now one.
 
 
 Where we are, measured
@@ -269,40 +272,106 @@ Whether the class stays in the test suite as a demonstration of the SPI, or goes
 question below.
 
 
+What the construction settled
+-----------------------------
+
+Written 2026-08-14, after building it. Seven of the eight questions below are answered; they are left
+standing because the reasoning is worth more than the verdict, and because two of them were answered
+*differently* from how they were posed.
+
+**1, the iteration count — 210,000, and it travels in the token.** Measured before being chosen: one
+derivation costs 38 ms on JDK 24 and 49 ms on JDK 17, and it happens once per salt. The departure is the
+second half. This document said the count would be "fixed in a scheme number", meaning fixed in what
+`aes-gcm` means; it is four bytes ahead of the salt instead. Nothing else could read a file written last
+year once the guidance moves, and a handler name per iteration count is not a rotation, it is an accident.
+**This is not the knob the "Who owns the payload" section argues against**: no syntax offers it to whoever
+edits the file, it is an output of the tool like the salt, the whole header is passed to GCM as additional
+authenticated data, and a token asking to be read with fewer than 100,000 iterations is refused rather
+than honoured. The argument that put the salt inside the authenticated envelope is the same one that puts
+the count there.
+
+**2, the name — `AesGcmHandler`, one class.** Named after what it does, because a second construction
+arrives as a second name and a second class rather than as a version of this one. Encryption and
+decryption are in it together: they share a token format, and a format written down in two places
+disagrees with itself.
+
+**3, the tool — a `main()` in the core jar**, `java -cp owner.jar org.aeonbits.owner.handlers.AesGcmTool`,
+with no `Main-Class` in the manifest, so the jar gains a class and not an identity as an executable. A
+separate artifact would be one more thing to release and one more thing to fetch before you can put a
+password in a file. The constraint held: neither the passphrase nor the values may be arguments, and a
+bare argument is refused with that sentence rather than accepted.
+
+**4, `StandardEncryptor` stays in the test suite**, as the fixture of the tests that were written against
+it. What it stopped being is *published*: the site page no longer reproduces its source, and says what
+changed to whoever copied it.
+
+**6, the warning about a weak construction — not given.** An `@EncryptedValue` whose value is not a marker
+is now the ordinary shape of every configuration written before today, and a line at `CONFIG` on all of
+them would be noise, not diagnosis.
+
+**7, registration — explicit only, no discovery.** A loader found on the classpath reads files that are
+already yours; a handler found on the classpath answers for the values inside them, and a jar arriving as
+a transitive dependency is not a decision anybody took. A name may not be empty and may not contain
+whitespace or any of `$ : { }`, checked at registration, which is the one moment the author of the handler
+is present to be told.
+
+**8, an unknown handler — an `UnsupportedOperationException` from `HandlersManager.resolve`**, naming what
+is registered so the message is actionable, and never repeating the payload, which is the one part of a
+marker that may be a secret.
+
+Two things were decided that no question asked about. **What a handler answers is not expanded again**: a
+value read from a property is, because that is how `a=${b}` works, but text arriving from outside the
+configuration is exactly the text that must not be read as a template. And **the passphrase and the
+derived keys are `transient`**, because a Config object is serializable and a handler is reachable from
+one, so writing them out would put a secret in a file nobody chose to protect.
+
+One thing had to be found by running the tool rather than by testing it: `System.console()` meant "there is
+a terminal" until JDK 21 and stopped meaning it in JDK 22, where a Console is returned even with the
+streams redirected. Asked the old question, the tool called `readPassword` on a pipe and silently took the
+first value being piped in as the passphrase. `Console.isTerminal()` is the new question and does not exist
+on the Java 8 baseline, so it is asked by reflection where it exists.
+
+
 Open questions
 --------------
 
-1. **The iteration count.** OWASP's current guidance for PBKDF2-HMAC-SHA256 is 210,000, which on the
+1. ~~**The iteration count.**~~ Answered above — 210,000, and carried in the token.
+   The reasoning as it was posed: OWASP's current guidance for PBKDF2-HMAC-SHA256 is 210,000, which on the
    Java 8 baseline is a noticeable pause. Deriving once per salt makes it once per configuration
    rather than once per value, which probably settles it — but it wants measuring on the oldest JDK
    we support before it is fixed, because once a token is written the count is not a knob the reader
    can change: it is part of what `aes-gcm` means.
-2. **The name.** `AesGcmDecryptor` says the construction, which is honest and matches the handler
+2. ~~**The name.**~~ Answered above — `AesGcmHandler`, one class. `AesGcmDecryptor` says the construction, which is honest and matches the handler
    name; something like `StandardDecryptor` says less and ages differently. Since the handler name is
    the identifier, a second construction arrives as a second name and a second class rather than as a
    version of this one — which argues for naming the class after what it does. The class implements
    both `Decryptor` and `Encryptor`, or two classes?
-3. **The tool's shape.** A `main()` in the core jar, reachable with `java -cp owner.jar …`, or a
+3. ~~**The tool's shape.**~~ Answered above — a `main()` in the core jar. A `main()` in the core jar, reachable with `java -cp owner.jar …`, or a
    separate artifact? The core has no `main` today, and adding one is a small change to what the jar
    is.
-4. **Does `StandardEncryptor` stay in the test suite** as a demonstration of the SPI, clearly labelled
+4. ~~**Does `StandardEncryptor` stay in the test suite**~~ Answered above — it stays, as a fixture; what it stopped being is published. as a demonstration of the SPI, clearly labelled
    as not a cipher to use, or does it go?
 5. ~~**The relationship with the value-level marker.**~~ Answered — see below.
-6. **Whether the warning about a weak construction is ours to give.** A decryptor somebody wrote
+6. ~~**Whether the warning about a weak construction is ours to give.**~~ Answered above — not given. A decryptor somebody wrote
    themselves may be anything, and we cannot inspect it. But an `@EncryptedValue` property whose
    value is not a marker is at least *not* using what we ship, which is something we could say once
    at `CONFIG`. It may also be noise.
-7. **Where a handler is registered, and what a name may be.** The loaders are the precedent —
+7. ~~**Where a handler is registered, and what a name may be.**~~ Answered above — registration only, and a name may not contain whitespace or `$ : { }`. The loaders are the precedent —
    `registerLoader(new DotEnvLoader(dialect))` on the factory, plus `ServiceLoader` discovery — and
    registering a *configured instance* is also what dissolves the question of where the passphrase
    comes from: the caller brings it. Left to decide: whether discovery applies to handlers at all
    (a cipher found on the classpath and silently enabled is a different proposition from a file
    format), and what shape a name may take, since it has to be told apart from an ordinary key.
-8. **What an unknown handler does.** Settled in principle on 2026-08-13 and recorded in `TODO.md`:
+8. ~~**What an unknown handler does.**~~ Answered above — an `UnsupportedOperationException` naming what is registered. Settled in principle on 2026-08-13 and recorded in `TODO.md`:
    an expression beginning `$` and containing `::` **is** a handler reference, and one naming a
    handler that is not registered is an error rather than a fallback — otherwise a misspelt name
    resolves to the empty string, which for a password is the worst answer available. What is left is
    where that refusal is raised and what it says.
 
 Question 5 was **answered on 2026-08-13** and is folded into the design above: the marker is the
-form, the token is what goes inside it, and the scheme number is gone.
+form, the token is what goes inside it, and the scheme number is gone. The other seven were answered by
+building it, on 2026-08-14, and the verdicts are in the section before this one.
+
+**The only question left open is not in this list**: the asymmetric case, which has a section of its own
+above and arrives as a second handler name whenever somebody wants it. Nothing about `aes-gcm` has to
+change for it.

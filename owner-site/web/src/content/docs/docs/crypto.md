@@ -2,75 +2,182 @@
 title: "Crypto support"
 ---
 
-What is this feature?
----------------------
+<div class="note warning">
+  <h5>If you copied the example that used to be on this page, read the last section first.</h5>
+  <p>
+    Until 2.0.0 this page reproduced the source of <code>StandardEncryptor</code> for you to paste into
+    your own project. That class is <b>AES/ECB with the passphrase used as the raw key</b>, and a file
+    encrypted with it discloses which of its secrets are equal. It was never part of the library, so
+    nothing was deprecated and nothing broke — but if it is in your code, it is worth an hour.
+    <a href="#the-example-this-page-used-to-publish">What changed, and what to do about it</a>.
+  </p>
+</div>
 
-Crypto support is available since version 1.0.10 and is part of the stable API.
+Since 2.0.0 there are two ways of putting an encrypted value in a configuration, and they are not
+equivalent. **Write the marker.** The annotation stays for the configurations that already use it.
 
-With Crypto it is possible to declare, with a simple annotation, that a property contains an encrypted value
-( a value which has to be decrypted ). A `@DecryptorClass` can be specified for a class or for each property.
-`@EncryptedValue(@DecryptorClass)` overrides a `@DecryptorClass` specified at class level.
-
-
-Which crypto frameworks are supported?
---------------------------------------
-
-Crypto support allows the use of any framework to decrypt values. You must supply a class
-implementing the `Decryptor` interface, where you can use any framework you want in order to decrypt values.
+|                        | `${$aes-gcm::…}` since 2.0.0 | `@EncryptedValue` since 1.0.10 |
+|---|---|---|
+| Where it is declared    | in the value                 | on the method                  |
+| A cipher is shipped     | yes, AES-256/GCM             | no — you supply the class      |
+| `fill()` gets the secret| yes                          | no                             |
+| A value referring to it | gets the secret              | gets the cipher text           |
+| `store()` writes back   | the marker                   | the cipher text                |
 
 
-How can I use it?
------------------
+The marker
+----------
 
-Suppose you will use the same `@DecryptorClass` to decrypt all values in your configuration:
+A value can name what resolves it instead of holding its own text:
+
+```properties
+db.password = ${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlmMpp4RxRWoHOoDUGjJI2AYd1o9qYPK}
+jdbc.url    = jdbc:h2:mem:test?password=${db.password}
+```
+
+Register the handler with the passphrase — from wherever your application already keeps it — and create
+the configuration afterwards:
 
 ```java
-@DecryptorClass( MyDecryptor1.class )
-public interface Sample extends Config {
+ConfigFactory.registerValueHandler(new AesGcmHandler(passphrase));
 
-    @EncryptedValue  
-    public String myEncryptedPassword1();
+MyConfig cfg = ConfigFactory.create(MyConfig.class);
+cfg.password();   // the secret
+cfg.jdbcUrl();    // …?password=<the secret>, because expansion recurses into the value
+```
 
-    @EncryptedValue
-    public String myEncryptedPassword2();
+Nothing goes on the interface. `password()` is an ordinary `String` method.
+
+<div class="note info">
+  <h5>The passphrase never comes from the properties.</h5>
+  <p>
+    That would be circular — the secret protecting the file, kept in the file. You construct the handler
+    and register it, the way a <a href="/owner/docs/file-formats/">loader</a> is registered, which is what
+    lets the passphrase arrive from an environment variable, a mounted secret, a vault client or anywhere
+    else your application already reads it from.
+  </p>
+</div>
+
+
+Encrypting a value
+------------------
+
+The tool is in the core jar and needs nothing else on the classpath:
+
+```
+$ printf 's3cr3t\nhunter2\n' | OWNER_PASSPHRASE='…' \
+    java -cp owner-2.0.0.jar org.aeonbits.owner.handlers.AesGcmTool
+
+${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlmMpp4RxRWoHOoDUGjJI2AYd1o9qYPK}
+${$aes-gcm::AAM0UBtPtHU9kZcgvqX673gZTlkT++B4i4OY/U+ozDWUAM4GLcG2l1wW}
+```
+
+Run it with no `OWNER_PASSPHRASE` and it asks on the terminal, twice, without echo. Markers go to standard
+output and everything else to standard error, so `> markers.txt` collects markers and nothing else.
+
+**Neither the passphrase nor the values may be command-line arguments**, and the tool refuses them there
+rather than accepting them: a command line stays in the shell history and is visible in `ps` to every user
+on the machine. `--name` and `--iterations` are arguments, because neither is secret.
+
+Encrypt a whole file's worth of values **in one run**. Every value of one run shares a salt and gets its
+own IV, so reading them back costs one key derivation between them instead of one per property.
+
+
+What the construction is
+------------------------
+
+`base64( iterations(4) | salt(16) | iv(12) | ciphertext | tag(16) )`, where
+
+- **AES-256/GCM** with a 128-bit tag, so an edited value fails loudly rather than decrypting to something
+  else;
+- **a random IV per value**, so two equal secrets do not produce equal cipher text;
+- **PBKDF2-HMAC-SHA256** at 210,000 iterations — OWASP's current guidance — over a passphrase of *any*
+  length;
+- the whole header is passed to GCM as additional authenticated data, so it cannot be edited on its own.
+
+The iteration count travels in the token so that raising it later leaves files already written readable. It
+is not a knob: no syntax offers it to whoever edits the file, and a token asking to be read with fewer than
+100,000 iterations is refused rather than honoured.
+
+
+Rotating a key
+--------------
+
+A handler is registered under a name, and the name is what a value refers to. Register two:
+
+```java
+ConfigFactory.registerValueHandler(new AesGcmHandler("aes-gcm-2025", current));
+ConfigFactory.registerValueHandler(new AesGcmHandler("aes-gcm-2024", previous));
+```
+
+```properties
+db.password  = ${$aes-gcm-2025::…}   # moved
+api.token    = ${$aes-gcm-2024::…}   # not yet
+```
+
+Both are readable while the rotation is under way, and it proceeds one value at a time.
+
+
+Other things a marker can name
+------------------------------
+
+The library reads the envelope — the `$`, the name, the `::` — and hands everything after the first `::`
+to the handler as text. **It owns the envelope and the handler owns the payload**, so nothing about the
+mechanism is specific to cryptography:
+
+```java
+public class FileHandler implements ValueHandler {
+    public String name() { return "file"; }
+
+    public String resolve(String path) {
+        try {
+            return new String(Files.readAllBytes(Paths.get(path)), UTF_8).trim();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read " + path, e);
+        }
+    }
 }
 ```
 
-And now suppose that you will use different `@DecryptorClass` for the previous properties:
+```properties
+db.password = ${$file::/run/secrets/db_password}
+api.token   = ${$vault::secret/data/app:v2}
+```
+
+Two rules a handler must respect:
+
+- **it must throw when it cannot answer**, never return the empty string — for a password that is the
+  worst available answer, and it is indistinguishable from success;
+- **what it returns is not expanded again.** A secret that happens to contain `${` is a secret, not a
+  template.
+
+There is no discovery on the classpath. A handler exists only because you registered it: a file format
+found on the classpath reads files that are already yours, while a handler found on the classpath would
+answer for the values inside them.
+
+A marker naming a handler nobody registered is an **error**, not an empty string — a misspelt name has to
+fail loudly for exactly the same reason.
+
+
+`@EncryptedValue`, and what it does not do
+------------------------------------------
+
+Available since 1.0.10 and unchanged. A `@DecryptorClass` can be given for a class or for a single
+property, and `@EncryptedValue(SomeDecryptor.class)` overrides the class-level one:
 
 ```java
+@DecryptorClass(MyDecryptor.class)
 public interface Sample extends Config {
 
-    @EncryptedValue( MyDecryptor1.class )
-    public String myEncryptedPassword1();
+    @EncryptedValue
+    String myEncryptedPassword1();
 
-    @EncryptedValue( MyDecryptor2.class )
-    public String myEncryptedPassword2();
+    @EncryptedValue(AnotherDecryptor.class)
+    String myEncryptedPassword2();
 }
 ```
 
-Or if you plan to use the same `@DecryptorClass` for all `@EncryptedValue` properties except `myEncryptedPassword1`:
-
-```java
-@DecryptorClass( MyDecryptor2.class )
-public interface Sample extends Config {
-
-    @EncryptedValue( MyDecryptor1.class )
-    public String myEncryptedPassword1();
-
-    @EncryptedValue
-    public String myEncryptedPassword2();
-
-    @EncryptedValue
-    public String myEncryptedPassword3();
-}
-```
-
-
-It works with other annotations...
-----------------------------------
-
-... so you can write code like this:
+You supply the `Decryptor`; the library ships none for this path. It composes with the other annotations:
 
 ```java
 @Key("crypto.list")
@@ -80,11 +187,14 @@ It works with other annotations...
 List<String> cryptoList();
 ```
 
+**A method may not carry both**, and a `@EncryptedValue` whose value is a marker is refused when the
+configuration is created. Expansion runs first, so the marker would decrypt the value and the decryptor
+would then be handed the plain secret to decrypt a second time.
 
-A value that refers to an encrypted one gets the cipher text
-------------------------------------------------------------
 
-*Since 2.0.0 this is reported.* Composing a value out of an encrypted property does **not** work, and it
+### A value that refers to an encrypted one gets the cipher text
+
+*Reported since 2.0.0.* Composing a value out of an `@EncryptedValue` property does **not** work, and it
 used to fail in silence:
 
 ```properties
@@ -114,114 +224,42 @@ WARNING: the value of 'jdbc.url' refers to 'crypto.password', which is declared
 ```
 
 and [`owner.strict`](/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning)
-turns that into a refusal. **The remedy is to compose the value in Java**, from the method that decrypts,
-rather than in the properties file.
+turns that into a refusal. **The marker is the cure**: written `crypto.password=${$aes-gcm::…}`, the
+reference above resolves to the secret, because decryption became part of the expansion instead of being
+attached to a method.
 
 <div class="note info">
   <h5>The same is true of a converter, and there it cannot be fixed.</h5>
   <p>
     A <code>@ConverterClass</code> is not applied either when a value is read through a variable, and that
     half has no cure at all: a converter answers with a typed object, and there is no room for one inside a
-    string. Decryption is text to text, so only the missing decryptor is a question of where the
+    string. Decryption is text to text, so only the missing decryptor was a question of where the
     declaration sits.
   </p>
 </div>
 
-Can you show me an example implementation of Decryptor?
--------------------------------------------------------
 
-This is the source code of `IdentityDecryptor.java`, a no-op Decryptor returning the same value received for decrypting:
+The example this page used to publish
+-------------------------------------
 
-```java
-package org.aeonbits.owner.crypto;
+This page carried the full source of `StandardEncryptor` and invited you to copy it. **If you did, you are
+running AES/ECB with your passphrase as the raw key**, and that is worth changing.
 
-public final class IdentityDecryptor
-extends AbstractDecryptor {
-    @Override
-    public String decrypt( String value ) {
-        return value;
-    }
-}
-```
+It was never shipped. The class lives in the test suite, and only the `Decryptor`, `Encryptor` and the two
+abstract classes were ever released API — so there is nothing deprecated here, and nothing that stopped
+compiling. What there is, is a consequence that was measured rather than assumed:
 
-It extends `AbstractDecryptor`, an abstract class that already implements the `Decrypt` interface and one of its
-methods. To get our Decryptor working, we just have to implement the other method, `decrypt( String value )` .
+- `Cipher.getInstance("AES")` is **AES/ECB**. The same plaintext gives the same cipher text every time, so
+  a file discloses which of its secrets are equal — the staging password and the production one, the two
+  services sharing a key.
+- There is **no integrity check**. An edited value decrypts to something else instead of failing.
+- The passphrase is used as the **raw key**, which is why it had to be exactly 16, 24 or 32 characters
+  long. That is not a key derivation; it is a length requirement.
 
-Another example is `StandardDecryptor.java`, which uses the `javax.crypto` features available in JDK.
+What to do: encrypt the same values again with the tool above and replace them with markers. The
+passphrase can be the same one, and it no longer has to be padded to fit. The `@EncryptedValue`
+annotations then come off, because a marker names what decrypts it.
 
-```java
-package org.aeonbits.owner.crypto;
-
-import java.io.UnsupportedEncodingException;
-import java.security.Key;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Base64;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-
-
-public class StandardEncryptor extends AbstractEncryptor {
-    private final String algorithm;
-    private final String encoding;
-    private final byte[] secretKey;
-    private final int secretKeySize;
-
-    public StandardEncryptor( String algorithm, String secretKey, String encoding, int secretKeySize ) {
-        try {
-            this.secretKeySize = secretKeySize;
-            this.algorithm = algorithm;
-            this.encoding = encoding;
-            this.secretKey = secretKey.getBytes( encoding );
-        } catch (UnsupportedEncodingException cause) {
-            throw new IllegalArgumentException( cause.getMessage(), cause);
-        }
-    }
-
-    public String getAlgorithm() {
-        return this.algorithm;
-    }
-
-
-    public String encrypt( String plainData ) {
-        try {
-            Key key = generateKey();
-            Cipher c = Cipher.getInstance( this.algorithm );
-            c.init(Cipher.ENCRYPT_MODE, key);
-            byte[] encVal = c.doFinal( plainData.getBytes( this.encoding ) );
-            String encryptedValue = Base64.getEncoder().encodeToString( encVal );
-            return encryptedValue;
-        } catch ( Exception cause ) {
-            throw new IllegalArgumentException( cause.getMessage(), cause );
-        }
-    }
-
-    public String decrypt(String encryptedData) throws IllegalArgumentException {
-        try {
-            Key key = generateKey();
-            Cipher c = Cipher.getInstance( this.algorithm );
-            c.init(Cipher.DECRYPT_MODE, key);
-            byte[] decodedValue = Base64.getDecoder().decode( encryptedData );
-            byte[] decValue = c.doFinal(decodedValue);
-            String decryptedValue = new String(decValue, this.encoding );
-            return decryptedValue;
-        } catch ( Exception cause ){
-            throw new IllegalArgumentException( cause.getMessage(), cause );
-        }
-    }
-
-    private Key generateKey() throws Exception {
-        return new SecretKeySpec( this.secretKey, this.getAlgorithm() );
-    }
-
-    public static final StandardEncryptor newInstance( String algorithm, String secretKey ) {
-        return newInstance( algorithm, secretKey, "UTF-8", secretKey.length() );
-    }
-
-    public static final StandardEncryptor newInstance( String algorithm, String secretKey, String encoding, int secretKeySize ) {
-        return new StandardEncryptor( algorithm, secretKey, encoding, secretKeySize );
-    }
-}
-```
+`Decryptor` and `Encryptor` remain part of the API, for anybody who wrote a real implementation against
+them. It is `StandardEncryptor` — an example, published for copying, that should not have been — that is
+gone from this page.

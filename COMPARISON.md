@@ -97,7 +97,12 @@ Checked against all of the above:
 - **Zero runtime dependencies in the core** — verified in the pom: test scope only.
 - **Java 8 baseline.** Coat needs 11, Gestalt 11, SmallRye 17. We are the only modern option for
   anyone still on 8.
-- **Encryption of values built in** (`@EncryptedValue`, `@DecryptorClass`), with no cloud module.
+- **Encryption of values with a cipher actually shipped** (`${$aes-gcm::…}`, added 2026-08-14): AES-256/GCM
+  over PBKDF2 at 210,000 iterations, in the core, with no dependency and no framework, on the Java 8
+  baseline — and the tool that encrypts a value in the same jar. The *marker* is not ours, SmallRye has
+  the same shape; the construction, the absence of a dependency and the fact that the key does not come
+  from a configuration property are. See "Encrypting a value against the equivalents" below. The older
+  `@EncryptedValue` / `@DecryptorClass` remain, for whoever brought their own decryptor.
 - **JMX**, **preprocessors**, **`Mutable`/`Accessible`** (we write, the others mostly only read),
   **parametrized properties**, **`@DisableFeature`** granularity, **prefix derived from the package**.
 - BSD licence, no framework lock-in.
@@ -206,6 +211,56 @@ endpoint with roles and authorization behind it. Our `list()` is a debugging con
 everything by default would break every existing caller and leave the feature useless.
 
 
+Encrypting a value against the equivalents
+------------------------------------------
+
+Checked 2026-08-14, while building ours. The finding that matters is the first one, and it is not
+flattering: **the marker is not our idea, and SmallRye got there first with almost our exact syntax.**
+
+| | How a value says it is encrypted | The cipher | Where the key comes from | Mixes with ordinary expansion |
+|---|---|---|---|---|
+| **OWNER 2.0.0** | `${$aes-gcm::…}` in the value | AES-256/GCM, PBKDF2-HMAC-SHA256 at 210,000, random IV per value, in the core | an instance the caller registers, holding the passphrase | **yes** |
+| **SmallRye Config** | `${aes-gcm-nopadding::…}` in the value | AES/GCM, key of **128 bits**, base64, **no key derivation** | the configuration property `smallrye.config.secret-handler.aes-gcm-nopadding.encryption-key` | **no** — "it is not possible to mix Secret Keys Expressions with Property Expressions" |
+| **Jasypt** (`jasypt-spring-boot`) | `ENC(…)` prefix on the value | PBEWITHHMACSHA512ANDAES_256 since 3.0.0: PBKDF2-HMAC-SHA512 at **1,000** iterations, AES-256-**CBC** | `jasypt.encryptor.password`, a property or an environment variable | a prefix is not an expression at all |
+| **Spring Cloud Config** | `{cipher}` prefix, decrypted **server side** | symmetric `encrypt.key`, or a keystore for the asymmetric case | `encrypt.key` / `ENCRYPT_KEY`, or a keystore | server side, before the client sees anything |
+| **Gestalt** | — | encrypts secrets **in memory after reading**, per-secret cipher and IV; also a temporary secret released after N reads | — | a different feature: nothing in the file is encrypted |
+
+Four things follow, and only the last two are ours.
+
+**The shape is settled and we are late to it.** `${handler::value}` is what SmallRye ships, which is
+reassurance rather than a problem: the design was reached twice independently, and a Quarkus user meets
+our syntax already knowing what it means. Our one deliberate difference is the leading `$`, and it is not
+decoration. SmallRye's expressions are a separate resolution pass, which is exactly why theirs *cannot*
+be mixed with property expansion; ours share the substitutor with ordinary keys, so a sigil is what tells
+`${$aes-gcm::…}` from a key called `aes-gcm::…`. **The sigil is what buys the mixing**, and the mixing is
+the whole reason the marker beats the annotation: `jdbc.url=…?password=${db.password}` gets the secret.
+
+**Their key comes from the configuration.** `smallrye.config.secret-handler.aes-gcm-nopadding.encryption-key`
+is a property, read from the same sources as everything else — the secret that protects the file, alongside
+the file. Jasypt has the same shape with `jasypt.encryptor.password`, and both are usually pointed at an
+environment variable to get out of it. We refused the circularity at the design stage instead: the handler
+is constructed by the caller and registered, so the passphrase arrives from wherever the application
+already keeps it and there is no property to forget.
+
+**On the construction we are ahead, and by more than politeness allows leaving unsaid.** SmallRye's
+handler takes a raw 128-bit key with no derivation, so the passphrase *is* the key and has to be
+generated rather than chosen. Jasypt derives properly but at **1,000 iterations**, which is the 2000s
+default and 210 times below current OWASP guidance, and encrypts with **CBC**, which has no integrity: an
+edited value decrypts to something else instead of failing. Ours is AES-256/GCM at 210,000 iterations
+with the whole header authenticated.
+
+**And it costs nothing to reach.** SmallRye's needs `smallrye-config-crypto` and Java 17; Jasypt needs
+Spring; Spring Cloud Config needs a config server. Ours is in the core jar, on the Java 8 baseline, with
+no dependency — because AES-GCM and PBKDF2 are in the JDK and there was never anything to pull in. The
+tool that encrypts a value is in the same jar, which is one thing none of them can say: Jasypt ships a CLI
+in its own artifact and Spring Cloud Config makes you POST to `/encrypt`.
+
+Where we deliberately did **not** follow them: SmallRye discovers handlers through `ServiceLoader` on
+`META-INF/services/io.smallrye.config.SecretKeysHandler`. We do not, and the reasoning is in
+`CRYPTO.md` — a file format found on the classpath reads files that are already yours, while a handler
+found on the classpath answers for the values inside them.
+
+
 Loader discovery against the equivalents
 ----------------------------------------
 
@@ -303,7 +358,8 @@ coincidence; it is evidence the demand is real.
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
 | Indexed keys `list[0]` | SmallRye, Gestalt, Spring | — (**closed 2026-08-09**) |
 | "Which source provided this?" | Spring (origin tracking), Gestalt | — (**closed 2026-08-11**) |
-| Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130, #143 |
+| Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130, #143 — **partly answered 2026-08-14**: a `ValueHandler` makes `${$vault::secret/data/app}` a per-value reference anybody can write, with no module and no dependency from us. What is still missing is a *source* — a whole tree read from S3 or Consul — which is a `Loader`, not a handler |
+| An encrypted value in the file | SmallRye, Jasypt, Spring Cloud Config | — (**closed 2026-08-14**, and we ship the cipher, which SmallRye half does and Jasypt does at 1,000 iterations) |
 | DI integration | every framework | #222, #147 |
 | GraalVM native image | Coat, by construction | — |
 
