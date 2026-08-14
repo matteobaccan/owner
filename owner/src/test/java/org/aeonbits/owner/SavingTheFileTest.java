@@ -293,6 +293,38 @@ public class SavingTheFileTest {
                 new String(Files.readAllBytes(fresh.toPath()), StandardCharsets.ISO_8859_1));
     }
 
+    /**
+     * The shape <a href="https://github.com/matteobaccan/owner/issues/3">#3</a> is actually about: an
+     * interface that has never had a file, carrying nothing but its defaults. No {@code @Sources} at all.
+     */
+    @Config.Description("Generated from the interface. Edit the values, not the descriptions.")
+    public interface NeverHadAFile extends Accessible {
+
+        @Config.Description("Where the service listens.")
+        @Config.DefaultValue("8080")
+        int port();
+
+        @Config.DefaultValue("30")
+        int seconds();
+    }
+
+    /** A template out of an interface and its defaults, which is the whole of what #3 asked to generate. */
+    @Test
+    public void anInterfaceThatNeverHadAFileGeneratesOneFromItsDefaults() throws IOException {
+        File fresh = new File(folder.getRoot(), "template.properties");
+
+        ConfigFactory.create(NeverHadAFile.class).save(fresh);
+
+        assertEquals(""
+                + "# Generated from the interface. Edit the values, not the descriptions.\n"
+                + "\n"
+                + "# Where the service listens.\n"
+                + "port = 8080\n"
+                + "\n"
+                + "seconds = 30\n",
+                new String(Files.readAllBytes(fresh.toPath()), StandardCharsets.ISO_8859_1));
+    }
+
     @Config.Sources("file:${test.saved.file}")
     public interface Awkward extends Mutable, Accessible {
         @Config.DefaultValue("nothing")

@@ -198,11 +198,15 @@ afternoon.
 
 ### What it does not settle, and must be decided
 
-**1. This does not close #16.** #16 asked for the file to be *preserved*; this regenerates it. They are
-different answers to the same complaint, and this one is better for a file the application owns and
-worse for a file a person owns. Whether #16 closes as "we chose the other answer" or stays open for
-somebody who genuinely needs layout preservation is a separate decision, and it is not this document's
-to take.
+**1. ~~This does not close #16.~~ Overtaken by the design, and worth recording because the draft got it
+backwards.** This paragraph was written when the plan was to *regenerate* the file, and said so: #16
+asked for preservation, we were offering something else, and closing it would have been a substitution.
+Then "the file owns the arrangement" was settled, and preservation is what got built — order, blank
+lines, unknown keys and banners all survive. The one thing that does not is a comment touching a
+described key, which is the trade the banner convention exists to steer around.
+
+So #16 is answered on its own terms rather than on ours, and the only reason this entry survives is as a
+reminder that a design document written a day early can argue against the thing it is about to become.
 
 **2. A file holds more than one interface reads.** `list()` prints every property, and a real
 `application.properties` is often read by several interfaces and by things that are not OWNER at all.
