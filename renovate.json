@@ -7,9 +7,14 @@
        "automerge": true
   },
      {
-       "description": "The jakarta.validation test stack must stay on the Java 11 line, because owner-extras is tested on every LTS from 11 while these artifacts moved to Java 17. Hibernate Validator 9 is class file version 61 and dies on JDK 11 with UnsupportedClassVersionError; Expressly 6 declares Require-Capability JavaSE 17 and takes Hibernate Validator down with it, since it needs an expression language to interpolate messages. Neither limits what a user may put on their own class path: OWNER names only the jakarta.validation API and never a provider.",
-       "matchPackageNames": ["org.hibernate.validator:hibernate-validator", "org.glassfish.expressly:expressly"],
+       "description": "Hibernate Validator 9 is compiled for Java 17 (class file version 61) and owner-extras is tested on every LTS from 11, where it dies with UnsupportedClassVersionError. It does not limit a user: OWNER names only the jakarta.validation API and never a provider, so an application on 17 may bring 9. NOTE: this rule and the expressly one below were briefly merged into one, which silently unpinned expressly - two artifacts with different ceilings cannot share an allowedVersions, and renovate reopened the expressly PR within the hour to prove it.",
+       "matchPackageNames": ["org.hibernate.validator:hibernate-validator"],
        "allowedVersions": "<9.0.0"
+  },
+     {
+       "description": "Expressly 6 declares Require-Capability JavaSE 17 in its manifest and this build runs on every LTS from 11. Hibernate Validator refuses to start without an expression language to interpolate its messages, so raising this makes the JDK 11 legs fail with HV000183 rather than with anything mentioning a version.",
+       "matchPackageNames": ["org.glassfish.expressly:expressly"],
+       "allowedVersions": "<6.0.0"
   },
      {
        "description": "bval-jsr 2.x is the javax.validation provider and 3.x is the jakarta one. owner-extras tests both namespaces and needs one provider for each, so raising this turns the javax half into a second jakarta provider and stops testing it. Hibernate Validator covers jakarta; this covers javax; they must not become the same thing.",

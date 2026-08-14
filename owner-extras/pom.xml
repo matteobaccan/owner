@@ -100,8 +100,8 @@
         <!-- Hibernate Validator 8 and NOT 9: 9 is compiled for Java 17 (class file version 61) and this
              build runs on every LTS from 11, where it dies with UnsupportedClassVersionError. It does not
              limit anybody: this library names the jakarta.validation API and never a provider, so a user
-             on 17 is free to bring 9. There is a rule in renovate.json covering this and Expressly, which
-             moved to 17 for the same reason. -->
+             on 17 is free to bring 9. There is a rule in renovate.json, separate from the Expressly one
+             because the two ceilings differ. -->
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -115,7 +115,8 @@
              declares Require-Capability JavaSE 17 in its manifest, and this build runs on every LTS from
              11. Renovate raised it on 14 August 2026 and only the three JDK 11 legs went red, with
              HV000183 - which is the matrix earning its keep, since a build on one JDK would have shipped
-             it. Covered by the same renovate.json rule as Hibernate Validator. -->
+             it. There is a rule in renovate.json, and it has to be its own: sharing one
+             allowedVersions with Hibernate Validator, whose ceiling is 9, unpinned this. -->
         <dependency>
             <groupId>org.glassfish.expressly</groupId>
             <artifactId>expressly</artifactId>
