@@ -37,6 +37,7 @@ The features that can be disabled are:
 | `VARIABLE_EXPANSION` | `${...}` variables are left untouched, both in the property values and in the keys. See [Variables expansion](/owner/docs/variables-expansion/). | 1.0.4 |
 | `PARAMETER_FORMATTING` | The property value is returned as it is, instead of being used as a format for the method arguments. See [Parametrized properties](/owner/docs/parametrized-properties/). | 1.0.4 |
 | `PREFIX` | Every prefix is ignored and the property is looked up with its bare key: the `@Prefix` declared on the interface, the one configured on the factory, and the path of a [nested section](/owner/docs/nested-configuration/) alike. See [Key prefix](/owner/docs/key-prefix/). | 2.0.0 |
+| `RELAXED_BINDING` | The method reads the key it resolves to and no other spelling of it, instead of also accepting `first-name`, `first_name` and `FIRST_NAME` for `firstName()`. See [How the key may be written](/owner/docs/usage/#how-the-key-may-be-written). | 2.0.0 |
 
 Not everything that can be switched off is a `DisableableFeature`. The
 expansion of [nested variables](/owner/docs/variables-expansion/#nested-variables),

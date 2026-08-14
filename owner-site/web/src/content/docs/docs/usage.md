@@ -141,6 +141,93 @@ interface, instead of repeating it on every method: see
   </p>
 </div>
 
+How the key may be written
+--------------------------
+
+The same setting gets spelled differently depending on where it is written. Java code says `firstName`,
+a `.properties` or a `.yaml` file usually says `first-name`, a shell says `FIRST_NAME`. Since version
+2.0.0 a method finds its property under any of them, which is what
+[#116](https://github.com/matteobaccan/owner/issues/116) asked for:
+
+```java
+public interface Person extends Config {
+    String firstName();
+}
+```
+
+```properties
+firstName  = Luigi     # the key the method resolves to
+first-name = Luigi     # kebab-case
+first_name = Luigi     # snake_case
+FIRST_NAME = Luigi     # the environment variable form
+```
+
+Any one of those four answers `firstName()`.
+
+**Four forms, and no more.** The set is closed: `firstname`, `FirstName`, `first.name` and `FIRST-NAME`
+are *not* spellings of this key. Spring Boot 1 matched loosely — separators dropped, case ignored, several
+spellings collapsing onto one property — and Boot 2 deliberately narrowed it, because with the loose
+version you could not say which key a value would be read from without running the program. This is the
+narrow side of that split.
+
+**The forms are derived from the key, not from the method name**, so `@Key` takes part in it: a method
+annotated `@Key("first-name")` is equally found under `firstName` or `FIRST_NAME`. `@Key` still means
+exactly what it says — it is the key that is tried first, the one every error message names, and the one
+the [key report](/owner/docs/debugging/) prints.
+
+**One form applies to the whole key at once**, prefixes and [nesting](/owner/docs/nested-configuration/)
+included. `server.maxThreads` is looked for as `server.max-threads`, `server.max_threads` and
+`SERVER.MAX_THREADS` — never as a mixture such as `server.MAX_THREADS`, since a file is written in one
+convention throughout. That is also what makes a whole section work: with `myDb()` returning a nested
+interface, `my-db.user-name` is simply one of the spellings of `myDb.userName`.
+
+### Which one wins
+
+A value that was **written** beats one that was only **defaulted**, whichever spelling holds it — so
+`max-threads=7` in the file beats the `@DefaultValue("42")` on `maxThreads()`, as anybody would expect.
+Among values that were all written, the key the method resolves to comes first, and the other spellings
+follow in the order they are listed above: kebab, snake, upper snake, camel.
+
+That order only matters when a configuration holds two spellings of one property at once, and when it
+does, one of them is read and the other is inert. OWNER does not fail silently, so it says so:
+
+```
+WARNING: com.acme.Person: 'firstName' is written in 2 spellings at once - [firstName, first-name].
+Relaxed binding reads 'firstName' and never looks at [first-name]. Keep one spelling, or switch the
+feature off for the method with @DisableFeature(RELAXED_BINDING) if they are meant to be different
+properties.
+```
+
+With [`owner.strict`](/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning)
+on, the same case is refused when the configuration is
+created instead of being reported. A `@DefaultValue` is never one of the two: it lives under the key of
+its own method and pairing it with what the file wrote would report every defaulted property in every
+kebab-case configuration.
+
+### What it does not touch
+
+* **The properties keep the names they were written with.** `store()`, `list()`, `propertyNames()` and
+  `toString()` show `first-name`, and nothing is ever added under the key of the method. See
+  [Accessible and Mutable](/owner/docs/accessible-mutable/).
+* **The methods that take a key answer about that key.** `getProperty("firstName")` returns `null` when
+  the file says `first-name`, and a [`Traceable`](/owner/docs/accessible-mutable/#the-traceable-interface)
+  origin stays attached to the key that really exists. These are addressed by key, and relaxing them
+  would mean `getProperty(k)` reading something that is not `k`.
+* **The prefix of a group is matched as it is written.** A method returning a `Map`, or an indexed list
+  such as `hostNames[0]`, reads everything below a prefix — there the prefix decides which keys *are* the
+  group, and choosing among four of them could silently merge two groups or answer with the wrong one.
+
+One thing does follow the spellings, and has to: what
+[`@Sensitive`](/owner/docs/debugging/#keeping-a-property-out-of-the-output) masks is matched by name
+against the properties as they were loaded, so a `@Sensitive String dbPassword()` reading `DB_PASSWORD`
+out of the environment is masked in `list()` and `toString()` under that name too.
+
+The feature is on by default and is switched off per method or per interface with
+`@DisableFeature(RELAXED_BINDING)`; see [Disabling features](/owner/docs/disabling-features/). Switching
+it off is worth it where a file deliberately holds two spellings as two different properties, and where a
+property that is often absent is read in a tight loop: a key that is found costs nothing extra, while a
+key that is missing is looked for three more times before the answer is `null`.
+
 A property that is set, but empty
 ---------------------------------
 

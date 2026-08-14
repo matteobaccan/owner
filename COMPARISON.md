@@ -368,7 +368,7 @@ coincidence; it is evidence the demand is real.
 | TOML | Gestalt, Micronaut, avaje, Spring via Jackson | — (YAML #14 #65 **closed 2026-08-11**; HOCON and #240 **closed 2026-08-12**) |
 | `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
 | Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
-| Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | #116 |
+| Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | — (**closed 2026-08-14**: four spellings, on by default, `@DisableFeature(RELAXED_BINDING)` to switch off. Where they differ from us is the direction — SmallRye and Boot 2 both canonicalise the *source* keys into an index, we derive the spellings from the key a method resolved to, which is what keeps `store()` and the origins showing the file's own names) |
 | Indexed keys `list[0]` | SmallRye, Gestalt, Spring | — (**closed 2026-08-09**) |
 | "Which source provided this?" | Spring (origin tracking), Gestalt | — (**closed 2026-08-11**) |
 | Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | #130 — **partly answered 2026-08-14**: a `ValueHandler` makes `${$vault::secret/data/app}` a per-value reference anybody can write, with no module and no dependency from us. What is still missing is a *source* — a whole tree read from S3 or Consul — which is a `Loader`, not a handler |
@@ -475,7 +475,12 @@ Backlog, highest value first
    lookup by key instead. Both of them also carry a file and a line number, which we do not — that needs
    every loader to report positions, and `Origin` is a type rather than a `String` precisely so it can
    grow one later without a second API.
-4. **Configurable naming strategy** (#116) — hooks into the factory-prefix machinery from 2.0.0.
+4. ~~**Configurable naming strategy** (#116)~~ — **done 2026-08-14**, and not as a strategy to configure:
+   a closed set of four spellings, all of them tried, which is what the issue actually asked for and what
+   removes the setting instead of adding one. SmallRye's `NamingStrategy` picks *one* convention per
+   mapping, so a file in the other one is simply not read; ours has no wrong answer to pick. The cost of
+   accepting several is that two of them may be written at once, and that is reported rather than left to
+   be discovered — which is the half neither SmallRye nor Boot does.
 5. **Bean Validation** (#201) as an optional module, never in the core.
 6. **GraalVM reachability metadata** plus a documentation chapter — defensive: today people hit the
    proxy wall and leave for Coat.

@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
+import static org.aeonbits.owner.Config.DisableableFeature.RELAXED_BINDING;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.convert;
@@ -367,7 +368,30 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
         if (!isOptional(method))
             return child;
-        return NestedProperties.anythingUnder(path, propertiesManager) ? Optional.of(child) : Optional.empty();
+        return anythingUnderAnySpelling(method, path) ? Optional.of(child) : Optional.empty();
+    }
+
+    /**
+     * Whether the section at the given path was written, under that path or under any spelling of it.
+     * <p>
+     * The spellings have to be tried here and nowhere else in the nesting. Everything a section
+     * <i>reads</i> is a key, and a key carries its whole path into the forms it is looked up under, so a
+     * file written in kebab-case answers <code>myDb.userName</code> through
+     * <code>my-db.user-name</code> without anybody resolving the path. Presence is the exception, being a
+     * question about the path itself: left alone, <code>Optional&lt;Db&gt; myDb()</code> would come back
+     * empty while <code>Db myDb()</code> answered with every value, which is the same accessor
+     * contradicting itself.
+     * </p>
+     */
+    private boolean anythingUnderAnySpelling(Method method, String path) {
+        if (NestedProperties.anythingUnder(path, propertiesManager))
+            return true;
+        if (RELAXED_BINDING.isDisabledFor(method))
+            return false;
+        for (String spelling : RelaxedKeys.alternativesTo(path))
+            if (NestedProperties.anythingUnder(spelling, propertiesManager))
+                return true;
+        return false;
     }
 
     /** The path a nested object hangs from, read back off its own handler. */
@@ -396,13 +420,34 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         return value != null && value.trim().isEmpty();
     }
 
+    /**
+     * The raw value a method reads, before anything is done to it.
+     * <p>
+     * This is the one place a mapping method turns a key into a value, and therefore the one place
+     * {@link Config.DisableableFeature#RELAXED_BINDING relaxed binding} lives.
+     * </p>
+     * <p>
+     * <b>A nested section comes along for free.</b> A form is applied to the whole key at once, path
+     * included, so <code>myDb.userName</code> has <code>my-db.user-name</code> among its spellings and a
+     * section named in another convention is found without the path itself ever being resolved: the child
+     * still hangs from the key its accessor resolved to, and relaxes its own keys from there. The one
+     * thing that has to be relaxed on its own is whether an {@link Optional} section is <b>present</b>,
+     * which is a question about the path rather than about a key; see {@link #anythingUnderAnySpelling}.
+     * </p>
+     * <p>
+     * <b>The prefix a group scans is matched as it is written.</b> A {@link Map} and an indexed list read
+     * everything below a prefix, so there the prefix decides which keys <i>are</i> the group — choosing
+     * among four of them could silently merge two groups or answer with the wrong one, where a single
+     * property can only be found or not found. That line is documented rather than hidden.
+     * </p>
+     */
     private String lookupValue(Method method, String key) {
-        String value = propertiesManager.getProperty(key);
+        String value = propertyOf(method, key);
 
         // TODO: this if should go away! See #84 and #86
         if (value == null && !VARIABLE_EXPANSION.isDisabledFor(method)) {
             String unexpandedKey = key(method, keyPrefix);
-            value = propertiesManager.getProperty(unexpandedKey);
+            value = propertyOf(method, unexpandedKey);
         }
         // a section whose path nobody could know in advance has no default among the properties: the
         // annotation is read off the method instead, so that an element of a list defaults like everything
@@ -411,6 +456,13 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         if (value == null && !defaultsRegistered)
             value = PropertiesMapper.defaultValue(method);
         return value;
+    }
+
+    /** One property, read the way the method asks for it. See {@link #lookupValue}. */
+    private String propertyOf(Method method, String key) {
+        if (RELAXED_BINDING.isDisabledFor(method))
+            return propertiesManager.getProperty(key);
+        return propertiesManager.getRelaxedProperty(key);
     }
 
     /**
@@ -511,7 +563,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         if (child == null) return;
 
         String path = NestedProperties.pathOf(expandKey(method));
-        if (isOptional(method) && !NestedProperties.anythingUnder(path, propertiesManager)) return;
+        if (isOptional(method) && !anythingUnderAnySpelling(method, path)) return;
         handlerOf(child).collectMissingMandatory(missingKeys);
     }
 

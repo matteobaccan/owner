@@ -173,6 +173,27 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     private boolean reportedEmptyLoad;
 
     /**
+     * The keys that {@link Config.DisableableFeature#RELAXED_BINDING relaxed binding} applies to, which is
+     * every key a method of this configuration reads a single property with — the nested interfaces
+     * included, under the path that nests them.
+     * <p>
+     * Kept for {@link #reportAmbiguousKeys} and for nothing else: the lookup itself derives the forms from
+     * the key it is handed, since a key carrying a variable or the arguments of a call is not knowable
+     * here. Those are the ones missing from this set, for the reason {@link #sensitiveKeys} misses them
+     * too, and a configuration writing one of them in two spellings goes unreported rather than reported
+     * wrongly.
+     * </p>
+     */
+    private final Set<String> relaxableKeys = new LinkedHashSet<>();
+
+    /**
+     * Whether the spellings of a key have been looked for yet. On the <b>first</b> load only, exactly as
+     * {@link #lookedForCipherReferences} is: under {@link #strict} this refuses, and a refusal belongs to
+     * the moment the object is created rather than to a reload on a scheduled thread.
+     */
+    private boolean lookedForAmbiguousKeys;
+
+    /**
      * Whether the values referring to an encrypted property have been looked for yet. Looked for on the
      * <b>first</b> load only, and not because saying it twice would be noise: under
      * {@link #strict} this refuses, and a refusal belongs to the moment the object is created rather than
@@ -310,6 +331,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     /** Reflection is slow, so what the methods of an interface declare is read once, when it is created. */
     private void scanAnnotations(Class<?> clazz, KeyPrefix prefix, Decryptor classDecryptor) {
         for (Method method : clazz.getMethods()) {
+            collectRelaxableKey(method, prefix);
+
             // a key that depends on the invocation arguments is not known in advance: those methods
             // are skipped rather than masked under a key that would never match
             if (isSensitive(method) && method.getParameterTypes().length == 0) {
@@ -317,11 +340,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 // a method reading a group, or a whole nested object, resolves to a prefix and not to a
                 // property: there is no key of that name in the file, and masking it alone would hide nothing
                 if (NestedProperties.nests(method))
-                    sensitivePrefixes.add(NestedProperties.pathOf(key));
+                    addWithItsSpellings(sensitivePrefixes, NestedProperties.pathOf(key), method);
                 else if (PropertiesAggregator.aggregates(method))
+                    // the prefix of a group is read as it is written, so no other spelling of it is ever
+                    // the source of a value this method answers with
                     sensitivePrefixes.add(PropertiesAggregator.prefixOf(key));
                 else
-                    sensitiveKeys.add(key);
+                    addWithItsSpellings(sensitiveKeys, key, method);
             }
 
             if (PropertiesMapper.isEncryptedValue(method)) {
@@ -330,9 +355,55 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                         ? Util.newInstance(declared)
                         : classDecryptor);
                 if (method.getParameterTypes().length == 0)
-                    encryptedKeyNames.add(PropertiesMapper.key(method, prefix));
+                    addWithItsSpellings(encryptedKeyNames, PropertiesMapper.key(method, prefix), method);
             }
         }
+    }
+
+    /**
+     * Registers a key under every spelling relaxed binding would read it by, and not only under the one
+     * the method resolves to.
+     * <p>
+     * These two sets are the places where a key is matched <b>by name</b> against the properties as they
+     * were loaded — what to mask, and what a variable must not refer to — and the name in the file is
+     * exactly what relaxed binding stopped pinning down. Left as one name, a
+     * <code>@Sensitive String password()</code> reading <code>PASSWORD</code> out of the environment
+     * would answer the method correctly and print the secret in <code>list()</code>.
+     * </p>
+     * <p>
+     * The over-approximation this brings is the one already chosen where a group and a key inside it
+     * disagree: a secret printed because nobody named the key it arrived under is the mistake that costs
+     * something, and a value masked that need not have been is read as over-caution and no more.
+     * </p>
+     */
+    private static void addWithItsSpellings(Set<String> keys, String key, Method method) {
+        keys.add(key);
+        if (!DisableableFeature.RELAXED_BINDING.isDisabledFor(method))
+            keys.addAll(RelaxedKeys.alternativesTo(key));
+    }
+
+    /**
+     * Notes down the key of a method that reads a single property, which is the only shape the spellings
+     * of a key can be checked for.
+     * <p>
+     * A method reading a whole group — a nested section, a {@link Map} — resolves to a prefix and not to a
+     * property, and relaxed binding does not reach a prefix: see
+     * {@link PropertiesInvocationHandler#lookupValue}. A method taking arguments, or one whose key holds a
+     * variable, has no key until it is called.
+     * </p>
+     */
+    private void collectRelaxableKey(Method method, KeyPrefix prefix) {
+        if (isLibraryMethod(method) || Reflection.isDefault(method))
+            return;
+        if (method.getParameterTypes().length > 0)
+            return;
+        if (NestedProperties.nests(method) || PropertiesAggregator.aggregates(method))
+            return;
+        if (DisableableFeature.RELAXED_BINDING.isDisabledFor(method))
+            return;
+        String key = PropertiesMapper.key(method, prefix);
+        if (!key.contains("${"))
+            relaxableKeys.add(key);
     }
 
     /**
@@ -478,6 +549,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             }
             refuseEncryptedValuesHoldingAMarker(props);
             reportReferencesToEncryptedValues(props);
+            reportAmbiguousKeys(props);
             return props;
         } finally {
             loading = false;
@@ -1049,6 +1121,73 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     }
 
     /**
+     * The same property written twice, in two of the spellings {@link RelaxedKeys} accepts.
+     * <pre>
+     *     firstName  = a
+     *     first-name = b
+     * </pre>
+     * <p>
+     * One of the two is read and the other is never looked at again, which is precisely the failure this
+     * library refuses to have: nothing is wrong, nothing errors, and half the file is inert. It is the
+     * cost of the feature — relaxed binding is what makes two spellings collide in the first place — so it
+     * is paid for here, where the pair can still be named.
+     * </p>
+     * <p>
+     * <b>A {@link Config.DefaultValue} is not one of the two.</b> Every defaulted property is registered
+     * under the key of its method and would otherwise pair with whatever the file wrote, which is not two
+     * spellings of one thing but the ordinary business of a default being overridden. Only what was
+     * written counts, which is the same distinction {@link #anythingWrittenUnder} draws.
+     * </p>
+     * <p>
+     * A <code>WARNING</code> and not a line at <code>CONFIG</code>, because this is not a decision being
+     * reported but a mistake being found: nobody spells one setting two ways on purpose in one
+     * configuration. Under {@link #strict} it is a refusal, like every other warning that has a caller to
+     * refuse.
+     * </p>
+     */
+    private void reportAmbiguousKeys(Properties props) {
+        if (relaxableKeys.isEmpty() || lookedForAmbiguousKeys)
+            return;
+        lookedForAmbiguousKeys = true;
+
+        for (String key : relaxableKeys) {
+            List<String> written = writtenSpellingsOf(props, key);
+            if (written.size() < 2)
+                continue;
+            String winner = written.get(0);
+            List<String> ignored = written.subList(1, written.size());
+
+            if (strict)
+                throw unsupported("%s: '%s' is written in %d spellings at once - %s - and %s is on. Relaxed "
+                                + "binding reads '%s' and never looks at %s, so that part of the "
+                                + "configuration is inert. Keep one spelling, or switch the feature off for "
+                                + "the method with @DisableFeature(RELAXED_BINDING) if they are meant to be "
+                                + "different properties.",
+                        clazz.getName(), key, written.size(), written, STRICT, winner, ignored);
+
+            LOGGER.log(Level.WARNING, () -> String.format(
+                    "%s: '%s' is written in %d spellings at once - %s. Relaxed binding reads '%s' and never "
+                            + "looks at %s. Keep one spelling, or switch the feature off for the method with "
+                            + "@DisableFeature(RELAXED_BINDING) if they are meant to be different properties.",
+                    clazz.getName(), key, written.size(), written, winner, ignored));
+        }
+    }
+
+    /**
+     * The spellings of the given key that somebody actually wrote, in the order relaxed binding tries
+     * them, so that the first of them is the one that will be read.
+     */
+    private List<String> writtenSpellingsOf(Properties props, String key) {
+        List<String> found = new ArrayList<>();
+        if (props.getProperty(key) != null && wasWritten(key))
+            found.add(key);
+        for (String form : RelaxedKeys.alternativesTo(key))
+            if (props.getProperty(form) != null && wasWritten(form))
+                found.add(form);
+        return found;
+    }
+
+    /**
      * The first encrypted key the given value refers to, or <code>null</code>. Both forms of a reference
      * count, the plain <code>${key}</code> and the one carrying a default, <code>${key:...}</code>.
      */
@@ -1091,6 +1230,55 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         } finally {
             readLock.unlock();
         }
+    }
+
+    /**
+     * The value of a key, accepting the other spellings of it: <code>first-name</code>,
+     * <code>first_name</code> and <code>FIRST_NAME</code> for a method that resolves to
+     * <code>firstName</code>. See {@link RelaxedKeys}.
+     * <p>
+     * <b>A value that was written beats one that was only defaulted, whichever spelling holds it.</b> That
+     * is the whole of the precedence rule and it is not the obvious one, "the key first and the
+     * alternatives afterwards": a {@link Config.DefaultValue} is registered under the key of the method and
+     * is a property like any other by the time this runs, so the plain rule would let the default of
+     * <code>firstName</code> shadow the <code>first-name=…</code> somebody put in the file. Among values
+     * that were all written, the key itself wins, and the alternatives are tried in the order
+     * {@link RelaxedKeys#alternativesTo} states.
+     * </p>
+     * <p>
+     * The cost of it is one lookup in {@link #origins} on the path where the key is found as written,
+     * which is the path a configuration that agrees with its file always takes. The forms are built only
+     * when that fails — for a property that is absent, or one that is holding its default.
+     * </p>
+     *
+     * @param key the key the method resolved to.
+     * @return the value, or <code>null</code> when no spelling of the key holds one.
+     */
+    String getRelaxedProperty(String key) {
+        readLock.lock();
+        try {
+            String value = properties.getProperty(key);
+            if (value != null && wasWritten(key))
+                return value;
+            for (String form : RelaxedKeys.alternativesTo(key)) {
+                String written = properties.getProperty(form);
+                if (written != null && wasWritten(form))
+                    return written;
+            }
+            return value;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    /**
+     * Whether the property under this key came from somewhere rather than from a {@link Config.DefaultValue}.
+     * An origin that is missing counts as written, as it does in {@link #anythingWrittenUnder}: only a
+     * default is ever recorded as not being one.
+     */
+    private boolean wasWritten(String key) {
+        Origin origin = origins.get(key);
+        return origin == null || origin.isWritten();
     }
 
     void syncReloadCheck() {

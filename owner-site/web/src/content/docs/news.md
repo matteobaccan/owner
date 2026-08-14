@@ -107,6 +107,35 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **A property may be spelt the way the file spells it**, which closes
+   [#116](https://github.com/matteobaccan/owner/issues/116), open since 2015. `String firstName()` now
+   finds `firstName`, `first-name`, `first_name` or `FIRST_NAME`:
+
+   ```properties
+   first-name = Luigi
+   ```
+
+   **Four forms and no more.** Spring Boot 1 matched loosely — separators dropped, case ignored — and Boot
+   2 deliberately narrowed it; this is the narrow side of that split, and `firstname`, `FirstName` and
+   `first.name` are not spellings of this key. The forms are derived from the *key*, so `@Key("first-name")`
+   is equally found under `FIRST_NAME`, and one form applies to the whole key at once — prefixes and
+   [nesting](/owner/docs/nested-configuration/) included, so `my-db.user-name` is a spelling of
+   `myDb.userName` and a whole section comes along with it.
+
+   **A value that was written beats one that was only defaulted**, whichever spelling holds it; among
+   written values the key the method resolves to comes first. Two spellings of one property in one
+   configuration mean that one of them is inert, so it is reported as a `WARNING` naming both — and
+   refused outright under
+   [`owner.strict`](/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning).
+
+   Nothing is added to the properties and nothing is renamed: `store()`, `list()` and `propertyNames()`
+   show the keys exactly as they were loaded, `getProperty("firstName")` still answers about `firstName`,
+   and a [`Traceable`](/owner/docs/accessible-mutable/#the-traceable-interface) origin stays attached to
+   the key that really exists. The prefix a `Map` or an indexed list scans is matched as written, since
+   there the prefix decides which keys *are* the group. On by default, off per method or per interface
+   with `@DisableFeature(RELAXED_BINDING)`. See
+   [How the key may be written](/owner/docs/usage/#how-the-key-may-be-written).
+
  * **A value can name what decrypts it, and a cipher is finally shipped.** Until now this library shipped
    none: `org.aeonbits.owner.crypto` was an SPI and a no-op, and the only concrete implementation lived in
    the test suite, where the documentation reproduced its source for you to copy. That class is AES/ECB

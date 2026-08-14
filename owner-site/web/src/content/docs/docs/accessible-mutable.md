@@ -112,6 +112,13 @@ because it is what makes the table predictable rather than arbitrary: **a variab
 it is resolved wherever the value is read; `@EncryptedValue`, `@ConverterClass` and the preprocessors are
 declared on a method, and a property asked for by name has no method to read the declaration from.**
 
+The same sentence settles the *key* as well. A mapping method also accepts the other spellings of the key
+it resolves to — `first-name` for `firstName()`, see
+[How the key may be written](/owner/docs/usage/#how-the-key-may-be-written) — and none of the methods in
+the table does: they were handed a key, and they answer about that key. `getProperty("firstName")` returns
+`null` where the file says `first-name`, `propertyNames()` and `store()` show `first-name`, and nothing is
+ever added under the name of the method.
+
 <div class="note info">
   <h5>Which is exactly why an encrypted value is better written in the value.</h5>
   <p>

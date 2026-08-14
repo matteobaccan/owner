@@ -625,7 +625,21 @@ public interface Config extends Serializable {
          *
          * @since 2.0.0
          */
-        PREFIX;
+        PREFIX,
+
+        /**
+         * Disables the relaxed binding, so that the annotated method — or every method of the annotated
+         * interface — reads the key it resolves to and no other spelling of it.
+         * <p>
+         * On by default: the four forms a key may be written in are a closed set, tried only after the
+         * key itself, and a configuration whose file already agrees with its interface never reaches
+         * them. Switch it off where a file deliberately holds two spellings of one name as two different
+         * properties, or where the extra lookups on a property that is absent are worth removing.
+         * </p>
+         *
+         * @since 2.0.0
+         */
+        RELAXED_BINDING;
 
         /**
          * Tells whether this feature is disabled for the given method, considering the
