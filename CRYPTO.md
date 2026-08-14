@@ -126,7 +126,7 @@ What the marker settles by construction, rather than by a second mechanism:
 
 | | why |
 |---|---|
-| **#285**, `fill()` does not decrypt | the marker *is* expansion, and `fill` expands since 2.0.0 |
+| **#285**, `fill()` does not decrypt (closed 2026-08-14) | the marker *is* expansion, and `fill` expands since 2.0.0 |
 | a value that refers to an encrypted one | `crypto.password=${$aes-gcm::…}` and `jdbc.url=…${crypto.password}`: expansion recurses into the value |
 | the round trip of `store()` | the properties hold the marker text, so `store` writes the marker back |
 | `@Sensitive` | a marker in a listing is unreadable already |

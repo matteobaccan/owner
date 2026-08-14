@@ -34,7 +34,7 @@ open questions; this is the short version.
 
 **The cipher shipped on 2026-08-14**, which was the last of the three largest gaps. `${$aes-gcm::…}`, a
 `ValueHandler` registered by name, AES-256/GCM over PBKDF2 at 210,000 iterations, and `EncryptTool` in the
-same jar to produce a marker. It closes #285 and the decryptor half of #287 by construction, retires the
+same jar to produce a marker. **#285, #287 and #115 were answered and closed on 2026-08-14.** It retires the
 AES/ECB example the site used to publish, and — because the envelope knows nothing about cryptography —
 gives `${$vault::…}` and `${$file::…}` to anybody who wants them, which is part of #130 and #143 with no
 module of ours. **The asymmetric case shipped the same day**: `${$rsa-oaep::…}`, `RsaHandler`, RSA-OAEP
@@ -399,11 +399,20 @@ an issue behind it, which is the point: what the others shipped is what our repo
       and PBKDF2 over a passphrase of any length, salt and IV travelling in the token. It goes in the
       core, since AES-GCM and PBKDF2 are in the JDK and the no-dependency rule does not bite.
       Being expansion, it settles by construction what two open issues ask for:
-      [#285](https://github.com/matteobaccan/owner/issues/285) (`fill()` does not decrypt) and the
+      [#285](https://github.com/matteobaccan/owner/issues/285) (`fill()` does not decrypt, **closed
+      2026-08-14**) and the
       decryptor half of [#287](https://github.com/matteobaccan/owner/issues/287) (a value that refers
       to an encrypted one gets the cipher text — which 2.0.0 warns about and `owner.strict` refuses,
       but does not cure). The converter half of #287 cannot be cured at all: a converter answers with a
       typed object and there is no room for one inside a string.
+      **#287 was closed on 2026-08-14 all the same**, and reading it properly is why: the example the
+      reporter actually wrote is a `String`-to-`String` converter, which *is* expressible as a
+      `ValueHandler`. Only a converter answering with a typed object is beyond reach, and the reply says
+      so and invites a reopen if that is the case they hit.
+      **#115 was closed the same day** and is not really ours: "a day in milliseconds is unreadable" is
+      answered by the automatic `Duration` conversion — `@DefaultValue("1d")` — which is what a commenter
+      proposed in 2015. The handler is only the escape hatch for genuine arithmetic, and we deliberately
+      do not ship one: that was Luigi's judgement in 2015 and the cost has not changed.
       Two rules already decided and not to be re-derived: an expression beginning `$` and containing
       `::` **is** a handler reference, and an unregistered name is an **error** rather than a fallback,
       because a misspelt handler would otherwise resolve to the empty string — the worst possible
