@@ -20,6 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -157,8 +159,60 @@ public class ValueHandlerExample {
         }
     }
 
+    // ---------------------------------------------------------------- a date in a path
+
     /**
-     * Runs the three in turn.
+     * The shape issue #104 asked for: a timestamp inside a value, without writing it in the file.
+     * <p>
+     * <b>The date is taken once, when the handler is built</b>, and that is the point of the example
+     * rather than a detail of it. A handler is asked on <em>every read</em>, because expansion happens
+     * where the value is read — so one answering with <code>now()</code> would give a different directory
+     * to two calls a millisecond apart, which for a log directory is a defect. A handler is an instance
+     * you construct, so the fix is to capture the value there.
+     * </p>
+     */
+    public static class StartupDateHandler implements ValueHandler {
+        private static final long serialVersionUID = 1L;
+
+        private final LocalDateTime startedAt = LocalDateTime.now();
+
+        @Override
+        public String name() {
+            return "date";
+        }
+
+        @Override
+        public String resolve(String pattern) {
+            try {
+                return startedAt.format(DateTimeFormatter.ofPattern(pattern));
+            } catch (IllegalArgumentException notAPattern) {
+                // throwing is the contract, and the message names the payload because a date pattern is
+                // not a secret - which is the one case where repeating it is the helpful thing to do
+                throw new IllegalArgumentException("'" + pattern + "' is not a date pattern", notAPattern);
+            }
+        }
+    }
+
+    /** <code>log.dir=/var/log/app-${$date::yyyyMMdd}</code>, resolved once and stable for the process. */
+    public interface LoggingConfig extends Config {
+        @Key("log.dir")
+        String logDirectory();
+    }
+
+    private static void withADateInThePath() {
+        ConfigFactory.registerValueHandler(new StartupDateHandler());
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("log.dir", "/var/log/app-${$date::yyyyMMdd-HHmmss}");
+
+        LoggingConfig config = ConfigFactory.create(LoggingConfig.class, properties);
+        System.out.println("  logDirectory() = " + config.logDirectory());
+        System.out.println("  and again      = " + config.logDirectory()
+                + "   <- the same, because the handler captured the time when it was built");
+    }
+
+    /**
+     * Runs them in turn.
      *
      * @param args ignored; the example generates whatever it needs.
      * @throws Exception when the JDK has no RSA or no temporary directory, neither of which is this
@@ -175,5 +229,9 @@ public class ValueHandlerExample {
         System.out.println();
         System.out.println("A handler of your own, ${$file::...}");
         withAHandlerOfYourOwn();
+
+        System.out.println();
+        System.out.println("A date in a path, ${$date::...} - issue #104");
+        withADateInThePath();
     }
 }

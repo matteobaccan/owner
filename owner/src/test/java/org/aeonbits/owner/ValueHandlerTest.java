@@ -378,4 +378,92 @@ public class ValueHandlerTest {
         ConfigFactory.create(WithTwoMarkersInOneEncryptedValue.class);
         ConfigFactory.create(WithAnUnclosedMarker.class);
     }
+
+    // --- when a handler is asked, which is the question #104 turns on -------------------------------
+
+    /**
+     * Counts how often it is asked, which is how the timing below is pinned down without a clock.
+     * <p>
+     * The shape a reader is likely to write for
+     * <a href="https://github.com/matteobaccan/owner/issues/104">#104</a> is a handler answering with the
+     * current date — <code>${$date::yyyyMMdd-HHmmss}</code>. This test exists because that shape has a
+     * trap in it, and the trap is not in the handler.
+     * </p>
+     */
+    static class CountingHandler implements ValueHandler {
+        int asked;
+
+        @Override
+        public String name() {
+            return "counted";
+        }
+
+        @Override
+        public String resolve(String payload) {
+            return payload + "-" + (++asked);
+        }
+    }
+
+    public interface AskedEveryTime extends Config {
+        @DefaultValue("${$counted::run}")
+        String value();
+    }
+
+    /**
+     * <b>A handler is asked on every read, not once when the configuration is created.</b> Expansion
+     * happens where the value is read, which is what makes a marker reach <code>fill()</code> and a value
+     * that refers to it — and it means a handler answering with <code>now()</code> answers differently
+     * each time it is called.
+     * <p>
+     * For a log directory that is a defect and not a feature: two calls, two directories.
+     * </p>
+     */
+    @Test
+    public void aHandlerIsAskedAgainOnEveryRead() {
+        CountingHandler handler = new CountingHandler();
+        ConfigFactory.registerValueHandler(handler);
+        AskedEveryTime cfg = ConfigFactory.create(AskedEveryTime.class);
+
+        assertEquals("run-1", cfg.value());
+        assertEquals("run-2", cfg.value());
+        assertEquals("asked once per read", 2, handler.asked);
+    }
+
+    /** Answers with what it was given when it was built, which is the fix for the trap above. */
+    static class FrozenHandler implements ValueHandler {
+        private final String whenTheApplicationStarted;
+
+        FrozenHandler(String whenTheApplicationStarted) {
+            this.whenTheApplicationStarted = whenTheApplicationStarted;
+        }
+
+        @Override
+        public String name() {
+            return "frozen";
+        }
+
+        @Override
+        public String resolve(String payload) {
+            return whenTheApplicationStarted;
+        }
+    }
+
+    public interface FrozenAtStartup extends Config {
+        @DefaultValue("/var/log/app-${$frozen::yyyyMMdd}")
+        String logDirectory();
+    }
+
+    /**
+     * And the way to have one value for the life of the process: hold it in the handler, which the caller
+     * constructs. That is the same property that lets a passphrase live in a handler — a handler is an
+     * <em>instance</em> you build, not a class the library instantiates for you.
+     */
+    @Test
+    public void aHandlerThatCapturedItsAnswerGivesTheSameOneEveryTime() {
+        ConfigFactory.registerValueHandler(new FrozenHandler("20260814"));
+        FrozenAtStartup cfg = ConfigFactory.create(FrozenAtStartup.class);
+
+        assertEquals("/var/log/app-20260814", cfg.logDirectory());
+        assertEquals("and again, an hour later", "/var/log/app-20260814", cfg.logDirectory());
+    }
 }
