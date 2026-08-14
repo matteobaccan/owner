@@ -133,18 +133,24 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
     /** How many derived keys to keep. One file uses one salt; the cap is there so a wrong one cannot grow. */
     private static final int CACHE_SIZE = 16;
 
+    /** The name values refer to this handler by. */
     private final String name;
+
+    /** The count to encrypt with; decryption uses the count carried by the token it is reading. */
     private final int iterations;
 
     /** See the note on serialization: a passphrase is not written out with the object holding it. */
     private final transient char[] passphrase;
 
+    /** Transient for the reason the passphrase is, and because a serialized one would carry its state. */
     private final transient SecureRandom random;
 
     /** Derived keys by count and salt, so the values of one file cost one derivation between them. */
     private final transient Map<String, SecretKey> keys;
 
     /**
+     * A handler under the name <code>aes-gcm</code>, encrypting at {@link #DEFAULT_ITERATIONS}.
+     *
      * @param passphrase the passphrase, of any length, copied rather than kept: the caller stays free to
      *                   blank its own array afterwards.
      */
@@ -153,6 +159,8 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
     }
 
     /**
+     * The same, from a <code>String</code>, which is what a passphrase read from the environment is.
+     *
      * @param passphrase the passphrase. A <code>String</code> cannot be blanked once it exists, so prefer
      *                   {@link #AesGcmHandler(char[])} when the passphrase is read rather than written.
      */
@@ -161,6 +169,8 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
     }
 
     /**
+     * A handler under a name of your own, which is how two keys are readable at once during a rotation.
+     *
      * @param name       the name values refer to this handler by, which is where a key rotation goes.
      * @param passphrase the passphrase, of any length.
      */
@@ -169,6 +179,8 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
     }
 
     /**
+     * A handler under a name of your own, encrypting at a count of your own.
+     *
      * @param name       the name values refer to this handler by.
      * @param passphrase the passphrase, of any length.
      * @param iterations the count to <b>encrypt</b> with. Decryption uses the count in the token, so this

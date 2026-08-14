@@ -124,7 +124,11 @@ public final class SourceOptions {
         return new SourceOptions(uri, parse(fragment, uri));
     }
 
-    /** @return whether the source carries no option at all. */
+    /**
+     * Whether the source carries no option at all.
+     *
+     * @return true when it carries none.
+     */
     public boolean isEmpty() {
         return options.isEmpty();
     }
@@ -269,7 +273,11 @@ public final class SourceOptions {
             this.setting = setting;
         }
 
-        /** @return the option name, trimmed and lower case, since a name is a keyword. */
+        /**
+         * The option name, trimmed and lower case, since a name is a keyword.
+         *
+         * @return the name.
+         */
         public String name() {
             return name;
         }

@@ -24,9 +24,17 @@ import java.time.ZoneId;
 import java.util.Properties;
 
 /**
+ * A runnable example of {@link org.aeonbits.owner.Config.HotReload}: it writes a properties file, reads
+ * it through a configuration, changes the file and shows the configuration answering differently.
+ *
  * @author Luigi R. Viggiano
  */
 public class HotReloadExample {
+
+    /** Nothing to build: the example is in {@link #main(String[])}. */
+    public HotReloadExample() {
+    }
+
     private static final String CFG_FILE = "file:target/examples-generated-resources/HotReloadExample.properties";
     private static File target;
 

@@ -105,6 +105,14 @@ import java.util.Properties;
  * @since 2.0.0
  */
 public class TomlLoader implements Loader {
+    /**
+     * A loader is built with no arguments, both when it is registered by hand and when
+     * {@link java.util.ServiceLoader} finds it on the class path. Declared rather than left implicit
+     * so that the requirement is visible to whoever changes this class.
+     */
+    public TomlLoader() {
+    }
+
 
     private static final long serialVersionUID = 8814431395297615185L;
 

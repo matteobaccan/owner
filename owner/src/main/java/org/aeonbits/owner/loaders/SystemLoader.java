@@ -21,6 +21,14 @@ import static org.aeonbits.owner.util.Util.system;
  * @since 1.0.10
  */
 public class SystemLoader implements Loader {
+    /**
+     * A loader is built with no arguments, both when it is registered by hand and when
+     * {@link java.util.ServiceLoader} finds it on the class path. Declared rather than left implicit
+     * so that the requirement is visible to whoever changes this class.
+     */
+    public SystemLoader() {
+    }
+
 /*
  * This class accesses <code>Util.system()</code> which is package accessible; for this reason this class cannot be moved
  * inside the package loaders.

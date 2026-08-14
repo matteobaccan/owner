@@ -24,6 +24,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Presents a configuration as a {@link javax.management.DynamicMBean}, so that its properties can be
+ * read and written from a JMX console.
+ * <p>
+ * Attached to the proxy only when <code>javax.management</code> is on the class path, which is what
+ * keeps this library working on a runtime that has no JMX at all.
+ * </p>
+ *
  * @author Robin Meißner
  * @author Luigi R. Viggiano
  */

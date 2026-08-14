@@ -88,19 +88,19 @@ public final class EnvDialect implements Serializable {
 
     /** The name this dialect goes by, used by the messages that have to say which rules were in force. */
     private final String name;
-    /** @see #isQuotesStripped() */
+    /** See {@link #isQuotesStripped()}. */
     private final boolean quotesStripped;
-    /** @see #isEscapesExpanded() */
+    /** See {@link #isEscapesExpanded()}. */
     private final boolean escapesExpanded;
-    /** @see #isExportPrefixStripped() */
+    /** See {@link #isExportPrefixStripped()}. */
     private final boolean exportPrefixStripped;
-    /** @see #isInlineComments() */
+    /** See {@link #isInlineComments()}. */
     private final boolean inlineComments;
-    /** @see #isMultilineValues() */
+    /** See {@link #isMultilineValues()}. */
     private final boolean multilineValues;
-    /** @see #isLineContinuation() */
+    /** See {@link #isLineContinuation()}. */
     private final boolean lineContinuation;
-    /** @see #bareNames() */
+    /** See {@link #bareNames()}. */
     private final BareNames bareNames;
 
     private EnvDialect(String name, boolean quotesStripped, boolean escapesExpanded, boolean exportPrefixStripped,
@@ -231,37 +231,65 @@ public final class EnvDialect implements Serializable {
         return name;
     }
 
-    /** @return whether matching quotes around a value are removed. */
+    /**
+     * Whether matching quotes around a value are removed.
+     *
+     * @return true when they are.
+     */
     public boolean isQuotesStripped() {
         return quotesStripped;
     }
 
-    /** @return whether escape sequences are expanded inside a double-quoted value. */
+    /**
+     * Whether escape sequences are expanded inside a double-quoted value.
+     *
+     * @return true when they are.
+     */
     public boolean isEscapesExpanded() {
         return escapesExpanded;
     }
 
-    /** @return whether a leading <code>export</code> is dropped. */
+    /**
+     * Whether a leading <code>export</code> is dropped.
+     *
+     * @return true when it is.
+     */
     public boolean isExportPrefixStripped() {
         return exportPrefixStripped;
     }
 
-    /** @return whether a <code>#</code> preceded by whitespace starts a comment. */
+    /**
+     * Whether a <code>#</code> preceded by whitespace starts a comment.
+     *
+     * @return true when it does.
+     */
     public boolean isInlineComments() {
         return inlineComments;
     }
 
-    /** @return whether a quoted value may span lines. */
+    /**
+     * Whether a quoted value may span lines.
+     *
+     * @return true when it may.
+     */
     public boolean isMultilineValues() {
         return multilineValues;
     }
 
-    /** @return whether a line ending in a backslash is joined to the next. */
+    /**
+     * Whether a line ending in a backslash is joined to the next.
+     *
+     * @return true when it is.
+     */
     public boolean isLineContinuation() {
         return lineContinuation;
     }
 
-    /** @return what is done with a line that names a variable without assigning to it. */
+    /**
+     * What is done with a line that names a variable without assigning to it.
+     *
+     * @return the rule for bare names.
+     */
     public BareNames bareNames() {
         return bareNames;
     }

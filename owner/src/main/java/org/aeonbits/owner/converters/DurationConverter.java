@@ -53,6 +53,14 @@ import java.time.Duration;
  * </p>
  */
 public class DurationConverter implements Converter<Duration> {
+    /**
+     * Built with no arguments: a converter named by {@link org.aeonbits.owner.Config.ConverterClass}
+     * is instantiated reflectively, so this constructor is part of the contract rather than an
+     * accident of there being no state.
+     */
+    public DurationConverter() {
+    }
+
 
     @Override
     public Duration convert(Method method, String input) {

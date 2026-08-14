@@ -44,6 +44,14 @@ import static org.aeonbits.owner.util.Util.unsupported;
  * @author Luigi R. Viggiano
  */
 public class ZooKeeperLoader implements Loader {
+    /**
+     * A loader is built with no arguments, both when it is registered by hand and when
+     * {@link java.util.ServiceLoader} finds it on the class path. Declared rather than left implicit
+     * so that the requirement is visible to whoever changes this class.
+     */
+    public ZooKeeperLoader() {
+    }
+
 
     private static final long serialVersionUID = -8541229366311874254L;
 

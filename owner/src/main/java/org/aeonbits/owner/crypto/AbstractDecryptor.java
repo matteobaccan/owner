@@ -13,6 +13,11 @@ package org.aeonbits.owner.crypto;
  */
 public abstract class AbstractDecryptor
 implements Decryptor {
+
+    /** For the subclasses, which is the only thing that can call it. */
+    protected AbstractDecryptor() {
+    }
+
     @Override
     public String decrypt( String value, String defaultValue ) {
         try {

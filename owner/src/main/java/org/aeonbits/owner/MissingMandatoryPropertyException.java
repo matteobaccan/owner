@@ -24,7 +24,7 @@ public class MissingMandatoryPropertyException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    /** @see #getKeys() */
+    /** The keys that were missing. See {@link #getKeys()}. */
     private final List<String> keys;
 
     MissingMandatoryPropertyException(String key) {

@@ -13,6 +13,14 @@ package org.aeonbits.owner.crypto;
  */
 public final class IdentityDecryptor
 extends AbstractDecryptor {
+
+    /**
+     * Built with no arguments, because it is named by an annotation and instantiated
+     * reflectively - and because there is nothing to configure about doing nothing.
+     */
+    public IdentityDecryptor() {
+    }
+
     @Override
     public String decrypt( String value ) {
         return value;

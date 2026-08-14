@@ -40,6 +40,14 @@ import static org.aeonbits.owner.util.Util.unsupported;
  * @author Luigi R. Viggiano
  */
 public class XMLLoader implements Loader {
+    /**
+     * A loader is built with no arguments, both when it is registered by hand and when
+     * {@link java.util.ServiceLoader} finds it on the class path. Declared rather than left implicit
+     * so that the requirement is visible to whoever changes this class.
+     */
+    public XMLLoader() {
+    }
+
 
     private static final long serialVersionUID = -894351666332018767L;
 

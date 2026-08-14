@@ -59,9 +59,9 @@ public final class Origin implements Serializable {
         RUNTIME
     }
 
-    /** @see #kind() */
+    /** Which sort of place the value came from. See {@link #kind()}. */
     private final Kind kind;
-    /** @see #source() */
+    /** Which place of that sort. See {@link #source()}. */
     private final String source;
 
     private Origin(Kind kind, String source) {

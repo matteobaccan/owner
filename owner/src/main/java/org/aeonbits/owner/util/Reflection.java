@@ -15,6 +15,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * The reflection this library needs and the JDK differences behind it: whether a method is a
+ * <code>default</code> one, how to invoke it on each baseline, and whether a class is on the class path.
+ *
  * @author Luigi R. Viggiano
  */
 public final class Reflection {

@@ -77,6 +77,14 @@ import java.util.Properties;
  * @since 2.0.0
  */
 public class JsonLoader implements Loader {
+    /**
+     * A loader is built with no arguments, both when it is registered by hand and when
+     * {@link java.util.ServiceLoader} finds it on the class path. Declared rather than left implicit
+     * so that the requirement is visible to whoever changes this class.
+     */
+    public JsonLoader() {
+    }
+
 
     private static final long serialVersionUID = 6142058516080633156L;
 

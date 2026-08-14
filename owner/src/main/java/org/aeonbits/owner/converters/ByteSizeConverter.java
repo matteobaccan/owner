@@ -18,9 +18,24 @@ import static org.aeonbits.owner.util.Util.blankLookingCharacterIn;
 import static org.aeonbits.owner.util.Util.splitNumericAndChar;
 
 /**
+ * Reads a {@link org.aeonbits.owner.util.bytesize.ByteSize} from a value such as <code>10 MB</code>.
+ * <p>
+ * Named with {@link org.aeonbits.owner.Config.ConverterClass} rather than applied automatically:
+ * <code>ByteSize</code> is this library's own type, not the JDK's, so a bare number in an existing
+ * configuration keeps meaning what it did.
+ * </p>
+ *
  * @author Stefan Freyr Stefansson
  */
 public class ByteSizeConverter implements Converter<ByteSize> {
+    /**
+     * Built with no arguments: a converter named by {@link org.aeonbits.owner.Config.ConverterClass}
+     * is instantiated reflectively, so this constructor is part of the contract rather than an
+     * accident of there being no state.
+     */
+    public ByteSizeConverter() {
+    }
+
 
     @Override
     public ByteSize convert(Method method, String input) {

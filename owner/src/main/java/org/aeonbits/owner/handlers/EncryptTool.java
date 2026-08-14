@@ -103,6 +103,12 @@ public final class EncryptTool {
     private EncryptTool() {
     }
 
+    /**
+     * The entry point, and the only thing in this jar that has one.
+     *
+     * @param args the options; never a passphrase and never a value, both of which are read from
+     *             standard input for the reason given above.
+     */
     public static void main(String[] args) {
         System.exit(run(args, System.out, System.err));
     }

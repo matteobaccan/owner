@@ -17,6 +17,13 @@ import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableSet;
 
 /**
+ * The properties as they are handed to a listener: every mutating method throws.
+ * <p>
+ * A {@link java.beans.PropertyChangeEvent} and a {@link org.aeonbits.owner.event.ReloadEvent} both
+ * carry the state that produced them, and a listener that edited it would be changing the configuration
+ * from inside the notification that it changed.
+ * </p>
+ *
  * @author Luigi R. Viggiano
  */
 class UnmodifiableProperties extends Properties {

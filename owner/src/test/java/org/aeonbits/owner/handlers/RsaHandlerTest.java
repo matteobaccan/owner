@@ -175,14 +175,15 @@ public class RsaHandlerTest {
 
     /**
      * The 1024-bit key below is the subject of the test and not a mistake in it: what is being checked is
-     * that {@link RsaHandler} refuses one. A scanner cannot tell a weak key being used from a weak key
-     * being rejected, so the suppression says which this is rather than leaving a high-severity alert
-     * standing on a security feature, where a real one would then be one row among the noise.
+     * that {@link RsaHandler} refuses one. It is the clearest example of why the whole of
+     * <code>src/test/java</code> is outside what CodeQL scans - see
+     * <code>.github/codeql/codeql-config.yml</code> - since a scanner cannot tell a weak key being used
+     * from a weak key being rejected, and this one exists only to prove the second.
      */
     @Test
     public void aKeyTooSmallToBeWorthUsingIsRefused() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(1024); // codeql[java/insufficient-key-size]
+        generator.initialize(1024);
         try {
             new RsaHandler(generator.generateKeyPair().getPublic());
             fail("1024 bits stopped being recommended in 2010");

@@ -13,4 +13,8 @@ package org.aeonbits.owner.crypto;
 public abstract class AbstractEncryptor
 extends AbstractDecryptor
 implements Encryptor {
+
+    /** For the subclasses, which is the only thing that can call it. */
+    protected AbstractEncryptor() {
+    }
 }

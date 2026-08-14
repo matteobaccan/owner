@@ -152,25 +152,25 @@ public final class IniDialect implements Serializable {
 
     /** The name this dialect goes by, used by the messages that have to say which rules were in force. */
     private final String name;
-    /** @see #separator() */
+    /** See {@link #separator()}. */
     private final Separator separator;
-    /** @see #duplicates() */
+    /** See {@link #duplicates()}. */
     private final Duplicates duplicates;
-    /** @see #keyCase() */
+    /** See {@link #keyCase()}. */
     private final KeyCase keyCase;
-    /** @see #bareKeys() */
+    /** See {@link #bareKeys()}. */
     private final BareKeys bareKeys;
-    /** @see #quotes() */
+    /** See {@link #quotes()}. */
     private final Quotes quotes;
-    /** @see #continuation() */
+    /** See {@link #continuation()}. */
     private final Continuation continuation;
-    /** @see #isInlineComments() */
+    /** See {@link #isInlineComments()}. */
     private final boolean inlineComments;
-    /** @see #isSubsections() */
+    /** See {@link #isSubsections()}. */
     private final boolean subsections;
-    /** @see #isDefaultSectionInherited() */
+    /** See {@link #isDefaultSectionInherited()}. */
     private final boolean defaultSectionInherited;
-    /** @see #isInterpolationRefused() */
+    /** See {@link #isInterpolationRefused()}. */
     private final boolean interpolationRefused;
 
     private IniDialect(String name, Separator separator, Duplicates duplicates, KeyCase keyCase,
@@ -327,57 +327,101 @@ public final class IniDialect implements Serializable {
                 subsections, defaultSectionInherited, value);
     }
 
-    /** @return the name of this dialect, for a message that has to say which rules were in force. */
+    /**
+     * The name this dialect goes by, for a message that has to say which rules were in force.
+     *
+     * @return the name.
+     */
     public String name() {
         return name;
     }
 
-    /** @return what separates a key from its value. */
+    /**
+     * What separates a key from its value.
+     *
+     * @return the separator.
+     */
     public Separator separator() {
         return separator;
     }
 
-    /** @return what a key repeated in one section means. */
+    /**
+     * What a key repeated in one section means.
+     *
+     * @return the rule for duplicates.
+     */
     public Duplicates duplicates() {
         return duplicates;
     }
 
-    /** @return whether a key is folded to lower case. */
+    /**
+     * Whether a key is folded to lower case.
+     *
+     * @return the rule for key case.
+     */
     public KeyCase keyCase() {
         return keyCase;
     }
 
-    /** @return what a name with no separator means. */
+    /**
+     * What a name with no separator means.
+     *
+     * @return the rule for bare keys.
+     */
     public BareKeys bareKeys() {
         return bareKeys;
     }
 
-    /** @return whether quotes around a value delimit it. */
+    /**
+     * Whether quotes around a value delimit it.
+     *
+     * @return the rule for quotes.
+     */
     public Quotes quotes() {
         return quotes;
     }
 
-    /** @return how a value may run onto the next line. */
+    /**
+     * How a value may run onto the next line.
+     *
+     * @return the rule for continuation.
+     */
     public Continuation continuation() {
         return continuation;
     }
 
-    /** @return whether a comment may follow a value. */
+    /**
+     * Whether a comment may follow a value.
+     *
+     * @return true when it may.
+     */
     public boolean isInlineComments() {
         return inlineComments;
     }
 
-    /** @return whether a quoted name in a section header is a subsection. */
+    /**
+     * Whether a quoted name in a section header is a subsection.
+     *
+     * @return true when it is.
+     */
     public boolean isSubsections() {
         return subsections;
     }
 
-    /** @return whether a <code>DEFAULT</code> section supplies values to the others. */
+    /**
+     * Whether a <code>DEFAULT</code> section supplies values to the others.
+     *
+     * @return true when it does.
+     */
     public boolean isDefaultSectionInherited() {
         return defaultSectionInherited;
     }
 
-    /** @return whether a value holding <code>%(name)s</code> is refused. */
+    /**
+     * Whether a value holding <code>%(name)s</code> is refused.
+     *
+     * @return true when it is.
+     */
     public boolean isInterpolationRefused() {
         return interpolationRefused;
     }

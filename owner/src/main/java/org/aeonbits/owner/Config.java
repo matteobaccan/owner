@@ -663,7 +663,9 @@ public interface Config extends Serializable {
     @Documented
     @interface Separator {
         /**
-         * @return the value specified is used as per {@link java.lang.String#split(String, int)} with int=-1
+         * The separator the value is split on.
+         *
+         * @return the separator, used as per {@link java.lang.String#split(String, int)} with int=-1
          */
         String value();
     }

@@ -134,7 +134,10 @@ public class RsaHandler implements ValueHandler, Encrypting {
     private static final int PREFIX_BYTES = FINGERPRINT_BYTES + 2;
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
+    /** The name values refer to this handler by. */
     private final String name;
+
+    /** The key values are encrypted to, or <code>null</code> in a handler that only reads. */
     private final PublicKey publicKey;
 
     /** See the note on serialization: a private key is not written out with the object holding it. */
@@ -151,22 +154,37 @@ public class RsaHandler implements ValueHandler, Encrypting {
     /** Four bytes of SHA-256 over the modulus, computed once from whichever half is present. */
     private final byte[] fingerprint;
 
-    /** A handler that can only write: the case of whoever adds a value without being able to read one. */
+    /**
+     * A handler that can only write: the case of whoever adds a value without being able to read one.
+     *
+     * @param publicKey the key values are encrypted to.
+     */
     public RsaHandler(PublicKey publicKey) {
         this(DEFAULT_NAME, publicKey, null);
     }
 
-    /** A handler that can only read: the case of a deployment, and the reason a key pair is used at all. */
+    /**
+     * A handler that can only read: the case of a deployment, and the reason a key pair is used at all.
+     *
+     * @param privateKey the key values are decrypted with.
+     */
     public RsaHandler(PrivateKey privateKey) {
         this(DEFAULT_NAME, null, privateKey);
     }
 
-    /** A handler that can do both, which is convenient in a test and rarely what a deployment wants. */
+    /**
+     * A handler that can do both, which is convenient in a test and rarely what a deployment wants.
+     *
+     * @param publicKey  the key values are encrypted to.
+     * @param privateKey the key values are decrypted with.
+     */
     public RsaHandler(PublicKey publicKey, PrivateKey privateKey) {
         this(DEFAULT_NAME, publicKey, privateKey);
     }
 
     /**
+     * A handler under a name of your own, holding either half of a key pair or both.
+     *
      * @param name       the name values refer to this handler by, which is where a key rotation goes.
      * @param publicKey  the key values are encrypted to, or <code>null</code> to only decrypt.
      * @param privateKey the key values are decrypted with, or <code>null</code> to only encrypt.
@@ -253,6 +271,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
     /**
      * Encrypts a value, producing the token that goes inside a marker.
      *
+     * @param plainText the value to encrypt.
+     * @return the base64 token.
      * @throws IllegalArgumentException if this handler holds no public key.
      */
     public String encrypt(String plainText) {
@@ -295,6 +315,9 @@ public class RsaHandler implements ValueHandler, Encrypting {
      * Encrypts several values. Unlike the symmetric handler there is nothing to share between them: every
      * value gets its own AES key and its own IV, because there is no passphrase to derive from and
      * therefore no cost to amortise.
+     *
+     * @param plainTexts the values to encrypt.
+     * @return the base64 tokens, in the same order.
      */
     @Override
     public String[] encryptAll(String... plainTexts) {
@@ -304,12 +327,22 @@ public class RsaHandler implements ValueHandler, Encrypting {
         return tokens;
     }
 
-    /** The whole marker for a value, which is what gets pasted into a configuration file. */
+    /**
+     * The whole marker for a value, which is what gets pasted into a configuration file.
+     *
+     * @param plainText the value to encrypt.
+     * @return the marker, ready to be written as a property value.
+     */
     public String markerFor(String plainText) {
         return marker(encrypt(plainText));
     }
 
-    /** The marker wrapping an already encrypted token. */
+    /**
+     * The marker wrapping an already encrypted token.
+     *
+     * @param token the token.
+     * @return the marker.
+     */
     @Override
     public String marker(String token) {
         return "${$" + name + "::" + token + "}";
@@ -321,6 +354,7 @@ public class RsaHandler implements ValueHandler, Encrypting {
      * or the base64 of either with the header lines missing.
      *
      * @param pem the PEM text.
+     * @return the public key.
      * @throws IllegalArgumentException if it is not a key this can read, with what to run to convert it.
      */
     public static PublicKey publicKeyFrom(String pem) {
@@ -343,7 +377,12 @@ public class RsaHandler implements ValueHandler, Encrypting {
         }
     }
 
-    /** Reads a public key from a PEM file. */
+    /**
+     * Reads a public key from a PEM file.
+     *
+     * @param pem the file.
+     * @return the public key.
+     */
     public static PublicKey publicKeyFrom(Path pem) {
         return publicKeyFrom(read(pem));
     }
@@ -358,6 +397,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
      * is one command.
      * </p>
      *
+     * @param pem the PEM text.
+     * @return the private key.
      * @throws IllegalArgumentException if it is not a key this can read.
      */
     public static PrivateKey privateKeyFrom(String pem) {
@@ -375,7 +416,12 @@ public class RsaHandler implements ValueHandler, Encrypting {
         }
     }
 
-    /** Reads a private key from a PKCS#8 PEM file. */
+    /**
+     * Reads a private key from a PKCS#8 PEM file.
+     *
+     * @param pem the file.
+     * @return the private key.
+     */
     public static PrivateKey privateKeyFrom(Path pem) {
         return privateKeyFrom(read(pem));
     }

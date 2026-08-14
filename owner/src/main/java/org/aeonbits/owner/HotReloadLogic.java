@@ -30,6 +30,13 @@ import static org.aeonbits.owner.util.Util.system;
 import static org.aeonbits.owner.util.Util.unsupported;
 
 /**
+ * Decides when a {@link org.aeonbits.owner.Config.HotReload} configuration reloads.
+ * <p>
+ * It holds the interval, the last time each source was seen to change, and whether the checking is
+ * {@link org.aeonbits.owner.Config.HotReloadType#SYNC} - done on the reading thread - or
+ * {@link org.aeonbits.owner.Config.HotReloadType#ASYNC}, done on the scheduler.
+ * </p>
+ *
  * @author Luigi R. Viggiano
  */
 class HotReloadLogic implements Serializable {

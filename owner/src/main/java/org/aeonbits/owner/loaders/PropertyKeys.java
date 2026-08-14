@@ -64,7 +64,7 @@ public final class PropertyKeys {
     /** Around the index of an element. */
     public static final char INDEX_OPEN = '[';
 
-    /** @see #INDEX_OPEN */
+    /** And the character closing it. See {@link #INDEX_OPEN}. */
     public static final char INDEX_CLOSE = ']';
 
     /** Don't let anyone instantiate this class */
