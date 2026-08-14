@@ -299,6 +299,44 @@ attached to a method.
 </div>
 
 
+What this does not do
+---------------------
+
+Written down because each of these is a decision rather than an omission.
+
+- **A passphrase or a key cannot come from the configuration.** That would be the secret protecting the
+  file, kept in the file. You construct the handler and register it, so the material arrives from wherever
+  your application already reads it.
+- **A handler is registered on the factory, and `ConfigFactory` is one object for the whole JVM.**
+  Registering a name replaces what was under it, for every configuration created afterwards. That is what
+  makes a key rotation an edit rather than a redeployment, and it also means a library registering a
+  handler is making a decision on behalf of its host application.
+- **A deserialized configuration cannot decrypt.** The passphrase and the private key are `transient`, on
+  purpose: writing them out would put a secret in a file nobody chose to protect. A handler that comes
+  back from deserialization says so rather than failing obscurely.
+- **`@EncryptedValue` still does not reach `fill()`,** and structurally cannot — it is declared on a
+  method, and a property asked for by name has no method to read the declaration from. Only the marker
+  fixes that, which is why it exists.
+- **`${$rsa-oaep::…}` is not `sops` or `age`.** It encrypts values, one at a time, to one key pair. There
+  is no multi-recipient support, no key rotation of the file as a whole, and no signature over it.
+- **A token is not portable to another tool.** The format is ours: `openssl` will not read one, and this
+  will not read what `openssl enc` writes.
+- **The terminal prompt of `EncryptTool` has no automated test.** Reading a passphrase twice without echo,
+  refusing an empty one and refusing two that differ are exercised by hand, because a JVM under a test
+  runner never has a terminal. What *is* tested is the half that matters most: with the streams redirected
+  and no `OWNER_PASSPHRASE`, the piped value is not mistaken for the passphrase.
+
+<div class="note info">
+  <h5>AES-256 and an old Java 8</h5>
+  <p>
+    Before <b>8u161</b> the unlimited strength jurisdiction policy files were a separate download, and
+    without them a JVM caps AES at 128 bits. <code>AesGcmHandler</code> checks for this when it is
+    constructed and says so, rather than letting it surface later as a decryption failure — an environment
+    problem wearing the costume of a cryptographic one. Every JDK since is unrestricted by default.
+  </p>
+</div>
+
+
 The example this page used to publish
 -------------------------------------
 

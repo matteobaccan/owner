@@ -195,6 +195,27 @@ public class JndiLoaderTest {
     }
 
     /**
+     * A naming tree that comes back to itself. JNDI has links and aliases, so a context can contain one of
+     * its own ancestors — and reading it used to follow that until the stack ran out, which is a
+     * StackOverflowError with no indication of what was being read.
+     */
+    @Test
+    public void aContextThatContainsItselfIsRefusedRatherThanFollowed() {
+        Map<String, Object> loop = context("host", "localhost");
+        loop.put("itself", loop);
+        InMemoryContextFactory.bind("java:comp/env/myconfig", loop);
+
+        try {
+            load("jndi:comp/env/myconfig");
+            fail("that tree has no bottom");
+        } catch (StackOverflowError followedIt) {
+            fail("the recursion was followed instead of being bounded");
+        } catch (Exception expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("levels deep"));
+        }
+    }
+
+    /**
      * The judgement that makes this loader usable at all: a real <code>java:comp/env</code> holds a
      * DataSource beside the settings, and refusing the whole context over it would be refusing the
      * container this exists for.

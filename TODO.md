@@ -419,6 +419,17 @@ an issue behind it, which is the point: what the others shipped is what our repo
       answer for a password; and `@EncryptedValue` on a method whose value is a marker is a
       contradiction to be **refused**, since expansion runs first and the decryptor would be handed
       plain text.
+- [ ] **The terminal prompt of `EncryptTool` has no automated test** — reading a passphrase twice without
+      echo, refusing an empty one, refusing two that differ. Not an oversight: a JVM under Surefire never
+      has a terminal, so `Console.readPassword` is unreachable from a test. What *is* covered is the half
+      that matters more, and it is covered behaviourally: with the streams redirected and no
+      `OWNER_PASSPHRASE`, the piped value is not mistaken for the passphrase — the JDK 22
+      `Console.isTerminal()` hazard the tool is built around.
+      Making the rest reachable means a production seam, something like
+      `static char[] passphrase(String fromEnvironment, Console console)` beside the existing
+      `run(args, out, err)` / `main` split. **Worth doing only if that seam earns its keep otherwise**; a
+      parameter that exists so a test can reach a branch is a parameter that lies about the design, which
+      is the mistake `passphrase(PrintStream)` already was once.
 - [ ] **A composite object of a type we cannot proxy** — [#72](https://github.com/matteobaccan/owner/issues/72),
       which this file wrongly listed as answered by the nested interfaces until it was read on 2026-08-12.
       It is not. The request is `DataSource getDataSource()`, assembled by a provider class out of several

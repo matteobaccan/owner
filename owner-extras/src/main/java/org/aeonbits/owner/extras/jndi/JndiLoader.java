@@ -168,8 +168,28 @@ public class JndiLoader implements Loader {
         return JAVA_SCHEME.equals(uri.getScheme()) ? JAVA_SCHEME + ':' + rest : rest;
     }
 
+    /**
+     * How deep the subcontexts may go.
+     * <p>
+     * Not a limit on configuration - nothing sane nests thirty-two levels - but on a naming tree that
+     * comes back to itself. JNDI has links and aliases, so a context can contain one of its own ancestors,
+     * and the recursion below would then follow it until the stack ran out. A depth bound turns that into
+     * a sentence.
+     * </p>
+     */
+    private static final int MAXIMUM_DEPTH = 32;
+
     /** Reads a context into the properties, joining the names of the subcontexts with a dot. */
     private void read(Context context, String prefix, Properties result) throws NamingException {
+        read(context, prefix, result, 0);
+    }
+
+    private void read(Context context, String prefix, Properties result, int depth) throws NamingException {
+        if (depth > MAXIMUM_DEPTH)
+            throw unsupported("the JNDI tree under '%s' is more than %d levels deep, which a configuration "
+                            + "is not: this is a context that contains one of its own ancestors, and "
+                            + "following it would have run the stack out instead of saying so.",
+                    prefix, MAXIMUM_DEPTH);
         NamingEnumeration<Binding> bindings = context.listBindings("");
         try {
             while (bindings.hasMore()) {
@@ -178,7 +198,7 @@ public class JndiLoader implements Loader {
                 Object value = binding.getObject();
 
                 if (value instanceof Context) {
-                    read((Context) value, key, result);
+                    read((Context) value, key, result, depth + 1);
                 } else if (isScalar(value)) {
                     result.setProperty(key, String.valueOf(value));
                 } else {

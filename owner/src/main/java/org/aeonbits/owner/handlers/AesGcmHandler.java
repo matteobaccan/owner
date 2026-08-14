@@ -226,6 +226,7 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
                             + "wait rather than a strength: the ceiling is about fifty times current "
                             + "guidance already.",
                     iterations, MAXIMUM_ITERATIONS));
+        refuseAJvmThatCannotDoAes256();
         this.name = name;
         this.iterations = iterations;
         this.passphrase = passphrase.clone();
@@ -238,6 +239,32 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
                 return size() > CACHE_SIZE;
             }
         };
+    }
+
+    /**
+     * Refuses, with the reason, a JVM whose policy caps AES below 256 bits.
+     * <p>
+     * This is the Java 8 baseline showing through, and it is worth a sentence of its own rather than a
+     * failure inside the cipher. Before 8u161 the unrestricted policy files were a separate download, so
+     * {@link Cipher#getMaxAllowedKeyLength(String)} answers 128 and a 256-bit key throws
+     * <code>InvalidKeyException</code> - which arrives here as "could not be decrypted", an environment
+     * problem wearing the costume of a cryptographic one. Every JDK since is unrestricted by default.
+     * </p>
+     */
+    private static void refuseAJvmThatCannotDoAes256() {
+        try {
+            int allowed = Cipher.getMaxAllowedKeyLength("AES");
+            if (allowed < KEY_BITS)
+                throw new IllegalArgumentException(String.format(
+                        "this JVM allows AES keys of at most %d bits and this handler uses %d. That is the "
+                                + "restricted jurisdiction policy, which was the default before Java "
+                                + "8u161: update the JRE, or install the unlimited strength policy files "
+                                + "in its lib/security. Nothing about the configuration is wrong.",
+                        allowed, KEY_BITS));
+        } catch (java.security.NoSuchAlgorithmException aesIsRequiredOfEveryJdk) {
+            throw new IllegalStateException("AES is required of every JDK and is missing",
+                    aesIsRequiredOfEveryJdk);
+        }
     }
 
     @Override

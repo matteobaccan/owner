@@ -1037,3 +1037,16 @@ jdbc.url    = jdbc:h2:mem:test?password=${db.password}
 The loader reads a context, the handler reads an entry, and each refuses the other's case with a pointer
 to it. The handler accepts the same names and applies the same refusal — more urgently, if anything, since
 a value is an easier place to write into than a source spec.
+
+### What it does not do
+
+- **It only reads.** `Loader` has no write side, so `store()` never writes back to JNDI. Commons
+  Configuration's `JNDIConfiguration` is read-only for the same reason.
+- **It is not watchable, so `@HotReload` drops it.** A JNDI context answers no "has this changed" question,
+  and a source that cannot be watched is dropped from the reload with a warning naming it — the same
+  treatment every unwatchable source gets, not something specific to JNDI.
+- **A subcontext tree deeper than 32 levels is refused.** Not a limit on configuration, but on a naming
+  tree that comes back to itself: JNDI has links, so a context can contain one of its own ancestors, and
+  the bound turns a `StackOverflowError` into a sentence.
+- **Values become properties through `String.valueOf`.** A `Double` bound as `1.0` arrives as
+  `"1.0"`, and the interface's return type decides what happens next, as with every other source.
