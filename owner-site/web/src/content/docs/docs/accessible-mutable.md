@@ -88,6 +88,56 @@ cfg.store(new FileOutputStream(tmp), "no comments");
 As you can see, [Accessible] is not limited to the `getProperty()` method, but you can also use this
 interface to `list()` or `store()` the properties.
 
+### Changing a properties file and writing it back
+
+The two interfaces together are the whole round trip, which is the commonest thing people come here
+looking for. The configuration is methods rather than fields, so the setter is not on the interface — it
+is `setProperty`, keyed by name:
+
+```java
+@Sources("file:/etc/myapp/app.properties")
+public interface AppConfig extends Mutable, Accessible {
+    String host();
+    int port();
+}
+```
+
+```java
+AppConfig config = ConfigFactory.create(AppConfig.class);
+config.setProperty("port", "9090");          // or removeProperty("port")
+
+try (OutputStream out = Files.newOutputStream(Paths.get("/etc/myapp/app.properties"))) {
+    config.store(out, "written back by the application");
+}
+```
+
+Everything you did not touch is written back unchanged, and a configuration created afterwards reads the
+new value. Pinned down in
+[`WritingTheFileBackTest`](https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/WritingTheFileBackTest.java)
+against a real file.
+
+<div class="note warning">
+  <h5>This rewrites the file; it does not edit it.</h5>
+  <p>
+    Underneath is
+    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#store-java.io.OutputStream-java.lang.String-"><code>Properties.store</code></a>,
+    which serialises a map — so <b>comments, blank lines and the original order do not survive</b>, and a
+    timestamp line is added. A hand-written file that somebody maintains comes back machine-written:
+  </p>
+  <pre><code># the database we talk to        #written back by the application
+host = localhost          -->    #Fri Aug 14 17:52:00 CEST 2026
+                                 host=localhost
+# in milliseconds                port=9090
+port = 8080
+</code></pre>
+  <p>
+    That is fine for a file only the application writes, and wrong for one a person edits. Saving without
+    destroying the file is <a href="https://github.com/matteobaccan/owner/issues/16">#16</a> and is not
+    implemented; until it is, the honest options are to keep machine-written state in a file of its own,
+    or to edit the text yourself and let OWNER only read it.
+  </p>
+</div>
+
 Which methods process the value
 -------------------------------
 
