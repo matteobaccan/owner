@@ -173,10 +173,16 @@ public class RsaHandlerTest {
         assertEquals(large.toString(), handler.resolve(handler.encrypt(large.toString())));
     }
 
+    /**
+     * The 1024-bit key below is the subject of the test and not a mistake in it: what is being checked is
+     * that {@link RsaHandler} refuses one. A scanner cannot tell a weak key being used from a weak key
+     * being rejected, so the suppression says which this is rather than leaving a high-severity alert
+     * standing on a security feature, where a real one would then be one row among the noise.
+     */
     @Test
     public void aKeyTooSmallToBeWorthUsingIsRefused() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(1024);
+        generator.initialize(1024); // codeql[java/insufficient-key-size]
         try {
             new RsaHandler(generator.generateKeyPair().getPublic());
             fail("1024 bits stopped being recommended in 2010");
