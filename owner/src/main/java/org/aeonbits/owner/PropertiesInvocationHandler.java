@@ -8,6 +8,8 @@
 package org.aeonbits.owner;
 
 import org.aeonbits.owner.Config.Mandatory;
+import org.aeonbits.owner.validation.ConstrainedProperty;
+import org.aeonbits.owner.validation.Constraints;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -27,6 +29,7 @@ import java.util.logging.Logger;
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
 import static org.aeonbits.owner.Config.DisableableFeature.RELAXED_BINDING;
+import static org.aeonbits.owner.Config.DisableableFeature.VALIDATION;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Converters.SpecialValue.NULL;
 import static org.aeonbits.owner.Converters.convert;
@@ -565,6 +568,143 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
         String path = NestedProperties.pathOf(expandKey(method));
         if (isOptional(method) && !anythingUnderAnySpelling(method, path)) return;
         handlerOf(child).collectMissingMandatory(missingKeys);
+    }
+
+    /**
+     * Checks the values of this configuration against the validation constraints its methods declare, and
+     * says which of those constraints are not going to be checked at all.
+     * <p>
+     * Run when the configuration is created, next to {@link #validateMandatoryProperties()} and for the same
+     * reason: a configuration is read once, at startup, and a value that is wrong is wrong then. It is not
+     * run again after a {@link Reloadable#reload()}, exactly as the mandatory check is not - what a reload
+     * brings in is checked by whoever reads it.
+     * </p>
+     * <p>
+     * <b>Every value it validates, it reads</b>, since Bean Validation checks a value and a property has
+     * none until it is resolved. That is what a configuration is for, so it costs the library nothing to do
+     * at startup what the application was about to do anyway - but it does bound which methods can take
+     * part, and {@link #cannotBeChecked(Method)} is that boundary.
+     * </p>
+     *
+     * @param proxy the configuration object, needed because a validation provider is handed the object as
+     *              well as the method.
+     */
+    void validateConstraints(Object proxy) {
+        List<ConstrainedProperty> toCheck = new LinkedList<>();
+        List<String> notChecked = new LinkedList<>();
+        collectConstraints(proxy, toCheck, notChecked);
+        ValidationSupport.check(propertiesManager, toCheck, notChecked);
+    }
+
+    private void collectConstraints(Object proxy, List<ConstrainedProperty> toCheck, List<String> notChecked) {
+        if (VALIDATION.isDisabledFor(configClass))
+            return;
+        for (Method method : configClass.getMethods()) {
+            descendOrReport(method, toCheck, notChecked);
+            if (!Constraints.anyOn(method) || VALIDATION.isDisabledFor(method))
+                continue;
+            String why = cannotBeChecked(method);
+            if (why != null) {
+                notChecked.add(String.format("'%s()' %s", method.getName(), why));
+                continue;
+            }
+            reportOptionalContainerConstraint(method, notChecked);
+            read(method, proxy, toCheck, notChecked);
+        }
+    }
+
+    /**
+     * The sections: descended into when they exist, reported when they cannot.
+     * <p>
+     * A plain accessor taking no arguments has its object already built — that is what
+     * {@link NestedProperties#childrenOf} did — so its constraints are checked here with everybody else's,
+     * one restart for the whole tree. The other three shapes have no object yet and no path either: the
+     * elements of a list, the values of a group and what an accessor taking arguments answers with are all
+     * built once something names them, and a check at creation time has nothing to run against. Those are
+     * named instead, and only when there is really something inside them to check.
+     * </p>
+     */
+    private void descendOrReport(Method method, List<ConstrainedProperty> toCheck, List<String> notChecked) {
+        if (NestedProperties.nests(method) && method.getParameterTypes().length == 0) {
+            Object child = children.get(method);
+            if (child == null)
+                return;
+            String path = NestedProperties.pathOf(expandKey(method));
+            if (isOptional(method) && !NestedProperties.anythingUnder(path, propertiesManager))
+                return;
+            handlerOf(child).collectConstraints(child, toCheck, notChecked);
+            return;
+        }
+
+        Class<?> element = NestedProperties.groupElementOf(method);
+        if (element != null && ValidationSupport.anyConstraintIn(element))
+            notChecked.add(String.format("the constraints declared inside '%s', which '%s()' reads, are not "
+                            + "checked: those sections are built when the properties - or the arguments of "
+                            + "the call - name one, so at this point there is nothing to check.",
+                    element.getSimpleName(), method.getName()));
+    }
+
+    /**
+     * Why a constraint written on this method is not going to be checked, or <code>null</code> when it is.
+     * <p>
+     * Every one of these is a shape whose value the library will not produce here, and none of them is a
+     * limitation of the validator: it is handed values, and these methods have none to hand it.
+     * </p>
+     */
+    private String cannotBeChecked(Method method) {
+        if (isDefault(method))
+            return "is a default method, so what it answers is your own code and not a property: this "
+                    + "library never reads it, and does not run it to find out.";
+        if (getDelegateMethod(method) != null)
+            return "is answered by a @Delegate rather than by a property.";
+        if (method.getParameterTypes().length > 0)
+            return "takes arguments, so it has no key and no value until it is called, and there is nothing "
+                    + "to call it with here. Check it where it is called.";
+        if (NestedProperties.nests(method))
+            return "reads a nested section, which is a view of the properties rather than a value: it is "
+                    + "never null and never absent, so the constraint could not fail. Write it on the "
+                    + "properties inside the section.";
+        return null;
+    }
+
+    /**
+     * A constraint written on a method that returns an {@link Optional}, rather than on what the Optional
+     * holds.
+     * <p>
+     * It is checked — the value is handed over as it is, an <code>Optional</code> and all — and it cannot
+     * fail, an <code>Optional</code> being neither null nor, to a validator, absent. Which is the silence
+     * this whole mechanism exists to break, so it is said: the spelling that means something is
+     * <code>Optional&lt;&#64;Min(12) Integer&gt;</code>, which the providers unwrap for you.
+     * </p>
+     */
+    private static void reportOptionalContainerConstraint(Method method, List<String> notChecked) {
+        if (!isOptional(method) || !Constraints.anyDeclaredOn(method))
+            return;
+        notChecked.add(String.format("'%s()' returns an Optional and carries a constraint on the method "
+                        + "itself, so the constraint applies to the Optional, which is never null and never "
+                        + "absent: write it on the value instead, as Optional<@Min(12) Integer>.",
+                method.getName()));
+    }
+
+    /**
+     * Reads the value to be checked, through the same path a caller would take.
+     * <p>
+     * A value that will not resolve — one that refuses to convert, most often — is reported and passed over
+     * rather than thrown from here: it fails on its own, with its own message, the moment anybody reads it,
+     * and turning that into a failure of the validation would report the wrong thing about the wrong
+     * feature. What must not happen is that it is passed over in silence.
+     * </p>
+     */
+    private void read(Method method, Object proxy, List<ConstrainedProperty> toCheck,
+                      List<String> notChecked) {
+        String key = expandKey(method);
+        try {
+            toCheck.add(new ConstrainedProperty(proxy, method, key, resolveProperty(method)));
+        } catch (RuntimeException cannotBeRead) {
+            notChecked.add(String.format("'%s()' carries constraints and its value could not be read, so "
+                            + "they were not checked: %s.",
+                    method.getName(), cannotBeRead.getClass().getSimpleName()));
+        }
     }
 
     private String preProcess(Method method, String value) {

@@ -53,6 +53,11 @@ class DefaultFactory implements Factory {
         handler.validateMandatoryProperties();
         T proxy = (T) newProxyInstance(clazz.getClassLoader(), interfaces, handler);
         handler.setProxy(proxy);
+        // after the proxy exists, and it has to be: a validation constraint is checked against a value, and
+        // a value is what a mapping method answers with. The mandatory check above needs no proxy and runs
+        // first on purpose - a property that is not there at all is a better thing to be told than the same
+        // property failing a @NotNull
+        handler.validateConstraints(proxy);
         return proxy;
     }
 

@@ -77,6 +77,53 @@
             <version>1.4.9</version>
             <optional>true</optional>
         </dependency>
+        <!-- The two spellings of Bean Validation. Both optional, neither transitive, and neither reachable
+             from a class this artifact loads before it is asked: see BeanValidator for why both are here
+             rather than one, and JakartaBeanValidation for what keeps them off everybody else's class path.
+             The API only - a provider is the user's choice, and the tests below make both choices. -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.0.2</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>2.0.1.Final</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- One provider per namespace, and deliberately not the same one twice: Hibernate Validator 6 and 8
+             share the org.hibernate.validator package, so the javax and the jakarta side of it cannot sit on
+             one class path. Apache BVal takes the other half, which is also the pair issue #201 was reported
+             against. -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>8.0.1.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Hibernate Validator interpolates its messages with an expression language and refuses to start
+             without an implementation of one -->
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <version>5.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.bval</groupId>
+            <artifactId>bval-jsr</artifactId>
+            <version>2.0.6</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- declared by BVal as provided, which means the user has to bring it -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.20.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>

@@ -15,10 +15,13 @@ import java.io.InputStream;
  * A class loader that pretends an optional dependency is not there.
  *
  * <p>
- * Both loaders in this package adapt a third-party library that most users of <code>owner-extras</code> will
- * not have, and both are discovered by {@link java.util.ServiceLoader} regardless - so both need to be tried
- * on a class path without that library, which is a class path the suite itself can never run on, needing
- * both libraries to test anything at all.
+ * Everything in this artifact that adapts a third-party library adapts one that most users of
+ * <code>owner-extras</code> will not have - the two loaders in this package, and the Bean Validation support
+ * in <code>org.aeonbits.owner.extras.validation</code> - and every one of them is discovered by
+ * {@link java.util.ServiceLoader} regardless. So each needs to be tried on a class path without that
+ * library, which is a class path the suite itself can never run on, needing all of them to test anything at
+ * all. It is public for that reason: the validation tests are in another package and want the same
+ * arrangement rather than a second copy of it.
  * </p>
  *
  * <p>
@@ -30,21 +33,24 @@ import java.io.InputStream;
  *
  * @author Matteo Baccan
  */
-final class WithholdingClassLoader extends ClassLoader implements AutoCloseable {
+public final class WithholdingClassLoader extends ClassLoader implements AutoCloseable {
 
-    private final String withheld;
+    private final String[] withheld;
 
     /**
-     * @param withheld the package prefix to refuse, as in <code>org.apache.curator</code>.
+     * @param withheld the package prefixes to refuse, as in <code>org.apache.curator</code>. More than one
+     *                 because the same feature can rest on more than one optional dependency: Bean
+     *                 Validation comes under two names, and a class path holding neither is the case worth
+     *                 testing.
      */
-    WithholdingClassLoader(String withheld) {
+    public WithholdingClassLoader(String... withheld) {
         super(WithholdingClassLoader.class.getClassLoader());
-        this.withheld = withheld;
+        this.withheld = withheld.clone();
     }
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        if (name.startsWith(withheld))
+        if (isWithheld(name))
             throw new ClassNotFoundException(name + " (withheld by " + getClass().getSimpleName() + ")");
         if (!name.startsWith("org.aeonbits.owner"))
             return super.loadClass(name, resolve);
@@ -61,6 +67,13 @@ final class WithholdingClassLoader extends ClassLoader implements AutoCloseable 
                 resolveClass(defined);
             return defined;
         }
+    }
+
+    private boolean isWithheld(String name) {
+        for (String prefix : withheld)
+            if (name.startsWith(prefix))
+                return true;
+        return false;
     }
 
     private byte[] bytecodeOf(String name) {

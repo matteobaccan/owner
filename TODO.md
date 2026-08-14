@@ -492,9 +492,17 @@ an issue behind it, which is the point: what the others shipped is what our repo
 - [ ] **Configurable naming strategy / relaxed binding** — kebab-case, snake_case, verbatim, as SmallRye,
       Gestalt and Spring all offer. It hooks into the factory-prefix machinery built for 2.0.0.
       Issue [#116](https://github.com/matteobaccan/owner/issues/116).
-- [ ] **Bean Validation (JSR-380)** as an optional `owner-validation` module, never in the core.
-      SmallRye, Gestalt and Spring have it. Issue
-      [#201](https://github.com/matteobaccan/owner/issues/201).
+- [x] **Bean Validation (JSR-380)**, never in the core. Done 2026-08-14, in `owner-extras` rather than in an
+      `owner-validation` module of its own: that artifact exists for exactly this shape — an optional
+      dependency, isolated in a class nothing loads until it is asked — and a second module would have been
+      a second thing to release for one service class. The core keeps no validation API and recognises a
+      constraint by the *name* of the `@Constraint` on it, which is enough to say when nothing is checking
+      one. `Validator.forExecutables().validateReturnValue` is what makes `port()` work where
+      `validate(config)` only ever saw `getPort()`, and every method shape that cannot be checked —
+      arguments, `default`, a section accessor, a constraint on an `Optional` container — is reported by
+      name, or refused under `owner.strict`. Both `javax` and `jakarta` are supported, since the Java 8
+      baseline and "not dead" point at different namespaces and a user's framework already chose.
+      Issue [#201](https://github.com/matteobaccan/owner/issues/201) **can be closed**.
 - [x] **Indexed keys**, `list[0]`, `list[1]`, complementing the `Map` grouping added in 2.0.0. Done
       2026-08-09: an indexed key wins over a single value, the elements are not tokenized, and a gap in the
       sequence is refused rather than closed up. `XMLLoader` emits them for repeated sibling elements,

@@ -639,7 +639,24 @@ public interface Config extends Serializable {
          *
          * @since 2.0.0
          */
-        RELAXED_BINDING;
+        RELAXED_BINDING,
+
+        /**
+         * Disables the checking of the Bean Validation constraints - <code>&#64;Min</code>,
+         * <code>&#64;NotNull</code> and the rest - written on the annotated method, or on every method of
+         * the annotated interface.
+         * <p>
+         * It disables the <b>report</b> as well as the check, and that is the point of it: a constraint
+         * that nothing checks is otherwise said out loud when the configuration is created, because an
+         * annotation that reads like a guarantee and is not one is the failure this library was asked to
+         * stop. This annotation is how a configuration says that its constraints are there for somebody
+         * else - a framework that reads the same interface, a code generator - and that OWNER is right to
+         * leave them alone.
+         * </p>
+         *
+         * @since 2.0.0
+         */
+        VALIDATION;
 
         /**
          * Tells whether this feature is disabled for the given method, considering the

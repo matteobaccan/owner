@@ -136,6 +136,44 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    with `@DisableFeature(RELAXED_BINDING)`. See
    [How the key may be written](/owner/docs/usage/#how-the-key-may-be-written).
 
+ * **`@Min(12) int port()` is finally checked, and a constraint nobody checks now says so.**
+   [Bean Validation](/owner/docs/validation/) has always worked against an OWNER configuration — provided
+   the methods were named as JavaBean getters. `Validator.validate(config)` walks *properties*, so
+   `@Min(12) int getPort()` was a property called `port` and was checked, while `@Min(12) int port()` — the
+   spelling this documentation teaches — was neither a property nor a field and was **passed over without a
+   word**, with Hibernate Validator and Apache BVal alike. That is
+   [#201](https://github.com/matteobaccan/owner/issues/201), open since 2018, and the dangerous half of it
+   was the silence rather than the missing check.
+
+   Put `owner-extras` and a validation provider on the class path and every constrained property is checked
+   when the configuration is created, next to the `@Mandatory` check and for the same reason:
+
+   ```
+   org.aeonbits.owner.validation.ConfigValidationException:
+     ServerConfig: 2 properties do not satisfy the constraints declared on them:
+     'port' (port()): must be greater than or equal to 12;
+     'hostname' (hostname()): must not be null
+   ```
+
+   Every violation in one exception, each naming the **key** — the line to go and change — and never the
+   value, which would put a rejected password in a log. Sections are walked into, so a violation inside one
+   arrives as `server.port`; `Optional<@Min(12) Integer>` and `List<@Min(12) Integer>` are unwrapped by the
+   provider as the specification says; and a getter-named method is reported **once**, not once as a
+   property and again as a method.
+
+   **The silence is the part that is gone.** Four method shapes cannot be checked at creation time — one
+   taking arguments has no key until it is called, a `default` method is your own code, a nested-section
+   accessor is a view that is never null, and a constraint written on an `Optional` applies to the container
+   — and each of them is now named, with its reason, as a `WARNING`, or refused outright under
+   `-Downer.strict=true`. So is a configuration carrying constraints that nothing on the class path can
+   check. An interface whose annotations belong to another framework says so with
+   `@DisableFeature(VALIDATION)`, which turns off the report as well as the check.
+
+   Both spellings of the specification are supported — `javax.validation` for the Java 8 world this library
+   still compiles for, `jakarta.validation` for everything current — and both are **optional** dependencies
+   of `owner-extras`: nothing is shipped, nothing is transitive, and a configuration with no constraint on
+   it pays nothing at all. `ConfigValidator` is a service like a loader, so another idea of what a
+   constraint means can be plugged in from outside.
  * **A value can name what decrypts it, and a cipher is finally shipped.** Until now this library shipped
    none: `org.aeonbits.owner.crypto` was an SPI and a no-op, and the only concrete implementation lived in
    the test suite, where the documentation reproduced its source for you to copy. That class is AES/ECB

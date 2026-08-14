@@ -367,7 +367,7 @@ coincidence; it is evidence the demand is real.
 | Nested config interfaces | SmallRye, Gestalt, Coat | — (**closed 2026-08-11**) |
 | TOML | Gestalt, Micronaut, avaje, Spring via Jackson | — (YAML #14 #65 **closed 2026-08-11**; HOCON and #240 **closed 2026-08-12**) |
 | `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
-| Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | #201 |
+| Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | — (**closed 2026-08-14**: checked on OWNER-style accessors through executable validation, which is what none of the three needed to do — their mapping methods are getters or records. What we have and they do not is the report: a constraint nobody is checking is a warning, or a refusal under `owner.strict`) |
 | Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | — (**closed 2026-08-14**: four spellings, on by default, `@DisableFeature(RELAXED_BINDING)` to switch off. Where they differ from us is the direction — SmallRye and Boot 2 both canonicalise the *source* keys into an index, we derive the spellings from the key a method resolved to, which is what keeps `store()` and the origins showing the file's own names) |
 | Indexed keys `list[0]` | SmallRye, Gestalt, Spring | — (**closed 2026-08-09**) |
 | "Which source provided this?" | Spring (origin tracking), Gestalt | — (**closed 2026-08-11**) |
@@ -481,7 +481,10 @@ Backlog, highest value first
    mapping, so a file in the other one is simply not read; ours has no wrong answer to pick. The cost of
    accepting several is that two of them may be written at once, and that is reported rather than left to
    be discovered — which is the half neither SmallRye nor Boot does.
-5. **Bean Validation** (#201) as an optional module, never in the core.
+5. ~~**Bean Validation** (#201)~~ — **done 2026-08-14**, in `owner-extras` and not in the core, both
+   namespaces, both optional. The interesting half is not the check but the report: SmallRye and Spring
+   validate what they can see and say nothing about what they cannot, and what they cannot see is exactly
+   the accessor spelling this library teaches.
 6. **GraalVM reachability metadata** plus a documentation chapter — defensive: today people hit the
    proxy wall and leave for Coat.
 

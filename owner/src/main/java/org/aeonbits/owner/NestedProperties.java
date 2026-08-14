@@ -384,8 +384,14 @@ final class NestedProperties {
      * The interface behind a method that reads a group of sections, or <code>null</code> when the method
      * reads something else: the element type of a list of sections, the value type of a map of them, or the
      * type an accessor taking arguments answers with.
+     * <p>
+     * These are the three shapes whose sections do <b>not</b> exist when the configuration is created - they
+     * are built once the properties, or the caller's arguments, name them - which is why
+     * {@link ValidationSupport} has to ask for them: what lives inside one of them is out of reach of every
+     * check that runs at creation time, and saying so is the whole of issue #201.
+     * </p>
      */
-    private static Class<?> groupElementOf(Method method) {
+    static Class<?> groupElementOf(Method method) {
         if (IndexedProperties.readsAList(method) && nestsElements(method))
             return Converters.elementType(method);
         if (PropertiesAggregator.aggregates(method) && nestsValues(method))

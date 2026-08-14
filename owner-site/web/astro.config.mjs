@@ -97,6 +97,7 @@ export default defineConfig({
             { label: 'File formats', slug: 'docs/file-formats' },
             { label: 'Event support', slug: 'docs/event-support' },
             { label: 'Singleton', slug: 'docs/singleton' },
+            { label: 'Bean Validation', slug: 'docs/validation' },
             { label: 'Crypto support', slug: 'docs/crypto' },
             { label: 'Preprocessors', slug: 'docs/preprocessors' },
             { label: 'JMX support', slug: 'docs/jmx' },
