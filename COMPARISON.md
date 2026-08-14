@@ -56,6 +56,60 @@ Star counts understate the Apache mirrors. The figure that matters for us is the
 the third largest installed base in the field and the oldest release of anyone in it.
 
 
+The matrix
+----------
+
+**Kept here and enriched over time**, rather than rebuilt from scratch whenever the question comes up.
+Our column is checked against the source in this repository; every other column is a survey and dates —
+see the warning at the top of this file. A **?** means *not verified*, which is not the same as *no*.
+
+Legend: **Y** ships it · **~** partly, or with a caveat · **n** does not · **?** unknown
+
+| | OWNER 2.0.0 | SmallRye 3.x | Gestalt 0.38 | Coat 2.0.2 | Archaius 2.8 | Typesafe 1.4 |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **The model** | | | | | | |
+| How a value reaches your code | interface + proxy | interface + proxy | interface, record, bean | generated at compile time | interface + proxy | node tree, no binding |
+| Java baseline | **8** | 17 | 11 | 11 | 8 | 8 |
+| No runtime dependency in the core | Y | n | Y | Y | n | Y |
+| **Binding** | | | | | | |
+| Nested configuration interfaces | Y | Y | Y | Y | ? | n |
+| Indexed keys `list[0]` | Y | Y | Y | ? | ? | n |
+| Relaxed binding | Y — four spellings, all tried | ~ one convention at a time | Y | ? | n | n |
+| Properties taking arguments at run time | Y | n | n | n — not expressible in generated code | Y | n |
+| **Sources and formats** | | | | | | |
+| Formats beyond `.properties` | Y — seven, no dependency but HOCON | ~ `.env` | Y | n | n | ~ HOCON, and it is theirs |
+| A source over the network (`https:`) | Y — since 1.0.5 | ? | Y | n | ? | ? |
+| JNDI as a source | Y — local names only | n | n | n | n | n |
+| Cloud sources needing signed access | ~ per value, or a `URLStreamHandlerProvider` | n | Y — S3, GCS, Azure, Git, Vault | n | n | n |
+| **At run time** | | | | | | |
+| Reload while running | Y — opt-in | n | Y | n | Y — the default | n |
+| Transactional reload with rollback | **Y** | n | n | n | n | n |
+| Writing the configuration back | **Y** | n | n | n | n | n |
+| Which source provided this value | Y | n | Y | n | n | ~ origin on a node |
+| JMX | **Y** | n | n | n | n | n |
+| **Secrets** | | | | | | |
+| A value kept out of listings and logs | Y — declared on the method | Y — `Secret<T>` | Y — by path pattern | n | n | n |
+| An encrypted value in the file | Y | Y | n | n | n | n |
+| A cipher actually shipped | Y — AES-256/GCM, PBKDF2 x210,000 | ~ AES-128, no derivation, key from a property | n | n | n | n |
+| A key pair, so the writer cannot read | **Y** | n | n | n | n | n |
+| Secrets that expire after N reads | n | n | Y | n | n | n |
+| **Around the edges** | | | | | | |
+| Bean Validation | Y — and it reports what it cannot check | Y | Y | Y — its own, at compile time | n | n |
+| Dependency injection integration | n | Y | ~ | n | Y | n |
+| GraalVM native image | ~ works, you supply the metadata | Y — through Quarkus | ? | Y — nothing to supply | ? | ? |
+
+Four rows are ours alone: transactional rollback, writing back, JMX, and a key pair for secrets — and the
+Java 8 baseline, which is not a feature but is the reason a whole population can use us at all.
+
+Four are still theirs, and only one of them is not arguable:
+
+- **cloud sources needing signed access** (#130 is closed, but Gestalt reads S3 and Consul as sources and
+  we read what a URL can reach);
+- **dependency injection** — see the two issues, and note they ask for opposite things;
+- **GraalVM without supplying metadata**, which Coat gets by being a code generator and we cannot;
+- **secrets that expire after N reads**, which is Gestalt's alone and which nobody has asked us for.
+
+
 The four that do what we do
 ---------------------------
 
