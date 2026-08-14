@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -458,5 +459,54 @@ public class EncryptToolTest {
                 bytes.write(buffer, 0, got);
         }
         return new String(bytes.toByteArray(), "UTF-8");
+    }
+
+    // --- the decision a terminal produces, which needs no terminal to check ---------------------------
+
+    /**
+     * <code>ConsolePassphrase</code> is excluded from the coverage measurement because it cannot be
+     * reached without a person at a keyboard. What it produces is judged here, on this side of that line:
+     * two typings agree and are not empty, or they are refused with the reason.
+     */
+    @Test
+    public void twoTypingsThatAgreeArePassphrase() {
+        assertArrayEquals("hunter2".toCharArray(),
+                EncryptTool.confirmed("hunter2".toCharArray(), "hunter2".toCharArray()));
+    }
+
+    @Test
+    public void twoTypingsThatDifferAreRefusedWithoutWritingAnything() {
+        try {
+            EncryptTool.confirmed("hunter2".toCharArray(), "hunter3".toCharArray());
+            fail("a mistyped passphrase writes a file nobody can read");
+        } catch (IllegalStateException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("do not match"));
+        }
+    }
+
+    @Test
+    public void anEmptyPassphraseIsRefusedAndSoIsEndOfInput() {
+        for (char[][] typed : new char[][][]{
+                {new char[0], new char[0]},
+                {null, null}}) {
+            try {
+                EncryptTool.confirmed(typed[0], typed[1]);
+                fail("that is not a passphrase");
+            } catch (IllegalStateException expected) {
+                assertTrue(expected.getMessage(), expected.getMessage().contains("empty"));
+            }
+        }
+    }
+
+    /** Neither array survives the call, including the one the answer is copied from. */
+    @Test
+    public void whatWasTypedIsBlankedOnTheWayOut() {
+        char[] typed = "hunter2".toCharArray();
+        char[] again = "hunter2".toCharArray();
+        char[] passphrase = EncryptTool.confirmed(typed, again);
+
+        assertArrayEquals("hunter2".toCharArray(), passphrase);
+        assertArrayEquals(new char[7], typed);
+        assertArrayEquals(new char[7], again);
     }
 }

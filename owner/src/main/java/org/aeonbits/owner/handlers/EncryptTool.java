@@ -12,6 +12,7 @@ import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -227,17 +228,38 @@ public final class EncryptTool {
                             + "keep it out of the command line: an argument is visible in ps and stays in "
                             + "the shell history.", PASSPHRASE_VARIABLE));
 
-        char[] typed = console.readPassword("Passphrase: ");
-        char[] again = console.readPassword("Again: ");
+        return ConsolePassphrase.ask(console);
+    }
+
+    /**
+     * The passphrase, given what was typed twice, or the reason it is neither.
+     * <p>
+     * Here rather than beside the two <code>readPassword</code> calls that produce them, and
+     * deliberately: a terminal cannot be had under a test runner, so whatever is left in
+     * {@link ConsolePassphrase} is unmeasured. "These two agree and are not empty" is a rule worth
+     * pinning down and needs no terminal to state, so it is on this side of that line.
+     * </p>
+     * <p>
+     * Neither array survives the call, the one the answer is copied from included.
+     * </p>
+     *
+     * @param typed what was typed the first time, or <code>null</code> at end of input.
+     * @param again what was typed the second time.
+     * @return the passphrase, as a copy.
+     * @throws IllegalStateException if the first is empty, or the two differ.
+     */
+    static char[] confirmed(char[] typed, char[] again) {
+        char[] first = typed == null ? new char[0] : typed;
+        char[] second = again == null ? new char[0] : again;
         try {
-            if (typed == null || typed.length == 0)
+            if (first.length == 0)
                 throw new IllegalStateException("The passphrase is empty.");
-            if (!Arrays.equals(typed, again))
+            if (!Arrays.equals(first, second))
                 throw new IllegalStateException("The two do not match. Nothing was written.");
-            return typed.clone();
+            return first.clone();
         } finally {
-            Arrays.fill(typed == null ? new char[0] : typed, '\0');
-            Arrays.fill(again == null ? new char[0] : again, '\0');
+            Arrays.fill(first, ' ');
+            Arrays.fill(second, ' ');
         }
     }
 
@@ -278,7 +300,7 @@ public final class EncryptTool {
         if (terminal() != null)
             err.println("Values, one per line. End with an empty line.");
         List<String> values = new ArrayList<>();
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
         String line;
         while ((line = in.readLine()) != null) {
             if (line.isEmpty())

@@ -14,7 +14,7 @@ import org.aeonbits.owner.handlers.RsaHandler;
 import org.aeonbits.owner.handlers.ValueHandler;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,8 +38,6 @@ import java.util.Map;
  * @see org.aeonbits.owner.handlers.ValueHandler
  */
 public class ValueHandlerExample {
-
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     /** Nothing to build: the example is in {@link #main(String[])}. */
     public ValueHandlerExample() {
@@ -130,7 +128,7 @@ public class ValueHandlerExample {
         @Override
         public String resolve(String path) {
             try {
-                return new String(Files.readAllBytes(Paths.get(path)), UTF_8).trim();
+                return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8).trim();
             } catch (IOException e) {
                 // throwing is the contract: answering with the empty string would report a failure as a
                 // value, and for a password that is the worst answer available
@@ -146,7 +144,7 @@ public class ValueHandlerExample {
 
     private static void withAHandlerOfYourOwn() throws IOException {
         Path secret = Files.createTempFile("owner-example", ".secret");
-        Files.write(secret, "read from a file\n".getBytes(UTF_8));
+        Files.write(secret, "read from a file\n".getBytes(StandardCharsets.UTF_8));
         try {
             ConfigFactory.registerValueHandler(new FileHandler());
 

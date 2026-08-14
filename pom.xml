@@ -108,7 +108,11 @@
         <sonar.organization>matteobaccan</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!-- demo main() programs and the SonaType release placeholder are not meant to be tested -->
-        <sonar.coverage.exclusions>**/examples/**,**/dummy/**</sonar.coverage.exclusions>
+        <!-- ConsolePassphrase holds the two readPassword calls and nothing else: a JVM under a test
+             runner has no terminal, so it cannot be reached and would sit as a permanent gap. The
+             decision those two calls produce is EncryptTool.confirmed, which is on the measured side of
+             that line on purpose. -->
+        <sonar.coverage.exclusions>**/examples/**,**/dummy/**,**/handlers/ConsolePassphrase.java</sonar.coverage.exclusions>
         <!--
             Writing to the console is what an example is for: the hot reload one asks the reader to edit a
             file and watch the values change, which a logger would hide behind a configuration they have not
@@ -190,6 +194,12 @@
                             <groupId>org.jacoco</groupId>
                             <artifactId>jacoco-maven-plugin</artifactId>
                             <version>0.8.15</version>
+                            <configuration>
+                                <!-- see sonar.coverage.exclusions above for why -->
+                                <excludes>
+                                    <exclude>org/aeonbits/owner/handlers/ConsolePassphrase.class</exclude>
+                                </excludes>
+                            </configuration>
                             <executions>
                                 <execution>
                                     <id>prepare-agent</id>

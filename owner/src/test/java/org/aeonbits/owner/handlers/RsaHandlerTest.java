@@ -516,9 +516,10 @@ public class RsaHandlerTest {
 
         assertNotEquals("another name", writer, new RsaHandler("rsa-2024", pair.getPublic(), null));
         assertNotEquals("another key pair", writer, new RsaHandler("rsa-2025", another.getPublic(), null));
-        assertNotEquals(writer, null);
-        assertNotEquals(writer, "not a handler at all");
-        assertEquals(writer, writer);
+        // see AesGcmHandlerTest: the contract is that a handler equals nothing of another type, which
+        // is asserted on the boolean because assertNotEquals reads it as a mistyped comparison
+        assertFalse("a handler is equal to nothing else", writer.equals(null));
+        assertFalse("nor to something of another type", writer.equals("not a handler at all"));
     }
 
     /** A Config object is serializable and a handler is reachable from one: the private key must not go. */

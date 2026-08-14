@@ -27,7 +27,6 @@ import static org.aeonbits.owner.util.Util.hideCredentials;
 import static org.aeonbits.owner.util.Util.unsupported;
 import static org.aeonbits.owner.util.Util.now;
 import static org.aeonbits.owner.util.Util.system;
-import static org.aeonbits.owner.util.Util.unsupported;
 
 /**
  * Decides when a {@link org.aeonbits.owner.Config.HotReload} configuration reloads.

@@ -15,7 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
@@ -132,7 +132,6 @@ public class RsaHandler implements ValueHandler, Encrypting {
     private static final int TAG_BITS = 128;
     private static final int FINGERPRINT_BYTES = 4;
     private static final int PREFIX_BYTES = FINGERPRINT_BYTES + 2;
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     /** The name values refer to this handler by. */
     private final String name;
@@ -260,7 +259,7 @@ public class RsaHandler implements ValueHandler, Encrypting {
             Cipher cipher = Cipher.getInstance(DATA_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, dataKey, new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(token, 0, headerBytes);
-            return new String(cipher.doFinal(token, headerBytes, token.length - headerBytes), UTF_8);
+            return new String(cipher.doFinal(token, headerBytes, token.length - headerBytes), StandardCharsets.UTF_8);
         } catch (GeneralSecurityException e) {
             throw new IllegalArgumentException("A value handled by '" + name + "' could not be decrypted. "
                     + "The fingerprint matched, so the key pair is the right one: either the value has "
@@ -301,7 +300,7 @@ public class RsaHandler implements ValueHandler, Encrypting {
             Cipher cipher = Cipher.getInstance(DATA_CIPHER);
             cipher.init(Cipher.ENCRYPT_MODE, dataKey, new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(header);
-            byte[] sealed = cipher.doFinal(plainText.getBytes(UTF_8));
+            byte[] sealed = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
 
             byte[] token = ByteBuffer.allocate(header.length + sealed.length).put(header).put(sealed).array();
             return Base64.getEncoder().encodeToString(token);
@@ -361,7 +360,7 @@ public class RsaHandler implements ValueHandler, Encrypting {
         if (pem != null && pem.contains("BEGIN CERTIFICATE")) {
             try {
                 return CertificateFactory.getInstance("X.509")
-                        .generateCertificate(new ByteArrayInputStream(pem.getBytes(UTF_8)))
+                        .generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.UTF_8)))
                         .getPublicKey();
             } catch (GeneralSecurityException e) {
                 throw new IllegalArgumentException("that certificate could not be read: " + e.getMessage(), e);
@@ -487,7 +486,7 @@ public class RsaHandler implements ValueHandler, Encrypting {
 
     private static String read(Path pem) {
         try {
-            return new String(Files.readAllBytes(pem), UTF_8);
+            return new String(Files.readAllBytes(pem), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IllegalArgumentException("could not read " + pem + ": " + e.getMessage(), e);
         }

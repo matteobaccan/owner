@@ -327,9 +327,10 @@ public class AesGcmHandlerTest {
 
         assertNotEquals(one, new AesGcmHandler("aes-gcm-2024", "one passphrase".toCharArray()));
         assertNotEquals(one, new AesGcmHandler("aes-gcm-2025", "one passphrase".toCharArray(), 400_000));
-        assertNotEquals(one, null);
-        assertNotEquals(one, "not a handler at all");
-        assertEquals(one, one);
+        // asserted on the boolean rather than through assertNotEquals: comparing a handler with a
+        // String is the contract being checked, and an assertion framework reads it as a mistake
+        assertFalse("a handler is equal to nothing else", one.equals(null));
+        assertFalse("nor to something of another type", one.equals("not a handler at all"));
     }
 
     /** A Config object is serializable and a handler is reachable from one: the passphrase must not go. */

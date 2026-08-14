@@ -14,7 +14,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -144,6 +144,7 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      */
     public static final int MAXIMUM_ITERATIONS = 10_000_000;
 
+    private static final String NO_PASSPHRASE = "the passphrase can't be null or empty";
     private static final String KDF = "PBKDF2WithHmacSHA256";
     private static final String CIPHER = "AES/GCM/NoPadding";
     private static final int KEY_BITS = 256;
@@ -151,7 +152,6 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
     private static final int IV_BYTES = 12;
     private static final int TAG_BITS = 128;
     private static final int HEADER_BYTES = 4 + SALT_BYTES + IV_BYTES;
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     /** How many derived keys to keep. One file uses one salt; the cap is there so a wrong one cannot grow. */
     private static final int CACHE_SIZE = 16;
@@ -188,7 +188,19 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      *                   {@link #AesGcmHandler(char[])} when the passphrase is read rather than written.
      */
     public AesGcmHandler(String passphrase) {
-        this(DEFAULT_NAME, passphrase == null ? null : passphrase.toCharArray(), DEFAULT_ITERATIONS);
+        this(DEFAULT_NAME, charactersOf(passphrase), DEFAULT_ITERATIONS);
+    }
+
+    /**
+     * Refuses a missing passphrase here rather than passing a <code>null</code> down for the other
+     * constructor to refuse. Same outcome, but the check is where the null is: threading one through two
+     * frames so that something else can object to it is a path a reader has to follow, and an analyser
+     * reads it as a constructor that always throws.
+     */
+    private static char[] charactersOf(String passphrase) {
+        if (passphrase == null || passphrase.isEmpty())
+            throw new IllegalArgumentException(NO_PASSPHRASE);
+        return passphrase.toCharArray();
     }
 
     /**
@@ -213,7 +225,7 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      */
     public AesGcmHandler(String name, char[] passphrase, int iterations) {
         if (passphrase == null || passphrase.length == 0)
-            throw new IllegalArgumentException("the passphrase can't be null or empty");
+            throw new IllegalArgumentException(NO_PASSPHRASE);
         if (iterations < MINIMUM_ITERATIONS)
             throw new IllegalArgumentException(String.format(
                     "%d iterations is below the %d this handler accepts. The count is what makes a "
@@ -307,7 +319,7 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
             cipher.init(Cipher.DECRYPT_MODE, keyFor(salt, tokenIterations), new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(token, 0, HEADER_BYTES);
             byte[] plain = cipher.doFinal(token, HEADER_BYTES, token.length - HEADER_BYTES);
-            return new String(plain, UTF_8);
+            return new String(plain, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException e) {
             // deliberately vague about which of the two it was: telling a wrong passphrase apart from an
             // edited value tells whoever is editing which one they got closer to
@@ -390,7 +402,7 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
             Cipher cipher = Cipher.getInstance(CIPHER);
             cipher.init(Cipher.ENCRYPT_MODE, keyFor(salt, iterations), new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(header);
-            byte[] sealed = cipher.doFinal(plainText.getBytes(UTF_8));
+            byte[] sealed = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
             byte[] token = ByteBuffer.allocate(header.length + sealed.length).put(header).put(sealed).array();
             return Base64.getEncoder().encodeToString(token);
         } catch (GeneralSecurityException e) {
