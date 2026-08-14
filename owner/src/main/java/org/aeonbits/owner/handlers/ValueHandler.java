@@ -75,6 +75,26 @@ import java.io.Serializable;
  * constructs the instance and brings it.
  * </p>
  *
+ * <h2>Why this is {@link Serializable}, and the one trap in it</h2>
+ * <p>
+ * A configuration object can be serialized, and it holds the handlers registered on the factory that
+ * created it - the same arrangement as {@link org.aeonbits.owner.loaders.Loader}. So a handler travels in
+ * the serialized form of <b>every</b> configuration that factory made, whether or not any of them uses a
+ * marker.
+ * </p>
+ * <p>
+ * <b>Which is why a handler should not be an anonymous or an inner class.</b> Both capture the instance
+ * that created them, so registering one drags that object into the graph, and a configuration that has
+ * nothing to do with it fails to serialize with a <code>NotSerializableException</code> naming a class
+ * nobody would think to look at. A static class, or a top-level one, has nothing to capture.
+ * </p>
+ * <p>
+ * Key material is the other half of this: {@link AesGcmHandler} and {@link RsaHandler} keep their
+ * passphrase and their private key <b>transient</b>, so that serializing a configuration never writes a
+ * secret into a file nobody chose to protect. Anything a handler holds that is a secret should do the
+ * same, and say so when it is asked to work without it.
+ * </p>
+ *
  * @author Matteo Baccan
  * @since 2.0.0
  */

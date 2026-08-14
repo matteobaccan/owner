@@ -160,19 +160,31 @@ public class ValueHandlerTest {
         String looksLikeATemplate();
     }
 
+    /**
+     * Answers with something that looks like a variable, to prove it is not read as one.
+     * <p>
+     * Static, like every handler here, and that is not a style choice: a handler registered on the
+     * factory is held by every configuration the factory creates and travels in its serialized form, so
+     * an anonymous class - which captures the enclosing instance - makes this test class part of the
+     * graph and every later test that serializes a Config object fail. Written as an anonymous class
+     * first, and found by the macOS leg of the build, which runs the tests in another order.
+     * </p>
+     */
+    static class EchoingHandler implements ValueHandler {
+        @Override
+        public String name() {
+            return "echo";
+        }
+
+        @Override
+        public String resolve(String payload) {
+            return "${elsewhere}";
+        }
+    }
+
     @Test
     public void whatAHandlerAnswersIsNotExpandedAgain() {
-        ConfigFactory.registerValueHandler(new ValueHandler() {
-            @Override
-            public String name() {
-                return "echo";
-            }
-
-            @Override
-            public String resolve(String payload) {
-                return "${elsewhere}";
-            }
-        });
+        ConfigFactory.registerValueHandler(new EchoingHandler());
         assertEquals("${elsewhere}",
                 ConfigFactory.create(WithAnAnswerThatLooksLikeAVariable.class).looksLikeATemplate());
     }
@@ -195,21 +207,26 @@ public class ValueHandlerTest {
         }
     }
 
+    /** Answers to the same name as {@link ReversingHandler} and says something else. */
+    static class RotatedHandler implements ValueHandler {
+        @Override
+        public String name() {
+            return "reverse";
+        }
+
+        @Override
+        public String resolve(String payload) {
+            return "rotated";
+        }
+    }
+
     @Test
     public void registeringTheSameNameAgainReplacesIt() {
         ConfigFactory.registerValueHandler(new ReversingHandler());
-        ConfigFactory.registerValueHandler(new ValueHandler() {
-            @Override
-            public String name() {
-                return "reverse";
-            }
-
-            @Override
-            public String resolve(String payload) {
-                return "rotated";
-            }
-        });
+        ConfigFactory.registerValueHandler(new RotatedHandler());
         assertEquals("rotated", ConfigFactory.create(WithMarker.class).password());
+        // put back what the other tests expect, since the factory is a singleton for the whole JVM
+        ConfigFactory.registerValueHandler(new ReversingHandler());
     }
 
     @Test
