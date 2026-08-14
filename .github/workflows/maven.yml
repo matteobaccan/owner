@@ -11,16 +11,25 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os: [ ubuntu-latest ]
         # LTS releases; JDK 8 is excluded because compiler-release=8
         # requires a JDK 9+ compiler, while bytecode stays Java 8 compatible
         java: [ 11, 17, 21, 25 ]
+        # Windows and macOS run one representative LTS: they are there to catch
+        # platform differences (paths, line separators, default charset), not to
+        # re-test every JDK, which Linux already does
+        include:
+          - os: windows-latest
+            java: 21
+          - os: macos-latest
+            java: 21
 
-    name: Build with JDK ${{ matrix.java }}
+    name: Build with JDK ${{ matrix.java }} on ${{ matrix.os }}
 
     steps:
     - name: Checkout sources
