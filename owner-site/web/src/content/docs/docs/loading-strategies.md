@@ -161,6 +161,51 @@ they are not, a `.env` being neither on the classpath nor named after the config
 
   [props]: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-
 
+### A source over the network
+
+Every loader opens its source with `uri.toURL().openStream()`, so **a `@Sources` entry may name any
+protocol the JVM knows** — and that has been true since 1.0.5 without ever being written down here:
+
+```java
+@LoadPolicy(LoadType.MERGE)
+@Sources({
+    "https://config.example.com/myapp.properties",
+    "classpath:myapp.properties" })
+public interface MyConfig extends Config { }
+```
+
+The format is still chosen from the extension **after** the stream is open, so a `.yaml` or a `.env`
+served over HTTPS is read by the loader for that format like any local file.
+
+That covers most of what is usually meant by keeping configuration outside the artifact: **a pre-signed
+S3 URL, an Azure Blob SAS, a signed Google Cloud Storage URL, a public bucket, a config server and a raw
+file from a Git host are all HTTPS**. Nothing needs to be registered and no dependency is involved.
+
+A remote source behaves like every other one under the [loading
+strategies](#loading-strategies-loadpolicy-and-loadtype): first-wins under `FIRST`, merged under `MERGE`.
+Two cases are worth telling apart, and the library does:
+
+| what the server answers | what happens |
+|---|---|
+| **404** | the source was **not there**, which is the network's version of a missing file. Passed over in silence, `owner.strict` or not — refusing it would break the commonest shape a configuration has |
+| **500, a refused connection, a timeout** | the source **is** there and something is wrong with it. A `WARNING` naming it, and a refusal under [`owner.strict`](#refusing-everything-that-would-only-have-been-a-warning) |
+
+<div class="note warning">
+  <h5>What is not covered, and what to do about it</h5>
+  <p>
+    A URL is all the authentication there is. A token in the query string works —
+    <code>?token=abc</code> is left alone, since the query belongs to the protocol — but anything needing
+    a signature or a header does not: <code>s3://bucket/key</code> signed with SigV4, a Vault token, Google
+    Application Default Credentials. For those, teach the <em>JVM</em> the protocol rather than teaching
+    OWNER: a <code>URLStreamHandlerProvider</code> (a service, since Java 9) makes
+    <code>@Sources("s3://bucket/app.properties")</code> work with no change here at all. On the Java 8
+    baseline the equivalent is <code>URL.setURLStreamHandlerFactory</code>, which may be called once per
+    JVM. Writing a <a href="#where-a-loader-of-your-own-sits-among-them">loader of your own</a> is the
+    other way, and the right one when the source is not a file at all — a key/value API rather than a
+    document.
+  </p>
+</div>
+
 ### Where a loader of your own sits among them
 
 *Since 2.0.0.* There are two ways in, and they land in different places:

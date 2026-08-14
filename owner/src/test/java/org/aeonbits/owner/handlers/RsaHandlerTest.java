@@ -26,6 +26,10 @@ import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
+import java.io.IOException;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import java.util.Base64;
 import java.util.HashMap;
 
@@ -586,5 +590,45 @@ public class RsaHandlerTest {
 
         @Key("new")
         String moved();
+    }
+
+    // --- a certificate outside its dates ------------------------------------------------------------
+
+    /**
+     * An expired certificate still yields a usable key, and the library says so rather than refusing.
+     * <p>
+     * The dates on a certificate assert an identity binding, and nothing here is trusting an identity —
+     * the caller handed over the file. But a certificate past its date usually means the key pair was
+     * rotated, and encrypting to a public key whose private half the deployment no longer holds fails
+     * there rather than here. The fixture was written by openssl with explicit dates in 2024.
+     * </p>
+     */
+    @Test
+    public void anExpiredCertificateIsUsedAndReported() throws Exception {
+        StringBuilder captured = new StringBuilder();
+        Logger logger = Logger.getLogger(RsaHandler.class.getName());
+        Handler listener = new Handler() {
+            @Override public void publish(LogRecord record) { captured.append(record.getMessage()); }
+            @Override public void flush() { }
+            @Override public void close() { }
+        };
+        logger.addHandler(listener);
+        try {
+            PublicKey key = RsaHandler.publicKeyFrom(read("expired.crt"));
+            assertEquals("the key is perfectly usable", "RSA", key.getAlgorithm());
+            assertTrue(captured.toString(), captured.toString().contains("expired on"));
+            assertTrue(captured.toString(), captured.toString().contains("rotated-last-year"));
+        } finally {
+            logger.removeHandler(listener);
+        }
+    }
+
+    private static String read(String name) throws IOException {
+        try (InputStream in = RsaHandlerTest.class.getResourceAsStream(name)) {
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            for (int n = in.read(buffer); n >= 0; n = in.read(buffer)) bytes.write(buffer, 0, n);
+            return new String(bytes.toByteArray(), java.nio.charset.StandardCharsets.UTF_8);
+        }
     }
 }

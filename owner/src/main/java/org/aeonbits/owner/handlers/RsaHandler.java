@@ -25,12 +25,18 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
@@ -112,6 +118,8 @@ import java.io.ByteArrayInputStream;
 public class RsaHandler implements ValueHandler, Encrypting {
 
     private static final long serialVersionUID = 8145517432160871157L;
+
+    private static final Logger LOGGER = Logger.getLogger(RsaHandler.class.getName());
 
     /** The name this handler answers to unless another is given. */
     public static final String DEFAULT_NAME = "rsa-oaep";
@@ -359,9 +367,10 @@ public class RsaHandler implements ValueHandler, Encrypting {
     public static PublicKey publicKeyFrom(String pem) {
         if (pem != null && pem.contains("BEGIN CERTIFICATE")) {
             try {
-                return CertificateFactory.getInstance("X.509")
-                        .generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.UTF_8)))
-                        .getPublicKey();
+                Certificate certificate = CertificateFactory.getInstance("X.509")
+                        .generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.UTF_8)));
+                reportACertificateOutsideItsDates(certificate);
+                return certificate.getPublicKey();
             } catch (GeneralSecurityException e) {
                 throw new IllegalArgumentException("that certificate could not be read: " + e.getMessage(), e);
             }
@@ -423,6 +432,48 @@ public class RsaHandler implements ValueHandler, Encrypting {
      */
     public static PrivateKey privateKeyFrom(Path pem) {
         return privateKeyFrom(read(pem));
+    }
+
+    /**
+     * Says so when a certificate is outside its validity dates, and encrypts to it anyway.
+     * <p>
+     * <b>Said rather than refused, and the distinction is the point.</b> The dates on a certificate are a
+     * statement about identity — a certificate authority asserting, until a date, that this key belongs to
+     * that subject. Nothing here is trusting an identity: the caller handed over the file, and the
+     * mathematics of encrypting to the key inside it does not expire.
+     * </p>
+     * <p>
+     * What an expired certificate usually <i>means</i>, though, is that the key pair has been rotated —
+     * and encrypting a new secret to a public key whose private half the deployment no longer holds is
+     * precisely the failure this handler's fingerprint exists to diagnose, discovered at the far end and
+     * hours later. So it is worth a line at the moment the file is read, which is the moment somebody can
+     * still go and fetch the current one.
+     * </p>
+     * <p>
+     * A certificate that is not valid <i>yet</i> gets the same line, because that is a clock that
+     * disagrees with the one that issued it, and the values written now may be unreadable there.
+     * </p>
+     */
+    private static void reportACertificateOutsideItsDates(Certificate certificate) {
+        if (!(certificate instanceof X509Certificate))
+            return;
+        X509Certificate x509 = (X509Certificate) certificate;
+        try {
+            x509.checkValidity();
+        } catch (CertificateExpiredException expired) {
+            LOGGER.log(Level.WARNING, () -> String.format(
+                    "the certificate for '%s' expired on %s, and its public key is being used anyway. "
+                            + "Encryption does not expire, so this works - but a certificate past its "
+                            + "date usually means the key pair was rotated, and a value encrypted to a "
+                            + "public key whose private half the deployment no longer holds will fail "
+                            + "there rather than here.",
+                    x509.getSubjectX500Principal().getName(), x509.getNotAfter()));
+        } catch (CertificateNotYetValidException notYet) {
+            LOGGER.log(Level.WARNING, () -> String.format(
+                    "the certificate for '%s' is not valid until %s, which is a clock disagreeing with "
+                            + "the one that issued it. Its public key is being used anyway.",
+                    x509.getSubjectX500Principal().getName(), x509.getNotBefore()));
+        }
     }
 
     /**
