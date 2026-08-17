@@ -185,11 +185,17 @@ the same two rules.
 
 **Two small things left on the floor**, neither urgent:
 
-- [ ] The two open [code scanning alerts](https://github.com/matteobaccan/owner/security/code-scanning),
-      #235 and #218, both `java/internal-representation-exposure`. Read on 2026-08-09 and both are false
-      positives: the fields are already an unmodifiable view over a defensive copy, and the analysis that
-      still reports them ran on a commit that contains the fix. They want dismissing with that reason,
-      which is a maintainer's call rather than a change to make.
+- [ ] The three open [code scanning alerts](https://github.com/matteobaccan/owner/security/code-scanning)
+      as of 2026-08-17 — #148, #313 and #318, all `java/unused-parameter` — want **dismissing rather than
+      fixing**, which is a maintainer's call. All three are on the parameters of *extension points*:
+      `Converter.convert(Method, String)`, `ReloadListener.reloadPerformed(ReloadEvent)` and the
+      `Preprocessor.processAbsent(String)` default, whose body declines by design. The query is right about
+      the code it can see — no implementation *in this repository* uses those parameters — and wrong about
+      the contract, which is implemented outside it. The earlier pair, #235 and #218
+      (`java/internal-representation-exposure`), is closed.
+      Everything else the scan reported was fixed on 2026-08-17: a `NumberFormatException` and a
+      `StringIndexOutOfBoundsException` reachable from `Accessible.save(File)`, and an
+      `OutputStreamWriter` that was flushed but never closed.
 - [x] ~~`PropertiesLoader` wraps its stream in an `InputStreamReader` that is never closed~~ — **done
       2026-08-10**, with try-with-resources on both, as `7af2529` did for `DotEnvLoader`. No descriptor
       was being lost, so nothing observable changes; what changes is that each of the two now closes

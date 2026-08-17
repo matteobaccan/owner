@@ -116,13 +116,13 @@ that is not ours to regenerate.
 
 ### Javadoc
 
-The Javadoc *is* published by hand, with ant, and it is the only thing that ant
-publishes:
+Nothing to do: the **Publish Javadoc** workflow builds the aggregate Javadoc and
+pushes it onto `gh-pages` itself, into `apidocs/latest/` on every push to master
+that touches the published sources, and into `apidocs/<tag>/` as well when a
+release is published.
 
-```bash
-$ cd owner-site
-$ ant javadoc publish
-```
-
-That generates the aggregate Javadoc and pushes it to `apidocs/latest/` on
-`gh-pages`, using the git command line tools, which have to be installed.
+It used to be published by hand, with `ant javadoc publish` from `owner-site`.
+That is why the published Javadoc sat on 1.0.12 from June 2020 until August 2026,
+describing a library that had moved on without it: a release step that depends on
+somebody remembering is a release step that stops happening. The ant script is
+gone, so that the directory has one owner.

@@ -16,7 +16,7 @@ name: Publish site
 # branch forever. Two directories are excluded from that deletion because they
 # are not ours to manage and cannot be regenerated from this build:
 #
-#   apidocs/     the Javadoc, published separately by `ant javadoc publish`
+#   apidocs/     the Javadoc, published by the "Publish Javadoc" workflow
 #   .well-known/ holds brave-rewards-verification.txt; deleting it silently
 #                breaks the verification
 #
@@ -40,6 +40,13 @@ on:
 
 permissions:
   contents: write
+
+# Shared with the "Publish Javadoc" workflow, which pushes to the same branch:
+# two jobs committing onto gh-pages at the same moment is a rejected push and a
+# publish that silently did not happen.
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
 
 jobs:
   publish:

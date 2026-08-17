@@ -280,6 +280,16 @@
                     <configuration>
                         <notimestamp>true</notimestamp>
                         <!--
+                            The same release the compiler targets, and it is what makes javadoc:aggregate
+                            work at all. Left unsaid, the plugin sees the Automatic-Module-Name of the three
+                            published jars, decides the reactor is modular, and builds a command line of
+                            module paths and patched modules; that then fails with "No source files for
+                            package org.aeonbits.owner", because in that mode it is modules it wants named
+                            and packages it was given. There are no module-info.java here and the bytecode
+                            is Java 8: saying so puts javadoc back where the rest of the build already is.
+                        -->
+                        <release>${compiler-release}</release>
+                        <!--
                             Off because the URL it invents does not exist. The plugin builds it from
                             ${project.url} plus the artifactId, which gives
                             https://matteobaccan.github.io/owner/owner/apidocs/ - a 404 - so every link

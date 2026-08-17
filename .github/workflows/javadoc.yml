@@ -1,0 +1,98 @@
+name: Publish Javadoc
+
+# Builds the aggregated Javadoc of the three published artifacts and syncs it onto
+# the gh-pages branch, under apidocs/, from which GitHub Pages serves
+# https://matteobaccan.github.io/owner/apidocs/latest/
+#
+# This replaces `ant javadoc publish` (owner-site/build.xml), which did the same
+# thing by hand. Nobody ran it between 7 June 2020 and the day this workflow was
+# written, so the published Javadoc stayed on 1.0.12 for six years while the
+# documentation site moved on: four of the classes the site links to answered 404,
+# and the ones that answered described a different library. A publishing step that
+# depends on somebody remembering is a publishing step that stops happening.
+#
+#   apidocs/latest/   follows master, which is what the documentation site
+#                     describes: the two are published from the same commits and
+#                     must not disagree about what the API is
+#   apidocs/<tag>/    written when a release is published, so that a link into the
+#                     Javadoc of a released version keeps meaning what it meant
+#
+# The site workflow excludes apidocs/ from its own rsync, for the same reason this
+# one touches nothing else: one directory, one owner. Both share a concurrency
+# group, because two jobs pushing to gh-pages at the same moment is a rejected
+# push and a lost publish.
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'owner/src/main/java/**'
+      - 'owner-extras/src/main/java/**'
+      - 'owner-formats/src/main/java/**'
+      - 'pom.xml'
+      - '.github/workflows/javadoc.yml'
+  release:
+    types: [ published ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v7
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: 21
+        cache: maven
+
+    - name: Build the aggregated Javadoc
+      # -P '!examples' leaves out owner-examples, which is not published and whose
+      # javadoc nobody reads. The release the plugin targets is set in the pom and
+      # is what keeps the aggregate out of modular mode - see the comment there.
+      run: mvn -B -DskipTests -P '!examples' javadoc:aggregate
+
+    - name: Checkout gh-pages
+      uses: actions/checkout@v7
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Sync apidocs/latest
+      # --delete so that a class that stops existing stops being published; the
+      # trailing slash on the source is what copies the contents rather than the
+      # directory itself.
+      run: |
+        mkdir -p gh-pages/apidocs/latest
+        rsync -a --delete target/reports/apidocs/ gh-pages/apidocs/latest/
+
+    - name: Keep a copy under the release tag
+      if: github.event_name == 'release'
+      run: |
+        mkdir -p "gh-pages/apidocs/${{ github.event.release.tag_name }}"
+        rsync -a --delete target/reports/apidocs/ "gh-pages/apidocs/${{ github.event.release.tag_name }}/"
+
+    - name: Commit and push
+      working-directory: gh-pages
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        if git diff --cached --quiet; then
+          echo "No changes to publish"
+        else
+          git commit -m "Publish javadoc from ${GITHUB_SHA}"
+          git push origin gh-pages
+        fi
