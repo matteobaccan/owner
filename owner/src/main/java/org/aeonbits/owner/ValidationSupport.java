@@ -15,6 +15,7 @@ import org.aeonbits.owner.validation.Violation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -237,7 +238,10 @@ final class ValidationSupport {
         for (ConfigValidator validator : ServiceLoader.load(ConfigValidator.class,
                 context != null ? context : ValidationSupport.class.getClassLoader()))
             found.add(validator);
-        return found;
+        // unmodifiable, and that is what makes publishing it through a volatile field correct rather than
+        // merely working: a reference handed out to several threads is safe when what it refers to cannot
+        // change afterwards, and "nobody mutates it" is a promise until the type says so
+        return Collections.unmodifiableList(found);
     }
 
     /**
@@ -248,7 +252,7 @@ final class ValidationSupport {
      * @param replacement the validators to use from now on.
      */
     static void install(List<ConfigValidator> replacement) {
-        validators = new ArrayList<>(replacement);
+        validators = Collections.unmodifiableList(new ArrayList<>(replacement));
     }
 
     /** Undoes {@link #install(List)}, so that the next configuration looks at the class path again. */
