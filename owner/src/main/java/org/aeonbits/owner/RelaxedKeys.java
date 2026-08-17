@@ -22,6 +22,13 @@ import java.util.List;
  * </pre>
  *
  * <p>
+ * <b>Three of the four keep the shape of the key and the fourth does not.</b> A dot separates the segments
+ * of a key and cannot appear in the name of an environment variable, so the environment form replaces every
+ * character that is not a letter or a digit with an underscore - <code>core.thread_number</code> is
+ * <code>CORE_THREAD_NUMBER</code>, not <code>CORE.THREAD_NUMBER</code>. See {@link #environmentForm}.
+ * </p>
+ *
+ * <p>
  * <b>Four forms and no more, derived from the key rather than guessed at.</b> Spring Boot 1 matched
  * loosely — separators removed, case ignored, several spellings collapsing onto one property — and Boot 2
  * deliberately narrowed it to a canonical form with a defined mapping, because the loose version made it
@@ -81,7 +88,7 @@ final class RelaxedKeys {
         List<String> forms = new ArrayList<>(4);
         add(forms, key, joined(segments, KEBAB, false));
         add(forms, key, joined(segments, SNAKE, false));
-        add(forms, key, joined(segments, SNAKE, true));
+        add(forms, key, environmentForm(segments));
         add(forms, key, camelCased(segments));
         return forms;
     }
@@ -161,6 +168,50 @@ final class RelaxedKeys {
             }
         }
         return out.toString();
+    }
+
+    /**
+     * The name the same setting has as an <b>environment variable</b>: every word in upper case, and every
+     * character that is not a letter or a digit - the separators between words, the dots between segments,
+     * the brackets around an index - an underscore. So <code>core.thread_number</code> is
+     * <code>CORE_THREAD_NUMBER</code> and <code>servers[0].host</code> is <code>SERVERS_0__HOST</code>.
+     * <p>
+     * <b>This is the one form that does not keep the shape of the key</b>, and it has to be: a dot cannot
+     * appear in an environment variable name that a shell can set, so a form that kept it -
+     * <code>CORE.THREAD_NUMBER</code>, which is what this was until the rule was fixed - would be a name
+     * nobody could ever export. It is the rule MicroProfile Config mandates for the same purpose and the
+     * one Spring Boot documents, so a configuration that already has environment variables for another
+     * framework keeps them.
+     * </p>
+     * <p>
+     * Letters and digits are the ASCII ones. An environment variable name is ASCII in practice, and the
+     * alternative - {@link Character#isLetterOrDigit}, which is Unicode-aware - would turn
+     * <code>caff&egrave;.size</code> into a name with an accented letter in it, which is no more usable
+     * and less predictable.
+     * </p>
+     */
+    private static String environmentForm(List<List<String>> segments) {
+        StringBuilder out = new StringBuilder();
+        for (int s = 0; s < segments.size(); s++) {
+            if (s > 0) out.append(SNAKE);
+            List<String> segment = segments.get(s);
+            for (int i = 0; i < segment.size(); i++) {
+                if (i > 0) out.append(SNAKE);
+                appendShouted(out, segment.get(i));
+            }
+        }
+        return out.toString();
+    }
+
+    private static void appendShouted(StringBuilder out, String word) {
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            out.append(isAsciiLetterOrDigit(c) ? Character.toUpperCase(c) : SNAKE);
+        }
+    }
+
+    private static boolean isAsciiLetterOrDigit(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
     }
 
     /** The words with no separator at all, each but the first of its segment capitalised. */

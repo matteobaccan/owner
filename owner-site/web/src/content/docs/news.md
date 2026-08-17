@@ -129,7 +129,11 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    for `core.thread_number` — is what the relaxed binding above does.
  * **A property may be spelt the way the file spells it**, which closes
    [#116](https://github.com/matteobaccan/owner/issues/116), open since 2015. `String firstName()` now
-   finds `firstName`, `first-name`, `first_name` or `FIRST_NAME`:
+   finds `firstName`, `first-name`, `first_name` or `FIRST_NAME` — and the last of those is a name a shell
+   can actually set, so `server.maxThreads` is looked for as `SERVER_MAX_THREADS` and not as
+   `SERVER.MAX_THREADS`: the environment form replaces every character that is not a letter or a digit
+   with an underscore, which is the rule MicroProfile Config mandates and Spring Boot documents. The other
+   three keep the shape of the key:
 
    ```properties
    first-name = Luigi

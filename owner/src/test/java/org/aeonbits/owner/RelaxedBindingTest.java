@@ -131,11 +131,13 @@ public class RelaxedBindingTest {
                 RelaxedKeys.alternativesTo("first_name"));
         assertEquals("a single lower case word has only the environment form",
                 asList("PORT"), RelaxedKeys.alternativesTo("port"));
-        assertEquals("the nesting separator is structure and survives every form",
-                asList("server.max-threads", "server.max_threads", "SERVER.MAX_THREADS"),
+        assertEquals("the nesting separator is structure in the three forms that keep the shape of the key",
+                asList("server.max-threads", "server.max_threads", "SERVER_MAX_THREADS"),
                 RelaxedKeys.alternativesTo("server.maxThreads"));
+        assertEquals("and cannot be, in the one form that is a name a shell has to be able to set",
+                asList("SERVERS_0__HOST"), RelaxedKeys.alternativesTo("servers[0].host"));
         assertEquals("the path of a section is a prefix and keeps its trailing separator",
-                asList("my-db.", "my_db.", "MY_DB."), RelaxedKeys.alternativesTo("myDb."));
+                asList("my-db.", "my_db.", "MY_DB_"), RelaxedKeys.alternativesTo("myDb."));
     }
 
     // ------------------------------------------------------------------ precedence
@@ -326,8 +328,18 @@ public class RelaxedBindingTest {
     @Test
     public void aPrefixIsPartOfTheKeyAndTheFormAppliesToTheWhole() {
         assertEquals("h", create(Prefixed.class, "server.host-name", "h").hostName());
-        assertEquals("h", create(Prefixed.class, "SERVER.HOST_NAME", "h").hostName());
+        assertEquals("h", create(Prefixed.class, "SERVER_HOST_NAME", "h").hostName());
         assertEquals("h", create(Prefixed.class, "server.hostName", "h").hostName());
+    }
+
+    /**
+     * The environment form of a prefixed key is the one a shell can actually export, which is the whole
+     * reason it stops keeping the shape of the key: <code>SERVER.HOST_NAME</code> is not a name anybody
+     * can set, and until this rule was fixed it was the only upper-case form we looked for.
+     */
+    @Test
+    public void theEnvironmentFormOfAPrefixedKeyIsOneAShellCanSet() {
+        assertNull(create(Prefixed.class, "SERVER.HOST_NAME", "h").hostName());
     }
 
     @Test

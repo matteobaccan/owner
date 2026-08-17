@@ -162,6 +162,10 @@ first_name = Luigi     # snake_case
 FIRST_NAME = Luigi     # the environment variable form
 ```
 
+The fourth is a form like the others and is looked for in every source, not only in `system:env`: one rule,
+the same in every context, is what makes it possible to say where a value will be read from without running
+the program.
+
 Any one of those four answers `firstName()`.
 
 **Four forms, and no more.** The set is closed: `firstname`, `FirstName`, `first.name` and `FIRST-NAME`
@@ -176,10 +180,28 @@ exactly what it says — it is the key that is tried first, the one every error 
 the [key report](/owner/docs/debugging/) prints.
 
 **One form applies to the whole key at once**, prefixes and [nesting](/owner/docs/nested-configuration/)
-included. `server.maxThreads` is looked for as `server.max-threads`, `server.max_threads` and
-`SERVER.MAX_THREADS` — never as a mixture such as `server.MAX_THREADS`, since a file is written in one
-convention throughout. That is also what makes a whole section work: with `myDb()` returning a nested
-interface, `my-db.user-name` is simply one of the spellings of `myDb.userName`.
+included. `server.maxThreads` is looked for as `server.max-threads` and `server.max_threads` — never as a
+mixture such as `server.MAX_THREADS`, since a file is written in one convention throughout. That is also
+what makes a whole section work: with `myDb()` returning a nested interface, `my-db.user-name` is simply
+one of the spellings of `myDb.userName`.
+
+**The environment form is the one exception, and it has to be.** A dot separates the segments of a key and
+cannot appear in the name of an environment variable a shell can set, so that form replaces **every
+character that is not a letter or a digit** with an underscore, and upper-cases the rest:
+
+| The key | As an environment variable |
+|---|---|
+| `firstName` | `FIRST_NAME` |
+| `server.maxThreads` | `SERVER_MAX_THREADS` |
+| `core.thread_number` | `CORE_THREAD_NUMBER` |
+| `servers[0].host` | `SERVERS_0__HOST` |
+
+It is the rule [MicroProfile Config](https://download.eclipse.org/microprofile/microprofile-config-3.1/microprofile-config-spec-3.1.html)
+mandates for the same purpose and the one Spring Boot documents, so an application that already exports
+`SERVER_MAX_THREADS` for something else keeps exporting one variable. **One consequence worth knowing**:
+two different keys can collapse onto one variable — `a.b` and `a_b` are both `A_B` — and then both methods
+read it. That is inherent to the environment's namespace, not to this library, and it is the reason the
+other three forms keep the shape of the key instead.
 
 ### Which one wins
 
