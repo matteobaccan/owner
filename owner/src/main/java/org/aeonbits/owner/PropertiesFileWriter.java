@@ -54,10 +54,16 @@ final class PropertiesFileWriter {
     private static final Charset LATIN_1 = StandardCharsets.ISO_8859_1;
 
     private final Map<String, String> descriptions;
+    private final Map<String, String> headings;
     private final String header;
 
     PropertiesFileWriter(Map<String, String> descriptions, String header) {
+        this(descriptions, Collections.<String, String>emptyMap(), header);
+    }
+
+    PropertiesFileWriter(Map<String, String> descriptions, Map<String, String> headings, String header) {
         this.descriptions = descriptions;
+        this.headings = headings;
         this.header = header;
     }
 
@@ -72,13 +78,49 @@ final class PropertiesFileWriter {
     static PropertiesFileWriter describing(Class<? extends Config> clazz, KeyPrefix prefix) {
         Map<String, String> descriptions = new HashMap<>();
         collectDescriptions(clazz, prefix, descriptions);
-        NestedProperties.forEachNested(clazz, prefix,
-                (nested, nestedPrefix) -> collectDescriptions(nested, nestedPrefix, descriptions));
+
+        // a section is described by the accessor that opens it or by the interface it is of, and what is
+        // written of it is a heading over the block of keys underneath - see the javadoc of headingFor
+        Map<String, String> headings = new HashMap<>();
+        NestedProperties.forEachNested(clazz, prefix, (nested, nestedPrefix) -> {
+            collectDescriptions(nested, nestedPrefix, descriptions);
+            headingFor(nested, nestedPrefix, descriptions, headings);
+        });
         // the header describes the configuration and not one interface of it, so it is taken from wherever
         // in the hierarchy it is written, nearest first - a base interface that describes what the file is
         // for describes it for everything that extends it
         Config.Description onTheInterface = Annotations.findAnnotation(clazz, Config.Description.class);
-        return new PropertiesFileWriter(descriptions, onTheInterface == null ? null : onTheInterface.value());
+        return new PropertiesFileWriter(descriptions, headings,
+                onTheInterface == null ? null : onTheInterface.value());
+    }
+
+    /**
+     * What is written above the block of keys of a section: the {@link Config.Description} of the accessor
+     * that opens it, or failing that the one on the interface it is of.
+     * <p>
+     * <b>A section resolves to a path and not to a property</b>, so a description on its accessor has no
+     * line of its own to sit above and was, until this was written, collected and then never used - which
+     * is how the shape <code>WRITING.md</code> promised, <i>"a heading over the block of keys under its
+     * prefix"</i>, came to be designed and not built. It is taken out of the ordinary descriptions here so
+     * that it cannot be written twice.
+     * </p>
+     * <p>
+     * The accessor wins over the interface because it is the more specific of the two: the same interface
+     * used for <code>primary()</code> and <code>replica()</code> is one type describing itself and two
+     * accessors describing what each of them is for.
+     * </p>
+     */
+    private static void headingFor(Class<?> nested, KeyPrefix nestedPrefix,
+                                   Map<String, String> descriptions, Map<String, String> headings) {
+        String path = nestedPrefix.path();
+        String heading = descriptions.remove(path.endsWith(".") ? path.substring(0, path.length() - 1) : path);
+        if (heading == null) {
+            Config.Description onTheType = nested.getAnnotation(Config.Description.class);
+            if (onTheType != null)
+                heading = onTheType.value();
+        }
+        if (heading != null)
+            headings.put(path, heading);
     }
 
     private static void collectDescriptions(Class<?> clazz, KeyPrefix prefix, Map<String, String> into) {
@@ -156,12 +198,15 @@ final class PropertiesFileWriter {
     private String render(List<String> existing, Properties values, Set<String> known) {
         List<String> out = new ArrayList<>();
         Set<String> placed = new LinkedHashSet<>();
+        // each section is announced once, above the first key of it that gets written, wherever the file
+        // happens to put that key
+        Set<String> pending = new LinkedHashSet<>(headings.keySet());
 
         if (existing.isEmpty() && header != null)
             addComment(out, header);
 
-        keepWhatTheFileArranged(existing, values, known, out, placed);
-        appendWhatTheFileDidNotHave(values, known, out, placed);
+        keepWhatTheFileArranged(existing, values, known, out, placed, pending);
+        appendWhatTheFileDidNotHave(values, known, out, placed, pending);
 
         StringBuilder text = new StringBuilder();
         for (String line : out)
@@ -173,7 +218,7 @@ final class PropertiesFileWriter {
 
     /** Walks the file as it stands, replacing values in place and leaving everything else alone. */
     private void keepWhatTheFileArranged(List<String> existing, Properties values, Set<String> known,
-                                         List<String> out, Set<String> placed) {
+                                         List<String> out, Set<String> placed, Set<String> pending) {
         for (int i = 0; i < existing.size(); i++) {
             String raw = existing.get(i);
             if (raw.trim().isEmpty() || isComment(raw)) {
@@ -205,9 +250,13 @@ final class PropertiesFileWriter {
                     dropTheCommentBlockAbove(out);
                 continue;
             }
-            if (descriptions.containsKey(key)) {
+            String heading = headingOf(key, pending);
+            if (descriptions.containsKey(key) || heading != null) {
                 dropTheCommentBlockAbove(out);
-                addComment(out, descriptions.get(key));
+                if (heading != null)
+                    announce(out, heading);
+                if (descriptions.containsKey(key))
+                    addComment(out, descriptions.get(key));
             }
             out.add(escapeKey(key) + " = " + escapeValue(values.getProperty(key)));
             placed.add(key);
@@ -216,7 +265,7 @@ final class PropertiesFileWriter {
 
     /** New keys go at the end, alphabetical among themselves, so the diff is an addition and nothing else. */
     private void appendWhatTheFileDidNotHave(Properties values, Set<String> known, List<String> out,
-                                             Set<String> placed) {
+                                             Set<String> placed, Set<String> pending) {
         Set<String> missing = new TreeSet<>();
         for (String key : values.stringPropertyNames())
             if (!placed.contains(key) && known.contains(key))
@@ -225,10 +274,35 @@ final class PropertiesFileWriter {
         for (String key : missing) {
             if (!out.isEmpty() && out.get(out.size() - 1).length() > 0)
                 out.add("");
+            String heading = headingOf(key, pending);
+            if (heading != null)
+                announce(out, heading);
             if (descriptions.containsKey(key))
                 addComment(out, descriptions.get(key));
             out.add(escapeKey(key) + " = " + escapeValue(values.getProperty(key)));
         }
+    }
+
+    /**
+     * The heading of the section this key belongs to, if it has one and it has not been written yet; the
+     * longest path wins, so a section inside a section announces the inner one.
+     */
+    private String headingOf(String key, Set<String> pending) {
+        String longest = null;
+        for (String path : pending)
+            if (key.startsWith(path) && (longest == null || path.length() > longest.length()))
+                longest = path;
+        if (longest == null)
+            return null;
+        pending.remove(longest);
+        return headings.get(longest);
+    }
+
+    /** A heading is a comment with a blank line above it, which is what makes it read as a heading. */
+    private static void announce(List<String> out, String heading) {
+        if (!out.isEmpty() && !out.get(out.size() - 1).isEmpty())
+            out.add("");
+        addComment(out, heading);
     }
 
     /**

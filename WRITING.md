@@ -105,7 +105,13 @@ sentence moves with the thing it describes, and the compiler is watching.
 - **It is testable.** A generated file can be asserted whole; "preserve whatever somebody wrote" can only
   be tested against the cases you thought of.
 - **Nested interfaces become sections.** A `@Description` on a nested type is a heading over the block of
-  keys under its prefix, which is a shape a properties file has never been able to express.
+  keys under its prefix, which is a shape a properties file has never been able to express. **Built on
+  2026-08-17**, three days late and found by writing the tests for it rather than by using it: the keys of a
+  section were not being written at all, and the heading was collected and then dropped. The accessor's
+  description wins over the type's, being the more specific of the two, and the heading touches the first
+  key of the block rather than sitting above a blank line — under our own convention a comment above a blank
+  line belongs to the file, so a heading placed there would be kept forever and joined by a fresh copy at
+  every save.
 - **It answers [#3](https://github.com/matteobaccan/owner/issues/3)** — "a tool that generates a
   properties file from the Config interfaces", open since 2013 — with the same machinery and no second
   feature. A configuration with no file yet is the same code path with nothing to merge.
