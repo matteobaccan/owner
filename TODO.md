@@ -603,9 +603,17 @@ an issue behind it, which is the point: what the others shipped is what our repo
       Every framework has its own story and we have none written down. Issues
       [#222](https://github.com/matteobaccan/owner/issues/222),
       [#147](https://github.com/matteobaccan/owner/issues/147).
-- [ ] **Generate the properties file, or its documentation, from the mapping interface.** Quarkus
-      generates a configuration reference this way. Issue
-      [#3](https://github.com/matteobaccan/owner/issues/3).
+- [x] ~~**Generate the properties file** from the mapping interface~~ — **done 2026-08-17**,
+      `TemplateTool`, which closes [#3](https://github.com/matteobaccan/owner/issues/3), the oldest issue
+      the project had. It is `Accessible.save(File)`'s writer with a `main` in front of it, so a file
+      generated and a file saved by a running configuration cannot drift apart, and it works on an
+      interface that does not extend `Accessible` — which `save` cannot, and which is every configuration
+      that has no file yet.
+- [ ] **Generate its documentation**, which is the other half and a different product: Quarkus generates a
+      configuration reference from `@ConfigMapping`, Spring generates
+      `spring-configuration-metadata.json` and gets IDE completion out of it. Both do it with an annotation
+      processor, at build time. Worth its own issue if it is wanted; the interesting question is whether to
+      aim at Spring's JSON, since that is the one with tooling already reading it.
 
 ### Before any of the above is called modularisation
 

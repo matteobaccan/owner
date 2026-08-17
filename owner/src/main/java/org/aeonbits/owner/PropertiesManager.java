@@ -1458,20 +1458,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     @Delegate
     @Override
     public void save(File file) throws IOException {
-        Map<String, String> descriptions = new HashMap<>();
-        Set<String> known = new HashSet<>();
-        for (Method method : clazz.getMethods()) {
-            String key = PropertiesMapper.key(method, keyPrefix);
-            known.add(key);
-            Config.Description description = method.getAnnotation(Config.Description.class);
-            if (description != null)
-                descriptions.put(key, description.value());
-        }
-
-        // the header describes the configuration and not one interface of it, so it is taken from wherever
-        // in the hierarchy it is written, nearest first — a base interface that describes what the file is
-        // for describes it for everything that extends it
-        Config.Description onTheInterface = Annotations.findAnnotation(clazz, Config.Description.class);
+        PropertiesFileWriter writer = PropertiesFileWriter.describing(clazz, keyPrefix);
+        Set<String> known = PropertiesFileWriter.keysOf(clazz, keyPrefix);
 
         readLock.lock();
         try {
@@ -1483,8 +1471,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 if (known.contains(key))
                     mine.setProperty(key, properties.getProperty(key));
 
-            new PropertiesFileWriter(descriptions, onTheInterface == null ? null : onTheInterface.value())
-                    .write(file, mine, known);
+            writer.write(file, mine, known);
         } finally {
             readLock.unlock();
         }

@@ -15,8 +15,11 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,36 @@ final class PropertiesFileWriter {
     PropertiesFileWriter(Map<String, String> descriptions, String header) {
         this.descriptions = descriptions;
         this.header = header;
+    }
+
+    /**
+     * A writer that knows what a mapping interface says about itself: the {@link Config.Description} of
+     * each method, under the key that method resolves to, and the one on the interface as the header.
+     * <p>
+     * Shared by {@link Accessible#save(java.io.File)} and by {@link TemplateTool}, so that a file written
+     * by the tool and one written by a running configuration cannot drift apart.
+     * </p>
+     */
+    static PropertiesFileWriter describing(Class<? extends Config> clazz, KeyPrefix prefix) {
+        Map<String, String> descriptions = new HashMap<>();
+        for (Method method : clazz.getMethods()) {
+            Config.Description description = method.getAnnotation(Config.Description.class);
+            if (description != null)
+                descriptions.put(PropertiesMapper.key(method, prefix), description.value());
+        }
+        // the header describes the configuration and not one interface of it, so it is taken from wherever
+        // in the hierarchy it is written, nearest first - a base interface that describes what the file is
+        // for describes it for everything that extends it
+        Config.Description onTheInterface = Annotations.findAnnotation(clazz, Config.Description.class);
+        return new PropertiesFileWriter(descriptions, onTheInterface == null ? null : onTheInterface.value());
+    }
+
+    /** Every key the interface owns, which is what tells the writer which lines of a file are ours. */
+    static Set<String> keysOf(Class<? extends Config> clazz, KeyPrefix prefix) {
+        Set<String> known = new HashSet<>();
+        for (Method method : clazz.getMethods())
+            known.add(PropertiesMapper.key(method, prefix));
+        return known;
     }
 
     /**

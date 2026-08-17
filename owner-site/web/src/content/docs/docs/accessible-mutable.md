@@ -55,6 +55,40 @@ In the above example we saw `setProperty` and `removeProperty` in action, but th
 methods like `clear()`, `load(InputStream)` and `load(Reader)`, and it should allow you to achieve complete write access
 to the properties contained inside a Config object.
 
+### Generating the file without running the application
+
+*Since 2.0.0.* The same writer has a command line in front of it, which is the other half of
+[#3](https://github.com/matteobaccan/owner/issues/3) — open since 2013:
+
+```
+$ java -cp app.jar:owner-2.0.0.jar org.aeonbits.owner.TemplateTool com.acme.MyConfig
+# Everything this application needs in order to start.
+
+# Where the service listens.
+port = 8080
+
+seconds = 30
+```
+
+```
+$ java -cp app.jar:owner-2.0.0.jar org.aeonbits.owner.TemplateTool       --into src/main/resources com.acme.MyConfig com.acme.OtherConfig
+```
+
+`--into` writes `<dir>/com/acme/MyConfig.properties`, which is exactly where the convention looks for it, so
+a directory that is a resources root produces a configuration the library finds with no `@Sources` at all.
+Without it the template goes to standard output, for one interface — two configurations are two files.
+
+Three things are worth knowing about it:
+
+- **it does not need `Accessible`.** `save(File)` is declared there, so a configuration that does not extend
+  it — most of them, and certainly one that has no file yet — could not write anything at all. The tool has
+  no such requirement: it is the interface's annotations that are read, not a running configuration;
+- **no source is read.** What comes out is what the code says: the `@DefaultValue` of each method and the
+  `@Description` above it. A tool that loaded the sources would write the machine it ran on into your
+  template — the environment, a password out of a home directory;
+- **run it twice and the second run keeps what you edited in between.** It is the writer described above, so
+  your values, your order, your comments and the keys belonging to something else all survive.
+
 ### Loading an XML document
 
 *Since 2.0.0.* `loadFromXML(InputStream)` reads an XML document into the configuration, and it is **not** a

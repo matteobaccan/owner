@@ -107,6 +107,13 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **A properties file can be generated from a mapping interface**, from the command line —
+   `java -cp app.jar:owner.jar org.aeonbits.owner.TemplateTool --into src/main/resources com.acme.MyConfig`
+   — which is what [#3](https://github.com/matteobaccan/owner/issues/3) asked for in 2013, the oldest issue
+   this project had. It writes the `@DefaultValue` of each method with its `@Description` above it, where
+   the convention looks for the file; it reads no source, so what comes out is what the code says rather
+   than what the machine it ran on holds; it needs no `Accessible` on the interface, which `save(File)`
+   does; and run twice it keeps what you edited in between, being the same writer.
  * **`Mutable.loadFromXML(InputStream)`**, which
    [#62](https://github.com/matteobaccan/owner/issues/62) asked for in 2013. It is not a delegate to
    `java.util.Properties.loadFromXML`: it reads the document the way an XML *source* is read, so an XML of
