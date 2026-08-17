@@ -380,9 +380,38 @@ public class XMLLoader implements Loader {
         SourceOptions options = SourceOptions.of(uri);
         options.refuseUnknown(VALIDATE);
 
-        InputStream input = uri.toURL().openStream();
+        try (InputStream input = uri.toURL().openStream()) {
+            read(result, input, validates(options, uri));
+        }
+    }
+
+    /**
+     * The same reading, from a stream that is already open, for a caller who has the bytes and no URI to
+     * name them with - {@link org.aeonbits.owner.Mutable#loadFromXML(InputStream)}.
+     * <p>
+     * The document is <b>validated against the grammar it declares</b>, as it is when read from a source.
+     * The option that switches that off lives in the fragment of a URI, and there is no URI here: a caller
+     * holding a stream is holding it for a reason of their own, and the way to read such a document
+     * unvalidated is to name it as a source with <code>#validate=false</code>.
+     * </p>
+     * <p>
+     * <b>The stream is closed</b> when this returns - the parser closes what it was handed - which is what
+     * {@link java.util.Properties#loadFromXML(InputStream)} does with its own and therefore the behaviour
+     * a caller of that method expects.
+     * </p>
+     *
+     * @param result where the properties read are put.
+     * @param input  the document; closed when this returns.
+     * @throws IOException if the document cannot be read, or is not well formed, or breaks its own grammar.
+     * @since 2.0.0
+     */
+    public void load(Properties result, InputStream input) throws IOException {
+        read(result, input, true);
+    }
+
+    private void read(Properties result, InputStream input, boolean validating) throws IOException {
         try {
-            SAXParser parser = factory(validates(options, uri)).newSAXParser();
+            SAXParser parser = factory(validating).newSAXParser();
             XmlToPropsHandler h = new XmlToPropsHandler();
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
             parser.parse(input, h);
@@ -393,8 +422,6 @@ public class XMLLoader implements Loader {
             throw new IllegalArgumentException(e);
         } catch (SAXException e) {
             throw new IOException(e);
-        } finally {
-            input.close();
         }
     }
 

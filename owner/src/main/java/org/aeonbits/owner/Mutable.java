@@ -89,6 +89,43 @@ public interface Mutable extends Config {
     void load(Reader reader) throws IOException;
 
     /**
+     * Reads a property list from an XML document, <b>the way this library reads one from a source</b> and
+     * not the way {@link java.util.Properties#loadFromXML(InputStream)} does.
+     * <p>
+     * The two differ on what counts as a document. <code>Properties</code> reads the format its own DTD
+     * defines - <code>&lt;entry key="a"&gt;b&lt;/entry&gt;</code> - and refuses everything else. This reads
+     * that format and <b>any other XML</b>, flattening the tree into keys the same way the
+     * <a href="https://matteobaccan.github.io/owner/docs/file-formats/#xml">XML loader</a> does when the
+     * document is named in {@code @Sources}, so that a file which can be a source can also be handed to
+     * this method. That is what
+     * <a href="https://github.com/matteobaccan/owner/issues/62">#62</a> asked for in 2013.
+     * </p>
+     * <p>
+     * Everything else is as {@link #load(InputStream)}: the properties are merged into the ones already
+     * held, the listeners are told, and a transactional listener may refuse the change.
+     * </p>
+     * <p>
+     * <b>The stream is closed</b> when this returns, which {@link #load(InputStream)} does not do to its
+     * own. The asymmetry is the JDK's and is followed rather than corrected:
+     * {@link java.util.Properties#load(InputStream)} leaves the stream open and
+     * {@link java.util.Properties#loadFromXML(InputStream)} closes it, so a caller who knows one of those
+     * two already knows this one. Verified against the JDK rather than assumed.
+     * </p>
+     * <p>
+     * The document is validated against the grammar it declares, if it declares one. The option that turns
+     * that off is written on a source - <code>file:app.xml#validate=false</code> - and a stream is not a
+     * source, so a document that breaks its own DTD has to be named as one to be read here.
+     * </p>
+     *
+     * @param inStream the input stream, closed when this returns.
+     * @throws IOException if an error occurred when reading from the input stream, or the document is not
+     *                     well formed, or it breaks the grammar it declares.
+     * @see java.util.Properties#loadFromXML(InputStream)
+     * @since 2.0.0
+     */
+    void loadFromXML(InputStream inStream) throws IOException;
+
+    /**
      * Adds a {@link PropertyChangeListener} to the Mutable interface.
      *
      * @param listener the listener to be added.

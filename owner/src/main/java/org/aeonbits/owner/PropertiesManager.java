@@ -11,6 +11,7 @@ import org.aeonbits.owner.crypto.Decryptor;
 import org.aeonbits.owner.crypto.IdentityDecryptor;
 import org.aeonbits.owner.event.*;
 import org.aeonbits.owner.loaders.SourceOptions;
+import org.aeonbits.owner.loaders.XMLLoader;
 import org.aeonbits.owner.util.Reflection;
 import org.aeonbits.owner.util.Util;
 
@@ -773,7 +774,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             firePropertyChangeEvents(events);
             fireReloadEvent(reloadEvent);
         } catch (RollbackBatchException e) {
-            ignore();
+            reportRollback("the reload", e);
         } finally {
             writeLock.unlock();
         }
@@ -1549,6 +1550,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 firePropertyChange(event);
                 return result;
             } catch (RollbackException e) {
+                reportRollback("the change to '" + key + "'", e);
                 return oldValue;
             }
         } finally {
@@ -1574,6 +1576,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             firePropertyChange(event);
             return result;
         } catch (RollbackException e) {
+            reportRollback("the removal of '" + key + "'", e);
             return properties.getProperty(key);
         } finally {
             writeLock.unlock();
@@ -1595,7 +1598,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             applyPropertyChangeEvents(events, null);
             firePropertyChangeEvents(events);
         } catch (RollbackBatchException e) {
-            ignore();
+            reportRollback("the clear", e);
         } finally {
             writeLock.unlock();
         }
@@ -1605,6 +1608,27 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     @Override
     public void load(InputStream inStream) throws IOException {
         load(loaded -> loaded.load(inStream));
+    }
+
+    /**
+     * Says that a change was refused by a listener of the application's own, and by whom if it explained
+     * itself.
+     * <p>
+     * <b>At {@code CONFIG}, not as a warning</b>, and the difference is the whole reason this exists.
+     * Nothing went wrong: a {@link org.aeonbits.owner.event.TransactionalPropertyChangeListener} is
+     * <i>meant</i> to be able to refuse, and an application using a veto as a rule - a configuration that
+     * is read-only while a job runs - would drown in warnings for behaving exactly as designed. What was
+     * missing is that the refusal reached <b>nobody but the listener that made it</b>: the caller of
+     * <code>setProperty</code> gets no return value, no exception, and until 2.0.0 no line anywhere - so
+     * "the property did not change and I cannot see why" had no answer at all. That is what
+     * <a href="https://github.com/matteobaccan/owner/issues/58">#58</a> asked to be told about, and asking
+     * the library what it decided is exactly what the {@code CONFIG} switch is for.
+     * </p>
+     */
+    private void reportRollback(String what, Exception refusal) {
+        LOGGER.log(Level.CONFIG, () -> String.format("%s: %s was rolled back by a listener%s",
+                clazz.getName(), what,
+                refusal.getMessage() == null ? "" : ": " + refusal.getMessage()));
     }
 
     private void performLoad(Set keys, Properties props) throws RollbackBatchException {
@@ -1619,6 +1643,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         load(loaded -> loaded.load(reader));
     }
 
+    @Delegate
+    @Override
+    public void loadFromXML(InputStream inStream) throws IOException {
+        load(loaded -> new XMLLoader().load(loaded, inStream));
+    }
+
     /**
      * What the two {@link Mutable} loads have in common, which is everything but the one line that reads the
      * bytes: the write lock is taken for the whole of it, the reading included, so that two loads cannot
@@ -1631,7 +1661,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             reader.readInto(loaded);
             performLoad(keys(loaded), loaded);
         } catch (RollbackBatchException ex) {
-            ignore();
+            reportRollback("the load", ex);
         } finally {
             writeLock.unlock();
         }
@@ -1675,7 +1705,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                     fireBeforePropertyChange(event);
                     events.add(event);
                 } catch (RollbackOperationException e) {
-                    ignore();
+                    reportRollback("the change to '" + key + "'", e);
                 }
             }
         }

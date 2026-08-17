@@ -107,6 +107,22 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **`Mutable.loadFromXML(InputStream)`**, which
+   [#62](https://github.com/matteobaccan/owner/issues/62) asked for in 2013. It is not a delegate to
+   `java.util.Properties.loadFromXML`: it reads the document the way an XML *source* is read, so an XML of
+   your own — `<server><http><port>8080</port></http></server>` — loads as `server.http.port=8080`, where
+   `Properties` refuses it. It closes the asymmetry with `storeToXML`, which has been on `Accessible` since
+   1.0.5 with nothing on this side to read back what it writes. The stream is closed when the method
+   returns, as the JDK's `loadFromXML` closes its own.
+ * **A rolled-back change is no longer silent.** A
+   [transactional listener](https://matteobaccan.github.io/owner/docs/event-support/) may refuse a property
+   change or a whole batch, and until now the refusal reached nobody but the listener that made it: the
+   exception was caught and discarded, `setProperty` returned the old value, and "the property did not
+   change and I cannot see why" had no answer. The library says it now, at `CONFIG` — what was refused, and
+   the listener's own message if it gave one. At `CONFIG` and not as a warning, because a listener refusing
+   is a listener working:
+   [#58](https://github.com/matteobaccan/owner/issues/58) asked for a `RollbackListener`, and what it wanted
+   was to be told.
  * **The conventional file can be named**, with `owner:default` — the constant `Config.Sources.CONVENTIONAL`.
    Written among the sources of `@Sources` it stands, in place, for everything the configuration would look
    for if it declared none, so a configuration can have its own sources *and* the file named after it

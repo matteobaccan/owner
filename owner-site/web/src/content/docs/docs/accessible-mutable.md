@@ -55,6 +55,34 @@ In the above example we saw `setProperty` and `removeProperty` in action, but th
 methods like `clear()`, `load(InputStream)` and `load(Reader)`, and it should allow you to achieve complete write access
 to the properties contained inside a Config object.
 
+### Loading an XML document
+
+*Since 2.0.0.* `loadFromXML(InputStream)` reads an XML document into the configuration, and it is **not** a
+delegate to [`java.util.Properties.loadFromXML`][jdk-loadfromxml]: it reads the document the way this library
+reads an [XML source](/owner/docs/file-formats/#xml), so both the Java properties format and an XML of your
+own work.
+
+```java
+config.loadFromXML(new FileInputStream("server.xml"));
+```
+
+```xml
+<server><http><port>8080</port></http></server>
+```
+
+That document is `server.http.port=8080` here, and is refused outright by `java.util.Properties`. It is what
+[#62](https://github.com/matteobaccan/owner/issues/62) asked for in 2013, and it closes the asymmetry with
+`storeToXML`, which has been on [Accessible] since 1.0.5 with nothing on this side to read back what it
+writes.
+
+Everything else is as `load(InputStream)`: the properties are merged into the ones already held, the
+listeners are told, and a transactional listener may refuse the change. **The stream is closed** when the
+method returns, which `load(InputStream)` does not do to its own — the asymmetry is the JDK's, where
+`Properties.load` leaves the stream open and `Properties.loadFromXML` closes it, and it is followed rather
+than corrected so that whoever knows that pair knows this one.
+
+  [jdk-loadfromxml]: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#loadFromXML-java.io.InputStream-
+
 The Accessible interface
 ------------------------
 

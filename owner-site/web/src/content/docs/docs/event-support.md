@@ -186,6 +186,28 @@ the previous values must be kept.
 If the any of the two `RollbackException` explained above is thrown, the `PropertyChangeListener.propertyChange()`
 will not be invoked, since the change has been aborted by the listener.
 
+<div class="note info">
+  <h5>A rollback used to reach nobody but the listener that made it.</h5>
+  <p>
+    <code>setProperty</code> returns the old value, <code>clear()</code> returns nothing, and neither of them
+    tells the caller that a listener refused: until 2.0.0 the exception was caught and discarded, so "the
+    property did not change and I cannot see why" had no answer anywhere. Since 2.0.0 the library says it, at
+    <code>CONFIG</code> — what was refused, and the listener's own message if it gave one:
+  </p>
+  <pre><code>CONFIG: com.acme.MyConfig: the change to 'minAge' was rolled back by a listener:
+the age is set by the licence, not by the file
+</code></pre>
+  <p>
+    <b>Not a warning</b>, and deliberately: a transactional listener is <em>meant</em> to refuse, and a
+    configuration that is read-only while a job runs would fill the log with warnings for working exactly as
+    designed. <code>CONFIG</code> is the switch somebody turns on to ask the library what it decided — see
+    <a href="/owner/docs/debugging/">Debugging</a> — which is the question a swallowed rollback leaves
+    behind. This is what
+    <a href="https://github.com/matteobaccan/owner/issues/58">#58</a> asked for in 2013; it asked for a
+    listener, and what it wanted was to be told.
+  </p>
+</div>
+
 Obviously also the `reload()` operation happenning during a hot reload, or when invoked via the `Reloadable` interface
 triggers the PropertyChangeEvent.
 
