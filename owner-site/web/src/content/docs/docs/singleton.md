@@ -131,6 +131,36 @@ MyConfig thirdFromCache = ConfigCache.getOrCreate("bar", MyConfig.class);
 
 The `id` is defined as `java.lang.Object`, but you can use a `String` such as a name, as in the above example.
 
+A `String` constant declared on the mapping interface itself makes a good id, and it is what
+[#148](https://github.com/matteobaccan/owner/issues/148) was asking for — fetching a configuration by
+something it declares, rather than by its class:
+
+```java
+public interface SampleConfiguration extends Config {
+    String PORT = "abc.port";
+
+    @Key(PORT)
+    int port();
+}
+```
+
+```java
+ConfigCache.getOrCreate(SampleConfiguration.PORT, SampleConfiguration.class);   // once, at startup
+…
+SampleConfiguration config = ConfigCache.get(SampleConfiguration.PORT);         // anywhere else
+```
+
+<div class="note info">
+  <h5>Why the id is chosen and not deduced.</h5>
+  <p>
+    It would be tempting to skip the first line and let the cache find "the configuration that declares
+    this property". It cannot: <b>a property name is not an identity</b>. Two mapping interfaces reading one
+    file may perfectly well declare the same key — that is the ordinary way of splitting a large
+    configuration into the parts each module cares about — so the question would have two answers and the
+    library would be picking one of them for you.
+  </p>
+</div>
+
 In some cases, it may be useful list all configuration objects in an application, for instance for debugging. This can
 be accomplished using the `ConfigCache.list()` method, which returns a set of the `id` objects in the cache. This set
 can be used to iterate over all configuration objects in the cache, for instance as follows.
