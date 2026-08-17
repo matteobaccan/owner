@@ -38,7 +38,7 @@ loadScripts(document, 'script');</script>
 <li>
 <p>Package:</p>
 <ul>
-<li>Description</li>
+<li><a href="#package-description">Description</a></li>
 <li>Related Packages</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -49,7 +49,7 @@ loadScripts(document, 'script');</script>
 <div id="navbar-sub-list">
 <ul class="sub-nav-list">
 <li>Package:&nbsp;</li>
-<li>Description&nbsp;|&nbsp;</li>
+<li><a href="#package-description">Description</a>&nbsp;|&nbsp;</li>
 <li>Related Packages&nbsp;|&nbsp;</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -69,6 +69,24 @@ loadScripts(document, 'script');</script>
 </div>
 <hr>
 <div class="package-signature">package <span class="element-name">org.aeonbits.owner.formats.toml</span></div>
+<section class="package-description" id="package-description">
+<div class="block">Reads a configuration written in <a href="https://toml.io/en/v1.0.0">TOML v1.0.0</a> - a source whose
+ path ends in <code>.toml</code> - flattening it into the keys the rest of the library already speaks.
+ <p>
+ Of the formats here this is the one that needed the least persuading: the flattening convention was
+ already shaped like TOML. A dotted key <i>is</i> the flattening, <code>[table]</code> is a prefix, and
+ <code>[[servers]]</code> is <code>servers[0]</code>, which is what a
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link"><code>List</code></a> of nested configuration objects reads.
+ </p>
+ <p>
+ <b>Values are handed back as written, except where TOML spells one value several ways.</b>
+ <code>1_000</code>, <code>0xDEAD</code>, <code>0o755</code> and <code>0b1101</code> are all one integer
+ and none of them would convert, so they become plain decimal; <code>inf</code> and <code>nan</code>
+ become what <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Double.html#parseDouble-java.lang.String-" title="class or interface in java.lang" class="external-link"><code>Double.parseDouble(java.lang.String)</code></a> answers to; and the space TOML allows in place of the
+ <code>T</code> of a date-time becomes a <code>T</code>, which is what
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html#parse-java.lang.CharSequence-" title="class or interface in java.time" class="external-link"><code>LocalDateTime.parse(java.lang.CharSequence)</code></a> wants. Strings are untouched.
+ </p></div>
+</section>
 <section class="summary">
 <ul class="summary-list">
 <li>

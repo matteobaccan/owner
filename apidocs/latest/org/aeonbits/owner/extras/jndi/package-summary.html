@@ -38,7 +38,7 @@ loadScripts(document, 'script');</script>
 <li>
 <p>Package:</p>
 <ul>
-<li>Description</li>
+<li><a href="#package-description">Description</a></li>
 <li>Related Packages</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -49,7 +49,7 @@ loadScripts(document, 'script');</script>
 <div id="navbar-sub-list">
 <ul class="sub-nav-list">
 <li>Package:&nbsp;</li>
-<li>Description&nbsp;|&nbsp;</li>
+<li><a href="#package-description">Description</a>&nbsp;|&nbsp;</li>
 <li>Related Packages&nbsp;|&nbsp;</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -69,6 +69,25 @@ loadScripts(document, 'script');</script>
 </div>
 <hr>
 <div class="package-signature">package <span class="element-name">org.aeonbits.owner.extras.jndi</span></div>
+<section class="package-description" id="package-description">
+<div class="block">Reading a configuration out of JNDI, which is where an application server keeps what it was told about
+ the application: as a whole context through
+ <a href="JndiLoader.html" title="class in org.aeonbits.owner.extras.jndi"><code>JndiLoader</code></a>, or one entry at a time through
+ <a href="JndiHandler.html" title="class in org.aeonbits.owner.extras.jndi"><code>JndiHandler</code></a>.
+ <p>
+ The two answer different questions. A source - <code>&#64;Sources("jndi:comp/env/myconfig")</code> -
+ binds a whole subtree as properties, and merges with the files below it like any other source. A
+ marker in a value - <code>${$jndi::comp/env/db/password}</code> - takes one entry and leaves the rest
+ of the file alone, which is what a single credential wants.
+ </p>
+ <p>
+ <b><code>JndiNames</code> refuses a name that would leave this machine</b>,
+ and it is the reason this package is three classes rather than two. A JNDI name can carry its own
+ scheme and <code>InitialContext</code> honours it, so <code>ldap://</code> and its relatives are names
+ it will resolve over the network - the shape of Log4Shell, reachable from a configuration file, since
+ a source spec is expanded before it is read and need not be a constant.
+ </p></div>
+</section>
 <section class="summary">
 <ul class="summary-list">
 <li>

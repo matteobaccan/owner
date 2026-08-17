@@ -38,7 +38,7 @@ loadScripts(document, 'script');</script>
 <li>
 <p>Package:</p>
 <ul>
-<li>Description</li>
+<li><a href="#package-description">Description</a></li>
 <li>Related Packages</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -49,7 +49,7 @@ loadScripts(document, 'script');</script>
 <div id="navbar-sub-list">
 <ul class="sub-nav-list">
 <li>Package:&nbsp;</li>
-<li>Description&nbsp;|&nbsp;</li>
+<li><a href="#package-description">Description</a>&nbsp;|&nbsp;</li>
 <li>Related Packages&nbsp;|&nbsp;</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -69,6 +69,25 @@ loadScripts(document, 'script');</script>
 </div>
 <hr>
 <div class="package-signature">package <span class="element-name">org.aeonbits.owner.extras.loaders</span></div>
+<section class="package-description" id="package-description">
+<div class="block">The loaders that cannot be written without somebody else's library on the class path: HOCON, which
+ reads an <code>application.conf</code> through Typesafe Config, and ZooKeeper, which reads a node
+ through Curator.
+ <p>
+ <b>That is the whole rule for what lives here rather than in the core or in
+ <code>owner-formats</code>.</b> A format OWNER parses itself ships with the library, because a
+ dependency is a thing every user of it inherits; a format defined by an implementation - HOCON is
+ whatever Typesafe Config accepts, and reimplementing its substitutions would mean reading somebody's
+ file differently from the tool that wrote it - is read by that implementation or not at all.
+ </p>
+ <p>
+ Each loader comes in two classes for the same reason
+ <code>JakartaBeanValidation</code> does: a
+ <a href="../../loaders/Loader.html" title="interface in org.aeonbits.owner.loaders"><code>Loader</code></a> is discovered and instantiated before anybody asks for it,
+ so the class that names the optional library is a second one, untouched until there is a source of
+ that kind to read.
+ </p></div>
+</section>
 <section class="summary">
 <ul class="summary-list">
 <li>

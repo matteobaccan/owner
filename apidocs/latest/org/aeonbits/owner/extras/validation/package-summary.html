@@ -38,7 +38,7 @@ loadScripts(document, 'script');</script>
 <li>
 <p>Package:</p>
 <ul>
-<li>Description</li>
+<li><a href="#package-description">Description</a></li>
 <li>Related Packages</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -49,7 +49,7 @@ loadScripts(document, 'script');</script>
 <div id="navbar-sub-list">
 <ul class="sub-nav-list">
 <li>Package:&nbsp;</li>
-<li>Description&nbsp;|&nbsp;</li>
+<li><a href="#package-description">Description</a>&nbsp;|&nbsp;</li>
 <li>Related Packages&nbsp;|&nbsp;</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -69,6 +69,25 @@ loadScripts(document, 'script');</script>
 </div>
 <hr>
 <div class="package-signature">package <span class="element-name">org.aeonbits.owner.extras.validation</span></div>
+<section class="package-description" id="package-description">
+<div class="block">The Bean Validation provider the core looks for: what makes <code>&#64;Min</code>,
+ <code>&#64;NotNull</code> and the rest mean something on a method named the way this library teaches.
+ <p>
+ They did not, and quietly. <code>Validator.validate(object)</code> walks JavaBean properties, so
+ <code>&#64;Min(12) int getPort()</code> was checked and <code>&#64;Min(12) int port()</code> was not -
+ an annotation that reads like a guarantee and is not one.
+ <a href="BeanValidator.html" title="class in org.aeonbits.owner.extras.validation"><code>BeanValidator</code></a> checks the value each method resolves to,
+ and <code>ViolationPath</code> reports it under the key the property is
+ read with rather than under the name of a getter nobody wrote.
+ </p>
+ <p>
+ <b>Both spellings of the specification are supported and neither is required</b>:
+ <code>JakartaBeanValidation</code> and
+ <code>JavaxBeanValidation</code> are the only classes that name
+ <code>jakarta.validation</code> and <code>javax.validation</code>, so that the validator itself can be
+ discovered and instantiated on a class path that has neither.
+ </p></div>
+</section>
 <section class="summary">
 <ul class="summary-list">
 <li>

@@ -38,7 +38,7 @@ loadScripts(document, 'script');</script>
 <li>
 <p>Package:</p>
 <ul>
-<li>Description</li>
+<li><a href="#package-description">Description</a></li>
 <li><a href="#related-package-summary">Related Packages</a></li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -49,7 +49,7 @@ loadScripts(document, 'script');</script>
 <div id="navbar-sub-list">
 <ul class="sub-nav-list">
 <li>Package:&nbsp;</li>
-<li>Description&nbsp;|&nbsp;</li>
+<li><a href="#package-description">Description</a>&nbsp;|&nbsp;</li>
 <li><a href="#related-package-summary">Related Packages</a>&nbsp;|&nbsp;</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -69,6 +69,21 @@ loadScripts(document, 'script');</script>
 </div>
 <hr>
 <div class="package-signature">package <span class="element-name">org.aeonbits.owner.converters</span></div>
+<section class="package-description" id="package-description">
+<div class="block">The converters this library ships for types its own conversion rules do not already cover: a
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html" title="class or interface in java.time" class="external-link"><code>Duration</code></a> and a <a href="../util/bytesize/ByteSize.html" title="class in org.aeonbits.owner.util.bytesize"><code>ByteSize</code></a>.
+ <p>
+ The two are not offered the same way, and the difference is the rule. <code>Duration</code> belongs to
+ the JDK, so it converts <b>automatically</b> - a method returning one needs no annotation. `ByteSize` is
+ ours, so its converter has to be <b>named</b> with <a href="../Config.ConverterClass.html" title="annotation in org.aeonbits.owner"><code>Config.ConverterClass</code></a>: a
+ type of ours cannot start changing what a value means in a configuration that predates it.
+ </p>
+ <p>
+ Both are ordinary <a href="../Converter.html" title="interface in org.aeonbits.owner"><code>Converter</code></a> implementations, written no differently from one
+ of yours, and both are here rather than in the core because the core's conversion is a closed set of
+ rules while these are two decisions about two types.
+ </p></div>
+</section>
 <section class="summary">
 <ul class="summary-list">
 <li>

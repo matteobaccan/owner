@@ -61,15 +61,34 @@ loadScripts(document, 'script');</script>
   files.</div>
 </div>
 <div class="col-first odd-row-color"><a href="#org.aeonbits.owner.extras.jndi">org.aeonbits.owner.extras.jndi</a></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Reading a configuration out of JNDI, which is where an application server keeps what it was told about
+ the application: as a whole context through
+ <a href="../extras/jndi/JndiLoader.html" title="class in org.aeonbits.owner.extras.jndi"><code>JndiLoader</code></a>, or one entry at a time through
+ <a href="../extras/jndi/JndiHandler.html" title="class in org.aeonbits.owner.extras.jndi"><code>JndiHandler</code></a>.</div>
+</div>
 <div class="col-first even-row-color"><a href="#org.aeonbits.owner.extras.loaders">org.aeonbits.owner.extras.loaders</a></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">The loaders that cannot be written without somebody else's library on the class path: HOCON, which
+ reads an <code>application.conf</code> through Typesafe Config, and ZooKeeper, which reads a node
+ through Curator.</div>
+</div>
 <div class="col-first odd-row-color"><a href="#org.aeonbits.owner.formats.json">org.aeonbits.owner.formats.json</a></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Reads a configuration written in JSON - a source whose path ends in <code>.json</code> - flattening it
+ into the keys the rest of the library already speaks: <code>server.host</code>,
+ <code>servers[0].host</code>.</div>
+</div>
 <div class="col-first even-row-color"><a href="#org.aeonbits.owner.formats.toml">org.aeonbits.owner.formats.toml</a></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Reads a configuration written in <a href="https://toml.io/en/v1.0.0">TOML v1.0.0</a> - a source whose
+ path ends in <code>.toml</code> - flattening it into the keys the rest of the library already speaks.</div>
+</div>
 <div class="col-first odd-row-color"><a href="#org.aeonbits.owner.formats.yaml">org.aeonbits.owner.formats.yaml</a></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Reads a configuration written in YAML - a source whose path ends in <code>.yaml</code> or
+ <code>.yml</code> - flattening it into the keys the rest of the library already speaks.</div>
+</div>
 <div class="col-first even-row-color"><a href="#org.aeonbits.owner.loaders">org.aeonbits.owner.loaders</a></div>
 <div class="col-last even-row-color">
 <div class="block">Provides interfaces and classes to allow OWNER to load properties from several file formats.</div>
