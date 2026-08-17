@@ -243,6 +243,14 @@ the order they are declared.</div>
  key itself, and a configuration whose file already agrees with its interface never reaches
  them. Switch it off where a file deliberately holds two spellings of one name as two different
  properties, or where the extra lookups on a property that is absent are worth removing.
+ </p>
+ <p>
+ Three of the four keep the shape of the key — kebab, snake, camel — and the fourth is the name
+ the setting has as an <b>environment variable</b>, where a dot cannot appear: every character
+ that is not a letter or a digit becomes an underscore, so <code>server.maxThreads</code> is
+ looked for as <code>SERVER_MAX_THREADS</code>. One rule, applied in every source rather than
+ only in <code>system:env</code>, which is what makes it possible to say where a value will come
+ from without running the program.
  </p></div>
 <dl class="notes">
 <dt>Since:</dt>
