@@ -77,18 +77,16 @@ final class PropertiesFileWriter {
         keepWhatTheFileArranged(existing, values, known, out, placed);
         appendWhatTheFileDidNotHave(values, known, out, placed);
 
-        OutputStream stream = Files.newOutputStream(file.toPath());
-        try {
-            Writer writer = new OutputStreamWriter(stream, LATIN_1);
+        // both are declared, and in this order, so that each closes what it opened: the writer holds an
+        // encoder of its own, and flushing the stream underneath it is not the same as closing it
+        try (OutputStream stream = Files.newOutputStream(file.toPath());
+             Writer writer = new OutputStreamWriter(stream, LATIN_1)) {
             for (String line : out) {
                 writer.write(line);
                 // \n rather than the platform separator: a configuration file travels between machines,
                 // and a rewrite that flips every line ending is a diff with no content in it
                 writer.write('\n');
             }
-            writer.flush();
-        } finally {
-            stream.close();
         }
     }
 
@@ -197,8 +195,20 @@ final class PropertiesFileWriter {
         for (int i = 0; i < trimmed.length(); i++) {
             char c = trimmed.charAt(i);
             if (c == '\\' && i + 1 < trimmed.length()) {
-                key.append(unescape(trimmed, ++i));
-                i += trimmed.charAt(i) == 'u' ? 4 : 0;
+                char escaped = trimmed.charAt(++i);
+                if (escaped != 'u') {
+                    key.append(unescape(escaped));
+                } else if (isHexQuadAt(trimmed, i + 1)) {
+                    key.append((char) Integer.parseInt(trimmed.substring(i + 1, i + 5), 16));
+                    i += 4;
+                } else {
+                    // a \\u nobody can read is nobody's to interpret. It is kept as the two characters it
+                    // is written with, so the key matches none of ours and the line goes back out
+                    // untouched - which is what this writer does with everything it cannot claim. The
+                    // file cannot have been loaded, java.util.Properties refusing it outright, but it can
+                    // perfectly well be the file we are saving into.
+                    key.append('\\').append('u');
+                }
                 continue;
             }
             if (c == '=' || c == ':' || Character.isWhitespace(c))
@@ -208,14 +218,22 @@ final class PropertiesFileWriter {
         return key.length() == 0 ? null : key.toString();
     }
 
-    private static char unescape(String s, int at) {
-        char c = s.charAt(at);
+    /** Whether four hexadecimal digits start at the given position, the end of the text included. */
+    private static boolean isHexQuadAt(String s, int at) {
+        if (at + 4 > s.length())
+            return false;
+        for (int i = at; i < at + 4; i++)
+            if (Character.digit(s.charAt(i), 16) < 0)
+                return false;
+        return true;
+    }
+
+    private static char unescape(char c) {
         switch (c) {
             case 'n': return '\n';
             case 'r': return '\r';
             case 't': return '\t';
             case 'f': return '\f';
-            case 'u': return (char) Integer.parseInt(s.substring(at + 1, at + 5), 16);
             default: return c;
         }
     }

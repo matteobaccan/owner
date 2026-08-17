@@ -356,4 +356,55 @@ public class SavingTheFileTest {
             assertEquals("round trip of [" + value + "]", value, read.getProperty("value"));
         }
     }
+
+    /**
+     * A line of somebody else's carrying a broken <code>&#92;u</code> escape is still a line of theirs, and
+     * saving must not die on it. Reading the key is how the writer decides whether a line is ours, and the
+     * four characters after a <code>&#92;u</code> in a key were being converted without being looked at:
+     * not hexadecimal threw {@link NumberFormatException}, and fewer than four before the end of the line
+     * threw {@link StringIndexOutOfBoundsException} - both out of {@link Accessible#save(File)}.
+     * <p>
+     * <b>The file is one this configuration never read</b>, and it has to be: such a file cannot be loaded
+     * at all, {@link java.util.Properties#load(java.io.InputStream)} refusing it outright with <i>Malformed
+     * &#92;uxxxx encoding</i>. Saving into a file is not reading it, though - the target of
+     * <code>save</code> is any file you name, written by anything - so the writer meets what the loader
+     * would have turned away.
+     * </p>
+     * <p>
+     * What it does with it is what it does with everything else it cannot claim: the escape is kept as the
+     * two characters it is written with, the key matches none of ours, and the line goes back out
+     * untouched. Refusing the file is the other defensible answer and is the wrong one here - the promise
+     * of this writer is that what it does not understand it does not damage.
+     * </p>
+     */
+    @Test
+    public void aBrokenUnicodeEscapeInSomebodyElsesLineIsCarriedThroughUntouched() throws IOException {
+        File alien = new File(folder.getRoot(), "written-by-something-else.properties");
+        Files.write(alien.toPath(), ("host = localhost\n"
+                + "not\\uZZZZ.hex = kept\n"
+                + "truncated\\u12\n").getBytes(StandardCharsets.ISO_8859_1));
+
+        AppConfig config = ConfigFactory.create(AppConfig.class);
+        config.setProperty("host", "db.internal");
+        config.save(alien);
+
+        String written = new String(Files.readAllBytes(alien.toPath()), StandardCharsets.ISO_8859_1);
+        assertTrue(written, written.contains("not\\uZZZZ.hex = kept\n"));
+        assertTrue(written, written.contains("truncated\\u12\n"));
+        assertTrue(written, written.contains("host = db.internal\n"));
+    }
+
+    /**
+     * The same thing said where it happens, one line at a time - and the two ways a broken escape breaks
+     * are different: four characters that are not hexadecimal, and fewer than four characters left.
+     */
+    @Test
+    public void aKeyIsReadThroughItsEscapesAndAroundTheBrokenOnes() {
+        assertEquals("caffè", PropertiesFileWriter.keyOf("caff\\u00e8 = x"));
+        assertEquals("a b", PropertiesFileWriter.keyOf("a\\ b = x"));
+
+        assertEquals("not\\uZZZZ.hex", PropertiesFileWriter.keyOf("not\\uZZZZ.hex = kept"));
+        assertEquals("truncated\\u12", PropertiesFileWriter.keyOf("truncated\\u12"));
+        assertEquals("ends.with\\u", PropertiesFileWriter.keyOf("ends.with\\u"));
+    }
 }
