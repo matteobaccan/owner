@@ -178,7 +178,7 @@ implements <a href="../../loaders/Loader.html" title="interface in org.aeonbits.
 <div class="block">A loader is built with no arguments, both when it is registered by hand and when
  <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html" title="class or interface in java.util" class="external-link"><code>ServiceLoader</code></a> finds it on the class path.</div>
 </div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.util.Hashtable)" class="member-name-link">JndiLoader</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Hashtable.html" title="class or interface in java.util" class="external-link">Hashtable</a>&lt;?,<wbr>?&gt;&nbsp;environment)</code></div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.util.Map)" class="member-name-link">JndiLoader</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;?,<wbr>?&gt;&nbsp;environment)</code></div>
 <div class="col-last odd-row-color">
 <div class="block">A loader against a JNDI environment of your own, which is how a provider somewhere else is reached.</div>
 </div>
@@ -237,9 +237,9 @@ implements <a href="../../loaders/Loader.html" title="interface in org.aeonbits.
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(java.util.Hashtable)">
+<section class="detail" id="&lt;init&gt;(java.util.Map)">
 <h3>JndiLoader</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">JndiLoader</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Hashtable.html" title="class or interface in java.util" class="external-link">Hashtable</a>&lt;?,<wbr>?&gt;&nbsp;environment)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">JndiLoader</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;?,<wbr>?&gt;&nbsp;environment)</span></div>
 <div class="block">A loader against a JNDI environment of your own, which is how a provider somewhere else is reached.
  <p>
  This is the deliberate way to do what a <code>ldap:</code> name in a source is refused for: the
