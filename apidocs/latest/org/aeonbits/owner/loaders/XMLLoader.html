@@ -152,9 +152,16 @@ implements <a href="Loader.html" title="interface in org.aeonbits.owner.loaders"
 <div class="block">Returns the default URI specification for a given URI resource, that can be handled by this loader.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#load(java.util.Properties,java.net.URI)" class="member-name-link">load</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html" title="class or interface in java.util" class="external-link">Properties</a>&nbsp;result,
- <a href="https://docs.oracle.com/javase/8/docs/api/java/net/URI.html" title="class or interface in java.net" class="external-link">URI</a>&nbsp;uri)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#load(java.util.Properties,java.io.InputStream)" class="member-name-link">load</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html" title="class or interface in java.util" class="external-link">Properties</a>&nbsp;result,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;input)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">The same reading, from a stream that is already open, for a caller who has the bytes and no URI to
+ name them with - <a href="../Mutable.html#loadFromXML(java.io.InputStream)"><code>Mutable.loadFromXML(InputStream)</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#load(java.util.Properties,java.net.URI)" class="member-name-link">load</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html" title="class or interface in java.util" class="external-link">Properties</a>&nbsp;result,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/net/URI.html" title="class or interface in java.net" class="external-link">URI</a>&nbsp;uri)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Reads the document, holding it to the grammar it declares.</div>
 </div>
 </div>
@@ -236,6 +243,36 @@ implements <a href="Loader.html" title="interface in org.aeonbits.owner.loaders"
 <dd><code>uri</code> - the <a href="https://docs.oracle.com/javase/8/docs/api/java/net/URI.html" title="class or interface in java.net" class="external-link"><code>URI</code></a> from where to load the properties.</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if there is some I/O error during the load.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="load(java.util.Properties,java.io.InputStream)">
+<h3>load</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">load</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html" title="class or interface in java.util" class="external-link">Properties</a>&nbsp;result,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;input)</span>
+          throws <span class="exceptions"><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">The same reading, from a stream that is already open, for a caller who has the bytes and no URI to
+ name them with - <a href="../Mutable.html#loadFromXML(java.io.InputStream)"><code>Mutable.loadFromXML(InputStream)</code></a>.
+ <p>
+ The document is <b>validated against the grammar it declares</b>, as it is when read from a source.
+ The option that switches that off lives in the fragment of a URI, and there is no URI here: a caller
+ holding a stream is holding it for a reason of their own, and the way to read such a document
+ unvalidated is to name it as a source with <code>#validate=false</code>.
+ </p>
+ <p>
+ <b>The stream is closed</b> when this returns - the parser closes what it was handed - which is what
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#loadFromXML-java.io.InputStream-" title="class or interface in java.util" class="external-link"><code>Properties.loadFromXML(InputStream)</code></a> does with its own and therefore the behaviour
+ a caller of that method expects.
+ </p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>result</code> - where the properties read are put.</dd>
+<dd><code>input</code> - the document; closed when this returns.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if the document cannot be read, or is not well formed, or breaks its own grammar.</dd>
+<dt>Since:</dt>
+<dd>2.0.0</dd>
 </dl>
 </section>
 </li>

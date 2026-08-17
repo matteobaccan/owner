@@ -166,20 +166,26 @@ extends <a href="Config.html" title="interface in org.aeonbits.owner">Config</a>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Reads a property list (key and element pairs) from the input character stream in a simple line-oriented format.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#removeProperty(java.lang.String)" class="member-name-link">removeProperty</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#loadFromXML(java.io.InputStream)" class="member-name-link">loadFromXML</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;inStream)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Reads a property list from an XML document, <b>the way this library reads one from a source</b> and
+ not the way <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#loadFromXML-java.io.InputStream-" title="class or interface in java.util" class="external-link"><code>Properties.loadFromXML(InputStream)</code></a> does.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#removeProperty(java.lang.String)" class="member-name-link">removeProperty</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Removes a given property.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#removePropertyChangeListener(java.beans.PropertyChangeListener)" class="member-name-link">removePropertyChangeListener</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/beans/PropertyChangeListener.html" title="class or interface in java.beans" class="external-link">PropertyChangeListener</a>&nbsp;listener)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#removePropertyChangeListener(java.beans.PropertyChangeListener)" class="member-name-link">removePropertyChangeListener</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/beans/PropertyChangeListener.html" title="class or interface in java.beans" class="external-link">PropertyChangeListener</a>&nbsp;listener)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Removes a <a href="https://docs.oracle.com/javase/8/docs/api/java/beans/PropertyChangeListener.html" title="class or interface in java.beans" class="external-link"><code>PropertyChangeListener</code></a> from the Mutable interface.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setProperty(java.lang.String,java.lang.String)" class="member-name-link">setProperty</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setProperty(java.lang.String,java.lang.String)" class="member-name-link">setProperty</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;value)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Sets a given property to the specified value.</div>
 </div>
 </div>
@@ -288,6 +294,55 @@ extends <a href="Config.html" title="interface in org.aeonbits.owner">Config</a>
 <dd>
 <ul class="tag-list-long">
 <li><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-" title="class or interface in java.util" class="external-link"><code>Properties.load(java.io.Reader)</code></a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="loadFromXML(java.io.InputStream)">
+<h3>loadFromXML</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">loadFromXML</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;inStream)</span>
+          throws <span class="exceptions"><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Reads a property list from an XML document, <b>the way this library reads one from a source</b> and
+ not the way <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#loadFromXML-java.io.InputStream-" title="class or interface in java.util" class="external-link"><code>Properties.loadFromXML(InputStream)</code></a> does.
+ <p>
+ The two differ on what counts as a document. <code>Properties</code> reads the format its own DTD
+ defines - <code>&lt;entry key="a"&gt;b&lt;/entry&gt;</code> - and refuses everything else. This reads
+ that format and <b>any other XML</b>, flattening the tree into keys the same way the
+ <a href="https://matteobaccan.github.io/owner/docs/file-formats/#xml">XML loader</a> does when the
+ document is named in <code>@Sources</code>, so that a file which can be a source can also be handed to
+ this method. That is what
+ <a href="https://github.com/matteobaccan/owner/issues/62">#62</a> asked for in 2013.
+ </p>
+ <p>
+ Everything else is as <a href="#load(java.io.InputStream)"><code>load(InputStream)</code></a>: the properties are merged into the ones already
+ held, the listeners are told, and a transactional listener may refuse the change.
+ </p>
+ <p>
+ <b>The stream is closed</b> when this returns, which <a href="#load(java.io.InputStream)"><code>load(InputStream)</code></a> does not do to its
+ own. The asymmetry is the JDK's and is followed rather than corrected:
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.InputStream-" title="class or interface in java.util" class="external-link"><code>Properties.load(InputStream)</code></a> leaves the stream open and
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#loadFromXML-java.io.InputStream-" title="class or interface in java.util" class="external-link"><code>Properties.loadFromXML(InputStream)</code></a> closes it, so a caller who knows one of those
+ two already knows this one. Verified against the JDK rather than assumed.
+ </p>
+ <p>
+ The document is validated against the grammar it declares, if it declares one. The option that turns
+ that off is written on a source - <code>file:app.xml#validate=false</code> - and a stream is not a
+ source, so a document that breaks its own DTD has to be named as one to be read here.
+ </p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>inStream</code> - the input stream, closed when this returns.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if an error occurred when reading from the input stream, or the document is not
+                     well formed, or it breaks the grammar it declares.</dd>
+<dt>Since:</dt>
+<dd>2.0.0</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#loadFromXML-java.io.InputStream-" title="class or interface in java.util" class="external-link"><code>Properties.loadFromXML(InputStream)</code></a></li>
 </ul>
 </dd>
 </dl>
