@@ -71,11 +71,9 @@ final class PropertiesFileWriter {
      */
     static PropertiesFileWriter describing(Class<? extends Config> clazz, KeyPrefix prefix) {
         Map<String, String> descriptions = new HashMap<>();
-        for (Method method : clazz.getMethods()) {
-            Config.Description description = method.getAnnotation(Config.Description.class);
-            if (description != null)
-                descriptions.put(PropertiesMapper.key(method, prefix), description.value());
-        }
+        collectDescriptions(clazz, prefix, descriptions);
+        NestedProperties.forEachNested(clazz, prefix,
+                (nested, nestedPrefix) -> collectDescriptions(nested, nestedPrefix, descriptions));
         // the header describes the configuration and not one interface of it, so it is taken from wherever
         // in the hierarchy it is written, nearest first - a base interface that describes what the file is
         // for describes it for everything that extends it
@@ -83,12 +81,41 @@ final class PropertiesFileWriter {
         return new PropertiesFileWriter(descriptions, onTheInterface == null ? null : onTheInterface.value());
     }
 
-    /** Every key the interface owns, which is what tells the writer which lines of a file are ours. */
+    private static void collectDescriptions(Class<?> clazz, KeyPrefix prefix, Map<String, String> into) {
+        for (Method method : clazz.getMethods()) {
+            Config.Description description = method.getAnnotation(Config.Description.class);
+            if (description != null)
+                into.put(PropertiesMapper.key(method, prefix), description.value());
+        }
+    }
+
+    /**
+     * Every key the interface owns, which is what tells the writer which lines of a file are ours.
+     * <p>
+     * <b>The nested interfaces are walked too</b>, under the key that nests them, so a configuration with a
+     * <code>server()</code> section owns <code>server.host</code> as much as it owns its own keys. Left at
+     * the root - which is how this shipped, and it took a template with a section in it to notice - saving
+     * such a configuration wrote the top-level keys and quietly dropped every section, since a key nobody
+     * claims is a key the writer leaves to whoever else reads the file.
+     * </p>
+     * <p>
+     * A section whose path the <b>properties</b> decide - an element of a list, a value of a map - has no
+     * key to be named by until there is a value under it, so it cannot be part of this set. Its keys are
+     * therefore somebody else's as far as the writer is concerned, which is the safe way round: they are
+     * kept as they are rather than rewritten or dropped.
+     * </p>
+     */
     static Set<String> keysOf(Class<? extends Config> clazz, KeyPrefix prefix) {
         Set<String> known = new HashSet<>();
-        for (Method method : clazz.getMethods())
-            known.add(PropertiesMapper.key(method, prefix));
+        collectKeys(clazz, prefix, known);
+        NestedProperties.forEachNested(clazz, prefix,
+                (nested, nestedPrefix) -> collectKeys(nested, nestedPrefix, known));
         return known;
+    }
+
+    private static void collectKeys(Class<?> clazz, KeyPrefix prefix, Set<String> into) {
+        for (Method method : clazz.getMethods())
+            into.add(PropertiesMapper.key(method, prefix));
     }
 
     /**

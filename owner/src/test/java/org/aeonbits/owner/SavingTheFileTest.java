@@ -394,6 +394,48 @@ public class SavingTheFileTest {
         assertTrue(written, written.contains("host = db.internal\n"));
     }
 
+    @Config.Description("The database we talk to.")
+    public interface Db extends Config {
+
+        @Config.Description("A host name or an address.")
+        @Config.DefaultValue("localhost")
+        String host();
+
+        @Config.DefaultValue("5432")
+        int port();
+    }
+
+    @Config.Sources("file:${test.saved.file}")
+    public interface WithASection extends Mutable, Accessible {
+
+        @Config.DefaultValue("acme")
+        String name();
+
+        Db db();
+    }
+
+    /**
+     * A section is part of the configuration, so its keys are part of the file. They were not: the keys a
+     * configuration owns were read off its own methods and nowhere else, so <code>db()</code> contributed
+     * the bare path <code>db</code> - which is no property at all - and every value under it was left to
+     * whoever else reads the file, which is to say dropped. Noticed three days after
+     * {@link Accessible#save(File)} shipped, by generating a template for an interface that had a section
+     * in it.
+     */
+    @Test
+    public void theKeysOfANestedSectionAreWrittenToo() throws IOException {
+        File fresh = new File(folder.getRoot(), "with-a-section.properties");
+
+        ConfigFactory.create(WithASection.class).save(fresh);
+
+        String contents = new String(Files.readAllBytes(fresh.toPath()), StandardCharsets.ISO_8859_1);
+        assertTrue(contents, contents.contains("name = acme"));
+        assertTrue(contents, contents.contains("db.host = localhost"));
+        assertTrue(contents, contents.contains("db.port = 5432"));
+        assertTrue("and a description written inside the section reaches the key it describes",
+                contents.contains("# A host name or an address."));
+    }
+
     /**
      * The same thing said where it happens, one line at a time - and the two ways a broken escape breaks
      * are different: four characters that are not hexadecimal, and fewer than four characters left.
