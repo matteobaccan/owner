@@ -196,10 +196,11 @@ final class PropertiesFileWriter {
             char c = trimmed.charAt(i);
             if (c == '\\' && i + 1 < trimmed.length()) {
                 char escaped = trimmed.charAt(++i);
+                int code = escaped == 'u' ? hexQuadAt(trimmed, i + 1) : -1;
                 if (escaped != 'u') {
                     key.append(unescape(escaped));
-                } else if (isHexQuadAt(trimmed, i + 1)) {
-                    key.append((char) Integer.parseInt(trimmed.substring(i + 1, i + 5), 16));
+                } else if (code >= 0) {
+                    key.append((char) code);
                     i += 4;
                 } else {
                     // a \\u nobody can read is nobody's to interpret. It is kept as the two characters it
@@ -218,14 +219,27 @@ final class PropertiesFileWriter {
         return key.length() == 0 ? null : key.toString();
     }
 
-    /** Whether four hexadecimal digits start at the given position, the end of the text included. */
-    private static boolean isHexQuadAt(String s, int at) {
+    /**
+     * The character the four hexadecimal digits at the given position spell, or <code>-1</code> when there
+     * are not four of them, or not hexadecimal, or not enough text left.
+     * <p>
+     * Reading them and deciding whether they are readable is one operation on purpose. Written as a check
+     * followed by an {@link Integer#parseInt} the two can disagree - and even where they cannot, nobody
+     * reading the code, and no analyser, can see that they cannot: the parse still looks like something
+     * that throws.
+     * </p>
+     */
+    private static int hexQuadAt(String s, int at) {
         if (at + 4 > s.length())
-            return false;
-        for (int i = at; i < at + 4; i++)
-            if (Character.digit(s.charAt(i), 16) < 0)
-                return false;
-        return true;
+            return -1;
+        int value = 0;
+        for (int i = at; i < at + 4; i++) {
+            int digit = Character.digit(s.charAt(i), 16);
+            if (digit < 0)
+                return -1;
+            value = value * 16 + digit;
+        }
+        return value;
     }
 
     private static char unescape(char c) {
