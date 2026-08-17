@@ -67,11 +67,48 @@ But this is just the tip of the iceberg.
 
 Continue reading here: [Basic usage](https://matteobaccan.github.io/owner/docs/usage/).
 
+WHAT ELSE IT DOES
+-----------------
+
+Everything below is a link into the documentation, and everything below works on
+an interface like the one above — there is no context to build, no container to
+be inside, and no dependency to add unless the row says so.
+
+| | |
+|---|---|
+| [Where the properties come from](https://matteobaccan.github.io/owner/docs/loading-strategies/) | several sources, tried in turn or merged; a file, the classpath, the environment, system properties, a URL, JNDI, ZooKeeper — or the file named after the interface, which needs no configuration at all |
+| [Formats](https://matteobaccan.github.io/owner/docs/file-formats/) | `.properties`, XML, `.env` and INI in the core; JSON, YAML and TOML in `owner-formats`, parsed by hand so that adding them adds nothing else to your build; HOCON in `owner-extras`, through Typesafe Config |
+| [Types](https://matteobaccan.github.io/owner/docs/type-conversion/) | primitives, enums, `URL`, `Duration`, arrays and collections, anything with a `valueOf` or a one-`String` constructor, `Optional<T>`, or a converter of yours |
+| [Nested configuration](https://matteobaccan.github.io/owner/docs/nested-configuration/) | a method returning another mapping interface reads a section of the file; a `List` of them reads `servers[0].host`, a `Map` reads `servers.alpha.host` |
+| [Defaults, variables and parameters](https://matteobaccan.github.io/owner/docs/variables-expansion/) | `@DefaultValue`, `${...}` expansion between properties with a default of its own, and values used as a format for the method's arguments |
+| [The key, spelt any of four ways](https://matteobaccan.github.io/owner/docs/usage/#how-the-key-may-be-written) | `firstName()` finds `firstName`, `first-name`, `first_name` or the environment's `FIRST_NAME` |
+| [Reload and hot reload](https://matteobaccan.github.io/owner/docs/reload/) | on demand, or by watching the file, synchronously or on a schedule |
+| [Reading and writing the properties](https://matteobaccan.github.io/owner/docs/accessible-mutable/) | `Accessible` to look at them, `Mutable` to change them, `Traceable` to ask which source a value came from, and `save(File)` to write the file back **keeping its comments and its order** |
+| [Secrets](https://matteobaccan.github.io/owner/docs/crypto/) | an encrypted value in the file, with the cipher included — one passphrase, or a key pair so that whoever adds a secret cannot read the others |
+| [Bean Validation](https://matteobaccan.github.io/owner/docs/validation/) | `@Min`, `@NotNull` and the rest checked on the accessors this library teaches you to write; a constraint nobody is checking is reported rather than ignored |
+| [When it does not work](https://matteobaccan.github.io/owner/docs/debugging/) | one switch and the library says what it looked for, what it found, which loader answered and which key each method resolves to — and `@Sensitive` keeps a secret out of that output |
+
 DOWNLOAD
 --------
 
-Public Releases can be downloaded from [GitHub Releases](https://github.com/matteobaccan/owner/releases) page or
-[Maven Central Repository](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.aeonbits.owner%22%20AND%20a%3A%22owner%22).
+```xml
+<dependency>
+    <groupId>org.aeonbits.owner</groupId>
+    <artifactId>owner</artifactId>
+    <version>1.0.12</version>
+</dependency>
+```
+
+That is the latest published release. **2.0.0 is in preparation** — it requires
+Java 8, it is what this documentation describes,
+and [what's new](https://matteobaccan.github.io/owner/news/) lists what it adds
+and the little it removes. Until it is out, check
+[Maven Central](https://central.sonatype.com/artifact/org.aeonbits.owner/owner)
+for the newest version, and see
+[Installation](https://matteobaccan.github.io/owner/docs/installation/) for the
+`owner-formats` and `owner-extras` artifacts.
+
+Releases are also on the [GitHub Releases](https://github.com/matteobaccan/owner/releases) page.
 
 
 DOCUMENTATION
@@ -79,6 +116,9 @@ DOCUMENTATION
 
 Make sure to have a look at the documentation on [project website][website]
 to learn how flexible and powerful OWNER is, and why you may need it!
+
+The [API documentation](https://matteobaccan.github.io/owner/apidocs/latest/) is
+published from `master`.
 
 Chinese documentation is provided by [Yunfeng Cheng](https://github.com/cyfonly) via a GitHub independent project at
 [this address][chinese-docs].
@@ -91,6 +131,14 @@ QUESTIONS AND DOCUMENTATION
 ---------------------------
 
 To interact with the **Owner Documentation**, visit [Deep Wiki](https://deepwiki.com/matteobaccan/owner).
+
+CONTRIBUTING
+------------
+
+Bug reports and pull requests are welcome. What makes one easy to say yes to is
+written down in [Contributing](https://matteobaccan.github.io/owner/docs/contributing/);
+`TODO.md` in this repository is the working list, with the reasons behind what is
+being done and what has deliberately not been.
 
 LICENSE
 -------

@@ -29,8 +29,34 @@ RELEASING
 WHERE TO PICK UP
 ----------------
 
-Updated at the end of 2026-08-14. `FORMATS.md`, `COMPARISON.md` and `CRYPTO.md` have the detail and the
+Updated at the end of 2026-08-17. `FORMATS.md`, `COMPARISON.md` and `CRYPTO.md` have the detail and the
 open questions; this is the short version.
+
+**2026-08-17 — the sources, the annotations, and the publishing.** Six commits, and the thread through them
+is that a rule nobody had chosen is a rule that will surprise somebody:
+
+- **Every class-level annotation is read the same way now.** `@Sources`, `@LoadPolicy` and `@HotReload`
+  stopped at the direct super-interfaces, `@DecryptorClass` and the class-level `@Description` were read off
+  the interface handed to the factory and nowhere else, and `@DisableFeature` answered one question two ways
+  — the method saw it, `getProperty` did not. One walk, `Annotations`, breadth first over the hierarchy, for
+  everything that describes the **configuration object**; the annotations that describe the **methods an
+  interface declares** (`@Prefix`, `@Mandatory`, `@Sensitive`, `@Separator`, `@TokenizerClass`,
+  `@PreprocessorClasses`) deliberately do not climb, and that half now has tests too. The whole rule, with
+  the propagation tables, is the site page *Where an annotation counts*.
+- **The conventional sources got their three decisions**: the order is chosen rather than inherited from the
+  loader registration (`.properties`, `.xml`, `.ini`, `.cfg`, discovered last — a `.cfg` no longer outranks
+  a `.properties`); more than one of them existing is a `WARNING`, a refusal under strict; and the
+  convention can be named with `owner:default`, or `owner:default.xml` for one of them. **#267 closed.**
+- **The environment spelling became a name a shell can set**: `server.maxThreads` is `SERVER_MAX_THREADS`,
+  not `SERVER.MAX_THREADS`. The MicroProfile rule, applied in every source rather than only in `system:env`.
+- **The javadoc has a publisher again.** It had served 1.0.12 since June 2020, because the only thing that
+  ever wrote `apidocs/` was `ant javadoc publish`, by hand. A workflow owns it now; the ant script is gone;
+  `javadoc:aggregate` had also been broken since `Automatic-Module-Name` landed, and is fixed in the pom.
+- **Nine packages had no description at all** and now do, with a test that refuses a new one without.
+- **Code scanning is at zero open alerts**: a `NumberFormatException` and a `StringIndexOutOfBoundsException`
+  reachable from `save(File)` fixed, a writer that was flushed and never closed fixed, four javadoc comments
+  that documented nothing put back on what they describe — with a test that refuses two comments in a row —
+  and the three `unused-parameter` alerts on extension points dismissed with a written reason.
 
 **The cipher shipped on 2026-08-14**, which was the last of the three largest gaps. `${$aes-gcm::…}`, a
 `ValueHandler` registered by name, AES-256/GCM over PBKDF2 at 210,000 iterations, and `EncryptTool` in the
@@ -129,6 +155,26 @@ Third, ~~**the five issues answered on 2026-08-11 and still open**~~ — **done 
 doing that rather than trusting this file: **#72 is not answered** and stays open, and **#240 is only half
 answered** — the snippet in it is HOCON, not JSON.
 
+THE SOURCES CLUSTER, WHICH IS WHERE TO PICK UP NEXT
+--------------------------------------------------
+
+Four issues ask variants of one question — *where do the sources come from* — and after 2026-08-17 the
+shape of the answer exists, so they should be read together while it is fresh:
+
+- **[#173](https://github.com/matteobaccan/owner/issues/173) `@AutoSources`** and
+  **[#349](https://github.com/matteobaccan/owner/issues/349) a `SourcesLocator`** both want the list of
+  sources decided by something other than a constant array. Part of it is already answered — a spec is
+  expanded before it is read, so `${...}` with a default puts a system property or an environment variable
+  in the path, and `owner:default` puts the convention in it by name. **Read them before writing anything**:
+  what is left after those two may be nothing, or may be one method.
+- **[#165](https://github.com/matteobaccan/owner/issues/165) inheritance between properties *files***, a
+  `needs=other` key inside a file. Ours is inheritance between *interfaces*; the file-level version is what
+  HOCON's `include` does. Worth deciding rather than writing: a key that reaches for another file is a
+  format feature, and it would apply to every format we read.
+- **[#45](https://github.com/matteobaccan/owner/issues/45) several `@Key`s on one method.** Relaxed binding
+  answers the spelling half of it; what is left is genuinely two different keys, one falling back on the
+  other, which today is written `@DefaultValue("${other.key}")`.
+
 A CONFIGURATION THAT EXPLAINS ITSELF
 -----------------------------------
 
@@ -185,9 +231,10 @@ the same two rules.
 
 **Two small things left on the floor**, neither urgent:
 
-- [ ] The three open [code scanning alerts](https://github.com/matteobaccan/owner/security/code-scanning)
-      as of 2026-08-17 — #148, #313 and #318, all `java/unused-parameter` — want **dismissing rather than
-      fixing**, which is a maintainer's call. All three are on the parameters of *extension points*:
+- [x] ~~The three open [code scanning alerts](https://github.com/matteobaccan/owner/security/code-scanning)
+      as of 2026-08-17 — #148, #313 and #318, all `java/unused-parameter`~~ — **dismissed on 2026-08-17**
+      with the reason below, which leaves the scan at zero open alerts. All three are on the parameters of
+      *extension points*:
       `Converter.convert(Method, String)`, `ReloadListener.reloadPerformed(ReloadEvent)` and the
       `Preprocessor.processAbsent(String)` default, whose body declines by design. The query is right about
       the code it can see — no implementation *in this repository* uses those parameters — and wrong about
