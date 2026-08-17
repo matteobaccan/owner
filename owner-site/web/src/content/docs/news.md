@@ -890,6 +890,23 @@ closed only when it has been understood.
    `extends` clause, then their parents, each interface visited once. If you were repeating an annotation on
    the interface handed to the `ConfigFactory` to work around this, the repetition can go — and for
    `@Sources` it should, since the same file would now be listed twice.
+ * **`@DecryptorClass` was ignored unless it was on the interface handed to the factory.** Not even its
+   direct super-interfaces were read, so this was the worst of the family, and it failed in silence: an
+   `@EncryptedValue` property came back as the cipher text stored in the file, which is a string like any
+   other and breaks, if it breaks at all, wherever it is finally used — a wrong password at the far end of
+   a connection, not an error where the mistake is. The decryptor of a configuration is a property of the
+   configuration, so it is now found wherever in the hierarchy it is written. The same applies to the
+   `@Description` that becomes the header of a saved file.
+ * **`@DisableFeature` on a super-interface made one configuration answer the same question two ways.**
+   A feature is disabled *for a method* — the annotation on the method or on the interface declaring it —
+   and *for the configuration object*, which is what `getProperty` and `fill` have to ask, being declared
+   on `Accessible` and never on the interface you wrote. One lookup served both and read the interface
+   handed to the factory alone, so with `@DisableFeature(VARIABLE_EXPANSION)` written one level up,
+   `cfg.home()` returned `${user.home}` unexpanded while `cfg.getProperty("home")` expanded it. The two
+   questions are told apart now: the method one still stops at the declaring interface — deliberately, or a
+   blanket disable on a base interface would cancel a `@Prefix` written explicitly below it — and the
+   object one reads the whole hierarchy, every declaration of it rather than the nearest, since the
+   annotation carries a set and two interfaces may each switch off one feature.
  * **The `MyConfig.properties` convention was appended even to a configuration that declared its sources.**
    The convention and the declared sources were the same call, so every interface *without* `@Sources`
    contributed the default list — and `Config` itself has none, so it happened to every configuration there

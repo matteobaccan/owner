@@ -135,7 +135,10 @@ contributes its `@Sources` once.
     were not loaded, and its policy or reload interval did not apply. It differed from
     <a href="/owner/docs/key-prefix/"><code>@Prefix</code></a>, which has always counted at any depth, and each
     of the three annotations had its own copy of the lookup, which is how the three came to disagree with a
-    fourth. They share one now.
+    fourth. They share one now, with every other annotation that describes the configuration object rather
+    than the methods of one interface — see
+    <a href="/owner/docs/usage/#what-a-class-level-annotation-reaches">what a class-level annotation
+    reaches</a>.
   </p>
   <p>
     If you were working around this by repeating an annotation on the interface handed to the

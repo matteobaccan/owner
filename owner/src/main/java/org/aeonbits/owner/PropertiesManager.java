@@ -17,7 +17,6 @@ import org.aeonbits.owner.util.Util;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -235,14 +234,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         this.keyPrefix = keyPrefix;
         this.strict = strict;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
-        Map<Class<?>, Sources> declared = findAnnotations(Sources.class);
+        Map<Class<?>, Sources> declared = Annotations.findAnnotations(clazz, Sources.class);
         sourcesWereDeclared = !declared.isEmpty();
         uris = toURIs(declared, urlFactory);
 
-        LoadPolicy loadPolicy = findAnnotation(LoadPolicy.class);
+        LoadPolicy loadPolicy = Annotations.findAnnotation(clazz, LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        HotReload hotReload = findAnnotation(HotReload.class);
+        HotReload hotReload = Annotations.findAnnotation(clazz, HotReload.class);
         if (hotReload != null) {
             long interval = HotReloadLogic.intervalMillis(hotReload, clazz, expander);
             hotReloadLogic = new HotReloadLogic(hotReload, interval, uris, this);
@@ -295,12 +294,18 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     }
 
     /**
-     * The decryptor an interface declares with {@link DecryptorClass}. A nested interface that declares none
-     * uses the one of the configuration holding it, the tree being a single configuration; the root falls
-     * back on the {@link IdentityDecryptor}.
+     * The decryptor an interface declares with {@link DecryptorClass}, or that any interface above it does.
+     * A nested interface that declares none uses the one of the configuration holding it, the tree being a
+     * single configuration; the root falls back on the {@link IdentityDecryptor}.
+     * <p>
+     * Until 2.0.0 this was read off the interface itself and nowhere else, not even its direct
+     * super-interfaces — so a {@code @DecryptorClass} written on a base interface did nothing, and did it
+     * quietly: an {@link EncryptedValue} then came back as the ciphertext stored in the file, which is a
+     * value like any other and fails, if it fails at all, wherever it is finally used.
+     * </p>
      */
     private static Decryptor declaredDecryptor(Class<?> clazz, Decryptor fallback) {
-        DecryptorClass declared = clazz.getAnnotation(DecryptorClass.class);
+        DecryptorClass declared = Annotations.findAnnotation(clazz, DecryptorClass.class);
         if (declared != null)
             return Util.newInstance(declared.value());
         return fallback != null ? fallback : Util.newInstance(IdentityDecryptor.class);
@@ -457,65 +462,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             return decryptor.decrypt(value);
         }
         return value;
-    }
-
-    /**
-     * The interfaces a class-level annotation is looked for on: the mapping interface itself, then the
-     * interfaces it extends, then the ones those extend, breadth first and each of them visited once.
-     * <p>
-     * Breadth first is what makes the order mean something. A super-interface is asked before that
-     * super-interface's own parents, and two interfaces extended by the same one are asked in the order of
-     * the {@code extends} clause, so "the nearest declaration wins" holds and a hierarchy one level deep
-     * behaves exactly as it did when the lookup stopped there. The set also keeps the diamond honest: an
-     * interface reached by two paths is read once, and so contributes its {@code @Sources} once.
-     * </p>
-     */
-    private Collection<Class<?>> hierarchy() {
-        Collection<Class<?>> visited = new LinkedHashSet<>();
-        Deque<Class<?>> pending = new ArrayDeque<>();
-        pending.add(clazz);
-        while (!pending.isEmpty()) {
-            Class<?> type = pending.poll();
-            if (visited.add(type))
-                Collections.addAll(pending, type.getInterfaces());
-        }
-        return visited;
-    }
-
-    /**
-     * The nearest declaration of an annotation that describes a <b>single</b> setting, such as
-     * {@link LoadPolicy} or {@link HotReload}, or <code>null</code> when nobody in the hierarchy declares it.
-     * <p>
-     * Until 2.0.0 each of these was looked for by its own copy of the same loop, and each of those loops
-     * stopped at the direct super-interfaces: a policy or a reload interval written two levels up was
-     * silently ignored, while {@link Config.Prefix} counted at any depth — so the library contradicted
-     * itself depending on which annotation was being read. It is one method now, and it walks the whole
-     * {@link #hierarchy()}.
-     * </p>
-     */
-    private <T extends Annotation> T findAnnotation(Class<T> annotationType) {
-        for (Class<?> type : hierarchy()) {
-            T annotation = type.getAnnotation(annotationType);
-            if (annotation != null)
-                return annotation;
-        }
-        return null;
-    }
-
-    /**
-     * The same walk for an annotation that describes a <b>set</b> and therefore accumulates rather than
-     * being won: every declaration of it in the hierarchy, keyed by the interface that carries it, in the
-     * order the interfaces are visited. The key is there for the diagnostics, which name the interface a
-     * source came from when it is not the one handed to the factory.
-     */
-    private <T extends Annotation> Map<Class<?>, T> findAnnotations(Class<T> annotationType) {
-        Map<Class<?>, T> result = new LinkedHashMap<>();
-        for (Class<?> type : hierarchy()) {
-            T annotation = type.getAnnotation(annotationType);
-            if (annotation != null)
-                result.put(type, annotation);
-        }
-        return result;
     }
 
     /**
@@ -1432,7 +1378,10 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                 descriptions.put(key, description.value());
         }
 
-        Config.Description onTheInterface = clazz.getAnnotation(Config.Description.class);
+        // the header describes the configuration and not one interface of it, so it is taken from wherever
+        // in the hierarchy it is written, nearest first — a base interface that describes what the file is
+        // for describes it for everything that extends it
+        Config.Description onTheInterface = Annotations.findAnnotation(clazz, Config.Description.class);
 
         readLock.lock();
         try {

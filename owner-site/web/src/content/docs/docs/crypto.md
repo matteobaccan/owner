@@ -237,6 +237,13 @@ public interface Sample extends Config {
 }
 ```
 
+The `@DecryptorClass` is a property of the configuration and not of one interface of it, so it is found
+wherever in the hierarchy it is written — on a base interface that a dozen configurations extend, for
+instance. Before 2.0.0 it was read off the interface handed to the `ConfigFactory` and nowhere else, not
+even its direct super-interfaces, and the failure was quiet: the method answered with the cipher text as
+stored, which is a string like any other. See
+[what a class-level annotation reaches](/owner/docs/usage/#what-a-class-level-annotation-reaches).
+
 You supply the `Decryptor`; the library ships none for this path. It composes with the other annotations:
 
 ```java

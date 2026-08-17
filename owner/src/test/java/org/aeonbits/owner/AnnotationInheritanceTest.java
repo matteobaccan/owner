@@ -41,7 +41,12 @@ import static org.junit.Assert.assertTrue;
  * ones it extends in the order of the {@code extends} clause, then theirs. Until then it stopped at the
  * direct super-interfaces and an annotation on a grandparent was silently ignored, which contradicted
  * {@link Config.Prefix} — that one always counted at any depth. Each of these three had its own copy of
- * the same loop; they share one now, which is what made the depth a single decision rather than three.</p>
+ * the same loop; they share one now — {@link Annotations} — which is what made the depth a single decision
+ * rather than three.</p>
+ * <p>
+ * These three are the ones {@link PropertiesManager} reads when the configuration is created. The other
+ * class-level annotations, and the rule that decides which of them walks the hierarchy at all, are in
+ * {@link ClassLevelAnnotationsTest}.</p>
  *
  * @author Matteo Baccan
  */

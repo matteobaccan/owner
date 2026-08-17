@@ -52,7 +52,20 @@ in one move.
   <p>
     When the annotation is placed on an interface, it applies to the methods <em>declared</em> in that
     interface. A method inherited from a super-interface keeps whatever the super-interface says, so
-    disabling a feature on a sub-interface does not reach the methods it inherits.
+    disabling a feature on a sub-interface does not reach the methods it inherits. This is the rule
+    <code>@Prefix</code> follows as well — see
+    <a href="/owner/docs/usage/#what-a-class-level-annotation-reaches">what a class-level annotation
+    reaches</a>.
+  </p>
+  <p>
+    <b>The methods of <a href="/owner/docs/accessible-mutable/"><code>Accessible</code></a> are the
+    exception</b>, and have to be: <code>getProperty</code> and <code>fill</code> are declared on
+    <code>Accessible</code> and never on the interface you wrote, so there is no declaring class of yours
+    for them to read. They ask the configuration object instead, and that question is answered by the
+    whole hierarchy: a <code>@DisableFeature(VARIABLE_EXPANSION)</code> written anywhere above reaches
+    them. Until 2.0.0 it was read off the interface handed to the factory alone, so one written on a
+    super-interface switched the expansion off for the mapping methods and left it on for
+    <code>getProperty</code> — the same property, two answers.
   </p>
 </div>
 

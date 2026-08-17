@@ -677,6 +677,15 @@ public interface Config extends Serializable {
          * Tells whether this feature is disabled for the given method, considering the
          * {@link DisableFeature} annotation on the method itself and on the interface declaring it.
          * <p>
+         * The lookup stops at the interface that <b>declares</b> the method, and deliberately: an interface
+         * governs the methods it declares, which is the same rule {@link Prefix} follows and the reason a
+         * sub-interface cannot change the meaning of the keys its parent declared. Were it to climb, a
+         * blanket <code>@DisableFeature(PREFIX)</code> on some base interface would cancel a
+         * <code>@Prefix</code> written explicitly two levels below it, which is a negative overruling a
+         * positive at a distance. For the question about the configuration <b>object</b> - has this
+         * configuration asked for the feature to be off? - see {@link #isDisabledFor(Class)}.
+         * </p>
+         * <p>
          * This method replaces <code>org.aeonbits.owner.util.Util.isFeatureDisabled(Method,
          * DisableableFeature)</code>, removed in 2.0.0: the knowledge of {@link DisableFeature} now
          * sits next to the annotation it reads.
@@ -688,18 +697,34 @@ public interface Config extends Serializable {
          * @since 2.0.0
          */
         public boolean isDisabledFor(Method method) {
-            return isDisabledFor(method.getDeclaringClass()) ||
+            return isDisabledBy(method.getDeclaringClass().getAnnotation(DisableFeature.class)) ||
                     isDisabledBy(method.getAnnotation(DisableFeature.class));
         }
 
         /**
-         * Tells whether this feature is disabled for the given interface as a whole.
+         * Tells whether this feature is disabled for a configuration object as a whole: the annotation is
+         * looked for on the given interface and on every interface above it, nearest first.
          * <p>
          * The methods of {@link Accessible} are asked this question rather than
          * {@link #isDisabledFor(Method)}: they are declared on <code>Accessible</code> and not on the
          * configuration interface, so the annotation that concerns them is never on their declaring
          * class. A <code>@DisableFeature(VARIABLE_EXPANSION)</code> written on a configuration interface
          * has to reach <code>getProperty</code> and <code>fill</code> as well, and this is how.
+         * </p>
+         * <p>
+         * It reads the whole hierarchy since 2.0.0. Before that it read the given interface and nothing
+         * above it, so one configuration answered the same question two ways: the annotation written on a
+         * super-interface switched the feature off for the methods that interface declares - through
+         * {@link #isDisabledFor(Method)}, which finds it on the declaring class - and left it on for
+         * <code>getProperty</code> and <code>fill</code>, which ask here. The same property came back
+         * expanded or unexpanded depending on which of the two you called.
+         * </p>
+         *
+         * <p>
+         * Every declaration found is read, not only the nearest one, because this annotation carries a
+         * <b>set</b> of features and two interfaces of the same hierarchy may switch off one each: taking
+         * the nearest would answer <code>false</code> about a feature a base interface had disabled, only
+         * because some interface below it disabled a different one.
          * </p>
          *
          * @param clazz the interface to inspect.
@@ -708,7 +733,10 @@ public interface Config extends Serializable {
          * @since 2.0.0
          */
         public boolean isDisabledFor(Class<?> clazz) {
-            return isDisabledBy(clazz.getAnnotation(DisableFeature.class));
+            for (DisableFeature declared : Annotations.findAnnotations(clazz, DisableFeature.class).values())
+                if (isDisabledBy(declared))
+                    return true;
+            return false;
         }
 
         private boolean isDisabledBy(DisableFeature annotation) {
