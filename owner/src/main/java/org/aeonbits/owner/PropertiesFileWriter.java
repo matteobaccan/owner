@@ -99,8 +99,34 @@ final class PropertiesFileWriter {
     void write(File file, Properties values, Set<String> known) throws IOException {
         List<String> existing = file.isFile()
                 ? Files.readAllLines(file.toPath(), LATIN_1)
-                : Collections.emptyList();
+                : Collections.<String>emptyList();
 
+        // both are declared, and in this order, so that each closes what it opened: the writer holds an
+        // encoder of its own, and flushing the stream underneath it is not the same as closing it
+        try (OutputStream stream = Files.newOutputStream(file.toPath());
+             Writer writer = new OutputStreamWriter(stream, LATIN_1)) {
+            writer.write(render(existing, values, known));
+        }
+    }
+
+    /**
+     * The same file, as text, for a caller that has nowhere to put it - {@link TemplateTool} writing to
+     * standard output.
+     * <p>
+     * It exists so that there is no temporary file anywhere in this. Writing a configuration into the
+     * system temporary directory to read it straight back would put its values where every local user can
+     * read them, and a default value is sometimes a password. The first version of the tool did exactly
+     * that and both scanners said so within the hour -
+     * <code>java/local-temp-file-or-directory-information-disclosure</code> and <code>S5443</code> - which
+     * is the second time in two days that the answer to a report was to remove the thing rather than to
+     * guard it.
+     * </p>
+     */
+    String render(Properties values, Set<String> known) {
+        return render(Collections.<String>emptyList(), values, known);
+    }
+
+    private String render(List<String> existing, Properties values, Set<String> known) {
         List<String> out = new ArrayList<>();
         Set<String> placed = new LinkedHashSet<>();
 
@@ -110,17 +136,12 @@ final class PropertiesFileWriter {
         keepWhatTheFileArranged(existing, values, known, out, placed);
         appendWhatTheFileDidNotHave(values, known, out, placed);
 
-        // both are declared, and in this order, so that each closes what it opened: the writer holds an
-        // encoder of its own, and flushing the stream underneath it is not the same as closing it
-        try (OutputStream stream = Files.newOutputStream(file.toPath());
-             Writer writer = new OutputStreamWriter(stream, LATIN_1)) {
-            for (String line : out) {
-                writer.write(line);
-                // \n rather than the platform separator: a configuration file travels between machines,
-                // and a rewrite that flips every line ending is a diff with no content in it
-                writer.write('\n');
-            }
-        }
+        StringBuilder text = new StringBuilder();
+        for (String line : out)
+            // a newline rather than the platform separator: a configuration file travels between machines,
+            // and a rewrite that flips every line ending is a diff with no content in it
+            text.append(line).append('\n');
+        return text.toString();
     }
 
     /** Walks the file as it stands, replacing values in place and leaving everything else alone. */

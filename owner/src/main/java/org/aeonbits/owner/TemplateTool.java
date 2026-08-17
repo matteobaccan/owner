@@ -10,13 +10,10 @@ package org.aeonbits.owner;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
  * Writes the properties file of a mapping interface, from the command line, without running the
@@ -149,16 +146,10 @@ public final class TemplateTool {
             return;
         }
 
-        // standard output has no file to keep, so the template is written to one that never existed and
-        // then read back - the same writer, rather than a second implementation of it that would drift
-        File temporary = File.createTempFile("owner-template", ".properties");
-        try {
-            Files.delete(temporary.toPath());
-            writer.write(temporary, values, known);
-            out.print(new String(Files.readAllBytes(temporary.toPath()), ISO_8859_1));
-        } finally {
-            Files.deleteIfExists(temporary.toPath());
-        }
+        // standard output has no file to keep, and no temporary one is made to stand in for it: a
+        // configuration written into the system temporary directory is a configuration every local user
+        // can read, and a default value is sometimes a password
+        out.print(writer.render(values, known));
     }
 
     private static void usage(PrintStream to) {
