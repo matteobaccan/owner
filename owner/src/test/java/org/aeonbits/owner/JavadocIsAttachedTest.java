@@ -59,13 +59,16 @@ public class JavadocIsAttachedTest {
     }
 
     /**
-     * Every java file of this module, main and test. The module directory is the working directory
-     * surefire runs in, and the assertion below says so out loud rather than letting a wrong one turn
-     * this test into one that passes because it looked at nothing.
+     * Every java file of the three modules, main and test. The paths are relative to this module's
+     * directory, which is where surefire runs, and the assertion below says so out loud rather than
+     * letting a wrong one turn this test into one that passes because it looked at nothing.
      */
     private static List<Path> sources() throws IOException {
         List<Path> found = new ArrayList<>();
-        for (String tree : new String[] {"src/main/java", "src/test/java"}) {
+        for (String tree : new String[] {
+                "src/main/java", "src/test/java",
+                "../owner-extras/src/main/java", "../owner-extras/src/test/java",
+                "../owner-formats/src/main/java", "../owner-formats/src/test/java"}) {
             Path root = Paths.get(tree);
             assertTrue(root.toAbsolutePath() + " is not there: this test is looking in the wrong place",
                     Files.isDirectory(root));
