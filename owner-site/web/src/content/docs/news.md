@@ -811,6 +811,14 @@ A large part of the work that went into 2.0.0 is not visible in the API. The obj
 coverage as far as it reasonably goes and to leave no warning unexamined, so that future changes start from a
 codebase that says what it does.
 
+ * **Four javadoc comments were documenting nothing**, and are back on what they describe. A comment
+   documents whatever is declared under it, so a new documented member inserted immediately below an
+   existing one leaves that one stranded: it stays in the file, reads as though it were published, and is
+   not. `@Separator` had lost its documentation the day `@Description` arrived, `Accessible.storeToXML` the
+   day `save(File)` did, and the note explaining why OAEP is given its parameters explicitly had drifted
+   onto an unrelated method. Neither the compiler nor javadoc says anything about this — javadoc warns
+   about a member with *no* comment, and in each case the member below had one of its own. A test reads the
+   source and refuses two javadoc comments in a row, so the next one cannot go unnoticed.
  * **Test coverage extended**, with the crypto, loaders, util and ConfigCache packages at or near 100%. The
    tests were written to pin down actual behaviour, not to move a percentage: several of them document
    decisions that were previously only implicit in the code.

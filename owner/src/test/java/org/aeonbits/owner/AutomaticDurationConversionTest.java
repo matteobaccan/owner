@@ -78,12 +78,12 @@ public class AutomaticDurationConversionTest {
     // -------------------------------------------------------------------------------------------------
 
     /**
-     * THE TRAP. A number with no unit is read as milliseconds. Whoever writes `timeout=30` meaning
-     * seconds gets thirty milliseconds, silently, and their service times out immediately.
-     */
-    /**
-     * Option (b): on the automatic path a bare number is refused, because it would silently mean
-     * milliseconds. The message says what to write instead.
+     * THE TRAP: a number with no unit is read as milliseconds, so whoever writes {@code timeout=30}
+     * meaning seconds gets thirty milliseconds, silently, and their service times out immediately.
+     * <p>
+     * Option (b) is what was chosen: on the automatic path a bare number is refused rather than read,
+     * and the message says what to write instead.
+     * </p>
      */
     @Test
     public void aBareNumberIsRefusedOnTheAutomaticPath() {

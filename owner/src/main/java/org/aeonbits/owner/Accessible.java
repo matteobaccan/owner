@@ -198,25 +198,6 @@ public interface Accessible extends Config {
     String getRawProperty(String key, String defaultValue);
 
     /**
-     * Emits an XML document representing all of the properties contained
-     * in this table.
-     *
-     * <p> An invocation of this method of the form <code>props.storeToXML(os,
-     * comment)</code> behaves in exactly the same way as the invocation
-     * <code>props.storeToXML(os, comment, "UTF-8");</code>.
-     *
-     * @param os the output stream on which to emit the XML document.
-     * @param comment a description of the property list, or <code>null</code>
-     *        if no comment is desired.
-     * @throws IOException if writing to the specified output stream
-     *         results in an <code>IOException</code>.
-     * @throws NullPointerException if <code>os</code> is null.
-     * @throws ClassCastException  if this <code>Properties</code> object
-     *         contains any keys or values that are not
-     *         <code>Strings</code>.
-     * @since 1.0.5
-     */
-    /**
      * Writes this configuration to a properties file, <b>keeping the file that is already there</b>.
      * <p>
      * Unlike {@link #store(OutputStream, String)}, which serialises a map and so loses the comments, the
@@ -263,15 +244,24 @@ public interface Accessible extends Config {
     void save(File file) throws IOException;
 
     /**
-     * Stores the underlying properties into an {@link java.io.OutputStream} in the XML format
-     * {@link java.util.Properties} defines, which the
-     * <a href="https://matteobaccan.github.io/owner/docs/file-formats/#xml">XML loader</a> reads back.
+     * Emits an XML document representing all of the properties contained
+     * in this table.
      *
-     * @param os      an output stream.
-     * @param comment a description of the property list, written as a comment; none if <code>null</code>.
-     * @throws IOException if writing this property list to the specified output stream throws an <code>IOException</code>.
+     * <p> An invocation of this method of the form <code>props.storeToXML(os,
+     * comment)</code> behaves in exactly the same way as the invocation
+     * <code>props.storeToXML(os, comment, "UTF-8");</code>.
+     *
+     * @param os the output stream on which to emit the XML document.
+     * @param comment a description of the property list, or <code>null</code>
+     *        if no comment is desired.
+     * @throws IOException if writing to the specified output stream
+     *         results in an <code>IOException</code>.
+     * @throws NullPointerException if <code>os</code> is null.
+     * @throws ClassCastException  if this <code>Properties</code> object
+     *         contains any keys or values that are not
+     *         <code>Strings</code>.
+     * @since 1.0.5
      * @see java.util.Properties#storeToXML(java.io.OutputStream, String)
-     * @since 1.0.4
      */
     void storeToXML(OutputStream os, String comment) throws IOException;
 

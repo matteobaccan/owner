@@ -476,10 +476,6 @@ public class RsaHandler implements ValueHandler, Encrypting {
         }
     }
 
-    /**
-     * OAEP with SHA-256 on both sides of it. Given explicitly rather than named in the transformation,
-     * because <code>OAEPWithSHA-256AndMGF1Padding</code> leaves MGF1 on SHA-1 in the JDK.
-     */
     /** See the field: created on first use, so that deserializing never inherits a random's state. */
     private synchronized SecureRandom random() {
         if (random == null)
@@ -487,6 +483,10 @@ public class RsaHandler implements ValueHandler, Encrypting {
         return random;
     }
 
+    /**
+     * OAEP with SHA-256 on both sides of it. Given explicitly rather than named in the transformation,
+     * because <code>OAEPWithSHA-256AndMGF1Padding</code> leaves MGF1 on SHA-1 in the JDK.
+     */
     private static OAEPParameterSpec oaep() {
         return new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256,
                 PSource.PSpecified.DEFAULT);
