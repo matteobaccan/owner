@@ -107,6 +107,26 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **The conventional file can be named**, with `owner:default` — the constant `Config.Sources.CONVENTIONAL`.
+   Written among the sources of `@Sources` it stands, in place, for everything the configuration would look
+   for if it declared none, so a configuration can have its own sources *and* the file named after it
+   without spelling out the package:
+
+   ```java
+   @LoadPolicy(LoadType.MERGE)
+   @Sources({"file:~/myapp.conf", "system:env", Sources.CONVENTIONAL})
+   public interface MyConfig extends Config { }
+   ```
+
+   The name is that of the interface handed to the `ConfigFactory`, not of the one carrying the annotation,
+   so a base interface can send twenty configurations each to its own file. Followed by an extension —
+   `owner:default.xml` — it stands for that one conventional source instead of all of them, which is how a
+   single format is asked for and how an order of your own is written:
+   `{"owner:default.yaml", "owner:default.properties"}` reads the YAML when it is there and the properties
+   when it is not. An extension no loader offers is refused rather than passed over, since it is not a
+   source that happens to be missing but one that could never exist. Closes the first half of
+   [#267](https://github.com/matteobaccan/owner/issues/267); the second half — reading `CORE_THREAD_NUMBER`
+   for `core.thread_number` — is what the relaxed binding above does.
  * **A property may be spelt the way the file spells it**, which closes
    [#116](https://github.com/matteobaccan/owner/issues/116), open since 2015. `String firstName()` now
    finds `firstName`, `first-name`, `first_name` or `FIRST_NAME`:
@@ -888,6 +908,20 @@ closed only when it has been understood.
    different variants; both are now uniform. The Maven wrapper sources are excluded, as they ship under Apache 2.0.
 
 #### Bugs fixes
+ * **The conventional file that won was decided by an order nobody had chosen.** When a configuration has
+   more than one of the files named after it, the first that exists is the one read — and that order was
+   the registration order of the loaders, which exists to answer a different question: *which loader can
+   read this URI*, where `PropertiesLoader` must come last because it accepts every URL it can resolve. As
+   a side effect `MyConfig.ini` and `MyConfig.cfg` silently outranked `MyConfig.properties`, so an
+   application reading its `.properties` for years would have stopped the day somebody dropped a `.cfg` in
+   the same directory — `.cfg` being the most generic of the four names and the likeliest to belong to
+   another tool. The two orders are now opposites on purpose: `.properties`, `.xml`, `.ini`, `.cfg`, and a
+   loader found on the classpath still last of all. A loader you register yourself still comes first in
+   both.
+ * **And when there is more than one of them, the library now says so**, at `WARNING`, naming both files,
+   which one was read and how to end the ambiguity — a refusal under `owner.strict`, like every other
+   warning with a caller to refuse. No ordering rule can do better than choose which of two silences you
+   get: the file you did not expect being read, or the file you did expect being ignored.
  * **`@Sources`, `@LoadPolicy` and `@HotReload` were ignored two levels up.** The three were looked for on
    the mapping interface and on the interfaces it extends *directly*, each by its own copy of the same loop,
    so an annotation on the parent of a parent did nothing: its sources were not loaded, its policy did not

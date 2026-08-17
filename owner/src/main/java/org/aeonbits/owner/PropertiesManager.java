@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
+import static org.aeonbits.owner.Config.Sources.CONVENTIONAL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
 import static org.aeonbits.owner.util.Util.*;
 
@@ -234,12 +235,15 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         this.keyPrefix = keyPrefix;
         this.strict = strict;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
+
+        // the policy is read before the sources because the warning about several conventional files names
+        // it: which of them is read, and whether the others are read at all, is what it decides
+        LoadPolicy loadPolicy = Annotations.findAnnotation(clazz, LoadPolicy.class);
+        loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
+
         Map<Class<?>, Sources> declared = Annotations.findAnnotations(clazz, Sources.class);
         sourcesWereDeclared = !declared.isEmpty();
         uris = toURIs(declared, urlFactory);
-
-        LoadPolicy loadPolicy = Annotations.findAnnotation(clazz, LoadPolicy.class);
-        loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         HotReload hotReload = Annotations.findAnnotation(clazz, HotReload.class);
         if (hotReload != null) {
@@ -489,7 +493,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             String[] specs = defaultSpecs(uriFactory);
             LOGGER.log(Level.CONFIG, () -> String.format("%s: no @Sources, looking for: %s",
                     clazz.getName(), Arrays.toString(specs)));
-            return resolve(specs, uriFactory);
+            return conventional(specs, uriFactory);
         }
 
         List<URI> result = new ArrayList<>();
@@ -498,9 +502,94 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             String[] specs = entry.getValue().value();
             LOGGER.log(Level.CONFIG, () -> String.format("%s: sources declared%s: %s", clazz.getName(),
                     declaring == clazz ? "" : " on " + declaring.getName(), Arrays.toString(specs)));
-            result.addAll(resolve(specs, uriFactory));
+            for (String spec : specs)
+                result.addAll(uriOf(spec, uriFactory));
         }
         return result;
+    }
+
+    /**
+     * One declared source, which is usually one spec but is the whole convention when it is the
+     * {@link Config.Sources#CONVENTIONAL} token. See there for what it means and why it exists.
+     */
+    private List<URI> uriOf(String spec, ConfigURIFactory uriFactory) {
+        String trimmed = spec.trim();
+        if (CONVENTIONAL.equals(trimmed)) {
+            String[] specs = defaultSpecs(uriFactory);
+            LOGGER.log(Level.CONFIG, () -> String.format("%s: %s stands for: %s",
+                    clazz.getName(), CONVENTIONAL, Arrays.toString(specs)));
+            return conventional(specs, uriFactory);
+        }
+        if (trimmed.startsWith(CONVENTIONAL + '.'))
+            return resolve(new String[] {conventionalSpecEnding(trimmed.substring(CONVENTIONAL.length()),
+                    uriFactory)}, uriFactory);
+        return resolve(new String[] {spec}, uriFactory);
+    }
+
+    /**
+     * The one conventional spec with the given extension - <code>owner:default.xml</code> - or a refusal
+     * naming what is available.
+     * <p>
+     * Refused rather than dropped, and that is the point of the qualified form: a spec that resolves to
+     * nothing is passed over, so a misspelt <code>owner:default.propertis</code> would leave a
+     * configuration reading nothing and saying nothing about it. An extension no loader offers is not a
+     * source that happens to be missing, it is a source that could never exist.
+     * </p>
+     */
+    private String conventionalSpecEnding(String extension, ConfigURIFactory uriFactory) {
+        String[] specs = defaultSpecs(uriFactory);
+        for (String spec : specs)
+            if (spec.regionMatches(true, spec.length() - extension.length(), extension, 0, extension.length()))
+                return spec;
+
+        StringBuilder available = new StringBuilder();
+        for (String spec : specs) {
+            if (available.length() > 0) available.append(", ");
+            available.append(spec.substring(spec.lastIndexOf('.')));
+        }
+        throw unsupported("%s: no conventional source ends in '%s'. Available: %s. A format read by a "
+                + "loader of its own needs that loader on the classpath.",
+                clazz.getName(), extension, available);
+    }
+
+    /**
+     * Resolves the conventional specs, and <b>says so when more than one of them is there</b>.
+     * <p>
+     * Two files named after the same interface is nobody's intention: one of them is a leftover, or belongs
+     * to another tool - <code>.cfg</code> is the most generic of the four names - or is the file somebody
+     * has just written and is wondering why nothing reads. Whichever it is, the library knows and the
+     * person does not, and no ordering rule can fix that by itself: it can only decide which of the two
+     * silences you get. So the ambiguity is named, with what was chosen and what it means.
+     * </p>
+     */
+    private List<URI> conventional(String[] specs, ConfigURIFactory uriFactory) {
+        List<URI> found = resolve(specs, uriFactory);
+        if (found.size() > 1)
+            reportSeveralConventionalSources(found);
+        return found;
+    }
+
+    private void reportSeveralConventionalSources(List<URI> found) {
+        String message = String.format("%s: more than one conventional source exists: %s. %s. "
+                        + "Name the one you mean with @Sources, or %s.<extension>.",
+                clazz.getName(), namesOf(found),
+                loadType == FIRST
+                        ? "With LoadType.FIRST only " + hideCredentials(found.get(0)) + " is read"
+                        : "With LoadType.MERGE all of them are read, the earlier ones prevailing",
+                CONVENTIONAL);
+        if (strict)
+            throw unsupported(message);
+        LOGGER.log(Level.WARNING, message);
+    }
+
+    /** The sources as text, credentials removed, for a message that names more than one of them. */
+    private static String namesOf(List<URI> uris) {
+        StringBuilder text = new StringBuilder();
+        for (URI uri : uris) {
+            if (text.length() > 0) text.append(", ");
+            text.append(hideCredentials(uri));
+        }
+        return text.toString();
     }
 
     private List<URI> resolve(String[] specs, ConfigURIFactory uriFactory) {

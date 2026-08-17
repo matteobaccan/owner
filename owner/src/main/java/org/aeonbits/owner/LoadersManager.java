@@ -53,6 +53,13 @@ class LoadersManager implements Serializable {
     private final List<Loader> loaders = new LinkedList<>();
     /** The subset of {@link #loaders} that was found on the classpath rather than built in or registered. */
     private final List<Loader> discovered = new LinkedList<>();
+    /**
+     * The subset of {@link #loaders} this library ships. Kept apart from the ones somebody registered
+     * because {@link #defaultSpecs(String)} treats the two differently: a loader registered by hand is an
+     * instruction and comes first, while these are a convention and are ordered by what a configuration
+     * without {@link Config.Sources} should read first.
+     */
+    private final List<Loader> builtIn = new LinkedList<>();
 
     LoadersManager() {
         this(discover());
@@ -72,6 +79,7 @@ class LoadersManager implements Serializable {
         registerLoader(new DotEnvLoader());
         registerLoader(new IniLoader());
         registerLoader(new SystemLoader());
+        builtIn.addAll(loaders);
         registerDiscovered(found);
     }
 
@@ -167,21 +175,40 @@ class LoadersManager implements Serializable {
         try {
             loaders.clear();
             discovered.clear();
+            builtIn.clear();
         } finally {
             lock.writeLock().unlock();
         }
     }
 
     /**
-     * The second ordering, and deliberately not the first one: <b>a discovered loader comes last</b>.
+     * The second ordering, and it is <b>the first one reversed</b>: the built-in loaders in the order they
+     * were registered - so <code>MyConfig.properties</code>, then <code>.xml</code>, then <code>.ini</code>
+     * and <code>.cfg</code> - and a discovered loader last of all.
      * <p>
      * These are the sources looked for when an interface carries no {@link Config.Sources}, and under
      * {@link Config.LoadType#FIRST} the first one that resolves is the one that answers, while
-     * {@link Config.LoadType#MERGE} lets the earlier ones overwrite the later. Ordered like
-     * {@link #findLoader(URI)}, a jar appearing on the classpath would place its spec in front and a
-     * forgotten <code>MyConfig.yaml</code> would silently start beating a working
-     * <code>MyConfig.properties</code>. Placed last, a discovered loader can only answer for a name nothing
-     * else claimed.
+     * {@link Config.LoadType#MERGE} lets the earlier ones overwrite the later. So this order decides which
+     * file wins when two of them exist, which is a different question from the one {@link #findLoader(URI)}
+     * answers, and it wants the opposite answer.
+     * </p>
+     * <p>
+     * <b>Being able to read anything is a liability there and an asset here.</b> Asked <i>can you read this
+     * URI</i>, {@link PropertiesLoader} must be last: it accepts every URL it can resolve and would answer
+     * for the formats registered after it. Asked <i>which file is this configuration's own</i>, it must be
+     * first: <code>MyConfig.properties</code> is the convention this library was built on and the one an
+     * application has been reading for years, and it cannot be displaced by a <code>MyConfig.cfg</code> that
+     * somebody else's tool left in the directory - <code>.cfg</code> being the most generic of the four
+     * names and the easiest to collide with. Until 2.0.0 the two orders were the same list, which is to say
+     * this one was never chosen: a <code>.ini</code> or a <code>.cfg</code> silently outranked a
+     * <code>.properties</code>.
+     * </p>
+     * <p>
+     * A discovered loader stays last under either reading. Ordered like {@link #findLoader(URI)}, a jar
+     * appearing on the classpath would place its spec in front and a forgotten <code>MyConfig.yaml</code>
+     * would silently start beating a working <code>MyConfig.properties</code>; last, it can only answer for
+     * a name nothing else claimed. What a configuration wants read first, it can now also say - see
+     * {@link Config.Sources} and <code>owner:default</code>.
      * </p>
      * <p>
      * That fixes precedence and not cost: {@link PropertiesManager} resolves every spec to a URI before any
@@ -197,28 +224,58 @@ class LoadersManager implements Serializable {
         lock.readLock().lock();
         try {
             Collection<String> defaultSpecs = new LinkedHashSet<>(loaders.size());
-            addSpecs(defaultSpecs, prefix, false);
-            addSpecs(defaultSpecs, prefix, true);
+            addRegisteredSpecs(defaultSpecs, prefix);
+            addBuiltInSpecs(defaultSpecs, prefix);
+            addDiscoveredSpecs(defaultSpecs, prefix);
             return defaultSpecs.toArray(new String[0]);
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    private void addSpecs(Collection<String> specs, String prefix, boolean fromClasspath) {
-        for (Loader loader : loaders) {
-            if (isDiscovered(loader) != fromClasspath) continue;
-            String[] offered = loader.defaultSpecsFor(prefix);
-            if (offered == null) continue;
-            for (String spec : offered) {
-                // a null among them is a mistake in the loader, not a way of saying "none" - that is an
-                // empty array - and only the author of the loader can put it right, so it is named
-                if (spec == null)
-                    throw unsupported("%s returned a null among its default specifications for '%s'",
-                            loader.getClass().getName(), prefix);
-                specs.add(spec);
-            }
+    /** Most recently registered first, as {@link #findLoader(URI)} asks them: this one is an instruction. */
+    private void addRegisteredSpecs(Collection<String> specs, String prefix) {
+        for (Loader loader : loaders)
+            if (!isDiscovered(loader) && !isBuiltIn(loader))
+                addSpecsOf(loader, specs, prefix);
+    }
+
+    /** Backwards, since registration pushes to the front: the list walked this way is registration order. */
+    private void addBuiltInSpecs(Collection<String> specs, String prefix) {
+        List<Loader> registered = new ArrayList<>(loaders);
+        for (int i = registered.size() - 1; i >= 0; i--) {
+            Loader loader = registered.get(i);
+            if (isBuiltIn(loader))
+                addSpecsOf(loader, specs, prefix);
         }
+    }
+
+    /** Forwards, which for these is the order {@link java.util.ServiceLoader} handed them over in. */
+    private void addDiscoveredSpecs(Collection<String> specs, String prefix) {
+        for (Loader loader : loaders)
+            if (isDiscovered(loader))
+                addSpecsOf(loader, specs, prefix);
+    }
+
+    private void addSpecsOf(Loader loader, Collection<String> specs, String prefix) {
+        String[] offered = loader.defaultSpecsFor(prefix);
+        if (offered == null) return;
+        for (String spec : offered) {
+            // a null among them is a mistake in the loader, not a way of saying "none" - that is an
+            // empty array - and only the author of the loader can put it right, so it is named
+            if (spec == null)
+                throw unsupported("%s returned a null among its default specifications for '%s'",
+                        loader.getClass().getName(), prefix);
+            specs.add(spec);
+        }
+    }
+
+    /** By identity, for the same reason {@link #isDiscovered(Loader)} is. */
+    private boolean isBuiltIn(Loader loader) {
+        for (Loader each : builtIn)
+            if (each == loader)
+                return true;
+        return false;
     }
 
     /** By identity: a loader is free to define equality, and two instances of one class are two loaders. */

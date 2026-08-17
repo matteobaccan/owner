@@ -102,7 +102,14 @@ public interface Config extends Serializable {
      * under the fully qualified name of the mapping interface with the extension of each format available. That
      * is a fallback for a configuration that names no source, not an extra source appended to the ones it named:
      * an interface carrying this annotation reads what it asked for and nothing else. Until 2.0.0 the convention
-     * was quietly appended to the declared sources as well.
+     * was quietly appended to the declared sources as well - and a configuration that wants both can now say so,
+     * which is what {@link #CONVENTIONAL} is for.
+     * </p>
+     * <p>
+     * When more than one conventional file exists - a <code>MyConfig.properties</code> and a
+     * <code>MyConfig.cfg</code> in the same place - the first of them answers and <b>a warning names them
+     * both</b>, since two files called after one interface is nobody's intention and no ordering rule can do
+     * more than choose which of the two silences you would otherwise get.
      * </p>
      *
      * @since 1.0.2
@@ -111,6 +118,42 @@ public interface Config extends Serializable {
     @Target(TYPE)
     @Documented
     @interface Sources {
+
+        /**
+         * The source that stands for <b>the convention</b>: written among the sources of this annotation, it
+         * is replaced, in place, by everything this configuration would look for if it declared none - the
+         * files named after the mapping interface, <code>.properties</code> first, then <code>.xml</code>,
+         * <code>.ini</code> and <code>.cfg</code>, then those offered by any
+         * {@link org.aeonbits.owner.loaders.Loader} found on the classpath.
+         * <pre>
+         *     &#64;LoadPolicy(LoadType.MERGE)
+         *     &#64;Sources({"file:~/myapp.conf", "system:env", Sources.CONVENTIONAL})
+         *     interface MyConfig extends Config { }
+         * </pre>
+         * <p>
+         * It exists because the alternative is to write <code>classpath:com/acme/MyConfig.properties</code>
+         * by hand, which repeats the package and, worse, is a string no refactoring will follow: move the
+         * interface to another package and that source stops resolving - silently, since a source that
+         * resolves to nothing is passed over by design.
+         * </p>
+         * <p>
+         * <b>The name is that of the interface handed to the {@link ConfigFactory}</b>, not of the one
+         * carrying the annotation, so a base interface can tell twenty configurations to read their own
+         * conventional file and each of them reads its own.
+         * </p>
+         * <p>
+         * Followed by an extension - <code>owner:default.xml</code> - it stands for that one conventional
+         * source instead of all of them, which is both how a single format is asked for and how an order of
+         * your own is written: <code>{"owner:default.yaml", "owner:default.properties"}</code> under
+         * {@link LoadType#FIRST} reads the YAML when it is there and the properties when it is not. An
+         * extension no loader offers is <b>refused</b> rather than passed over, since it is not a source
+         * that happens to be missing but one that could never exist.
+         * </p>
+         *
+         * @since 2.0.0
+         */
+        String CONVENTIONAL = "owner:default";
+
         /**
          * The source URIs from which to load the properties, in URI string format.
          *

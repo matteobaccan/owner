@@ -181,9 +181,95 @@ Five are available out of the box, and they are consulted in this order:
 fallback, not a candidate among equals.
 
 Three of them offer default file names, so a configuration with no `@Sources` looks for
-`MyConfig.properties`, `MyConfig.xml`, `MyConfig.ini` and `MyConfig.cfg` and nothing more.
-`SystemLoader` and `DotEnvLoader` offer none: they answer when they are named and cost nothing when
-they are not, a `.env` being neither on the classpath nor named after the configuration class.
+`MyConfig.properties`, `MyConfig.xml`, `MyConfig.ini` and `MyConfig.cfg` and nothing more —
+**in that order**, which is the subject of the next section. `SystemLoader` and `DotEnvLoader` offer
+none: they answer when they are named and cost nothing when they are not, a `.env` being neither on
+the classpath nor named after the configuration class.
+
+The conventional sources
+------------------------
+
+The files named after the mapping interface are *the convention*, and three questions come with them:
+which one wins when there is more than one, what happens when that is not what you meant, and how to
+ask for them by name from a configuration that also declares sources of its own.
+
+### Which one wins
+
+The order is the one above — `.properties`, `.xml`, `.ini`, `.cfg`, and then any file name offered by
+a [loader found on the classpath](#where-a-loader-of-your-own-sits-among-them) — and under the default `LoadType.FIRST` the
+first one that **exists** is the one that answers.
+
+It is **the reverse of the table above**, and deliberately:
+
+| Question | Order | Why |
+|---|---|---|
+| *Can you read this URI?* | `PropertiesLoader` **last** | it accepts every URL it can resolve, so asked earlier it would answer for the `.ini` and `.xml` files of the loaders after it |
+| *Which file is this configuration's own?* | `PropertiesLoader` **first** | `MyConfig.properties` is the convention this library was built on and the file an application has been reading for years |
+
+Being able to read anything is a liability in the first question and an asset in the second. `.cfg`
+is last of the four for the same reason read backwards: it is the most generic of the names and the
+likeliest to belong to somebody else's tool.
+
+<div class="note warning">
+  <h5>Until 2.0.0 this order was never chosen.</h5>
+  <p>
+    It was the registration order of the loaders — which exists to answer the <em>first</em> question —
+    so <code>MyConfig.ini</code> and <code>MyConfig.cfg</code> silently outranked
+    <code>MyConfig.properties</code>. An application reading its <code>.properties</code> for years would
+    have stopped, without a word, the day somebody dropped a <code>.cfg</code> in the same directory.
+  </p>
+</div>
+
+### When there is more than one, the library says so
+
+No order can do better than choose *which* of two silences you get: the file you did not expect being
+read, or the file you did expect being ignored. So when more than one conventional file exists, it is
+said out loud — a `WARNING`, naming both, saying which was read and how to end the ambiguity:
+
+```
+MyConfig: more than one conventional source exists: classpath:com/acme/MyConfig.properties,
+classpath:com/acme/MyConfig.xml. With LoadType.FIRST only classpath:com/acme/MyConfig.properties is
+read. Name the one you mean with @Sources, or owner:default.<extension>.
+```
+
+Under [`owner.strict`](/owner/docs/configuring/) it is a refusal, like every other warning that has a
+caller to refuse.
+
+### Asking for the convention by name
+
+`owner:default` — the constant `Config.Sources.CONVENTIONAL` — stands, **where you write it**, for
+everything the configuration would look for if it declared no sources at all:
+
+```java
+@LoadPolicy(LoadType.MERGE)
+@Sources({"file:~/myapp.conf", "system:env", Sources.CONVENTIONAL})
+public interface MyConfig extends Config { }
+```
+
+Two things are worth knowing about it:
+
+- **the name is that of the interface you hand to the `ConfigFactory`**, not of the one carrying the
+  annotation, so a base interface can tell twenty configurations to read their own conventional file
+  and each of them reads its own;
+- **followed by an extension** — `owner:default.xml` — it stands for that one conventional source
+  instead of all of them. An extension no loader offers is **refused** rather than passed over: a
+  source that resolves to nothing is skipped by design, so a misspelt `owner:default.propertis` would
+  otherwise leave a configuration reading nothing and saying nothing about it.
+
+The alternative is to write `classpath:com/acme/MyConfig.properties` by hand. That works, and it has
+two costs: it repeats the package, and it is a string no refactoring will follow — move the interface
+to another package and that source stops resolving, silently.
+
+### The use cases, and how each is written
+
+| You want | Write |
+|---|---|
+| your own sources **and** your conventional file, without spelling its path — [#267](https://github.com/matteobaccan/owner/issues/267) | `@Sources({"file:~/foo.config", Sources.CONVENTIONAL})` |
+| the environment to win, the conventional file as the base | `@Sources({"system:env", Sources.CONVENTIONAL})` with `@LoadPolicy(MERGE)` |
+| one base interface, twenty configurations, each reading its own file | the same `@Sources` on the base — the name follows the interface being created |
+| only the XML one, because a `.cfg` in that directory belongs to another tool | `@Sources("owner:default.xml")` |
+| YAML if it is there, properties otherwise | `@Sources({"owner:default.yaml", "owner:default.properties"})` with `FIRST` |
+| to know why your new `MyConfig.ini` is not being read | nothing: the `WARNING` above names the file that won |
 
   [props]: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-
 

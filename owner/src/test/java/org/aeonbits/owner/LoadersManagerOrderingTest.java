@@ -34,6 +34,26 @@ public class LoadersManagerOrderingTest {
     private static final String PREFIX = "classpath:org/aeonbits/owner/MyConfig";
 
     /**
+     * The order of the built-in specs, which is the first ordering <b>reversed</b> and is what decides which
+     * file wins when a configuration has two of them.
+     * <p>
+     * <code>.properties</code> first because it is the convention this library was built on and the file an
+     * application has been reading for years; <code>.cfg</code> last of the four because it is the most
+     * generic name of them all and the likeliest to belong to somebody else's tool. Until 2.0.0 this list
+     * was the registration order as it stands, so <code>.ini</code> and <code>.cfg</code> silently outranked
+     * <code>.properties</code> - which nobody chose, it simply fell out of the order
+     * {@link LoadersManager#findLoader(java.net.URI)} needs and which wants the opposite answer.
+     * </p>
+     */
+    @Test
+    public void theBuiltInSpecsAreOfferedMostConventionalFirst() {
+        LoadersManager loaders = new LoadersManager(Collections.<Loader>emptyList());
+
+        assertEquals(Arrays.asList(PREFIX + ".properties", PREFIX + ".xml", PREFIX + ".ini", PREFIX + ".cfg"),
+                Arrays.asList(loaders.defaultSpecs(PREFIX)));
+    }
+
+    /**
      * PropertiesLoader accepts every URL it can resolve, so a discovered loader that came after it would
      * never see one of its own files.
      */
