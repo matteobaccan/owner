@@ -1,0 +1,15 @@
+org.aeonbits.owner
+org.aeonbits.owner.converters
+org.aeonbits.owner.crypto
+org.aeonbits.owner.event
+org.aeonbits.owner.extras.jndi
+org.aeonbits.owner.extras.loaders
+org.aeonbits.owner.extras.validation
+org.aeonbits.owner.formats.json
+org.aeonbits.owner.formats.toml
+org.aeonbits.owner.formats.yaml
+org.aeonbits.owner.handlers
+org.aeonbits.owner.loaders
+org.aeonbits.owner.util
+org.aeonbits.owner.util.bytesize
+org.aeonbits.owner.validation
