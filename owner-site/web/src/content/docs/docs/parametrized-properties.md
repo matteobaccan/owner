@@ -125,3 +125,43 @@ public interface Sample extends Config {
 
 }
 ```
+
+Another dialect: `{0}` and `MessageFormat`
+------------------------------------------
+
+The formatting is [`java.util.Formatter`][formatter]'s — `%s`, `%d` — and it is not
+[`java.text.MessageFormat`][messageformat]'s `{0}`, which is what a GWT or a `ResourceBundle` message file
+uses. That has caught people out, because a `{0}` pattern is not a *broken* format string: it is a correct
+one in the other dialect, so nothing fails. The value comes back exactly as it was written and the
+arguments are dropped.
+
+*Since 2.0.0* the library says so, once per key:
+
+```
+WARNING: diskMessage() takes arguments and the value of 'disk.message' holds {0} placeholders, which is
+java.text.MessageFormat and not java.util.Formatter: the arguments were not used and the value was
+returned as it was written. Write %s, or format it yourself in a default method.
+```
+
+If the file has to keep its `{0}` — because something else reads it too — format it where you read it, in
+a `default` method:
+
+```java
+public interface Messages extends Config {
+
+    @DefaultValue("The disk \"{1}\" contains {0} file(s).")
+    String diskPattern();
+
+    default String disk(int files, String disk) {
+        return MessageFormat.format(diskPattern(), files, disk);
+    }
+}
+```
+
+That is [#118](https://github.com/matteobaccan/owner/issues/118) answered in the code that wanted it, and
+it is deliberately not a feature of the library: a configuration binder is not an i18n engine — Spring
+keeps the two apart with `MessageSource`, and MicroProfile has no parametrized properties at all — while a
+`default` method is two lines, steps through in a debugger, and can use any formatter you like.
+
+  [formatter]: https://docs.oracle.com/javase/8/docs/api/java/util/Formatter.html#syntax
+  [messageformat]: https://docs.oracle.com/javase/8/docs/api/java/text/MessageFormat.html

@@ -107,6 +107,14 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **A `{0}` in a parametrized property no longer fails in silence.** This library formats with
+   `java.util.Formatter` and a `java.text.MessageFormat` pattern is not a broken format string but a
+   correct one in another dialect, so `String.format` raised nothing, returned the value as written and
+   dropped the arguments without a word — which is what
+   [#118](https://github.com/matteobaccan/owner/issues/118) was opened about in 2015. It is reported once
+   per key now, with what to do instead. `MessageFormat` itself is still not supported and deliberately:
+   a configuration binder is not an i18n engine, and a `default` method formats it in two lines with any
+   formatter you like.
  * **A properties file can be generated from a mapping interface**, from the command line —
    `java -cp app.jar:owner.jar org.aeonbits.owner.TemplateTool --into src/main/resources com.acme.MyConfig`
    — which is what [#3](https://github.com/matteobaccan/owner/issues/3) asked for in 2013, the oldest issue

@@ -17,14 +17,18 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static org.aeonbits.owner.Config.DisableableFeature.PARAMETER_FORMATTING;
@@ -67,6 +71,16 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
     /** The interface this object implements, which for a nested one is not the one the manager was built on. */
     private final Class<?> configClass;
+
+    /**
+     * The shape of a {@link java.text.MessageFormat} placeholder: a number in braces, on its own or
+     * followed by a format type. Deliberately narrow — <code>{}</code> is SLF4J's and <code>{name}</code>
+     * is Spring's, and neither is a dialect anybody would expect this library to read.
+     */
+    private static final Pattern MESSAGE_FORMAT = Pattern.compile("\\{\\d+[,}]");
+
+    /** The keys already reported by {@link #reportAnotherDialect}, so that a call in a loop says it once. */
+    private final Set<String> reportedAnotherDialect = Collections.synchronizedSet(new HashSet<String>());
 
     /** The prefix this object resolves its keys with: the factory's, or the path a nested object hangs from. */
     private final KeyPrefix keyPrefix;
@@ -757,7 +771,10 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
 
         try {
             // Do this to achieve property expansion
-            return String.format(format, args);
+            String formatted = String.format(format, args);
+            if (formatted.equals(format))
+                reportAnotherDialect(method, format);
+            return formatted;
             }
         catch ( Exception notAFormat ) {
             // There's no guarantee that a property value from a config file
@@ -794,6 +811,38 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                         + "It is returned as it was written. A value that was never meant as a format needs "
                         + "nothing done about this; one that was has a placeholder in it that is not.",
                 method.getName(), key, notAFormat.getClass().getSimpleName()));
+    }
+
+    /**
+     * A value that carries <code>{0}</code> placeholders, given to a method that takes arguments.
+     * <p>
+     * This library formats with {@link java.util.Formatter} - <code>%s</code> - and a
+     * {@link java.text.MessageFormat} pattern is not a broken format string but a correct one in another
+     * dialect: <code>String.format</code> raises nothing, returns the text unchanged, and <b>the arguments
+     * are dropped without a word</b>. That silence is what
+     * <a href="https://github.com/matteobaccan/owner/issues/118">#118</a> was opened about in 2015, by
+     * somebody sharing a message file with a GWT project, and it is the one shape here that cannot be an
+     * innocent value: a password holding a <code>%</code> is ordinary, while <code>{0}</code> next to a
+     * method that takes arguments is somebody expecting a substitution.
+     * </p>
+     * <p>
+     * Said once per key, at {@code WARNING}, and not turned into a refusal by {@code owner.strict}: it
+     * happens when the method is called rather than when the configuration is built, and refusing there
+     * would take down an application over a message that came out badly.
+     * </p>
+     */
+    private void reportAnotherDialect(Method method, String format) {
+        if (!MESSAGE_FORMAT.matcher(format).find() || format.indexOf('%') >= 0)
+            return;
+        String key = key(method, keyPrefix);
+        if (!reportedAnotherDialect.add(key))
+            return;
+        LOGGER.log(Level.WARNING, () -> String.format(
+                "%s() takes arguments and the value of '%s' holds {0} placeholders, which is "
+                        + "java.text.MessageFormat and not java.util.Formatter: the arguments were not "
+                        + "used and the value was returned as it was written. Write %%s, or format it "
+                        + "yourself in a default method - see the documentation, Parametrized properties.",
+                method.getName(), key));
     }
 
     private String expandVariables(Method method, String value) {
