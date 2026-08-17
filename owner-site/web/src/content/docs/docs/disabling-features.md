@@ -54,8 +54,7 @@ in one move.
     interface. A method inherited from a super-interface keeps whatever the super-interface says, so
     disabling a feature on a sub-interface does not reach the methods it inherits. This is the rule
     <code>@Prefix</code> follows as well — see
-    <a href="/owner/docs/usage/#what-a-class-level-annotation-reaches">what a class-level annotation
-    reaches</a>.
+    <a href="/owner/docs/annotation-scope/">where an annotation counts</a>.
   </p>
   <p>
     <b>The methods of <a href="/owner/docs/accessible-mutable/"><code>Accessible</code></a> are the

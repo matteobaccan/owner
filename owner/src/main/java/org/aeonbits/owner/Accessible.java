@@ -262,6 +262,17 @@ public interface Accessible extends Config {
      */
     void save(File file) throws IOException;
 
+    /**
+     * Stores the underlying properties into an {@link java.io.OutputStream} in the XML format
+     * {@link java.util.Properties} defines, which the
+     * <a href="https://matteobaccan.github.io/owner/docs/file-formats/#xml">XML loader</a> reads back.
+     *
+     * @param os      an output stream.
+     * @param comment a description of the property list, written as a comment; none if <code>null</code>.
+     * @throws IOException if writing this property list to the specified output stream throws an <code>IOException</code>.
+     * @see java.util.Properties#storeToXML(java.io.OutputStream, String)
+     * @since 1.0.4
+     */
     void storeToXML(OutputStream os, String comment) throws IOException;
 
     /**

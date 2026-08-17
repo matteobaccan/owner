@@ -137,8 +137,7 @@ contributes its `@Sources` once.
     of the three annotations had its own copy of the lookup, which is how the three came to disagree with a
     fourth. They share one now, with every other annotation that describes the configuration object rather
     than the methods of one interface — see
-    <a href="/owner/docs/usage/#what-a-class-level-annotation-reaches">what a class-level annotation
-    reaches</a>.
+    <a href="/owner/docs/annotation-scope/">where an annotation counts</a>.
   </p>
   <p>
     If you were working around this by repeating an annotation on the interface handed to the

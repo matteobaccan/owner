@@ -14,6 +14,7 @@ import org.aeonbits.owner.Config.DisableFeature;
 import org.aeonbits.owner.Config.EncryptedValue;
 import org.aeonbits.owner.Config.Mandatory;
 import org.aeonbits.owner.Config.PreprocessorClasses;
+import org.aeonbits.owner.Config.Prefix;
 import org.aeonbits.owner.Config.Sensitive;
 import org.aeonbits.owner.Config.Separator;
 import org.aeonbits.owner.crypto.Decryptor;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.aeonbits.owner.Config.DisableableFeature.PREFIX;
 import static org.aeonbits.owner.Config.DisableableFeature.VALIDATION;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.junit.Assert.assertEquals;
@@ -252,6 +254,53 @@ public class ClassLevelAnnotationsTest {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         ConfigFactory.create(configClass).list(new PrintStream(bytes, true, "UTF-8"));
         return new String(bytes.toByteArray(), UTF_8);
+    }
+
+    @Sensitive
+    interface SensitiveGrandParent extends Config, Accessible {
+        @DefaultValue("s3cr3t")
+        String password();
+    }
+
+    interface MiddleWithoutSensitive extends SensitiveGrandParent {
+    }
+
+    interface TwoLevelsBelow extends MiddleWithoutSensitive {
+    }
+
+    /**
+     * Depth is not what this family is about: the annotation two levels up applies at once, because two
+     * levels up is where the method is declared. Nothing walks here and nothing needs to - the declaring
+     * interface is wherever it is, and {@link java.lang.reflect.Method#getDeclaringClass()} points at it.
+     */
+    @Test
+    public void sensitiveOnAGrandParentThatDeclaresTheMethodApplies() throws UnsupportedEncodingException {
+        assertTrue(listed(TwoLevelsBelow.class).contains("password=" + Sensitive.MASK));
+    }
+
+    @DisableFeature(PREFIX)
+    interface DisablingThePrefixAbove extends Config {
+    }
+
+    @Prefix("db.")
+    interface PrefixedBelow extends DisablingThePrefixAbove, Accessible {
+        @DefaultValue("localhost")
+        String host();
+    }
+
+    /**
+     * Why the method question does not climb, made concrete. {@code @DisableFeature} is a negative, and a
+     * blanket one written on some base interface would otherwise cancel a {@code @Prefix} written
+     * explicitly below it - a statement about keys nobody was looking at overruling one made about the keys
+     * in front of you. The prefix survives, and whoever wants it gone says so where the methods are.
+     */
+    @Test
+    public void aDisabledFeatureAboveDoesNotCancelWhatIsDeclaredBelow() {
+        PrefixedBelow cfg = ConfigFactory.create(PrefixedBelow.class);
+
+        assertEquals("localhost", cfg.host());
+        assertNull(cfg.getProperty("host"));
+        assertEquals("localhost", cfg.getProperty("db.host"));
     }
 
     interface DeclaringAnAbsentProperty extends Config {

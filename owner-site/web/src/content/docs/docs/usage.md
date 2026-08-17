@@ -425,72 +425,34 @@ on the default values: setting `feature.default.setting` in a properties file
 changes the answer, which is not something an inherited `@DefaultValue` could
 ever do.
 
-What a class-level annotation reaches
-------------------------------------
+Where a class-level annotation counts
+-------------------------------------
 
 Several annotations are written on the interface rather than on a method, and
-once interfaces start extending each other the question is where each of them
-counts. There are two answers, and which one applies follows from what the
-annotation is about.
+once interfaces extend each other the question is where each of them counts.
+There are two answers, and which one applies follows from what the annotation
+is about.
 
-**The ones that describe the configuration object** are found wherever in the
-hierarchy they are written: the interface handed to the `ConfigFactory`, then
-every interface it extends **directly** in the order of the `extends` clause,
-then theirs, each visited once. The nearest declaration wins — except
-`@Sources`, which accumulates, and `@DisableFeature`, which carries a set and
-is therefore read everywhere it appears.
+**The ones that describe the configuration object** — `@Sources`,
+`@LoadPolicy`, `@HotReload`, `@DecryptorClass`, the `@Description` of a saved
+file — are found wherever in the hierarchy they are written, nearest first: the
+configuration object is the interface you hand to the `ConfigFactory` together
+with everything it extends.
 
-| Annotation | Describes |
-|---|---|
-| [`@Sources`](/owner/docs/loading-strategies/) | which files the configuration reads |
-| [`@LoadPolicy`](/owner/docs/loading-strategies/) | how those files combine |
-| [`@HotReload`](/owner/docs/reload/) | whether and how it reloads |
-| [`@DecryptorClass`](/owner/docs/crypto/) | who decrypts its `@EncryptedValue` properties |
-| `@Description` | the header written into a file it [saves](/owner/docs/accessible-mutable/) |
-| [`@DisableFeature`](/owner/docs/disabling-features/) | *asked of the object* — see below |
+**The ones that describe the methods an interface declares** — `@Prefix`,
+`@Mandatory`, `@Sensitive`, `@Separator`, `@TokenizerClass`,
+`@PreprocessorClasses` — are read off the interface that declares the method,
+and neither climb nor descend. A sub-interface saying `@Sensitive` does not
+mask the keys its parent declared, and one saying `@Separator(";")` does not
+change how a list its parent described is cut: an interface governs what it
+declares, or two interfaces would be describing one key.
 
-**The ones that describe the methods an interface declares** are read off the
-interface that declares the method, and neither climb nor descend:
+`@DisableFeature` is asked both questions, and answers each with its own rule.
 
-| Annotation | Describes |
-|---|---|
-| [`@Prefix`](/owner/docs/key-prefix/) | the prefix its keys are read with |
-| [`@Mandatory`](#mandatory-properties) | that its properties must be present |
-| [`@Sensitive`](/owner/docs/debugging/) | that its values are not to be printed |
-| [`@Separator`, `@TokenizerClass`](/owner/docs/type-conversion/) | how its list values are cut |
-| [`@PreprocessorClasses`](/owner/docs/preprocessors/) | how its values are rewritten before use |
-| [`@DisableFeature`](/owner/docs/disabling-features/) | *asked of a method* — see below |
-
-An interface governs what it declares. A sub-interface saying `@Sensitive`
-does not mask the keys its parent declared, and a sub-interface saying
-`@Separator(";")` does not change how a list its parent described is cut —
-otherwise two interfaces would be describing one key, and the one that wrote
-the property would not be the one deciding what it means. Say it where the
-method is declared, or on the method.
-
-<div class="note info">
-  <h5>Why <code>@DisableFeature</code> is in both tables.</h5>
-  <p>
-    It is asked both questions. <em>Is this feature off for this method?</em> — the method and the interface
-    declaring it, second table. <em>Has this configuration asked for the feature to be off?</em> — the whole
-    hierarchy, first table. The second question is the one the
-    <a href="/owner/docs/accessible-mutable/"><code>Accessible</code></a> methods ask, since
-    <code>getProperty</code> and <code>fill</code> are declared on <code>Accessible</code> and never on the
-    interface you wrote, so there is no declaring class of yours for them to read.
-  </p>
-  <p>
-    Until 2.0.0 one lookup answered both, and a configuration could contradict itself: with
-    <code>@DisableFeature(VARIABLE_EXPANSION)</code> on a super-interface, the method returned the value
-    unexpanded while <code>getProperty()</code> expanded it.
-  </p>
-</div>
-
-Java is no help with any of this: `@Inherited` applies to classes extending
-classes, and does nothing for an interface. Every lookup of this kind is
-written out, which is exactly why they used to disagree — three stopped at the
-direct super-interfaces, three read the interface handed to the factory and
-nothing above it, and `@Prefix` counted at any depth. Since 2.0.0 they share
-one walk.
+The tables — which annotation is in which family, how each propagates through a
+hierarchy, the order the interfaces are visited in, and the reason behind each
+of the eight rules — are in
+[Where an annotation counts](/owner/docs/annotation-scope/).
 
 Conclusions
 -----------

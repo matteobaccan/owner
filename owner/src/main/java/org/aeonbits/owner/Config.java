@@ -176,7 +176,10 @@ public interface Config extends Serializable {
      * throws a {@link MissingMandatoryPropertyException} instead of returning <code>null</code>.
      * </p>
      * <p>
-     * When applied to an interface, all the properties declared in that interface are mandatory.
+     * When applied to an interface, all the properties declared in that interface are mandatory - the ones
+     * it <b>declares</b>, and no others: an annotation here neither reaches the methods declared by a
+     * super-interface nor is inherited by a sub-interface, since an interface governs what it declares. See
+     * the documentation, <i>Where an annotation counts</i>.
      * Methods taking parameters cannot be validated at creation time, since the property key may depend on the
      * invocation arguments; for those the check happens on access only.
      * </p>
@@ -218,7 +221,10 @@ public interface Config extends Serializable {
      * The prefix is not inherited by sub-interfaces: <b>every method takes the prefix of the interface
      * where it is declared</b>, so the prefix of a sub-interface does not leak onto the methods it
      * inherits, and the methods declared in a super-interface keep the prefix of that super-interface at
-     * any depth of the hierarchy.
+     * any depth of the hierarchy. This is the rule every annotation describing the methods of an interface
+     * follows - {@link Mandatory}, {@link Sensitive}, {@link Separator}, {@link TokenizerClass} and
+     * {@link PreprocessorClasses} with it - and this one is where it was first written down. See the
+     * documentation, <i>Where an annotation counts</i>.
      * </p>
      * <p>
      * The prefix is subject to {@link DisableableFeature#VARIABLE_EXPANSION variable expansion} just like
@@ -317,6 +323,14 @@ public interface Config extends Serializable {
      * A value that names what decrypts it needs neither this nor {@link EncryptedValue} - see there for the
      * difference, and for why both remain.
      * </p>
+     * <p>
+     * The decryptor belongs to the configuration object rather than to one interface of it, so it is found
+     * wherever in the hierarchy it is written, the nearest declaration winning - on a base interface that a
+     * dozen configurations extend, for instance. Until 2.0.0 it was read off the interface handed to the
+     * {@link ConfigFactory} and nowhere else, not even its direct super-interfaces, and failed in silence:
+     * the method answered with the cipher text as stored. See the documentation, <i>Where an annotation
+     * counts</i>.
+     * </p>
      */
     @Retention(RUNTIME)
     @Target(TYPE)
@@ -358,7 +372,12 @@ public interface Config extends Serializable {
      * clear inside the line that refers to it.
      * </p>
      * <p>
-     * When applied to an interface, all the properties declared in that interface are masked.
+     * When applied to an interface, all the properties declared in that interface are masked - the ones it
+     * <b>declares</b>, and no others. A sub-interface saying this does not mask the keys its parent
+     * declared, and a parent saying it does not reach what a sub-interface declares: an interface governs
+     * what it declares, which is the rule every annotation about the methods of an interface follows here.
+     * Write it where the methods are, or on the methods. See the documentation, <i>Where an annotation
+     * counts</i>.
      * </p>
      * <p>
      * <b>On a method that reads a group</b> — one returning a {@link java.util.Map}, which resolves to a
@@ -745,27 +764,6 @@ public interface Config extends Serializable {
     }
 
     /**
-     * Specifies simple <code>{@link String}</code> as separator to tokenize properties values specified as a
-     * single string value, into elements for vectors and collections.
-     * The value specified is used as per {@link String#split(String, int)} with int=-1, every element is also
-     * trimmed out from spaces using {@link String#trim()}.
-     *
-     * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
-     * together on the same level:
-     * <ul>
-     *     <li>
-     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same method
-     *     </li>
-     *     <li>
-     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same class
-     *     </li>
-     * </ul>
-     * in the two above cases an {@link UnsupportedOperationException} will be thrown when the corresponding conversion
-     * is executed.
-     *
-     * @since 1.0.4
-     */
-    /**
      * What this property is for, in a sentence, written where the property is declared.
      * <p>
      * It is not read when a configuration is loaded — it costs a running application nothing. It is used
@@ -814,7 +812,10 @@ public interface Config extends Serializable {
      * under a heading is what everybody writes anyway.
      * </p>
      * <p>
-     * On the interface rather than on a method, it is the header of the file.
+     * On the interface rather than on a method, it is the header of the file - and being about the file
+     * rather than about one interface, it is found wherever in the hierarchy it is written, the nearest
+     * declaration replacing the ones above it: one file, one header. See the documentation, <i>Where an
+     * annotation counts</i>.
      * </p>
      *
      * @since 2.0.0
@@ -831,6 +832,36 @@ public interface Config extends Serializable {
         String value();
     }
 
+    /**
+     * Specifies simple <code>{@link String}</code> as separator to tokenize properties values specified as a
+     * single string value, into elements for vectors and collections.
+     * The value specified is used as per {@link String#split(String, int)} with int=-1, every element is also
+     * trimmed out from spaces using {@link String#trim()}.
+     *
+     * Notice that {@link TokenizerClass} and {@link Separator} do conflict with each-other when they are both specified
+     * together on the same level:
+     * <ul>
+     *     <li>
+     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same method
+     *     </li>
+     *     <li>
+     *     You cannot specify {@link TokenizerClass} and {@link Separator} both together on the same class
+     *     </li>
+     * </ul>
+     * in the two above cases an {@link UnsupportedOperationException} will be thrown when the corresponding conversion
+     * is executed.
+     *
+     * <p>
+     * Written on an interface it applies to the methods that interface <b>declares</b>, and to those only:
+     * it neither reaches the methods declared by a super-interface nor is inherited by a sub-interface. An
+     * interface governs what it declares - a sub-interface re-cutting a list its parent described with
+     * commas would change the meaning of a value the parent wrote - which is the rule every annotation
+     * about the methods of an interface follows here, {@link Prefix} included. See the documentation,
+     * <i>Where an annotation counts</i>.
+     * </p>
+     *
+     * @since 1.0.4
+     */
     @Retention(RUNTIME)
     @Target({METHOD, TYPE})
     @Documented
@@ -859,6 +890,11 @@ public interface Config extends Serializable {
      * </ul>
      * in the two above cases an {@link UnsupportedOperationException} will be thrown when the corresponding conversion
      * is executed.
+     * <p>
+     * Written on an interface it applies to the methods that interface <b>declares</b>, and to those only,
+     * exactly as {@link Separator} does and for the same reason. See the documentation, <i>Where an
+     * annotation counts</i>.
+     * </p>
      *
      * @since 1.0.4
      */
@@ -921,6 +957,12 @@ public interface Config extends Serializable {
     /**
      * Specifies a <code>{@link Preprocessor}</code> class to allow the user to define a custom logic to pre-process
      * the property value before being used by the library.
+     * <p>
+     * The ones on the method run first, then the ones on the interface that <b>declares</b> it - and those
+     * only: an annotation here neither reaches the methods declared by a super-interface nor is inherited
+     * by a sub-interface, since an interface governs what it declares. See the documentation, <i>Where an
+     * annotation counts</i>.
+     * </p>
      *
      * @since 1.0.9
      */

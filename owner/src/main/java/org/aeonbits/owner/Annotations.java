@@ -38,6 +38,31 @@ import java.util.Map;
  * super-interfaces, three read the interface handed to the factory and nothing above it, and
  * {@link Config.Prefix} counted at any depth.
  * </p>
+ * <table>
+ *   <caption>Which annotation is read how, and what changed in 2.0.0</caption>
+ *   <tr><th>Annotation</th><th>Read on</th><th>Until 2.0.0</th></tr>
+ *   <tr><td>{@link Config.Sources}</td><td>the hierarchy, accumulating</td>
+ *       <td>the direct super-interfaces, plus the convention appended</td></tr>
+ *   <tr><td>{@link Config.LoadPolicy}, {@link Config.HotReload}</td><td>the hierarchy, nearest wins</td>
+ *       <td>the direct super-interfaces</td></tr>
+ *   <tr><td>{@link Config.DecryptorClass}</td><td>the hierarchy, nearest wins</td>
+ *       <td>the interface handed to the factory alone</td></tr>
+ *   <tr><td>{@link Config.Description} on a type</td><td>the hierarchy, nearest wins</td>
+ *       <td>the interface handed to the factory alone</td></tr>
+ *   <tr><td>{@link Config.DisableFeature} asked of the object</td><td>the hierarchy, every declaration</td>
+ *       <td>the interface handed to the factory alone</td></tr>
+ *   <tr><td>{@link Config.DisableFeature} asked of a method</td><td>the method and its declaring interface</td>
+ *       <td>unchanged, and deliberately: see
+ *       {@link Config.DisableableFeature#isDisabledFor(java.lang.reflect.Method)}</td></tr>
+ *   <tr><td>{@link Config.Prefix}, {@link Config.Mandatory}, {@link Config.Sensitive},
+ *       {@link Config.Separator}, {@link Config.TokenizerClass}, {@link Config.PreprocessorClasses}</td>
+ *       <td>the interface declaring the method</td><td>unchanged</td></tr>
+ * </table>
+ * <p>
+ * The whole of it, with the reasons and the propagation tables, is on the site under
+ * <i>Where an annotation counts</i>; every row of those tables is a test in
+ * <code>ClassLevelAnnotationsTest</code> and <code>AnnotationInheritanceTest</code>.
+ * </p>
  *
  * @author Matteo Baccan
  */

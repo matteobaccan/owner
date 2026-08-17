@@ -84,6 +84,7 @@ export default defineConfig({
           items: [
             { label: 'Key prefix', slug: 'docs/key-prefix' },
             { label: 'Nested configuration', slug: 'docs/nested-configuration' },
+            { label: 'Where an annotation counts', slug: 'docs/annotation-scope' },
             { label: 'Loading strategies', slug: 'docs/loading-strategies' },
             { label: 'Importing properties', slug: 'docs/importing-properties' },
             { label: 'Parametrized properties', slug: 'docs/parametrized-properties' },

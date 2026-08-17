@@ -242,7 +242,7 @@ wherever in the hierarchy it is written — on a base interface that a dozen con
 instance. Before 2.0.0 it was read off the interface handed to the `ConfigFactory` and nowhere else, not
 even its direct super-interfaces, and the failure was quiet: the method answered with the cipher text as
 stored, which is a string like any other. See
-[what a class-level annotation reaches](/owner/docs/usage/#what-a-class-level-annotation-reaches).
+[where an annotation counts](/owner/docs/annotation-scope/).
 
 You supply the `Decryptor`; the library ships none for this path. It composes with the other annotations:
 
