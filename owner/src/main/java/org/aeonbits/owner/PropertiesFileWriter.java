@@ -176,7 +176,7 @@ final class PropertiesFileWriter {
                                          List<String> out, Set<String> placed) {
         for (int i = 0; i < existing.size(); i++) {
             String raw = existing.get(i);
-            if (raw.trim().length() == 0 || isComment(raw)) {
+            if (raw.trim().isEmpty() || isComment(raw)) {
                 // blank lines and comments are the file's, and pass through before anything is parsed
                 out.add(raw);
                 continue;
@@ -269,7 +269,7 @@ final class PropertiesFileWriter {
      */
     static String keyOf(String line) {
         String trimmed = line.trim();
-        if (trimmed.length() == 0 || isComment(trimmed))
+        if (trimmed.isEmpty() || isComment(trimmed))
             return null;
 
         StringBuilder key = new StringBuilder();

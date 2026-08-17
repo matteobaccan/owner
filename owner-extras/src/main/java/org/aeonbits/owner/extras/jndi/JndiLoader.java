@@ -17,6 +17,7 @@ import javax.naming.NamingException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -120,8 +121,8 @@ public class JndiLoader implements Loader {
      * @param environment the environment handed to {@link InitialContext}, or <code>null</code> for the
      *                    ambient one. Copied, so the caller may keep using its own.
      */
-    public JndiLoader(Hashtable<?, ?> environment) {
-        this.environment = environment == null ? null : new Hashtable<>(environment);
+    public JndiLoader(Map<?, ?> environment) {
+        this.environment = environment == null ? null : new Hashtable<Object, Object>(environment);
     }
 
     @Override

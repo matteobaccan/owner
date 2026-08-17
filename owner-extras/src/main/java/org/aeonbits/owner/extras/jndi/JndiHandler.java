@@ -13,6 +13,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Reads a <b>single</b> JNDI entry into a value:
@@ -70,7 +71,7 @@ public class JndiHandler implements ValueHandler {
      * @param environment the environment handed to {@link InitialContext}, or <code>null</code> for the
      *                    ambient one. Copied, so the caller may keep using its own.
      */
-    public JndiHandler(Hashtable<?, ?> environment) {
+    public JndiHandler(Map<?, ?> environment) {
         this(DEFAULT_NAME, environment);
     }
 
@@ -81,9 +82,9 @@ public class JndiHandler implements ValueHandler {
      * @param environment the environment handed to {@link InitialContext}, or <code>null</code> for the
      *                    ambient one.
      */
-    public JndiHandler(String name, Hashtable<?, ?> environment) {
+    public JndiHandler(String name, Map<?, ?> environment) {
         this.name = name;
-        this.environment = environment == null ? null : new Hashtable<>(environment);
+        this.environment = environment == null ? null : new Hashtable<Object, Object>(environment);
     }
 
     @Override
