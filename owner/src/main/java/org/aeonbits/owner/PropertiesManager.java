@@ -17,6 +17,7 @@ import org.aeonbits.owner.util.Util;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -234,37 +235,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         this.keyPrefix = keyPrefix;
         this.strict = strict;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
-        Sources declared = clazz.getAnnotation(Sources.class);
+        Map<Class<?>, Sources> declared = findAnnotations(Sources.class);
+        sourcesWereDeclared = !declared.isEmpty();
         uris = toURIs(declared, urlFactory);
 
-        boolean anyDeclared = declared != null;
-        for (Class<?> inter : clazz.getInterfaces()) {
-            Sources inherited = inter.getAnnotation(Sources.class);
-            anyDeclared |= inherited != null;
-            this.uris.addAll(toURIs(inherited, urlFactory));
-        }
-        sourcesWereDeclared = anyDeclared;
-
-        LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
-        if (loadPolicy == null) {
-            for (Class<?> inter : clazz.getInterfaces()) {
-                loadPolicy = inter.getAnnotation(LoadPolicy.class);
-                if (loadPolicy != null) {
-                    break;
-                }
-            }
-        }
+        LoadPolicy loadPolicy = findAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
-        HotReload hotReload = clazz.getAnnotation(HotReload.class);
-        if (hotReload == null) {
-            for (Class<?> inter : clazz.getInterfaces()) {
-                hotReload = inter.getAnnotation(HotReload.class);
-                if (hotReload != null) {
-                    break;
-                }
-            }
-        }
+        HotReload hotReload = findAnnotation(HotReload.class);
         if (hotReload != null) {
             long interval = HotReloadLogic.intervalMillis(hotReload, clazz, expander);
             hotReloadLogic = new HotReloadLogic(hotReload, interval, uris, this);
@@ -482,7 +460,76 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     }
 
     /**
-     * Turns the declared sources into the URIs that will be tried, in order.
+     * The interfaces a class-level annotation is looked for on: the mapping interface itself, then the
+     * interfaces it extends, then the ones those extend, breadth first and each of them visited once.
+     * <p>
+     * Breadth first is what makes the order mean something. A super-interface is asked before that
+     * super-interface's own parents, and two interfaces extended by the same one are asked in the order of
+     * the {@code extends} clause, so "the nearest declaration wins" holds and a hierarchy one level deep
+     * behaves exactly as it did when the lookup stopped there. The set also keeps the diamond honest: an
+     * interface reached by two paths is read once, and so contributes its {@code @Sources} once.
+     * </p>
+     */
+    private Collection<Class<?>> hierarchy() {
+        Collection<Class<?>> visited = new LinkedHashSet<>();
+        Deque<Class<?>> pending = new ArrayDeque<>();
+        pending.add(clazz);
+        while (!pending.isEmpty()) {
+            Class<?> type = pending.poll();
+            if (visited.add(type))
+                Collections.addAll(pending, type.getInterfaces());
+        }
+        return visited;
+    }
+
+    /**
+     * The nearest declaration of an annotation that describes a <b>single</b> setting, such as
+     * {@link LoadPolicy} or {@link HotReload}, or <code>null</code> when nobody in the hierarchy declares it.
+     * <p>
+     * Until 2.0.0 each of these was looked for by its own copy of the same loop, and each of those loops
+     * stopped at the direct super-interfaces: a policy or a reload interval written two levels up was
+     * silently ignored, while {@link Config.Prefix} counted at any depth — so the library contradicted
+     * itself depending on which annotation was being read. It is one method now, and it walks the whole
+     * {@link #hierarchy()}.
+     * </p>
+     */
+    private <T extends Annotation> T findAnnotation(Class<T> annotationType) {
+        for (Class<?> type : hierarchy()) {
+            T annotation = type.getAnnotation(annotationType);
+            if (annotation != null)
+                return annotation;
+        }
+        return null;
+    }
+
+    /**
+     * The same walk for an annotation that describes a <b>set</b> and therefore accumulates rather than
+     * being won: every declaration of it in the hierarchy, keyed by the interface that carries it, in the
+     * order the interfaces are visited. The key is there for the diagnostics, which name the interface a
+     * source came from when it is not the one handed to the factory.
+     */
+    private <T extends Annotation> Map<Class<?>, T> findAnnotations(Class<T> annotationType) {
+        Map<Class<?>, T> result = new LinkedHashMap<>();
+        for (Class<?> type : hierarchy()) {
+            T annotation = type.getAnnotation(annotationType);
+            if (annotation != null)
+                result.put(type, annotation);
+        }
+        return result;
+    }
+
+    /**
+     * Turns the declared sources into the URIs that will be tried, in order: those of the mapping interface
+     * first, then those of every interface above it, and the default specs only when <b>nobody</b> in the
+     * hierarchy declared any.
+     * <p>
+     * The convention is a fallback for a configuration that names no source, not an extra source appended to
+     * the ones that were named: an interface carrying {@code @Sources} reads what it asked for and nothing
+     * else. Until 2.0.0 the two were the same call, so the defaults were looked for once per interface with
+     * no annotation — twice for the plainest configuration there is, since {@code Config} itself has none —
+     * and were quietly appended even to a configuration that had declared its sources, which the
+     * {@code CONFIG} line then contradicted by saying <em>no @Sources</em> about an interface that had one.
+     * </p>
      * <p>
      * A spec that resolves to nothing is dropped here, which is right — that is how {@code @LoadPolicy}
      * falls back on the next source — and is also the reason a configuration full of defaults can have no
@@ -491,11 +538,26 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
      * my property missing" without anyone having to guess.
      * </p>
      */
-    private List<URI> toURIs(Sources sources, ConfigURIFactory uriFactory) {
-        String[] specs = specs(sources, uriFactory);
-        LOGGER.log(Level.CONFIG, () -> String.format("%s: %s %s", clazz.getName(),
-                sources != null ? "sources declared:" : "no @Sources, looking for:", Arrays.toString(specs)));
+    private List<URI> toURIs(Map<Class<?>, Sources> declared, ConfigURIFactory uriFactory) {
+        if (declared.isEmpty()) {
+            String[] specs = defaultSpecs(uriFactory);
+            LOGGER.log(Level.CONFIG, () -> String.format("%s: no @Sources, looking for: %s",
+                    clazz.getName(), Arrays.toString(specs)));
+            return resolve(specs, uriFactory);
+        }
 
+        List<URI> result = new ArrayList<>();
+        for (Map.Entry<Class<?>, Sources> entry : declared.entrySet()) {
+            Class<?> declaring = entry.getKey();
+            String[] specs = entry.getValue().value();
+            LOGGER.log(Level.CONFIG, () -> String.format("%s: sources declared%s: %s", clazz.getName(),
+                    declaring == clazz ? "" : " on " + declaring.getName(), Arrays.toString(specs)));
+            result.addAll(resolve(specs, uriFactory));
+        }
+        return result;
+    }
+
+    private List<URI> resolve(String[] specs, ConfigURIFactory uriFactory) {
         List<URI> result = new ArrayList<>();
         for (String spec : specs) {
             try {
@@ -510,11 +572,6 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
             }
         }
         return result;
-    }
-
-    private String[] specs(Sources sources, ConfigURIFactory uriFactory) {
-        if (sources != null) return sources.value();
-        return defaultSpecs(uriFactory);
     }
 
     private String[] defaultSpecs(ConfigURIFactory uriFactory) {
@@ -1509,16 +1566,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     @Delegate
     @Override
     public void load(InputStream inStream) throws IOException {
-        writeLock.lock();
-        try {
-            Properties loaded = new Properties();
-            loaded.load(inStream);
-            performLoad(keys(loaded), loaded);
-        } catch (RollbackBatchException ex) {
-            ignore();
-        } finally {
-            writeLock.unlock();
-        }
+        load(loaded -> loaded.load(inStream));
     }
 
     private void performLoad(Set keys, Properties props) throws RollbackBatchException {
@@ -1530,16 +1578,30 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     @Delegate
     @Override
     public void load(Reader reader) throws IOException {
+        load(loaded -> loaded.load(reader));
+    }
+
+    /**
+     * What the two {@link Mutable} loads have in common, which is everything but the one line that reads the
+     * bytes: the write lock is taken for the whole of it, the reading included, so that two loads cannot
+     * interleave and leave the properties holding half of each.
+     */
+    private void load(PropertiesReader reader) throws IOException {
         writeLock.lock();
         try {
             Properties loaded = new Properties();
-            loaded.load(reader);
+            reader.readInto(loaded);
             performLoad(keys(loaded), loaded);
         } catch (RollbackBatchException ex) {
             ignore();
         } finally {
             writeLock.unlock();
         }
+    }
+
+    /** Reads a stream or a reader into the given {@link Properties}. */
+    private interface PropertiesReader {
+        void readInto(Properties loaded) throws IOException;
     }
 
     void setProxy(Object proxy) {

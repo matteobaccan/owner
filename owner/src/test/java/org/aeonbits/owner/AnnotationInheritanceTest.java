@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.Config.HotReload;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.util.LogCapture;
 import org.aeonbits.owner.util.TimeProviderForTest;
 import org.junit.After;
 import org.junit.Before;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
@@ -35,9 +37,11 @@ import static org.junit.Assert.assertTrue;
  * {@link LoadPolicy} and {@link HotReload} — behave when they sit on a super-interface rather than on the
  * interface handed to the factory.
  * <p>
- * The lookup walks the <b>direct</b> super-interfaces only, so an annotation on a grandparent is silently
- * ignored. That is the behaviour as it stands, and these tests exist to make any change to it deliberate and
- * visible: it differs from {@link Config.Prefix}, which counts at any depth of the hierarchy.</p>
+ * The lookup walks the <b>whole</b> hierarchy since 2.0.0, breadth first: the interface itself, then the
+ * ones it extends in the order of the {@code extends} clause, then theirs. Until then it stopped at the
+ * direct super-interfaces and an annotation on a grandparent was silently ignored, which contradicted
+ * {@link Config.Prefix} — that one always counted at any depth. Each of these three had its own copy of
+ * the same loop; they share one now, which is what made the depth a single decision rather than three.</p>
  *
  * @author Matteo Baccan
  */
@@ -90,15 +94,16 @@ public class AnnotationInheritanceTest {
     interface PolicyOnTheGrandParent extends MiddleWithoutPolicy {
     }
 
-    /**
-     * The lookup stops at the direct super-interfaces, so the grandparent's {@code @LoadPolicy(MERGE)} does not
-     * apply and the default FIRST policy is used: only first.properties is read, and {@code bar} is not there.
-     */
+    /** The lookup walks the whole hierarchy, so the grandparent's {@code @LoadPolicy(MERGE)} applies. */
     @Test
-    public void loadPolicyOnAGrandParentIsIgnored() {
+    public void loadPolicyOnAGrandParentIsUsed() {
         PolicyOnTheGrandParent cfg = ConfigFactory.create(PolicyOnTheGrandParent.class);
         assertEquals("first", cfg.foo());
-        assertNull(cfg.bar());
+        assertEquals("second", cfg.bar());
+    }
+
+    @Sources({FIRST_PROPERTIES, SECOND_PROPERTIES})
+    interface TwoBranches extends MiddleWithoutPolicy, FirstParent {
     }
 
     @LoadPolicy(FIRST)
@@ -118,6 +123,18 @@ public class AnnotationInheritanceTest {
     public void theFirstDeclaredSuperInterfaceWins() {
         assertEquals("second", ConfigFactory.create(MergeDeclaredFirst.class).bar());
         assertNull(ConfigFactory.create(FirstDeclaredFirst.class).bar());
+    }
+
+    /**
+     * The walk is breadth first, and this is the case that says so: {@code TwoBranches} extends an
+     * unannotated interface whose own parent declares {@code MERGE}, and a second one that declares
+     * {@code FIRST} itself. Every direct parent is asked before any grandparent, so {@code FIRST} answers.
+     * Depth first would have gone up the first branch to the end and merged instead — which is the same
+     * question the {@code extends} clause already answers between two siblings, asked one level up.
+     */
+    @Test
+    public void everyDirectParentIsAskedBeforeAnyGrandParent() {
+        assertNull(ConfigFactory.create(TwoBranches.class).bar());
     }
 
     // -- @Sources ------------------------------------------------------------------------------------
@@ -155,12 +172,80 @@ public class AnnotationInheritanceTest {
     interface SourcesOnTheGrandParent extends MiddleWithoutSources {
     }
 
-    /** Accumulating too stops at the direct super-interfaces: the grandparent's source is not loaded. */
+    /** Accumulating reaches the whole hierarchy too: the grandparent's source is loaded after the rest. */
     @Test
-    public void sourcesOnAGrandParentAreIgnored() {
+    public void sourcesOnAGrandParentAreAccumulatedToo() {
         SourcesOnTheGrandParent cfg = ConfigFactory.create(SourcesOnTheGrandParent.class);
         assertEquals("first", cfg.foo());
+        assertEquals("second", cfg.bar());
+    }
+
+    interface OneBranch extends SecondSourceGrandParent {
+    }
+
+    interface AnotherBranch extends SecondSourceGrandParent {
+    }
+
+    @Sources(FIRST_PROPERTIES)
+    @LoadPolicy(MERGE)
+    interface Diamond extends OneBranch, AnotherBranch {
+    }
+
+    /**
+     * An interface reached by two paths is read once, so its sources are declared once. Nothing observable
+     * would break if they were listed twice — the same file merged with itself says the same thing — but the
+     * diagnostics would say it twice, and the file would be opened twice for nothing.
+     */
+    @Test
+    public void anInterfaceReachedTwiceContributesItsSourcesOnce() {
+        try (LogCapture capture = LogCapture.ofLibrary(Level.CONFIG)) {
+            ConfigFactory.create(Diamond.class);
+
+            String said = capture.messagesAt(Level.CONFIG);
+            assertEquals(said, 1, countOf("SecondSourceGrandParent", said));
+        }
+    }
+
+    /**
+     * The convention — {@code MyConfig.properties} and its siblings — is what a configuration that declares
+     * no source at all falls back on, and until 2.0.0 it was quietly appended to the sources of one that
+     * <b>had</b> declared them: {@link Sources} was read one interface at a time, and every interface without
+     * the annotation contributed the default list. {@code Config} itself has none, so it happened to
+     * everybody. Here first.properties is declared and merged, and the convention file next to this test
+     * holds a {@code bar} that must not be read.
+     */
+    @Test
+    public void theConventionIsNotAppendedToTheSourcesThatWereDeclared() {
+        DeclaringAndConventional cfg = ConfigFactory.create(DeclaringAndConventional.class);
+
+        assertEquals("first", cfg.foo());
         assertNull(cfg.bar());
+    }
+
+    @Sources(FIRST_PROPERTIES)
+    @LoadPolicy(MERGE)
+    interface DeclaringAndConventional extends TwoSources {
+    }
+
+    /** And the fallback itself is looked for once, rather than once per interface that does not declare it. */
+    @Test
+    public void theConventionIsLookedForOnceWhenNobodyDeclaresASource() {
+        try (LogCapture capture = LogCapture.ofLibrary(Level.CONFIG)) {
+            ConfigFactory.create(DeclaringNothing.class);
+
+            String said = capture.messagesAt(Level.CONFIG);
+            assertEquals(said, 1, countOf("no @Sources, looking for:", said));
+        }
+    }
+
+    interface DeclaringNothing extends TwoSources {
+    }
+
+    private static int countOf(String needle, String text) {
+        int count = 0;
+        for (int at = text.indexOf(needle); at >= 0; at = text.indexOf(needle, at + needle.length()))
+            count++;
+        return count;
     }
 
     // -- @HotReload ----------------------------------------------------------------------------------
@@ -215,9 +300,9 @@ public class AnnotationInheritanceTest {
     interface HotReloadOnTheGrandParent extends MiddleWithoutHotReload {
     }
 
-    /** The grandparent's {@code @HotReload} is ignored, so the change on disk is never picked up. */
+    /** The grandparent's {@code @HotReload} applies, so the change on disk is picked up. */
     @Test
-    public void hotReloadOnAGrandParentIsIgnored() throws IOException {
+    public void hotReloadOnAGrandParentIsUsed() throws IOException {
         writeAgedValue(10);
 
         HotReloadOnTheGrandParent cfg = ConfigFactory.create(HotReloadOnTheGrandParent.class);
@@ -226,7 +311,7 @@ public class AnnotationInheritanceTest {
         writeValue(20);
         time.elapse(6, SECONDS);
 
-        assertEquals(Integer.valueOf(10), cfg.someValue());
+        assertEquals(Integer.valueOf(20), cfg.someValue());
     }
 
     /** Writes the watched file and backdates it, so that the test starts with the reload interval already past. */

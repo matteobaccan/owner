@@ -880,6 +880,25 @@ closed only when it has been understood.
    different variants; both are now uniform. The Maven wrapper sources are excluded, as they ship under Apache 2.0.
 
 #### Bugs fixes
+ * **`@Sources`, `@LoadPolicy` and `@HotReload` were ignored two levels up.** The three were looked for on
+   the mapping interface and on the interfaces it extends *directly*, each by its own copy of the same loop,
+   so an annotation on the parent of a parent did nothing: its sources were not loaded, its policy did not
+   apply, and a `@HotReload` written there never fired — silently, since none of the three is required. The
+   fourth annotation read at class level, `@Prefix`, has always counted at any depth, so the library
+   contradicted itself depending on which one you were reading. There is one lookup now, and it walks the
+   whole hierarchy breadth first: the interface, then everything it extends directly in the order of the
+   `extends` clause, then their parents, each interface visited once. If you were repeating an annotation on
+   the interface handed to the `ConfigFactory` to work around this, the repetition can go — and for
+   `@Sources` it should, since the same file would now be listed twice.
+ * **The `MyConfig.properties` convention was appended even to a configuration that declared its sources.**
+   The convention and the declared sources were the same call, so every interface *without* `@Sources`
+   contributed the default list — and `Config` itself has none, so it happened to every configuration there
+   is, twice over for the plainest one. A configuration that declared `@Sources("file:my.properties")` was
+   therefore also reading a `MyConfig.properties` left on the classpath, and the `CONFIG` diagnostic said
+   *no @Sources* about an interface that had one. The convention is now what it reads like: the fallback for
+   a configuration that names no source at all. If you were relying on the appended file, name it —
+   `@Sources({"file:my.properties", "classpath:com/acme/MyConfig.properties"})` does the same thing where it
+   can be seen.
  * **A source with no scheme made the ZooKeeper loader throw.** `ZooKeeperLoader.accept` compared the URI's
    scheme against its own without allowing for a URI that has none, so it raised a `NullPointerException`
    rather than answering. Every registered loader is asked about every source, so this bit anyone following

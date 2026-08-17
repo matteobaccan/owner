@@ -58,10 +58,10 @@ public interface Config extends Serializable {
      * the last, if there are conflicts in properties names the earlier files loaded prevail.
      * <p>
      * Being a single setting, this annotation is not accumulated across a hierarchy of interfaces: the first one
-     * found wins, that is the one declared on the mapping interface if it has one, otherwise the one declared on
-     * the first super-interface that has it, in declaration order. Note that the lookup only reaches the
-     * <b>direct</b> super-interfaces: an annotation two levels up is silently ignored. That is a known
-     * limitation, and it differs from {@link Prefix}, which counts at any depth.
+     * found wins, that is the one declared on the mapping interface if it has one, otherwise the nearest one
+     * above it. The hierarchy is walked breadth first, so every interface extended <b>directly</b> is asked, in
+     * declaration order, before any of their own parents. Until 2.0.0 the walk stopped at the direct
+     * super-interfaces and an annotation two levels up was silently ignored, which {@link Prefix} never was.
      * </p>
      *
      * @since 1.0.2
@@ -92,10 +92,17 @@ public interface Config extends Serializable {
      * <p>
      * Unlike {@link LoadPolicy} and {@link HotReload}, this annotation describes a set rather than a single
      * setting, and across a hierarchy of interfaces it <b>accumulates</b>, by design: the URIs declared here come
-     * first, followed by those declared on each super-interface, and the resulting list is the one the load
-     * policy is applied to. Note that only the <b>direct</b> super-interfaces are read: the sources declared two
-     * levels up are silently left out. That is a known limitation, and it differs from {@link Prefix}, which
-     * counts at any depth.
+     * first, followed by those declared on each interface above, in the order those are walked - breadth first,
+     * every interface extended directly before any of their own parents, and one reached by two paths read once.
+     * The resulting list is the one the load policy is applied to. Until 2.0.0 only the <b>direct</b>
+     * super-interfaces were read and the sources declared two levels up were silently left out.
+     * </p>
+     * <p>
+     * When <b>nobody</b> in the hierarchy declares this annotation, the properties are looked for by convention,
+     * under the fully qualified name of the mapping interface with the extension of each format available. That
+     * is a fallback for a configuration that names no source, not an extra source appended to the ones it named:
+     * an interface carrying this annotation reads what it asked for and nothing else. Until 2.0.0 the convention
+     * was quietly appended to the declared sources as well.
      * </p>
      *
      * @since 1.0.2
@@ -484,8 +491,8 @@ public interface Config extends Serializable {
      * To intercept the {@link org.aeonbits.owner.event.ReloadEvent} see {@link Reloadable#addReloadListener(org.aeonbits.owner.event.ReloadListener)}.
      * <p>
      * Being a single setting, this annotation follows the same rule as {@link LoadPolicy} across a hierarchy of
-     * interfaces: the first one found wins, and the lookup only reaches the <b>direct</b> super-interfaces, so an
-     * annotation two levels up is silently ignored and no reloading takes place.
+     * interfaces: the first one found wins, and since 2.0.0 the whole hierarchy is walked breadth first, so one
+     * written two levels up applies rather than being silently ignored.
      *
      * @since 1.0.4
      */

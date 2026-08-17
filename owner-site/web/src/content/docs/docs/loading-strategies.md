@@ -118,22 +118,46 @@ of extending a mapping interface.
 
 Contrast this with `@LoadPolicy` and `@HotReload`, which describe a single
 setting and therefore cannot be accumulated: for those, the first annotation
-found wins — the one on the interface if it has one, otherwise the one on the
-first super-interface that declares it, in declaration order.
+found wins — the one on the interface if it has one, otherwise the nearest one
+above it.
 
-<div class="note warning">
-  <h5>Only the direct super-interfaces are considered.</h5>
+All three are looked for on the whole hierarchy, and the order the interfaces
+are visited in is what "nearest" means: the mapping interface first, then every
+interface it extends **directly**, in the order of the `extends` clause, then
+the ones those extend, and so on. Every direct parent is therefore asked before
+any grandparent, and an interface reached by two paths is read once — so it
+contributes its `@Sources` once.
+
+<div class="note info">
+  <h5>Before 2.0.0 the lookup stopped at the direct super-interfaces.</h5>
   <p>
-    All three annotations — <code>@Sources</code>, <code>@LoadPolicy</code> and <code>@HotReload</code> — are
-    looked up on the mapping interface and on the interfaces it extends <em>directly</em>. An annotation sitting
-    two levels up, on the parent of a parent, is silently ignored: its sources are not loaded, and its policy
-    or reload interval does not apply.
+    An annotation sitting two levels up, on the parent of a parent, used to be silently ignored: its sources
+    were not loaded, and its policy or reload interval did not apply. It differed from
+    <a href="/owner/docs/key-prefix/"><code>@Prefix</code></a>, which has always counted at any depth, and each
+    of the three annotations had its own copy of the lookup, which is how the three came to disagree with a
+    fourth. They share one now.
   </p>
   <p>
-    This is a known limitation rather than a design decision, and it differs from
-    <a href="/owner/docs/key-prefix/"><code>@Prefix</code></a>, which counts at any depth of the
-    hierarchy. Until it is addressed, declare these annotations on the interface you pass to the
-    <code>ConfigFactory</code>, or on one it extends directly.
+    If you were working around this by repeating an annotation on the interface handed to the
+    <code>ConfigFactory</code>, the repetition is no longer needed — and for <code>@Sources</code> it is
+    no longer harmless, since the same file would now be listed twice.
+  </p>
+</div>
+
+<div class="note warning">
+  <h5>Declaring <code>@Sources</code> switches the convention off.</h5>
+  <p>
+    When nobody in the hierarchy declares <code>@Sources</code>, the properties are looked for by convention,
+    under the name of the mapping interface — see <a href="#where-the-properties-come-from">below</a>. That is
+    a fallback for a configuration that names no source, <em>not</em> an extra source appended to the ones it
+    named: an interface carrying <code>@Sources</code> reads what it asked for and nothing else.
+  </p>
+  <p>
+    Before 2.0.0 the convention was appended to the declared sources as well, because the two were the same
+    lookup: every interface without the annotation contributed the default list, and <code>Config</code> itself
+    has none. So a <code>MyConfig.properties</code> on the classpath was read even by a configuration that had
+    declared its sources elsewhere. If that is what you want, declare it: <code>@Sources({"file:my.properties",
+    "classpath:com/acme/MyConfig.properties"})</code> says so, and says it where it can be seen.
   </p>
 </div>
 
