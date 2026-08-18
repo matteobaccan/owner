@@ -190,6 +190,49 @@ public final class org.aeonbits.owner.ConfigCache {
 
 The ConfigCache is designed to be thread safe, so you don't have to worry about concurrent access.
 
+One instance per thread
+-----------------------
+
+**Thread safe is not the same as thread isolated**, and the difference is the whole of
+[#283](https://github.com/matteobaccan/owner/issues/283): several threads may ask the cache for a
+configuration at the same time without corrupting it, but `getOrCreate(MyConfig.class)` uses the class as
+the id, so what they all get is *one* object. If that object is `Mutable`, what one thread writes the next
+one reads.
+
+Wrapping it in a `ThreadLocal` does not change that: the supplier returns the shared instance, so every
+thread caches the same object.
+
+```java
+// still one single instance for the whole JVM
+ThreadLocal<MyConfig> config =
+    ThreadLocal.withInitial(() -> ConfigCache.getOrCreate(MyConfig.class));
+```
+
+An instance per thread needs no new API — the id is any object, so make the thread the id:
+
+```java
+MyConfig config = ConfigCache.getOrCreate(Thread.currentThread().getName(), MyConfig.class);
+```
+
+<div class="note warning">
+  <h5>The cache does not forget.</h5>
+  <p>
+    An id per thread leaves an instance per thread in the cache, and it stays there after the thread is
+    gone: nothing evicts it but <code>ConfigCache.remove(id)</code>. That is fine for a fixed set of
+    long-lived workers, and it is a leak for threads that come and go — a request per thread, a pool that
+    renames its threads. For those, put the <code>ThreadLocal</code> over the <b>factory</b> instead of over
+    the cache: same isolation, and the instance is collected with the thread that owned it.
+  </p>
+</div>
+
+```java
+private static final ThreadLocal<MyConfig> CONFIG =
+    ThreadLocal.withInitial(() -> ConfigFactory.create(MyConfig.class));
+```
+
+Note the `static final`: a `ThreadLocal` built inside the method that uses it is a new `ThreadLocal` on
+every call, which caches nothing at all.
+
 Since a cached instance is the one created the first time, it also keeps the
 settings of the factory that created it. That matters for the
 [prefix configured on a factory](/owner/docs/key-prefix/), which is

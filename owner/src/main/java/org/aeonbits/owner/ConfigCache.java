@@ -16,7 +16,20 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Utility class caching Config instances that can be used as Singletons.
  *
- * This class is designed to be thread safe.
+ * <p>This class is designed to be thread safe: several threads may ask for a configuration at the same
+ * time without corrupting the cache. <b>That is not the same as an instance per thread</b> &mdash;
+ * {@link #getOrCreate(Class, Map...)} uses the class as the id, so every thread receives the same object,
+ * and a {@link ThreadLocal} over it caches that one shared object per thread. An instance per thread is a
+ * matter of choosing the id, since the id is any object at all:
+ *
+ * <pre>
+ * MyConfig config = ConfigCache.getOrCreate(Thread.currentThread().getName(), MyConfig.class);
+ * </pre>
+ *
+ * <p>What that does not do is forget: an entry survives the thread that asked for it until somebody calls
+ * {@link #remove(Object)}. For threads that come and go, a {@code ThreadLocal} over
+ * {@link ConfigFactory#create(Class, Map...)} isolates the same way and is collected with the thread.
+ * See <a href="https://github.com/matteobaccan/owner/issues/283">#283</a>.
  *
  * @author Luigi R. Viggiano
  * @since 1.0.6
