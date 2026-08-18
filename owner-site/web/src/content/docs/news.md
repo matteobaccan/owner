@@ -69,6 +69,31 @@ each is described in full below — but the number should say so rather than the
 Everything else is additive. In particular, a `Map` return type used to throw on every access, so the new
 grouping behaviour described below cannot change the result of any configuration that worked.
 
+#### The 1.0.12 test suite, run against 2.0.0
+
+That claim was measured rather than argued: **the test suite released with 1.0.12 was compiled and run
+against this version**, which is the one test that asks what an upgrade actually costs. **216 tests, 212
+green.** The four that are not divide into two:
+
+ * **two are a feature of this release, doing its job.** `testNonInstantiableTokenizer` and
+   `testConverterCantBeAccessed` asserted that a **private** class named in an annotation *cannot* be
+   instantiated — an `UnsupportedOperationException` caused by an `IllegalAccessException`. It can now, on
+   purpose (see *A class named in an annotation no longer has to be public*, below), so the two old tests
+   fail by proving the change;
+ * **two are the test harness rather than the library.** `PropertiesInvocationHandlerTest` puts a Mockito
+   `@Spy` on `java.util.Properties`, whose internals a spy does not carry on a current JDK. No API of this
+   library is involved.
+
+**Seventeen of the ninety-one test files do not compile against 2.0.0 at all**, and every one of them for
+the same reason: they reach for an internal utility this release removed — `org.aeonbits.owner.util.Base64`
+and the `Util.save`, `Util.delete`, `Util.saveJar`, `Util.eq`, `Util.debug` and `Util.newArray` helpers,
+all listed under *Removals* below — or they construct `PropertiesManager` and
+`PropertiesInvocationHandler`, which are package-private and never were API. Reimplementing four of those
+helpers on the JDK methods the removals point at was five lines, after which the suite compiled.
+
+So: **no unintentional change of behaviour was found in the public API.** The differences are the removals
+this page documents and one addition that makes something work where it used to be refused.
+
 Beyond the individual changes, this release has an explicit goal: to bring the test coverage as high as it can
 practically go, and to bring the number of warnings reported by the static analysers down to zero. A library
 that other projects depend on for their configuration has to be trustworthy first and featureful second, and

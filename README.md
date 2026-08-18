@@ -140,6 +140,13 @@ written down in [Contributing](https://matteobaccan.github.io/owner/docs/contrib
 `TODO.md` in this repository is the working list, with the reasons behind what is
 being done and what has deliberately not been.
 
+Beside it are the working documents that hold a decision and the reason for it:
+`WRITING.md` for the file this library writes back, `FORMATS.md` and `CRYPTO.md`
+for those two subjects, `COMPARISON.md` for what the rest of the field does,
+`INCLUDES.md` for a feature specified and not yet built, and
+`COMPATIBILITY.md`, which is how the test suite of the previous release is run
+against the current one and what that found.
+
 LICENSE
 -------
 
