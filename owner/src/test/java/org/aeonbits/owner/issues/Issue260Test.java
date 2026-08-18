@@ -9,7 +9,6 @@ package org.aeonbits.owner.issues;
 
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;

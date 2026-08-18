@@ -132,7 +132,7 @@ public class YamlLoader implements Loader {
             bytes.write(buffer, 0, count);
 
         String text = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
-        return text.startsWith("﻿") ? text.substring(1) : text;
+        return text.startsWith("\uFEFF") ? text.substring(1) : text;
     }
 
     @Override

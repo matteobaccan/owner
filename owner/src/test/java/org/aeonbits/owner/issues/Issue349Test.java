@@ -8,7 +8,6 @@
 package org.aeonbits.owner.issues;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;

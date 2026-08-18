@@ -7,7 +7,6 @@
  */
 package org.aeonbits.owner.issues;
 
-import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;

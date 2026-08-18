@@ -8,7 +8,6 @@
 package org.aeonbits.owner.issues;
 
 import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.util.LogCapture;
 import org.junit.After;

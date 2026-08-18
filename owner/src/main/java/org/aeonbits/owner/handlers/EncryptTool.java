@@ -258,8 +258,8 @@ public final class EncryptTool {
                 throw new IllegalStateException("The two do not match. Nothing was written.");
             return first.clone();
         } finally {
-            Arrays.fill(first, ' ');
-            Arrays.fill(second, ' ');
+            Arrays.fill(first, '\u0000');
+            Arrays.fill(second, '\u0000');
         }
     }
 

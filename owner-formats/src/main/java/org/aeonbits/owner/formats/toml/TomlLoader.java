@@ -165,7 +165,7 @@ public class TomlLoader implements Loader {
             throw new IOException("the document is not valid UTF-8, which TOML requires: "
                     + notUtf8.getMessage(), notUtf8);
         }
-        return text.startsWith("﻿") ? text.substring(1) : text;
+        return text.startsWith("\uFEFF") ? text.substring(1) : text;
     }
 
     @Override

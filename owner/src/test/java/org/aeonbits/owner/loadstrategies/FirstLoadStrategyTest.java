@@ -52,10 +52,28 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
         String helloWorld();
     }
 
+    /** Two sources that both exist, so that reading the second one would show. */
+    @Sources({"classpath:org/aeonbits/owner/first.properties",
+            "classpath:org/aeonbits/owner/second.properties"})
+    public static interface TwoSourcesThatBothExist extends Config {
+        String foo();
+
+        String bar();
+    }
+
+    /**
+     * <b>The default is FIRST</b>, and this is what saying so requires: the interface above declares no
+     * {@link LoadPolicy}, and only its first source is read. The proof is the property that is
+     * <em>missing</em> — <code>bar</code> exists in the second file and nowhere else, so a null is the one
+     * observation that tells FIRST from MERGE. Asserting a value that both strategies produce says nothing,
+     * which is what this test did until it was noticed that another one had exactly the same body.
+     */
     @Test
     public void firstIsTheDefaultLoadStrategy() throws Exception {
-        SampleConfigWithSource sample = ConfigFactory.create(SampleConfigWithSource.class);
-        assertEquals("Hello World!", sample.helloWorld());
+        TwoSourcesThatBothExist config = ConfigFactory.create(TwoSourcesThatBothExist.class);
+
+        assertEquals("first", config.foo());
+        assertNull("the second source was never read, and that is what FIRST means", config.bar());
     }
 
     @Sources({"classpath:foo/bar/baz.properties",
@@ -107,6 +125,12 @@ public class FirstLoadStrategyTest extends LoadStrategyTestBase {
         assertEquals("Hello World!", props.getProperty("helloWorld"));
     }
 
+    /**
+     * Reading the source that was named — the second of the four declared above, the others being absent.
+     * It used to be written twice, letter for letter, once under this name and once under
+     * {@code firstIsTheDefaultLoadStrategy}; the duplicate is what pointed at the other one saying less
+     * than its name.
+     */
     @Test
     public void shouldLoadPropertiesFromSpecifiedSource() throws Exception {
         SampleConfigWithSource sample = ConfigFactory.create(SampleConfigWithSource.class);

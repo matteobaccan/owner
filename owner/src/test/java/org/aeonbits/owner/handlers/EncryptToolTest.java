@@ -311,8 +311,8 @@ public class EncryptToolTest {
         for (int i = 0; i < base64.length(); i += 64)
             pem.append(base64, i, Math.min(i + 64, base64.length())).append('\n');
         pem.append("-----END PUBLIC KEY-----\n");
-        try (OutputStream out = new FileOutputStream(file)) {
-            out.write(pem.toString().getBytes("UTF-8"));
+        try (OutputStream stream = new FileOutputStream(file)) {
+            stream.write(pem.toString().getBytes("UTF-8"));
         }
         return file;
     }
