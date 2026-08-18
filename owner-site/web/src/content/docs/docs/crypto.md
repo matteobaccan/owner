@@ -211,6 +211,33 @@ Two rules a handler must respect:
 - **what it returns is not expanded again.** A secret that happens to contain `${` is a secret, not a
   template.
 
+Two properties of the mechanism follow from that and are worth stating, because they answer questions that
+have nothing to do with cryptography.
+
+**A handler is registered as an object, so whatever builds your objects can build it.** A class named in an
+annotation — `@DecryptorClass`, `@ConverterClass` — is built by this library out of a no-argument
+constructor, and a decryptor that needs a key management client or an HSM session cannot be. A handler can:
+
+```java
+ConfigFactory.registerValueHandler(injector.getInstance(MyHandler.class));
+```
+
+That is the supported way to have a container build the thing that decrypts, and it is the answer given on
+[#222](https://github.com/matteobaccan/owner/issues/222): moving a secret from `@EncryptedValue` on a method
+to a marker in the value moves its decryptor from something this library constructs to something you
+construct.
+
+**A handler is asked when the value is read**, not when the configuration is loaded — so a marker naming a
+remote store fetches the keys that are read and no others:
+
+```properties
+foo.bar = ${$redis::foo.bar}
+```
+
+That is what [#198](https://github.com/matteobaccan/owner/issues/198) had been asking for since 2017: a
+configuration backed by Redis or etcd where a store holding a hundred thousand keys is never asked for all
+of them. Caching is the handler's own business — the shipped ciphers keep one, keyed by salt.
+
 There is no discovery on the classpath. A handler exists only because you registered it: a file format
 found on the classpath reads files that are already yours, while a handler found on the classpath would
 answer for the values inside them.
