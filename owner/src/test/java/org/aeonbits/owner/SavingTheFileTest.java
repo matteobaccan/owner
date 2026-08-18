@@ -511,6 +511,67 @@ public class SavingTheFileTest {
     }
 
     /**
+     * A value written across two lines with a trailing backslash — which
+     * {@link java.util.Properties} joins when it reads the file, and which this writer has to join too
+     * before it can tell whose key that is.
+     * <p>
+     * <b>Whose it is decides what comes back out.</b> A key of ours is rewritten, on one line, because the
+     * line is ours to write. A key belonging to somebody else goes back <b>as the two lines it was written
+     * on</b>: the joined form means the same thing to every reader of properties files, and putting it
+     * back joined would still be reflowing a file we were only passing through — a diff with no content in
+     * it, which is the thing this writer exists to avoid.
+     * </p>
+     */
+    @Test
+    public void aContinuedLineIsJoinedToBeReadAndSomebodyElsesIsPutBackAsItWas() throws IOException {
+        given("host = localhost\n"
+                + "their.motto = we are \\\n"
+                + "    open all hours\n");
+
+        AppConfig config = ConfigFactory.create(AppConfig.class);
+        assertEquals("joined to be read, exactly as java.util.Properties reads it",
+                "we are open all hours", config.getProperty("their.motto"));
+
+        config.save(file);
+
+        assertTrue(contents(), contents().contains("their.motto = we are \\\n    open all hours"));
+    }
+
+    /** And one of ours written that way is rewritten on one line, because that line is ours. */
+    @Test
+    public void butOneOfOursIsRewrittenOnASingleLine() throws IOException {
+        given("host = local\\\n"
+                + "    host\n");
+
+        AppConfig config = ConfigFactory.create(AppConfig.class);
+        assertEquals("localhost", config.host());
+
+        config.save(file);
+
+        assertTrue(contents(), contents().contains("host = localhost\n"));
+        assertFalse(contents(), contents().contains("\\\n"));
+    }
+
+    /**
+     * Two backslashes are an escaped backslash and not a continuation — the rule is the <b>odd</b> number,
+     * and the file below is two properties rather than one.
+     */
+    @Test
+    public void anEvenNumberOfBackslashesEndsTheLine() throws IOException {
+        given("their.path = C:\\\\\n"
+                + "host = localhost\n");
+
+        AppConfig config = ConfigFactory.create(AppConfig.class);
+        assertEquals("localhost", config.host());
+        assertEquals("C:\\", config.getProperty("their.path"));
+
+        config.save(file);
+
+        assertTrue(contents(), contents().contains("their.path = C:\\\\"));
+        assertTrue(contents(), contents().contains("host = localhost"));
+    }
+
+    /**
      * The same thing said where it happens, one line at a time - and the two ways a broken escape breaks
      * are different: four characters that are not hexadecimal, and fewer than four characters left.
      */

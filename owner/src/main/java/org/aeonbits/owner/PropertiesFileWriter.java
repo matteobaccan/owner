@@ -57,10 +57,6 @@ final class PropertiesFileWriter {
     private final Map<String, String> headings;
     private final String header;
 
-    PropertiesFileWriter(Map<String, String> descriptions, String header) {
-        this(descriptions, Collections.<String, String>emptyMap(), header);
-    }
-
     PropertiesFileWriter(Map<String, String> descriptions, Map<String, String> headings, String header) {
         this.descriptions = descriptions;
         this.headings = headings;
@@ -310,21 +306,28 @@ final class PropertiesFileWriter {
                 continue;
             }
             // a line ending in an odd number of backslashes continues onto the next one, and the key is
-            // only readable once they are joined
+            // only readable once they are joined. The physical lines are kept beside the joined one: what
+            // is not ours goes back out as it was written, and writing it joined would reflow somebody
+            // else's file for no reason - the value would be the same and the diff would not
+            List<String> physical = new ArrayList<>();
+            physical.add(raw);
             String logical = raw;
-            while (continuesOntoTheNextLine(logical) && i + 1 < existing.size())
-                logical = logical.substring(0, logical.length() - 1) + existing.get(++i).replaceAll("^\\s+", "");
+            while (continuesOntoTheNextLine(logical) && i + 1 < existing.size()) {
+                String next = existing.get(++i);
+                physical.add(next);
+                logical = logical.substring(0, logical.length() - 1) + next.replaceAll("^\\s+", "");
+            }
 
             String key = keyOf(logical);
             if (key == null) {
-                out.add(logical);
+                out.addAll(physical);
                 continue;
             }
             if (!values.containsKey(key)) {
                 if (!known.contains(key)) {
                     // not ours to touch: the file is read by more than this interface, and a key we have
                     // never heard of is somebody else's line, kept exactly as it was written
-                    out.add(logical);
+                    out.addAll(physical);
                     continue;
                 }
                 // declared, and no longer there: removed through Mutable, so the key goes and so does
