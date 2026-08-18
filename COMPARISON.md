@@ -23,6 +23,12 @@ Two of those four found **no agreement at all** among the others, which is itsel
 meant the question had to be decided on merit rather than by alignment, and both decisions are written
 down with the reasoning rather than with a citation.
 
+**Amended again 2026-08-18**, twice and both times before a decision: *what a mapping object shows* — the
+section near the bottom, which decided #150 — and *who builds the classes named in annotations*, below,
+which decided not to build the hook #222 asked for. The second one found the closest precedents outside the
+configuration field entirely, which is worth remembering as a method: **the libraries with our problem are
+not always the libraries with our subject.**
+
 **Amended again 2026-08-10**, before deciding C6 rather than after: how the field discovers loaders and
 whether discovery means enablement, whether anyone has per-loader settings or per-source options, what
 happens to a `null` in a tree-shaped source, and whether refusing an unrecognised option has a precedent.
@@ -161,8 +167,10 @@ Checked against all of the above:
   Config has it behind a config server, and the rest are symmetric only. See "Encrypting a value against
   the equivalents" below. The older `@EncryptedValue` / `@DecryptorClass` remain, for whoever brought
   their own decryptor.
-- **JMX**, **preprocessors**, **`Mutable`/`Accessible`** (we write, the others mostly only read; and what
-  that view is *scoped* to was checked against the sources on **2026-08-18**, see below),
+- **JMX**, **preprocessors**, **`Mutable`/`Accessible`** (we write, the others mostly only read; what that
+  view is *scoped* to was checked against the sources on **2026-08-18**, see below, and since that day it
+  can be restricted to what an interface declares with `@DeclaredOnly` — which nobody else offers because
+  nobody else has the problem, their mapping objects having no whole-store view to restrict),
   **parametrized properties**, **`@DisableFeature`** granularity, **prefix derived from the package**.
 - BSD licence, no framework lock-in.
 - **A `.env` whose dialect you choose** (added 2026-08-09; see `FORMATS.md`). Reading a `.env` is not
@@ -391,6 +399,42 @@ turned on the people it hits first are the ones whose configuration was already 
 SmallRye, where `smallrye.config.mapping.validate-unknown` defaults to `true` and an unmapped property
 under the prefix fails the mapping.
 
+
+Who builds the classes named in annotations, against the equivalents
+--------------------------------------------------------------------
+
+Checked **2026-08-18** against the sources, before deciding whether to build the hook
+[#222](https://github.com/matteobaccan/owner/issues/222) asked for — a way to let a dependency injection
+container supply the `Converter`, `Tokenizer`, `Preprocessor` or `Decryptor` a method names in an
+annotation, which today this library instantiates itself out of a no-argument constructor.
+
+**No configuration library has this problem**, which is the first finding: SmallRye, Spring, Gestalt and
+Coat do not have users name handler classes in annotations the way we do, so there is nothing to compare.
+The precedent is in two libraries that *do*, and both solved it the same way:
+
+- **Jackson, `HandlerInstantiator`.** From its javadoc: *"Helper class used for handling details of creating
+  handler instances … One use case is that of allowing dependency injection, which would otherwise be
+  difficult to do."* And the design detail worth copying: *"Custom instances are allowed to return `null` to
+  indicate that caller should use the default instantiation handling."* Per-kind methods —
+  `deserializerInstance`, `converterInstance`, and ten more — each receiving the annotated element.
+- **Jakarta Validation, `ConstraintValidatorFactory`**: `getInstance(Class)` plus `releaseInstance(...)`,
+  described as the contract framework implementers use to hand validator construction to a container.
+  Spring ships an implementation of each — `SpringHandlerInstantiator`, `SpringConstraintValidatorFactory` —
+  which is how the integration stays out of the library.
+
+**What we took from it, and what we did instead.** The shape is settled by those two and is one interface:
+`instantiate(Class, AnnotatedElement)`, nullable return meaning "build it yourself". `@KamBha`'s original
+proposal of a `DependencyAnnotations` annotation for qualifiers turns out to be unnecessary — handing over
+the `Method` lets an implementation read the container's own `@Named` or `@Qualifier` and we define nothing.
+**It is designed and not built**, because everything asked for in eight years is already served by
+registering an **object**: a `Loader`, a `ValueHandler` — which is also the answer to a container-built
+decryptor, see `CRYPTO.md` — and, since 2.0.0, a `Converter` by type. What would justify building it is
+somebody wanting one for a single method.
+
+**And the anomaly it exposed on our side**, which was a bug rather than a comparison:
+`Factory.setTypeConverter` is an instance method that wrote a static map, so a converter registered on one
+factory converted values in every other one. Fixed the same day. The field has nothing to say about it —
+nobody else has a converter registry that is neither per instance nor documented as global.
 
 What a mapping object shows, against the equivalents
 ----------------------------------------------------

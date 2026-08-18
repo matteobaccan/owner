@@ -3,13 +3,28 @@ CONFIGURATION FORMATS
 
 **Internal working document — not published on the project site.**
 
-Started 2026-08-09. Where the "further formats" item of `TODO.md` stands: what each format would
-cost, what the core is missing, and in which order they are worth doing. The open questions are
-collected at the bottom.
+Started 2026-08-09 as a plan: what each format would cost, what the core was missing, in which order they
+were worth doing. **Every format it planned shipped, and on 2026-08-18 the plan became a record.** What is
+worth reading here now is not the ordering — that is spent — but the rules each format settled and the
+questions each one answered, because those are the things a sixth format would have to be consistent with
+and the things nobody will re-derive from the code.
 
-The companion documents are `COMPARISON.md`, which records what the other libraries support and how
-that was established, and `TODO.md`, which holds the ordered backlog. This file is the level of
-detail neither of those wants.
+| Format | Where it lives | Shipped |
+|---|---|---|
+| `.env` | core, `DotEnvLoader` with three dialects | 2026-08-09 |
+| INI | core, `IniLoader` with three dialects | 2026-08-10 |
+| JSON | `owner-formats` | 2026-08-11 |
+| YAML | `owner-formats`, a **documented subset** | 2026-08-11 |
+| TOML | `owner-formats`, held to `toml-test` | 2026-08-12 |
+| HOCON | `owner-extras`, through Typesafe Config | 2026-08-12 |
+
+**Nothing is planned after these.** A seventh format is not on `TODO.md` and should not be until somebody
+asks for one: what the four hand-written parsers proved is that the cost is in the *rules* rather than in
+the parsing, and every rule below was argued against several implementations before a line was written.
+
+The companion documents are `COMPARISON.md`, which records what the other libraries support and how that
+was established, and `TODO.md`, which holds what is left to do — one feature, as of 2026-08-18. This file is
+the level of detail neither of those wants.
 
 **Shipped 2026-08-09, commit `d04c500`: phase 0, `.env` in the core.** `DotEnvLoader` and
 `EnvDialect` in `org.aeonbits.owner.loaders`, registered by default, 833 core tests green. Three
@@ -901,9 +916,14 @@ Open questions
    the name goes, the list of what is missing wants that much room.
 3. ~~**`list[0]` or `list.0`?**~~ — **settled 2026-08-09: `list[0]`**, and for a better reason than the
    one written here first. See *Indexed keys* below.
-4. **Where do the parsers live?** Half answered by shipping: `.env` is in the core and that was
-   right. Still open, and still uncommitted either way: whether the tree-shaped formats get an
-   `owner-formats` of their own, which is a third artifact to maintain and release. **Checked
+4. ~~**Where do the parsers live?**~~ — **settled by shipping, and in two places rather than one.** The
+   tree-shaped formats we parse ourselves went into **`owner-formats`** (JSON 2026-08-11, YAML the same
+   day, TOML 2026-08-12); HOCON went into **`owner-extras`** instead, because it is a delegation to
+   Typesafe Config rather than a parser of ours and `owner-extras` is where an optional dependency
+   belongs. `.env` and INI stayed in the core, having none. So the rule the two artifacts express is not
+   "flat here, tree there" but **what we parse ourselves against what somebody else parses for us**, which
+   is the line that also decides who owns a bug. The reasoning as it stood:
+   **Checked
    2026-08-10**: the field splits *per format*, finer than what is proposed here — Gestalt publishes
    `gestalt-json`, `gestalt-yaml`, `gestalt-toml` and `gestalt-hocon` separately, SmallRye ships the
    YAML source as its own artifact, and only Spring keeps the loaders in the core with the parser as
@@ -935,6 +955,9 @@ Open questions
    probing on — stops existing once question 6 is answered the way it is. **`Loader` gets no name.**
 9. ~~**How does a format that has `null` say so?**~~ — **settled 2026-08-10, and the answer is that the
    core does not answer it.** See *Null, and why it is not a core rule* below.
-10. **New, and cheap.** Should the flattener be reachable as a `Properties`-shaped helper — "here is a
-    tree, give me the keys" — rather than only as the two naming methods `PropertyKeys` exposes? Writing
-    JSON will answer it by needing it or not. Deliberately not designed in advance.
+10. ~~**Should the flattener be reachable as a `Properties`-shaped helper**~~ — **answered by not being
+    needed, which is why it was left to be answered that way.** Four parsers were written after this
+    question — JSON, YAML, TOML and the HOCON adapter — and none of them wanted a tree handed over to be
+    flattened: each one flattens **as it parses**, because it has to report the line a refusal happened on
+    and a tree built first would have lost it. `PropertyKeys` still exposes exactly the two naming methods
+    and the three constants it did then, and that is the whole of the shared surface between the formats.

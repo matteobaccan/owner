@@ -1,14 +1,28 @@
 TODO LIST
 =========
 
-This file is used to keep track of things that should be done, sometime next.
-For bugs and features request please see [GitHub issues](https://github.com/matteobaccan/owner/issues).
+Things that should be done, sometime next. For bugs and feature requests see
+[GitHub issues](https://github.com/matteobaccan/owner/issues) — which, as of 2026-08-18, hold **one** item
+of work and Renovate's dashboard.
+
+**Emptied on 2026-08-18.** This file had grown into a record of everything done during the 2.0.0 work, with
+the reasoning behind each decision. That reasoning was not thrown away: it lives in the working documents
+beside this one, in the release notes, and in the commit that made each change. What is left here is what
+is left to do.
+
+| Document | What it holds |
+|---|---|
+| `INCLUDES.md` | the specification of #165, decided and not yet built |
+| `FORMATS.md` | what each format costs and the questions each one raised |
+| `CRYPTO.md` | the cipher, the marker, the field, and what was deliberately not shipped |
+| `COMPARISON.md` | what the rest of the field does, verified against their sources |
+| `COMPATIBILITY.md` | the 1.0.12 suite run against 2.0.0, and how to run it again |
+| `WRITING.md` | the rules of the file this library writes back |
+| `RELEASING.md` | the release procedure |
 
 WEBSITE
 -------
 
-- [x] Write documentation for pre processing feature (see [Preprocessors](https://matteobaccan.github.io/owner/docs/preprocessors/))
-- [x] Write documentation for JMX support (see [JMX support](https://matteobaccan.github.io/owner/docs/jmx/))
 - [ ] Update the release note: the 2.0.0 announcement is already on the site, at the top of
       `owner-site/web/src/content/docs/news.md`, behind a notice saying the version is not out yet.
       When 2.0.0 is published, remove that notice and add the release date.
@@ -25,606 +39,95 @@ RELEASING
       documentation rather than that note: this moves.
 - [ ] While in there: `distributionManagement/site` still deploys over FTP to `newinstance.it`, a host
       the project no longer controls. Harmless unless somebody runs `mvn site-deploy`.
+- [ ] Correct the comment at `pom.xml:31`, which says `aeonbits.org` "no longer exists". It exists and
+      belongs to somebody else now — the deferred half of the 2026-08-18 finding that every old
+      documentation link is unrecoverable. **The maintainer asked for this to wait for the beta.**
 
-WHERE TO PICK UP
-----------------
+THE ONE FEATURE LEFT
+--------------------
 
-Updated at the end of 2026-08-17. `FORMATS.md`, `COMPARISON.md` and `CRYPTO.md` have the detail and the
-open questions; this is the short version.
+- [ ] **Inheritance between properties files**, [#165](https://github.com/matteobaccan/owner/issues/165):
+      a file naming the file it builds on. **Specified in `INCLUDES.md`** on 2026-08-18 — the four
+      decisions are settled, the ten tests are listed in the order that finds the problems earliest, and
+      nothing is built. The hard part is named there: the list of sources is computed once in the
+      constructor and handed to `HotReloadLogic`, and with includes it has to be worked out again after
+      every load.
 
-**2026-08-17 — the sources, the annotations, and the publishing.** Six commits, and the thread through them
-is that a rule nobody had chosen is a rule that will surprise somebody:
+WORTH DOING, NOBODY WAITING
+---------------------------
 
-- **Every class-level annotation is read the same way now.** `@Sources`, `@LoadPolicy` and `@HotReload`
-  stopped at the direct super-interfaces, `@DecryptorClass` and the class-level `@Description` were read off
-  the interface handed to the factory and nowhere else, and `@DisableFeature` answered one question two ways
-  — the method saw it, `getProperty` did not. One walk, `Annotations`, breadth first over the hierarchy, for
-  everything that describes the **configuration object**; the annotations that describe the **methods an
-  interface declares** (`@Prefix`, `@Mandatory`, `@Sensitive`, `@Separator`, `@TokenizerClass`,
-  `@PreprocessorClasses`) deliberately do not climb, and that half now has tests too. The whole rule, with
-  the propagation tables, is the site page *Where an annotation counts*.
-- **The conventional sources got their three decisions**: the order is chosen rather than inherited from the
-  loader registration (`.properties`, `.xml`, `.ini`, `.cfg`, discovered last — a `.cfg` no longer outranks
-  a `.properties`); more than one of them existing is a `WARNING`, a refusal under strict; and the
-  convention can be named with `owner:default`, or `owner:default.xml` for one of them. **#267 closed.**
-- **The environment spelling became a name a shell can set**: `server.maxThreads` is `SERVER_MAX_THREADS`,
-  not `SERVER.MAX_THREADS`. The MicroProfile rule, applied in every source rather than only in `system:env`.
-- **The javadoc has a publisher again.** It had served 1.0.12 since June 2020, because the only thing that
-  ever wrote `apidocs/` was `ant javadoc publish`, by hand. A workflow owns it now; the ant script is gone;
-  `javadoc:aggregate` had also been broken since `Automatic-Module-Name` landed, and is fixed in the pom.
-- **Nine packages had no description at all** and now do, with a test that refuses a new one without.
-- **Code scanning is at zero open alerts**: a `NumberFormatException` and a `StringIndexOutOfBoundsException`
-  reachable from `save(File)` fixed, a writer that was flushed and never closed fixed, four javadoc comments
-  that documented nothing put back on what they describe — with a test that refuses two comments in a row —
-  and the three `unused-parameter` alerts on extension points dismissed with a written reason.
-
-**The cipher shipped on 2026-08-14**, which was the last of the three largest gaps. `${$aes-gcm::…}`, a
-`ValueHandler` registered by name, AES-256/GCM over PBKDF2 at 210,000 iterations, and `EncryptTool` in the
-same jar to produce a marker. **#285, #287 and #115 were answered and closed on 2026-08-14.** It retires the
-AES/ECB example the site used to publish, and — because the envelope knows nothing about cryptography —
-gives `${$vault::…}` and `${$file::…}` to anybody who wants them, which is part of #130 and #143 with no
-module of ours. **The asymmetric case shipped the same day**: `${$rsa-oaep::…}`, `RsaHandler`, RSA-OAEP
-wrapping AES-256/GCM, so whoever writes a secret into a configuration cannot read the ones already there.
-`CRYPTO.md` has no open question left.
-
-**Two of the three largest gaps closed on 2026-08-11.**
-
-- **Nested configuration interfaces**, in the four shapes the other libraries have between them: a section,
-  a list of sections from `servers[0].host`, a map of them from `servers.alpha.host`, and one asked for by
-  name with a parametrized key. The flattening convention and the reader met without either being reworked,
-  which was the bet made when the convention was chosen: an XML tree is now read end to end into typed
-  elements. Issues #129, #2, #126 and #209 were **closed on 2026-08-12**. **#72 is not one of them** —
-  see below.
-- **Origin tracking**, `Traceable` and `Origin`: which source a merged property actually came from. Issue
-  #277 was **closed on 2026-08-12**.
-
-Both were preceded by a survey of what SmallRye, Archaius, Coat, Gestalt, Spring and Typesafe do, and both
-times it changed the design rather than confirming it — the survey is in `COMPARISON.md` so that the two
-minority positions we hold can be defended instead of remembered.
-
-**The queue below this line is now the whole of it**: JSON, then YAML; the two diagnostics still missing;
-the four silent failures; and the gaps against the other libraries further down.
-
-**C6 and C5 are done**, in three commits, and the day spent checking the open questions against Spring
-Boot, SmallRye/MicroProfile and Gestalt before writing any of it paid for itself: it cancelled a third of
-the work, inverted the rule at the centre of it, and turned up two silent failures nobody had noticed.
-
-- **`673c6ee6`** — `SourceOptions`, public: one way to read the options on a source and to refuse what a
-  loader does not recognise. The options live in the **fragment** now, which is a rule for every loader and
-  every scheme — the query belongs to the protocol. That removed the stripping that had been losing a token
-  from a `.env` fetched over HTTPS, and repaired an XML with a query string being read as a properties file.
-  The `classpath:` case works like every other.
-- **`8b12f8e2`** — `ServiceLoader` discovery, which **enables** what it finds. The two orderings are
-  separated: head of the `accept()` list so a format loader is asked before `PropertiesLoader` takes its
-  files, tail of the default-spec list so a jar on the classpath cannot make a forgotten `MyConfig.yaml`
-  beat a working `MyConfig.properties`. Context class loader with a fallback, and a `CONFIG` line naming
-  what was found — including when nothing was.
-- **`512ab586`** — C5: a format may go by more than one name, as additive default methods, so no
-  implementation of `Loader` anywhere needs a change or a recompilation.
-
-**Cancelled, not postponed**: the `owner.loaders.*` settings and any name on `Loader`. Nobody in the field
-has a settings namespace for a loader, and the single thing ours was to express stopped existing once
-discovery was made to enable.
-
-**`null` is settled by being moved**: the core keeps its three states and learns nothing new, and a format
-that has a null decides in its own loader, as an option of that format. Two core rules already constrain
-that decision and are written down in `FORMATS.md` so the JSON loader does not rediscover them.
-
-INI IS DONE, AND WHAT IT PROVED
-------------------------------
-
-**Shipped 2026-08-10**, `c3fab93b`. It went ahead of JSON and YAML for reasons argued in `FORMATS.md`, and
-the ones that were bets came good: C6 got its first consumer and held, C5 got the two extensions it was
-built for, and the duplicate-key question — **C9** — is now answered for YAML, TOML and HOCON as well.
-
-The rules were settled against five implementations before a line was written, and they disagree three ways
-on the only question that matters. A repeated key is a **list** here, because that is what this library
-already does with a repeated XML element; reading the same shape two ways would have been the incoherence.
-
-The `python` dialect answered a question worth remembering: **the rules were cheap and the name was
-expensive.** `ConfigParser` interpolates `%(name)s` and we never will, so the preset refuses such a value
-rather than handing back the literal — five lines that keep a file from meaning one thing to Python and
-another here.
-
-WHAT IS NEXT
-------------
-
-~~**JSON**~~ — **done 2026-08-11**, in a new artifact `owner-formats`, which also settles where the parsers
-we write ourselves live. Its three open questions are answered and written down in `FORMATS.md`: a `null`
-writes no key, an empty array writes an empty value, a repeated name is refused. It reads end to end
-through the nested interfaces, which is what it was meant to validate.
-
-~~**YAML**~~ — **done 2026-08-11**, a documented subset: block mappings and sequences, a mapping opened on
-its dash, quoted and plain scalars, block scalars with chomping, flow collections and comments in; anchors,
-aliases, merge keys, tags, complex keys, a second document, a tab in the indentation and a value continued
-without `|` or `>` all refused by name and by line. The Norway problem never arose, exactly as `FORMATS.md`
-predicted it would not: the literal scalar is kept and the interface declares the type, which is why the
-parser is around 450 lines rather than 5000. Issues #14 and #65 **can be closed**.
-
-**The formats are done** but for TOML and HOCON. HOCON is the one that wants deciding rather than writing:
-its value is reading the `application.conf` files that already exist, and its substitutions resolve after
-merging and may be self-referential, so a partial implementation changes the meaning of somebody's
-configuration in silence — which is worse than not reading the format.
-
-Second, and the one that would close the most support questions: **the rest of a configuration that
-explains itself**. Three of its five lines shipped with #170; the two left are below.
-
-Third, ~~**the five issues answered on 2026-08-11 and still open**~~ — **done 2026-08-12**: #129, #2, #126,
-#209 and #277 are closed, each with the usual comment, and #48 turned out to have been closed already on
-2026-08-10. Reading them one by one before writing corrected the list twice, which is the argument for
-doing that rather than trusting this file: **#72 is not answered** and stays open, and **#240 is only half
-answered** — the snippet in it is HOCON, not JSON.
-
-THE SOURCES CLUSTER, WHICH IS WHERE TO PICK UP NEXT
---------------------------------------------------
-
-Four issues ask variants of one question — *where do the sources come from* — and after 2026-08-17 the
-shape of the answer exists, so they should be read together while it is fresh:
-
-- **[#173](https://github.com/matteobaccan/owner/issues/173) `@AutoSources`** and
-  **[#349](https://github.com/matteobaccan/owner/issues/349) a `SourcesLocator`** both want the list of
-  sources decided by something other than a constant array. Part of it is already answered — a spec is
-  expanded before it is read, so `${...}` with a default puts a system property or an environment variable
-  in the path, and `owner:default` puts the convention in it by name. **Read them before writing anything**:
-  what is left after those two may be nothing, or may be one method.
-- **[#165](https://github.com/matteobaccan/owner/issues/165) inheritance between properties *files***, a
-  `needs=other` key inside a file. Ours is inheritance between *interfaces*; the file-level version is what
-  HOCON's `include` does. Worth deciding rather than writing: a key that reaches for another file is a
-  format feature, and it would apply to every format we read.
-- **[#45](https://github.com/matteobaccan/owner/issues/45) several `@Key`s on one method.** Relaxed binding
-  answers the spelling half of it; what is left is genuinely two different keys, one falling back on the
-  other, which today is written `@DefaultValue("${other.key}")`.
-
-A CONFIGURATION THAT EXPLAINS ITSELF
------------------------------------
-
-`WARNING` says something went wrong; `CONFIG` says what was decided. The four silent failures further down
-are the first kind. These are the second, and they matter more, because most of "it does not work" is not a
-failure at all — everything succeeded, just not on the file or the key somebody thought.
-
-One switch, `org.aeonbits.owner.level = CONFIG`, and the library says what it did. In the order of how many
-real questions each would close — **the first three shipped with
-[#170](https://github.com/matteobaccan/owner/issues/170); the last two are what is left**:
-
-- [x] **Which sources were resolved, and which one answered** — **done**, with the two lines
-      `PropertiesManager.toURIs` now writes: what was looked for, and which of those was not there. It
-      subsumes the second silent failure below, since a spec that `newURI` cannot resolve is dropped with
-      `if (uri != null)` and never reaches a loader; that one is therefore *visible* now, though still not
-      a warning.
-- [x] **Which loader answered for each source** — **done**, `Reading %s with %s` in `LoadersManager`, plus
-      a line naming the loaders discovered on the classpath, including when none were.
-- [x] **The specs looked for when there is no `@Sources`** — **done**, the same line as the first: it says
-      `no @Sources, looking for:` and lists them.
-- [x] **The effective key prefix** — **done 2026-08-11**, and the question turned out to have moved since
-      this was written. After nesting there is no single effective prefix: there is one per declaring
-      interface, one per section, and `@DisableFeature` is per method. So what is reported is the thing
-      actually wanted, **the key each method resolves to**, at `FINE`, walking the nested interfaces; a key
-      that is not yet final says which kind it is. At `CONFIG` one line names the factory prefix alone,
-      which earns it by being the only prefix written in no source file. The field was surveyed first:
-      Spring exposes the same through `/actuator/configprops`, Typesafe through `render()`, Coat by
-      generating readable code, and SmallRye has nothing (quarkus#8218 is still open) — none of them logs
-      "the prefix", all of them make the resolved mapping inspectable.
-      The original entry:
-- [x] **The effective key prefix**, from `KeyPrefix`, `@Prefix` or `@DisableFeature(PREFIX)`. A wrong prefix
-      makes *every* property vanish at once, which is the most disorienting failure there is and the least
-      visible: nothing errors.
-- [x] **Hot reload: whether it is on, of which kind, how often, and on which sources** — **done
-      2026-08-11**, and it turned out to be two things rather than one. The `CONFIG` line says what was
-      asked for and what is being watched; the half that mattered more is a `WARNING` for the sources that
-      **cannot** be watched, which were dropped from the list in silence. That one is not a diagnostic of
-      the usual kind: an absent source is a fallback working, while here somebody wrote `@HotReload` and for
-      that source it will never fire, which is a request that cannot be honoured.
-      The original entry:
-- [x] **Hot reload: whether it is on, of which kind, how often, and on which sources.** "I changed the file
-      and nothing happened" — because `ASYNC` watches only `file:` sources, or the source is inside a jar.
-
-Two rules, and the first was nearly missed: **a URI can carry credentials.** `https://user:pass@host/app.properties`
-is legal and used, and it is exactly what these lines would print. Every URI that reaches a log goes through
-something that blanks the userinfo first — the existing rule about never logging a *value* does not cover
-this, because here the secret is in the *source*. And **at `CONFIG` the "say it once" rule inverts**: it is
-off unless somebody turned it on to look into something, so seeing every reload is the reason it was turned
-on. What is decided once — prefix, hot reload, discovery — is said at creation; what depends on the load is
-said per load.
-
-Worth doing together with the four `WARNING` items below: they are one reading of the same code paths and
-the same two rules.
-
-**Two small things left on the floor**, neither urgent:
-
-- [x] ~~The three open [code scanning alerts](https://github.com/matteobaccan/owner/security/code-scanning)
-      as of 2026-08-17 — #148, #313 and #318, all `java/unused-parameter`~~ — **dismissed on 2026-08-17**
-      with the reason below, which leaves the scan at zero open alerts. All three are on the parameters of
-      *extension points*:
-      `Converter.convert(Method, String)`, `ReloadListener.reloadPerformed(ReloadEvent)` and the
-      `Preprocessor.processAbsent(String)` default, whose body declines by design. The query is right about
-      the code it can see — no implementation *in this repository* uses those parameters — and wrong about
-      the contract, which is implemented outside it. The earlier pair, #235 and #218
-      (`java/internal-representation-exposure`), is closed.
-      Everything else the scan reported was fixed on 2026-08-17: a `NumberFormatException` and a
-      `StringIndexOutOfBoundsException` reachable from `Accessible.save(File)`, and an
-      `OutputStreamWriter` that was flushed but never closed.
-- [x] ~~`PropertiesLoader` wraps its stream in an `InputStreamReader` that is never closed~~ — **done
-      2026-08-10**, with try-with-resources on both, as `7af2529` did for `DotEnvLoader`. No descriptor
-      was being lost, so nothing observable changes; what changes is that each of the two now closes
-      what it opened, which is the rule the next loader will follow.
-
-CODE
-----
-
-- [x] **Break the package cycle between `org.aeonbits.owner` and `org.aeonbits.owner.converters`.** The
-      parsing now lives in `org.aeonbits.owner.util.DurationParser`, which both the core and
-      `DurationConverter` call; the converter is the public adapter and the core no longer imports the
-      `converters` package.
-- [x] **Break the remaining package cycle, between `org.aeonbits.owner` and `org.aeonbits.owner.util`.**
-      **Done 2026-08-12.** It was the older of the two and the last one left: `Util.isFeatureDisabled`
-      read `Config.DisableFeature`, so `util` pointed back at the core while most of the core points at
-      `util` — and those two imports in `Util.java` were the whole of the edge. **There are now no
-      cycles between the packages of the core.**
-      The method moved onto the enum it reads, as `Config.DisableableFeature.isDisabledFor(Method)`, so
-      that `PREFIX.isDisabledFor(method)` replaces `isFeatureDisabled(method, PREFIX)` at all six call
-      sites — three classes, all in the core, which is where the method's only callers already were.
-      Two things worth carrying:
-      **the usual softening was not available.** An API is normally removed in two steps, the body
-      moved and the old method left `@Deprecated` delegating to it. Not here: a delegating
-      `Util.isFeatureDisabled` still imports `Config`, and the import *is* the cycle. It was remove or
-      keep, which is why this waited for a major version.
-      **It is not a net removal of API.** A public method left `Util` and a public method arrived on
-      `DisableableFeature`, a type that was already public — which is both easier to write in the
-      release note and a better home, since the knowledge of `@DisableFeature` now sits next to the
-      annotation it reads. It also stopped being callable on a method that is not reached through a
-      `Config`, so `DisableFeatureTest` now tests it directly rather than only through a configuration
-      object: four tests, one of them on an interface that does not extend `Config` at all.
-      **This does not unblock `module-info`** and was not done for it — JPMS forbids cycles between
-      *modules*, and these two packages would share one. What it unblocks is moving a package: while
-      `util` pointed at the core, `util` could not go anywhere, and `owner-formats` has just made that
-      freedom concrete.
-
-- [x] **`List<String>[]` ended in a `StackOverflowError`** — **done 2026-08-12**, and a probe first showed
-      the defect was three times larger than the entry said. `elementType` erases the component of a
-      `GenericArrayType` to `List`, `ARRAY` hands that to `COLLECTION`, and `COLLECTION` asks `elementType`
-      about the same method again: `List<List<String>>` reaches the same loop, and so does a
-      `@ConverterClass` on either shape, whose converter was never even called because `COLLECTION` is
-      consulted before it. All three now refuse the shape where the recursion started, with a message that
-      sends the reader to `@CollectionConverterClass` — which is checked *before* `COLLECTION` and is
-      therefore the one way that did work and still does. `NestedCollectionsTest`.
-      The refusal is not a limitation waiting to be lifted: a property value is tokenized once, by one
-      separator, so it carries no second level for the inner collections to be told apart by.
-
-- [x] **`ByteSize.equals` compared the *rounded* byte count** — **done 2026-08-12**. `getBytes()` rounds
-      towards positive infinity so a buffer sized from it is never too small; identity was built on that,
-      so `0.4 B` equalled `0.6 B` and a `HashSet` of the two held one element. Identity is now decided on
-      the exact number of bytes, `compareTo` with it.
-      **What the fix uncovered**, which is the half that reported a wrong size rather than merging two
-      right ones: `convertTo` rounded the same way *before dividing*, so `1.5 B` came back as `2 B` — from
-      a method that changes the unit and nothing else, and even when the unit asked for was the one the
-      size was already written in. It is exact now, which is also what the javadoc of `in()` already
-      claimed. `in()` keeps its canonical form by dropping the trailing zeros a division inherits from its
-      operands, so `1000.0 KB` still reads `1 MB` and not `1.0 MB`.
-
-- [x] **A `default` method on a non-`public` interface failed with `IllegalAccessException`** — **done
-      2026-08-12**, the bug promised "tracked separately" in the comment closing #41 and never tracked.
-      `Reflection.invokeDefaultMethod` looked the method up with a lookup belonging to
-      `org.aeonbits.owner.util`, so an interface that is package-private anywhere else was not accessible
-      from it and the call died at the first invocation with *symbolic reference class is not accessible*.
-      It now takes `MethodHandles.privateLookupIn` on the declaring interface — reflectively, the bytecode
-      targeting Java 8 — and falls back on the old path when there is none. Java 8 was never affected: its
-      constructor hack already built the lookup on the declaring interface, which is the same thing said
-      the unsupported way. The only test there was used a public top-level interface, the one shape that
-      could not catch it; `DefaultMethodOnNonPublicInterfaceTest` uses a package-private one and a private
-      nested one.
-
-SILENT FAILURES STILL TO LOOK AT
---------------------------------
-
-Found by reading the code on 2026-08-09, while adding the first two diagnostics the library has ever had:
-the hot reload that used to die on its first failure, and the XXE hardening that could be absent without
-anyone being told. `java.util.logging` is now used for both — the JDK's, so still no dependency, and
-`org.aeonbits.owner.level = OFF` quietens the lot. These four are the rest of what that reading turned up,
-in the order they seem worth doing.
-
-Two rules any of them has to keep. **Never log a value**: `@Sensitive` exists to keep values out of logs and
-a diagnostic that leaked a password would be a poor trade. And **say it once**: a configuration is long
-lived and `reload()` runs the whole load again, so anything reported per load has to be guarded the way
-`PropertiesManager.lastReportedReloadFailure` is, or it repeats at the hot reload interval for ever.
-
-- [x] ~~**A source that was named and never arrived.**~~ — **done 2026-08-11**, with the rule below and one
-      correction to it that a test found: the distinction cannot be read off the exception, because
-      `FileInputStream` throws `FileNotFoundException` for a file that is missing, for a directory named
-      where a file was meant, and for one it may not open. For a file the filesystem is asked instead; only
-      a source that is not a file falls back on the exception. Added beyond the rule: `#required=true` on a
-      source, which turns its absence into a refusal — Spring's `optional:` the other way up — and which
-      also covers the classpath case below, the one that never reaches a loader.
-      The original entry, which the rule came from:
-- [x] **A source that was named and never arrived.** `Config.LoadType.FIRST` and `MERGE` both do
-      `catch (IOException) { ignore(); }`, with a comment admitting it covers two different things: a file
-      legitimately absent, which is how the fallback is *meant* to work, and a file that is there but cannot
-      be read — wrong permissions, a typo in the path, a network source down. In the second case the caller
-      gets a configuration full of defaults and no hint whatever. A typo in
-      `@Sources("file:/etc/myap.env")` yields an object that works and lies.
-      Warning on every absent file would be unbearable noise, since `FIRST` expects misses by design and the
-      default probe tries `MyConfig.properties` and `MyConfig.xml` for every interface. The rule that seems
-      right: **`FileNotFoundException` stays silent, every other `IOException` is a warning**; and one
-      further warning when `@Sources` was declared explicitly and *nothing at all* could be read, which is
-      exactly the typo case and costs nothing in the normal one.
-- [x] ~~**A classpath source that disappears before any loader sees it.**~~ — **done 2026-08-11**, in the
-      same piece of work as the item above, as that entry said it had to be. It stays silent when it is
-      merely absent, is counted among the sources that did not answer, and is refused outright when it
-      carries `#required=true` — which had to be answered in `ConfigURIFactory`, since that is where such a
-      source stops existing.
-- [x] ~~**XML that is malformed and is not in the Java properties format.**~~ — **done 2026-08-11**, and
-      the entry above described both the cause and the cure wrongly, which a probe found before a line was
-      written. Throwing outright breaks **every** ordinary XML: with validation on, a parser reports a
-      validity error for any document that declares no grammar — *no grammar found* — and that is what the
-      `isJavaPropertiesFormat` test was really shielding. Nor were the properties "partial": a validity
-      error is recoverable, the parse runs to the end, and the caller got *more* than the grammar allows,
-      not less. The rule now is whether the document **declares a grammar**, read off its `DOCTYPE`; an
-      external DTD counts as none, since the hardening neutralizes it and a document cannot be held to a
-      rule we refused to read. `#validate=false` on the source is the way out, for either kind of grammar.
-- [x] **A `@Key` whose value is not a legal format string** — **done 2026-08-11**, at `FINE` and costing
-      nothing, the `catch` being already there. One thing the entry did not foresee: neither the value nor
-      the exception message can go in the line, since the message of a formatting failure quotes the piece
-      of the format it choked on, and that piece is the value. The key and the name of the failure are
-      what is left, and they are enough.
-      The original entry:
-- [x] **A `@Key` whose value is not a legal format string.** `PropertiesInvocationHandler` catches the
-      failure from `String.format` and returns the template unexpanded, which is documented and probably the
-      right behaviour — a property value has no obligation to be a format string. Worth a `FINE`, not a
-      `WARNING`, and only if it costs nothing.
-
-Deliberately **not** on this list: the five `ignore()` calls in `PropertiesManager`. They all catch
-`RollbackBatchException` or `RollbackOperationException`, which means a listener chose to veto the change.
-That is the event API working, not a failure, and it should stay quiet.
-
-GAPS AGAINST THE OTHER CONFIGURATION LIBRARIES
-----------------------------------------------
-
-From the comparison run on 2026-08-07. The evidence, the state of the field and the reasoning are in
-`COMPARISON.md`; this is only the list of work, in the order the value came out. Nearly every line has
-an issue behind it, which is the point: what the others shipped is what our reporters asked for.
-
-- [x] **Nested configuration interfaces** — `ServerConfig server();` resolving `server.host`,
-      `server.port`. Was the largest visible gap: SmallRye, Gestalt and Coat all have it. **Done
-      2026-08-11**, `NestedProperties`: the accessor names the section, the nested object shares its
-      parent's `PropertiesManager` and loads nothing of its own, the objects are built when the
-      configuration is created so that `@Mandatory` one level down is checked then and a cycle is refused
-      there. Also `List<ServerConfig>` from `servers[0].host` — which closes the loop with the flattening
-      convention, an XML tree now being read end to end — `Map<String, ServerConfig>` from
-      `servers.alpha.host`, and `@Key("servers.%s") ServerConfig server(String name)`, which together
-      answer [#126](https://github.com/matteobaccan/owner/issues/126) and
-      [#209](https://github.com/matteobaccan/owner/issues/209) without the by-hand recipe.
-      Issues [#129](https://github.com/matteobaccan/owner/issues/129) and
-      [#2](https://github.com/matteobaccan/owner/issues/2) **closed 2026-08-12**, with #126 and #209.
-      Two decisions to carry: a `@Prefix` on a nested interface **composes** with the path, where the
-      factory prefix is overridden by it (Gestalt composes, SmallRye and Archaius ignore the annotation
-      outright — see `COMPARISON.md`); and an `Optional` section is present as soon as anything is below
-      its path, defaults included, which is what SmallRye settled on in its version 3 after shipping the
-      opposite. `@Mandatory` on the accessor of a section is refused for the same reason.
-- [ ] **A section read by key, relative to the section.** Deliberately **not** an issue: nobody has asked
-      for it, and opening one advertises a feature to people who do not need it. It lives here until
-      somebody does ask, and then the note already written on the `nested-configuration.md` page is the
-      text to open it with.
-      The shape is settled and has two precedents: Typesafe Config's `getConfig("section")` returns a
-      configuration **rooted at that path**, Commons Configuration's `subset(prefix)` returns one with the
-      **prefix stripped from the keys**. The other camp — SmallRye, Spring, Coat, Gestalt — puts no
-      key-based API on a nested object at all, the key-based view being a separate object with absolute
-      keys, one per application.
-      A nested interface may not extend `Accessible`, `Mutable` or `Traceable` since 2.0.0, refused when
-      the configuration is created, precisely so that this stays possible: **allowing it later breaks
-      nobody, correcting it later would break everybody.** Without the refusal a section answered
-      `getProperty("host")` with the root's `host` — a different property, no error — and `clear()` on a
-      section emptied the whole configuration.
-      What has to be decided before writing it, and what the refusal bought the time for: what `store()`
-      on a section writes and whether it can be read back, what `clear()` clears, what `load(InputStream)`
-      merges, and which key `originOf` is asked with. `@Sensitive` needs nothing: the masking is already
-      computed over the whole tree from the root. **The one thing genuinely missing today** is that there
-      is no public way to ask a nested object for its own path — `KeyPrefix` is package-private — so a
-      section reached through a list or through an accessor taking arguments has a path only the caller can
-      reconstruct. That is the gap this would close, and the argument for doing it one day.
-- [x] **Ship a cipher, and a marker that says a value is one** — **done 2026-08-14**, in three commits:
-      the envelope (`ValueHandler`, `HandlersManager`, the hook in `StrSubstitutor`), the cipher
-      (`AesGcmHandler`), the tool (`EncryptTool`) and, the same day, the asymmetric cipher
-      (`RsaHandler`, `rsa-oaep`). The site page was rewritten with it, and says what
-      changed to whoever copied the old example. What the build settled beyond the design below:
-      **210,000 iterations**, measured rather than guessed — 38 ms on JDK 24, 49 ms on JDK 17, once per
-      salt and not once per value. **The count travels in the token**, four bytes ahead of the salt, so
-      that raising it later leaves files already written readable; it is not a knob, since no syntax
-      offers it to whoever edits the file, the whole header is GCM-authenticated, and a token asking for
-      fewer than 100,000 iterations is refused. **One class, not two** — encryption and decryption share a
-      format, and a format written down twice disagrees with itself. **No discovery**, and the tool goes
-      in the core jar with no `Main-Class`. The passphrase and the derived keys are `transient`, because a
-      Config object is serializable and a handler is reachable from one.
-      The asymmetric case was expected to be postponed and was not: on this envelope it cost a second
-      handler name and a second class, with no change to `aes-gcm` and none to the substitution. Its key
-      material is **not** a keystore, which is where the analysis below guessed wrong — the caller brings
-      `PublicKey` / `PrivateKey`, and two readers take the PEM that `openssl` writes.
-      The analysis below is kept because it is the reasoning, not the plan.
-      `CRYPTO.md` holds the whole of it —
-      what `@EncryptedValue` is worth today, what the field does, the design and the open questions.
-      The short version: **the library shipped no cipher at all until 2026-08-14.**
-      `org.aeonbits.owner.crypto` is an SPI
-      and a no-op; the only concrete implementation lived in the test suite, and `crypto.md` reproduced
-      its source for the reader to copy — so that class is what people run. It is AES/ECB with the
-      passphrase used as the raw key, which was probed rather than assumed: the same plaintext gives
-      the same cipher text every time, so a file discloses which secrets are equal.
-      The form was settled on 2026-08-13: **`${$aes-gcm::<base64>}`**, a marker resolved by the
-      substitutor through a handler registered by **name** — the name being the scheme identifier, so
-      there is no registry of numbers for us to own. Inside it, AES-256/GCM with a random IV per value
-      and PBKDF2 over a passphrase of any length, salt and IV travelling in the token. It goes in the
-      core, since AES-GCM and PBKDF2 are in the JDK and the no-dependency rule does not bite.
-      Being expansion, it settles by construction what two open issues ask for:
-      [#285](https://github.com/matteobaccan/owner/issues/285) (`fill()` does not decrypt, **closed
-      2026-08-14**) and the
-      decryptor half of [#287](https://github.com/matteobaccan/owner/issues/287) (a value that refers
-      to an encrypted one gets the cipher text — which 2.0.0 warns about and `owner.strict` refuses,
-      but does not cure). The converter half of #287 cannot be cured at all: a converter answers with a
-      typed object and there is no room for one inside a string.
-      **#287 was closed on 2026-08-14 all the same**, and reading it properly is why: the example the
-      reporter actually wrote is a `String`-to-`String` converter, which *is* expressible as a
-      `ValueHandler`. Only a converter answering with a typed object is beyond reach, and the reply says
-      so and invites a reopen if that is the case they hit.
-      **#115 was closed the same day** and is not really ours: "a day in milliseconds is unreadable" is
-      answered by the automatic `Duration` conversion — `@DefaultValue("1d")` — which is what a commenter
-      proposed in 2015. The handler is only the escape hatch for genuine arithmetic, and we deliberately
-      do not ship one: that was Luigi's judgement in 2015 and the cost has not changed.
-      Two rules already decided and not to be re-derived: an expression beginning `$` and containing
-      `::` **is** a handler reference, and an unregistered name is an **error** rather than a fallback,
-      because a misspelt handler would otherwise resolve to the empty string — the worst possible
-      answer for a password; and `@EncryptedValue` on a method whose value is a marker is a
-      contradiction to be **refused**, since expansion runs first and the decryptor would be handed
-      plain text.
+- [ ] **Remote and cloud sources** — S3, Vault, Consul — as loaders in `owner-extras`, where JNDI and
+      ZooKeeper already live. Gestalt covers all of these.
+      Issue [#130](https://github.com/matteobaccan/owner/issues/130). The rule JNDI settled and this would
+      inherit: **a source that carries its own scheme is a configuration file turning into a request to
+      somebody else's server**, so the loader refuses the remote form and the way in is Java code — the
+      same rule as the encryption passphrase.
+- [ ] **The line a value came from.** `Traceable` says which *source* answered; Spring and Typesafe both
+      carry the line number too. It needs every loader to report positions, and `Origin` was made a type
+      rather than a `String` precisely so that it can grow one without a second API.
+- [ ] **Generate the documentation of a configuration** from the mapping interface — the other half of
+      `TemplateTool` and a different product. Quarkus generates a reference from `@ConfigMapping`, Spring
+      generates `spring-configuration-metadata.json` and gets IDE completion out of it; both with an
+      annotation processor, at build time. Worth its own issue if it is wanted. The interesting question is
+      whether to aim at Spring's JSON, that being the one with tooling already reading it.
 - [ ] **The terminal prompt of `EncryptTool` has no automated test** — reading a passphrase twice without
       echo, refusing an empty one, refusing two that differ. Not an oversight: a JVM under Surefire never
-      has a terminal, so `Console.readPassword` is unreachable from a test. What *is* covered is the half
-      that matters more, and it is covered behaviourally: with the streams redirected and no
-      `OWNER_PASSPHRASE`, the piped value is not mistaken for the passphrase — the JDK 22
-      `Console.isTerminal()` hazard the tool is built around.
-      Making the rest reachable means a production seam, something like
-      `static char[] passphrase(String fromEnvironment, Console console)` beside the existing
-      `run(args, out, err)` / `main` split. **Worth doing only if that seam earns its keep otherwise**; a
-      parameter that exists so a test can reach a branch is a parameter that lies about the design, which
-      is the mistake `passphrase(PrintStream)` already was once.
-- [ ] **A composite object of a type we cannot proxy** — [#72](https://github.com/matteobaccan/owner/issues/72),
-      which this file wrongly listed as answered by the nested interfaces until it was read on 2026-08-12.
-      It is not. The request is `DataSource getDataSource()`, assembled by a provider class out of several
-      properties, and `NestedProperties.nests` requires `type.isInterface() && Config.class.isAssignableFrom(type)`
-      — a `DataSource` is neither. Nesting gives you `JdbcConfig jdbc()` and you still build the
-      `DataSource` yourself, which is the assembly the reporter wanted to be rid of.
-      **The design was already decided in 2014 and never built**, by lviggiano on the issue itself: not a
-      new annotation, but a `Converter` able to see the properties. Today `Converter.convert(Method, String)`
-      receives one value, and `Converters.convertWithConverterClass` builds it with `converterClass.newInstance()`,
-      so a no-argument constructor is the only one there is. His proposal was to try a constructor taking a
-      `Properties`, or one taking the `Config` subclass, before falling back to that. Both hooks are in one
-      method, which is what makes this small; the questions to settle are which of the two forms to offer,
-      and whether the converter sees the raw or the expanded properties.
-- [ ] **Further formats as `Loader`s, written by hand, with no external dependency.** The SPI has
-      existed since 1.0.5, a loader is a three-method class, and two external projects have already
-      hand-written a YAML loader and a JSON one against it. Being properties-only is the top reason
-      people pick Typesafe Config over us. **`FORMATS.md` holds the whole analysis** — what each format
-      costs, what the core is missing, and the order.
-      **Done 2026-08-09**: `.env` in the core, `DotEnvLoader` with an `EnvDialect` of seven rules and
-      three presets, `docker` by default (`d04c500`); indexed keys (`aace753`); and the flattening
-      convention, `PropertyKeys`, with `XMLLoader` emitting indices for repeated elements (`d77165c`).
-      **The data model is no longer the blocker** — what queued behind it can now be written. What is
-      left: loader enablement and per-loader options, then JSON, then YAML, then INI and TOML.
-      **Done 2026-08-10**: loader enablement, per-loader options and INI. **Done 2026-08-11**: JSON, in a
-      new `owner-formats` artifact, which is also where the parsers we write will live from now on — the
-      core keeps the formats the JDK can parse, a hand-written parser goes next door, and discovery makes
-      the split cost the reader nothing. **Done 2026-08-11 as well**: YAML, a documented subset, which was
-      the last of the four.
-      **Done 2026-08-12**: HOCON, and #240 closed with it — the issue asked for JSON in its title and
-      carried HOCON in its body, which is what made it the argument for doing HOCON now rather than a debt
-      against JSON. **TOML the same day**, written here rather than delegated, and with it **the format
-      list is finished**: properties, XML, `.env`, INI, JSON, YAML, TOML, HOCON.
-      **TOML is held to `toml-test` in every build, and the refusals are complete**: 499 of 499 documents
-      that must be refused are refused, and 204 of the 210 that must be read are read as the suite expects.
-      The six left are an empty key and a dot inside a quoted key — the two places TOML and the flattening
-      convention disagree — so they are a decision about the convention, for the whole library, and not a
-      fix to this parser. `FORMATS.md` has the reasoning.
-      The rule in `FORMATS.md` gained its one exception and a criterion to contain it: a format whose
-      specification *is* an implementation is delegated. See there, and `COMPARISON.md` for the field
-      evidence that settled it — nobody hand-writes a HOCON parser, and Gestalt hand-writes no parser at
-      all.
-      Issues
-      [#14](https://github.com/matteobaccan/owner/issues/14),
-      [#65](https://github.com/matteobaccan/owner/issues/65),
-      [#240](https://github.com/matteobaccan/owner/issues/240), and
-      [#48](https://github.com/matteobaccan/owner/issues/48) is on the critical path rather than beside
-      it.
-- [x] **Origin tracking** — which source a merged property actually came from. **Done 2026-08-11**:
-      `Traceable`, a fourth interface of the `Accessible` family, and `Origin`, which says the kind
-      (`SOURCE`, `IMPORT`, `DEFAULT_VALUE`, `RUNTIME`) and names the source with its credentials masked.
-      `LoadType.load` now reads each source into a map of its own so that what each contributed is known
-      while it still can be, and under `MERGE` the origin recorded is the source whose value survived. The
-      set of purely-defaulted keys added the same day was the degenerate case of this and is gone.
-      Issue [#277](https://github.com/matteobaccan/owner/issues/277) **can be closed**; related to
-      [#170](https://github.com/matteobaccan/owner/issues/170), which asked for the same information as a
-      log rather than as an API.
-      **Not done, and the obvious next ask**: the line number a value came from, which Spring and Typesafe
-      both carry. It needs every loader to report positions, and `Origin` was made a type rather than a
-      `String` so that it can grow one without a second API.
-- [ ] **Configurable naming strategy / relaxed binding** — kebab-case, snake_case, verbatim, as SmallRye,
-      Gestalt and Spring all offer. It hooks into the factory-prefix machinery built for 2.0.0.
-      Issue [#116](https://github.com/matteobaccan/owner/issues/116).
-- [x] **Bean Validation (JSR-380)**, never in the core. Done 2026-08-14, in `owner-extras` rather than in an
-      `owner-validation` module of its own: that artifact exists for exactly this shape — an optional
-      dependency, isolated in a class nothing loads until it is asked — and a second module would have been
-      a second thing to release for one service class. The core keeps no validation API and recognises a
-      constraint by the *name* of the `@Constraint` on it, which is enough to say when nothing is checking
-      one. `Validator.forExecutables().validateReturnValue` is what makes `port()` work where
-      `validate(config)` only ever saw `getPort()`, and every method shape that cannot be checked —
-      arguments, `default`, a section accessor, a constraint on an `Optional` container — is reported by
-      name, or refused under `owner.strict`. Both `javax` and `jakarta` are supported, since the Java 8
-      baseline and "not dead" point at different namespaces and a user's framework already chose.
-      Issue [#201](https://github.com/matteobaccan/owner/issues/201) **can be closed**.
-- [x] **Indexed keys**, `list[0]`, `list[1]`, complementing the `Map` grouping added in 2.0.0. Done
-      2026-08-09: an indexed key wins over a single value, the elements are not tokenized, and a gap in the
-      sequence is refused rather than closed up. `XMLLoader` emits them for repeated sibling elements,
-      which is a change of behaviour and is in the release note draft. The reasoning, and what the other
-      three libraries do instead — they disagree with each other — is in `FORMATS.md`.
-      Issue [#48](https://github.com/matteobaccan/owner/issues/48) **can be closed**, saying why the 2013
-      refusal no longer holds: it was right while properties was the only format, and JSON or YAML cannot
-      express a list without this.
-- [ ] **Remote and cloud sources** — S3, Vault, Consul — as loaders in `owner-extras`, which is
-      what that artifact is for now that it holds nothing else. Gestalt covers all of these. Issue
-      [#130](https://github.com/matteobaccan/owner/issues/130).
-      **JNDI is done, 2026-08-14**, [#143](https://github.com/matteobaccan/owner/issues/143):
-      `jndi:comp/env/myconfig` as a source plus `${$jndi::…}` per value, no dependency since JNDI is in the
-      JDK. The design decision worth not re-deriving is that **only `java:` names are accepted and there is
-      no option to allow others**: a JNDI name carries its own scheme, `InitialContext` follows it over the
-      network, and a `@Sources` spec is expanded before it is read — so `jndi:ldap://…` is a configuration
-      file turning into a request to somebody else's server, which is the shape of Log4Shell. The
-      deliberate way out is `new JndiLoader(environment)` in Java, which is the same rule as the encryption
-      passphrase. Spring's `JndiPropertySource` prefixes `java:comp/env/` by default for a related reason;
-      neither it nor Commons Configuration refuses a remote name outright, so this is stricter than the
-      field.
-      The other thing settled: **a binding that is not a scalar is skipped, not refused**, because a real
-      `java:comp/env` holds a `DataSource` beside the settings and refusing the context over it would make
-      the loader useless in the container it exists for.
-- [x] **GraalVM native image** — **the chapter is written, 2026-08-14**, and the other half of that line
-      was struck out rather than done: *"ship reachability metadata for the dynamic proxies"* is not
-      something this project can do. Every entry a native build needs is the **user's** code — their
-      interface is the proxy's interface list, their classes are named in `@ConverterClass` and its
-      relatives, their return types own the `String` constructors, their files are the resources. A
-      `META-INF/native-image` directory inside our jar would cover none of it while looking as though it
-      did. And with no native build in CI we could not verify what we shipped anyway, so it would be
-      untestable as well as useless.
-      What the chapter says instead is: use the tracing agent, and here is what it should find so you can
-      check. It names the one entry that is easy to hand-write wrongly — the proxy is over **two**
-      interfaces, yours and `DynamicMBean`, whenever JMX is on the class path — and the one most often
-      forgotten, which is that a native image contains no resources unless told, so
-      `classpath:app.properties` silently becomes the default values.
-      **Reopen this when somebody opens an issue about native image**, not before: that is the point at
-      which a GraalVM job in CI would start paying for itself, and only then could anything we ship be
-      verified. An annotation processor emitting metadata for the user's interfaces is the shape that
-      would work — and is a build plugin to maintain, not a file to write.
-      Defensive rather than competitive — the proxy is our design and Coat wins on this ground by
-      construction — but today someone trying it hits the wall unaided and leaves.
-- [ ] **Dependency injection**: a documented, supported way to obtain a Config from Spring, CDI or Guice.
-      Every framework has its own story and we have none written down. Issues
-      [#222](https://github.com/matteobaccan/owner/issues/222),
-      [#147](https://github.com/matteobaccan/owner/issues/147).
-- [x] ~~**Generate the properties file** from the mapping interface~~ — **done 2026-08-17**,
-      `TemplateTool`, which closes [#3](https://github.com/matteobaccan/owner/issues/3), the oldest issue
-      the project had. It is `Accessible.save(File)`'s writer with a `main` in front of it, so a file
-      generated and a file saved by a running configuration cannot drift apart, and it works on an
-      interface that does not extend `Accessible` — which `save` cannot, and which is every configuration
-      that has no file yet.
-- [ ] **Generate its documentation**, which is the other half and a different product: Quarkus generates a
-      configuration reference from `@ConfigMapping`, Spring generates
-      `spring-configuration-metadata.json` and gets IDE completion out of it. Both do it with an annotation
-      processor, at build time. Worth its own issue if it is wanted; the interesting question is whether to
-      aim at Spring's JSON, since that is the one with tooling already reading it.
+      has a terminal, so `Console.readPassword` is unreachable from a test. What *is* covered, and
+      behaviourally, is the half that matters more: with the streams redirected and no `OWNER_PASSPHRASE`,
+      the piped value is not mistaken for the passphrase — the JDK 22 `Console.isTerminal()` hazard the
+      tool is built around. Making the rest reachable means a production seam, and it is **worth doing only
+      if that seam earns its keep otherwise**: a parameter that exists so a test can reach a branch is a
+      parameter that lies about the design.
 
-### Before any of the above is called modularisation
+DECIDED, AND DELIBERATELY NOT OPENED AS ISSUES
+----------------------------------------------
+
+Kept here rather than on GitHub because opening an issue advertises a feature to people who do not need it.
+Each becomes an issue the day somebody asks.
+
+- [ ] **A section read by key, relative to the section.** The shape is settled and has two precedents:
+      Typesafe Config's `getConfig("section")` returns a configuration **rooted at that path**, Commons
+      Configuration's `subset(prefix)` returns one with the **prefix stripped**. The other camp — SmallRye,
+      Spring, Coat, Gestalt — puts no key-based API on a nested object at all.
+      A nested interface may not extend `Accessible`, `Mutable` or `Traceable` since 2.0.0, refused when
+      the configuration is created, precisely so that this stays possible: **allowing it later breaks
+      nobody, correcting it later would break everybody.** Without that refusal a section answered
+      `getProperty("host")` with the root's `host` — a different property, no error — and `clear()` on a
+      section emptied the whole configuration.
+      What has to be decided before writing it: what `store()` on a section writes and whether it can be
+      read back, what `clear()` clears, what `load(InputStream)` merges, and which key `originOf` is asked
+      with. `@Sensitive` needs nothing, the masking being computed over the whole tree already. **The one
+      thing genuinely missing today** is that there is no public way to ask a nested object for its own
+      path — `KeyPrefix` is package-private — so a section reached through a list or through an accessor
+      taking arguments has a path only the caller can reconstruct.
+- [ ] **A hook that lets a container build the classes named in annotations** — `@ConverterClass`,
+      `@TokenizerClass`, `@PreprocessorClasses`, `@DecryptorClass`. Designed on 2026-08-18 while answering
+      [#222](https://github.com/matteobaccan/owner/issues/222) and deliberately not built: one interface,
+      `instantiate(Class, AnnotatedElement)`, returning `null` to mean "build it yourself", which is what
+      Jackson's `HandlerInstantiator` and Bean Validation's `ConstraintValidatorFactory` both do. It is not
+      built because everything asked for in eight years is already served by registering an **object** — a
+      `Loader`, a `ValueHandler`, and since 2.0.0 a `Converter` by type. What would justify it is somebody
+      wanting a container-built converter or decryptor **for one particular method**.
+- [ ] **GraalVM native image metadata.** The chapter is written; shipping reachability metadata is not
+      something this project can do, since every entry a native build needs is the *user's* code — their
+      interface is the proxy's interface list, their classes are named in `@ConverterClass`, their files
+      are the resources. **Reopen when somebody opens an issue about native image**: that is when a GraalVM
+      job in CI would start paying for itself, and only then could anything shipped be verified. An
+      annotation processor emitting metadata for the user's interfaces is the shape that would work, and is
+      a build plugin to maintain rather than a file to write.
+
+BEFORE ANY OF THE ABOVE IS CALLED MODULARISATION
+------------------------------------------------
 
 - [ ] A real `module-info` is blocked by two things beyond the Java 8 baseline: a third party already
       declares `package org.aeonbits.owner` — `TechnologyBrewery/krausening` does it to subclass
       `DefaultFactory`, whose constructor is package-private — and would break twice over. That is also a
       signal of missing public API: "build a `Factory` with my own scheduler". Decide deliberately.
 
-### Strategic, not tasks
+STRATEGIC, NOT TASKS
+--------------------
 
-- The runtime proxy is both our ergonomics and our ceiling: native image and raw speed structurally
-  favour compile-time approaches. Do not change the model; do ship the metadata.
+- The runtime proxy is both our ergonomics and our ceiling: native image and raw speed structurally favour
+  compile-time approaches. Do not change the model.
 - Java 8 is the moat and the swamp. It is the only segment with no competition, and it costs us records,
   sealed types and modern switch. Keep it for 2.x; plan a 3.0 on 17 once 2.x has settled, not before.

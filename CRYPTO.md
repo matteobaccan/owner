@@ -401,3 +401,40 @@ building it, on 2026-08-14, and the verdicts are in the section before this one.
 
 **And the question that was not in this list — the asymmetric case — was answered the same day**, by
 building it. See the section above. There is nothing open in this document any more.
+
+Two things learnt afterwards, on 2026-08-18
+-------------------------------------------
+
+Neither changes the design; both are the kind of thing that gets re-litigated if it is not written down.
+
+**The marker is also the answer to dependency injection**, and `@DecryptorClass` is not. A class named in an
+annotation is built by this library out of a no-argument constructor, so a decryptor that needs a
+collaborator — a key management client, an HSM session — cannot come from a container.
+[#222](https://github.com/matteobaccan/owner/issues/222) had been asking for a hook to fix that since 2018
+and the most recent comment on it, in March 2025, is exactly this case: *"is there a way to allow guice to
+create the class that decrypts? right now I have to do `getInjector().injectMembers(this)` inside my
+`decrypt` method"*. **The envelope built here already answers it**, because a `ValueHandler` is registered
+as an **object**:
+
+```java
+ConfigFactory.registerValueHandler(injector.getInstance(MyHandler.class));
+```
+
+So the migration from `@EncryptedValue` on a method to `${$name::…}` in the value is worth recommending for
+a reason beyond the cipher: it moves the decryptor from something we construct to something you construct.
+That is now the answer given on the issue, and the hook it asked for stays unbuilt.
+
+**What the tests deliberately do not cover, and why** — because the next person to look at the coverage of
+`AesGcmHandler`, `RsaHandler` and `EncryptTool` will find around 130 uncovered instructions and should not
+spend a day on them:
+
+- **the JVM-capability guards** — *this JVM cannot do AES-256*, *SHA-256 is missing from this JDK* — are
+  unreachable on any JDK this library supports, and are there for the one that is not;
+- **a failure of the JCE mid-encryption** would need `Cipher` mocked;
+- **the certificate date branches** (`CertificateNotYetValidException`, and the warning for an expired one)
+  need a certificate built for the purpose. There is no public API to make one, so it would mean either a
+  new test dependency for two log lines or **committing a private key to the repository** — which secret
+  scanning would flag, correctly. Left uncovered on purpose;
+- **`EncryptTool.main`** is one line calling `System.exit`, which under Surefire is not a branch but an
+  ending. The terminal prompt has an entry of its own in `TODO.md`, with the reason a test seam was not
+  added for it.
