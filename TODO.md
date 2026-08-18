@@ -18,7 +18,6 @@ is left to do.
 | `COMPARISON.md` | what the rest of the field does, verified against their sources |
 | `RELEASING.md` | the release procedure — including running the previous release's suite against the new code |
 | `WRITING.md` | the rules of the file this library writes back |
-| `RELEASING.md` | the release procedure |
 
 WEBSITE
 -------
