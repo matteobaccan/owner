@@ -280,6 +280,87 @@ Variable expansion can be switched off, for a single method or for the whole int
 [Variables expansion](/owner/docs/variables-expansion/#disabling-variables-expansion). Written on the
 interface it reaches `getProperty()` and `fill()` as well, and they then behave like the `getRaw` pair.
 
+Showing only what this interface declares
+----------------------------------------
+
+One properties file read by several mapping interfaces is an ordinary way to configure an application —
+one file to hand out, one interface per module — and it has a consequence nobody asks for: every one of
+those configurations holds the whole file. `list()`, `store()`, `propertyNames()` and `toString()` show
+your module's keys, the other modules' keys, and whatever was merged in besides — the system properties,
+the environment, the imports. Printing a configuration to a log then prints somebody else's database.
+
+*Since 2.0.0* an interface can ask to be shown as itself:
+
+```java
+@DeclaredOnly
+@Sources("classpath:app.properties")
+public interface AppConfig extends Config, Accessible {
+    @Key("app.name")
+    String name();
+}
+
+config.propertyNames();   // [app.name] — and not db.host, logging.level, PATH, …
+```
+
+The same can be asked of a whole factory, which is how a configuration you did not write — one supplied
+by a plugin — is restricted without annotating it:
+
+```properties
+owner.declared.only = true
+```
+
+The annotation wins over the property **in both directions**: `@DeclaredOnly(false)` keeps the whole view
+on an interface whose factory asked for the restriction. Like every other factory setting, it is read when
+the Config object is created and kept for that object's life.
+
+**What counts as declared** is every key of every mapping method of the interface *and of the interfaces
+it extends*, sections included, under the key each of them actually reads. A `@Prefix` belongs to the
+interface that declares the method, so an inherited method keeps the prefix it was declared with.
+
+<div class="note warning">
+  <h5>It restricts what is shown, never what is loaded.</h5>
+  <p>
+    A <code>${...}</code> is resolved against the other properties, so a configuration that loaded only
+    its own keys could not expand a variable pointing at a key it does not declare. That is why this is a
+    view and not a load policy — the reporter of
+    <a href="https://github.com/matteobaccan/owner/issues/150">#150</a> worked it out for himself while
+    trying to implement it. For the same reason <code>getProperty(key)</code> is <b>not</b> restricted:
+    asking for a key by name is a question about the file, and it is the only way left to look at the
+    properties a variable of yours depends on.
+  </p>
+</div>
+
+Two kinds of key cannot be part of it, and both for the same reason — there is no key until the method is
+called:
+
+- one whose key depends on the arguments, `@Key("server.%s.host")`;
+- a section reached through a group whose path the properties decide, an element of a list or a value of a
+  map.
+
+They keep working and they do not appear in the restricted view. It is the rule
+[`@Sensitive`](/owner/docs/debugging/#keeping-a-property-out-of-the-output) and `@EncryptedValue` already
+follow.
+
+### A key that holds a variable is shown as it is read
+
+`@Key("${myproject.prefix}.debug")` is declared like that and read as `myproject.debug`, the expansion
+happening when the method is called. The key as written is where a `@DefaultValue` is registered, and
+where the lookup looks when the expanded key finds nothing — so it is a real entry in the properties, and
+it used to be listed as though it were a property of its own:
+
+```
+${myproject.prefix}.debug = false      ← nothing can ever read this
+myproject.debug = true                 ← what debug() answers with
+```
+
+*Since 2.0.0* every view shows the key that is read, and only that one, whether or not the view is
+restricted. Where both exist the loaded value wins, exactly as the lookup does. `getProperty()` answers
+under **both** names, so that a loop over `propertyNames()` — which is what `fill()` and the JMX attribute
+list are — finds a value for everything the listing named, and code already reading the property by the
+key as written keeps working. That is
+[#230](https://github.com/matteobaccan/owner/issues/230), and the same rule applies to
+[`save(File)`](#changing-a-properties-file-and-writing-it-back), where naming the wrong key cost the value rather than the tidiness.
+
 The Traceable interface
 -----------------------
 

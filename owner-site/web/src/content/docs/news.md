@@ -107,6 +107,25 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **A configuration can be shown as itself.** One properties file read by several mapping interfaces —
+   one file to hand out, one interface per module — gave every one of those configurations the whole
+   file: `list()`, `store()`, `propertyNames()` and `toString()` showed the other modules' keys, the
+   environment and the imports besides, so printing a configuration to a log printed somebody else's
+   database. `@DeclaredOnly` on the interface, or `owner.declared.only` on the
+   [Factory](/owner/docs/configuring/) for the interfaces you did not write, restricts every view to the
+   properties that interface declares — inherited ones included, sections included. It is
+   [#150](https://github.com/matteobaccan/owner/issues/150), asked in 2015. **It restricts what is shown
+   and never what is loaded**, which is not a nicety: a `${...}` is resolved against the other
+   properties, so a configuration that loaded only its own keys could not expand a variable pointing
+   outside them. `getProperty(key)` is left unrestricted for the same reason.
+ * **A key that holds a variable is listed as it is read.** `@Key("${myproject.prefix}.debug")` is read
+   as `myproject.debug`, but the key as written is where a `@DefaultValue` is registered — so it was a
+   real entry in the properties and every listing showed both, saying the configuration had two
+   properties where it had one. Every view now shows the key that is read, and where both exist the
+   loaded value wins, exactly as the lookup does:
+   [#230](https://github.com/matteobaccan/owner/issues/230). The same rule reached `save(File)`, where
+   naming the key as written meant writing a property nothing can read and leaving the real one to
+   whoever else reads the file — losing the value outright into a file that did not have the key yet.
  * **A `{0}` in a parametrized property no longer fails in silence.** This library formats with
    `java.util.Formatter` and a `java.text.MessageFormat` pattern is not a broken format string but a
    correct one in another dialect, so `String.format` raised nothing, returned the value as written and

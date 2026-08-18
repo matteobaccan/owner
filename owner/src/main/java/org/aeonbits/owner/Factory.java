@@ -63,6 +63,10 @@ public interface Factory {
      *     not a list of its own — it is the warnings, and those already leave the legitimate cases alone: a
      *     source that is merely absent stays silent under it too, since
      *     {@link Config.LoadType#FIRST} expects misses by design.</li>
+     *     <li><code>owner.declared.only</code>: <code>true</code> restricts every {@link Accessible} view
+     *     and {@link Object#toString()} to the properties each interface declares, for the interfaces that
+     *     do not carry {@link Config.DeclaredOnly} — the ones you did not write. An interface that carries
+     *     the annotation decides for itself, in both directions.</li>
      * </ul>
      * <p>
      * They are read when a Config object is created, and the object keeps them for the rest of its life.

@@ -161,7 +161,8 @@ Checked against all of the above:
   Config has it behind a config server, and the rest are symmetric only. See "Encrypting a value against
   the equivalents" below. The older `@EncryptedValue` / `@DecryptorClass` remain, for whoever brought
   their own decryptor.
-- **JMX**, **preprocessors**, **`Mutable`/`Accessible`** (we write, the others mostly only read),
+- **JMX**, **preprocessors**, **`Mutable`/`Accessible`** (we write, the others mostly only read; and what
+  that view is *scoped* to was checked against the sources on **2026-08-18**, see below),
   **parametrized properties**, **`@DisableFeature`** granularity, **prefix derived from the package**.
 - BSD licence, no framework lock-in.
 - **A `.env` whose dialect you choose** (added 2026-08-09; see `FORMATS.md`). Reading a `.env` is not
@@ -389,6 +390,46 @@ So: refusing is right, **and the message has to carry the likely cause**, becaus
 turned on the people it hits first are the ones whose configuration was already wrong. Same direction at
 SmallRye, where `smallrye.config.mapping.validate-unknown` defaults to `true` and an unmapped property
 under the prefix fails the mapping.
+
+
+What a mapping object shows, against the equivalents
+----------------------------------------------------
+
+Checked **2026-08-18** against the sources, before deciding #150 — *may a configuration object show
+properties it does not declare?* The field splits in two, and **nobody does what we were doing**.
+
+| | The object **is** the store | The object **maps** the store |
+|---|---|---|
+| Who | Typesafe Config, Commons Configuration | Coat, SmallRye, Spring, Gestalt |
+| Whole-store view | yes — and asking for a part scopes it | none at all |
+
+- **Coat** is the one that decides it, because it has our shape: an annotated interface and a generated
+  implementation. `AbstractImmutableCoatConfig` has exactly a constructor and `toString()`; the string
+  comes from `CoatConfigBuilder.getParamStringRepresentations()`, which iterates `this.params` — the
+  declared parameters — so keys present in the loaded `Properties` and not declared are **never shown**.
+  `validate()` likewise checks only the declared ones: missing mandatory values fail, superfluous keys
+  are not reported.
+- **SmallRye**: a `@ConfigMapping` interface has the methods you declared and nothing else;
+  `getPropertyNames()` is on `SmallRyeConfig`, not on the mapping.
+- **Spring**: a `@ConfigurationProperties` bean exposes its typed getters; enumeration lives on
+  `Environment`/`ConfigurableEnvironment` and on the `env` and `configprops` actuator endpoints.
+- **Gestalt**: `getConfig(path, Class)` hands back the typed object, and there is no documented
+  enumeration API on it or on `Gestalt`.
+- **Typesafe**: `SimpleConfig.getConfig(path)` is `getObject(path).toConfig()` and `entrySet()` walks that
+  object, so the view is the subtree that was asked for.
+- **Commons Configuration**: `subset(prefix)` is *"a decorator Configuration containing every key that
+  starts with the specified prefix. The prefix is removed"*.
+
+**Which is why the restriction is by declared keys and not by prefix.** The two that scope by prefix do it
+because a subtree is all they have to go on; the ones shaped like us go by what the interface declares,
+and so does our own `save(File)`, which has restricted itself to `keysOf(clazz, prefix)` since it shipped.
+One definition of "what this interface owns", not two.
+
+**Where we still differ, deliberately:** ours is opt-in. Coat has no whole-file view to lose, while
+`Accessible` was designed as the `java.util.Properties` API exposed on demand — lviggiano, #31, 2013:
+*"so that all the features available by java.util.Properties methods can be used, but only if the user
+decides that his Config object needs to"*. Taking it away by default would contradict the reason the
+interface exists; `@DeclaredOnly` is the same sentence one level further in.
 
 
 Null against the equivalents

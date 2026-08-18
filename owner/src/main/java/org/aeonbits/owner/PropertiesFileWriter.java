@@ -137,7 +137,7 @@ final class PropertiesFileWriter {
                                             KeyExpansion expansion) {
         for (Method method : clazz.getMethods()) {
             Config.Description description = method.getAnnotation(Config.Description.class);
-            if (description != null)
+            if (description != null && isMapping(method))
                 into.put(expansion.of(method, PropertiesMapper.key(method, prefix)), description.value());
         }
     }
@@ -221,7 +221,26 @@ final class PropertiesFileWriter {
     private static void collectKeys(Class<?> clazz, KeyPrefix prefix, Set<String> into,
                                     KeyExpansion expansion) {
         for (Method method : clazz.getMethods())
-            into.add(expansion.of(method, PropertiesMapper.key(method, prefix)));
+            if (isMapping(method))
+                into.add(expansion.of(method, PropertiesMapper.key(method, prefix)));
+    }
+
+    /**
+     * Whether a method maps a property at all, as opposed to being one of the library's own.
+     * <p>
+     * <code>clazz.getMethods()</code> answers with everything the interface inherits, so an interface
+     * extending {@link Mutable}, {@link Accessible}, {@link Reloadable} and {@link Traceable} declares two
+     * properties and hands back <b>twenty-two</b> keys: <code>store</code>, <code>load</code>,
+     * <code>clear</code>, <code>reload</code>, <code>origins</code> and the rest of the API, each under the
+     * name of its method. Harmless in a file that has no property called <code>store</code> and wrong in
+     * any case — those names are not the interface's to claim, and a set that holds them cannot be used to
+     * answer "is this key mine".
+     * </p>
+     */
+    private static boolean isMapping(Method method) {
+        Class<?> declaring = method.getDeclaringClass();
+        return declaring != Config.class && declaring != Accessible.class && declaring != Mutable.class
+                && declaring != Reloadable.class && declaring != Traceable.class;
     }
 
     /**

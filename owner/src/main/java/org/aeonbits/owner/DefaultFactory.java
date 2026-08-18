@@ -45,9 +45,10 @@ class DefaultFactory implements Factory {
         Class<?>[] interfaces = interfaces(clazz);
         VariablesExpander expander = new VariablesExpander(props, handlersManager);
         // read once, here: from now on the Config object keeps the prefix it was born with
+        boolean strict = Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT));
+        boolean declaredOnly = Boolean.parseBoolean(props.getProperty(PropertiesManager.DECLARED_ONLY));
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
-                handlersManager, KeyPrefix.from(props),
-                Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT)), imports);
+                handlersManager, KeyPrefix.from(props), strict, declaredOnly, imports);
         Object jmxSupport = getJMXSupport(clazz, manager);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(clazz, manager, jmxSupport);
         handler.validateMandatoryProperties();

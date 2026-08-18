@@ -73,6 +73,7 @@ the factory itself, and all of them arrived in 2.0.0:
 | [`owner.key.prefix`](/owner/docs/key-prefix/) | a literal, prepended to the key of every property |
 | [`owner.key.prefix.from.package`](/owner/docs/key-prefix/) | `true` derives that prefix from the package of the interface declaring the method |
 | [`owner.strict`](/owner/docs/loading-strategies/#refusing-everything-that-would-only-have-been-a-warning) | `true` turns the library's warnings into refusals, so that a configuration which would have carried on with its default values is not created at all |
+| [`owner.declared.only`](/owner/docs/accessible-mutable/#showing-only-what-this-interface-declares) | `true` restricts every `Accessible` view and `toString()` to the properties each interface declares — for the interfaces you did not write and cannot annotate |
 
 They are read when a Config object is **created**, and the object keeps them for the rest of its life —
 changing one afterwards does not move a configuration that already exists, which is what keeps its keys

@@ -312,6 +312,55 @@ public interface Config extends Serializable {
     }
 
     /**
+     * Shows, through {@link Accessible} and {@link Object#toString()}, only the properties this interface
+     * declares.
+     * <p>
+     * One file read by several mapping interfaces is an ordinary way to configure an application, and each
+     * of those interfaces then holds — through <code>list()</code>, <code>store()</code>,
+     * <code>propertyNames()</code> and <code>toString()</code> — everything the file has, plus everything
+     * that was merged into it: the system properties, the environment, the imports. That is what
+     * <a href="https://github.com/matteobaccan/owner/issues/150">#150</a> asked about in 2015, having
+     * printed one configuration object and got somebody else's keys.
+     * </p>
+     * <p>
+     * <b>It restricts what is shown and never what is loaded.</b> The distinction is not a nicety: a
+     * <code>${...}</code> in a value is resolved against the other properties, so a configuration that
+     * loaded only its own keys could not expand a variable pointing at a key it does not declare — which
+     * the reporter worked out for himself, and it is why this is a view and not a load policy.
+     * <code>getProperty</code> is left alone for the same reason: asking for a key by name is a question
+     * about the file, not about this interface.
+     * </p>
+     * <p>
+     * The same can be asked of a whole {@link Factory} with the <code>owner.declared.only</code> property,
+     * which is how a configuration you did not write — one supplied by a plugin, as in the issue — is
+     * restricted without annotating it. This annotation wins over that property in both directions:
+     * <code>@DeclaredOnly(false)</code> on an interface keeps the whole view when the factory asked for
+     * the restriction.
+     * </p>
+     * <p>
+     * <b>What is declared</b> is every key of every mapping method of this interface and of the interfaces
+     * it extends, sections included, under the key each of them actually reads. A method whose key depends
+     * on its arguments — <code>@Key("server.%s.host")</code> — has no key until it is called, so nothing
+     * of it can be shown; that is the same rule {@link Sensitive} and {@link EncryptedValue} already
+     * follow.
+     * </p>
+     *
+     * @since 2.0.0
+     */
+    @Retention(RUNTIME)
+    @Target(TYPE)
+    @Documented
+    @interface DeclaredOnly {
+        /**
+         * Whether the restriction applies, <code>true</code> by default.
+         *
+         * @return <code>false</code> to keep the whole view on an interface whose factory asked for the
+         *         restriction with <code>owner.declared.only</code>.
+         */
+        boolean value() default true;
+    }
+
+    /**
      * Declares that this method's value is encrypted, and is to be decrypted by the {@link Decryptor} named
      * here or, when none is, by the one the interface declares with {@link DecryptorClass}.
      *

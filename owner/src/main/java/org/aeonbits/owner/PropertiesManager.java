@@ -139,6 +139,18 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     static final String STRICT = "owner.strict";
 
     /**
+     * The name of the {@link Factory} property that restricts every view to the properties the interface
+     * declares: <code>owner.declared.only</code>, the factory-wide form of {@link Config.DeclaredOnly}.
+     * <p>
+     * It exists for the configuration you did not write. The interface that prints somebody else's keys
+     * may come from a plugin, which is exactly the case
+     * <a href="https://github.com/matteobaccan/owner/issues/150">#150</a> was reported from, and an
+     * annotation is no use on a type you cannot edit.
+     * </p>
+     */
+    static final String DECLARED_ONLY = "owner.declared.only";
+
+    /**
      * Whether this configuration refuses what it would otherwise only warn about.
      * <p>
      * The default is <b>off</b>, and off is the behaviour this library has always had: a source that
@@ -162,6 +174,26 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
      * </p>
      */
     private final boolean strict;
+
+    /**
+     * Whether the views show only what this interface declares: {@link Config.DeclaredOnly} if the
+     * interface says anything, and the factory's {@link #DECLARED_ONLY} when it does not.
+     */
+    private final boolean declaredOnly;
+
+    /**
+     * Every key this interface declares, <b>as it is written</b> — the expansion happens when a view is
+     * built, since what a variable resolves to changes with the properties. Read once here because
+     * reflection is slow and the methods of an interface do not change, which is the same reason
+     * {@link #sensitiveKeys} is collected in the constructor.
+     */
+    private final Set<String> declaredKeys;
+
+    /**
+     * The subset of {@link #declaredKeys} holding a variable their method expands, which are the only ones
+     * a view has to resolve. Almost always empty, and then a view costs one set lookup per property.
+     */
+    private final Set<String> declaredKeysWithVariables;
 
     /** Whether any source answered during the load now running; see {@link #reportIfNothingAnswered}. */
     private boolean somethingWasRead;
@@ -223,12 +255,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
                       VariablesExpander expander, LoadersManager loaders, KeyPrefix keyPrefix, boolean strict,
                       Map<?, ?>... imports) {
-        this(clazz, properties, scheduler, expander, loaders, new HandlersManager(), keyPrefix, strict, imports);
+        this(clazz, properties, scheduler, expander, loaders, new HandlersManager(), keyPrefix, strict, false,
+                imports);
     }
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
                       VariablesExpander expander, LoadersManager loaders, HandlersManager handlers,
-                      KeyPrefix keyPrefix, boolean strict, Map<?, ?>... imports) {
+                      KeyPrefix keyPrefix, boolean strict, boolean declaredOnlyByDefault,
+                      Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.loaders = loaders;
@@ -236,6 +270,27 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         this.imports = imports;
         this.keyPrefix = keyPrefix;
         this.strict = strict;
+
+        // the interface has the last word in both directions: @DeclaredOnly(false) keeps the whole view on
+        // an interface whose factory asked for the restriction
+        Config.DeclaredOnly onTheInterface = Annotations.findAnnotation(clazz, Config.DeclaredOnly.class);
+        this.declaredOnly = onTheInterface != null ? onTheInterface.value() : declaredOnlyByDefault;
+
+        Set<String> withVariables = new HashSet<>();
+        this.declaredKeys = PropertiesFileWriter.keysOf(clazz, keyPrefix, new PropertiesFileWriter.KeyExpansion() {
+            @Override
+            public String of(Method method, String key) {
+                if (key.contains("${") && !VARIABLE_EXPANSION.isDisabledFor(method))
+                    withVariables.add(key);
+                return key;
+            }
+
+            @Override
+            public String ofPath(String path) {
+                return path;
+            }
+        });
+        this.declaredKeysWithVariables = withVariables;
         ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
 
         // the policy is read before the sources because the warning about several conventional files names
@@ -421,12 +476,81 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     private Properties masked() {
         readLock.lock();
         try {
+            return masked(visible());
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    private Properties masked(Properties base) {
+        readLock.lock();
+        try {
             if (sensitiveKeys.isEmpty() && sensitivePrefixes.isEmpty())
-                return properties;
+                return base;
             Properties result = new Properties();
-            for (Enumeration<?> names = properties.propertyNames(); names.hasMoreElements(); ) {
+            for (Enumeration<?> names = base.propertyNames(); names.hasMoreElements(); ) {
                 String name = (String) names.nextElement();
-                result.setProperty(name, isSensitiveKey(name) ? Sensitive.MASK : properties.getProperty(name));
+                result.setProperty(name, isSensitiveKey(name) ? Sensitive.MASK : base.getProperty(name));
+            }
+            return result;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    /**
+     * The properties as they can be <b>read</b>, which is what every view is built from.
+     * <p>
+     * Two things separate this from the map underneath, and the first is not optional. A key holding a
+     * variable is stored as it is written — that is where a {@link Config.DefaultValue} is registered and
+     * where {@link PropertiesInvocationHandler} looks when the expanded key finds nothing — so a
+     * configuration declaring <code>@Key("${myproject.prefix}.debug")</code> holds an entry called
+     * <code>${myproject.prefix}.debug</code> that no method will ever answer with. Printing it is what
+     * <a href="https://github.com/matteobaccan/owner/issues/230">#230</a> was reported for, and it is
+     * shown here under the key that is actually read: the same rule as the lookup, so that what a view
+     * says and what a method answers cannot disagree. Where the file also has the real key, the file wins
+     * — again as the lookup does, and the entry that was only ever a fallback disappears.
+     * </p>
+     * <p>
+     * The second is {@link Config.DeclaredOnly}, which drops everything this interface does not declare.
+     * That one is asked for.
+     * </p>
+     * <p>
+     * The map itself is handed back untouched when there is nothing to do, which is the ordinary case: no
+     * variable in any key and no restriction asked for.
+     * </p>
+     */
+    private Properties visible() {
+        readLock.lock();
+        try {
+            if (declaredKeysWithVariables.isEmpty() && !declaredOnly)
+                return properties;
+
+            Map<String, String> readAs = new HashMap<>();
+            Set<String> mine = new HashSet<>(declaredKeys);
+            if (!declaredKeysWithVariables.isEmpty()) {
+                StrSubstitutor substitutor = new StrSubstitutor(properties, strict, handlers);
+                for (String declared : declaredKeysWithVariables) {
+                    String read = substitutor.replace(declared);
+                    if (!read.equals(declared)) {
+                        readAs.put(declared, read);
+                        mine.remove(declared);
+                        mine.add(read);
+                    }
+                }
+            }
+
+            Properties result = new Properties();
+            for (String name : properties.stringPropertyNames()) {
+                String read = readAs.get(name);
+                if (read == null) {
+                    if (!declaredOnly || mine.contains(name))
+                        result.setProperty(name, properties.getProperty(name));
+                } else if (!properties.containsKey(read) && (!declaredOnly || mine.contains(read))) {
+                    // the fallback entry, and nothing answers under the key that is read: it is the value
+                    // the method gives back, so it is shown under the name the method reads it by
+                    result.setProperty(read, properties.getProperty(name));
+                }
             }
             return result;
         } finally {
@@ -1320,10 +1444,37 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     public String getProperty(String key) {
         readLock.lock();
         try {
-            return properties.getProperty(key);
+            String value = properties.getProperty(key);
+            return value != null ? value : storedUnderTheKeyAsWritten(key);
         } finally {
             readLock.unlock();
         }
+    }
+
+    /**
+     * The value of a key that is <b>read</b> under this name and <b>stored</b> under another one.
+     * <p>
+     * A {@link Config.DefaultValue} on a method whose key holds a variable is registered under the key as
+     * it is written — <code>${myproject.prefix}.debug</code> — while the method reads
+     * <code>myproject.debug</code>. Without this, a configuration would name a property in
+     * {@link #propertyNames()} that {@link #getProperty(String)} then answers <code>null</code> for, which
+     * is the pattern <code>fill</code> and the JMX attribute list are built out of, and it would be a new
+     * way for the same key to mean two things. The three now agree: the mapping method, the listing and
+     * the lookup by name.
+     * </p>
+     * <p>
+     * Answers <code>null</code> at once for every configuration that has no such key, which is nearly all
+     * of them.
+     * </p>
+     */
+    private String storedUnderTheKeyAsWritten(String readKey) {
+        if (declaredKeysWithVariables.isEmpty())
+            return null;
+        StrSubstitutor substitutor = new StrSubstitutor(properties, strict, handlers);
+        for (String declared : declaredKeysWithVariables)
+            if (readKey.equals(substitutor.replace(declared)))
+                return properties.getProperty(declared);
+        return null;
     }
 
     /**
@@ -1384,7 +1535,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     public String getProperty(String key, String defaultValue) {
         readLock.lock();
         try {
-            return properties.getProperty(key, defaultValue);
+            String value = getProperty(key);
+            return value != null ? value : defaultValue;
         } finally {
             readLock.unlock();
         }
@@ -1409,7 +1561,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     public void storeToXML(OutputStream os, String comment) throws IOException {
         readLock.lock();
         try {
-            properties.storeToXML(os, comment);
+            visible().storeToXML(os, comment);
         } finally {
             readLock.unlock();
         }
@@ -1420,8 +1572,9 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     public Set<String> propertyNames() {
         readLock.lock();
         try {
+            Properties view = visible();
             LinkedHashSet<String> result = new LinkedHashSet<>();
-            for (Enumeration<?> propertyNames = properties.propertyNames(); propertyNames.hasMoreElements(); )
+            for (Enumeration<?> propertyNames = view.propertyNames(); propertyNames.hasMoreElements(); )
                 result.add((String) propertyNames.nextElement());
             return result;
         } finally {
@@ -1510,7 +1663,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     public void store(OutputStream out, String comments) throws IOException {
         readLock.lock();
         try {
-            properties.store(out, comments);
+            visible().store(out, comments);
         } finally {
             readLock.unlock();
         }
@@ -1521,7 +1674,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     public void store(Writer out, String comments) throws IOException {
         readLock.lock();
         try {
-            properties.store(out, comments);
+            visible().store(out, comments);
         } finally {
             readLock.unlock();
         }
@@ -1541,8 +1694,12 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     void fill(Map map, UnaryOperator<String> process) {
         readLock.lock();
         try {
-            for (String propertyName : propertyNames())
-                map.put(propertyName, process.apply(getProperty(propertyName)));
+            // read out of the view rather than by key: a property whose key holds a variable is shown
+            // under the key its method reads, and asking getProperty for that key would find nothing —
+            // the value is stored under the key as it was written
+            Properties view = visible();
+            for (String propertyName : view.stringPropertyNames())
+                map.put(propertyName, process.apply(view.getProperty(propertyName)));
         } finally {
             readLock.unlock();
         }
