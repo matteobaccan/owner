@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.Config.Sources.CONVENTIONAL;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
@@ -1451,6 +1452,30 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     }
 
     /**
+     * How a declared key becomes the key that is actually read, for the writer.
+     * <p>
+     * It is the rule the mapping methods use, and it has to be: a file that named a property differently
+     * from the method reading it would be a file the configuration cannot load back.
+     * {@code @DisableFeature(VARIABLE_EXPANSION)} is honoured per method for the same reason — a method
+     * that reads its key as it is written owns that key as it is written.
+     * </p>
+     */
+    private PropertiesFileWriter.KeyExpansion keyExpansion() {
+        final StrSubstitutor substitutor = new StrSubstitutor(properties, isStrict(), handlers());
+        return new PropertiesFileWriter.KeyExpansion() {
+            @Override
+            public String of(Method method, String key) {
+                return VARIABLE_EXPANSION.isDisabledFor(method) ? key : substitutor.replace(key);
+            }
+
+            @Override
+            public String ofPath(String path) {
+                return substitutor.replace(path);
+            }
+        };
+    }
+
+    /**
      * Writes the configuration to a file, keeping the file that is already there. The rule and its
      * reasons are on {@link Accessible#save(File)}; this assembles the three things the writer needs —
      * the descriptions declared in the code, the keys the interface owns, and the values as they stand.
@@ -1458,11 +1483,14 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     @Delegate
     @Override
     public void save(File file) throws IOException {
-        PropertiesFileWriter writer = PropertiesFileWriter.describing(clazz, keyPrefix);
-        Set<String> known = PropertiesFileWriter.keysOf(clazz, keyPrefix);
-
         readLock.lock();
         try {
+            // built here and not once per object: it reads the properties as they stand, and after a
+            // reload or a setProperty the key a variable resolves to is not the one it resolved to before
+            PropertiesFileWriter.KeyExpansion expansion = keyExpansion();
+            PropertiesFileWriter writer = PropertiesFileWriter.describing(clazz, keyPrefix, expansion);
+            Set<String> known = PropertiesFileWriter.keysOf(clazz, keyPrefix, expansion);
+
             // what the interface owns, and nothing else: a configuration that merges system:properties
             // holds hundreds of keys that have no business being written into somebody's file. Keys the
             // file already had are kept by the writer itself, whether we know them or not.

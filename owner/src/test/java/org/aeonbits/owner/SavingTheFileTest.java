@@ -414,6 +414,20 @@ public class SavingTheFileTest {
         Db db();
     }
 
+    /** ysmartin's interface from #230, which is where a declared key and a read key come apart. */
+    @Config.Sources("file:${test.saved.file}")
+    public interface WithAnExpandedKey extends Mutable, Accessible {
+
+        @Config.Key("myproject.prefix")
+        @Config.DefaultValue("myproject")
+        String configPrefix();
+
+        @Config.Description("Whether to log every request.")
+        @Config.Key("${myproject.prefix}.debug")
+        @Config.DefaultValue("false")
+        boolean debug();
+    }
+
     /**
      * A section is part of the configuration, so its keys are part of the file. They were not: the keys a
      * configuration owns were read off its own methods and nowhere else, so <code>db()</code> contributed
@@ -434,6 +448,66 @@ public class SavingTheFileTest {
         assertTrue(contents, contents.contains("db.port = 5432"));
         assertTrue("and a description written inside the section reaches the key it describes",
                 contents.contains("# A host name or an address."));
+    }
+
+    /**
+     * A key holding a variable is declared one way and read another, and what gets written has to be the
+     * key that is <b>read</b>: this is the half of
+     * <a href="https://github.com/matteobaccan/owner/issues/230">#230</a> that costs data rather than
+     * tidiness. Until this was written, saving such a configuration wrote
+     * <code>${myproject.prefix}.debug</code> — the place the default is registered, which no method can
+     * ever read — and left <code>myproject.debug</code>, the key that was loaded and answered with, to
+     * whoever else reads the file. The value was gone and the default took its place.
+     */
+    @Test
+    public void aKeyThatHoldsAVariableIsWrittenAsItIsRead() throws IOException {
+        given("myproject.prefix = myproject\n"
+                + "myproject.debug = true\n"
+                + "somebody.else = not mine\n");
+
+        ConfigFactory.create(WithAnExpandedKey.class).save(file);
+
+        assertTrue(contents(), contents().contains("myproject.debug = true"));
+        assertFalse("the key nothing reads is not written",
+                contents().contains("${myproject.prefix}"));
+        assertTrue("and what belongs to somebody else is still left alone",
+                contents().contains("somebody.else = not mine"));
+    }
+
+    /** And the description follows the key it describes, rather than staying on the declared one. */
+    @Test
+    public void andItsDescriptionFollowsIt() throws IOException {
+        given("myproject.prefix = myproject\n"
+                + "myproject.debug = true\n");
+
+        ConfigFactory.create(WithAnExpandedKey.class).save(file);
+
+        assertTrue(contents(), contents().contains("# Whether to log every request."));
+        assertTrue(contents(), contents().indexOf("# Whether to log every request.")
+                < contents().indexOf("myproject.debug"));
+    }
+
+    /**
+     * And a change to it is written back, which is the loss as somebody meets it.
+     * <p>
+     * A key the writer does not own is not dropped — the line the file already had goes through untouched
+     * — so over an existing file the damage was quieter than a missing property: <code>debug</code> was
+     * somebody else's key, the new value had nowhere to go, and the file came back saying what it said
+     * before. Written into a file that did not have the key yet, the same rule loses it outright.
+     * </p>
+     */
+    @Test
+    public void andAChangeToItIsWrittenBack() throws IOException {
+        given("myproject.prefix = myproject\n"
+                + "myproject.debug = true\n");
+
+        WithAnExpandedKey config = ConfigFactory.create(WithAnExpandedKey.class);
+        assertTrue(config.debug());
+        config.setProperty("myproject.debug", "false");
+
+        config.save(file);
+        assertTrue(contents(), contents().contains("myproject.debug = false"));
+        assertFalse("and the value it used to have is not left behind", contents().contains("= true"));
     }
 
     /**

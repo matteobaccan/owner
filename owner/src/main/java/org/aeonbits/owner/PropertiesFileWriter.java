@@ -76,15 +76,24 @@ final class PropertiesFileWriter {
      * </p>
      */
     static PropertiesFileWriter describing(Class<? extends Config> clazz, KeyPrefix prefix) {
+        return describing(clazz, prefix, KeyExpansion.NONE);
+    }
+
+    /**
+     * The same, for a configuration that is running: every key is the one its method <b>reads</b> and not
+     * the one it declares. See {@link KeyExpansion}.
+     */
+    static PropertiesFileWriter describing(Class<? extends Config> clazz, KeyPrefix prefix,
+                                           KeyExpansion expansion) {
         Map<String, String> descriptions = new HashMap<>();
-        collectDescriptions(clazz, prefix, descriptions);
+        collectDescriptions(clazz, prefix, descriptions, expansion);
 
         // a section is described by the accessor that opens it or by the interface it is of, and what is
         // written of it is a heading over the block of keys underneath - see the javadoc of headingFor
         Map<String, String> headings = new HashMap<>();
         NestedProperties.forEachNested(clazz, prefix, (nested, nestedPrefix) -> {
-            collectDescriptions(nested, nestedPrefix, descriptions);
-            headingFor(nested, nestedPrefix, descriptions, headings);
+            collectDescriptions(nested, nestedPrefix, descriptions, expansion);
+            headingFor(nested, nestedPrefix, descriptions, headings, expansion);
         });
         // the header describes the configuration and not one interface of it, so it is taken from wherever
         // in the hierarchy it is written, nearest first - a base interface that describes what the file is
@@ -111,8 +120,9 @@ final class PropertiesFileWriter {
      * </p>
      */
     private static void headingFor(Class<?> nested, KeyPrefix nestedPrefix,
-                                   Map<String, String> descriptions, Map<String, String> headings) {
-        String path = nestedPrefix.path();
+                                   Map<String, String> descriptions, Map<String, String> headings,
+                                   KeyExpansion expansion) {
+        String path = expansion.ofPath(nestedPrefix.path());
         String heading = descriptions.remove(path.endsWith(".") ? path.substring(0, path.length() - 1) : path);
         if (heading == null) {
             Config.Description onTheType = nested.getAnnotation(Config.Description.class);
@@ -123,12 +133,57 @@ final class PropertiesFileWriter {
             headings.put(path, heading);
     }
 
-    private static void collectDescriptions(Class<?> clazz, KeyPrefix prefix, Map<String, String> into) {
+    private static void collectDescriptions(Class<?> clazz, KeyPrefix prefix, Map<String, String> into,
+                                            KeyExpansion expansion) {
         for (Method method : clazz.getMethods()) {
             Config.Description description = method.getAnnotation(Config.Description.class);
             if (description != null)
-                into.put(PropertiesMapper.key(method, prefix), description.value());
+                into.put(expansion.of(method, PropertiesMapper.key(method, prefix)), description.value());
         }
+    }
+
+    /**
+     * Turns the key a method <b>declares</b> into the key it <b>reads</b>.
+     * <p>
+     * The two are the same for almost every method and are not the same when the key holds a variable:
+     * <code>@Key("${myproject.prefix}.debug")</code> is declared like that and read as
+     * <code>myproject.debug</code>, since the expansion happens when the method is called. A writer given
+     * the declared key names a property that nothing can read — it wrote
+     * <code>${myproject.prefix}.debug</code> into the file and left the real key to somebody else, which
+     * meant the value that had been loaded was dropped and the default was written in its place. That is
+     * the half of <a href="https://github.com/matteobaccan/owner/issues/230">#230</a> that costs data
+     * rather than tidiness.
+     * </p>
+     * <p>
+     * {@link #NONE} is for {@link TemplateTool}, which has a class and no configuration: nothing has been
+     * loaded, so there is nothing to expand a variable from, and the declared key is the only key there
+     * is. A running configuration passes the expansion its own methods use, disabled methods included, so
+     * that the file cannot name a key differently from the method that reads it.
+     * </p>
+     */
+    interface KeyExpansion {
+
+        KeyExpansion NONE = new KeyExpansion() {
+            @Override
+            public String of(Method method, String key) {
+                return key;
+            }
+
+            @Override
+            public String ofPath(String path) {
+                return path;
+            }
+        };
+
+        /** The key of a method, expanded the way that method expands it. */
+        String of(Method method, String key);
+
+        /**
+         * The path of a nested section, which has no method to be asked about: the accessor that opens the
+         * section is reached through the interfaces above it and is not handed down here. It is expanded
+         * with the rule of the configuration rather than with the rule of a method.
+         */
+        String ofPath(String path);
     }
 
     /**
@@ -148,16 +203,25 @@ final class PropertiesFileWriter {
      * </p>
      */
     static Set<String> keysOf(Class<? extends Config> clazz, KeyPrefix prefix) {
+        return keysOf(clazz, prefix, KeyExpansion.NONE);
+    }
+
+    /**
+     * The same, for a configuration that is running: every key is the one its method <b>reads</b> and not
+     * the one it declares. See {@link KeyExpansion}.
+     */
+    static Set<String> keysOf(Class<? extends Config> clazz, KeyPrefix prefix, KeyExpansion expansion) {
         Set<String> known = new HashSet<>();
-        collectKeys(clazz, prefix, known);
+        collectKeys(clazz, prefix, known, expansion);
         NestedProperties.forEachNested(clazz, prefix,
-                (nested, nestedPrefix) -> collectKeys(nested, nestedPrefix, known));
+                (nested, nestedPrefix) -> collectKeys(nested, nestedPrefix, known, expansion));
         return known;
     }
 
-    private static void collectKeys(Class<?> clazz, KeyPrefix prefix, Set<String> into) {
+    private static void collectKeys(Class<?> clazz, KeyPrefix prefix, Set<String> into,
+                                    KeyExpansion expansion) {
         for (Method method : clazz.getMethods())
-            into.add(PropertiesMapper.key(method, prefix));
+            into.add(expansion.of(method, PropertiesMapper.key(method, prefix)));
     }
 
     /**
