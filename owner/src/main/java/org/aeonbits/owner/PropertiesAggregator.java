@@ -106,8 +106,9 @@ final class PropertiesAggregator {
             String entryKey = name.substring(start.length());
             // the key to report is the property the entry comes from, not the group: telling somebody that
             // 'servers' failed to convert leaves them looking through the whole group by hand
-            result.put(convert(method, keyType, entryKey, name),
-                    convert(method, valueType, value.apply(manager.getProperty(name)), name));
+            result.put(convert(method, keyType, entryKey, name, manager.converters()),
+                    convert(method, valueType, value.apply(manager.getProperty(name)), name,
+                            manager.converters()));
         }
         return result;
     }
@@ -154,7 +155,7 @@ final class PropertiesAggregator {
         for (String section : NestedProperties.sectionNamesUnder(start, parent.propertiesManager)) {
             // the key to report on a failure is the section, not the group: the reader has to know which
             // one of them would not convert
-            result.put(convert(method, keyType, section, start + section),
+            result.put(convert(method, keyType, section, start + section, parent.propertiesManager.converters()),
                     NestedProperties.sectionAt(valueType, start + section + SEPARATOR, parent, ancestors));
         }
         return result;

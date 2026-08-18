@@ -120,7 +120,8 @@ final class IndexedProperties {
             String name = ordered.get(i);
             // the key reported on a failure is the property the element came from, not the list: telling
             // somebody that 'servers' would not convert leaves them counting brackets by hand
-            Array.set(array, i, convert(method, elementType, value.apply(manager.getProperty(name)), name));
+            Array.set(array, i, convert(method, elementType, value.apply(manager.getProperty(name)), name,
+                    manager.converters()));
         }
 
         Class<?> targetType = OptionalSupport.valueClass(method);

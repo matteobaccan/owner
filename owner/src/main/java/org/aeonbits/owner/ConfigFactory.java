@@ -156,6 +156,12 @@ public final class ConfigFactory {
     /**
      * Sets a converter for the given type. Setting a converter via this method will override any default converters
      * but not {@link Config.ConverterClass} annotations.
+     * <p>
+     * Like every static method here, this one is <b>the default factory</b> and nothing more: it sets the
+     * converter for the configurations created through {@link #create(Class, Map[])} and not for those
+     * created by a factory of your own, which since 2.0.0 keeps its own converters. See
+     * {@link Factory#setTypeConverter}.
+     * </p>
      *
      * @param type the type for which to set a converter.
      * @param converter the converter class to use for the specified type.

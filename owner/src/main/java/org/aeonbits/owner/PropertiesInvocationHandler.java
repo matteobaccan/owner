@@ -350,7 +350,7 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
                 text = process(method, key, onEmpty, args);
         }
 
-        Object result = convert(method, valueClass(method), text, key);
+        Object result = convert(method, valueClass(method), text, key, propertiesManager.converters());
         if (result == NULL) return optional ? Optional.empty() : null;
         return optional ? Optional.of(result) : result;
     }

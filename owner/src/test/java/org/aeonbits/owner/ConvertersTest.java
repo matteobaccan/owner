@@ -10,6 +10,7 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.util.IsolatedClassLoader;
 import org.junit.Test;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -124,23 +125,24 @@ public class ConvertersTest {
         try {
             ClassLoader isolated = new IsolatedClassLoader(Converters.class.getClassLoader());
             Class<?> converters = Class.forName("org.aeonbits.owner.Converters", true, isolated);
+            Object registry = emptyRegistryIn(isolated);
             assertNotSame(Converters.class, converters);
 
             Method convert = converters.getDeclaredMethod(
-                    "convert", Method.class, Class.class, String.class, String.class);
+                    "convert", Method.class, Class.class, String.class, String.class, registry.getClass());
             convert.setAccessible(true);
 
-            assertEquals(Byte.valueOf((byte) 1), convert.invoke(null, method("aByte"), Byte.TYPE, "1", "aByte"));
-            assertEquals(Short.valueOf((short) 2), convert.invoke(null, method("aShort"), Short.TYPE, "2", "aShort"));
-            assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3", "anInt"));
-            assertEquals(Long.valueOf(4L), convert.invoke(null, method("aLong"), Long.TYPE, "4", "aLong"));
-            assertEquals(Boolean.TRUE, convert.invoke(null, method("aBoolean"), Boolean.TYPE, "true", "aBoolean"));
-            assertEquals(Float.valueOf(1.5f), convert.invoke(null, method("aFloat"), Float.TYPE, "1.5", "aFloat"));
-            assertEquals(Double.valueOf(2.5d), convert.invoke(null, method("aDouble"), Double.TYPE, "2.5", "aDouble"));
+            assertEquals(Byte.valueOf((byte) 1), convert.invoke(null, method("aByte"), Byte.TYPE, "1", "aByte", registry));
+            assertEquals(Short.valueOf((short) 2), convert.invoke(null, method("aShort"), Short.TYPE, "2", "aShort", registry));
+            assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3", "anInt", registry));
+            assertEquals(Long.valueOf(4L), convert.invoke(null, method("aLong"), Long.TYPE, "4", "aLong", registry));
+            assertEquals(Boolean.TRUE, convert.invoke(null, method("aBoolean"), Boolean.TYPE, "true", "aBoolean", registry));
+            assertEquals(Float.valueOf(1.5f), convert.invoke(null, method("aFloat"), Float.TYPE, "1.5", "aFloat", registry));
+            assertEquals(Double.valueOf(2.5d), convert.invoke(null, method("aDouble"), Double.TYPE, "2.5", "aDouble", registry));
 
             // non primitive types skip the PRIMITIVE converter and fall through to the next one
             assertEquals(Integer.valueOf(42),
-                    convert.invoke(null, method("anInteger"), Integer.class, "42", "anInteger"));
+                    convert.invoke(null, method("anInteger"), Integer.class, "42", "anInteger", registry));
         } finally {
             if (oldValue == null)
                 System.clearProperty(PROPERTY_EDITOR_DISABLED_PROPERTY);
@@ -159,16 +161,17 @@ public class ConvertersTest {
         ClassLoader isolated = new IsolatedClassLoader(
                 Converters.class.getClassLoader(), "java.beans.PropertyEditorManager");
         Class<?> converters = Class.forName("org.aeonbits.owner.Converters", true, isolated);
+        Object registry = emptyRegistryIn(isolated);
         assertNotSame(Converters.class, converters);
 
         Method convert = converters.getDeclaredMethod(
-                "convert", Method.class, Class.class, String.class, String.class);
+                "convert", Method.class, Class.class, String.class, String.class, registry.getClass());
         convert.setAccessible(true);
 
         // primitives are handled by the PRIMITIVE converter
-        assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3", "anInt"));
+        assertEquals(Integer.valueOf(3), convert.invoke(null, method("anInt"), Integer.TYPE, "3", "anInt", registry));
         // wrappers fall through to the CLASS_WITH_STRING_CONSTRUCTOR converter
-        assertEquals(Integer.valueOf(42), convert.invoke(null, method("anInteger"), Integer.class, "42", "anInteger"));
+        assertEquals(Integer.valueOf(42), convert.invoke(null, method("anInteger"), Integer.class, "42", "anInteger", registry));
     }
 
     /**
@@ -181,13 +184,14 @@ public class ConvertersTest {
         ClassLoader isolated = new IsolatedClassLoader(
                 Converters.class.getClassLoader(), "java.beans.PropertyEditorManager");
         Class<?> converters = Class.forName("org.aeonbits.owner.Converters", true, isolated);
+        Object registry = emptyRegistryIn(isolated);
 
         Method convert = converters.getDeclaredMethod(
-                "convert", Method.class, Class.class, String.class, String.class);
+                "convert", Method.class, Class.class, String.class, String.class, registry.getClass());
         convert.setAccessible(true);
 
         try {
-            convert.invoke(null, method("anInt"), Integer.TYPE, "abc", "server.port");
+            convert.invoke(null, method("anInt"), Integer.TYPE, "abc", "server.port", registry);
             fail("an UnsupportedOperationException was expected");
         } catch (InvocationTargetException e) {
             assertTrue(e.getCause() instanceof UnsupportedOperationException);
@@ -198,6 +202,21 @@ public class ConvertersTest {
 
     private static Method method(String name) throws NoSuchMethodException {
         return PrimitiveConfig.class.getMethod(name);
+    }
+
+    /**
+     * An empty converter registry, loaded by the same class loader as the {@code Converters} under test.
+     * <p>
+     * It has to be that one: the registry is a parameter of <code>convert</code> now, and a
+     * <code>ConvertersManager</code> from this class loader is a different type as far as the isolated
+     * <code>Converters</code> is concerned.
+     * </p>
+     */
+    private static Object emptyRegistryIn(ClassLoader isolated) throws Exception {
+        Class<?> manager = Class.forName("org.aeonbits.owner.ConvertersManager", true, isolated);
+        Constructor<?> constructor = manager.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return constructor.newInstance();
     }
 
 }

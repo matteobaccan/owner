@@ -81,6 +81,13 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     private final HandlersManager handlers;
 
     /**
+     * The converters registered on the factory that created this configuration. Kept for the same reason
+     * {@link #handlers} and {@link #keyPrefix} are: they belong to that factory, and a configuration keeps
+     * answering the way it was born even if the factory is reconfigured afterwards.
+     */
+    private final ConvertersManager converters;
+
+    /**
      * The prefix configured on the factory, captured when this object is created rather than looked up later:
      * that is what keeps the keys of a live Config object from moving when the factory is reconfigured, keeps
      * a reload resolving the same keys, and lets the mapping travel with the object when it is serialized.
@@ -255,18 +262,19 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
                       VariablesExpander expander, LoadersManager loaders, KeyPrefix keyPrefix, boolean strict,
                       Map<?, ?>... imports) {
-        this(clazz, properties, scheduler, expander, loaders, new HandlersManager(), keyPrefix, strict, false,
-                imports);
+        this(clazz, properties, scheduler, expander, loaders, new HandlersManager(), new ConvertersManager(),
+                keyPrefix, strict, false, imports);
     }
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
                       VariablesExpander expander, LoadersManager loaders, HandlersManager handlers,
-                      KeyPrefix keyPrefix, boolean strict, boolean declaredOnlyByDefault,
-                      Map<?, ?>... imports) {
+                      ConvertersManager converters, KeyPrefix keyPrefix, boolean strict,
+                      boolean declaredOnlyByDefault, Map<?, ?>... imports) {
         this.clazz = clazz;
         this.properties = properties;
         this.loaders = loaders;
         this.handlers = handlers;
+        this.converters = converters;
         this.imports = imports;
         this.keyPrefix = keyPrefix;
         this.strict = strict;
@@ -1207,6 +1215,11 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     /** The handlers a <code>${$name::payload}</code> marker may name. See {@link #handlers}. */
     HandlersManager handlers() {
         return handlers;
+    }
+
+    /** The converters of the factory that created this configuration; see {@link ConvertersManager}. */
+    ConvertersManager converters() {
+        return converters;
     }
 
     /**

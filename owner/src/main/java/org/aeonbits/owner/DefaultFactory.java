@@ -30,12 +30,14 @@ class DefaultFactory implements Factory {
     private Properties props;
     final LoadersManager loadersManager;
     final HandlersManager handlersManager;
+    final ConvertersManager convertersManager;
 
     DefaultFactory(ScheduledExecutorService scheduler, Properties props) {
         this.scheduler = scheduler;
         this.props = props;
         this.loadersManager = new LoadersManager();
         this.handlersManager = new HandlersManager();
+        this.convertersManager = new ConvertersManager();
     }
 
     @SuppressWarnings("unchecked")
@@ -48,7 +50,7 @@ class DefaultFactory implements Factory {
         boolean strict = Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT));
         boolean declaredOnly = Boolean.parseBoolean(props.getProperty(PropertiesManager.DECLARED_ONLY));
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
-                handlersManager, KeyPrefix.from(props), strict, declaredOnly, imports);
+                handlersManager, convertersManager, KeyPrefix.from(props), strict, declaredOnly, imports);
         Object jmxSupport = getJMXSupport(clazz, manager);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(clazz, manager, jmxSupport);
         handler.validateMandatoryProperties();
@@ -133,12 +135,12 @@ class DefaultFactory implements Factory {
 
     @Override
     public void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter) {
-        Converters.setTypeConverter(type, converter);
+        convertersManager.setTypeConverter(type, converter);
     }
 
     @Override
     public void removeTypeConverter(Class<?> type){
-        Converters.removeTypeConverter(type);
+        convertersManager.removeTypeConverter(type);
     }
 
     @Override

@@ -10,6 +10,7 @@ package org.aeonbits.owner.typeconversion;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Converter;
+import org.aeonbits.owner.Factory;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -81,5 +82,66 @@ public class ConverterRegistryTest {
         ConfigFactory.setTypeConverter(String.class, LeetTranslatorConverter.class);
         assertEquals("Still expecting a response from the annotated converter class", FOOBAR_RESPONSE, cfg.leetSpeekWithConverterClassAnnotation());
         ConfigFactory.removeTypeConverter(String.class);
+    }
+
+    /**
+     * <b>A converter belongs to the factory it was registered on.</b> Until 2.0.0 it did not: the registry
+     * was a static field, so this - an instance method on {@link org.aeonbits.owner.Factory} - wrote a map
+     * every factory in the JVM shared. A configuration created by {@code ConfigFactory.newInstance()} is
+     * isolated in its properties, its loaders, its value handlers, its prefix and its strictness, and
+     * conversion was the one thing that leaked out of it.
+     */
+    @Test
+    public void aConverterRegisteredOnOneFactoryDoesNotReachAnother() {
+        Factory one = ConfigFactory.newInstance();
+        Factory two = ConfigFactory.newInstance();
+
+        one.setTypeConverter(String.class, LeetTranslatorConverter.class);
+        try {
+            assertEquals("the factory it was registered on converts",
+                    LEET_TRANSLATION, one.create(MyConfig.class).leetSpeek());
+            assertEquals("and the one it was not registered on does not",
+                    LEET_SPEEK, two.create(MyConfig.class).leetSpeek());
+            assertEquals("nor does the default factory",
+                    LEET_SPEEK, ConfigFactory.create(MyConfig.class).leetSpeek());
+        } finally {
+            one.removeTypeConverter(String.class);
+        }
+    }
+
+    /** And removing it where it was never registered takes nothing away from anybody. */
+    @Test
+    public void removingItOnOneFactoryDoesNotRemoveItOnAnother() {
+        Factory one = ConfigFactory.newInstance();
+        Factory two = ConfigFactory.newInstance();
+
+        one.setTypeConverter(String.class, LeetTranslatorConverter.class);
+        try {
+            two.removeTypeConverter(String.class);
+
+            assertEquals(LEET_TRANSLATION, one.create(MyConfig.class).leetSpeek());
+        } finally {
+            one.removeTypeConverter(String.class);
+        }
+    }
+
+    /**
+     * The static methods of {@code ConfigFactory} are the default factory and nothing more, which is what
+     * they are for every other setting: {@code setProperty}, {@code registerLoader},
+     * {@code registerValueHandler}. <b>This is the behaviour that changed in 2.0.0</b> — code that
+     * registered a converter statically and then created its configurations from a factory of its own was
+     * relying on the leak.
+     */
+    @Test
+    public void theStaticMethodsAreTheDefaultFactoryAndNothingMore() {
+        Factory fresh = ConfigFactory.newInstance();
+
+        ConfigFactory.setTypeConverter(String.class, LeetTranslatorConverter.class);
+        try {
+            assertEquals(LEET_TRANSLATION, ConfigFactory.create(MyConfig.class).leetSpeek());
+            assertEquals(LEET_SPEEK, fresh.create(MyConfig.class).leetSpeek());
+        } finally {
+            ConfigFactory.removeTypeConverter(String.class);
+        }
     }
 }

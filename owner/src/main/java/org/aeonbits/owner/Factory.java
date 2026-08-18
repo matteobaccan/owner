@@ -152,6 +152,17 @@ public interface Factory {
     /**
      * Sets a converter for the given type. Setting a converter via this method will override any default converters
      * but not {@link Config.ConverterClass} annotations.
+     * <p>
+     * <b>The converter belongs to this factory</b>, and to the configurations it creates. That is new in
+     * 2.0.0: the registry used to be shared by every factory in the JVM, so this method — an instance
+     * method — changed how values converted everywhere, and {@link #removeTypeConverter} on one factory
+     * took the converter away from all the others.
+     * </p>
+     * <p>
+     * It is read <b>when a value is converted</b> and not when the configuration is created, so registering
+     * a converter changes what a Config object that already exists answers, and removing it changes it
+     * back. That part is unchanged and is what the method is for.
+     * </p>
      *
      * @param type the type for which to set a converter.
      * @param converter the converter class to use for the specified type.
@@ -160,7 +171,8 @@ public interface Factory {
     void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter);
 
     /**
-     * Removes a converter for the given type.
+     * Removes a converter for the given type, from this factory: see {@link #setTypeConverter}.
+     *
      * @param type the type for which to remove the converter.
      * @since 1.0.10
      */

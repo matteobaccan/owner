@@ -31,7 +31,7 @@ removal of some compatibility leftovers dating back to Java 6/7: see the "Remova
 (short) migration instructions.
 
 #### Why 2.0.0
-This release was prepared as 1.0.13 and renumbered before publication, because three of its changes alter the
+This release was prepared as 1.0.13 and renumbered before publication, because four of its changes alter the
 result of a configuration that used to work, and a patch number would have been a quiet place to put them.
 None is expected to affect a real configuration — the whole test suite of the project passes unchanged, and
 each is described in full below — but the number should say so rather than the changelog alone:
@@ -53,6 +53,18 @@ each is described in full below — but the number should say so rather than the
    reads exactly as it did. What changes is the reading of documents that were already losing data: if a
    configuration reads `parent.tag` from an XML that repeats that element, it was getting the last of
    several values, chosen by nothing better than document order.
+
+ * **A registered type converter belongs to the factory it was registered on.** `setTypeConverter` and
+   `removeTypeConverter` are instance methods of the [`Factory`](/owner/docs/configuring/), and until now
+   they wrote a map every factory in the JVM shared: registering a converter on one factory converted the
+   values of configurations created by all the others, and removing it on one took it away from every one
+   of them. A configuration created by `ConfigFactory.newInstance()` is isolated in its properties, its
+   loaders, its value handlers, its prefix and its strictness — conversion was the one thing that leaked.
+   The static `ConfigFactory.setTypeConverter` is the default factory, exactly as `setProperty` and
+   `registerLoader` are. **If you registered a converter statically and created your configurations from a
+   factory of your own, register it on that factory instead**: it is the only code this can affect, and it
+   is a one-line move. What has not changed is when the registry is read — registering a converter still
+   changes what an existing Config object answers, and removing it changes it back.
 
 Everything else is additive. In particular, a `Map` return type used to throw on every access, so the new
 grouping behaviour described below cannot change the result of any configuration that worked.
