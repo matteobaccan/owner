@@ -91,7 +91,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;<a href="../util/bytesize/ByteSize.html" title="class in org.aeonbits.owner.util.bytesize">ByteSize</a>&gt;</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a></code>, <code><a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;<a href="../util/bytesize/ByteSize.html" title="class in org.aeonbits.owner.util.bytesize">ByteSize</a>&gt;</code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ByteSizeConverter</span>
@@ -106,6 +106,12 @@ implements <a href="../Converter.html" title="interface in org.aeonbits.owner">C
 <dl class="notes">
 <dt>Author:</dt>
 <dd>Stefan Freyr Stefansson</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../serialized-form.html#org.aeonbits.owner.converters.ByteSizeConverter">Serialized Form</a></li>
+</ul>
+</dd>
 </dl>
 </section>
 <section class="summary">
@@ -186,7 +192,15 @@ implements <a href="../Converter.html" title="interface in org.aeonbits.owner">C
 <div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Converter.html#convert(java.lang.reflect.Method,java.lang.String)">Converter</a></code></span></div>
 <div class="block">Converts the given input into an Object of type T.
  If the method returns null, null will be returned by the Config object.
- The converter is instantiated for every call, so it shouldn't have any internal state.</div>
+ <p>
+ <b>A converter named by a class is instantiated for every call</b>, so one written that way should
+ have no internal state. A converter <b>registered as an instance</b> —
+ <a href="../Factory.html#setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)"><code>Factory.setTypeConverter(Class, Converter)</code></a>, since 2.0.0 — is the object you handed over, and
+ lives as long as the factory does: it is then yours to make thread safe, and it travels with the
+ configuration when the configuration is serialized, which is why this interface is
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html" title="class or interface in java.io" class="external-link"><code>Serializable</code></a> as <a href="../loaders/Loader.html" title="interface in org.aeonbits.owner.loaders"><code>Loader</code></a> and
+ <a href="../handlers/ValueHandler.html" title="interface in org.aeonbits.owner.handlers"><code>ValueHandler</code></a> are.
+ </p></div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Converter.html#convert(java.lang.reflect.Method,java.lang.String)">convert</a></code>&nbsp;in interface&nbsp;<code><a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;<a href="../util/bytesize/ByteSize.html" title="class in org.aeonbits.owner.util.bytesize">ByteSize</a>&gt;</code></dd>

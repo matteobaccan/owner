@@ -181,6 +181,13 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Sets a converter for the given type.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)" class="member-name-link">setTypeConverter</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type,
+ <a href="Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;?&gt;&nbsp;converter)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Sets a converter for the given type on the default factory, as an object rather than as a class,
+ which is how a converter built by a dependency injection container is registered.</div>
+</div>
 </div>
 </div>
 </div>
@@ -363,6 +370,23 @@ loadScripts(document, 'script');</script>
 <dd><code>converter</code> - the converter class to use for the specified type.</dd>
 <dt>Since:</dt>
 <dd>1.0.10</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)">
+<h3>setTypeConverter</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setTypeConverter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type,
+ <a href="Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;?&gt;&nbsp;converter)</span></div>
+<div class="block">Sets a converter for the given type on the default factory, as an object rather than as a class,
+ which is how a converter built by a dependency injection container is registered. See
+ <a href="Factory.html#setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)"><code>Factory.setTypeConverter(Class, Converter)</code></a>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - the type for which to set a converter.</dd>
+<dd><code>converter</code> - the converter to use for the specified type.</dd>
+<dt>Since:</dt>
+<dd>2.0.0</dd>
 </dl>
 </section>
 </li>

@@ -165,6 +165,12 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Sets a converter for the given type.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)" class="member-name-link">setTypeConverter</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type,
+ <a href="Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;?&gt;&nbsp;converter)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Sets a converter for the given type, as an object rather than as a class.</div>
+</div>
 </div>
 </div>
 </div>
@@ -385,10 +391,43 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)">
+<h3>setTypeConverter</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">setTypeConverter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type,
+ <a href="Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;?&gt;&nbsp;converter)</span></div>
+<div class="block">Sets a converter for the given type, as an object rather than as a class.
+ <p>
+ This is how a converter that somebody else built is registered — <b>a dependency injection
+ container</b>, most of the time, which is what
+ <a href="https://github.com/matteobaccan/owner/issues/222">#222</a> asked for: a converter that
+ needs a collaborator of its own, an <code>ObjectMapper</code> or a data source, cannot be built by
+ this library out of a no-argument constructor. <a href="#registerLoader(org.aeonbits.owner.loaders.Loader)"><code>registerLoader(org.aeonbits.owner.loaders.Loader)</code></a> and
+ <a href="#registerValueHandler(org.aeonbits.owner.handlers.ValueHandler)"><code>registerValueHandler(org.aeonbits.owner.handlers.ValueHandler)</code></a> have always taken objects for the same reason; this is the third.
+ </p>
+ <p>
+ The object is used as it is, once and for every conversion, so <b>it is yours to make thread
+ safe</b> — unlike a converter named by a class, which is built again each time and therefore cannot
+ share anything. It also travels with the configurations this factory creates, so it has to be
+ serializable if they are serialized.
+ </p>
+ <p>
+ Registering a converter for a type replaces whatever was registered for it, in either form.
+ </p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - the type for which to set a converter.</dd>
+<dd><code>converter</code> - the converter to use for the specified type.</dd>
+<dt>Since:</dt>
+<dd>2.0.0</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="removeTypeConverter(java.lang.Class)">
 <h3>removeTypeConverter</h3>
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">removeTypeConverter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type)</span></div>
-<div class="block">Removes a converter for the given type, from this factory: see <a href="#setTypeConverter(java.lang.Class,java.lang.Class)"><code>setTypeConverter(java.lang.Class&lt;?&gt;, java.lang.Class&lt;? extends org.aeonbits.owner.Converter&lt;?&gt;&gt;)</code></a>.</div>
+<div class="block">Removes a converter for the given type, from this factory: see <a href="#setTypeConverter(java.lang.Class,java.lang.Class)"><code>setTypeConverter(java.lang.Class&lt;?&gt;, java.lang.Class&lt;? extends org.aeonbits.owner.Converter&lt;?&gt;&gt;)</code></a>. It removes
+ it whether it was registered as a class or as an object.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>type</code> - the type for which to remove the converter.</dd>

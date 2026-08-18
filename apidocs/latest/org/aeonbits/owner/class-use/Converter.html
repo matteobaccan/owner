@@ -54,14 +54,44 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Package</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><a href="#org.aeonbits.owner.converters">org.aeonbits.owner.converters</a></div>
+<div class="col-first even-row-color"><a href="#org.aeonbits.owner">org.aeonbits.owner</a></div>
 <div class="col-last even-row-color">
+<div class="block">
+  The goal of OWNER API is to minimize the code required to handle application configuration through Java properties
+  files.</div>
+</div>
+<div class="col-first odd-row-color"><a href="#org.aeonbits.owner.converters">org.aeonbits.owner.converters</a></div>
+<div class="col-last odd-row-color">
 <div class="block">The converters this library ships for types its own conversion rules do not already cover: a
  <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html" title="class or interface in java.time" class="external-link"><code>Duration</code></a> and a <a href="../util/bytesize/ByteSize.html" title="class in org.aeonbits.owner.util.bytesize"><code>ByteSize</code></a>.</div>
 </div>
 </div>
 <section class="class-uses">
 <ul class="block-list">
+<li>
+<section class="detail" id="org.aeonbits.owner">
+<h2>Uses of <a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a> in <a href="../package-summary.html">org.aeonbits.owner</a></h2>
+<div class="caption"><span>Methods in <a href="../package-summary.html">org.aeonbits.owner</a> with parameters of type <a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Method</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">ConfigFactory.</span><code><a href="../ConfigFactory.html#setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)" class="member-name-link">setTypeConverter</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type,
+ <a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;?&gt;&nbsp;converter)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Sets a converter for the given type on the default factory, as an object rather than as a class,
+ which is how a converter built by a dependency injection container is registered.</div>
+</div>
+<div class="col-first odd-row-color"><code>void</code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">Factory.</span><code><a href="../Factory.html#setTypeConverter(java.lang.Class,org.aeonbits.owner.Converter)" class="member-name-link">setTypeConverter</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type,
+ <a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;?&gt;&nbsp;converter)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Sets a converter for the given type, as an object rather than as a class.</div>
+</div>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="org.aeonbits.owner.converters">
 <h2>Uses of <a href="../Converter.html" title="interface in org.aeonbits.owner">Converter</a> in <a href="../converters/package-summary.html">org.aeonbits.owner.converters</a></h2>
