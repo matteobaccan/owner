@@ -173,6 +173,48 @@ public class TemplateToolTest {
         assertTrue(complained(), complained().contains("No source is read"));
     }
 
+    /** <code>--into</code> with nothing behind it: the one misuse that reads like a typo rather than a mistake. */
+    @Test
+    public void intoWithoutADirectorySaysWhatIsMissing() throws Exception {
+        assertEquals(2, run(NeverHadAFile.class.getName(), "--into"));
+
+        assertTrue(complained(), complained().contains("--into needs the directory to write into."));
+        assertEquals("", written());
+    }
+
+    /**
+     * A class that implements {@link Config} is not what carries the keys: the annotations are read off an
+     * interface, and a class reaching here means somebody named the implementation instead of the mapping.
+     */
+    public static class AConfigurationClass implements Config {
+    }
+
+    @Test
+    public void aClassIsRefusedAndTheMessageSaysWhatToNameInstead() throws Exception {
+        assertEquals(1, run(AConfigurationClass.class.getName()));
+
+        assertTrue(complained(), complained().contains("is a class"));
+        assertTrue(complained(), complained().contains("mapping interface"));
+        assertEquals("", written());
+    }
+
+    /**
+     * The directory cannot be made because a <b>file</b> of that name is in the way — the ordinary shape of
+     * a mistyped <code>--into</code>. What matters is that the tool says which template it failed to write
+     * and answers 1, rather than dying with a stack trace at the caller.
+     */
+    @Test
+    public void aDirectoryThatCannotBeMadeIsReportedAgainstTheTemplateItBelongsTo() throws Exception {
+        File inTheWay = folder.newFile("not-a-directory");
+
+        assertEquals(1, run(NeverHadAFile.class.getName(), "--into", inTheWay.getAbsolutePath()));
+
+        assertTrue(complained(), complained().contains("Could not write the template for "
+                + NeverHadAFile.class.getName()));
+        assertTrue(complained(), complained().contains("cannot create"));
+        assertEquals("", written());
+    }
+
     private static String contentsOf(File file) throws IOException {
         return new String(Files.readAllBytes(file.toPath()), ISO_8859_1);
     }
