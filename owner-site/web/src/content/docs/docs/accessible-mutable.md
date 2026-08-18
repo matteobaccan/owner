@@ -150,6 +150,46 @@ cfg.store(new FileOutputStream(tmp), "no comments");
 As you can see, [Accessible] is not limited to the `getProperty()` method, but you can also use this
 interface to `list()` or `store()` the properties.
 
+### Reading a file you have not declared
+
+A mapping method is a typed, checked way in, and it is worth writing for the values your code depends on.
+It is not worth writing three hundred times. A configuration that declares **nothing** still holds
+everything its sources have, and `fill` hands the lot over in one call:
+
+```java
+@Sources("classpath:messages.properties")
+public interface AppConfig extends Config, Accessible { }        // no methods at all
+```
+
+```java
+Map<String, String> messages = new HashMap<>();
+ConfigFactory.create(AppConfig.class).fill(messages);
+```
+
+That is what [#260](https://github.com/matteobaccan/owner/issues/260) was about — a file of three hundred
+application messages, and an interface nobody wanted to write by hand. From a JSF page, or any expression
+language, the map is **indexed** rather than walked, which is also the only way to reach a key that has
+dots in it:
+
+```xhtml
+#{appConfigBean.messages['menu.home']}
+```
+
+What `fill` puts in the map is the value ready to show: the variables are expanded, so a message built out
+of another property arrives assembled. `getRawProperty` still gives the template — see
+[Which methods process the value](#which-methods-process-the-value).
+
+<div class="note info">
+  <h5>Though messages are not configuration.</h5>
+  <p>
+    Three hundred pieces of text for the user are i18n, and a
+    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ResourceBundle.html"><code>ResourceBundle</code></a>
+    is the tool for them — it knows about locales, and JSF reads one with <code>&lt;f:loadBundle&gt;</code>.
+    Keep this library for the settings, declare the handful of those that matter, and let the messages
+    live where the framework already looks for them.
+  </p>
+</div>
+
 ### Changing a properties file and writing it back
 
 The two interfaces together are the whole round trip, which is the commonest thing people come here
