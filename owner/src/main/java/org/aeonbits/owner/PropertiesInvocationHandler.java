@@ -470,7 +470,21 @@ class PropertiesInvocationHandler implements InvocationHandler, Serializable {
     private String lookupValue(Method method, String key) {
         String value = propertyOf(method, key);
 
-        // TODO: this if should go away! See #84 and #86
+        // A key holding a variable is read under the name the variable resolves to now, and a
+        // @DefaultValue is registered under the key as it is written: this is what joins the two, and it
+        // carried a "this should go away" note from 2014 until it was measured.
+        //
+        // It should not go away. The alternative offered in #84 was to register the defaults under the
+        // expanded keys instead, and what that misses is that the expanded key is not stable: with
+        // @Key("${myproject.prefix}.debug"), a setProperty on myproject.prefix moves the key this method
+        // reads - to elsewhere.debug - while the default would have stayed behind under the name the
+        // prefix had when the configuration was built. The method would answer null having been given a
+        // default. Storing it under the key as written attaches it to the method rather than to a name
+        // that can move, and this line is what finds it again.
+        //
+        // #86, opened against this very line, is that the debugging methods then showed the unexpanded
+        // key. That is true and is now fixed where it belonged - in the view, see
+        // PropertiesManager.visible() - rather than by moving the value somewhere it cannot be found.
         if (value == null && !VARIABLE_EXPANSION.isDisabledFor(method)) {
             String unexpandedKey = key(method, keyPrefix);
             value = propertyOf(method, unexpandedKey);

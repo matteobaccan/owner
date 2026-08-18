@@ -13,6 +13,7 @@ import org.aeonbits.owner.Config.DefaultValue;
 import org.aeonbits.owner.Config.Key;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.Mutable;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -70,6 +71,18 @@ public class Issue230Test {
     /** The same interface over a file that has the prefix and not the property it names. */
     @Sources("classpath:org/aeonbits/owner/issues/issue230-nothing-but-the-prefix.properties")
     public interface NothingButThePrefix extends Config, Accessible {
+
+        @Key("myproject.prefix")
+        @DefaultValue("myproject")
+        String configPrefix();
+
+        @Key("${myproject.prefix}.debug")
+        @DefaultValue("false")
+        boolean debug();
+    }
+
+    /** The same shape again, writable, so that the prefix can be moved while the configuration runs. */
+    public interface Movable extends Mutable, Accessible {
 
         @Key("myproject.prefix")
         @DefaultValue("myproject")
@@ -166,6 +179,43 @@ public class Issue230Test {
     public void theKeyAsWrittenStillAnswersToo() {
         assertEquals("false",
                 ConfigFactory.create(NothingButThePrefix.class).getProperty("${myproject.prefix}.debug"));
+    }
+
+    /**
+     * <b>The key a method reads can move while the configuration is running</b>, and this is why the
+     * default is stored under the key as it is <b>written</b> rather than under the one it expands to.
+     * <p>
+     * It settles a note that sat in {@code PropertiesInvocationHandler} from 2014 saying the fallback to
+     * the unexpanded key "should go away" — the alternative offered in
+     * <a href="https://github.com/matteobaccan/owner/pull/84">#84</a> being to register the defaults under
+     * the expanded keys. Move the prefix and that default is left behind under the name the prefix used to
+     * have: the method would answer <code>null</code> having been given one. Under the key as written it
+     * belongs to the method instead, and follows it wherever the variable points.
+     * </p>
+     * <p>
+     * <a href="https://github.com/matteobaccan/owner/issues/86">#86</a>, opened against that same line in
+     * 2014, is this issue eight years early: the debugging methods showed the unexpanded key. That half is
+     * fixed in the view, which is what the rest of this test is about.
+     * </p>
+     */
+    @Test
+    public void theViewFollowsTheKeyWhenTheVariableMoves() {
+        Movable config = ConfigFactory.create(Movable.class);
+
+        assertFalse(config.debug());
+        assertTrue(config.propertyNames().toString(), config.propertyNames().contains("myproject.debug"));
+
+        config.setProperty("myproject.prefix", "elsewhere");
+
+        assertFalse("the default is still found, because it never depended on the prefix", config.debug());
+        assertTrue("and the view says which key is read now",
+                config.propertyNames().contains("elsewhere.debug"));
+        assertFalse("under the old name it is nobody's property any more",
+                config.propertyNames().contains("myproject.debug"));
+
+        config.setProperty("elsewhere.debug", "true");
+        assertTrue("and a value written where the method now looks is the one it answers with",
+                config.debug());
     }
 
     /**
