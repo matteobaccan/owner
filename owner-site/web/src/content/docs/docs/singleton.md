@@ -239,3 +239,55 @@ settings of the factory that created it. That matters for the
 read when the Config object is created: asking `ConfigCache` for the same `id`
 again returns the existing object, prefix included, whatever the factory
 handed over the second time says.
+
+With a dependency injection container
+-------------------------------------
+
+If your application already has a container — Guice, Dagger, Spring, CDI — then it, and not `ConfigCache`,
+is where a configuration should be kept. There is nothing to integrate: **a configuration is an object
+that a factory produces**, so it is bound like any other object your code did not `new` itself. In Guice:
+
+```java
+public class ConfigModule extends AbstractModule {
+
+    @Provides @Singleton
+    Factory ownerFactory() {
+        Factory factory = ConfigFactory.newInstance();
+        factory.registerLoader(new MyLoader());          // whatever this application needs
+        return factory;
+    }
+
+    @Provides @Singleton
+    MyConfig myConfig(Factory factory) {
+        return factory.create(MyConfig.class);
+    }
+}
+```
+
+```java
+@Inject MyConfig config;
+```
+
+`@Provides` rather than `toInstance` so that the configuration is built when it is first needed rather
+than at startup, and `@Singleton` so that it is built once. Dagger is the same with `@Module`, Spring the
+same with a `@Bean` method. **No implementation class of your own, and no delegation**: the interface is
+what the factory returns, so the container has an instance of it to bind.
+
+<div class="note info">
+  <h5>Bind the factory too, not only the configuration.</h5>
+  <p>
+    A factory of your own is what makes the loaders, the value handlers, the converters and the properties
+    of <em>this</em> application separate from anybody else's — including those of a library that also uses
+    OWNER. It also means the container can build the things you register on it: a
+    <a href="/owner/docs/loading-strategies/"><code>Loader</code></a> that reads from your database, a
+    <a href="/owner/docs/crypto/"><code>ValueHandler</code></a> that decrypts with your key management, a
+    <a href="/owner/docs/type-conversion/#registering-a-converter-for-a-type">converter</a> that needs your
+    <code>ObjectMapper</code>. All three are registered as <b>objects</b>, so whatever built them is fine.
+  </p>
+</div>
+
+What cannot come from the container is a class named in an annotation — `@ConverterClass`,
+`@TokenizerClass`, `@PreprocessorClasses`, `@DecryptorClass` — because an annotation can only carry a
+class literal, and this library builds it. When one of those needs a collaborator, register it instead:
+that is what the object-shaped registrations above are for, and for decryption it is
+[the value handler](/owner/docs/crypto/) rather than `@DecryptorClass`.

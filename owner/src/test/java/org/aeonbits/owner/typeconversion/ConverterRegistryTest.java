@@ -126,6 +126,79 @@ public class ConverterRegistryTest {
     }
 
     /**
+     * <b>A converter can be registered as an object</b>, which is the only shape a dependency injection
+     * container can hand over: a converter that needs a collaborator of its own — an {@code ObjectMapper},
+     * a data source — cannot be built out of a no-argument constructor, and that is what
+     * <a href="https://github.com/matteobaccan/owner/issues/222">#222</a> was about. {@code registerLoader}
+     * and {@code registerValueHandler} have always taken objects; this is the third.
+     */
+    @Test
+    public void aConverterCanBeRegisteredAsAnObject() {
+        Factory factory = ConfigFactory.newInstance();
+        factory.setTypeConverter(String.class, new LeetTranslatorConverter());
+        try {
+            assertEquals(LEET_TRANSLATION, factory.create(MyConfig.class).leetSpeek());
+        } finally {
+            factory.removeTypeConverter(String.class);
+        }
+    }
+
+    /**
+     * And it is the object that was handed over, kept: a converter named by a class is built again for
+     * every conversion — which is what its javadoc has always said — while one registered as an object is
+     * the one the container built, so it may hold whatever the container gave it.
+     */
+    @Test
+    public void theObjectRegisteredIsTheObjectUsed() {
+        Counting counting = new Counting();
+        Factory factory = ConfigFactory.newInstance();
+
+        factory.setTypeConverter(String.class, counting);
+        try {
+            MyConfig cfg = factory.create(MyConfig.class);
+            cfg.leetSpeek();
+            cfg.leetSpeek();
+            cfg.leetSpeek();
+
+            assertEquals("three conversions, one object, and it counted them", 3, counting.calls);
+        } finally {
+            factory.removeTypeConverter(String.class);
+        }
+    }
+
+    /** Registering one form replaces the other, so a type never has two converters. */
+    @Test
+    public void registeringOneFormReplacesTheOther() {
+        Factory factory = ConfigFactory.newInstance();
+        factory.setTypeConverter(String.class, new LeetTranslatorConverter());
+        factory.setTypeConverter(String.class, FooBarConverter.class);
+        try {
+            assertEquals(FOOBAR_RESPONSE, factory.create(MyConfig.class).leetSpeek());
+        } finally {
+            factory.removeTypeConverter(String.class);
+        }
+
+        factory.setTypeConverter(String.class, FooBarConverter.class);
+        factory.setTypeConverter(String.class, new LeetTranslatorConverter());
+        try {
+            assertEquals(LEET_TRANSLATION, factory.create(MyConfig.class).leetSpeek());
+        } finally {
+            factory.removeTypeConverter(String.class);
+        }
+    }
+
+    /** A converter that keeps a count of what it was asked to do, which a per-call one could not. */
+    public static class Counting implements Converter<String> {
+        int calls;
+
+        @Override
+        public String convert(Method targetMethod, String text) {
+            calls++;
+            return text;
+        }
+    }
+
+    /**
      * The static methods of {@code ConfigFactory} are the default factory and nothing more, which is what
      * they are for every other setting: {@code setProperty}, {@code registerLoader},
      * {@code registerValueHandler}. <b>This is the behaviour that changed in 2.0.0</b> — code that

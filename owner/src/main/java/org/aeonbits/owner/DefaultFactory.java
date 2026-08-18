@@ -139,6 +139,11 @@ class DefaultFactory implements Factory {
     }
 
     @Override
+    public void setTypeConverter(Class<?> type, Converter<?> converter) {
+        convertersManager.setTypeConverter(type, converter);
+    }
+
+    @Override
     public void removeTypeConverter(Class<?> type){
         convertersManager.removeTypeConverter(type);
     }

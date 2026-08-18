@@ -150,10 +150,10 @@ enum Converters {
         @Override
         Object tryConvert(Method targetMethod, Class<?> targetType, String text, String key,
                           ConvertersManager converters) {
-            Class<? extends Converter> converterClass = converters.converterFor(targetType);
-            if (converterClass == null) return SKIP;
+            Converter<?> converter = converters.converterFor(targetType);
+            if (converter == null) return SKIP;
 
-            return convertWithConverterClass(targetMethod, text, converterClass);
+            return convertWith(converter, targetMethod, text);
         }
     },
 
@@ -516,7 +516,14 @@ enum Converters {
      */
     private static Object convertWithConverterClass(
             Method targetMethod, String text, Class<? extends Converter> converterClass) {
-        Converter<?> converter = newInstance(converterClass);
+        return convertWith(newInstance(converterClass), targetMethod, text);
+    }
+
+    /**
+     * The conversion itself, once there is a converter to do it with — whether it was named by an
+     * annotation and built a moment ago, or registered as an object and built by whoever registered it.
+     */
+    private static Object convertWith(Converter<?> converter, Method targetMethod, String text) {
         Object result = converter.convert(targetMethod, text);
         if (result == null) return NULL;
         return result;

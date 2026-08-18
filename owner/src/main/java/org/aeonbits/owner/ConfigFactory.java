@@ -172,6 +172,19 @@ public final class ConfigFactory {
     }
 
     /**
+     * Sets a converter for the given type on the default factory, as an object rather than as a class,
+     * which is how a converter built by a dependency injection container is registered. See
+     * {@link Factory#setTypeConverter(Class, Converter)}.
+     *
+     * @param type      the type for which to set a converter.
+     * @param converter the converter to use for the specified type.
+     * @since 2.0.0
+     */
+    public static void setTypeConverter(Class<?> type, Converter<?> converter) {
+        INSTANCE.setTypeConverter(type, converter);
+    }
+
+    /**
      * Removes a converter for the given type.
      * @param type the type for which to remove the converter.
      * @since 1.0.10

@@ -7,6 +7,8 @@
  */
 package org.aeonbits.owner;
 
+import org.aeonbits.owner.util.Util;
+
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -41,18 +43,40 @@ class ConvertersManager implements Serializable {
      */
     private static final long serialVersionUID = 7395218374195329215L;
 
-    private final ConcurrentMap<Class<?>, Class<? extends Converter<?>>> registry = new ConcurrentHashMap<>();
+    /** Registered by class: built again for every conversion, which is what the annotations do too. */
+    private final ConcurrentMap<Class<?>, Class<? extends Converter<?>>> classes = new ConcurrentHashMap<>();
+
+    /** Registered as an object: handed back as it is, which is the only shape a container can supply. */
+    private final ConcurrentMap<Class<?>, Converter<?>> instances = new ConcurrentHashMap<>();
 
     void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter) {
-        registry.put(type, converter);
+        instances.remove(type);
+        classes.put(type, converter);
+    }
+
+    void setTypeConverter(Class<?> type, Converter<?> converter) {
+        classes.remove(type);
+        instances.put(type, converter);
     }
 
     void removeTypeConverter(Class<?> type) {
-        registry.remove(type);
+        classes.remove(type);
+        instances.remove(type);
     }
 
-    /** The converter registered for the given type, or <code>null</code> when there is none. */
-    Class<? extends Converter<?>> converterFor(Class<?> type) {
-        return registry.get(type);
+    /**
+     * The converter registered for the given type, or <code>null</code> when there is none.
+     * <p>
+     * One registered as an object is returned as it is, once and for every conversion; one registered as a
+     * class is built here, every time, which is what {@link Config.ConverterClass} does as well and what the
+     * javadoc of {@link Converter} has always promised.
+     * </p>
+     */
+    Converter<?> converterFor(Class<?> type) {
+        Converter<?> instance = instances.get(type);
+        if (instance != null)
+            return instance;
+        Class<? extends Converter<?>> declared = classes.get(type);
+        return declared == null ? null : Util.newInstance(declared);
     }
 }

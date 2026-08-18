@@ -171,7 +171,34 @@ public interface Factory {
     void setTypeConverter(Class<?> type, Class<? extends Converter<?>> converter);
 
     /**
-     * Removes a converter for the given type, from this factory: see {@link #setTypeConverter}.
+     * Sets a converter for the given type, as an object rather than as a class.
+     * <p>
+     * This is how a converter that somebody else built is registered — <b>a dependency injection
+     * container</b>, most of the time, which is what
+     * <a href="https://github.com/matteobaccan/owner/issues/222">#222</a> asked for: a converter that
+     * needs a collaborator of its own, an <code>ObjectMapper</code> or a data source, cannot be built by
+     * this library out of a no-argument constructor. {@link #registerLoader} and
+     * {@link #registerValueHandler} have always taken objects for the same reason; this is the third.
+     * </p>
+     * <p>
+     * The object is used as it is, once and for every conversion, so <b>it is yours to make thread
+     * safe</b> — unlike a converter named by a class, which is built again each time and therefore cannot
+     * share anything. It also travels with the configurations this factory creates, so it has to be
+     * serializable if they are serialized.
+     * </p>
+     * <p>
+     * Registering a converter for a type replaces whatever was registered for it, in either form.
+     * </p>
+     *
+     * @param type      the type for which to set a converter.
+     * @param converter the converter to use for the specified type.
+     * @since 2.0.0
+     */
+    void setTypeConverter(Class<?> type, Converter<?> converter);
+
+    /**
+     * Removes a converter for the given type, from this factory: see {@link #setTypeConverter}. It removes
+     * it whether it was registered as a class or as an object.
      *
      * @param type the type for which to remove the converter.
      * @since 1.0.10

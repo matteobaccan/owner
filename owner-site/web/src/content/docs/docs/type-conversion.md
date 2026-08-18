@@ -586,6 +586,52 @@ To see the complete test cases supported by owner see [ConverterClassTest] on Gi
 
   [ConverterClassTest]: https://github.com/matteobaccan/owner/blob/master/owner/src/test/java/org/aeonbits/owner/typeconversion/ConverterClassTest.java
 
+Registering a converter for a type
+----------------------------------
+
+`@ConverterClass` says how *this method* converts. When every property of a given type converts the same
+way, register the converter on the [factory](/owner/docs/configuring/) instead and leave the interfaces
+alone:
+
+```java
+ConfigFactory.setTypeConverter(Duration.class, MyDurationConverter.class);
+```
+
+An annotation still wins over it, so a method that says how it converts keeps saying so. The registry is
+read **when a value is converted**, not when the configuration is created: registering a converter changes
+what a `Config` object that already exists answers, and `removeTypeConverter` changes it back.
+
+*Since 2.0.0* it can also be an **object** rather than a class:
+
+```java
+factory.setTypeConverter(Duration.class, injector.getInstance(MyDurationConverter.class));
+```
+
+That is how a converter built by a dependency injection container is registered — one that needs a
+collaborator of its own, an `ObjectMapper` or a data source, cannot be built by this library out of a
+no-argument constructor. It is the same shape `registerLoader` and `registerValueHandler` have always had.
+
+<div class="note info">
+  <h5>A class is built for every conversion; an object is not.</h5>
+  <p>
+    A converter named by a class — in the annotation or in the registry — is instantiated again for every
+    value it converts, so it should have no state. The object you register is the object that is used, for
+    every conversion and for as long as the factory lives: it is yours to make thread safe, and it is
+    serialized with the configurations that factory created.
+  </p>
+</div>
+
+<div class="note warning">
+  <h5>The converters belong to the factory, since 2.0.0.</h5>
+  <p>
+    Registering on one factory used to change how values converted in every other factory of the JVM, and
+    removing on one took the converter away from all of them. It does not any more, and the static
+    <code>ConfigFactory.setTypeConverter</code> is the default factory — exactly as
+    <code>setProperty</code> and <code>registerLoader</code> are. If you registered a converter statically
+    and create your configurations from a factory of your own, register it on that factory.
+  </p>
+</div>
+
 The @CollectionConverterClass annotation
 ----------------------------------------
 

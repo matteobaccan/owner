@@ -119,6 +119,17 @@ older JVMs is gone. If you are affected, migration is a one-liner in each case:
    APIs cover the same ground.
 
 #### Enhancements
+ * **A converter can be registered as an object**, and not only as a class:
+   `factory.setTypeConverter(Duration.class, injector.getInstance(MyConverter.class))`. That is the only
+   shape a dependency injection container can hand over — a converter needing a collaborator of its own,
+   an `ObjectMapper` or a data source, cannot be built out of a no-argument constructor — and it is what
+   [#222](https://github.com/matteobaccan/owner/issues/222) asked for in 2018. `registerLoader` and
+   `registerValueHandler` have always taken objects; this is the third. A converter named by a class is
+   still built again for every conversion, so it must have no state; the object you register is the one
+   that is used, for as long as the factory lives, which makes it yours to make thread safe. `Converter`
+   is now `Serializable`, like `Loader` and `ValueHandler`, because a registered object travels with the
+   configurations that factory created. The whole picture — what a container can supply and what it
+   cannot — is under [With a dependency injection container](/owner/docs/singleton/#with-a-dependency-injection-container).
  * **A configuration can be shown as itself.** One properties file read by several mapping interfaces —
    one file to hand out, one interface per module — gave every one of those configurations the whole
    file: `list()`, `store()`, `propertyNames()` and `toString()` showed the other modules' keys, the
