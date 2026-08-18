@@ -16,7 +16,7 @@ is left to do.
 | `FORMATS.md` | what each format costs and the questions each one raised |
 | `CRYPTO.md` | the cipher, the marker, the field, and what was deliberately not shipped |
 | `COMPARISON.md` | what the rest of the field does, verified against their sources |
-| `COMPATIBILITY.md` | the 1.0.12 suite run against 2.0.0, and how to run it again |
+| `RELEASING.md` | the release procedure — including running the previous release's suite against the new code |
 | `WRITING.md` | the rules of the file this library writes back |
 | `RELEASING.md` | the release procedure |
 

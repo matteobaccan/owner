@@ -70,6 +70,22 @@ git push origin my_awesome_feature
 * Create a pull request against matteobaccan/owner and describe what your change
   does and the why you think it should be merged.
 
+### Seeing what the analysers say, without an account
+
+Every push is read by SonarCloud, CodeQL and Codacy, and a pull request shows their verdict. For
+SonarCloud you do not need an account to see *what* it found: the project is public and so is its issue
+API, which answers plain JSON —
+
+```bash
+curl "https://sonarcloud.io/api/issues/search?componentKeys=matteobaccan_owner&issueStatuses=OPEN&ps=100"
+```
+
+Add `&rules=java:S1128` for one rule at a time. Each finding carries the file, the line and the message,
+which is worth having before changing anything: a rule rarely flags what its title suggests. `java:S1128`,
+*"unnecessary imports"*, turned out to be seventeen imports of `Config.Key` and its neighbours inside
+interfaces that **extend** `Config` — where the nested annotation is already in scope, so the import is
+redundant although the name does appear in the file.
+
 Updating Documentation
 ----------------------
 

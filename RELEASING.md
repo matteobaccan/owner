@@ -53,6 +53,47 @@ While you are in there, `distributionManagement/site` deploys over FTP to
 host this project controls any more either. It only bites if somebody runs
 `mvn site-deploy`, which nothing in the release procedure does.
 
+BEFORE A MAJOR: RUN THE PREVIOUS RELEASE'S TESTS AGAINST THE NEW CODE
+--------------------------------------------------------------------
+
+The project's own suite says the library does what *this* version promises. It cannot say what an upgrade
+costs, having been written alongside the code it tests. **The suite of the previous release can**: every one
+of its assertions is a promise that version made to somebody, so whatever it refuses is a promise this one
+takes back — intentionally or otherwise, and telling those two apart is the point.
+
+Done for the first time on 2026-08-18, 1.0.12 against 2.0.0: **216 tests, 212 green**, and the paragraph
+that went into the release notes out of it is under *Why 2.0.0*. The four were two things — two were a
+feature of 2.0.0 doing its job, and two were a Mockito spy on `java.util.Properties`, whose internals a spy
+does not carry on a current JDK.
+
+```bash
+# 1. the version being released, into the local repository
+mvn -DskipTests -pl owner install
+
+# 2. the previous release's tests and resources, into a scratch directory
+git archive owner-1.0.12 owner/src/test | tar -x -C /tmp/compat
+
+# 3. a pom in /tmp/compat with NO main sources: a dependency on the version from step 1,
+#    plus exactly the test dependencies that release declared - for 1.0.12 they were
+#    hamcrest-all 1.3, junit 4.12, mockito-core 2.23.4, commons-codec 1.11.
+#    Set testFailureIgnore so that one broken class does not hide the rest.
+
+# 4. run it
+cd /tmp/compat && mvn test
+```
+
+Three things to know before reading the output, each of which cost an hour the first time:
+
+- **separate the two kinds of failure.** A test that does not *compile* because it uses an internal is a
+  different fact from a test that runs and disagrees. Only the second is a compatibility break; the first
+  is a removal, and it should already be in the release notes.
+- **adapt the helpers, not the tests.** In 1.0.12 `UtilTest` doubles as a bag of test utilities that
+  delegate to `Util`, so reimplementing four of them on the JDK methods that replaced them — `Properties.store`,
+  `JarOutputStream`, `Files`, `Objects.equals` — brought back the seventy-odd behavioural tests that only
+  ever used them to write a file.
+- **do not commit the harness.** It is a copy of another release's tests. What belongs in the repository is
+  the paragraph in the release notes and this section.
+
 RELEASE PROCEDURE
 -----------------
 
