@@ -350,7 +350,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setTypeConverter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;type,
  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;? extends <a href="Converter.html" title="interface in org.aeonbits.owner">Converter</a>&lt;?&gt;&gt;&nbsp;converter)</span></div>
 <div class="block">Sets a converter for the given type. Setting a converter via this method will override any default converters
- but not <a href="Config.ConverterClass.html" title="annotation in org.aeonbits.owner"><code>Config.ConverterClass</code></a> annotations.</div>
+ but not <a href="Config.ConverterClass.html" title="annotation in org.aeonbits.owner"><code>Config.ConverterClass</code></a> annotations.
+ <p>
+ Like every static method here, this one is <b>the default factory</b> and nothing more: it sets the
+ converter for the configurations created through <a href="#create(java.lang.Class,java.util.Map...)"><code>create(Class, Map[])</code></a> and not for those
+ created by a factory of your own, which since 2.0.0 keeps its own converters. See
+ <a href="Factory.html#setTypeConverter(java.lang.Class,java.lang.Class)"><code>Factory.setTypeConverter(java.lang.Class&lt;?&gt;, java.lang.Class&lt;? extends org.aeonbits.owner.Converter&lt;?&gt;&gt;)</code></a>.
+ </p></div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>type</code> - the type for which to set a converter.</dd>
