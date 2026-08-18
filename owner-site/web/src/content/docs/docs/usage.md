@@ -476,6 +476,54 @@ hierarchy, the order the interfaces are visited in, and the reason behind each
 of the eight rules — are in
 [Where an annotation counts](/owner/docs/annotation-scope/).
 
+Keeping this library out of the API you publish
+-----------------------------------------------
+
+`extends Config` is how an interface is declared to be a configuration, and it
+is the reason `ConfigFactory.create(MyConfig.class)` is checked by the compiler
+rather than at run time. `Config` is a marker: it declares **no methods**, so
+extending it adds nothing to your type. `Accessible`, `Mutable`, `Reloadable`
+and `Traceable` do add methods, and you extend those only if you want them.
+
+There is one case where the marker costs something, and it is worth knowing the
+way out. If you are writing a library of your own **on top of** this one and you
+publish the configuration interface to your users, then `extends Config` puts
+OWNER on their compile classpath: their code will not compile without it. Keep
+the two apart, and it does not:
+
+```java
+// what your users compile against — nothing of ours on it
+public interface AppSettings {
+    String host();
+    int port();
+}
+```
+
+```java
+// what you keep to yourself
+interface AppSettingsMapping extends AppSettings, Config {
+    @Override @Key("app.host") @DefaultValue("localhost")
+    String host();
+
+    @Override @Key("app.port") @DefaultValue("8080")
+    int port();
+}
+
+AppSettings settings = ConfigFactory.create(AppSettingsMapping.class);
+```
+
+The methods are **redeclared** in the mapping interface so that the annotations
+have somewhere to live that your users never see — an `@Key` on the published
+interface would put us back on their classpath just as surely as the supertype
+would. A method redeclared like that is the one whose annotations are read.
+
+This is [#66](https://github.com/matteobaccan/owner/issues/66), and it is also
+the answer to the half of it that was about not exposing `list(PrintStream)` and
+the other debugging methods: those are on `Accessible`, which nobody has to
+extend. If you do want `Accessible` and do not want it showing the whole file,
+that is
+[`@DeclaredOnly`](/owner/docs/accessible-mutable/#showing-only-what-this-interface-declares).
+
 Conclusions
 -----------
 
