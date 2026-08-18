@@ -3,16 +3,21 @@ CRYPTO
 
 **Internal working document — not published on the project site.**
 
-Started 2026-08-13. What `@EncryptedValue` actually gives somebody today, why that is weaker than it
-looks, and what shipping a real one would have to be. The companion documents are `COMPARISON.md`,
-which records what the other libraries do, `FORMATS.md`, which is the same kind of document for the
-file formats, and `TODO.md`, which holds the ordered backlog.
+Started 2026-08-13 as the argument for shipping a cipher, built on 2026-08-14, and **trimmed on
+2026-08-18 to what only it holds.** What went: the survey of what the other libraries do, which
+`COMPARISON.md` carries better and with a table of sources; the case for retiring the published example,
+which the site page now makes to the reader who copied it; and the list of open questions, since there are
+none.
 
-**Built on 2026-08-14.** `ValueHandler`, `HandlersManager` and the hook in `StrSubstitutor` are the
-envelope; `AesGcmHandler` and `RsaHandler` are the two ciphers; `EncryptTool` is the tool; the site page
-was rewritten. What the
-building decided, and where it departed from what is written below, is in **What the construction
-settled** at the bottom, ahead of the open questions — which are now one.
+What is left is the reasoning, and it is here because the two documents that could hold it cannot. The
+[Crypto support](https://matteobaccan.github.io/owner/docs/crypto/) page says **what the thing is** — the
+marker, the two ciphers, the token, the tool, and a section of its own for what it deliberately does not
+do. `COMPARISON.md` says **what everybody else does**. Neither can say *why ours is built this way, and
+where the design was wrong before it was built* — which is what gets re-litigated by whoever next opens
+`AesGcmHandler` and asks why the iteration count travels in the token instead of in the handler's name.
+
+Read from **What the construction settled**, near the bottom: that is where each decision meets what
+building it actually found, including the two that came out differently from how they were posed.
 
 
 Where we are, measured
@@ -67,31 +72,6 @@ The constraint, and why it does not bite here
 anything in this case: `AES/GCM/NoPadding`, `PBKDF2WithHmacSHA256` and `SecureRandom` are all in
 `javax.crypto` on the Java 8 baseline. A correct construction is available without adding a line to
 the dependency list, which is why this belongs in the **core** rather than in `owner-extras`.
-
-
-What the others do
-------------------
-
-Three of the four ship a cipher, and the three agree on more than they disagree.
-
-| | construction | how a value is produced |
-|---|---|---|
-| **Jasypt** | `PBEWITHHMACSHA512ANDAES_256`: PBKDF2-HMAC-SHA512, 1000 iterations, 16-byte random salt, AES-256-CBC | a CLI, `encrypt.sh` / `JasyptPBEStringEncryptionCLI` |
-| **Spring Cloud Config** | `{cipher}` values, symmetric via `encrypt.key` or asymmetric via a keystore | `/encrypt` and `/decrypt` endpoints on the config server |
-| **SmallRye / Quarkus** | `${aes-gcm-nopadding::…}`, the key in a configuration property | a Quarkus CLI command |
-| **Typesafe Config** | nothing — no encryption concept at all | — |
-
-Two things to take from that table.
-
-**Everybody who ships a cipher also ships a way to produce a value.** Without it the feature cannot
-be adopted: you have the annotation and no way to get the text to put in the file. That is most of
-why our users copy the example — it is the only thing that will encrypt anything.
-
-**And a trap worth not copying.** Jasypt's own CLI does *not* use an IV generator unless
-`ivGeneratorClassName=org.jasypt.iv.RandomIvGenerator` is passed by hand, so the default invocation
-of the most-used tool in this space produces deterministic cipher text — the same weakness measured
-above. The lesson is not to add the knob and document it properly: it is to have **no knob**, one
-construction, and no way to reach a weaker one by leaving something out.
 
 
 The design
@@ -276,28 +256,6 @@ read with, so it pins down the padding, while the class is just a Java identifie
 `aes-gcm` changed for any of it, which was the point of dispatching on a name.
 
 
-Retiring the example in `crypto.md`
------------------------------------
-
-**In API terms it costs nothing.** `StandardEncryptor` was never shipped: it lives in
-`owner/src/test/java`, and `Decryptor`, `Encryptor` and the two abstract classes — which *are*
-published API — do not change. There is nothing to deprecate, because there was never anything
-released to deprecate.
-
-Two things it does cost:
-
-- **The test suite has to use something.** It should use what is shipped, which is better than what
-  it does now: the tests would exercise the implementation users run instead of a fixture.
-- **An obligation to the people who copied it.** They are running AES-ECB in production because the
-  documentation told them to. Swapping the page in silence leaves them there. The page has to say
-  what changed, why it matters and what to do about it — which also means the retirement is not a
-  deletion but a rewrite, and that whatever replaces it should be shorter, because it will say
-  *"register this"* rather than *"paste this"*.
-
-Whether the class stays in the test suite as a demonstration of the SPI, or goes entirely, is an open
-question below.
-
-
 What the construction settled
 -----------------------------
 
@@ -357,50 +315,6 @@ streams redirected. Asked the old question, the tool called `readPassword` on a 
 first value being piped in as the passphrase. `Console.isTerminal()` is the new question and does not exist
 on the Java 8 baseline, so it is asked by reflection where it exists.
 
-
-Open questions
---------------
-
-1. ~~**The iteration count.**~~ Answered above — 210,000, and carried in the token.
-   The reasoning as it was posed: OWASP's current guidance for PBKDF2-HMAC-SHA256 is 210,000, which on the
-   Java 8 baseline is a noticeable pause. Deriving once per salt makes it once per configuration
-   rather than once per value, which probably settles it — but it wants measuring on the oldest JDK
-   we support before it is fixed, because once a token is written the count is not a knob the reader
-   can change: it is part of what `aes-gcm` means.
-2. ~~**The name.**~~ Answered above — `AesGcmHandler`, one class. `AesGcmDecryptor` says the construction, which is honest and matches the handler
-   name; something like `StandardDecryptor` says less and ages differently. Since the handler name is
-   the identifier, a second construction arrives as a second name and a second class rather than as a
-   version of this one — which argues for naming the class after what it does. The class implements
-   both `Decryptor` and `Encryptor`, or two classes?
-3. ~~**The tool's shape.**~~ Answered above — a `main()` in the core jar. A `main()` in the core jar, reachable with `java -cp owner.jar …`, or a
-   separate artifact? The core has no `main` today, and adding one is a small change to what the jar
-   is.
-4. ~~**Does `StandardEncryptor` stay in the test suite**~~ Answered above — it stays, as a fixture; what it
-   stopped being is *published*. As it was posed: does it stay as a demonstration of the SPI, clearly
-   labelled as not a cipher to use, or does it go?
-5. ~~**The relationship with the value-level marker.**~~ Answered — see below.
-6. ~~**Whether the warning about a weak construction is ours to give.**~~ Answered above — not given. A decryptor somebody wrote
-   themselves may be anything, and we cannot inspect it. But an `@EncryptedValue` property whose
-   value is not a marker is at least *not* using what we ship, which is something we could say once
-   at `CONFIG`. It may also be noise.
-7. ~~**Where a handler is registered, and what a name may be.**~~ Answered above — registration only, and a name may not contain whitespace or `$ : { }`. The loaders are the precedent —
-   `registerLoader(new DotEnvLoader(dialect))` on the factory, plus `ServiceLoader` discovery — and
-   registering a *configured instance* is also what dissolves the question of where the passphrase
-   comes from: the caller brings it. Left to decide: whether discovery applies to handlers at all
-   (a cipher found on the classpath and silently enabled is a different proposition from a file
-   format), and what shape a name may take, since it has to be told apart from an ordinary key.
-8. ~~**What an unknown handler does.**~~ Answered above — an `UnsupportedOperationException` naming what is registered. Settled in principle on 2026-08-13 and recorded in `TODO.md`:
-   an expression beginning `$` and containing `::` **is** a handler reference, and one naming a
-   handler that is not registered is an error rather than a fallback — otherwise a misspelt name
-   resolves to the empty string, which for a password is the worst answer available. What is left is
-   where that refusal is raised and what it says.
-
-Question 5 was **answered on 2026-08-13** and is folded into the design above: the marker is the
-form, the token is what goes inside it, and the scheme number is gone. The other seven were answered by
-building it, on 2026-08-14, and the verdicts are in the section before this one.
-
-**And the question that was not in this list — the asymmetric case — was answered the same day**, by
-building it. See the section above. There is nothing open in this document any more.
 
 Two things learnt afterwards, on 2026-08-18
 -------------------------------------------

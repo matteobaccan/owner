@@ -106,6 +106,10 @@ The iteration count travels in the token so that raising it later leaves files a
 is not a knob: no syntax offers it to whoever edits the file, and a token asking to be read with fewer than
 100,000 iterations is refused rather than honoured.
 
+**What it costs**, measured before the number was chosen: one key derivation is around 38 ms on JDK 24 and
+49 ms on JDK 17 — and it happens **once per salt**, not once per value. Encrypt a group of secrets with one
+run of the tool and they share the salt, so reading them all back costs one derivation between them.
+
 
 Rotating a key
 --------------
