@@ -240,6 +240,10 @@ loadScripts(document, 'script');</script>
      not a list of its own — it is the warnings, and those already leave the legitimate cases alone: a
      source that is merely absent stays silent under it too, since
      <a href="Config.LoadType.html#FIRST"><code>Config.LoadType.FIRST</code></a> expects misses by design.</li>
+     <li><code>owner.declared.only</code>: <code>true</code> restricts every <a href="Accessible.html" title="interface in org.aeonbits.owner"><code>Accessible</code></a> view
+     and <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#toString--" title="class or interface in java.lang" class="external-link"><code>Object.toString()</code></a> to the properties each interface declares, for the interfaces that
+     do not carry <a href="Config.DeclaredOnly.html" title="annotation in org.aeonbits.owner"><code>Config.DeclaredOnly</code></a> — the ones you did not write. An interface that carries
+     the annotation decides for itself, in both directions.</li>
  </ul>
  <p>
  They are read when a Config object is created, and the object keeps them for the rest of its life.
