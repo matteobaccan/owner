@@ -65,6 +65,10 @@ public interface ServerConfig extends Config {
 
 In this case, for *every property* all the specified URLs will be queries, and the first resource defining the property
 will prevail.
+
+> A source can also be named **inside a file**, so that a deployment wanting one more of them needs no
+> recompiling: see [One file building on another](/owner/docs/includes/). The sources a file names are read
+> immediately below it, and the same first-named-wins rule decides between them.
 More in detail, this is what will happen:
 
  1. First, it will try to load the given property from ~/.myapp.config;

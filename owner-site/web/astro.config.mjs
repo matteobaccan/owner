@@ -86,6 +86,7 @@ export default defineConfig({
             { label: 'Nested configuration', slug: 'docs/nested-configuration' },
             { label: 'Where an annotation counts', slug: 'docs/annotation-scope' },
             { label: 'Loading strategies', slug: 'docs/loading-strategies' },
+            { label: 'One file building on another', slug: 'docs/includes' },
             { label: 'Importing properties', slug: 'docs/importing-properties' },
             { label: 'Parametrized properties', slug: 'docs/parametrized-properties' },
             { label: 'Type conversion', slug: 'docs/type-conversion' },

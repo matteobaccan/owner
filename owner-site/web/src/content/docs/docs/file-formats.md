@@ -18,6 +18,10 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [HOCON](#hocon) | a path ending in `.conf` | `MyConfig.conf` | **not ours**, and the only one: see [below](#hocon) |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
+Whatever the format, a source can **name the sources it builds on**, with an `owner.include` key at the root
+of the document: see [One file building on another](/owner/docs/includes/). It works in every format on this
+page, a file of one format may include a file of another, and the page has one example per format.
+
 Four of them are worth reading twice. **`.env` and INI have no standard**, so which rules they are read by
 is something you choose; see [below](#env) and [below](#ini). **XML is parsed with hardening turned on**,
 which in rare cases cannot be applied, and **a document that declares a grammar is held to it**; see
