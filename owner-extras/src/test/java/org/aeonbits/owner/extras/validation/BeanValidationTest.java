@@ -9,6 +9,7 @@ package org.aeonbits.owner.extras.validation;
 
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.Factory;
 import org.aeonbits.owner.validation.ConfigValidationException;
 import org.aeonbits.owner.validation.Violation;
 import org.junit.Test;
@@ -228,5 +229,68 @@ public class BeanValidationTest {
             assertTrue(refused.getMessage(), refused.getMessage().contains("'port()'"));
             assertTrue(refused.getMessage(), refused.getMessage().contains("Optional<@Min(12) Integer>"));
         }
+    }
+
+    // ------------------------------------------------------ the shapes that have no value to check
+
+    /** A constraint on a value that will not convert, so it cannot be read to be checked. */
+    public interface ConstraintOnAValueThatWillNotConvert extends Config {
+        @jakarta.validation.constraints.Min(12)
+        @DefaultValue("not a number")
+        int port();
+    }
+
+    /**
+     * A value that refuses to convert is <b>reported and passed over</b>, not thrown from the validation:
+     * it fails on its own, with its own message, the moment anybody reads it, and turning that into a
+     * failure of the validation would report the wrong thing about the wrong feature. What must not
+     * happen is that it is passed over in silence — so under <code>owner.strict</code> it is a refusal,
+     * which is what this asserts, and a warning otherwise.
+     */
+    @Test
+    public void aValueThatCannotBeReadIsReportedRatherThanThrownFromTheValidation() {
+        Factory strict = ConfigFactory.newInstance();
+        strict.setProperty("owner.strict", "true");
+        try {
+            strict.create(ConstraintOnAValueThatWillNotConvert.class);
+            fail("expected a value that cannot be read to be reported");
+        } catch (UnsupportedOperationException refused) {
+            assertTrue(refused.getMessage(), refused.getMessage().contains("'port()'"));
+            assertTrue(refused.getMessage(), refused.getMessage().contains("could not be read"));
+        }
+    }
+
+    /** Without strict the same interface is created, and the value fails on its own when it is read. */
+    @Test
+    public void andWithoutStrictItIsOnlyAWarning() {
+        ConstraintOnAValueThatWillNotConvert cfg =
+                ConfigFactory.newInstance().create(ConstraintOnAValueThatWillNotConvert.class);
+        try {
+            cfg.port();
+            fail("the value still fails when it is read, which is where it belongs");
+        } catch (RuntimeException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("not a number"));
+        }
+    }
+
+    /** The same interface with validation switched off on the method: nothing is checked and nothing said. */
+    public interface ValidationDisabledOnTheMethod extends Config {
+        @jakarta.validation.constraints.Min(12)
+        @DisableFeature(DisableableFeature.VALIDATION)
+        @DefaultValue("1")
+        int port();
+    }
+
+    /**
+     * <code>@DisableFeature(VALIDATION)</code> on a method takes it out of the check <b>and</b> out of the
+     * report — under <code>owner.strict</code> too, which is the assertion that says the two are the same
+     * decision. Saying "this constraint is not being checked" about a method that asked not to be checked
+     * would be noise, and noise is how a real warning stops being read.
+     */
+    @Test
+    public void aMethodThatDisabledValidationIsNeitherCheckedNorReported() {
+        Factory strict = ConfigFactory.newInstance();
+        strict.setProperty("owner.strict", "true");
+        assertEquals(1, strict.create(ValidationDisabledOnTheMethod.class).port());
     }
 }
