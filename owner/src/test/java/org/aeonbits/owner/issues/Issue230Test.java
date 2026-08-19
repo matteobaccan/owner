@@ -27,6 +27,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -170,7 +171,7 @@ public class Issue230Test {
         assertEquals("false", config.getProperty("myproject.debug", "not this"));
 
         for (String name : config.propertyNames())
-            assertTrue("listed and unanswered: " + name, config.getProperty(name) != null);
+            assertNotNull("listed and unanswered: " + name, config.getProperty(name));
     }
 
     /** And the key as it is written keeps answering, for whoever already reads the properties by it. */

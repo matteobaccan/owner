@@ -48,7 +48,8 @@ public class MergeLoadStrategyTest {
         @DefaultValue("this should be ignored")
         String qux();
 
-        String quux(); // this should return null;
+        // no default and nothing in any source: this one answers with null
+        String quux();
         @DefaultValue("theDefaultValue")
         String fubar();
     }

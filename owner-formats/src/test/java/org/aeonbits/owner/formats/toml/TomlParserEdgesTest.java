@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * The corners of {@link TomlParser} that neither {@link TomlLoaderTest} nor

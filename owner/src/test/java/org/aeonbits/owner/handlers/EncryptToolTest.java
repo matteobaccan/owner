@@ -36,6 +36,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -61,10 +62,10 @@ public class EncryptToolTest {
     }
 
     /** Runs the tool end to end with the given text on standard input, and puts the stream back. */
-    private int runWith(String input) {
+    private int runWith(String input) throws IOException {
         InputStream save = System.in;
-        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
-        try {
+        try (InputStream in = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8))) {
+            System.setIn(in);
             return EncryptTool.run(new String[0], new PrintStream(out), new PrintStream(err));
         } finally {
             System.setIn(save);
@@ -114,7 +115,7 @@ public class EncryptToolTest {
         Object save = UtilTest.setSystem(new SystemProviderForTest(new Properties(), environment));
         try {
             int status = runWith("hunter2\n");
-            assertTrue(stderr(), status != 0);
+            assertNotEquals(stderr(), 0, status);
             assertTrue(stderr(), stderr().contains("OWNER_PASSPHRASE"));
         } finally {
             UtilTest.setSystem(save);

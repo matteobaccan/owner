@@ -11,7 +11,6 @@ package org.aeonbits.owner;
 import org.aeonbits.owner.crypto.Decryptor;
 import org.aeonbits.owner.crypto.IdentityDecryptor;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
