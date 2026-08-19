@@ -135,4 +135,42 @@ public class JndiHandlerTest {
         assertEquals("s3cr3t", config.password());
         assertEquals("jdbc:h2:mem:test?password=s3cr3t", config.url());
     }
+
+    /**
+     * The constructor that takes an environment and leaves the name alone, which is the shape somebody
+     * uses who has one provider to reach but a context of their own to reach it with.
+     */
+    @Test
+    public void aHandlerMayBeGivenAnEnvironmentAndKeepTheDefaultName() {
+        Map<String, String> environment = new HashMap<>();
+        environment.put(Context.INITIAL_CONTEXT_FACTORY, InMemoryContextFactory.class.getName());
+        InMemoryContextFactory.bind("java:comp/env/db/password", "s3cr3t");
+
+        JndiHandler withEnvironment = new JndiHandler(environment);
+        assertEquals("jndi", withEnvironment.name());
+        assertEquals("s3cr3t", withEnvironment.resolve("comp/env/db/password"));
+    }
+
+    /**
+     * The environment is <b>copied</b>, so a caller may go on using its own map — and a handler holding a
+     * live reference to somebody else's mutable map is the kind of thing that works until it does not.
+     */
+    @Test
+    public void theEnvironmentIsCopiedRatherThanKept() {
+        Map<String, String> environment = new HashMap<>();
+        environment.put(Context.INITIAL_CONTEXT_FACTORY, InMemoryContextFactory.class.getName());
+        InMemoryContextFactory.bind("java:comp/env/db/password", "s3cr3t");
+
+        JndiHandler withEnvironment = new JndiHandler(environment);
+        environment.clear();
+
+        assertEquals("s3cr3t", withEnvironment.resolve("comp/env/db/password"));
+    }
+
+    /** What it says of itself, which is what a list of registered handlers prints. */
+    @Test
+    public void itSaysItsNameWhenPrinted() {
+        assertEquals("JndiHandler[name=jndi]", new JndiHandler().toString());
+        assertEquals("JndiHandler[name=other]", new JndiHandler("other", null).toString());
+    }
 }

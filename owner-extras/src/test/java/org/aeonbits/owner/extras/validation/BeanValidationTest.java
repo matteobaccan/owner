@@ -293,4 +293,34 @@ public class BeanValidationTest {
         strict.setProperty("owner.strict", "true");
         assertEquals(1, strict.create(ValidationDisabledOnTheMethod.class).port());
     }
+
+    /**
+     * A constraint the provider has no validator for. <code>@Min</code> on a String would not do — the
+     * provider reads it as a number and reports an ordinary violation — so this is <code>@Size</code> on
+     * an <code>int</code>, which has no length to measure.
+     */
+    public interface ConstraintOnATypeItDoesNotFit extends Config {
+        @jakarta.validation.constraints.Size(min = 2)
+        @DefaultValue("8080")
+        int port();
+    }
+
+    /**
+     * A constraint written on a type its provider has no validator for.
+     * <p>
+     * The provider raises this while validating, not while starting, so without a word here it arrives as
+     * a bare <code>UnexpectedTypeException</code> from inside somebody else's library. It is turned into a
+     * refusal that names <b>the method</b>, which is the one piece of information the provider's own
+     * message does not carry and the only one that says where to go and fix it.
+     * </p>
+     */
+    @Test
+    public void aConstraintOnATypeTheProviderCannotValidateNamesTheMethod() {
+        try {
+            ConfigFactory.newInstance().create(ConstraintOnATypeItDoesNotFit.class);
+            fail("expected a constraint with no validator for its type to be refused");
+        } catch (UnsupportedOperationException refused) {
+            assertTrue(refused.getMessage(), refused.getMessage().contains("port"));
+        }
+    }
 }
