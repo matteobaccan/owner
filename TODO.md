@@ -15,7 +15,7 @@ again from scratch, and no part of it is waiting on anybody.
 
 | Document | What it holds |
 |---|---|
-| `INCLUDES.md` | #165: seven decisions, why each of them, and what the measurements changed |
+| `INCLUDES.md` | #165: **why** each decision went the way it did — the feature itself is on the site |
 | `FORMATS.md` | what each format costs and the questions each one raised |
 | `CRYPTO.md` | the cipher, the marker, the field, and what was deliberately not shipped |
 | `COMPARISON.md` | what the rest of the field does, verified against their sources |
