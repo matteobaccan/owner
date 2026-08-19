@@ -73,4 +73,8 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run:
-        mvn -B -Pcoverage clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar --file pom.xml
+        # The version is pinned, as every other version in this repository is. Without one, Maven has to
+        # ask Maven Central for the newest release on every run - and when that lookup fails, so does the
+        # build, with "Plugin not found in any plugin repository" and nothing wrong with the code. That
+        # happened on 2026-08-19, eight minutes after the same job had passed.
+        mvn -B -Pcoverage clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar --file pom.xml
