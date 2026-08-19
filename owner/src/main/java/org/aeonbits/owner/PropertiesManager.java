@@ -32,6 +32,7 @@ import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
@@ -93,6 +94,31 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
      * a reload resolving the same keys, and lets the mapping travel with the object when it is serialized.
      */
     private final KeyPrefix keyPrefix;
+
+    /**
+     * The expander of the factory that created this configuration, kept for the same reason
+     * {@link #keyPrefix} is - and needed at every load rather than only at construction, since the sources
+     * a file includes are specs of the same kind as {@link Sources} entries and are expanded the same way.
+     */
+    private final VariablesExpander expander;
+
+    /**
+     * The key a source has to write to name the sources it builds on, empty when the feature is off:
+     * {@link Includes#INCLUDE_KEY} on the factory decides it, and this configuration keeps the token it was
+     * born with. A string rather than an {@link Includes}, because {@link Includes} is built for one load
+     * and thrown away, and this object is serialized.
+     */
+    private final String includeToken;
+
+    /**
+     * The sources reached through the directive at the last load, which are the ones
+     * {@link Config.HotReload} has to be told about on top of the declared ones.
+     * <p>
+     * Kept so that {@link HotReloadLogic} is only rebuilt when the list actually moved: a file may add an
+     * include or stop naming one, and every configuration written before this release adds none at all.
+     * </p>
+     */
+    private List<URI> included = emptyList();
 
 
     /**
@@ -263,14 +289,16 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
                       VariablesExpander expander, LoadersManager loaders, KeyPrefix keyPrefix, boolean strict,
                       Map<?, ?>... imports) {
         this(clazz, properties, scheduler, expander, loaders, new HandlersManager(), new ConvertersManager(),
-                keyPrefix, strict, false, imports);
+                keyPrefix, strict, false, Includes.DEFAULT_TOKEN, imports);
     }
 
     PropertiesManager(Class<? extends Config> clazz, Properties properties, ScheduledExecutorService scheduler,
                       VariablesExpander expander, LoadersManager loaders, HandlersManager handlers,
                       ConvertersManager converters, KeyPrefix keyPrefix, boolean strict,
-                      boolean declaredOnlyByDefault, Map<?, ?>... imports) {
+                      boolean declaredOnlyByDefault, String includeToken, Map<?, ?>... imports) {
         this.clazz = clazz;
+        this.expander = expander;
+        this.includeToken = includeToken;
         this.properties = properties;
         this.loaders = loaders;
         this.handlers = handlers;
@@ -1033,9 +1061,124 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         }
     }
 
+    /**
+     * Reads the sources and hands back what they held, merged.
+     * <p>
+     * The list handed to the reader is the declared one; what the reader hands back is that list plus
+     * whatever the files themselves named, which is why the watched set is worked out again here rather
+     * than once in the constructor.
+     * </p>
+     */
     private Properties doLoad() {
         somethingWasRead = false;
-        return loadType.load(uris, loaders, this);
+        Includes reader = new Includes(includeToken,
+                new ConfigURIFactory(clazz.getClassLoader(), expander), loaders, this);
+        Properties loaded = loadType.load(uris, reader, this);
+        rewatch(reader.included());
+        return loaded;
+    }
+
+    /**
+     * Tells {@link HotReloadLogic} about the sources the files named, on top of the ones the interface
+     * declared.
+     * <p>
+     * <b>The declared ones stay in the watched set even under {@link Config.LoadType#FIRST}</b>, where the
+     * ones after the source that answered were never read: that is what this library has always watched,
+     * and a source appearing where a higher-priority one was expected is precisely a reason to reload.
+     * What is new is the second half of the list, and a configuration whose files include nothing gets an
+     * identical list and no rebuild at all.
+     * </p>
+     */
+    private void rewatch(List<URI> discovered) {
+        if (hotReloadLogic == null || (discovered.isEmpty() && included.isEmpty()))
+            return;
+        included = discovered;
+        List<URI> watched = new ArrayList<>(uris);
+        watched.addAll(discovered);
+        hotReloadLogic.setupWatchableResources(watched);
+    }
+
+    /**
+     * A source named <b>inside another source</b> that did not arrive.
+     * <p>
+     * Not the same case as {@link #sourceFailed}, and the difference is the whole reason this method
+     * exists. A declared source that is merely absent says nothing, because {@link Config.LoadType#FIRST}
+     * is a chain of fallbacks in which every miss but the last is how the feature works. <b>Nobody builds
+     * a fallback chain out of a file naming another file</b>: an include that is not there is a file
+     * somebody meant to write, so absence is a warning here and a refusal under {@link #STRICT} — and a
+     * source that said for itself that it is required is refused either way.
+     * </p>
+     * <p>
+     * Said once per source and again only if what happened to it changes, for the reason
+     * {@link #sourceFailed} is: a hot reload runs the whole load again at its interval, for as long as the
+     * process lives.
+     * </p>
+     *
+     * @param spec    the source as it was written in the file, which is what the reader has to go and fix.
+     * @param uri     what the spec resolved to, or <code>null</code> when it resolved to nothing at all.
+     * @param failure what went wrong reading it, or <code>null</code> when there was nothing to read.
+     */
+    void includeNotRead(String spec, URI uri, IOException failure) {
+        if (Includes.isRequired(uri))
+            throw unsupported(failure, "%s: the source %s, included by another source, says it is required "
+                    + "and could not be read", clazz.getName(), hideCredentials(uri));
+
+        if (strict)
+            throw unsupported(failure, "%s: the source '%s' is named by %s inside another source and could "
+                            + "not be read, and %s is on. A source a file names is not a fallback the way a "
+                            + "declared one is: nothing else was going to answer in its place.",
+                    clazz.getName(), spec, includeToken, STRICT);
+
+        URI reported = uri != null ? uri : unresolved(spec);
+        String signature = spec + " -> " + (failure == null
+                ? "no such resource"
+                : failure.getClass().getName() + ": " + failure.getMessage());
+        if (signature.equals(reportedFailures.get(reported)))
+            return;
+        reportedFailures.put(reported, signature);
+        LOGGER.log(Level.WARNING, failure, () -> String.format(
+                "%s: the source '%s' is named by %s inside another source and could not be read. The "
+                        + "configuration goes on without it, so this is not an error - but a source a file "
+                        + "names is not a fallback the way a declared one is, and nothing else was going to "
+                        + "answer in its place.",
+                clazz.getName(), spec, includeToken));
+    }
+
+    /**
+     * The directive written more than once in a format that answers a repeated key with a list.
+     * <p>
+     * Then there is no key called the token at all — an INI file turns two lines into
+     * <code>owner.include[0]</code> and <code>owner.include[1]</code> — so the feature simply does not
+     * happen, and nothing else would ever say so. The other two families answer for themselves: a
+     * properties file keeps the last line and loses the first, which nothing here can see; JSON, YAML and
+     * TOML refuse the whole document, naming the key and the line.
+     * </p>
+     * <p>
+     * A warning and not a refusal even under {@link #STRICT}: what was written is not wrong, it is written
+     * in a spelling this directive does not have. The message says the spelling it does have.
+     * </p>
+     *
+     * @param token the directive, as this configuration reads it.
+     * @param named the sources the repeated lines were carrying, so that the fix can be copied out of it.
+     */
+    void directiveWrittenTwice(String token, List<String> named) {
+        LOGGER.log(Level.WARNING, () -> String.format(
+                "%s: %s is written %d times in one source, and this format answers a repeated key with a "
+                        + "list - so there is no %s in what was read and nothing was included. Write it once, "
+                        + "with the sources separated by commas: %s = %s",
+                clazz.getName(), token, named.size(), token, token, String.join(", ", named)));
+    }
+
+    /**
+     * A key standing for a spec that resolved to nothing, so that two different missing includes are two
+     * different entries in {@link #reportedFailures} rather than one taking turns with the other.
+     */
+    private static URI unresolved(String spec) {
+        try {
+            return new URI("owner", "unresolved", spec);
+        } catch (URISyntaxException notAFragmentWeCanBuild) {
+            return URI.create("owner:unresolved");
+        }
     }
 
     /** A source that was read, whatever it held: an empty file answered too. */

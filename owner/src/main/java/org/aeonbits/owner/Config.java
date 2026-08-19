@@ -508,19 +508,8 @@ public interface Config extends Serializable {
          */
         FIRST {
             @Override
-            Properties load(List<URI> uris, LoadersManager loaders, PropertiesManager report) {
-                Properties result = new Properties();
-                for (URI uri : uris)
-                    try {
-                        Properties loaded = new Properties();
-                        loaders.load(loaded, uri);
-                        report.sourceAnswered(uri, loaded);
-                        result.putAll(loaded);
-                        break;
-                    } catch (IOException ex) {
-                        report.sourceFailed(uri, ex);
-                    }
-                return result;
+            boolean stopsAtTheFirstThatAnswers() {
+                return true;
             }
         },
 
@@ -530,27 +519,28 @@ public interface Config extends Serializable {
          */
         MERGE {
             @Override
-            Properties load(List<URI> uris, LoadersManager loaders, PropertiesManager report) {
-                Properties result = new Properties();
-                for (URI uri :  reverse(uris))
-                    try {
-                        Properties loaded = new Properties();
-                        loaders.load(loaded, uri);
-                        report.sourceAnswered(uri, loaded);
-                        result.putAll(loaded);
-                    } catch (IOException ex) {
-                        report.sourceFailed(uri, ex);
-                    }
-                return result;
+            boolean stopsAtTheFirstThatAnswers() {
+                return false;
             }
         };
+
+        /**
+         * Whether the sources after the one that answered are read at all.
+         * <p>
+         * It is the whole of the difference between the two policies. What each of them does with the
+         * sources it did read is the same thing, and is written once in {@link #load}.
+         * </p>
+         *
+         * @return <code>true</code> for {@link #FIRST}, <code>false</code> for {@link #MERGE}.
+         */
+        abstract boolean stopsAtTheFirstThatAnswers();
 
         /**
          * Reads the sources, in the order this policy prescribes.
          * <p>
          * Each of them is read into a map of its own and then merged, rather than all of them into one, so
          * that what each source contributed is known while it still can be: the merge is exactly what makes
-         * a value indistinguishable from the one it overwrote. Every source is announced as it is read, in
+         * a value indistinguishable from the one it overwrote. Every source is announced as it is merged, in
          * merge order, so that what is recorded against a key is the source that won.
          * </p>
          * <p>
@@ -558,13 +548,27 @@ public interface Config extends Serializable {
          * it is no longer swallowed either: it is announced too, and what to make of it is decided in one
          * place rather than here.
          * </p>
+         * <p>
+         * <b>The list of sources is no longer closed.</b> A file may name the files it builds on, and those
+         * are read immediately after it and merged below it; {@link Includes} works out what that list
+         * comes to and this method merges what it hands back. Reading happens forwards, so that a file is
+         * read before the files it includes; merging happens backwards, so that the first source declared
+         * is the last one applied and therefore the one that prevails.
+         * </p>
          *
          * @param uris    the sources, in the order they were declared.
-         * @param loaders the loaders to read them with.
+         * @param reader  reads them, following what each of them includes.
          * @param report  told about each source that answered and each that could not be read.
          * @return the properties, merged.
          */
-        abstract Properties load(List<URI> uris, LoadersManager loaders, PropertiesManager report);
+        Properties load(List<URI> uris, Includes reader, PropertiesManager report) {
+            Properties result = new Properties();
+            for (Includes.Source source : reverse(reader.readAll(uris, stopsAtTheFirstThatAnswers()))) {
+                report.sourceAnswered(source.uri(), source.properties());
+                result.putAll(source.properties());
+            }
+            return result;
+        }
     }
 
     /**

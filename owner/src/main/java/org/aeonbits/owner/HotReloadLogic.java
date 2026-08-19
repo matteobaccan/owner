@@ -51,6 +51,18 @@ class HotReloadLogic implements Serializable {
     private volatile long lastCheckTime = now();
     private final List<WatchableResource> watchableResources = new ArrayList<>();
 
+    /**
+     * The sources this list was built from, so that {@link #setupWatchableResources} can be called after
+     * every load and do nothing when nothing moved.
+     * <p>
+     * It has to be callable again since 2.0.0: a source may name the sources it builds on, so the list is
+     * no longer decided once in the constructor - a file can add an include or stop naming one. Every
+     * configuration whose files include nothing hands over the same list at every load and never gets past
+     * the first line of that method.
+     * </p>
+     */
+    private List<URI> watching = new ArrayList<>();
+
     private interface WatchableResource extends Serializable {
         boolean isChanged();
     }
@@ -181,12 +193,29 @@ class HotReloadLogic implements Serializable {
      * the question that follows, and the answer has to be somewhere.
      * </p>
      */
-    private void setupWatchableResources(List<URI> uris) {
+    synchronized void setupWatchableResources(List<URI> uris) {
+        if (uris.equals(watching))
+            return;
+        watching = new ArrayList<>(uris);
+
+        // what is already being watched is kept rather than built again: a WatchableFile reads the file's
+        // timestamp when it is created, so replacing one would move its baseline to now and lose a change
+        // made between the load that rebuilt this list and the check after it
+        Map<File, WatchableResource> byFile = new LinkedHashMap<>();
+        WatchableResource systemProperties = null;
+        for (WatchableResource resource : watchableResources) {
+            if (resource instanceof WatchableFile)
+                byFile.put(((WatchableFile) resource).file, resource);
+            else
+                systemProperties = resource;
+        }
+
         Set<File> files = new LinkedHashSet<>();
         List<URI> unwatchable = new ArrayList<>();
+        boolean wantsSystemProperties = false;
         for (URI uri : uris) {
             if (uri.toString().equals("system:properties")) {
-                watchableResources.add(new WatchableSystemProperties());
+                wantsSystemProperties = true;
             } else {
                 File file = fileFromURI(uri);
                 if (file != null)
@@ -195,8 +224,14 @@ class HotReloadLogic implements Serializable {
                     unwatchable.add(uri);
             }
         }
-        for (File file : files)
-            watchableResources.add(new WatchableFile(file));
+
+        watchableResources.clear();
+        if (wantsSystemProperties)
+            watchableResources.add(systemProperties != null ? systemProperties : new WatchableSystemProperties());
+        for (File file : files) {
+            WatchableResource known = byFile.get(file);
+            watchableResources.add(known != null ? known : new WatchableFile(file));
+        }
 
         reportWhatCannotBeWatched(unwatchable);
         LOGGER.log(Level.CONFIG, () -> String.format(

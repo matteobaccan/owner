@@ -50,7 +50,8 @@ class DefaultFactory implements Factory {
         boolean strict = Boolean.parseBoolean(props.getProperty(PropertiesManager.STRICT));
         boolean declaredOnly = Boolean.parseBoolean(props.getProperty(PropertiesManager.DECLARED_ONLY));
         PropertiesManager manager = new PropertiesManager(clazz, new Properties(), scheduler, expander, loadersManager,
-                handlersManager, convertersManager, KeyPrefix.from(props), strict, declaredOnly, imports);
+                handlersManager, convertersManager, KeyPrefix.from(props), strict, declaredOnly,
+                Includes.tokenIn(props), imports);
         Object jmxSupport = getJMXSupport(clazz, manager);
         PropertiesInvocationHandler handler = new PropertiesInvocationHandler(clazz, manager, jmxSupport);
         handler.validateMandatoryProperties();

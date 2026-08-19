@@ -67,6 +67,11 @@ public interface Factory {
      *     and {@link Object#toString()} to the properties each interface declares, for the interfaces that
      *     do not carry {@link Config.DeclaredOnly} — the ones you did not write. An interface that carries
      *     the annotation decides for itself, in both directions.</li>
+     *     <li><code>owner.include.key</code>: the key a source has to write to name the sources it builds
+     *     on, <code>owner.include</code> when it is not set. <b>The empty value turns the feature off</b>,
+     *     and that is what it is for: whoever already has a legitimate property called
+     *     <code>owner.include</code> must be able to say <i>not here</i>. See
+     *     <a href="https://github.com/matteobaccan/owner/issues/165">#165</a>.</li>
      * </ul>
      * <p>
      * They are read when a Config object is created, and the object keeps them for the rest of its life.
