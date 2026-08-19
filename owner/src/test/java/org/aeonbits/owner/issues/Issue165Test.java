@@ -366,6 +366,51 @@ public class Issue165Test {
         assertEquals("b", cfg.fromB());
     }
 
+    /**
+     * With includes the list of sources is no longer written anywhere a person can look, so the library
+     * says what it turned out to be — at <code>CONFIG</code>, the level that carries what the library
+     * <i>decided</i>, and <b>only when a file actually named one</b>.
+     * <p>
+     * Without that line there is nothing left to read: {@link Sources} names the declared sources and the
+     * files name the rest, and no single place holds both. A configuration whose files include nothing is
+     * unaffected — its sources are on its interface, where they always were, and the line that names them
+     * is still the whole truth.
+     * </p>
+     */
+    @Test
+    public void whatWasActuallyReadIsReportedWhenTheFilesAddedToIt() throws IOException {
+        write("z.properties", "fromZ = from z", "shared = z's", "twoDeep = z's");
+        write("a.properties",
+                "owner.include = file:target/issue165/z.properties",
+                "fromA = from a", "shared = a's", "twoDeep = a's");
+        write("b.properties",
+                "owner.include = file:target/issue165/a.properties",
+                "fromB = from b", "shared = b's");
+
+        try (LogCapture log = LogCapture.ofLibrary(Level.CONFIG)) {
+            factory.create(Chain.class);
+
+            String said = log.messagesAt(Level.CONFIG);
+            assertTrue(said, said.contains("the first prevailing"));
+            // in the order they were read, which is the order they prevail in
+            int b = said.indexOf("b.properties");
+            int a = said.indexOf("a.properties");
+            int z = said.indexOf("z.properties");
+            assertTrue(said, b >= 0 && b < a && a < z);
+        }
+    }
+
+    /** And a configuration whose files name nothing says nothing extra: its sources are on its interface. */
+    @Test
+    public void nothingIsReportedWhenNoFileNamedASource() throws IOException {
+        write("child.properties", "fromChild = from the child", "fromParent = x", "shared = y");
+
+        try (LogCapture log = LogCapture.ofLibrary(Level.CONFIG)) {
+            factory.create(Child.class);
+            assertFalse(log.messagesAt(Level.CONFIG).contains("the first prevailing"));
+        }
+    }
+
     // ------------------------------------------------------------------------------------------------
     // 5: what the value came from
     // ------------------------------------------------------------------------------------------------

@@ -93,6 +93,9 @@ final class Includes {
     /** The sources reached through the directive, in the order they were scheduled. */
     private final List<URI> included = new ArrayList<>();
 
+    /** Every source that answered, declared or included, in the order it was read. */
+    private final List<URI> readInOrder = new ArrayList<>();
+
     Includes(String token, ConfigURIFactory uriFactory, LoadersManager loaders, PropertiesManager report) {
         this.token = token == null ? DEFAULT_TOKEN : token.trim();
         this.uriFactory = uriFactory;
@@ -137,6 +140,17 @@ final class Includes {
     }
 
     /**
+     * Every source that answered, in the order it was read — which is the order they take precedence in,
+     * the first prevailing. It is what a person is owed when the list of sources is no longer written
+     * anywhere they can look: {@link Config.Sources} names the declared ones and the files name the rest.
+     *
+     * @return the sources read, in precedence order.
+     */
+    List<URI> readInOrder() {
+        return Collections.unmodifiableList(readInOrder);
+    }
+
+    /**
      * Reads the sources, following what each of them includes.
      * <p>
      * The declared sources are walked in the order they were declared, and the sources each one includes
@@ -168,7 +182,7 @@ final class Includes {
             Properties loaded = readDeclared(uri);
             if (loaded == null)
                 continue;
-            result.add(new Source(uri, loaded));
+            record(result, uri, loaded);
             follow(loaded, uri, result, scheduled);
             if (stopAtTheFirstThatAnswers)
                 break;
@@ -194,9 +208,15 @@ final class Includes {
             Properties p = readIncluded(spec, uri);
             if (p == null)
                 continue;
-            result.add(new Source(uri, p));
+            record(result, uri, p);
             follow(p, uri, result, scheduled);
         }
+    }
+
+    /** Keeps a source that answered, and the place it took in the order. */
+    private void record(List<Source> result, URI uri, Properties loaded) {
+        result.add(new Source(uri, loaded));
+        readInOrder.add(uri);
     }
 
     /**

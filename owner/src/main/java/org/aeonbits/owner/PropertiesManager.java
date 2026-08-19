@@ -1074,8 +1074,30 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         Includes reader = new Includes(includeToken,
                 new ConfigURIFactory(clazz.getClassLoader(), expander), loaders, this);
         Properties loaded = loadType.load(uris, reader, this);
+        reportWhatWasActuallyRead(reader);
         rewatch(reader.included());
         return loaded;
+    }
+
+    /**
+     * Says what the sources turned out to be, when the files added to them.
+     * <p>
+     * <b>Only then</b>, and that is the whole rule: without includes the list is written on the interface
+     * where anybody can read it, and the line above already names it. With includes it is written across
+     * however many files, some of which name others, and there is no longer anywhere a person can look to
+     * find out what was read — which is the same silence {@link Config.Sources} itself gets a
+     * <code>CONFIG</code> line for.
+     * </p>
+     * <p>
+     * In the order they were read, which is the order they take precedence in: the first prevails.
+     * </p>
+     */
+    private void reportWhatWasActuallyRead(Includes reader) {
+        if (reader.included().isEmpty())
+            return;
+        LOGGER.log(Level.CONFIG, () -> String.format(
+                "%s: the files named more sources through %s. Read in this order, the first prevailing: %s",
+                clazz.getName(), includeToken, namesOf(reader.readInOrder())));
     }
 
     /**
