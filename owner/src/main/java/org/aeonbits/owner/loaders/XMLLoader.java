@@ -305,12 +305,37 @@ public class XMLLoader implements Loader {
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             String key = paths.peek();
-            String propertyValue = this.value.peek().toString().trim();
-            if (!propertyValue.isEmpty() &&
-                    !(isJavaPropertiesFormat && "comment".equals(key)))
-                put(key, propertyValue);
+            String text = this.value.peek().toString();
+            if (isJavaPropertiesFormat)
+                putAsTheJdkWould(qName, key, text);
+            else if (!text.trim().isEmpty())
+                put(key, text.trim());
             value.pop();
             paths.pop();
+        }
+
+        /**
+         * The Java properties format, where <b>the reference implementation is in the JDK</b>:
+         * {@link Properties#loadFromXML(java.io.InputStream)} reads the same documents, so where the two
+         * disagree one of them is wrong, and it is not the one in the JDK.
+         * <p>
+         * Two things follow, and both were found by running the same document through both.
+         * <b>The text is taken as written</b>, where the other half of this loader trims: an
+         * <code>&lt;entry&gt;</code> holding <code>"  spaced  "</code> is that value, spaces and all,
+         * because in this format the element holds the value and nothing else — while in an XML of your
+         * own the whitespace is the indentation of a pretty-printed file and has to go.
+         * <b>And an entry that is empty is a property</b>: <code>&lt;entry key="a"&gt;&lt;/entry&gt;</code>
+         * is the empty value, which this library treats as a state of its own — a key present and empty is
+         * not a key that is absent, and only the second lets a {@code @DefaultValue} win.
+         * </p>
+         * <p>
+         * Only <code>entry</code> carries anything. <code>comment</code> is the format's own, and
+         * <code>properties</code> is the root, whose text is the whitespace between its children.
+         * </p>
+         */
+        private void putAsTheJdkWould(String qName, String key, String text) {
+            if ("entry".equals(qName) && key != null)
+                put(key, text);
         }
 
         /**
