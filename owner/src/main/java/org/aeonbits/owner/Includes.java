@@ -36,7 +36,7 @@ import static org.aeonbits.owner.util.Util.unsupported;
  * This class is built for one load and thrown away: it holds what is needed to read a source and to turn a
  * spec into a URI, and it is the only place that knows an include from a declared source. It is not kept
  * as a field of anything, so it needs no serialised form — {@link PropertiesManager} keeps the
- * {@linkplain #token() token} instead, which is a string.
+ * {@link #INCLUDE_KEY token} instead, which is a string.
  * </p>
  *
  * <h2>Where the directive is recognised</h2>
@@ -112,11 +112,6 @@ final class Includes {
     static String tokenIn(Properties props) {
         String declared = props.getProperty(INCLUDE_KEY);
         return declared == null ? DEFAULT_TOKEN : declared.trim();
-    }
-
-    /** The key a file has to write to name the files it builds on; empty when the feature is off. */
-    String token() {
-        return token;
     }
 
     /** Whether the directive is read at all. */

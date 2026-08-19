@@ -477,6 +477,57 @@ public class Issue165Test {
         }
     }
 
+    @Sources("file:target/issue165/naming-two.properties")
+    interface NamingTwo extends Config, Accessible, org.aeonbits.owner.Reloadable {
+        @DefaultValue("its default")
+        String value();
+    }
+
+    /**
+     * <b>Two missing includes are two warnings</b>, not one taking turns with the other.
+     * <p>
+     * A classpath spec that matches no resource never becomes a URI at all, so there is nothing to key the
+     * "said once" record by — and keying them all by one placeholder made the second report overwrite the
+     * first's record, so at the next load the first looked new again and they alternated for ever. The key
+     * carries the spec for that reason, and this is the test that says so.
+     * </p>
+     */
+    @Test
+    public void twoIncludesThatResolveToNothingAreBothReported() throws IOException {
+        write("naming-two.properties",
+                "owner.include = classpath:no/such/first.properties, classpath:no/such/second.properties");
+
+        try (LogCapture log = LogCapture.ofLibrary(Level.WARNING)) {
+            NamingTwo cfg = factory.create(NamingTwo.class);
+            assertEquals("its default", cfg.value());
+
+            String said = log.messagesAt(Level.WARNING);
+            assertTrue(said, said.contains("no/such/first.properties"));
+            assertTrue(said, said.contains("no/such/second.properties"));
+        }
+    }
+
+    /**
+     * And each of them is said <b>once</b>, however many times the configuration is loaded. A hot reload
+     * runs the whole load again at its interval, for as long as the process lives, so a source that stays
+     * missing would otherwise fill the log at that rate.
+     */
+    @Test
+    public void anIncludeThatStaysMissingIsReportedOnce() throws IOException {
+        write("naming-two.properties",
+                "owner.include = classpath:no/such/first.properties, classpath:no/such/second.properties");
+
+        try (LogCapture log = LogCapture.ofLibrary(Level.WARNING)) {
+            NamingTwo cfg = factory.create(NamingTwo.class);
+            int afterTheFirstLoad = log.linesAt(Level.WARNING).size();
+            assertEquals(2, afterTheFirstLoad);
+
+            cfg.reload();
+            cfg.reload();
+            assertEquals(afterTheFirstLoad, log.linesAt(Level.WARNING).size());
+        }
+    }
+
     /** The same source, under <code>owner.strict</code>: a refusal at the moment the object is created. */
     @Test
     public void anIncludedFileThatIsNotThereIsRefusedUnderStrict() throws IOException {
@@ -999,6 +1050,36 @@ public class Issue165Test {
                 jar.write(entry.getValue().getBytes(Charset.defaultCharset()));
                 jar.closeEntry();
             }
+        }
+    }
+
+    @LoadPolicy(MERGE)
+    @Sources("system:properties")
+    interface FromTheSystemProperties extends Config, Accessible {
+        @DefaultValue("nothing")
+        String value();
+    }
+
+    /**
+     * A relative spec named by a source that <b>nothing can be found beside</b>.
+     * <p>
+     * <code>system:properties</code> is a source like any other and may carry the directive — somebody
+     * setting <code>-Downer.include=…</code> is a legitimate way to add a file from the command line — but
+     * it is not a place, so there is no "next door" to look in. The message says that, and says the two
+     * spellings that would work, rather than letting the JDK answer <i>unknown protocol: system</i>.
+     * </p>
+     */
+    @Test
+    public void aRelativeSpecNamedBySomethingThatIsNotAPlaceIsRefused() {
+        System.setProperty("owner.include", "sibling.properties");
+        try {
+            factory.create(FromTheSystemProperties.class);
+            fail("a relative spec has to be answered for when there is nothing to be relative to");
+        } catch (UnsupportedOperationException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("names no scheme"));
+            assertTrue(expected.getMessage(), expected.getMessage().contains("file:sibling.properties"));
+        } finally {
+            System.clearProperty("owner.include");
         }
     }
 
