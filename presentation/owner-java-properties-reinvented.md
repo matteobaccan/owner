@@ -322,32 +322,40 @@ complex things should be possible."*
 
 ---
 
-# Features Overview — added since this talk
+# Features Overview — added in 1.x
 
 | feature | since |
 |---|---|
+| Custom loaders — the `Loader` SPI | 1.0.5 |
+| A source over the network — any protocol the JVM knows | 1.0.5 |
+| Variable expansion in `@Key` — `@Key("servers.${env}.name")` | 1.0.6 |
 | Preprocessors — `@PreprocessorClasses` | 1.0.9 |
 | Crypto — `@EncryptedValue`, `@DecryptorClass` | 1.0.10 |
-| Crypto — `${$aes-gcm::…}`, `${$rsa-oaep::…}`, and a cipher shipped | 2.0.0 |
-| JNDI as a source — `jndi:comp/env/…` in `owner-extras` | 2.0.0 |
 | JMX — every `Config` is a `DynamicMBean` | 1.0.10 |
 | Singleton — `ConfigCache` | 1.0.10 |
-| Key prefix — `@Prefix` | 2.0.0 |
-| Mandatory properties — `@Mandatory` | 2.0.0 |
-| Sensitive values — `@Sensitive` | 2.0.0 |
-| `Optional` and `Map` return types | 2.0.0 |
-| `.env` files, and options on a source | 2.0.0 |
-| Nested configuration interfaces, and indexed keys `list[0]` | 2.0.0 |
-| INI, JSON, YAML, TOML — `owner-formats`; HOCON — `owner-extras` | 2.0.0 |
-| Where a value came from — `Traceable` | 2.0.0 |
-| Diagnostics, and `owner.strict` | 2.0.0 |
-| Writing the file back, keeping it — `save(File)`, `@Description` | 2.0.0 |
-| The same key in four spellings, all tried | 2.0.0 |
-| Bean Validation, and what it cannot check | 2.0.0 |
-| One file building on another — `owner.include` | 2.0.0 |
-| What a configuration shows of itself — `@DeclaredOnly` | 2.0.0 |
 
-The rest of this deck is the 2014 talk; the last section covers 2.0.0.
+Four of these were on the 2014 wish list at the end of this deck. The rest of it is that talk, and
+its last section takes the next slide one row at a time.
+
+---
+
+<!-- _class: tight -->
+
+# Features Overview — added in 2.0.0
+
+| | |
+|---|---|
+| **Formats** | `.env` in the core; INI, JSON, YAML and TOML in `owner-formats`; HOCON in `owner-extras`; options on a source |
+| **Shape** | nested configuration interfaces, indexed keys `list[0]`, `Optional` and `Map` return types |
+| **Keys** | `@Prefix`, and the same key in four spellings, all of them tried |
+| **Writing** | `save(File)` and `@Description` — the file kept and edited, not serialised over |
+| **Inheritance** | `owner.include`, a file naming the files it builds on, in every format and across them |
+| **Secrets** | `${$aes-gcm::…}`, `${$rsa-oaep::…}`, and a cipher actually shipped |
+| **Masking** | `@Sensitive` |
+| **Saying what happened** | `Traceable`, the diagnostics, and `owner.strict` to refuse where it warned |
+| **Promises checked** | `@Mandatory`, and Bean Validation — with a report of what it *cannot* check |
+| **What a view shows** | `@DeclaredOnly` |
+| **One more source** | JNDI — `jndi:comp/env/…` in `owner-extras` |
 
 ---
 
