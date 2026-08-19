@@ -18,6 +18,13 @@ read out of the box, how each format is recognised, and where each one has a rul
 | [HOCON](#hocon) | a path ending in `.conf` | `MyConfig.conf` | **not ours**, and the only one: see [below](#hocon) |
 | [System properties and environment](#system-properties-and-the-environment) | the `system:properties` and `system:env` pseudo-URIs | — | — |
 
+Every one of them is read as **UTF-8**, whatever the platform's default encoding is — including
+`.properties`, where the JDK's own reader would have used ISO-8859-1. A **byte order mark** at the front,
+which is what Windows editors leave, is stripped by all of them. And a document that is *not* valid UTF-8
+is **refused** by JSON, YAML and TOML rather than repaired: `new String(bytes, UTF_8)` would put a U+FFFD
+inside a value and read on, and a password with a replacement character in it authenticates nowhere with
+nothing to say why.
+
 Whatever the format, a source can **name the sources it builds on**, with an `owner.include` key at the root
 of the document: see [One file building on another](/owner/docs/includes/). It works in every format on this
 page, a file of one format may include a file of another, and the page has one example per format.

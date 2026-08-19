@@ -14,6 +14,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -118,7 +122,22 @@ public class JsonLoader implements Loader {
         for (int count = input.read(buffer); count > 0; count = input.read(buffer))
             bytes.write(buffer, 0, count);
 
-        String text = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+        // strictly, which new String(bytes, UTF_8) is not: that constructor replaces a malformed
+        // byte with U+FFFD and reads on, so a truncated or mis-encoded file would come back as a
+        // configuration with a replacement character sitting inside a value - a password that
+        // authenticates nowhere, and nothing anywhere saying why. RFC 8259 says the document
+        // is UTF-8, so one that is not is refused rather than repaired. TomlLoader has read this
+        // way since it shipped and this is the same rule, one format over
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT);
+        String text;
+        try {
+            text = decoder.decode(ByteBuffer.wrap(bytes.toByteArray())).toString();
+        } catch (CharacterCodingException notUtf8) {
+            throw new IOException("the document is not valid UTF-8, which JSON requires: "
+                    + notUtf8.getMessage(), notUtf8);
+        }
         return text.startsWith("\uFEFF") ? text.substring(1) : text;
     }
 

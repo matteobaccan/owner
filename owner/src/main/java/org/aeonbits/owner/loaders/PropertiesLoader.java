@@ -10,6 +10,8 @@ package org.aeonbits.owner.loaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PushbackReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -73,9 +75,36 @@ public class PropertiesLoader implements Loader {
      * @throws IOException if there is some I/O error while reading.
      */
     void load(Properties result, InputStream input) throws IOException {
-        try (InputStreamReader characters = new InputStreamReader(input, StandardCharsets.UTF_8)) {
+        try (Reader characters = withoutTheByteOrderMark(new InputStreamReader(input, StandardCharsets.UTF_8))) {
             result.load(characters);
         }
+    }
+
+    /** Written as an escape on purpose: the character itself is invisible, so a mangled file would look right. */
+    private static final char BYTE_ORDER_MARK = '﻿';
+
+    /**
+     * The same reader, past a byte order mark if there is one.
+     * <p>
+     * A UTF-8 BOM is what Notepad, PowerShell's <code>Out-File</code> and Visual Studio put in front of a
+     * file they save, and {@link Properties#load(Reader)} has no idea what it is: it reads it as the first
+     * character of the first key, so <code>first=one</code> arrives under a name nothing asks for and
+     * <b>the property silently takes its default instead</b>. Only the first one, which is what makes it
+     * hard to see - the rest of the file is fine.
+     * </p>
+     * <p>
+     * Two things make it worth the four lines. The file this bites is the commonest format this library
+     * reads, on the platform where a BOM is the default. And <code>owner.include</code> is written at the
+     * top of a file by convention, so a BOM would silently stop a whole included file from being read.
+     * {@link IniLoader} has done this since it shipped; this is the same thing, one format over.
+     * </p>
+     */
+    private static Reader withoutTheByteOrderMark(Reader characters) throws IOException {
+        PushbackReader reader = new PushbackReader(characters, 1);
+        int first = reader.read();
+        if (first != -1 && first != BYTE_ORDER_MARK)
+            reader.unread(first);
+        return reader;
     }
 
     @Override
