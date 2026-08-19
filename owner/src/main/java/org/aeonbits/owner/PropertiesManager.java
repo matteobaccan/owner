@@ -1695,6 +1695,32 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
     }
 
     /**
+     * The value of a declared key, looked for under each spelling relaxed binding would try, in that
+     * order — so what is saved is what the methods answer.
+     * <p>
+     * <b>Not {@link #writtenSpellingsOf}</b>, which exists for the ambiguity warning and skips a value
+     * that came from a {@link Config.DefaultValue}: writing the defaults into the file is what
+     * {@link Accessible#save(File)} is <i>for</i>, and what {@link TemplateTool} produces a file out of.
+     * </p>
+     *
+     * @param key       the key the interface declares.
+     * @param anySpelling whether relaxed binding applies to it; with the feature off for the method, the
+     *                    declared spelling is the only one that is its own.
+     * @return the value, or <code>null</code> if no spelling of the key holds one.
+     */
+    private String valueUnderAnySpellingOf(String key, boolean anySpelling) {
+        String value = properties.getProperty(key);
+        if (value != null || !anySpelling)
+            return value;
+        for (String form : RelaxedKeys.alternativesTo(key)) {
+            value = properties.getProperty(form);
+            if (value != null)
+                return value;
+        }
+        return null;
+    }
+
+    /**
      * Whether the property under this key came from somewhere rather than from a {@link Config.DefaultValue}.
      * An origin that is missing counts as written, as it does in {@link #anythingWrittenUnder}: only a
      * default is ever recorded as not being one.
@@ -1818,19 +1844,55 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
         try {
             // built here and not once per object: it reads the properties as they stand, and after a
             // reload or a setProperty the key a variable resolves to is not the one it resolved to before
-            PropertiesFileWriter.KeyExpansion expansion = keyExpansion();
+            // the keys are collected through the expansion, so the walk that finds them also says which
+            // of them relaxed binding applies to: it is the method that carries @DisableFeature, and the
+            // method is gone by the time there is only a key
+            final Set<String> relaxed = new HashSet<>();
+            final PropertiesFileWriter.KeyExpansion expanding = keyExpansion();
+            PropertiesFileWriter.KeyExpansion expansion = new PropertiesFileWriter.KeyExpansion() {
+                @Override
+                public String of(Method method, String key) {
+                    String expanded = expanding.of(method, key);
+                    if (!DisableableFeature.RELAXED_BINDING.isDisabledFor(method))
+                        relaxed.add(expanded);
+                    return expanded;
+                }
+
+                @Override
+                public String ofPath(String path) {
+                    return expanding.ofPath(path);
+                }
+            };
             PropertiesFileWriter writer = PropertiesFileWriter.describing(clazz, keyPrefix, expansion);
             Set<String> known = PropertiesFileWriter.keysOf(clazz, keyPrefix, expansion);
 
             // what the interface owns, and nothing else: a configuration that merges system:properties
             // holds hundreds of keys that have no business being written into somebody's file. Keys the
             // file already had are kept by the writer itself, whether we know them or not.
-            Properties mine = new Properties();
-            for (String key : properties.stringPropertyNames())
-                if (known.contains(key))
-                    mine.setProperty(key, properties.getProperty(key));
+            //
+            // And every spelling of a declared key belongs to it, wherever the file wrote it.
+            // Relaxed binding reads four of them, so a writer that knew only the declared one would leave
+            // the line it did not recognise standing and add a second - and a set made under the file's
+            // own spelling would reach no line at all and be lost without a word
+            Map<String, String> spellings = new HashMap<>();
+            Set<String> ours = new HashSet<>(known);
+            for (String key : known)
+                if (relaxed.contains(key))
+                    for (String form : RelaxedKeys.alternativesTo(key)) {
+                        spellings.put(form, key);
+                        ours.add(form);
+                    }
 
-            writer.write(file, mine, known);
+            // the value under the key the interface declares, taken from whichever spelling holds it -
+            // the first one relaxed binding would read, so that what is saved is what the methods answer
+            Properties mine = new Properties();
+            for (String key : known) {
+                String value = valueUnderAnySpellingOf(key, relaxed.contains(key));
+                if (value != null)
+                    mine.setProperty(key, value);
+            }
+
+            writer.write(file, mine, ours, spellings);
         } finally {
             readLock.unlock();
         }

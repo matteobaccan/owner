@@ -240,6 +240,34 @@ final class PropertiesFileWriter {
     }
 
     /**
+     * The spelling a key is written with in the file, mapped to the one the interface declares.
+     * <p>
+     * Empty unless the caller says otherwise, which is what keeps {@link TemplateTool} - writing a file
+     * that does not exist yet - out of all of this.
+     * </p>
+     */
+    private Map<String, String> spellings = Collections.emptyMap();
+
+    /** The key the interface declares for what the file wrote, which is the same key unless it is not. */
+    private String declaredAs(String written) {
+        String declared = spellings.get(written);
+        return declared != null ? declared : written;
+    }
+
+    /**
+     * @param file      the file to rewrite, which may not exist yet
+     * @param values    what to write, key by key, under the key the interface declares
+     * @param known     the keys the interface declares and every spelling of them; anything else in the
+     *                  file is somebody else's
+     * @param spellings each of those other spellings, mapped to the declared key it stands for
+     */
+    void write(File file, Properties values, Set<String> known, Map<String, String> spellings)
+            throws IOException {
+        this.spellings = spellings;
+        write(file, values, known);
+    }
+
+    /**
      * @param file   the file to rewrite, which may not exist yet
      * @param values what to write, key by key
      * @param known  the keys the interface declares; anything else in the file is somebody else's
@@ -318,11 +346,16 @@ final class PropertiesFileWriter {
                 logical = logical.substring(0, logical.length() - 1) + next.replaceAll("^\\s+", "");
             }
 
-            String key = keyOf(logical);
-            if (key == null) {
+            String written = keyOf(logical);
+            if (written == null) {
                 out.addAll(physical);
                 continue;
             }
+            // the file spells a key the way it likes and relaxed binding reads all four spellings, so the
+            // line is looked up under the key the interface declares - and written back under the one the
+            // file used. Anything else leaves the old line standing and adds a second, and the same
+            // property then sits in the file twice with two values
+            String key = declaredAs(written);
             if (!values.containsKey(key)) {
                 if (!known.contains(key)) {
                     // not ours to touch: the file is read by more than this interface, and a key we have
@@ -344,7 +377,7 @@ final class PropertiesFileWriter {
                 if (descriptions.containsKey(key))
                     addComment(out, descriptions.get(key));
             }
-            out.add(escapeKey(key) + " = " + escapeValue(values.getProperty(key)));
+            out.add(escapeKey(written) + " = " + escapeValue(values.getProperty(key)));
             placed.add(key);
         }
     }
