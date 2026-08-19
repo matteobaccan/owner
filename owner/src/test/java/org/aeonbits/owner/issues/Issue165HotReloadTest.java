@@ -66,18 +66,36 @@ public class Issue165HotReloadTest {
                 file.delete();
     }
 
-    private static File write(String name, String... lines) throws IOException {
+    /**
+     * A fixed point for the timestamps below, so that neither the machine's clock nor the filesystem's
+     * granularity is part of the test.
+     */
+    private static final long EPOCH = 1_500_000_000_000L;
+
+    private long stamp;
+
+    /**
+     * Writes a source and stamps it with a time of its own, each one later than the last.
+     * <p>
+     * <b>The stamp is the point.</b> What decides a reload is the file's modification time, and a
+     * filesystem's is as coarse as it likes — ext4 with a low-resolution inode, or any of them under a
+     * clock that has not ticked. Two writes inside one tick are one timestamp, so a rewrite would be
+     * invisible and the test would fail on a fast machine and pass on a slow one. It did: this class went
+     * green here and red on Linux with JDK 25, on the first push.
+     * </p>
+     */
+    private File write(String name, String... lines) throws IOException {
         File file = new File(DIR, name);
         try (PrintWriter out = new PrintWriter(file, Charset.defaultCharset().name())) {
             for (String line : lines)
                 out.println(line);
         }
+        assertTrue("the filesystem refused a timestamp", file.setLastModified(EPOCH + (stamp += 2000)));
         return file;
     }
 
-    /** Ages a file and moves the test's clock to match it, the way the other hot reload tests do. */
+    /** Moves the test's clock to the file's own time, so that an interval can then be made to elapse. */
     private void age(File file) {
-        assertTrue(file.setLastModified(file.lastModified() - 15000));
         time.setTime(file.lastModified());
     }
 
