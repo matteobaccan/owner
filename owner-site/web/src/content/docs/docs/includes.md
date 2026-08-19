@@ -128,8 +128,9 @@ nothing for it to be beside.
 
 ## A file per format
 
-The directive is an ordinary key at the **root** of the document, so every format OWNER reads can carry it.
-A file of one format may include a file of another — the format of each source is decided by its own path.
+The directive is an ordinary key at the **root** of the document, so every format OWNER reads can carry it
+— bar one, noted under [XML](#xml) below. A file of one format may include a file of another: the format of
+each source is decided by its own path.
 
 ### Properties
 
@@ -159,6 +160,9 @@ DATABASE_HOST=db.example.com
 
 ### XML
 
+The [Java XML properties format](/owner/docs/file-formats/#the-java-xml-properties-format), which has a
+root level to write a key at:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
@@ -167,6 +171,12 @@ DATABASE_HOST=db.example.com
   <entry key="database.host">db.example.com</entry>
 </properties>
 ```
+
+**An [XML of your own](/owner/docs/file-formats/#an-xml-of-your-own) cannot carry the directive**, and it
+is the one format that cannot. Every key there is built from the path of its elements, the root included,
+so `<config><owner.include>` arrives as `config.owner.include` — a key one level down, which is
+[somebody's property and not a directive](#only-at-the-root). There is no root level in that format to
+write at. Name the file from `@Sources`, or include it *from* another format.
 
 ### JSON
 
