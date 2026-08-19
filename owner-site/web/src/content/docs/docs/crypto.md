@@ -215,6 +215,15 @@ Two rules a handler must respect:
 - **what it returns is not expanded again.** A secret that happens to contain `${` is a secret, not a
   template.
 
+And two rules about the shape of a marker, both of them checked rather than assumed:
+
+- **a name may not be empty, and may not contain whitespace or any of `$ : { }`.** Those are what tell a
+  marker apart from an ordinary value, so a name using one could not be read back. It is refused at
+  registration, which is the one moment the author of the handler is present to be told.
+- **a payload may not contain `}`**, which is what closes the marker. Everything else survives: base64's
+  `+ / =`, a `:` in the middle — `${$vault::secret/data/app:v2}` reads as you would hope — and a marker
+  substituted inside a longer value.
+
 Two properties of the mechanism follow from that and are worth stating, because they answer questions that
 have nothing to do with cryptography.
 
@@ -247,7 +256,8 @@ found on the classpath reads files that are already yours, while a handler found
 answer for the values inside them.
 
 A marker naming a handler nobody registered is an **error**, not an empty string — a misspelt name has to
-fail loudly for exactly the same reason.
+fail loudly for exactly the same reason. The message names what *is* registered, so it is actionable, and
+**never repeats the payload**: that is the one part of a marker that may be a secret.
 
 
 `@EncryptedValue`, and what it does not do

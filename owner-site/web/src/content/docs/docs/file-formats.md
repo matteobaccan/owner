@@ -64,9 +64,64 @@ expects. Square brackets because the dot is taken: a method returning a `Map` re
 `server.` as a group, so `ports.0` would make one layout of keys mean two things according only to the
 return type.
 
-The two compose, in both directions: `servers[0].host` is the host of the first server and `grid[0][1]` a
-cell of a list of lists. Reading the first of those needs nested configuration interfaces and does not work
-yet, but a source flattened today already produces the key that will be read then.
+The two compose, in both directions: `servers[0].host` is the host of the first server — read with
+[nested configuration interfaces](/owner/docs/nested-configuration/) — and `grid[0][1]` a cell of a list of
+lists.
+
+### Indexed keys, written by hand
+
+Nothing about them is specific to a tree-shaped format. Write them in a properties file and they read the
+same way:
+
+```properties
+servers[0]=alpha
+servers[1]=beta
+```
+
+```java
+List<String> servers();     // [alpha, beta]
+```
+
+The point is not the notation but what it makes possible. A list held in a single value has to be split on
+something — a comma, by [default](/owner/docs/type-conversion/) — and a value containing that something
+cannot then be expressed at all: `["a,b"]` and `["a","b"]` are the same string. Three rules follow, and each
+of them will surprise somebody once:
+
+**The separator does not apply.** An element with a key of its own is one element whatever it contains:
+
+```properties
+servers[0]=alpha,beta       # one element, the string "alpha,beta"
+servers=alpha,beta          # two elements
+```
+
+**If there is one indexed key, that is the list**, and the plain key is not consulted at all:
+
+```properties
+servers=ignored
+servers[0]=alpha            # the list is [alpha]
+```
+
+That also settles what would otherwise be a question about `@DefaultValue`: defaults are merged into the
+same properties when the configuration is loaded, so afterwards a value that came from a file cannot be told
+from one that came from an annotation, and a rule that had to tell them apart could not be written.
+
+**The indices must start at 0 and run consecutively**, and a gap is **refused**:
+
+```properties
+servers[0]=alpha
+servers[2]=gamma            # refused
+```
+
+```
+The indexed properties of 'servers' skip from 'servers[0]' to 'servers[2]'. Reading the list
+across the gap would silently shorten it and move every element after the gap to a different
+position, so it is refused instead: number the elements from zero without gaps.
+```
+
+Closing the gap up or filling it with a null are the alternatives, and both are silent: the list comes out
+shorter than the file says and every element after the gap has moved. The three other libraries with this
+feature do three different things here, so there is no convention to follow — Spring Boot refuses, SmallRye
+compacts, Gestalt inserts a null.
 
 <div class="note info">
   <h5>A dot inside a name is ambiguous, on purpose</h5>
