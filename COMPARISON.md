@@ -13,31 +13,19 @@ libraries belong here and need re-checking before they are relied on.
 Everything below was verified against the projects themselves — the GitHub API for release dates,
 the actual source files for the APIs — rather than taken from articles.
 
-**Amended 2026-08-09**, everywhere marked with that date. Four things were checked against the sources
-that day, each because we were deciding the same question and wanted to know what the field had settled
-on before choosing: how SmallRye reads a `.env`, how the three libraries with indexed keys treat a gap in
-the sequence, how each of them decides that a value is a secret, and — for the backlog line on formats —
-what `FORMATS.md` has since superseded.
+**Amended on 2026-08-09, 08-10, 08-14 and 08-18**, each time *before* a decision rather than after it, and
+each section below carries the date it was checked. Anything undated still dates from the snapshot above.
 
-Two of those four found **no agreement at all** among the others, which is itself the useful result: it
-meant the question had to be decided on merit rather than by alignment, and both decisions are written
-down with the reasoning rather than with a citation.
+**The method, and the reason this file exists at all.** Every one of those amendments was a day spent
+checking a question against the sources before deciding it. It has never once failed to pay: it **inverted**
+one decision (whether discovering a loader implies enabling it), **cancelled** another outright (a settings
+namespace per loader, which nobody has), corrected a line about TOON that was simply wrong, and found the
+closest precedent for one question outside the configuration field entirely — **the libraries with our
+problem are not always the libraries with our subject**.
 
-**Amended again 2026-08-18**, twice and both times before a decision: *what a mapping object shows* — the
-section near the bottom, which decided #150 — and *who builds the classes named in annotations*, below,
-which decided not to build the hook #222 asked for. The second one found the closest precedents outside the
-configuration field entirely, which is worth remembering as a method: **the libraries with our problem are
-not always the libraries with our subject.**
-
-**Amended again 2026-08-10**, before deciding C6 rather than after: how the field discovers loaders and
-whether discovery means enablement, whether anyone has per-loader settings or per-source options, what
-happens to a `null` in a tree-shaped source, and whether refusing an unrecognised option has a precedent.
-The first of those found the field **unanimous against what we had proposed**, and the reason it is still
-right to follow them is a difference in precedence models rather than in taste — see below. The one on
-`null` found the two largest in open disagreement.
-
-Everything not marked with one of those dates still dates from the snapshot above and still needs
-re-checking before it is relied on.
+**And four of the checks found the field in open disagreement**, which is not a failure of the method but
+its point: it says which decisions have to be argued on merit rather than aligned. Those four are marked
+where they occur.
 
 
 The landscape
@@ -237,16 +225,11 @@ so it was decided on merit rather than by alignment.
 | **SmallRye** | closed up: the values are collected and sorted, with no empty elements | *"the indexed property format is prioritized"* |
 | **Gestalt** | a `null` is inserted, with `setTreatMissingArrayIndexAsError` to refuse instead | not documented |
 
-Two things came out of this that are ours rather than borrowed. **The notation is `[0]` because the dot
-was already taken** by the `Map` grouping we added in 2.0.0 — with `list.0` a map whose keys are numbers
-would be indistinguishable from a list — which is a better argument than "the others write it that way".
-And **the gap is refused** because SmallRye's compaction moves every element after the gap to a different
-position with nothing said, and Gestalt thought a switch to strictness worth adding, which suggests the
-lenient default bit somebody.
-
-Spring can afford to refuse a gap for a reason we cannot copy: it never merges a collection across
+**Spring can afford to refuse a gap for a reason we cannot copy**: it never merges a collection across
 sources, so a gap is always one file's mistake. Ours merge by key, which makes splitting a list across
-files broken already, in a quieter way — see `FORMATS.md`.
+files broken already, in a quieter way. Why we refuse anyway, and why the notation is `[0]` and not
+`list.0`, is in `FORMATS.md`; what the rules are is on the
+[File formats](https://matteobaccan.github.io/owner/docs/file-formats/#indexed-keys-written-by-hand) page.
 
 
 Hiding a value against the equivalents
@@ -495,29 +478,35 @@ SmallRye indexes as `servers[0].host`, with no dot before the bracket, which is 
 escaping we deliberately did not build, with the reasoning in `FORMATS.md`.
 
 
-What the gaps line up with
---------------------------
+What the gaps lined up with
+---------------------------
 
-Our open issues are, almost one for one, the features the others have shipped. That is not a
-coincidence; it is evidence the demand is real.
+The table that stood here listed sixteen features the others had and we did not, one per open issue, as
+evidence that the demand was real. **Fifteen of the sixteen closed between 2026-08-09 and 2026-08-19**, so
+it has become a changelog and the release notes hold it better.
 
-| Gap | Who has it | Our issue |
-|---|---|---|
-| Nested config interfaces | SmallRye, Gestalt, Coat | — (**closed 2026-08-11**) |
-| TOML | Gestalt, Micronaut, avaje, Spring via Jackson | — (YAML #14 #65 **closed 2026-08-11**; HOCON and #240 **closed 2026-08-12**) |
-| `.env` files | SmallRye, Spring via env, the dotenv ports | — (**closed 2026-08-09**) |
-| Bean Validation (JSR-380) | SmallRye, Gestalt, Spring | — (**closed 2026-08-14**: checked on OWNER-style accessors through executable validation, which is what none of the three needed to do — their mapping methods are getters or records. What we have and they do not is the report: a constraint nobody is checking is a warning, or a refusal under `owner.strict`) |
-| Relaxed binding / kebab-case | SmallRye, Gestalt, Spring | — (**closed 2026-08-14**: four spellings, on by default, `@DisableFeature(RELAXED_BINDING)` to switch off. Where they differ from us is the direction — SmallRye and Boot 2 both canonicalise the *source* keys into an index, we derive the spellings from the key a method resolved to, which is what keeps `store()` and the origins showing the file's own names. **Corrected on 2026-08-17**: three forms keep the shape of the key and the fourth cannot, a dot being unusable in an environment variable name, so it follows the MicroProfile rule — every character that is not a letter or a digit becomes `_`, `server.maxThreads` is `SERVER_MAX_THREADS`. Ours applies it in every source rather than only in `system:env`, which is the price of deriving instead of indexing and is worth paying: one rule, and you can say where a value comes from without running the program) |
-| Naming the conventional file inside `@Sources` | Typesafe (`include "application"`), Spring (`spring.config.import`) | — (**closed 2026-08-17**, #267: `owner:default`, and `owner:default.xml` for one of them. The order the conventional files are tried in was also chosen rather than inherited from the loader registration, and two of them existing is now a warning — neither of the other two says anything about the case) |
-| Indexed keys `list[0]` | SmallRye, Gestalt, Spring | — (**closed 2026-08-09**) |
-| "Which source provided this?" | Spring (origin tracking), Gestalt | — (**closed 2026-08-11**) |
-| Cloud sources (S3, Vault, Consul) | Gestalt, cfg4j | — (**closed 2026-08-14**, and the gap was smaller than this table said. Measured: every loader opens with `uri.toURL().openStream()`, so an `https:` source has worked since 1.0.5 and was never documented — which covers a pre-signed S3 URL, a Blob SAS, a signed GCS URL and a config server. What is genuinely missing is not "cloud" but **authentication that cannot go in a URL**: SigV4, a Vault token, Google ADC. The general answer to those is a `URLStreamHandlerProvider`, which teaches the JVM the protocol and needs no change here) |
-| JNDI as a source | Spring (`JndiPropertySource`), Commons Configuration (`JNDIConfiguration`) | — (**closed 2026-08-14**: `jndi:comp/env/myconfig` in `@Sources`, plus `${$jndi::…}` per value. Ours refuses a non-`java:` name outright, which neither of theirs does) |
-| An encrypted value in the file | SmallRye, Jasypt, Spring Cloud Config | — (**closed 2026-08-14**, and we ship the cipher, which SmallRye half does and Jasypt does at 1,000 iterations) |
-| An encrypted value only the deployment can read | Spring Cloud Config, and only through a server | — (**closed 2026-08-14**: `${$rsa-oaep::…}`. The one row here where no library is level with us) |
-| DI integration | every framework | #222, #147 |
-| GraalVM native image | Coat, by construction | — (**answered 2026-08-14** with a chapter rather than with code: native image works, and every entry the metadata needs is the user's own code, so there is nothing we could ship. Reopen if somebody opens an issue) |
+**One row is still open**: dependency injection integration, [#222](https://github.com/matteobaccan/owner/issues/222)
+and [#147](https://github.com/matteobaccan/owner/issues/147) — and the two ask for opposite things. What
+the field does about it is below, under *Who builds the classes named in annotations*; why we designed the
+hook and did not build it is in `TODO.md`.
 
+Three of the closures corrected something this file had asserted, which is the part worth keeping:
+
+- **"Cloud sources" was not the gap it looked like.** Measured: every loader opens with
+  `uri.toURL().openStream()`, so an `https:` source has worked since 1.0.5 and was simply never documented
+  — which covers a pre-signed S3 URL, a Blob SAS, a signed GCS URL and a config server. What is genuinely
+  missing is not "cloud" but **authentication that cannot go in a URL**: SigV4, a Vault token, Google ADC.
+  The general answer to those is a `URLStreamHandlerProvider`, which teaches the JVM the protocol and needs
+  no change here.
+- **Relaxed binding: we derive where they index.** SmallRye and Boot 2 both canonicalise the *source* keys
+  into an index; we derive the spellings from the key a method resolved to, which is what keeps `store()`
+  and the origins showing the file's own names. The cost is that the rule applies in every source rather
+  than only in `system:env`, and it is worth paying: one rule, and you can say where a value comes from
+  without running the program.
+- **Bean Validation: the check was never the interesting half.** SmallRye, Gestalt and Spring all validate
+  what they can see and say nothing about what they cannot — and what they cannot see is exactly the
+  accessor spelling this library teaches. A constraint nobody is checking is a warning here, or a refusal
+  under `owner.strict`. None of the three needed to do that: their mapping methods are getters or records.
 
 How the others nest
 -------------------
@@ -572,69 +561,30 @@ Field evidence
   scheduler". Decide deliberately before modularising.
 
 
-Backlog, highest value first
+What the backlog turned into
 ----------------------------
 
-1. ~~**Nested config interfaces**~~ — **done 2026-08-11**, in the four shapes the others have between
-   them: a section, a list of sections from `servers[0].host`, a map of sections from
-   `servers.alpha.host`, and one asked for by name with a parametrized key. The survey that settled the
-   two contested decisions is below, under *How the others nest*.
-2. **Further formats** — a loader is a three-method class, the SPI has existed since 1.0.5, and people
-   are already writing these by hand (see above). Removes the "properties only" objection, which is
-   the top reason people pick Typesafe Config. **`FORMATS.md` supersedes this line**: it was written
-   here as "YAML/JSON/TOML as optional loaders in owner-extras", and the analysis that followed
-   changed both halves of that. No external dependency means every parser is ours to write, which
-   makes HOCON the most expensive item rather than the cheapest; and `.env`, not YAML, turned out to
-   be the place to start — it is the most widespread format in container work and the only one
-   needing none of the data-model work. It shipped on 2026-08-09, in the core.
-   **INI followed on 2026-08-10 and JSON on 2026-08-11**, the second in a new artifact,
-   `owner-formats`, which settles the other half of the question this line got wrong: the parsers we
-   write ourselves do not go in `owner-extras` — that artifact is for sources needing somebody else's
-   library — but in one of their own, because a hand-written parser is untrusted-input code and a defect
-   in it should not be a security release for people who never used the format. **YAML followed the same
-   day**, a documented subset whose refusals are named one by one — and the Norway problem, which is what
-   makes YAML expensive for everybody else, never arose here: we keep the literal scalar and the mapping
-   interface declares the type. **HOCON followed on 2026-08-12**, and it was indeed a decision rather than
-   a piece of work — but not the decision expected here. It is the one format we delegate, to
-   `com.typesafe:config`, because HOCON's specification *is* an implementation. **Only TOML is left**, and
-   that one will be written.
+Everything on it shipped between 2026-08-09 and 2026-08-19 except the last line, and the ordering is spent.
+Three findings from working through it are worth keeping, because they are about **the field** and are
+recorded nowhere else:
 
-   Checking the field first changed the answer, as it keeps doing. What stood here was that HOCON is a gap
-   against *everyone*, and that is false: Spring Boot has no native HOCON — only `.properties` and `.yaml`
-   loaders, the rest being third-party starters — and avaje-config has none at all. **Gestalt and
-   Micronaut have it, and both delegate**: `gestalt-hocon` declares `com.typesafe:config`, and Micronaut
-   reaches it through Config4k, which is a Kotlin wrapper over the same library. **Nobody hand-writes a
-   HOCON parser**, and the unanimity is the argument.
+- **On hand-written parsing we are not a minority; we are alone.** Gestalt writes no parser for *any*
+  format — `gestalt-json` declares Jackson, `gestalt-yaml` and `gestalt-toml` the Jackson dataformats. Its
+  artifact-per-format split, which this file cites as the precedent for ours, splits **dependencies** where
+  ours splits **code**.
+- **Nobody hand-writes a HOCON parser**, and the unanimity is what decided us to delegate it. Spring Boot
+  has no native HOCON at all — only `.properties` and `.yaml` loaders — and avaje-config has none;
+  `gestalt-hocon` declares `com.typesafe:config` and Micronaut reaches the same library through Config4k.
+- **Checking first changed the answer, again.** What stood here was that HOCON is a gap against *everyone*.
+  It is not, and the two who have it both delegate.
 
-   The wider finding is worth keeping, because it is unflattering: Gestalt writes no parser for *any*
-   format — `gestalt-json` declares Jackson, `gestalt-yaml` and `gestalt-toml` the Jackson dataformats. So
-   its artifact-per-format split, which this file cites as precedent for ours, splits *dependencies* where
-   ours splits *code*. On hand-written parsing we are not a minority; we are alone.
-3. ~~**Origin tracking** (#277)~~ — **done 2026-08-11**, `Traceable` and `Origin`. Spring and Typesafe
-   both attach the origin to the *value*, which we cannot: ours are strings in a `Properties`, so it is a
-   lookup by key instead. Both of them also carry a file and a line number, which we do not — that needs
-   every loader to report positions, and `Origin` is a type rather than a `String` precisely so it can
-   grow one later without a second API.
-4. ~~**Configurable naming strategy** (#116)~~ — **done 2026-08-14**, and not as a strategy to configure:
-   a closed set of four spellings, all of them tried, which is what the issue actually asked for and what
-   removes the setting instead of adding one. SmallRye's `NamingStrategy` picks *one* convention per
-   mapping, so a file in the other one is simply not read; ours has no wrong answer to pick. The cost of
-   accepting several is that two of them may be written at once, and that is reported rather than left to
-   be discovered — which is the half neither SmallRye nor Boot does.
-5. ~~**Bean Validation** (#201)~~ — **done 2026-08-14**, in `owner-extras` and not in the core, both
-   namespaces, both optional. The interesting half is not the check but the report: SmallRye and Spring
-   validate what they can see and say nothing about what they cannot, and what they cannot see is exactly
-   the accessor spelling this library teaches.
-6. **GraalVM reachability metadata** plus a documentation chapter — defensive: today people hit the
-   proxy wall and leave for Coat.
+**GraalVM reachability metadata** is the one line that did not ship, and it was answered with a chapter
+rather than with code: every entry the metadata needs is the user's own code, so there is nothing we could
+ship. See `TODO.md`.
 
+The two strategic conclusions
+-----------------------------
 
-Two strategic risks
--------------------
-
-**The runtime proxy** is our ergonomics and our ceiling: native image and raw speed structurally
-favour Coat and Micronaut. Do not change the model; do ship the metadata.
-
-**Java 8 is both the moat and the swamp.** It is the only segment where we have no competition, and
-it costs us records, sealed types and modern switch. Keep it for 2.x, plan a 3.0 on 17 once 2.x has
-settled — not before.
+Drawn from all of the above and **kept in `TODO.md`**, under *Strategic*, because that is the file somebody
+reads: the runtime proxy is our ergonomics and our ceiling, and Java 8 is both the moat and the swamp.
+Written once, there.

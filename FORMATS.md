@@ -181,13 +181,7 @@ representation without which the other formats cannot be read honestly. Worth sa
 is closed.
 
 **Refusing a gap: there was no convention to follow.** The three libraries that have this do three
-incompatible things:
-
-| | `[0]` and `[2]`, no `[1]` |
-|---|---|
-| **Spring Boot** | error: *"Omitting indices will lead to an `UnboundConfigurationPropertiesException`"* |
-| **SmallRye** | compacts: the values are collected and sorted, with no empty elements |
-| **Gestalt** | inserts `null`, with `setTreatMissingArrayIndexAsError` to make it an error instead |
+incompatible things — the table is in `COMPARISON.md`, which is where what other libraries do belongs.
 
 Refusing, for four reasons. It is what the largest installed base does. **Gestalt thought a switch to the
 strict behaviour worth adding**, which suggests the lenient default bit somebody. SmallRye's compaction has

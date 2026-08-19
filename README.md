@@ -3,11 +3,16 @@ OWNER
 
 OWNER, an API to ease Java property files usage.
 
-[![Owner build](https://github.com/matteobaccan/owner/actions/workflows/maven.yml/badge.svg)](https://github.com/matteobaccan/owner/actions/workflows/maven.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=matteobaccan_owner&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=matteobaccan_owner)
+[![Build](https://github.com/matteobaccan/owner/actions/workflows/maven.yml/badge.svg)](https://github.com/matteobaccan/owner/actions/workflows/maven.yml)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=matteobaccan_owner&metric=coverage)](https://sonarcloud.io/component_measures?id=matteobaccan_owner&metric=coverage)
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=matteobaccan_owner&metric=sqale_rating)](https://sonarcloud.io/project/issues?id=matteobaccan_owner&resolved=false&types=CODE_SMELL)
+[![Security](https://sonarcloud.io/api/project_badges/measure?project=matteobaccan_owner&metric=security_rating)](https://sonarcloud.io/project/issues?id=matteobaccan_owner&resolved=false&types=VULNERABILITY)
+[![Maven Central](https://img.shields.io/maven-central/v/org.aeonbits.owner/owner)](https://central.sonatype.com/artifact/org.aeonbits.owner/owner)
+[![Java 8+](https://img.shields.io/badge/Java-8%2B-blue)](https://matteobaccan.github.io/owner/docs/installation/)
+[![License BSD](https://img.shields.io/badge/license-BSD-blue)](LICENSE)
 
-[![Built with Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
+Every badge links to what it measures: the build to its run, each Sonar badge to the page listing what it
+counted, the version to Maven Central.
 
 
 INTRODUCTION
@@ -140,12 +145,13 @@ written down in [Contributing](https://matteobaccan.github.io/owner/docs/contrib
 `TODO.md` in this repository is the working list, with the reasons behind what is
 being done and what has deliberately not been.
 
-Beside it are the working documents that hold a decision and the reason for it:
-`WRITING.md` for the file this library writes back, `FORMATS.md` and `CRYPTO.md`
-for those two subjects, `COMPARISON.md` for what the rest of the field does, and
-`INCLUDES.md` for a feature specified and not yet built. `RELEASING.md` holds the
-release procedure, including how the previous release's test suite is run against
-the new code before a major goes out.
+Beside it are the working documents. Each one holds **why** a decision went the way
+it did — what the library *does* is on the website, and none of it is written in two
+places: `FORMATS.md` for the formats, `CRYPTO.md` for the cipher, `INCLUDES.md` for
+one file building on another, `WRITING.md` for the file this library writes back,
+and `COMPARISON.md` for what the rest of the field does, each claim next to its
+source. `RELEASING.md` holds the release procedure, including how the previous
+release's test suite is run against the new code before a major goes out.
 
 LICENSE
 -------
