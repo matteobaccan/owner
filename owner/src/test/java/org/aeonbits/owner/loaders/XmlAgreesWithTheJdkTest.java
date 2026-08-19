@@ -39,6 +39,13 @@ import static org.junit.Assert.assertEquals;
  * one that reads an XML of your own, where trimming is right because the whitespace is a pretty-printer's
  * and an empty element is a container rather than a value.
  * </p>
+ * <p>
+ * <b>Every case says what it expects, and compares only if the JDK can read it.</b> The reader behind
+ * {@code loadFromXML} is a small parser inside {@code java.base} and it has changed: on 11 and 17 it
+ * refuses a CDATA section that 21 reads without a word. Asserting our own answer first means the test
+ * still says something on every JDK this project supports, and the comparison is what it adds where it
+ * can be made — which is the opposite of what the first version did, and CI said so within two minutes.
+ * </p>
  *
  * @author Matteo Baccan
  */
@@ -65,16 +72,15 @@ public class XmlAgreesWithTheJdkTest {
     }
 
     /**
-     * Reads the same document both ways and asserts they agree, which is the whole of every test below.
+     * Reads the document, asserts what it holds, and asserts the JDK agrees when its own reader can read
+     * it at all.
      *
-     * @param body what goes inside {@code <properties>}.
+     * @param body     what goes inside {@code <properties>}.
+     * @param expected the properties, as {@link TreeMap#toString()} spells them.
      */
-    private void bothAgreeOn(String body) throws IOException {
+    private void bothAgreeOn(String body, String expected) throws IOException {
         String document = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + DTD
                 + "<properties>" + body + "</properties>";
-
-        Properties fromTheJdk = new Properties();
-        fromTheJdk.loadFromXML(new ByteArrayInputStream(document.getBytes(StandardCharsets.UTF_8)));
 
         File file = new File(DIR, "d" + documents++ + ".xml");
         try (OutputStream out = Files.newOutputStream(file.toPath())) {
@@ -82,14 +88,23 @@ public class XmlAgreesWithTheJdkTest {
         }
         Properties fromUs = new Properties();
         new XMLLoader().load(fromUs, file.toURI());
+        assertEquals(body, expected, new TreeMap<Object, Object>(fromUs).toString());
 
-        assertEquals(body, new TreeMap<Object, Object>(fromTheJdk).toString(),
-                new TreeMap<Object, Object>(fromUs).toString());
+        Properties fromTheJdk = new Properties();
+        try {
+            fromTheJdk.loadFromXML(new ByteArrayInputStream(document.getBytes(StandardCharsets.UTF_8)));
+        } catch (java.util.InvalidPropertiesFormatException notOnThisJdk) {
+            // this JDK's own reader will not read the document, so there is nothing to compare it with -
+            // the assertion above is what holds. See the note on the class
+            return;
+        }
+        assertEquals("the JDK reads this differently: " + body,
+                expected, new TreeMap<Object, Object>(fromTheJdk).toString());
     }
 
     @Test
     public void anOrdinaryEntry() throws IOException {
-        bothAgreeOn("<entry key=\"a\">1</entry>");
+        bothAgreeOn("<entry key=\"a\">1</entry>", "{a=1}");
     }
 
     /**
@@ -99,7 +114,7 @@ public class XmlAgreesWithTheJdkTest {
      */
     @Test
     public void anEntryWithAnEmptyValue() throws IOException {
-        bothAgreeOn("<entry key=\"a\"></entry>");
+        bothAgreeOn("<entry key=\"a\"></entry>", "{a=}");
     }
 
     /**
@@ -108,50 +123,66 @@ public class XmlAgreesWithTheJdkTest {
      */
     @Test
     public void anEntryWhoseValueIsPaddedWithSpaces() throws IOException {
-        bothAgreeOn("<entry key=\"a\">  spaced  </entry>");
+        bothAgreeOn("<entry key=\"a\">  spaced  </entry>", "{a=  spaced  }");
     }
 
     /** The comment element, which belongs to the format and is not a property. */
     @Test
     public void theCommentElementIsNotAProperty() throws IOException {
-        bothAgreeOn("<comment>hello</comment><entry key=\"a\">1</entry>");
+        bothAgreeOn("<comment>hello</comment><entry key=\"a\">1</entry>", "{a=1}");
     }
 
     /** A name written twice: the last one wins, in both. */
     @Test
     public void aNameWrittenTwice() throws IOException {
-        bothAgreeOn("<entry key=\"a\">1</entry><entry key=\"a\">2</entry>");
+        bothAgreeOn("<entry key=\"a\">1</entry><entry key=\"a\">2</entry>", "{a=2}");
     }
 
     /** The empty name, which the format allows and neither of the two refuses. */
     @Test
     public void theEmptyName() throws IOException {
-        bothAgreeOn("<entry key=\"\">1</entry>");
+        bothAgreeOn("<entry key=\"\">1</entry>", "{=1}");
     }
 
-    /** Entities, character data and a numeric reference: XML's own escaping, read by the parser. */
+    /** The entities XML defines, which the parser resolves before anybody here sees them. */
     @Test
-    public void everyWayOfEscapingAValue() throws IOException {
-        bothAgreeOn("<entry key=\"a\">&lt;&amp;&gt;</entry>");
-        bothAgreeOn("<entry key=\"a\"><![CDATA[<raw>]]></entry>");
-        bothAgreeOn("<entry key=\"a\">&#128640;</entry>");
+    public void theEntitiesXmlDefines() throws IOException {
+        bothAgreeOn("<entry key=\"a\">&lt;&amp;&gt;</entry>", "{a=<&>}");
+    }
+
+    /**
+     * A character reference, and one outside the basic plane — which arrives as the two Java chars that
+     * spell it.
+     */
+    @Test
+    public void aNumericCharacterReference() throws IOException {
+        bothAgreeOn("<entry key=\"a\">&#128640;</entry>", "{a=🚀}");
+    }
+
+    /**
+     * A CDATA section, where the comparison is the part that cannot always be made: the reader inside
+     * {@code java.base} refuses one before JDK 21. What we do with it is asserted either way.
+     */
+    @Test
+    public void aCdataSection() throws IOException {
+        bothAgreeOn("<entry key=\"a\"><![CDATA[<raw>]]></entry>", "{a=<raw>}");
     }
 
     /** A value on more than one line, where the break belongs to the value. */
     @Test
     public void aValueThatSpansLines() throws IOException {
-        bothAgreeOn("<entry key=\"a\">one\ntwo</entry>");
+        bothAgreeOn("<entry key=\"a\">one\ntwo</entry>", "{a=one\ntwo}");
     }
 
     /** A name and a value outside ASCII, the document having said it is UTF-8. */
     @Test
     public void aNameAndAValueOutsideAscii() throws IOException {
-        bothAgreeOn("<entry key=\"caffè\">设置</entry>");
+        bothAgreeOn("<entry key=\"caffè\">设置</entry>", "{caffè=设置}");
     }
 
     /** A document with no entries at all, which is a configuration with no properties and not an error. */
     @Test
     public void aDocumentWithNoEntries() throws IOException {
-        bothAgreeOn("");
+        bothAgreeOn("", "{}");
     }
 }
