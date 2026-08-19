@@ -16,8 +16,8 @@ again from scratch, and no part of it is waiting on anybody.
 | Document | What it holds |
 |---|---|
 | `INCLUDES.md` | #165: **why** each decision went the way it did — the feature itself is on the site |
-| `FORMATS.md` | what each format costs and the questions each one raised |
-| `CRYPTO.md` | the cipher, the marker, the field, and what was deliberately not shipped |
+| `FORMATS.md` | **why** each format is read the way it is — what each one does is on the site |
+| `CRYPTO.md` | **why** the cipher is built this way — what it is, and what it will not do, is on the site |
 | `COMPARISON.md` | what the rest of the field does, verified against their sources |
 | `RELEASING.md` | the release procedure — including running the previous release's suite against the new code |
 | `WRITING.md` | the rules of the file this library writes back |
