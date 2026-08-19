@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.aeonbits.owner.util.Util.system;
+
 /**
  * Turns values into the markers that go in a configuration file, with either of the two ciphers.
  * <pre>
@@ -217,7 +219,7 @@ public final class EncryptTool {
      * </p>
      */
     private static char[] passphrase() {
-        String fromEnvironment = System.getenv(PASSPHRASE_VARIABLE);
+        String fromEnvironment = system().getenv().get(PASSPHRASE_VARIABLE);
         if (fromEnvironment != null && !fromEnvironment.isEmpty())
             return fromEnvironment.toCharArray();
 

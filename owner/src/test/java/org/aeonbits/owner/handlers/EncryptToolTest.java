@@ -7,6 +7,8 @@
  */
 package org.aeonbits.owner.handlers;
 
+import org.aeonbits.owner.util.SystemProviderForTest;
+import org.aeonbits.owner.util.UtilTest;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -25,6 +27,10 @@ import java.io.PrintStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Arrays;
+import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
@@ -54,10 +60,65 @@ public class EncryptToolTest {
         return new String(err.toByteArray());
     }
 
+    /** Runs the tool end to end with the given text on standard input, and puts the stream back. */
+    private int runWith(String input) {
+        InputStream save = System.in;
+        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        try {
+            return EncryptTool.run(new String[0], new PrintStream(out), new PrintStream(err));
+        } finally {
+            System.setIn(save);
+        }
+    }
+
     private int encrypt(EncryptTool.Options options, String... values) {
         Encrypting handler = EncryptTool.handlerFor(options, PASSPHRASE.toCharArray());
         return EncryptTool.encrypt(handler, options, Arrays.asList(values),
                 new PrintStream(out), new PrintStream(err));
+    }
+
+    /**
+     * The passphrase taken from the environment, which is the way the tool is meant to be driven and the
+     * one path through {@code passphrase()} a test can reach: a JVM under a test runner has no terminal,
+     * so the prompt below it is unreachable and stays so on purpose — see <code>TODO.md</code>.
+     * <p>
+     * The environment is read through {@link org.aeonbits.owner.util.Util#system()}, as
+     * <code>DotEnvLoader</code>, <code>SystemLoader</code> and <code>VariablesExpander</code> all read it.
+     * This tool used to call {@link System#getenv(String)} directly and was the only place in the library
+     * that did.
+     * </p>
+     */
+    @Test
+    public void thePassphraseComesFromTheEnvironment() throws Exception {
+        Map<String, String> environment = new HashMap<>();
+        environment.put("OWNER_PASSPHRASE", PASSPHRASE);
+        Object save = UtilTest.setSystem(new SystemProviderForTest(new Properties(), environment));
+        try {
+            int status = runWith("hunter2\n");
+            assertEquals(stderr(), 0, status);
+
+            String marker = stdout().trim();
+            assertTrue(marker, marker.startsWith("${$aes-gcm::"));
+            assertEquals("hunter2", new AesGcmHandler(PASSPHRASE.toCharArray())
+                    .resolve(marker.substring("${$aes-gcm::".length(), marker.length() - 1)));
+        } finally {
+            UtilTest.setSystem(save);
+        }
+    }
+
+    /** And with the variable empty, which is not a passphrase and has to be told apart from one being set. */
+    @Test
+    public void anEmptyPassphraseVariableIsNotAPassphrase() throws Exception {
+        Map<String, String> environment = new HashMap<>();
+        environment.put("OWNER_PASSPHRASE", "");
+        Object save = UtilTest.setSystem(new SystemProviderForTest(new Properties(), environment));
+        try {
+            int status = runWith("hunter2\n");
+            assertTrue(stderr(), status != 0);
+            assertTrue(stderr(), stderr().contains("OWNER_PASSPHRASE"));
+        } finally {
+            UtilTest.setSystem(save);
+        }
     }
 
     @Test
