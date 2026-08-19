@@ -2,8 +2,8 @@ TODO LIST
 =========
 
 Things that should be done, sometime next. For bugs and feature requests see
-[GitHub issues](https://github.com/matteobaccan/owner/issues) — which, as of 2026-08-18, hold **one** item
-of work and Renovate's dashboard.
+[GitHub issues](https://github.com/matteobaccan/owner/issues) — which, as of 2026-08-19, hold Renovate's
+dashboard and nothing else that is work: #165 is built and waits only on its documentation.
 
 **Emptied on 2026-08-18.** This file had grown into a record of everything done during the 2.0.0 work, with
 the reasoning behind each decision. That reasoning was not thrown away: it lives in the working documents
@@ -12,7 +12,7 @@ is left to do.
 
 | Document | What it holds |
 |---|---|
-| `INCLUDES.md` | the specification of #165, decided and not yet built |
+| `INCLUDES.md` | #165: the four decisions, why each of them, and what the tests found |
 | `FORMATS.md` | what each format costs and the questions each one raised |
 | `CRYPTO.md` | the cipher, the marker, the field, and what was deliberately not shipped |
 | `COMPARISON.md` | what the rest of the field does, verified against their sources |
@@ -45,12 +45,20 @@ RELEASING
 THE ONE FEATURE LEFT
 --------------------
 
-- [ ] **Inheritance between properties files**, [#165](https://github.com/matteobaccan/owner/issues/165):
-      a file naming the file it builds on. **Specified in `INCLUDES.md`** on 2026-08-18 — the four
-      decisions are settled, the ten tests are listed in the order that finds the problems earliest, and
-      nothing is built. The hard part is named there: the list of sources is computed once in the
-      constructor and handed to `HotReloadLogic`, and with includes it has to be worked out again after
-      every load.
+- [x] **Inheritance between properties files**, [#165](https://github.com/matteobaccan/owner/issues/165):
+      a file naming the file it builds on. **Built 2026-08-19**, specification and record in `INCLUDES.md`.
+      The hard part named there was real and is done: the watched set is worked out again after every load,
+      so a file that starts naming an include gets it watched and one that stops naming it stops.
+      **50 tests** across `owner`, `owner-formats` and `owner-extras`; the formats module needed no code
+      at all. **Documented**: `docs/includes.md` on the site, one example per format, and the pair that
+      sounds like one question — the position of the directive means nothing, the order inside it means
+      everything.
+- [x] **What an include's path is relative to** — decided and built 2026-08-19, **Spring's rule**, which is
+      also C's: a spec naming a scheme is fixed, a spec naming none is looked for beside the source that
+      named it, and it chains. It cost nothing in compatibility, the schemeless form having been an error
+      before. Works inside a jar, where a leading `/` means the jar's own root — `URI.resolve` would have
+      failed there in silence, a `jar:` URI being opaque, so the resolution goes through `java.net.URL`, as
+      Spring's and Commons' do. `@Sources` deliberately untouched. See `INCLUDES.md`, decision 7.
 
 WORTH DOING, NOBODY WAITING
 ---------------------------
