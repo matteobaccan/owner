@@ -48,10 +48,12 @@ Check the current Sonatype documentation rather than trusting this note: the
 migration has its own deadlines and its own account steps, and what is required
 may have moved again since this was written.
 
-While you are in there, `distributionManagement/site` deploys over FTP to
-`ftp://newinstance.it:/public_html/owner/${project.version}/`, which is not a
-host this project controls any more either. It only bites if somebody runs
-`mvn site-deploy`, which nothing in the release procedure does.
+`distributionManagement/site` used to sit beside those, deploying over FTP to
+`newinstance.it` — a host this project does not control either. **Removed on
+2026-08-19**, along with the `maven-site-plugin` execution that ran `site` and
+`stage` on every `deploy`: the Maven site published nothing that is not already
+on the documentation site, in the Javadoc, in the Actions logs or on SonarCloud.
+`mvn site` still works by hand, and the plugin's version is still pinned for it.
 
 BEFORE A MAJOR: RUN THE PREVIOUS RELEASE'S TESTS AGAINST THE NEW CODE
 --------------------------------------------------------------------

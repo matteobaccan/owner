@@ -93,11 +93,6 @@
             <name>Nexus Release Repository</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-        <site>
-            <id>newinstance-maven-website</id>
-            <name>NewInstance Maven Website</name>
-            <url>ftp://newinstance.it:/public_html/owner/${project.version}/</url>
-        </site>
     </distributionManagement>
 
     <properties>
@@ -320,18 +315,11 @@
                     <version>3.8.0</version>
                 </plugin>
                 <plugin>
+                    <!-- Version pinned for whoever runs `mvn site` by hand; nothing binds it. It used to
+                         run site and stage on every deploy, to build a report nobody read and stage it into
+                         target/staging, where it stayed. -->
                     <artifactId>maven-site-plugin</artifactId>
                     <version>3.22.0</version>
-                    <executions>
-                        <execution>
-                            <id>generate-site</id>
-                            <phase>deploy</phase>
-                            <goals>
-                                <goal>site</goal>
-                                <goal>stage</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>

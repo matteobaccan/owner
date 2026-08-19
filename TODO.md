@@ -31,9 +31,6 @@ BEFORE 2.0.0 GOES OUT
       at all — the replacement is `central-publishing-maven-plugin`. **As it stands the release fails at the
       deploy step**, which is the worst moment to find out. `RELEASING.md` has the detail; verify against
       Sonatype's current documentation rather than that note, because this moves.
-- [ ] **`distributionManagement/site` still deploys over FTP to `newinstance.it`**, a host the project no
-      longer controls. Harmless unless somebody runs `mvn site-deploy`. Worth doing while in the `pom.xml`
-      for the item above.
 - [ ] **Correct the comment at `pom.xml:31`**, which says `aeonbits.org` "no longer exists". It exists and
       belongs to somebody else now. **The maintainer asked for this to wait for the beta.**
 - [ ] **The release note.** The 2.0.0 announcement is already at the top of
