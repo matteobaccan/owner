@@ -6,6 +6,15 @@ This site aims to be a comprehensive guide to OWNER. We'll cover topics such as
 getting started with the basic features, the advanced usages, and give you some
 advice on participating in the future development of OWNER itself.
 
+<div class="note info">
+  <h5>In a hurry?</h5>
+  <p>
+    <a href="https://matteobaccan.github.io/owner/presentation/owner-java-properties-reinvented.html">The
+    slide deck</a> is the whole library in one pass — what it does, what it looks like, and everything
+    2.0.0 adds — without reading the rest of this site. It opens in the browser; use the arrow keys.
+  </p>
+</div>
+
 
 So what is OWNER, exactly?
 --------------------------

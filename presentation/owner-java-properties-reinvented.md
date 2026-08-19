@@ -337,10 +337,15 @@ complex things should be possible."*
 | Sensitive values — `@Sensitive` | 2.0.0 |
 | `Optional` and `Map` return types | 2.0.0 |
 | `.env` files, and options on a source | 2.0.0 |
-| Nested configuration interfaces | 2.0.0 |
-| INI, JSON, YAML, TOML — `owner-formats` | 2.0.0 |
+| Nested configuration interfaces, and indexed keys `list[0]` | 2.0.0 |
+| INI, JSON, YAML, TOML — `owner-formats`; HOCON — `owner-extras` | 2.0.0 |
 | Where a value came from — `Traceable` | 2.0.0 |
 | Diagnostics, and `owner.strict` | 2.0.0 |
+| Writing the file back, keeping it — `save(File)`, `@Description` | 2.0.0 |
+| The same key in four spellings, all tried | 2.0.0 |
+| Bean Validation, and what it cannot check | 2.0.0 |
+| One file building on another — `owner.include` | 2.0.0 |
+| What a configuration shows of itself — `@DeclaredOnly` | 2.0.0 |
 
 The rest of this deck is the 2014 talk; the last section covers 2.0.0.
 
@@ -1336,8 +1341,11 @@ public interface SampleConfig extends Config {
 - **Java 8 is the minimum runtime.** `owner-java8` and `owner-java8-extras` are gone: `default` methods, `DurationConverter`, `ByteSize` are all in the core `owner` artifact now.
 - **New annotations:** `@Prefix`, `@Mandatory`, `@Sensitive`, `@CollectionConverterClass`, `@DefaultValue(useOnEmpty = true)`.
 - **New return types:** `Optional<T>`, `Map`— which used to throw on every access — and **a nested interface**, for a configuration that is not flat.
-- **New formats:** `.env` in the core, and INI, JSON, YAML, TOML in `owner-formats`. Every parser written by hand, so the core still has **no dependencies**.
+- **New formats:** `.env` in the core, INI, JSON, YAML and TOML in `owner-formats`, HOCON in `owner-extras`. Every parser written by hand bar the last, so the core still has **no dependencies**.
 - **New interface:** `Traceable`, which says where a value came from.
+- **It writes now, and keeps the file:** `save(File)` edits the values and leaves the comments, the order and everybody else's keys where they were.
+- **A file may name the files it builds on**, with `owner.include`, so one more source is a deployment's decision rather than a recompilation.
+- **The same key in four spellings**, all of them tried, and **Bean Validation** — with a report of every constraint nobody is checking.
 - **It stopped failing in silence:** warnings where there were none, and `owner.strict` to refuse instead.
 - **A handful of behaviour changes** that earned the major number.
 
@@ -1687,9 +1695,9 @@ Which closes requests open since 2013 and 2015 — and reads an XML tree end to 
 
 <!-- _class: tight -->
 
-# Four more formats, still no dependencies
+# Five more formats, still no dependencies
 
-`.env` in the core; **INI, JSON, YAML and TOML** in a new `owner-formats` artifact — every parser written by hand.
+`.env` in the core; **INI, JSON, YAML and TOML** in a new `owner-formats` artifact — every parser written by hand. **HOCON** in `owner-extras`, through Typesafe Config, and it is the one we delegate: its specification *is* an implementation, so a subset would not fail on what it could not handle — it would read it and mean something else.
 
 <div class="columns">
 <div>
@@ -1845,6 +1853,166 @@ With a key pair, whoever *writes* a secret holds only the public key: a CI job c
 
 ---
 
+# The file, written back
+
+<div class="columns">
+<div>
+
+`store()` serialises a map, so it loses the comments, the blank lines and the order. Fine for a file only the application writes; wrong for one a person maintains.
+
+```java
+cfg.setProperty("port", "9090");
+cfg.save(new File("app.properties"));
+```
+
+```properties
+# the server this instance talks to
+host = localhost
+# in milliseconds
+port = 9090        <- only this changed
+```
+
+</div>
+<div>
+
+<p class="step">open since 2013, seventeen comments</p>
+
+`Accessible.save(File)` **keeps the file** and edits the values in it. A key it has never heard of is somebody else's line and is left alone; a `@Description` on the method is written as the comment above its key.
+
+The division: **the code owns the descriptions, the file owns the arrangement.**
+
+Nobody else in the field writes the user's configuration file back.
+
+</div>
+</div>
+
+---
+
+# The same key, four ways
+
+<div class="columns">
+<div>
+
+```java
+interface ServerConfig extends Config {
+    String maxThreads();
+}
+```
+
+Any of these answers it:
+
+```properties
+maxThreads  = 42
+max-threads = 42
+max_threads = 42
+```
+```
+MAX_THREADS=42     # the environment
+```
+
+</div>
+<div>
+
+<p class="step">all of them tried, no convention to pick</p>
+
+SmallRye and Spring make you choose **one** naming strategy, so a file in the other one is simply not read. Here there is no wrong answer to pick.
+
+The environment spelling follows the MicroProfile rule — every character that is not a letter or a digit becomes `_` — because a dot cannot be in an environment variable name.
+
+Two spellings of one key **in the same file** is reported, which is the half neither of them does.
+
+</div>
+</div>
+
+---
+
+# Constraints, and what nobody is checking
+
+<div class="columns">
+<div>
+
+```java
+interface ServerConfig extends Config {
+    @Min(12)
+    int port();
+
+    @NotNull
+    String hostname();
+}
+```
+
+Bean Validation, both namespaces — `jakarta` and `javax` — in `owner-extras`, both optional. Hibernate Validator and Apache BVal are what it was tested against.
+
+</div>
+<div>
+
+<p class="step">the interesting half is the report</p>
+
+The others validate what they can see and say nothing about what they cannot — and what they cannot see is exactly the accessor spelling this library teaches: `port()`, not `getPort()`.
+
+So a constraint **nobody is checking** is a warning here, and a refusal under `owner.strict`: a method that takes arguments, one answered by a `@Delegate`, a value that will not convert, a constraint on an `Optional` rather than inside it.
+
+A promise that is not being kept is worse than one never made.
+
+</div>
+</div>
+
+---
+
+# One file building on another
+
+<div class="columns">
+<div>
+
+```properties
+# production.properties
+owner.include = classpath:base.properties
+
+database.host = db.internal.example.com
+```
+
+The included file is the **template**; the file naming it specialises it. Nothing changes in the Java.
+
+Works in every format, and across them: a JSON document may include a YAML one.
+
+</div>
+<div>
+
+<p class="step">asked for in 2016, shipped in 2.0.0</p>
+
+`@Sources` decides the sources **in the code**, so a deployment that wants one more file has to be recompiled. That was the whole of the request.
+
+A spec naming **no scheme** is looked for beside the file that named it, and it chains — Spring Boot's rule for `spring.config.import`, and C's since 1972.
+
+> The position of the directive means nothing. The order inside it means everything.
+
+`@HotReload` watches the included files too.
+
+</div>
+</div>
+
+---
+
+<!-- _class: tight -->
+
+# What a configuration shows of itself
+
+`Accessible` is the whole store: `list()` prints every property the configuration holds, including the hundreds that arrived from `system:properties` and have nothing to do with this interface.
+
+```java
+@DeclaredOnly
+interface ServerConfig extends Config, Accessible {
+    String host();
+    int port();
+}
+```
+
+Now `list()`, `propertyNames()`, `store()` and `toString()` show **the two keys this interface declares**. `getProperty` and the mutators deliberately keep the whole store: what a view shows and what an object can reach are two questions.
+
+`owner.declared.only` asks the same of a whole factory — for the interface you did **not** write, which is where the report came from: an interface printing somebody else's keys came from a plugin, and an annotation is no use on a type you cannot edit.
+
+---
+
 # The smaller things that add up
 
 - **`java.time.Duration` is converted out of the box**, like a `File` or a `URL`.
@@ -1915,7 +2083,7 @@ Everything else is additive. Four changes alter the result of a configuration th
 | JMX bean | ✔ every `Config` is a `DynamicMBean` |
 | Singleton mechanism | ✔ `ConfigCache` |
 | More file formats | ✔ `.env` in the core; INI, JSON, YAML, TOML in `owner-formats`; HOCON and JNDI in `owner-extras` |
-| Validation | - still open |
+| Validation | ✔ since 2.0.0 — Bean Validation in `owner-extras`, and a report of what it cannot check |
 
 Arrived without being asked for: `@Prefix`, Preprocessors, `@Sensitive` masking, transactional event listeners.
 

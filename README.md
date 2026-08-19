@@ -22,9 +22,10 @@ The goal of OWNER API is to minimize the code required to handle
 application configuration through Java properties files.
 
 **In a hurry?** The [slide deck][presentation] is the whole library in one
-pass — what it does, what it looks like, and what is new in 2.0.0 — without
-reading the documentation. It opens in the browser; use the arrow keys. Full
-documentation is on the [project website][website].
+pass — what it does, what it looks like, and everything 2.0.0 adds — without
+reading the documentation. It opens in the browser; use the arrow keys. It is
+also in the sidebar of the [project website][website], which has the full
+documentation.
 
 BASIC USAGE
 -----------

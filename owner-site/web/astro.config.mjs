@@ -76,6 +76,15 @@ export default defineConfig({
             { label: 'Welcome', slug: 'docs/welcome' },
             { label: 'Installation', slug: 'docs/installation' },
             { label: 'Basic usage', slug: 'docs/usage' },
+            // Rendered from presentation/ by marp-cli in the site workflow, into
+            // public/presentation/. Spelled as a full URL for the same reason the
+            // Javadoc below is: given as a root-relative path ending in .html,
+            // `trailingSlash: 'always'` rewrites it and the link dies.
+            {
+              label: 'The slide deck',
+              link: 'https://matteobaccan.github.io/owner/presentation/owner-java-properties-reinvented.html',
+              attrs: { target: '_blank' },
+            },
           ],
         },
         {
