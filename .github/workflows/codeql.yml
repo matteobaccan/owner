@@ -40,7 +40,7 @@ jobs:
       # See .github/codeql/codeql-config.yml for why the tests are out of scope.
       - name: Set up JDK 17
         if: ${{ matrix.language == 'java' }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: 17
