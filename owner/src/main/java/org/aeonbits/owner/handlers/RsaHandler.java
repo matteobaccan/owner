@@ -244,7 +244,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
         ByteBuffer buffer = ByteBuffer.wrap(token);
         byte[] theirs = new byte[FINGERPRINT_BYTES];
         buffer.get(theirs);
-        if (!java.util.Arrays.equals(theirs, fingerprint))
+        // Use constant-time comparison to protect against timing side-channel attacks during fingerprint validation
+        if (!MessageDigest.isEqual(theirs, fingerprint))
             throw notAToken(String.format("it was written for the key pair %s and this handler holds %s. "
                             + "Encrypting against the wrong public key is silent, because whoever does it "
                             + "cannot read back what they wrote",
