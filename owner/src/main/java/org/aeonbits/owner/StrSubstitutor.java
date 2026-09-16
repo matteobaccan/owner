@@ -63,6 +63,12 @@ class StrSubstitutor implements Serializable {
      */
     static final String NESTED_VARIABLE_EXPANSION = "owner.nested.variable.expansion";
 
+    /**
+     * The maximum allowed nesting/recursion depth for variable substitution.
+     * Prevents stack overflow (DoS) caused by deeply nested variable expressions.
+     */
+    static final int MAX_NESTING_DEPTH = 32;
+
     private static final Pattern PATTERN = compile("\\$\\{(.+?)\\}");
     private static final char DEFAULT_VALUE_SEPARATOR = ':';
     private static final String VARIABLE_START = "${";
@@ -125,15 +131,18 @@ class StrSubstitutor implements Serializable {
     String replace(String source) {
         if (source == null)
             return null;
-        return replace(source, new LinkedHashSet<String>());
+        return replace(source, new LinkedHashSet<String>(), 0);
     }
 
     /**
      * @param resolving the expressions being resolved further up the recursion, in order, used to detect a
      *                  circular reference before it exhausts the stack.
+     * @param depth     the current recursion/nesting depth.
      */
-    private String replace(String source, Set<String> resolving) {
-        return nested ? replaceNested(source, resolving) : replaceFlat(source, resolving);
+    private String replace(String source, Set<String> resolving, int depth) {
+        if (depth > MAX_NESTING_DEPTH)
+            throw new IllegalArgumentException("Maximum variable nesting depth (" + MAX_NESTING_DEPTH + ") exceeded");
+        return nested ? replaceNested(source, resolving, depth) : replaceFlat(source, resolving, depth);
     }
 
     /**
@@ -141,11 +150,11 @@ class StrSubstitutor implements Serializable {
      * expression is whatever sits between <code>${</code> and the first <code>}</code> that follows it, and it
      * is looked up as it is written.
      */
-    private String replaceFlat(String source, Set<String> resolving) {
+    private String replaceFlat(String source, Set<String> resolving, int depth) {
         Matcher m = PATTERN.matcher(source);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
-            String replacement = resolve(m.group(1), resolving);
+            String replacement = resolve(m.group(1), resolving, depth);
             m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         m.appendTail(sb);
@@ -161,7 +170,7 @@ class StrSubstitutor implements Serializable {
      * Only the <code>${</code> sequence opens a nesting level: a lone brace inside an expression is ordinary
      * text, exactly as it was before, so a key such as <code>a{b</code> keeps resolving.</p>
      */
-    private String replaceNested(String source, Set<String> resolving) {
+    private String replaceNested(String source, Set<String> resolving, int depth) {
         StringBuilder sb = new StringBuilder();
         int index = 0;
         while (index < source.length()) {
@@ -176,8 +185,8 @@ class StrSubstitutor implements Serializable {
                 continue;
             }
             sb.append(source, index, start);
-            String expression = replace(source.substring(start + VARIABLE_START.length(), end), resolving);
-            sb.append(resolve(expression, resolving));
+            String expression = replace(source.substring(start + VARIABLE_START.length(), end), resolving, depth + 1);
+            sb.append(resolve(expression, resolving, depth + 1));
             index = end + 1;
         }
         sb.append(source, index, source.length());
@@ -230,7 +239,7 @@ class StrSubstitutor implements Serializable {
      * @return the replacement text; the empty string when nothing can be resolved and no default is given.
      * @throws IllegalArgumentException if the expression is already being resolved further up the recursion.
      */
-    private String resolve(String expression, Set<String> resolving) {
+    private String resolve(String expression, Set<String> resolving, int depth) {
         if (HandlersManager.isMarker(expression))
             return resolveMarker(expression);
 
@@ -239,7 +248,7 @@ class StrSubstitutor implements Serializable {
         try {
             String value = values.getProperty(expression);
             if (value != null)
-                return replace(value, resolving);
+                return replace(value, resolving, depth + 1);
 
             int separator = expression.indexOf(DEFAULT_VALUE_SEPARATOR);
             if (separator == -1) {
@@ -257,7 +266,7 @@ class StrSubstitutor implements Serializable {
             }
 
             value = values.getProperty(expression.substring(0, separator));
-            return (value != null) ? replace(value, resolving) : expression.substring(separator + 1);
+            return (value != null) ? replace(value, resolving, depth + 1) : expression.substring(separator + 1);
         } finally {
             resolving.remove(expression);
         }

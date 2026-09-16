@@ -16,6 +16,8 @@ import java.util.Properties;
 import static org.aeonbits.owner.StrSubstitutor.NESTED_VARIABLE_EXPANSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for the expansion of nested variables, i.e. a <code>${...}</code> expression whose key is itself built
@@ -360,5 +362,24 @@ public class NestedVariableExpansionTest {
 
         System.setProperty(NESTED_VARIABLE_EXPANSION, "yes please");
         assertEquals("http://devhost", new StrSubstitutor(values).replace("${servers.${env}.url}"));
+    }
+
+    @Test
+    public void exceedingMaxNestingDepthThrowsException() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 40; i++) {
+            sb.append("${a");
+        }
+        for (int i = 0; i < 40; i++) {
+            sb.append("}");
+        }
+
+        try {
+            new StrSubstitutor(new Properties()).replace(sb.toString());
+            fail("Expected IllegalArgumentException due to max nesting depth exceeded");
+        } catch (IllegalArgumentException e) {
+            assertTrue("unexpected message: " + e.getMessage(),
+                    e.getMessage().contains("Maximum variable nesting depth"));
+        }
     }
 }
