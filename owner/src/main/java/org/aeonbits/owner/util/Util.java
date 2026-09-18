@@ -315,8 +315,16 @@ public abstract class Util {
         // relative file path produce - the very ones a message is most likely to be about
         int host = text.indexOf("//");
         if (host < 0) return text;
-        int at = text.indexOf('@', host);
-        if (at < 0) return text;
+        int end = text.length();
+        for (int i = host + 2; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '/' || c == '?' || c == '#') {
+                end = i;
+                break;
+            }
+        }
+        int at = text.lastIndexOf('@', end - 1);
+        if (at <= host + 2) return text;
         return text.substring(0, host + 2) + "***" + text.substring(at);
     }
 
