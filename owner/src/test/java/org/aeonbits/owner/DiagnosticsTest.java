@@ -98,6 +98,14 @@ public class DiagnosticsTest {
         assertFalse(message, message.contains("hunter2"));
     }
 
+    @Test
+    public void sensitiveQueryParamsInASourceAreMasked() throws URISyntaxException {
+        assertEquals("https://config.example.org/app.properties?api_key=***&env=prod&access_token=***",
+                hideCredentials(new URI("https://config.example.org/app.properties?api_key=secret123&env=prod&access_token=xyz789")));
+        assertEquals("https://***@config.example.org/app.properties?secret=***#fragment",
+                hideCredentials(new URI("https://user:pass@config.example.org/app.properties?secret=topsecret#fragment")));
+    }
+
     // ---------------------------------------------------------------- what it says when asked
 
     @Test
