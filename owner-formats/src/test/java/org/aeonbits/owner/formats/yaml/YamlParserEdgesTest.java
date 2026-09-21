@@ -72,6 +72,28 @@ public class YamlParserEdgesTest {
         assertEquals("9090", windows.getProperty("server.port"));
     }
 
+    // ---------------------------------------------------------------- document start & indentation
+
+    /**
+     * A document whose first line is indented is refused, because nothing says what it is indented under.
+     */
+    @Test
+    public void aDocumentThatBeginsIndentedIsRefused() {
+        String said = refused("  name: owner");
+        assertNotNull(said);
+        assertTrue(said, said.contains("the document begins indented"));
+    }
+
+    /**
+     * A tab used as indentation is refused rather than counted.
+     */
+    @Test
+    public void tabsUsedAsIndentationAreRefused() {
+        String said = refused("\thost: localhost");
+        assertNotNull(said);
+        assertTrue(said, said.contains("a tab is used to indent this line"));
+    }
+
     // ---------------------------------------------------------------- indentation that says nothing
 
     /**
@@ -245,7 +267,122 @@ public class YamlParserEdgesTest {
         assertEquals("d", p.getProperty("grid[1][1]"));
     }
 
+    // ---------------------------------------------------------------- unsupported features & mapping errors
+
+    /**
+     * YAML features that this subset does not read — merge keys, complex keys, anchors/aliases, and tags —
+     * are refused by name with an explanation.
+     */
+    @Test
+    public void unsupportedYamlFeaturesAreRefused() {
+        String mergeKey = refused("<<: *defaults");
+        assertNotNull(mergeKey);
+        assertTrue(mergeKey, mergeKey.contains("a merge key is not read"));
+
+        String complexKey = refused("? key: value");
+        assertNotNull(complexKey);
+        assertTrue(complexKey, complexKey.contains("a complex key is not read"));
+
+        String anchor = refused("&anchor value");
+        assertNotNull(anchor);
+        assertTrue(anchor, anchor.contains("an anchor or an alias is not read"));
+
+        String alias = refused("*alias");
+        assertNotNull(alias);
+        assertTrue(alias, alias.contains("an anchor or an alias is not read"));
+
+        String tag = refused("!tag value");
+        assertNotNull(tag);
+        assertTrue(tag, tag.contains("a tag is not read"));
+    }
+
+    /**
+     * Mapping syntax errors — empty keys, duplicate keys, missing colons, or a sequence item where a key
+     * name was expected — are refused with descriptive error messages.
+     */
+    @Test
+    public void mappingSyntaxErrorsAreRefused() {
+        String emptyKey = refused(": value");
+        assertNotNull(emptyKey);
+        assertTrue(emptyKey, emptyKey.contains("a name here is empty"));
+
+        String duplicateKey = refused("key: 1", "key: 2");
+        assertNotNull(duplicateKey);
+        assertTrue(duplicateKey, duplicateKey.contains("the name 'key' is given twice in the same block"));
+
+        String missingColon = refused("key value");
+        assertNotNull(missingColon);
+        assertTrue(missingColon, missingColon.contains("a name here needs a colon after it"));
+
+        String seqInMapping = refused("key: 1", "- item");
+        assertNotNull(seqInMapping);
+        assertTrue(seqInMapping, seqInMapping.contains("a sequence item where a name was expected"));
+    }
+
+    // ---------------------------------------------------------------- block scalars & chomping
+
+    /**
+     * Block scalar chomping indicators: '+' keeps trailing newlines, '-' strips them, and invalid chomping
+     * indicators are refused.
+     */
+    @Test
+    public void blockScalarChompingModifiersWork() throws IOException {
+        Properties keep = read(
+                "text: |+",
+                "    line1",
+                "    line2",
+                "",
+                "");
+        assertEquals("line1\nline2\n\n", keep.getProperty("text"));
+
+        Properties strip = read(
+                "text: |-",
+                "    line1",
+                "    line2",
+                "",
+                "");
+        assertEquals("line1\nline2", strip.getProperty("text"));
+
+        String invalid = refused("text: |*");
+        assertNotNull(invalid);
+        assertTrue(invalid, invalid.contains("only '+' to keep the blank lines at the end and '-' to strip them"));
+    }
+
     // ---------------------------------------------------------------- quoting and comments
+
+    /**
+     * Quoted scalar escape sequences in double quotes and single quotes, as well as malformed unicode escapes.
+     */
+    @Test
+    public void escapesInDoubleAndSingleQuotedStrings() throws IOException {
+        Properties p = read(
+                "escaped: \"\\n\\t\\r\\b\\f\\0\\\"\\\\\\u0041\\z\"",
+                "single: 'It''s single'");
+        assertEquals("\n\t\r\b\f\0\"\\A\\z", p.getProperty("escaped"));
+        assertEquals("It's single", p.getProperty("single"));
+
+        String shortHex = refused("val: \"\\u004\"");
+        assertNotNull(shortHex);
+        assertTrue(shortHex, shortHex.contains("a \\u escape needs four hexadecimal digits"));
+
+        String invalidHex = refused("val: \"\\u000G\"");
+        assertNotNull(invalidHex);
+        assertTrue(invalidHex, invalidHex.contains("'000G' is not four hexadecimal digits"));
+    }
+
+    /**
+     * Flow style error cases: unclosed collections and missing colons inside flow mappings.
+     */
+    @Test
+    public void flowStyleErrorCasesAreRefused() {
+        String unclosed = refused("val: [1, 2");
+        assertNotNull(unclosed);
+        assertTrue(unclosed, unclosed.contains("this collection is never closed"));
+
+        String missingColon = refused("val: {a}");
+        assertNotNull(missingColon);
+        assertTrue(missingColon, missingColon.contains("'a' needs a colon: it is inside braces"));
+    }
 
     /**
      * A quoted scalar whose closing quote is missing is not a quoted scalar: it is read as the plain text
