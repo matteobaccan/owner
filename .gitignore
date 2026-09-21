@@ -26,4 +26,3 @@ owner-site/web/public/presentation/
 
 # Claude Code keeps its local settings and its agent worktrees here
 .claude/
-bin/
