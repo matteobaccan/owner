@@ -354,6 +354,8 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      */
     @Override
     public String[] encryptAll(String... plainTexts) {
+        if (plainTexts == null)
+            throw new IllegalArgumentException("there is nothing to encrypt: the array is null");
         byte[] salt = newSalt();
         String[] tokens = new String[plainTexts.length];
         for (int i = 0; i < plainTexts.length; i++)
@@ -442,6 +444,8 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
     }
 
     private byte[] decode(String payload) {
+        if (payload == null)
+            throw notAToken("it is null");
         try {
             return Base64.getDecoder().decode(payload.trim());
         } catch (IllegalArgumentException e) {

@@ -634,4 +634,24 @@ public class RsaHandlerTest {
             return new String(bytes.toByteArray(), java.nio.charset.StandardCharsets.UTF_8);
         }
     }
+
+    @Test
+    public void resolveWithNullPayloadIsRefused() {
+        try {
+            both().resolve(null);
+            fail("null payload should be refused");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("it is null"));
+        }
+    }
+
+    @Test
+    public void encryptAllWithNullArrayIsRefused() {
+        try {
+            both().encryptAll((String[]) null);
+            fail("null array should be refused");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("array is null"));
+        }
+    }
 }
