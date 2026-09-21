@@ -61,12 +61,16 @@ public class DiagnosticsTest {
                 hideCredentials(new URI("https://user:secret@config.example.org/app.properties")));
         assertEquals("https://***@config.example.org/app.properties",
                 hideCredentials(new URI("https://user@config.example.org/app.properties")));
+        assertEquals("https://***@config.example.org/app.properties",
+                hideCredentials(new URI("https://user:p@ssword@config.example.org/app.properties")));
     }
 
     @Test
     public void aSourceWithNoCredentialsIsLeftAsItIs() throws URISyntaxException {
         assertEquals("https://config.example.org/app.properties",
                 hideCredentials(new URI("https://config.example.org/app.properties")));
+        assertEquals("https://config.example.org/path/user@domain/app.properties",
+                hideCredentials(new URI("https://config.example.org/path/user@domain/app.properties")));
         assertEquals("file:/etc/app.ini", hideCredentials(new URI("file:/etc/app.ini")));
         assertEquals("null", hideCredentials(null));
     }
@@ -92,6 +96,14 @@ public class DiagnosticsTest {
 
         assertTrue(message, message.contains("ftp://***@host/app.ini"));
         assertFalse(message, message.contains("hunter2"));
+    }
+
+    @Test
+    public void sensitiveQueryParamsInASourceAreMasked() throws URISyntaxException {
+        assertEquals("https://config.example.org/app.properties?api_key=***&env=prod&access_token=***",
+                hideCredentials(new URI("https://config.example.org/app.properties?api_key=secret123&env=prod&access_token=xyz789")));
+        assertEquals("https://***@config.example.org/app.properties?secret=***#fragment",
+                hideCredentials(new URI("https://user:pass@config.example.org/app.properties?secret=topsecret#fragment")));
     }
 
     // ---------------------------------------------------------------- what it says when asked

@@ -314,10 +314,70 @@ public abstract class Util {
         // read from the text rather than from getUserInfo(), which is null on the opaque URIs a jar or a
         // relative file path produce - the very ones a message is most likely to be about
         int host = text.indexOf("//");
-        if (host < 0) return text;
-        int at = text.indexOf('@', host);
-        if (at < 0) return text;
-        return text.substring(0, host + 2) + "***" + text.substring(at);
+if (host >= 0) {
+            int end = text.length();
+            for (int i = host + 2; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c == '/' || c == '?' || c == '#') {
+                    end = i;
+                    break;
+                }
+            }
+            int at = text.lastIndexOf('@', end - 1);
+            if (at > host + 2) {
+                text = text.substring(0, host + 2) + "***" + text.substring(at);
+            }
+        }
+        return maskSensitiveQueryParams(text);
+    }
+
+    private static String maskSensitiveQueryParams(String text) {
+        int queryStart = text.indexOf('?');
+        if (queryStart < 0) return text;
+        int fragmentStart = text.indexOf('#', queryStart);
+        String beforeQuery = text.substring(0, queryStart + 1);
+        String queryString = (fragmentStart >= 0) ? text.substring(queryStart + 1, fragmentStart) : text.substring(queryStart + 1);
+        String fragmentString = (fragmentStart >= 0) ? text.substring(fragmentStart) : "";
+
+        StringBuilder maskedQuery = new StringBuilder();
+        String[] pairs = queryString.split("&", -1);
+        for (int i = 0; i < pairs.length; i++) {
+            if (i > 0) maskedQuery.append('&');
+            String pair = pairs[i];
+            int eq = pair.indexOf('=');
+            if (eq > 0) {
+                String paramName = pair.substring(0, eq);
+                if (isSensitiveQueryParam(paramName)) {
+                    maskedQuery.append(paramName).append("=***");
+                } else {
+                    maskedQuery.append(pair);
+                }
+            } else {
+                maskedQuery.append(pair);
+            }
+        }
+        return beforeQuery + maskedQuery.toString() + fragmentString;
+    }
+
+    private static boolean isSensitiveQueryParam(String name) {
+        if (name == null || name.isEmpty()) return false;
+        String k = name.toLowerCase();
+        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password"))
+            return true;
+        if (k.contains("secret"))
+            return true;
+        if (k.contains("token"))
+            return true;
+        if (k.equals("key") || k.contains("apikey") || k.contains("_key") || k.contains("key_") || k.endsWith("key")) {
+            if (k.endsWith("key") && (k.endsWith("monkey") || k.endsWith("donkey") || k.endsWith("hockey") || k.endsWith("turkey")))
+                return false;
+            return true;
+        }
+        if (k.equals("auth") || k.startsWith("auth_") || k.endsWith("_auth") || k.contains("authorization") || k.contains("authenticat"))
+            return true;
+        if (k.contains("credential"))
+            return true;
+        return false;
     }
 
     /**
