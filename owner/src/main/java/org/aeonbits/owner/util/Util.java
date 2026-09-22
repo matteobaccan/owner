@@ -362,7 +362,7 @@ if (host >= 0) {
     private static boolean isSensitiveQueryParam(String name) {
         if (name == null || name.isEmpty()) return false;
         String k = name.toLowerCase();
-        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password"))
+        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password") || k.contains("passphrase"))
             return true;
         if (k.contains("secret"))
             return true;
