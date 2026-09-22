@@ -451,13 +451,6 @@ See the terms of the BSD license in the documentation provided with this softwar
                 </executions>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ftp</artifactId>
-                <version>3.5.3</version>
-            </extension>
-        </extensions>
     </build>
 
     <reporting>
