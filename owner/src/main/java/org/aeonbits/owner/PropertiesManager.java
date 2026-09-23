@@ -603,7 +603,7 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
      * something; masking a value that need not have been is read as over-caution and no more.
      * </p>
      */
-    private boolean isSensitiveKey(String name) {
+    boolean isSensitiveKey(String name) {
         if (sensitiveKeys.contains(name))
             return true;
         for (String prefix : sensitivePrefixes)

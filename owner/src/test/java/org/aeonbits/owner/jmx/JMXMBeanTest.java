@@ -7,6 +7,8 @@
  */
 package org.aeonbits.owner.jmx;
 
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.Config.Sensitive;
 import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
 import org.aeonbits.owner.Reloadable;
@@ -89,5 +91,35 @@ public class JMXMBeanTest {
 		assertEquals("7878", mbs.getAttribute(mbeanName1, "port"));			
 		assertEquals(mbs.getAttribute(mbeanName2, "port"), mbs.getAttribute(mbeanName1, "port"));		
 	}
-	
+
+	private interface JMXConfigWithSensitive extends DynamicMBean, Config {
+		@DefaultValue("user")
+		String username();
+
+		@Sensitive
+		@DefaultValue("secret123")
+		String password();
+	}
+
+	@Test
+	public void testSensitivePropertyMaskedInJMX() throws Throwable {
+		Properties props = new Properties();
+		JMXConfigWithSensitive config = ConfigFactory.create(JMXConfigWithSensitive.class, props);
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName mbeanName = new ObjectName(
+				"org.aeonbits.owner.jmx:type=testSensitivePropertyMaskedInJMX,id=JMXConfigWithSensitive");
+		mbs.registerMBean(config, mbeanName);
+
+		assertEquals("user", mbs.getAttribute(mbeanName, "username"));
+		assertEquals("********", mbs.getAttribute(mbeanName, "password"));
+
+		AttributeList attrList = mbs.getAttributes(mbeanName, new String[] { "username", "password" });
+		AttributeList expected = new AttributeList();
+		expected.add(new Attribute("username", "user"));
+		expected.add(new Attribute("password", "********"));
+		assertEquals(expected, attrList);
+
+		assertEquals("********", mbs.invoke(mbeanName, "getProperty", new String[] { "password" }, null));
+	}
+
 }
