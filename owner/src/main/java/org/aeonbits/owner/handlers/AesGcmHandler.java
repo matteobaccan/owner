@@ -17,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -432,8 +433,9 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
         }
         PBEKeySpec spec = new PBEKeySpec(passphrase, salt, count, KEY_BITS);
         try {
-            SecretKey derived = new SecretKeySpec(
-                    SecretKeyFactory.getInstance(KDF).generateSecret(spec).getEncoded(), "AES");
+            byte[] keyBytes = SecretKeyFactory.getInstance(KDF).generateSecret(spec).getEncoded();
+            SecretKey derived = new SecretKeySpec(keyBytes, "AES");
+            Arrays.fill(keyBytes, (byte) 0);
             synchronized (keys) {
                 keys.put(cacheKey, derived);
             }
