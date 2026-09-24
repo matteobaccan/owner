@@ -34,6 +34,7 @@ import java.security.interfaces.RSAKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -263,7 +264,9 @@ public class RsaHandler implements ValueHandler, Encrypting {
         try {
             Cipher unwrap = Cipher.getInstance(WRAP_CIPHER);
             unwrap.init(Cipher.DECRYPT_MODE, privateKey, oaep());
-            SecretKey dataKey = new SecretKeySpec(unwrap.doFinal(wrapped), "AES");
+            byte[] unwrappedKey = unwrap.doFinal(wrapped);
+            SecretKey dataKey = new SecretKeySpec(unwrappedKey, "AES");
+            Arrays.fill(unwrappedKey, (byte) 0);
 
             Cipher cipher = Cipher.getInstance(DATA_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, dataKey, new GCMParameterSpec(TAG_BITS, iv));
@@ -299,7 +302,9 @@ public class RsaHandler implements ValueHandler, Encrypting {
 
             Cipher wrap = Cipher.getInstance(WRAP_CIPHER);
             wrap.init(Cipher.ENCRYPT_MODE, publicKey, oaep());
-            byte[] wrapped = wrap.doFinal(dataKey.getEncoded());
+            byte[] rawKey = dataKey.getEncoded();
+            byte[] wrapped = wrap.doFinal(rawKey);
+            Arrays.fill(rawKey, (byte) 0);
 
             byte[] iv = new byte[IV_BYTES];
             source.nextBytes(iv);
