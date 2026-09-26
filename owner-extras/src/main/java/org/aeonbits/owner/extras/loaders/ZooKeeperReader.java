@@ -14,6 +14,7 @@ import org.apache.curator.utils.ZKPaths;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import static java.lang.Integer.parseInt;
@@ -92,7 +93,7 @@ final class ZooKeeperReader {
     }
 
     private static String getValue(CuratorFramework client, String basePath, String key) throws Exception {
-        return new String(client.getData().forPath(ZKPaths.makePath(basePath, key)));
+        return new String(client.getData().forPath(ZKPaths.makePath(basePath, key)), StandardCharsets.UTF_8);
     }
 
     private static void connect(CuratorFramework client) throws InterruptedException {
