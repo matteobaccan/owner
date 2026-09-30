@@ -422,4 +422,16 @@ public class AesGcmHandlerTest {
             assertTrue(expected.getMessage(), expected.getMessage().contains("array is null"));
         }
     }
+
+    @Test
+    public void invalidHandlerNameIsRefused() {
+        for (String invalidName : new String[]{null, "", "  ", "aes gcm", "aes:gcm", "aes$gcm", "aes{gcm}"}) {
+            try {
+                new AesGcmHandler(invalidName, PASSPHRASE.toCharArray());
+                fail("invalid name '" + invalidName + "' should be refused");
+            } catch (IllegalArgumentException expected) {
+                assertTrue(expected.getMessage(), expected.getMessage().contains("handler name"));
+            }
+        }
+    }
 }
