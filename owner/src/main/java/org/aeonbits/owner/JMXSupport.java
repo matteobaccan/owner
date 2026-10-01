@@ -46,11 +46,16 @@ class JMXSupport implements Serializable {
         this.manager = manager;
     }
 
+    private String getProperty(String name) {
+        String value = manager.getProperty(name);
+        return (value != null && manager.isSensitiveKey(name)) ? Config.Sensitive.MASK : value;
+    }
+
     @Delegate
     public Object getAttribute(String attribute)
             throws AttributeNotFoundException, MBeanException,
             ReflectionException {
-        return manager.getProperty(attribute);
+        return getProperty(attribute);
     }
 
     @Delegate
@@ -64,7 +69,7 @@ class JMXSupport implements Serializable {
     public AttributeList getAttributes(String[] attributes) {
         List<Attribute> attrList = new LinkedList<>();
         for (String propertyName : attributes)
-            attrList.add(new Attribute(propertyName, manager.getProperty(propertyName)));
+            attrList.add(new Attribute(propertyName, getProperty(propertyName)));
         return new AttributeList(attrList);
     }
 
@@ -79,7 +84,7 @@ class JMXSupport implements Serializable {
     public Object invoke(String actionName, Object[] params, String[] signature)
             throws MBeanException, ReflectionException {
         if (actionName.equals("getProperty") && params != null && params.length == 1) {
-            return manager.getProperty((String) params[0]);
+            return getProperty((String) params[0]);
         } else if (actionName.equals("setProperty") && params != null && params.length == 2) {
             manager.setProperty((String) params[0], (String) params[1]);
             return null;
