@@ -112,7 +112,7 @@ public class TomlParserTest {
     @Test
     public void testStringsAndEscapes() throws IOException {
         Properties p = parse("basic = \"Hello\\nWorld\\t!\"\n"
-                + "literal = 'C:\\\\Users\\\\path'\n"
+                + "literal = 'C:\\Users\\path'\n"
                 + "unicode = \"\\u00E9 \\U0001F600\"\n"
                 + "multiline = \"\"\"\nLine 1\nLine 2\"\"\"\n");
         assertEquals("Hello\nWorld\t!", p.getProperty("basic"));
