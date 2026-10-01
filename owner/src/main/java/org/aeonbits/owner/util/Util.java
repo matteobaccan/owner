@@ -362,11 +362,13 @@ if (host >= 0) {
     private static boolean isSensitiveQueryParam(String name) {
         if (name == null || name.isEmpty()) return false;
         String k = name.toLowerCase();
-        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password"))
+        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password") || k.contains("passphrase"))
             return true;
         if (k.contains("secret"))
             return true;
         if (k.contains("token"))
+            return true;
+        if (k.contains("signature") || k.equals("sig") || k.endsWith("_sig") || k.startsWith("sig_"))
             return true;
         if (k.equals("key") || k.contains("apikey") || k.contains("_key") || k.contains("key_") || k.endsWith("key")) {
             if (k.endsWith("key") && (k.endsWith("monkey") || k.endsWith("donkey") || k.endsWith("hockey") || k.endsWith("turkey")))
