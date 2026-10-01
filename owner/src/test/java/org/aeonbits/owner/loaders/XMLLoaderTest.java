@@ -139,6 +139,35 @@ public class XMLLoaderTest {
         assertTrue(records.toString(), records.isEmpty());
     }
 
+    @Test
+    public void testExternalAccessPropertiesAreSet() throws Exception {
+        List<LogRecord> records;
+        SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+        try (LogCapture capture = LogCapture.of(XMLLoader.class, Level.ALL)) {
+            XMLLoader.setProperty(parser, javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            XMLLoader.setProperty(parser, javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            records = capture.lines();
+        }
+
+        assertTrue(records.toString(), records.isEmpty());
+    }
+
+    @Test
+    public void testAPropertyTheParserRefusesIsReported() throws Exception {
+        List<LogRecord> records;
+        SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+        try (LogCapture capture = LogCapture.of(XMLLoader.class, Level.ALL)) {
+            XMLLoader.setProperty(parser, "http://invalid.property/test", "value");
+            records = capture.lines();
+        }
+
+        assertEquals(1, records.size());
+        assertEquals(Level.WARNING, records.get(0).getLevel());
+        String message = records.get(0).getMessage();
+        assertTrue(message, message.contains("http://invalid.property/test"));
+        assertTrue(message, message.contains("hardening is not in force"));
+    }
+
     private static final String SOME_FEATURE = "http://xml.org/sax/features/external-general-entities";
 
     /** Stands in for a parser too old, too small or too odd to know the features this loader asks for. */

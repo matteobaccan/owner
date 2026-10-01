@@ -244,7 +244,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
         ByteBuffer buffer = ByteBuffer.wrap(token);
         byte[] theirs = new byte[FINGERPRINT_BYTES];
         buffer.get(theirs);
-        if (!java.util.Arrays.equals(theirs, fingerprint))
+        // Use constant-time comparison to protect against timing side-channel attacks during fingerprint validation
+        if (!MessageDigest.isEqual(theirs, fingerprint))
             throw notAToken(String.format("it was written for the key pair %s and this handler holds %s. "
                             + "Encrypting against the wrong public key is silent, because whoever does it "
                             + "cannot read back what they wrote",
@@ -328,6 +329,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
      */
     @Override
     public String[] encryptAll(String... plainTexts) {
+        if (plainTexts == null)
+            throw new IllegalArgumentException("there is nothing to encrypt: the array is null");
         String[] tokens = new String[plainTexts.length];
         for (int i = 0; i < plainTexts.length; i++)
             tokens[i] = encrypt(plainTexts[i]);
@@ -544,6 +547,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
     }
 
     private byte[] decode(String payload) {
+        if (payload == null)
+            throw notAToken("it is null");
         try {
             return Base64.getDecoder().decode(payload.trim());
         } catch (IllegalArgumentException e) {

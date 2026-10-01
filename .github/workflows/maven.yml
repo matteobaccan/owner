@@ -60,7 +60,7 @@ jobs:
       uses: actions/setup-java@v6
       with:
         distribution: 'temurin'
-        java-version: 17.0.20+101
+        java-version: 25.0.4+101.0.LTS
         cache: maven
 
     - name: Cache SonarCloud packages

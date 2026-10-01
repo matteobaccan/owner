@@ -123,6 +123,17 @@ public class XMLLoader implements Loader {
     }
 
     /**
+     * Sets a property on the SAX parser if supported, warning if the parser implementation refuses it.
+     */
+    static void setProperty(SAXParser parser, String name, Object value) {
+        try {
+            parser.setProperty(name, value);
+        } catch (SAXException refused) {
+            reportUnavailable(name, refused);
+        }
+    }
+
+    /**
      * Asks the parser for one of the hardening features, and says so when it will not have it.
      * <p>
      * A parser that does not know a feature cannot be made to honour it, and there is nothing to do but carry
@@ -437,6 +448,8 @@ public class XMLLoader implements Loader {
     private void read(Properties result, InputStream input, boolean validating) throws IOException {
         try {
             SAXParser parser = factory(validating).newSAXParser();
+            setProperty(parser, XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            setProperty(parser, XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             XmlToPropsHandler h = new XmlToPropsHandler();
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", h);
             parser.parse(input, h);
