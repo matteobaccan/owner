@@ -200,7 +200,6 @@ public class RsaHandler implements ValueHandler, Encrypting {
      *                                  {@link #MINIMUM_KEY_BITS}.
      */
     public RsaHandler(String name, PublicKey publicKey, PrivateKey privateKey) {
-        checkName(name);
         if (publicKey == null && privateKey == null)
             throw new IllegalArgumentException("a handler with neither key can do nothing: pass the "
                     + "public key to encrypt, the private key to decrypt, or both");
@@ -458,18 +457,6 @@ public class RsaHandler implements ValueHandler, Encrypting {
      * disagrees with the one that issued it, and the values written now may be unreadable there.
      * </p>
      */
-    private static void checkName(String name) {
-        if (name == null || name.isEmpty())
-            throw new IllegalArgumentException("handler name can't be null or empty");
-        for (int i = 0; i < name.length(); i++) {
-            char c = name.charAt(i);
-            if (Character.isWhitespace(c) || "$:{}".indexOf(c) != -1)
-                throw new IllegalArgumentException(String.format(
-                        "handler name '%s' contains invalid character '%s'",
-                        name, Character.isWhitespace(c) ? "whitespace" : String.valueOf(c)));
-        }
-    }
-
     private static void reportACertificateOutsideItsDates(Certificate certificate) {
         if (!(certificate instanceof X509Certificate))
             return;

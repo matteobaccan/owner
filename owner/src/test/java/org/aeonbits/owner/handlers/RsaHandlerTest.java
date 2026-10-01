@@ -654,16 +654,4 @@ public class RsaHandlerTest {
             assertTrue(expected.getMessage(), expected.getMessage().contains("array is null"));
         }
     }
-
-    @Test
-    public void invalidHandlerNameIsRefused() {
-        for (String invalidName : new String[]{null, "", "  ", "rsa oaep", "rsa:oaep", "rsa$oaep", "rsa{oaep}"}) {
-            try {
-                new RsaHandler(invalidName, pair.getPublic(), pair.getPrivate());
-                fail("invalid name '" + invalidName + "' should be refused");
-            } catch (IllegalArgumentException expected) {
-                assertTrue(expected.getMessage(), expected.getMessage().contains("handler name"));
-            }
-        }
-    }
 }

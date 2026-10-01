@@ -197,18 +197,6 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      * frames so that something else can object to it is a path a reader has to follow, and an analyser
      * reads it as a constructor that always throws.
      */
-    private static void checkName(String name) {
-        if (name == null || name.isEmpty())
-            throw new IllegalArgumentException("handler name can't be null or empty");
-        for (int i = 0; i < name.length(); i++) {
-            char c = name.charAt(i);
-            if (Character.isWhitespace(c) || "$:{}".indexOf(c) != -1)
-                throw new IllegalArgumentException(String.format(
-                        "handler name '%s' contains invalid character '%s'",
-                        name, Character.isWhitespace(c) ? "whitespace" : String.valueOf(c)));
-        }
-    }
-
     private static char[] charactersOf(String passphrase) {
         if (passphrase == null || passphrase.isEmpty())
             throw new IllegalArgumentException(NO_PASSPHRASE);
@@ -236,7 +224,6 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      *                                  {@link #MINIMUM_ITERATIONS}.
      */
     public AesGcmHandler(String name, char[] passphrase, int iterations) {
-        checkName(name);
         if (passphrase == null || passphrase.length == 0)
             throw new IllegalArgumentException(NO_PASSPHRASE);
         if (iterations < MINIMUM_ITERATIONS)
