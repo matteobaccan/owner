@@ -256,13 +256,23 @@ public final class EncryptTool {
         try {
             if (first.length == 0)
                 throw new IllegalStateException("The passphrase is empty.");
-            if (!Arrays.equals(first, second))
+            if (!constantTimeEquals(first, second))
                 throw new IllegalStateException("The two do not match. Nothing was written.");
             return first.clone();
         } finally {
             Arrays.fill(first, '\u0000');
             Arrays.fill(second, '\u0000');
         }
+    }
+
+    /** Constant-time comparison of two char arrays to protect against timing side-channel attacks. */
+    private static boolean constantTimeEquals(char[] a, char[] b) {
+        if (a.length != b.length)
+            return false;
+        int result = 0;
+        for (int i = 0; i < a.length; i++)
+            result |= a[i] ^ b[i];
+        return result == 0;
     }
 
     /**
