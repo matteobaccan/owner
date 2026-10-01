@@ -23,6 +23,7 @@ import java.io.InterruptedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -86,6 +87,29 @@ public class ZooKeeperReaderTest {
 
         assertEquals("localhost", result.getProperty("db.host"));
         assertEquals("5432", result.getProperty("db.port"));
+    }
+
+    @Test
+    public void shouldReadUtf8PropertiesFromZooKeeper() throws Exception {
+        String connectString = server.getConnectString();
+        CuratorFramework client = CuratorFrameworkFactory.newClient(connectString, 50, 50,
+                (retryCount, elapsedTimeMs, sleeper) -> false);
+        try {
+            client.start();
+            client.blockUntilConnected(30, SECONDS);
+            String basePath = "/utf8Config";
+            client.create().creatingParentsIfNeeded().forPath(
+                    ZKPaths.makePath(basePath, "secret.key"),
+                    "secrets-\uD83D\uDD11-caf\u00E9".getBytes(StandardCharsets.UTF_8));
+        } finally {
+            client.close();
+        }
+
+        Properties result = new Properties();
+        URI uri = new URI("zookeeper://" + connectString + "/utf8Config");
+        ZooKeeperReader.read(result, uri);
+
+        assertEquals("secrets-\uD83D\uDD11-caf\u00E9", result.getProperty("secret.key"));
     }
 
     @Test
