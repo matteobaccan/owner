@@ -109,7 +109,7 @@ public class HoconReaderTest {
     @Test
     public void throwsUnsupportedOperationExceptionOnParseErrorAndHidesCredentials() throws Exception {
         File file = writeDocument("invalid { hocon = [ ]");
-        URI uriWithCreds = URI.create("file://user:secretpassword@localhost" + file.getAbsolutePath());
+        URI uriWithCreds = new URI("file", "user:secretpassword", "localhost", -1, file.toURI().getPath(), null, null);
 
         try {
             Properties result = new Properties();
