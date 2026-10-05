@@ -103,6 +103,23 @@ public class JndiHandlerTest {
         }
     }
 
+    @Test
+    public void aPrefixedRemoteUrlThatWouldLeaveThisMachineIsRefused() {
+        String[] evasionAttempts = {
+                "java:ldap://evil.example/dc=x",
+                "java://evil.example/dc=x",
+                "java:rmi://evil.example/obj"
+        };
+        for (String attempt : evasionAttempts) {
+            try {
+                handler.resolve(attempt);
+                fail("remote URL " + attempt + " should not be resolved");
+            } catch (IllegalArgumentException expected) {
+                assertTrue(expected.getMessage(), expected.getMessage().contains("local names only"));
+            }
+        }
+    }
+
     /** Throwing is the contract: the empty string would report a failure as a value. */
     @Test
     public void aNameNothingIsBoundToThrowsRatherThanAnsweringEmpty() {
