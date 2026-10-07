@@ -547,6 +547,22 @@ public class EncryptToolTest {
     }
 
     @Test
+    public void twoTypingsWithDifferentLengthsAreRefused() {
+        try {
+            EncryptTool.confirmed("hunter2".toCharArray(), "hunter22".toCharArray());
+            fail("passphrases of different length do not match");
+        } catch (IllegalStateException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("do not match"));
+        }
+        try {
+            EncryptTool.confirmed("hunter22".toCharArray(), "hunter2".toCharArray());
+            fail("passphrases of different length do not match");
+        } catch (IllegalStateException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("do not match"));
+        }
+    }
+
+    @Test
     public void anEmptyPassphraseIsRefusedAndSoIsEndOfInput() {
         for (char[][] typed : new char[][][]{
                 {new char[0], new char[0]},
