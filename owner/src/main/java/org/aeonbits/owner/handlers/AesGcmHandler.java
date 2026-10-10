@@ -189,7 +189,35 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      *                   {@link #AesGcmHandler(char[])} when the passphrase is read rather than written.
      */
     public AesGcmHandler(String passphrase) {
-        this(DEFAULT_NAME, charactersOf(passphrase), DEFAULT_ITERATIONS);
+        this(DEFAULT_NAME, passphrase, DEFAULT_ITERATIONS);
+    }
+
+    /**
+     * A handler under a name of your own, constructed from a <code>String</code> passphrase.
+     *
+     * @param name       the name values refer to this handler by.
+     * @param passphrase the passphrase.
+     */
+    public AesGcmHandler(String name, String passphrase) {
+        this(name, passphrase, DEFAULT_ITERATIONS);
+    }
+
+    /**
+     * A handler under a name of your own, encrypting at a count of your own, from a <code>String</code> passphrase.
+     *
+     * @param name       the name values refer to this handler by.
+     * @param passphrase the passphrase.
+     * @param iterations the count to encrypt with.
+     */
+    public AesGcmHandler(String name, String passphrase, int iterations) {
+        this(name, charactersOf(passphrase), iterations, true);
+    }
+
+    private AesGcmHandler(String name, char[] passphrase, int iterations, boolean wipeInput) {
+        this(name, passphrase, iterations);
+        if (wipeInput && passphrase != null) {
+            Arrays.fill(passphrase, '\0');
+        }
     }
 
     /**
@@ -277,6 +305,20 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
         } catch (java.security.NoSuchAlgorithmException aesIsRequiredOfEveryJdk) {
             throw new IllegalStateException("AES is required of every JDK and is missing",
                     aesIsRequiredOfEveryJdk);
+        }
+    }
+
+    /**
+     * Wipes the internal passphrase array and clears cached derived keys from memory.
+     */
+    public void clear() {
+        if (passphrase != null) {
+            Arrays.fill(passphrase, '\0');
+        }
+        if (keys != null) {
+            synchronized (keys) {
+                keys.clear();
+            }
         }
     }
 
