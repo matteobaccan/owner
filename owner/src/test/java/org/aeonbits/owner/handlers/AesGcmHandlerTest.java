@@ -422,4 +422,24 @@ public class AesGcmHandlerTest {
             assertTrue(expected.getMessage(), expected.getMessage().contains("array is null"));
         }
     }
+
+    @Test
+    public void clearingTheHandlerErasesThePassphrase() {
+        AesGcmHandler handler = handler();
+        String token = handler.encrypt("s3cr3t");
+        handler.clear();
+        try {
+            handler.resolve(token);
+            fail("a cleared handler should no longer be able to decrypt with the original passphrase");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("could not be decrypted"));
+        }
+    }
+
+    @Test
+    public void aStringConstructorWorksAndWipesTemporaryArray() {
+        AesGcmHandler handler = new AesGcmHandler("a passphrase from string");
+        String token = handler.encrypt("s3cr3t");
+        assertEquals("s3cr3t", handler.resolve(token));
+    }
 }
