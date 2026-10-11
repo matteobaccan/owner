@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -172,5 +174,20 @@ public class JndiHandlerTest {
     public void itSaysItsNameWhenPrinted() {
         assertEquals("JndiHandler[name=jndi]", new JndiHandler().toString());
         assertEquals("JndiHandler[name=other]", new JndiHandler("other", null).toString());
+    }
+
+    @Test
+    public void testEqualsAndHashCode() {
+        JndiHandler h1 = new JndiHandler();
+        JndiHandler h2 = new JndiHandler("jndi", null);
+        JndiHandler h3 = new JndiHandler("custom", null);
+
+        assertEquals(h1, h1);
+        assertEquals(h1, h2);
+        assertEquals(h1.hashCode(), h2.hashCode());
+
+        assertNotEquals(null, h1);
+        assertNotEquals("jndi", h1);
+        assertNotEquals(h1, h3);
     }
 }
