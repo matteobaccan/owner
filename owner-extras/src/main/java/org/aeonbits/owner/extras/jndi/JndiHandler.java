@@ -142,6 +142,20 @@ public class JndiHandler implements ValueHandler {
         }
     }
 
+    /** Two handlers are told apart by name. */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        JndiHandler that = (JndiHandler) other;
+        return name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[name=" + name + "]";
