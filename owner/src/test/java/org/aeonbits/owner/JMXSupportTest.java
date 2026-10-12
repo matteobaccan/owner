@@ -142,4 +142,33 @@ public class JMXSupportTest {
         invokeExpectingFailure(newConfig(), "unknownAction", null, null);
     }
 
+    @Test
+    public void getAttributesWithNullReturnsEmptyList() throws Exception {
+        JMXDummyConfig config = newConfig();
+        AttributeList list = config.getAttributes((String[]) null);
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    public void getAttributeWithNullReturnsNull() throws Exception {
+        JMXDummyConfig config = newConfig();
+        assertNull(config.getAttribute(null));
+    }
+
+    private interface SensitiveGroupConfig extends DynamicMBean, Config {
+        @Config.Sensitive
+        interface DBConfig {
+            @DefaultValue("secret")
+            String password();
+        }
+
+        DBConfig db();
+    }
+
+    @Test
+    public void getAttributeWithNullWhenSensitivePrefixesExistDoesNotThrow() throws Exception {
+        SensitiveGroupConfig config = ConfigFactory.create(SensitiveGroupConfig.class);
+        assertNull(config.getAttribute(null));
+    }
+
 }

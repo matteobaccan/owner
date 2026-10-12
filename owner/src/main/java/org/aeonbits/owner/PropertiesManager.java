@@ -604,6 +604,8 @@ class PropertiesManager implements Reloadable, Accessible, Mutable, Traceable {
      * </p>
      */
     boolean isSensitiveKey(String name) {
+        if (name == null)
+            return false;
         if (sensitiveKeys.contains(name))
             return true;
         for (String prefix : sensitivePrefixes)

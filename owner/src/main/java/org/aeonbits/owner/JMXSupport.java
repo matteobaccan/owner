@@ -47,6 +47,8 @@ class JMXSupport implements Serializable {
     }
 
     private String getProperty(String name) {
+        if (name == null)
+            return null;
         String value = manager.getProperty(name);
         return (value != null && manager.isSensitiveKey(name)) ? Config.Sensitive.MASK : value;
     }
@@ -68,8 +70,10 @@ class JMXSupport implements Serializable {
     @Delegate
     public AttributeList getAttributes(String[] attributes) {
         List<Attribute> attrList = new LinkedList<>();
-        for (String propertyName : attributes)
-            attrList.add(new Attribute(propertyName, getProperty(propertyName)));
+        if (attributes != null) {
+            for (String propertyName : attributes)
+                attrList.add(new Attribute(propertyName, getProperty(propertyName)));
+        }
         return new AttributeList(attrList);
     }
 
