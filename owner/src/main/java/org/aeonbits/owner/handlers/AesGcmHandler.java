@@ -167,10 +167,10 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
     private final transient char[] passphrase;
 
     /** Transient for the reason the passphrase is, and because a serialized one would carry its state. */
-    private final transient SecureRandom random;
+    private transient SecureRandom random;
 
     /** Derived keys by count and salt, so the values of one file cost one derivation between them. */
-    private final transient Map<String, SecretKey> keys;
+    private transient Map<String, SecretKey> keys;
 
     /**
      * A handler under the name <code>aes-gcm</code>, encrypting at {@link #DEFAULT_ITERATIONS}.
@@ -244,14 +244,7 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
         this.iterations = iterations;
         this.passphrase = passphrase.clone();
         this.random = new SecureRandom();
-        this.keys = new LinkedHashMap<String, SecretKey>(CACHE_SIZE, 0.75f, true) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<String, SecretKey> eldest) {
-                return size() > CACHE_SIZE;
-            }
-        };
+        this.keys = createKeysMap();
     }
 
     /**
@@ -399,7 +392,7 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
         if (plainText == null)
             throw new IllegalArgumentException("there is nothing to encrypt: the value is null");
         byte[] iv = new byte[IV_BYTES];
-        random.nextBytes(iv);
+        random().nextBytes(iv);
         byte[] header = ByteBuffer.allocate(HEADER_BYTES).putInt(iterations).put(salt).put(iv).array();
         try {
             Cipher cipher = Cipher.getInstance(CIPHER);
@@ -416,8 +409,35 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
 
     private byte[] newSalt() {
         byte[] salt = new byte[SALT_BYTES];
-        random.nextBytes(salt);
+        random().nextBytes(salt);
         return salt;
+    }
+
+    private synchronized SecureRandom random() {
+        if (random == null)
+            random = new SecureRandom();
+        return random;
+    }
+
+    /**
+     * The key for a salt and a count, derived once. Synchronized rather than concurrent because the map is
+     * also an LRU and because the thing being guarded is the derivation, which happens once per file.
+     */
+    private Map<String, SecretKey> createKeysMap() {
+        return new LinkedHashMap<String, SecretKey>(CACHE_SIZE, 0.75f, true) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, SecretKey> eldest) {
+                return size() > CACHE_SIZE;
+            }
+        };
+    }
+
+    private synchronized Map<String, SecretKey> keys() {
+        if (keys == null)
+            keys = createKeysMap();
+        return keys;
     }
 
     /**
@@ -426,8 +446,9 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
      */
     private SecretKey keyFor(byte[] salt, int count) throws GeneralSecurityException {
         String cacheKey = count + ":" + Base64.getEncoder().encodeToString(salt);
-        synchronized (keys) {
-            SecretKey cached = keys.get(cacheKey);
+        Map<String, SecretKey> map = keys();
+        synchronized (map) {
+            SecretKey cached = map.get(cacheKey);
             if (cached != null)
                 return cached;
         }
@@ -436,8 +457,8 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
             byte[] keyBytes = SecretKeyFactory.getInstance(KDF).generateSecret(spec).getEncoded();
             SecretKey derived = new SecretKeySpec(keyBytes, "AES");
             Arrays.fill(keyBytes, (byte) 0);
-            synchronized (keys) {
-                keys.put(cacheKey, derived);
+            synchronized (map) {
+                map.put(cacheKey, derived);
             }
             return derived;
         } finally {

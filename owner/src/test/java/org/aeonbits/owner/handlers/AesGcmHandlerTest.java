@@ -422,4 +422,26 @@ public class AesGcmHandlerTest {
             assertTrue(expected.getMessage(), expected.getMessage().contains("array is null"));
         }
     }
+
+    @Test
+    public void aDeserializedHandlerReinitializesRandomWithoutNullPointer() throws Exception {
+        AesGcmHandler handler = handler();
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+            out.writeObject(handler);
+        }
+
+        AesGcmHandler back;
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+            back = (AesGcmHandler) in.readObject();
+        }
+
+        java.lang.reflect.Field field = AesGcmHandler.class.getDeclaredField("passphrase");
+        field.setAccessible(true);
+        field.set(back, PASSPHRASE.toCharArray());
+
+        String token = back.encrypt("secret");
+        assertEquals("secret", back.resolve(token));
+    }
 }
