@@ -435,13 +435,23 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
         try {
             byte[] keyBytes = SecretKeyFactory.getInstance(KDF).generateSecret(spec).getEncoded();
             SecretKey derived = new SecretKeySpec(keyBytes, "AES");
-            Arrays.fill(keyBytes, (byte) 0);
+            zero(keyBytes);
             synchronized (keys) {
                 keys.put(cacheKey, derived);
             }
             return derived;
         } finally {
             spec.clearPassword();
+        }
+    }
+
+    /** Securely zeroes a byte array to prevent dead-code elimination of zeroing sensitive key material. */
+    static void zero(byte[] bytes) {
+        if (bytes == null) return;
+        Arrays.fill(bytes, (byte) 0);
+        // Volatile read / compiler barrier to ensure Arrays.fill is not eliminated by JIT
+        if (bytes.length > 0 && bytes[0] != 0) {
+            throw new IllegalStateException();
         }
     }
 

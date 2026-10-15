@@ -266,7 +266,7 @@ public class RsaHandler implements ValueHandler, Encrypting {
             unwrap.init(Cipher.DECRYPT_MODE, privateKey, oaep());
             byte[] unwrappedKey = unwrap.doFinal(wrapped);
             SecretKey dataKey = new SecretKeySpec(unwrappedKey, "AES");
-            Arrays.fill(unwrappedKey, (byte) 0);
+            AesGcmHandler.zero(unwrappedKey);
 
             Cipher cipher = Cipher.getInstance(DATA_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, dataKey, new GCMParameterSpec(TAG_BITS, iv));
@@ -304,7 +304,7 @@ public class RsaHandler implements ValueHandler, Encrypting {
             wrap.init(Cipher.ENCRYPT_MODE, publicKey, oaep());
             byte[] rawKey = dataKey.getEncoded();
             byte[] wrapped = wrap.doFinal(rawKey);
-            Arrays.fill(rawKey, (byte) 0);
+            AesGcmHandler.zero(rawKey);
 
             byte[] iv = new byte[IV_BYTES];
             source.nextBytes(iv);
