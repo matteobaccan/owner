@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -310,11 +311,30 @@ public abstract class Util {
      */
     public static String hideCredentials(URI uri) {
         if (uri == null) return "null";
-        String text = uri.toString();
-        // read from the text rather than from getUserInfo(), which is null on the opaque URIs a jar or a
-        // relative file path produce - the very ones a message is most likely to be about
+        return hideCredentials(uri.toString());
+    }
+
+    /**
+     * The text of a URL source, with any credentials in it replaced.
+     *
+     * @param url the source URL, may be <code>null</code>.
+     * @return the URL as text, with no credentials in it.
+     */
+    public static String hideCredentials(URL url) {
+        if (url == null) return "null";
+        return hideCredentials(url.toString());
+    }
+
+    /**
+     * The text of a URI/URL string source, with any credentials or sensitive parameters in it replaced.
+     *
+     * @param text the source text, may be <code>null</code>.
+     * @return the source text, with no credentials or sensitive parameters in it.
+     */
+    public static String hideCredentials(String text) {
+        if (text == null) return "null";
         int host = text.indexOf("//");
-if (host >= 0) {
+        if (host >= 0) {
             int end = text.length();
             for (int i = host + 2; i < text.length(); i++) {
                 char c = text.charAt(i);
@@ -383,7 +403,7 @@ if (host >= 0) {
     }
 
     /**
-     * Replaces every {@link URI} among the arguments of a message with its credential-free text.
+     * Replaces every {@link URI}, {@link URL}, or URI string among the arguments of a message with its credential-free text.
      * <p>
      * Done here, once, rather than at each of the twenty-odd places that name a source in a message: it
      * covers the ones written since as well, which is the property worth having.
@@ -393,9 +413,19 @@ if (host >= 0) {
         if (args == null) return null;
         Object[] safe = null;
         for (int i = 0; i < args.length; i++) {
-            if (!(args[i] instanceof URI)) continue;
-            if (safe == null) safe = args.clone();
-            safe[i] = hideCredentials((URI) args[i]);
+            if (args[i] instanceof URI) {
+                if (safe == null) safe = args.clone();
+                safe[i] = hideCredentials((URI) args[i]);
+            } else if (args[i] instanceof URL) {
+                if (safe == null) safe = args.clone();
+                safe[i] = hideCredentials((URL) args[i]);
+            } else if (args[i] instanceof String) {
+                String str = (String) args[i];
+                if (str.contains("://") || str.contains("?")) {
+                    if (safe == null) safe = args.clone();
+                    safe[i] = hideCredentials(str);
+                }
+            }
         }
         return safe == null ? args : safe;
     }
