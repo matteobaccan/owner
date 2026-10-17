@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.logging.Level;
 
@@ -72,7 +73,7 @@ public class DiagnosticsTest {
         assertEquals("https://config.example.org/path/user@domain/app.properties",
                 hideCredentials(new URI("https://config.example.org/path/user@domain/app.properties")));
         assertEquals("file:/etc/app.ini", hideCredentials(new URI("file:/etc/app.ini")));
-        assertEquals("null", hideCredentials(null));
+        assertEquals("null", hideCredentials((URI) null));
     }
 
     /**
@@ -106,6 +107,21 @@ public class DiagnosticsTest {
                 hideCredentials(new URI("https://user:pass@config.example.org/app.properties?secret=topsecret#fragment")));
         assertEquals("https://config.example.org/app.properties?passphrase=***&sig=***",
                 hideCredentials(new URI("https://config.example.org/app.properties?passphrase=myPass123&sig=abc987")));
+    }
+
+    @Test
+    public void urlObjectsAndStringsHaveCredentialsMaskedInMessages() throws Exception {
+        URL url = new URI("https://user:secret123@config.example.org/app.properties").toURL();
+        assertEquals("https://***@config.example.org/app.properties", hideCredentials(url));
+
+        String messageWithUrl = unsupported("cannot read %s", url).getMessage();
+        assertTrue(messageWithUrl, messageWithUrl.contains("https://***@config.example.org/app.properties"));
+        assertFalse(messageWithUrl, messageWithUrl.contains("secret123"));
+
+        String messageWithString = unsupported("cannot read %s", "https://user:secret123@config.example.org/app.properties?api_key=token999").getMessage();
+        assertTrue(messageWithString, messageWithString.contains("https://***@config.example.org/app.properties?api_key=***"));
+        assertFalse(messageWithString, messageWithString.contains("secret123"));
+        assertFalse(messageWithString, messageWithString.contains("token999"));
     }
 
     // ---------------------------------------------------------------- what it says when asked
