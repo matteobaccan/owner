@@ -271,7 +271,13 @@ public class RsaHandler implements ValueHandler, Encrypting {
             Cipher cipher = Cipher.getInstance(DATA_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, dataKey, new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(token, 0, headerBytes);
-            return new String(cipher.doFinal(token, headerBytes, token.length - headerBytes), StandardCharsets.UTF_8);
+            byte[] plain = cipher.doFinal(token, headerBytes, token.length - headerBytes);
+            try {
+                return new String(plain, StandardCharsets.UTF_8);
+            } finally {
+                // Zero out sensitive plaintext byte array in memory after use
+                Arrays.fill(plain, (byte) 0);
+            }
         } catch (GeneralSecurityException e) {
             throw new IllegalArgumentException("A value handled by '" + name + "' could not be decrypted. "
                     + "The fingerprint matched, so the key pair is the right one: either the value has "
