@@ -224,7 +224,8 @@ public class AnsweredByTwoPointZeroTest {
 
     @Test
     public void issue132_anObjectIsBuiltOutOfANestedXmlBlock() throws Exception {
-        File xml = File.createTempFile("person", ".xml");
+        // Files.createTempFile rather than File.createTempFile: creates file with owner-only permissions
+        File xml = Files.createTempFile("person", ".xml").toFile();
         try {
             Files.write(xml.toPath(), ("<properties>\n"
                     + "  <person>\n"

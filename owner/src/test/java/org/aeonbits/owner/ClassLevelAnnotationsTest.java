@@ -165,7 +165,8 @@ public class ClassLevelAnnotationsTest {
     }
 
     private static String saved(Class<? extends Accessible> configClass) throws IOException {
-        File file = File.createTempFile("owner-class-level", ".properties");
+        // Files.createTempFile rather than File.createTempFile: creates file with owner-only permissions
+        File file = Files.createTempFile("owner-class-level", ".properties").toFile();
         try {
             ConfigFactory.create(configClass).save(file);
             return new String(Files.readAllBytes(file.toPath()), UTF_8);
