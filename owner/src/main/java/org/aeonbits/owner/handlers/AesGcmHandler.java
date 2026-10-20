@@ -320,7 +320,9 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
             cipher.init(Cipher.DECRYPT_MODE, keyFor(salt, tokenIterations), new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(token, 0, HEADER_BYTES);
             byte[] plain = cipher.doFinal(token, HEADER_BYTES, token.length - HEADER_BYTES);
-            return new String(plain, StandardCharsets.UTF_8);
+            String result = new String(plain, StandardCharsets.UTF_8);
+            Arrays.fill(plain, (byte) 0);
+            return result;
         } catch (GeneralSecurityException e) {
             // deliberately vague about which of the two it was: telling a wrong passphrase apart from an
             // edited value tells whoever is editing which one they got closer to
