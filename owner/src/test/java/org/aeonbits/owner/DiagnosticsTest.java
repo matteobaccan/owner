@@ -106,6 +106,8 @@ public class DiagnosticsTest {
                 hideCredentials(new URI("https://user:pass@config.example.org/app.properties?secret=topsecret#fragment")));
         assertEquals("https://config.example.org/app.properties?passphrase=***&sig=***",
                 hideCredentials(new URI("https://config.example.org/app.properties?passphrase=myPass123&sig=abc987")));
+        assertEquals("https://config.example.org/app.properties?bearer=***&jwt=***&session=***",
+                hideCredentials(new URI("https://config.example.org/app.properties?bearer=xyz123&jwt=abc.def.ghi&session=sess456")));
     }
 
     // ---------------------------------------------------------------- what it says when asked

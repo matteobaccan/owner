@@ -366,7 +366,7 @@ if (host >= 0) {
             return true;
         if (k.contains("secret"))
             return true;
-        if (k.contains("token"))
+        if (k.contains("token") || k.contains("bearer") || k.contains("jwt") || k.contains("session"))
             return true;
         if (k.contains("signature") || k.equals("sig") || k.endsWith("_sig") || k.startsWith("sig_"))
             return true;
