@@ -222,6 +222,17 @@ public class UtilTest {
     }
 
     @Test
+    public void testHideCredentialsInURI() throws URISyntaxException {
+        assertEquals("null", Util.hideCredentials(null));
+        assertEquals("http://***@example.com/config.properties",
+                Util.hideCredentials(new URI("http://user:pass@example.com/config.properties")));
+        assertEquals("http://example.com/config.properties?api-key=***&env=prod",
+                Util.hideCredentials(new URI("http://example.com/config.properties?api-key=secret123&env=prod")));
+        assertEquals("https://***@example.com/config.properties?access_token=***&session_id=***#fragment",
+                Util.hideCredentials(new URI("https://admin:p%40ss@example.com/config.properties?access_token=xyz&session_id=abc123#fragment")));
+    }
+
+    @Test
     public void testFileFromURIWithUnsupportedScheme() throws URISyntaxException {
         assertNull(Util.fileFromURI("http://example.com/foo.properties"));
     }
