@@ -366,16 +366,16 @@ if (host >= 0) {
             return true;
         if (k.contains("secret"))
             return true;
-        if (k.contains("token"))
+        if (k.contains("token") || k.contains("session") || k.contains("bearer"))
             return true;
-        if (k.contains("signature") || k.equals("sig") || k.endsWith("_sig") || k.startsWith("sig_"))
+        if (k.contains("signature") || k.equals("sig") || k.endsWith("_sig") || k.startsWith("sig_") || k.endsWith("-sig") || k.startsWith("sig-"))
             return true;
-        if (k.equals("key") || k.contains("apikey") || k.contains("_key") || k.contains("key_") || k.endsWith("key")) {
+        if (k.equals("key") || k.contains("apikey") || k.contains("api-key") || k.contains("_key") || k.contains("-key") || k.contains("key_") || k.contains("key-") || k.endsWith("key")) {
             if (k.endsWith("key") && (k.endsWith("monkey") || k.endsWith("donkey") || k.endsWith("hockey") || k.endsWith("turkey")))
                 return false;
             return true;
         }
-        if (k.equals("auth") || k.startsWith("auth_") || k.endsWith("_auth") || k.contains("authorization") || k.contains("authenticat"))
+        if (k.equals("auth") || k.startsWith("auth_") || k.endsWith("_auth") || k.startsWith("auth-") || k.endsWith("-auth") || k.contains("authorization") || k.contains("authenticat"))
             return true;
         if (k.contains("credential"))
             return true;
