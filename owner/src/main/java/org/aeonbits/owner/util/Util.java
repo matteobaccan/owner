@@ -333,30 +333,46 @@ if (host >= 0) {
 
     private static String maskSensitiveQueryParams(String text) {
         int queryStart = text.indexOf('?');
-        if (queryStart < 0) return text;
-        int fragmentStart = text.indexOf('#', queryStart);
-        String beforeQuery = text.substring(0, queryStart + 1);
-        String queryString = (fragmentStart >= 0) ? text.substring(queryStart + 1, fragmentStart) : text.substring(queryStart + 1);
-        String fragmentString = (fragmentStart >= 0) ? text.substring(fragmentStart) : "";
+        int fragmentStart = text.indexOf('#');
+        if (queryStart < 0 && fragmentStart < 0) return text;
 
-        StringBuilder maskedQuery = new StringBuilder();
-        String[] pairs = queryString.split("&", -1);
+        if (queryStart >= 0 && (fragmentStart < 0 || queryStart < fragmentStart)) {
+            String beforeQuery = text.substring(0, queryStart + 1);
+            if (fragmentStart >= 0) {
+                String queryString = text.substring(queryStart + 1, fragmentStart);
+                String fragmentString = text.substring(fragmentStart + 1);
+                return beforeQuery + maskPairs(queryString) + "#" + maskPairs(fragmentString);
+            } else {
+                String queryString = text.substring(queryStart + 1);
+                return beforeQuery + maskPairs(queryString);
+            }
+        } else if (fragmentStart >= 0) {
+            String beforeFragment = text.substring(0, fragmentStart + 1);
+            String fragmentString = text.substring(fragmentStart + 1);
+            return beforeFragment + maskPairs(fragmentString);
+        }
+        return text;
+    }
+
+    private static String maskPairs(String paramPairs) {
+        StringBuilder masked = new StringBuilder();
+        String[] pairs = paramPairs.split("&", -1);
         for (int i = 0; i < pairs.length; i++) {
-            if (i > 0) maskedQuery.append('&');
+            if (i > 0) masked.append('&');
             String pair = pairs[i];
             int eq = pair.indexOf('=');
             if (eq > 0) {
                 String paramName = pair.substring(0, eq);
                 if (isSensitiveQueryParam(paramName)) {
-                    maskedQuery.append(paramName).append("=***");
+                    masked.append(paramName).append("=***");
                 } else {
-                    maskedQuery.append(pair);
+                    masked.append(pair);
                 }
             } else {
-                maskedQuery.append(pair);
+                masked.append(pair);
             }
         }
-        return beforeQuery + maskedQuery.toString() + fragmentString;
+        return masked.toString();
     }
 
     private static boolean isSensitiveQueryParam(String name) {
