@@ -108,6 +108,14 @@ public class DiagnosticsTest {
                 hideCredentials(new URI("https://config.example.org/app.properties?passphrase=myPass123&sig=abc987")));
     }
 
+    @Test
+    public void sensitiveFragmentParamsInASourceAreMasked() throws URISyntaxException {
+        assertEquals("file:.env#password=***&key=***",
+                hideCredentials(new URI("file:.env#password=s3cr3t&key=myKey")));
+        assertEquals("https://***@config.example.org/app.properties?secret=***#token=***",
+                hideCredentials(new URI("https://user:pass@config.example.org/app.properties?secret=topsecret#token=xyz123")));
+    }
+
     // ---------------------------------------------------------------- what it says when asked
 
     @Test
