@@ -571,4 +571,16 @@ public class EncryptToolTest {
         assertArrayEquals(new char[7], typed);
         assertArrayEquals(new char[7], again);
     }
+
+    @Test
+    public void constantTimeEqualsChecks() {
+        assertTrue(EncryptTool.constantTimeEquals("hunter2".toCharArray(), "hunter2".toCharArray()));
+        assertFalse(EncryptTool.constantTimeEquals("hunter2".toCharArray(), "hunter3".toCharArray()));
+        assertFalse(EncryptTool.constantTimeEquals("hunter2".toCharArray(), "hunter".toCharArray()));
+        assertFalse(EncryptTool.constantTimeEquals("hunter".toCharArray(), "hunter2".toCharArray()));
+        assertTrue(EncryptTool.constantTimeEquals(new char[0], new char[0]));
+        assertTrue(EncryptTool.constantTimeEquals(null, null));
+        assertFalse(EncryptTool.constantTimeEquals("hunter".toCharArray(), null));
+        assertFalse(EncryptTool.constantTimeEquals(null, "hunter".toCharArray()));
+    }
 }
