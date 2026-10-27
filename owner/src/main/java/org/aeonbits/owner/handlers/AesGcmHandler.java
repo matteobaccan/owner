@@ -320,7 +320,12 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
             cipher.init(Cipher.DECRYPT_MODE, keyFor(salt, tokenIterations), new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(token, 0, HEADER_BYTES);
             byte[] plain = cipher.doFinal(token, HEADER_BYTES, token.length - HEADER_BYTES);
-            return new String(plain, StandardCharsets.UTF_8);
+            try {
+                return new String(plain, StandardCharsets.UTF_8);
+            } finally {
+                // Wipe sensitive decrypted plaintext byte array from heap memory
+                Arrays.fill(plain, (byte) 0);
+            }
         } catch (GeneralSecurityException e) {
             // deliberately vague about which of the two it was: telling a wrong passphrase apart from an
             // edited value tells whoever is editing which one they got closer to
@@ -401,16 +406,20 @@ public class AesGcmHandler implements ValueHandler, Encrypting {
         byte[] iv = new byte[IV_BYTES];
         random.nextBytes(iv);
         byte[] header = ByteBuffer.allocate(HEADER_BYTES).putInt(iterations).put(salt).put(iv).array();
+        byte[] plainBytes = plainText.getBytes(StandardCharsets.UTF_8);
         try {
             Cipher cipher = Cipher.getInstance(CIPHER);
             cipher.init(Cipher.ENCRYPT_MODE, keyFor(salt, iterations), new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(header);
-            byte[] sealed = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+            byte[] sealed = cipher.doFinal(plainBytes);
             byte[] token = ByteBuffer.allocate(header.length + sealed.length).put(header).put(sealed).array();
             return Base64.getEncoder().encodeToString(token);
         } catch (GeneralSecurityException e) {
             throw new IllegalArgumentException("Could not encrypt a value with '" + name + "': "
                     + e.getMessage(), e);
+        } finally {
+            // Wipe sensitive plaintext byte array from heap memory
+            Arrays.fill(plainBytes, (byte) 0);
         }
     }
 
