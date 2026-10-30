@@ -271,7 +271,12 @@ public class RsaHandler implements ValueHandler, Encrypting {
             Cipher cipher = Cipher.getInstance(DATA_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, dataKey, new GCMParameterSpec(TAG_BITS, iv));
             cipher.updateAAD(token, 0, headerBytes);
-            return new String(cipher.doFinal(token, headerBytes, token.length - headerBytes), StandardCharsets.UTF_8);
+            byte[] plain = cipher.doFinal(token, headerBytes, token.length - headerBytes);
+            try {
+                return new String(plain, StandardCharsets.UTF_8);
+            } finally {
+                Arrays.fill(plain, (byte) 0);
+            }
         } catch (GeneralSecurityException e) {
             throw new IllegalArgumentException("A value handled by '" + name + "' could not be decrypted. "
                     + "The fingerprint matched, so the key pair is the right one: either the value has "
@@ -429,6 +434,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
             throw new IllegalArgumentException(
                     "that is not a PKCS#8 private key. openssl writes one with:\n"
                             + "    openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out app.key", e);
+        } finally {
+            Arrays.fill(der, (byte) 0);
         }
     }
 
