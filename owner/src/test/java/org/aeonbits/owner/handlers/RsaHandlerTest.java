@@ -529,6 +529,18 @@ public class RsaHandlerTest {
         assertFalse("nor to something of another type", equalToAString);
     }
 
+    @Test
+    public void fingerprintComparisonInEquals() {
+        RsaHandler h1 = new RsaHandler("rsa-test", pair.getPublic(), null);
+        RsaHandler h2 = new RsaHandler("rsa-test", null, pair.getPrivate());
+        RsaHandler hDifferentKey = new RsaHandler("rsa-test", another.getPublic(), null);
+
+        assertTrue("handlers with identical name and key pair fingerprint must be equal", h1.equals(h2));
+        assertEquals("hashCodes must agree when equal", h1.hashCode(), h2.hashCode());
+        assertFalse("handlers with differing key pair fingerprints must not be equal", h1.equals(hDifferentKey));
+        assertFalse("comparison against null must safely return false", h1.equals(null));
+    }
+
     /** A Config object is serializable and a handler is reachable from one: the private key must not go. */
     @Test
     public void aPrivateKeyIsNotWrittenOutWithTheObjectHoldingIt() throws Exception {
