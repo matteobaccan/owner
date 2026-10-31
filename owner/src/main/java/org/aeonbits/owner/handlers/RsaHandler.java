@@ -574,7 +574,8 @@ public class RsaHandler implements ValueHandler, Encrypting {
         if (this == other) return true;
         if (other == null || getClass() != other.getClass()) return false;
         RsaHandler that = (RsaHandler) other;
-        return name.equals(that.name) && java.util.Arrays.equals(fingerprint, that.fingerprint);
+        // Use constant-time comparison on cryptographic fingerprints to guard against timing side-channel attacks
+        return name.equals(that.name) && MessageDigest.isEqual(fingerprint, that.fingerprint);
     }
 
     @Override
