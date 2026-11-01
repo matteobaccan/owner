@@ -359,6 +359,10 @@ if (host >= 0) {
         return beforeQuery + maskedQuery.toString() + fragmentString;
     }
 
+    /**
+     * Identifies query parameter names that commonly hold secrets, tokens, or credentials so that
+     * they can be masked when printing or logging URIs in diagnostics and error messages.
+     */
     private static boolean isSensitiveQueryParam(String name) {
         if (name == null || name.isEmpty()) return false;
         String k = name.toLowerCase();
@@ -366,7 +370,7 @@ if (host >= 0) {
             return true;
         if (k.contains("secret"))
             return true;
-        if (k.contains("token"))
+        if (k.contains("token") || k.contains("jwt") || k.contains("bearer"))
             return true;
         if (k.contains("signature") || k.equals("sig") || k.endsWith("_sig") || k.startsWith("sig_"))
             return true;
@@ -377,7 +381,7 @@ if (host >= 0) {
         }
         if (k.equals("auth") || k.startsWith("auth_") || k.endsWith("_auth") || k.contains("authorization") || k.contains("authenticat"))
             return true;
-        if (k.contains("credential"))
+        if (k.contains("credential") || k.contains("private") || k.contains("session"))
             return true;
         return false;
     }
