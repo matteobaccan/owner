@@ -359,14 +359,19 @@ if (host >= 0) {
         return beforeQuery + maskedQuery.toString() + fragmentString;
     }
 
+    /**
+     * Prevents sensitive credential leakage in URI diagnostic messages and logs by detecting
+     * common parameter names for secrets, tokens, keys, and credentials (including kebab-case).
+     */
     private static boolean isSensitiveQueryParam(String name) {
         if (name == null || name.isEmpty()) return false;
-        String k = name.toLowerCase();
+        // Normalize kebab-case to snake_case so patterns match both api_key and api-key
+        String k = name.toLowerCase().replace('-', '_');
         if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password") || k.contains("passphrase"))
             return true;
         if (k.contains("secret"))
             return true;
-        if (k.contains("token"))
+        if (k.contains("token") || k.equals("jwt") || k.contains("bearer"))
             return true;
         if (k.contains("signature") || k.equals("sig") || k.endsWith("_sig") || k.startsWith("sig_"))
             return true;
