@@ -362,7 +362,10 @@ if (host >= 0) {
     private static boolean isSensitiveQueryParam(String name) {
         if (name == null || name.isEmpty()) return false;
         String k = name.toLowerCase();
-        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password") || k.contains("passphrase"))
+        // Mask passwords and passphrases, including common abbreviations like passwd or pwd,
+        // to prevent secret credentials in URI parameters from leaking into logs and diagnostics.
+        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.equals("passwd")
+                || k.contains("password") || k.contains("passphrase") || k.contains("passwd"))
             return true;
         if (k.contains("secret"))
             return true;
