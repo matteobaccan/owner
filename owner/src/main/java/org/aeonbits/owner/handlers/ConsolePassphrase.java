@@ -8,6 +8,7 @@
 package org.aeonbits.owner.handlers;
 
 import java.io.Console;
+import java.util.Arrays;
 
 /**
  * The one thing in this library that needs a person at a keyboard: reading a passphrase off a terminal,
@@ -47,7 +48,21 @@ final class ConsolePassphrase {
      * @throws IllegalStateException if it is empty, or the two typings differ.
      */
     static char[] ask(Console console) {
-        return EncryptTool.confirmed(console.readPassword("Passphrase: "),
-                console.readPassword("Again: "));
+        char[] first = null;
+        char[] second = null;
+        try {
+            first = console.readPassword("Passphrase: ");
+            second = console.readPassword("Again: ");
+            return EncryptTool.confirmed(first, second);
+        } catch (Throwable t) {
+            // Zero out sensitive passphrase material if an exception occurs before confirmed() cleans it up
+            if (first != null) {
+                Arrays.fill(first, '\u0000');
+            }
+            if (second != null) {
+                Arrays.fill(second, '\u0000');
+            }
+            throw t;
+        }
     }
 }
