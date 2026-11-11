@@ -267,10 +267,9 @@ public final class EncryptTool {
 
     /** Constant-time comparison of two char arrays to protect against timing side-channel attacks. */
     private static boolean constantTimeEquals(char[] a, char[] b) {
-        if (a.length != b.length)
-            return false;
-        int result = 0;
-        for (int i = 0; i < a.length; i++)
+        int result = a.length ^ b.length;
+        int minLength = Math.min(a.length, b.length);
+        for (int i = 0; i < minLength; i++)
             result |= a[i] ^ b[i];
         return result == 0;
     }
