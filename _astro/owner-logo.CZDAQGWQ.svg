@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="OWNER">
+  <title>OWNER</title>
+<g transform="translate(0 0) scale(1)">
+    <rect width="128" height="128" rx="28" fill="#fc0"/>
+    <circle cx="64" cy="64" r="34" fill="none" stroke="#1c1c1c" stroke-width="16"/>
+    <rect x="50" y="50.5" width="28" height="9" rx="2" fill="#1c1c1c"/>
+    <rect x="50" y="68.5" width="28" height="9" rx="2" fill="#1c1c1c"/>
+  </g>
+</svg>
