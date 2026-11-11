@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="owner-site/web/public/img/owner-logo-wordmark-dark.svg">
+    <img src="owner-site/web/public/img/owner-logo-wordmark.svg" alt="OWNER" width="360">
+  </picture>
+</p>
+
 OWNER
 =====
 
