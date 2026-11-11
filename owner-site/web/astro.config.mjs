@@ -33,6 +33,8 @@ export default defineConfig({
       title: 'OWNER',
       description:
         'Get rid of the boilerplate code in properties based configuration.',
+      // The mark: an O holding an equals sign, the key=value that OWNER maps.
+      logo: { src: './public/img/owner-logo.svg', alt: '' },
       favicon: '/favicon.png',
       defaultLocale: 'root',
       locales: {

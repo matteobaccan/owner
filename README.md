@@ -1,6 +1,9 @@
 OWNER
 =====
 
+![OWNER logo](owner-site/web/public/img/owner-logo-wordmark.svg#gh-light-mode-only)
+![OWNER logo](owner-site/web/public/img/owner-logo-wordmark-dark.svg#gh-dark-mode-only)
+
 OWNER, an API to ease Java property files usage.
 
 [![Build](https://github.com/matteobaccan/owner/actions/workflows/maven.yml/badge.svg)](https://github.com/matteobaccan/owner/actions/workflows/maven.yml)
