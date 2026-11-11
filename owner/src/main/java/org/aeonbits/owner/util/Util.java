@@ -361,12 +361,14 @@ if (host >= 0) {
 
     private static boolean isSensitiveQueryParam(String name) {
         if (name == null || name.isEmpty()) return false;
-        String k = name.toLowerCase();
-        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password") || k.contains("passphrase"))
+        // kebab-case is folded into snake_case, so that api-key is caught wherever api_key is
+        String k = name.toLowerCase().replace('-', '_');
+        if (k.equals("password") || k.equals("pass") || k.equals("pwd") || k.contains("password") || k.contains("passphrase")
+                || k.contains("passwd"))
             return true;
         if (k.contains("secret"))
             return true;
-        if (k.contains("token"))
+        if (k.contains("token") || k.equals("jwt") || k.contains("bearer") || k.contains("session"))
             return true;
         if (k.contains("signature") || k.equals("sig") || k.endsWith("_sig") || k.startsWith("sig_"))
             return true;
