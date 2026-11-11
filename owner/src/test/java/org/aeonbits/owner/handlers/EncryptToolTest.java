@@ -547,6 +547,20 @@ public class EncryptToolTest {
     }
 
     @Test
+    public void differentLengthTypingsAreRefusedAndBlanked() {
+        char[] typed = "hunter2".toCharArray();
+        char[] again = "hunter22".toCharArray();
+        try {
+            EncryptTool.confirmed(typed, again);
+            fail("passphrases with different lengths must be refused");
+        } catch (IllegalStateException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("do not match"));
+        }
+        assertArrayEquals(new char[7], typed);
+        assertArrayEquals(new char[8], again);
+    }
+
+    @Test
     public void anEmptyPassphraseIsRefusedAndSoIsEndOfInput() {
         for (char[][] typed : new char[][][]{
                 {new char[0], new char[0]},

@@ -31,7 +31,6 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'OWNER',
-      tagline: 'Java™ properties reinvented.',
       description:
         'Get rid of the boilerplate code in properties based configuration.',
       favicon: '/favicon.png',

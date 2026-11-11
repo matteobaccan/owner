@@ -142,7 +142,7 @@ assertEquals("Good Morning", cfg.getProperty("salutation.text"));
 cfg.list(System.out);
 
 // saves properties to an OutputStream
-File tmp = File.createTempFile("owner-", ".tmp");
+File tmp = Files.createTempFile("owner-", ".tmp").toFile();
 cfg.store(new FileOutputStream(tmp), "no comments");
 
 ```

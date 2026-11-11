@@ -101,6 +101,9 @@ final class JndiNames {
      * </p>
      */
     private static void refuseANameThatLeavesThisMachine(String written, String spec) {
+        if (written.contains("://") || written.startsWith("//"))
+            throw unsupported("%s names a remote URL, and this loader resolves local names only.", spec);
+
         int colon = written.indexOf(':');
         if (colon < 0)
             return;
@@ -109,7 +112,7 @@ final class JndiNames {
             return;
 
         String scheme = written.substring(0, colon);
-        if (LOCAL_SCHEME.equals(scheme))
+        if (LOCAL_SCHEME.equalsIgnoreCase(scheme))
             return;
 
         throw unsupported("%s names a '%s:' context, and this loader resolves local names only. A JNDI "

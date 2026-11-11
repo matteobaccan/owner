@@ -106,6 +106,12 @@ public class DiagnosticsTest {
                 hideCredentials(new URI("https://user:pass@config.example.org/app.properties?secret=topsecret#fragment")));
         assertEquals("https://config.example.org/app.properties?passphrase=***&sig=***",
                 hideCredentials(new URI("https://config.example.org/app.properties?passphrase=myPass123&sig=abc987")));
+        assertEquals("https://config.example.org/app.properties?api-key=***&client-secret=***&x-auth=***&env=prod",
+                hideCredentials(new URI("https://config.example.org/app.properties?api-key=k1&client-secret=s1&x-auth=a1&env=prod")));
+        assertEquals("https://config.example.org/app.properties?jwt=***&bearer=***&session_id=***",
+                hideCredentials(new URI("https://config.example.org/app.properties?jwt=h.p.s&bearer=b1&session_id=sess456")));
+        assertEquals("https://config.example.org/app.properties?passwd=***&db_passwd=***&region=us-east-1",
+                hideCredentials(new URI("https://config.example.org/app.properties?passwd=p1&db_passwd=p2&region=us-east-1")));
     }
 
     // ---------------------------------------------------------------- what it says when asked
