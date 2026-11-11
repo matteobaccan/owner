@@ -140,6 +140,18 @@ public class XMLLoaderTest {
     }
 
     @Test
+    public void testSecureProcessingPropertyIsSetOnParser() throws Exception {
+        List<LogRecord> records;
+        SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+        try (LogCapture capture = LogCapture.of(XMLLoader.class, Level.ALL)) {
+            XMLLoader.setFeature(parser, javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            records = capture.lines();
+        }
+
+        assertTrue(records.toString(), records.isEmpty());
+    }
+
+    @Test
     public void testExternalAccessPropertiesAreSet() throws Exception {
         List<LogRecord> records;
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
