@@ -1,12 +1,8 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="owner-site/web/public/img/owner-logo-wordmark-dark.svg">
-    <img src="owner-site/web/public/img/owner-logo-wordmark.svg" alt="OWNER" width="360">
-  </picture>
-</p>
-
 OWNER
 =====
+
+![OWNER logo](owner-site/web/public/img/owner-logo-wordmark.svg#gh-light-mode-only)
+![OWNER logo](owner-site/web/public/img/owner-logo-wordmark-dark.svg#gh-dark-mode-only)
 
 OWNER, an API to ease Java property files usage.
 
